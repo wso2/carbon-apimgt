@@ -24,6 +24,7 @@
                     </h5>
                 </div>
                     <div id="request-apisApiIdRatingsGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings HTTP 1/1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 X-WSO2-Tenant: test.com
 </code></div>
 
@@ -61,7 +62,7 @@ Content-Type: application/json
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings&#39; -H &#39;X-WSO2-Tenant: test.com&#39; </code></div>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; -H &#39;X-WSO2-Tenant: test.com&#39; </code></div>
 
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
@@ -236,6 +237,7 @@ Content-Type: application/json
                     </h5>
                 </div>
                     <div id="request-apisApiIdRatingsRatingIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings/25 HTTP 1/1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 X-WSO2-Tenant: test.com
 </code></div>
 
@@ -256,7 +258,7 @@ Content-Type: application/json
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings/25&#39; -H &#39;X-WSO2-Tenant: test.com&#39; </code></div>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/ratings/25&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; -H &#39;X-WSO2-Tenant: test.com&#39; </code></div>
 
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
@@ -587,13 +589,10 @@ X-WSO2-Tenant: test.com
             <p class="marked">This operation can be used to get the list of ratings of an API.
 
 &#x60;X-WSO2-Tenant&#x60; header can be used to retrive ratings of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
-
-**NOTE:**
-* This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s Ratings, you need to provide the Authorization header.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <p>Not required</p>
+                <code>apim:subscribe</code>
 
             <h4 class="section-heading">
                 Examples
@@ -817,13 +816,10 @@ Content-Type: application/json
             <p class="marked">This operation can be used to get a specific rating of an API.
 
 &#x60;X-WSO2-Tenant&#x60; header can be used to retrive a specific rating of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
-
-**NOTE:**
-* This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s Rating, you need to provide the Authorization header.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <p>Not required</p>
+                <code>apim:subscribe</code>
 
             <h4 class="section-heading">
                 Examples

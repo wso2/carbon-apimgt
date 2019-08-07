@@ -743,15 +743,14 @@ paths:
 #-----------------------------------------------------
     get:
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+          - apim:subscribe
+      x-scope: apim:subscribe
       summary: Get API ratings
       description: |
         This operation can be used to get the list of ratings of an API.
 
         `X-WSO2-Tenant` header can be used to retrive ratings of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
-
-        **NOTE:**
-        * This operation does not require an Authorization header by default. But in order to see a restricted API's Ratings, you need to provide the Authorization header.
       x-examples:
         $ref: docs/examples/apis/apis_id_ratings_get.yaml
       parameters:
@@ -792,15 +791,14 @@ paths:
   #-----------------------------------------------------
     get:
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+          - apim:subscribe
+      x-scope: apim:subscribe
       summary: Get a single API rating
       description: |
         This operation can be used to get a specific rating of an API.
 
         `X-WSO2-Tenant` header can be used to retrive a specific rating of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
-
-        **NOTE:**
-        * This operation does not require an Authorization header by default. But in order to see a restricted API's Rating, you need to provide the Authorization header.
       x-examples:
         $ref: docs/examples/apis/apis_id_ratings_id_get.yaml
       parameters:

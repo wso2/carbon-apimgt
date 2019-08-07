@@ -172,13 +172,19 @@ class StarRatingBar extends React.Component {
                                         <Link>
                                             <StarRate
                                                 key={i}
-                                                className={rating.userRating >= i ? classes.starRate : classes.noStarRate}
+                                                className={rating.userRating >= i
+                                                    ? classes.starRate
+                                                    : classes.noStarRate
+                                                }
                                                 onClick={() => this.doRate(i)}
                                             />
                                         </Link>
                                     ))}
                                     <Link>
-                                        <Cancel className={classes.removeRating} onClick={() => this.removeUserRating()} />
+                                        <Cancel
+                                            className={classes.removeRating}
+                                            onClick={() => this.removeUserRating()}
+                                        />
                                     </Link>
                                 </div>
                             </React.Fragment>
@@ -187,7 +193,11 @@ class StarRatingBar extends React.Component {
                                 {[1, 2, 3, 4, 5].map(i => (
                                     <StarRate
                                         key={i}
-                                        className={avgRating >= (i - 0.5) ? classes.starRate : classes.noStarRate}
+                                        className={
+                                            avgRating >= (i - 0.5)
+                                                ? classes.starRate
+                                                : classes.noStarRate
+                                        }
                                     />
                                 ))}
                             </React.Fragment>

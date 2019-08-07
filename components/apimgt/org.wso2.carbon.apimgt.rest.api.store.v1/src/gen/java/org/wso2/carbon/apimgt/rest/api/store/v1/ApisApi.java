@@ -223,9 +223,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/ratings")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get API ratings", notes = "This operation can be used to get the list of ratings of an API.  `X-WSO2-Tenant` header can be used to retrive ratings of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.  **NOTE:** * This operation does not require an Authorization header by default. But in order to see a restricted API's Ratings, you need to provide the Authorization header. ", response = RatingListDTO.class, authorizations = {
+    @ApiOperation(value = "Get API ratings", notes = "This operation can be used to get the list of ratings of an API.  `X-WSO2-Tenant` header can be used to retrive ratings of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used. ", response = RatingListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "Ratings",  })
     @ApiResponses(value = { 
@@ -240,9 +240,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/ratings/{ratingId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get a single API rating", notes = "This operation can be used to get a specific rating of an API.  `X-WSO2-Tenant` header can be used to retrive a specific rating of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.  **NOTE:** * This operation does not require an Authorization header by default. But in order to see a restricted API's Rating, you need to provide the Authorization header. ", response = RatingDTO.class, authorizations = {
+    @ApiOperation(value = "Get a single API rating", notes = "This operation can be used to get a specific rating of an API.  `X-WSO2-Tenant` header can be used to retrive a specific rating of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used. ", response = RatingDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "Ratings",  })
     @ApiResponses(value = { 
