@@ -1556,7 +1556,7 @@
 
         <carbon.governance.version>4.8.0</carbon.governance.version>
         <carbon.deployment.version>4.9.4</carbon.deployment.version>
-        <carbon.multitenancy.version>4.7.3</carbon.multitenancy.version>
+        <carbon.multitenancy.version>4.7.4</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
         <apimserver.version>1.10.0</apimserver.version>
         <siddhi.version>3.2.4</siddhi.version>
