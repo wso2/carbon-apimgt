@@ -385,6 +385,7 @@ Listing.propTypes = {
         createLinkWrapper: PropTypes.string,
         appContent: PropTypes.string,
     }).isRequired,
+    theme: PropTypes.shape({}).isRequired,
     intl: PropTypes.func.isRequired,
 };
 

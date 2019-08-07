@@ -347,7 +347,9 @@ NewApp.propTypes = {
     }).isRequired,
     updateApps: PropTypes.func.isRequired,
     handleClose: PropTypes.func.isRequired,
-    intl: PropTypes.func.isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func.isRequired,
+    }).isRequired,
     handleClickOpen: PropTypes.func.isRequired,
     open: PropTypes.bool.isRequired,
 };
