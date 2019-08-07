@@ -453,8 +453,9 @@ function EndpointOverview(props) {
                                 </Typography>
                                 <GenericEndpoint
                                     className={classes.defaultEndpointWrapper}
-                                    endpointURL={epConfig.production_endpoints.length > 0 ?
-                                        epConfig.production_endpoints[0].url : epConfig.production_endpoints.url}
+                                    endpointURL={
+                                        epConfig.production_endpoints && epConfig.production_endpoints.length > 0 ?
+                                            epConfig.production_endpoints[0].url : epConfig.production_endpoints.url}
                                     type=''
                                     index={0}
                                     category='production_endpoints'
@@ -473,7 +474,7 @@ function EndpointOverview(props) {
                                 </div>
                                 <GenericEndpoint
                                     className={classes.defaultEndpointWrapper}
-                                    endpointURL={epConfig.sandbox_endpoints.length > 0 ?
+                                    endpointURL={epConfig.sandbox_endpoints && epConfig.sandbox_endpoints.length > 0 ?
                                         epConfig.sandbox_endpoints[0].url : epConfig.sandbox_endpoints.url}
                                     type=''
                                     index={0}
