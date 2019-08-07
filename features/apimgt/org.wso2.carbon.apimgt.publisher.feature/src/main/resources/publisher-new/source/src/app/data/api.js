@@ -51,6 +51,7 @@ class API extends Resource {
             };
         }
         this.apiType = API.CONSTS.API;
+        Utils.deepFreeze(properties);
         this._data = properties;
         for (const key in properties) {
             if (Object.prototype.hasOwnProperty.call(properties, key)) {
@@ -680,14 +681,16 @@ class API extends Resource {
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
     update(api) {
-        const promised_update = this.client.then((client) => {
+        const promisedUpdate = this.client.then((client) => {
             const payload = {
                 apiId: api.id,
                 body: api
             };
             return client.apis['API (Individual)'].put_apis__apiId_(payload);
         });
-        return promised_update;
+        return promisedUpdate.then(response => {
+            return new API(response.body);
+        });
     }
 
         /**
@@ -1239,7 +1242,7 @@ class API extends Resource {
         return promisedAPIs.then((response) => {
             response.obj.apiType = API.CONSTS.API;
             return response;
-        }); 
+        });
     }
 
     /**
