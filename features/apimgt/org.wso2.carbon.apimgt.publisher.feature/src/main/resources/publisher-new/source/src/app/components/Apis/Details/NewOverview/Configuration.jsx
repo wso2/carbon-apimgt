@@ -31,6 +31,11 @@ import ApiContext from '../components/ApiContext';
 
 function Configuration(props) {
     const { parentClasses } = props;
+    const securitySchemeMap = {
+        oauth2: 'OAuth2',
+        basic_auth: 'Basic Auth',
+        mutualssl: 'Mutual TLS',
+    };
     return (
         <ApiContext.Consumer>
             {({ api }) => (
@@ -225,6 +230,46 @@ function Configuration(props) {
                                     </React.Fragment>
                                 )}
                                 {!api.transport && <React.Fragment>?</React.Fragment>}
+                            </Typography>
+                            {/* API Security */}
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Configuration.securityScheme'
+                                    defaultMessage='API Security'
+                                />
+                                <Tooltip
+                                    placement='top'
+                                    classes={{
+                                        tooltip: parentClasses.htmlTooltip,
+                                    }}
+                                    disableHoverListener
+                                    title={
+                                        <React.Fragment>
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.Configuration.securityScheme.tooltip'
+                                                defaultMessage='OAuth2 is used as the default security schema.'
+                                            />
+                                        </React.Fragment>
+                                    }
+                                >
+                                    <Button className={parentClasses.helpButton}>
+                                        <HelpOutline className={parentClasses.helpIcon} />
+                                    </Button>
+                                </Tooltip>
+                            </Typography>
+                            <Typography component='p' variant='body1'>
+                                {api.securityScheme && api.securityScheme.length !== 0 && (
+                                    <React.Fragment>
+                                        {api.securityScheme.map(item => (
+                                            item.includes('mandatory') ? (null) : (
+                                                <span>
+                                                    { securitySchemeMap[item] + ', '}
+                                                </span>
+                                            )
+                                        ))}
+                                    </React.Fragment>
+                                )}
+                                {!api.securityScheme && <React.Fragment>?</React.Fragment>}
                             </Typography>
                             {/* Response Caching */}
                             <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
