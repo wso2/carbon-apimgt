@@ -164,7 +164,11 @@ class Details extends Component {
                                 component={() => (
                                     <TokenManager
                                         keyType='PRODUCTION'
-                                        selectedApp={{ appId: application.applicationId, label: application.name }}
+                                        selectedApp={{
+                                            appId: application.applicationId,
+                                            label: application.name,
+                                            tokenType: application.tokenType,
+                                        }}
                                     />
                                 )}
                             />
@@ -173,7 +177,11 @@ class Details extends Component {
                                 component={() => (
                                     <TokenManager
                                         keyType='SANDBOX'
-                                        selectedApp={{ appId: application.applicationId, label: application.name }}
+                                        selectedApp={{
+                                            appId: application.applicationId,
+                                            label: application.name,
+                                            tokenType: application.tokenType,
+                                        }}
                                     />
                                 )}
                             />

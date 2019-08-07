@@ -77,12 +77,11 @@ class NewApp extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            open: false,
             applicationRequest: {
                 name: '',
                 throttlingPolicy: '',
                 description: '',
-                tokenType: null,
+                tokenType: 'OAUTH',
                 attributes: {},
             },
             isNameValid: true,
@@ -112,6 +111,9 @@ class NewApp extends React.Component {
                 }
                 const allAppAttributes = [];
                 allAttributes.body.list.map(item => allAppAttributes.push(item));
+                if (allAttributes.length > 0) {
+                    newRequest.attributes = allAppAttributes.filter(item => !item.hidden);
+                }
                 this.setState({ applicationRequest: newRequest, throttlingPolicyList, allAppAttributes });
             })
             .catch((error) => {

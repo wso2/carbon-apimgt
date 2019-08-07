@@ -59,7 +59,6 @@ const ApplicationCreate = (props) => {
         const { applicationRequest, updateApplicationRequest } = props;
         const newRequest = { ...applicationRequest };
         const { target: currentTarget } = event;
-
         switch (field) {
             case 'name':
                 newRequest.name = currentTarget.value;
@@ -98,7 +97,9 @@ const ApplicationCreate = (props) => {
         isRequiredAttribute,
         getAttributeValue,
         intl,
+        validateName,
     } = props;
+    const tokenTypeList = ['JWT', 'OAUTH'];
     return (
         <form className={classes.container} noValidate autoComplete='off'>
             <Grid container spacing={24} className={classes.root}>
@@ -116,7 +117,8 @@ const ApplicationCreate = (props) => {
                             }}
                             helperText={intl.formatMessage({
                                 defaultMessage:
-                                    'Enter a name to identify the Application. You will be able to pick this application when subscribing to APIs',
+                                    `Enter a name to identify the Application. 
+                                    You will be able to pick this application when subscribing to APIs`,
                                 id: 'Shared.AppsAndKeys.ApplicationCreateForm.enter.a.name',
                             })}
                             fullWidth
@@ -128,7 +130,7 @@ const ApplicationCreate = (props) => {
                             })}
                             autoFocus
                             className={classes.inputText}
-                            onBlur={e => props.validateName(e.target.value)}
+                            onBlur={e => validateName(e.target.value)}
                             error={!isNameValid}
                         />
                     </FormControl>
@@ -154,13 +156,33 @@ const ApplicationCreate = (props) => {
                             </Select>
                             <Typography variant='caption'>
                                 <FormattedMessage
-                                    defaultMessage='Assign API request quota per access token. Allocated quota will be shared among all
-                                    the subscribed APIs of the application.'
+                                    defaultMessage={`Assign API request quota per access token. 
+                                    Allocated quota will be shared among all
+                                    the subscribed APIs of the application.`}
                                     id='Shared.AppsAndKeys.ApplicationCreateForm.assign.api.request'
                                 />
                             </Typography>
                         </FormControl>
                     )}
+                    <FormControl margin='normal' className={classes.FormControlOdd}>
+                        <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>
+                            <FormattedMessage
+                                defaultMessage='Token Type'
+                                id='Shared.AppsAndKeys.ApplicationCreateForm.token.type'
+                            />
+                        </InputLabel>
+                        <Select
+                            value={applicationRequest.tokenType}
+                            onChange={e => handleChange('tokenType', e)}
+                            input={<Input name='tokenType' id='quota-helper' />}
+                        >
+                            {tokenTypeList.map(type => (
+                                <MenuItem key={type} value={type}>
+                                    {type}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                     <FormControl margin='normal' className={classes.FormControl}>
                         <TextField
                             label='Application Description'
@@ -219,16 +241,16 @@ const ApplicationCreate = (props) => {
 
 ApplicationCreate.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({}).isRequired,
     applicationRequest: PropTypes.shape({}).isRequired,
-    updateApplicationRequest: PropTypes.func.isRequired,
-    throttlingPolicyList: PropTypes.shape({}).isRequired,
-    isNameValid: PropTypes.func.isRequired,
-    allAppAttributes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.func.isRequired,
+    isNameValid: PropTypes.bool.isRequired,
+    allAppAttributes: PropTypes.arrayOf(PropTypes.array).isRequired,
     handleAttributesChange: PropTypes.func.isRequired,
-    isRequiredAttribute: PropTypes.func.isRequired,
     getAttributeValue: PropTypes.func.isRequired,
-
+    validateName: PropTypes.func.isRequired,
+    updateApplicationRequest: PropTypes.func.isRequired,
+    isRequiredAttribute: PropTypes.bool.isRequired,
+    throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(ApplicationCreate));

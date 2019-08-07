@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import Listing from './Listing/Listing';
 import Details from './Details/index';
@@ -27,16 +27,16 @@ import { PageNotFound } from '../Base/Errors';
  * @class Applications
  * @extends {Component}
  */
-class Applications extends Component {
-    render() {
-        return (
-            <Switch>
-                <Route exact path='/applications' component={Listing} />
-                <Route path='/applications/:application_uuid/' render={props => <Details {...props} />} />
-                <Route component={PageNotFound} />
-            </Switch>
-        );
-    }
-}
 
-export default Applications;
+const applications = () => {
+    return (
+        <Switch>
+            <Route exact path='/applications' component={Listing} />
+            <Route path='/applications/:application_uuid/' render={props => <Details {...props} />} />
+            <Route component={PageNotFound} />
+        </Switch>
+    );
+};
+
+
+export default applications;

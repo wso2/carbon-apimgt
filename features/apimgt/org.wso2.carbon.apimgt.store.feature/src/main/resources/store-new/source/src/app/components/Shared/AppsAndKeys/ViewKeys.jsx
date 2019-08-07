@@ -136,12 +136,33 @@ class ViewKeys extends React.Component {
             });
     }
 
+    /**
+     *
+     *
+     * @param {*} prevProps previous props
+     * @memberof ViewKeys
+     */
+    componentDidUpdate(prevProps) {
+        const { isKeyJWT } = this.props;
+        if (isKeyJWT && !prevProps.isKeyJWT) {
+            // eslint-disable-next-line react/no-did-update-set-state
+            this.setState({ isKeyJWT: true });
+        }
+    }
+
+
+    /**
+     * Set accesstoken request in state
+     * @param {*} accessTokenRequest access token request object
+     * @memberof ViewKeys
+     */
     updateAccessTokenRequest = (accessTokenRequest) => {
         this.setState({ accessTokenRequest });
     }
 
     /**
      * Handle onClick of the copy icon
+     * @param {*} name name of what is copied
      * */
     onCopy = (name) => {
         this.setState({
@@ -191,7 +212,7 @@ class ViewKeys extends React.Component {
      * Handle on close of dialog for generating access token and get curl
      * */
     handleClose = () => {
-        this.setState({ open: false, showCurl: false });
+        this.setState({ open: false, showCurl: false, isKeyJWT: false });
     };
 
     /**
@@ -199,16 +220,15 @@ class ViewKeys extends React.Component {
      * */
     generateAccessToken = () => {
         const { accessTokenRequest } = this.state;
-        const { intl } = this.props;
         this.applicationPromise
             .then(application => application.generateToken(accessTokenRequest.keyType,
                 accessTokenRequest.timeout,
                 accessTokenRequest.scopesSelected))
             .then((response) => {
                 console.log('token generated successfully ' + response);
-                this.token = response;
                 this.setState({
                     showToken: true,
+                    tokenResponse: response,
                     token: response.accessToken,
                     tokenScopes: response.tokenScopes,
                     tokenValidityTime: response.validityTime,
@@ -231,10 +251,10 @@ class ViewKeys extends React.Component {
     render() {
         const {
             notFound, showCS, showToken, showCurl, secretCopied, tokenCopied, keyCopied, open,
-            token, tokenScopes, tokenValidityTime, accessTokenRequest, subscriptionScopes,
+            token, tokenScopes, tokenValidityTime, accessTokenRequest, subscriptionScopes, isKeyJWT, tokenResponse,
         } = this.state;
         const {
-            intl, keyType, classes, fullScreen, keys,
+            intl, keyType, classes, fullScreen, keys, selectedApp: { tokenType },
         } = this.props;
 
         if (notFound) {
@@ -250,6 +270,7 @@ class ViewKeys extends React.Component {
         let accessToken;
         let accessTokenScopes;
         let validityPeriod;
+        let tokenDetails;
 
         if (token) {
             accessToken = token;
@@ -259,6 +280,7 @@ class ViewKeys extends React.Component {
             ({ accessToken } = keys.get(keyType).token);
             accessTokenScopes = keys.get(keyType).token.tokenScopes;
             validityPeriod = keys.get(keyType).token.validityTime;
+            tokenDetails = keys.get(keyType).token;
         }
 
         return consumerKey ? (
@@ -345,7 +367,7 @@ class ViewKeys extends React.Component {
                                 </FormHelperText>
                             </FormControl>
                         </Grid>
-                        {accessToken && (
+                        {(accessToken && !tokenType === 'JWT') && (
                             <Grid item xs={6}>
                                 <InputLabel htmlFor='adornment-amount'>
                                     <FormattedMessage
@@ -378,7 +400,7 @@ class ViewKeys extends React.Component {
                         <Grid item xs={12}>
                             <Dialog
                                 fullScreen={fullScreen}
-                                open={open}
+                                open={open || isKeyJWT}
                                 onClose={this.handleClose}
                                 aria-labelledby='responsive-dialog-title'
                             >
@@ -386,7 +408,7 @@ class ViewKeys extends React.Component {
                                     {showCurl ? 'Get CURL to Generate Access Token' : 'Generate Access Token'}
                                 </DialogTitle>
                                 <DialogContent>
-                                    {!showCurl && (
+                                    {!showCurl && !isKeyJWT && (
                                         <DialogContentText>
                                             {!showToken && (
                                                 <Tokens
@@ -395,7 +417,7 @@ class ViewKeys extends React.Component {
                                                     subscriptionScopes={subscriptionScopes}
                                                 />
                                             )}
-                                            {showToken && <ViewToken token={this.token} />}
+                                            {showToken && <ViewToken token={tokenResponse} />}
                                         </DialogContentText>
                                     )}
                                     {showCurl && (
@@ -403,9 +425,14 @@ class ViewKeys extends React.Component {
                                             <ViewCurl keys={{ consumerKey, consumerSecret }} />
                                         </DialogContentText>
                                     )}
+                                    {(isKeyJWT && tokenDetails) && (
+                                        <DialogContentText>
+                                            <ViewToken token={tokenDetails} />
+                                        </DialogContentText>
+                                    )}
                                 </DialogContent>
                                 <DialogActions>
-                                    {!showToken && !showCurl && (
+                                    {!showToken && !showCurl && !isKeyJWT && (
                                         <Button onClick={this.generateAccessToken} color='primary'>
                                             <FormattedMessage
                                                 id='Shared.AppsAndKeys.ViewKeys.consumer.generate.btn'
@@ -466,8 +493,9 @@ class ViewKeys extends React.Component {
 }
 
 ViewKeys.propTypes = {
-    classes: PropTypes.object,
+    classes: PropTypes.shape({}).isRequired,
     fullScreen: PropTypes.bool.isRequired,
+    isKeyJWT: PropTypes.bool.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(ViewKeys));
