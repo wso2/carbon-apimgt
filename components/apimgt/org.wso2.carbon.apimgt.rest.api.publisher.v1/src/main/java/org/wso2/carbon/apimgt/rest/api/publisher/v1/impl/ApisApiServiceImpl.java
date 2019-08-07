@@ -1551,13 +1551,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 (OpenAPIDefinitionValidationResponseDTO)validationResponseMap.get(RestApiConstants.RETURN_DTO);
         return Response.ok().entity(validationResponseDTO).build();
     }
-
-    @Override
-    public Response validateWSDLDefinition(String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
-
-        return null;
-    }
-
     /**
      * Importing an OpenAPI definition and create an API
      *

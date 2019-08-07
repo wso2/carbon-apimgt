@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.ApisApiServiceImpl;
@@ -226,7 +227,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "GraphQL Schema (Individual)",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested GraphQL Schema DTO object belongs to the API ", response = GraphQLSchemaDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
@@ -244,7 +245,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "GraphQL Schema (Individual)",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with updated schema definition ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified. ", response = ErrorDTO.class),
@@ -438,7 +439,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update an API", notes = "This operation can be used to update an existing API. But the properties `name`, `version`, `context`, `provider`, `state` will not be changed by this operation. ", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_update", description = "Update API")
+            
         })
     }, tags={ "API (Individual)",  })
     @ApiResponses(value = { 
@@ -566,7 +567,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a scope of an API", notes = "This operation can be used to delete a scope associated with an API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            
         })
     }, tags={ "Scope (Individual)",  })
     @ApiResponses(value = { 
@@ -601,7 +602,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update a Scope of an API", notes = "This operation can be used to update scope of an API ", response = ScopeDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+            
         })
     }, tags={ "Scope (Individual)",  })
     @ApiResponses(value = { 
@@ -872,13 +873,16 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
     }, tags={ "API (Collection)",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = APIDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was in a not supported format. ", response = ErrorDTO.class) })
     public Response apisImportGraphQLSchemaPost(@Multipart(value = "type", required = false)  String type,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail, @Multipart(value = "additionalProperties", required = false)  String additionalProperties, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
         return delegate.apisImportGraphQLSchemaPost(type, fileInputStream, fileDetail, additionalProperties, ifMatch, securityContext);
     }
+
+    @POST
+    
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Create a new API", notes = "This operation can be used to create a new API specifying the details of the API in the payload. The new API will be in `CREATED` state.  There is a special capability for a user who has `APIM Admin` permission such that he can create APIs on behalf of other users. For that he can to specify `\"provider\" : \"some_other_user\"` in the payload so that the API's creator will be shown as `some_other_user` in the UI. ", response = APIDTO.class, authorizations = {
@@ -892,6 +896,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was in a not supported format. ", response = ErrorDTO.class) })
     public Response apisPost(@ApiParam(value = "API object that needs to be added " ,required=true) APIDTO body) {
         return delegate.apisPost(body, securityContext);
+    }
+
+    @POST
+    @Path("/validate-graphql-schema")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Validate GraphQL API definition and retrieve a summary", notes = "This operation can be used to validate a graphQL definition and retrieve a summary. ", response = GraphQLValidationResponseDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "API (Collection)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API definition validation information is returned ", response = GraphQLValidationResponseDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Workflow for the given reference in not found. ", response = ErrorDTO.class) })
+    public Response apisValidateGraphqlSchemaPost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail) {
+        return delegate.apisValidateGraphqlSchemaPost(fileInputStream, fileDetail, securityContext);
     }
 
     @POST
@@ -928,23 +949,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.importWSDLDefinition(fileInputStream, fileDetail, url, additionalProperties, implementationType, securityContext);
     }
 
-    @POST
-    @Path("/validate-graphql-schema")
-    @Consumes({ "multipart/form-data" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Validate GraphQL API definition and retrieve a summary", notes = "This operation can be used to validate a graphQL definition and retrieve a summary. ", response = GraphQLValidationResponseDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
-        })
-    }, tags={ "API (Collection)",  })
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK. API definition validation information is returned ", response = GraphQLValidationResponseDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Workflow for the given reference in not found. ", response = ErrorDTO.class) })
-    public Response apisValidateGraphqlSchemaPost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail) {
-        return delegate.apisValidateGraphqlSchemaPost(fileInputStream, fileDetail, securityContext);
-    }
-
     @PUT
     @Path("/{apiId}/thumbnail")
     @Consumes({ "multipart/form-data" })
@@ -972,7 +976,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
     }, tags={ "Validation",  })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API definition validation information is returned ", response = OpenAPIDefinitionValidationResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Workflow for the given reference in not found. ", response = ErrorDTO.class) })
@@ -989,7 +993,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
     }, tags={ "Validation" })
-    @ApiResponses(value = {
+    @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API definition validation information is returned ", response = WSDLValidationResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Workflow for the given reference in not found. ", response = ErrorDTO.class) })
