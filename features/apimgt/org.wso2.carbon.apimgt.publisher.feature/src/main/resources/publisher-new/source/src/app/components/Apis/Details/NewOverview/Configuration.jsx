@@ -33,7 +33,7 @@ function Configuration(props) {
     const securitySchemeMap = {
         oauth2: 'OAuth2',
         basic_auth: 'Basic Auth',
-        mutualssl: 'Mutual SSL',
+        mutualssl: 'Mutual TLS',
     };
     return (
         <ApiContext.Consumer>
@@ -252,7 +252,7 @@ function Configuration(props) {
                             <Typography component='p' variant='body1'>
                                 {api.securityScheme && api.securityScheme.length !== 0 && (
                                     <React.Fragment>
-                                        {api.securityScheme.map((item, index) => (
+                                        {api.securityScheme.map(item => (
                                             item.includes('mandatory') ? (null) : (
                                                 <span>
                                                     { securitySchemeMap[item] + ', '}

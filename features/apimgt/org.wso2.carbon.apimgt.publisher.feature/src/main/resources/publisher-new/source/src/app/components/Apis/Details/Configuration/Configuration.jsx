@@ -40,6 +40,7 @@ import ChipInput from 'material-ui-chip-input';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import ApiContext from '../components/ApiContext';
+import ApiSecurity from './APISecurity';
 
 const styles = theme => ({
     titleWrapper: {
@@ -153,7 +154,6 @@ const securitySchemaValues = {
     oauthBasicAuthMandatory: 'oauth_basic_auth_mandatory',
     mutualSSLMandatory: 'mutualssl_mandatory',
 };
-
 class Configuration extends React.Component {
     constructor(props) {
         super(props);
@@ -192,13 +192,6 @@ class Configuration extends React.Component {
             return 'no';
         }
     }
-    getAPISecurityState(type, securityScheme, apiSecurityScheme) {
-        if (securityScheme) {
-            return securityScheme.includes(type);
-        } else {
-            return apiSecurityScheme.includes(type);
-        }
-    }
     getTransportState(type, transport, apiTransport) {
         if (transport) {
             return transport.includes(type);
@@ -206,14 +199,17 @@ class Configuration extends React.Component {
             return apiTransport.includes(type);
         }
     }
-    isAPISecurityMandatory(type, securityScheme, apiSecurityScheme) {
-        let scheme = apiSecurityScheme;
-        if (!scheme) scheme = securityScheme;
-
-        if (scheme.includes(type)) {
-            return 'Mandatory';
-        } else {
-            return 'Optional';
+    setSecurityScheme = (updatedSecurityScheme) => {
+        this.setState({ securityScheme: updatedSecurityScheme });
+    }
+    addToArray(element, array) {
+        if (!array.includes(element)) {
+            array.push(element);
+        }
+    }
+    removeFromArray(element, array) {
+        if (array.includes(element)) {
+            array.splice(array.indexOf(element), 1);
         }
     }
     handleChange = name => (event) => {
@@ -230,90 +226,6 @@ class Configuration extends React.Component {
             [name]: value,
         });
     };
-    handleAPISecuritySchemeChange = apiSecurityScheme => (event) => {
-        const { value, checked } = event.target;
-        this.setState((oldState) => {
-            let { securityScheme } = oldState;
-            if (!securityScheme) securityScheme = apiSecurityScheme;
-
-            if (checked) {
-                this.addToArray(value, securityScheme);
-            } else if (!checked) {
-                this.removeFromArray(value, securityScheme);
-            }
-
-            const mutualSSLWithOauthOrBasicAuth = securityScheme.includes(securitySchemaValues.mutualSSL) &&
-            (securityScheme.includes(securitySchemaValues.oauth2) ||
-            securityScheme.includes(securitySchemaValues.basicAuth));
-
-            const mutualSSLOnly = securityScheme.includes(securitySchemaValues.mutualSSL) &&
-            !securityScheme.includes(securitySchemaValues.oauth2) &&
-            !securityScheme.includes(securitySchemaValues.basicAuth);
-
-            if (!mutualSSLWithOauthOrBasicAuth) {
-                if (mutualSSLOnly) {
-                    this.addToArray(securitySchemaValues.mutualSSLMandatory, securityScheme);
-                    this.removeFromArray(securitySchemaValues.oauthBasicAuthMandatory, securityScheme);
-                } else {
-                    this.addToArray(securitySchemaValues.oauthBasicAuthMandatory, securityScheme);
-                    this.removeFromArray(securitySchemaValues.mutualSSLMandatory, securityScheme);
-                }
-            }
-
-            return { securityScheme };
-        });
-    };
-    handleAPISecurityMandatoryStateChange = apiSecurityScheme => (event) => {
-        const { value, name } = event.target;
-        this.setState((oldState) => {
-            let { securityScheme } = oldState;
-            if (!securityScheme) securityScheme = apiSecurityScheme;
-            const isMandatory = value === 'Mandatory';
-
-            if (name === 'mutualSSLMandatoryState') {
-                if (isMandatory) this.addToArray(securitySchemaValues.mutualSSLMandatory, securityScheme);
-                else {
-                    this.removeFromArray(securitySchemaValues.mutualSSLMandatory, securityScheme);
-                    if (securityScheme.includes(securitySchemaValues.oauth2) ||
-                securityScheme.includes(securitySchemaValues.basicAuth)
-                    ) {
-                        this.addToArray(securitySchemaValues.oauthBasicAuthMandatory, securityScheme);
-                    }
-                }
-            } else if (name === 'oauthBasicAuthMandatoryState') {
-                if (isMandatory) this.addToArray(securitySchemaValues.oauthBasicAuthMandatory, securityScheme);
-                else {
-                    this.removeFromArray(securitySchemaValues.oauthBasicAuthMandatory, securityScheme);
-                    if (securityScheme.includes(securitySchemaValues.mutualSSL)) {
-                        this.addToArray(securitySchemaValues.mutualSSLMandatory, securityScheme);
-                    }
-                }
-            }
-
-            return { securityScheme };
-        });
-    };
-    showMandatoryOption(securityScheme, apiSecurityScheme) {
-        let scheme;
-
-        if (securityScheme) scheme = securityScheme;
-        else scheme = apiSecurityScheme;
-
-        const mutualSSLWithOauthOrBasicAuth = scheme.includes(securitySchemaValues.mutualSSL) &&
-        (scheme.includes(securitySchemaValues.oauth2) || scheme.includes(securitySchemaValues.basicAuth));
-
-        return mutualSSLWithOauthOrBasicAuth;
-    }
-    addToArray(element, array) {
-        if (!array.includes(element)) {
-            array.push(element);
-        }
-    }
-    removeFromArray(element, array) {
-        if (array.includes(element)) {
-            array.splice(array.indexOf(element), 1);
-        }
-    }
     handleTransportChange = (apiTransport, apiSecurityScheme) => (event) => {
         const { value, checked } = event.target;
         this.setState((oldState) => {
@@ -599,7 +511,11 @@ class Configuration extends React.Component {
                                                                     transport,
                                                                     api.transport,
                                                                 )}
-                                                                onChange={this.handleTransportChange(api.transport, api.securityScheme)}
+                                                                onChange={
+                                                                    this.handleTransportChange(
+                                                                        api.transport,
+                                                                        api.securityScheme,
+                                                                    )}
                                                                 value='http'
                                                             />
                                                         }
@@ -616,7 +532,11 @@ class Configuration extends React.Component {
                                                                     transport,
                                                                     api.transport,
                                                                 )}
-                                                                onChange={this.handleTransportChange(api.transport, api.securityScheme)}
+                                                                onChange={
+                                                                    this.handleTransportChange(
+                                                                        api.transport,
+                                                                        api.securityScheme,
+                                                                    )}
                                                                 value='https'
                                                             />
                                                         }
@@ -637,196 +557,23 @@ class Configuration extends React.Component {
                                                     )}
                                                 </FormGroup>
                                             </FormControl>
-                                            {/* Transport Security */}
-                                            {this.getTransportState(
-                                                'https',
-                                                transport,
-                                                api.transport,
-                                            ) && (
-                                                <div>
-                                                    <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                            Transport Security
-                                                        <Tooltip
-                                                            placement='top'
-                                                            classes={{
-                                                                tooltip: classes.htmlTooltip,
-                                                            }}
-                                                            disableHoverListener
-                                                            title={
-                                                                <React.Fragment>
-                                                            Enable/Disable Mutual SSL security schema.
-                                                                </React.Fragment>
-                                                            }
-                                                        >
-                                                            <Button className={classes.helpButton}>
-                                                                <HelpOutline className={classes.helpIcon} />
-                                                            </Button>
-                                                        </Tooltip>
-                                                    </Typography>
-                                                    <div style={{ 'padding-left': '25px' }} >
-                                                        <FormControl
-                                                            required
-                                                            error={error}
-                                                            component='fieldset'
-                                                            className={classes.formControl}
-                                                        >
-                                                            {this.showMandatoryOption(securityScheme, api.securityScheme) && (
-                                                                <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                                    State
-                                                                    <FormGroup>
-                                                                        <RadioGroup
-                                                                            name='mutualSSLMandatoryState'
-                                                                            className={classes.group}
-                                                                            value={this.isAPISecurityMandatory(
-                                                                                securitySchemaValues.mutualSSLMandatory,
-                                                                                securityScheme,
-                                                                                api.securityScheme,
-                                                                            )}
-                                                                            onChange={
-                                                                                this.handleAPISecurityMandatoryStateChange(api.securityScheme)
-                                                                            }
-                                                                        >
-                                                                            <FormControlLabel
-                                                                                value='Mandatory'
-                                                                                control={<Radio />}
-                                                                                label='Mandatory'
-                                                                            />
-                                                                            <FormControlLabel
-                                                                                value='Optional'
-                                                                                control={<Radio />}
-                                                                                label='Optional'
-                                                                            />
-                                                                        </RadioGroup>
-                                                                    </FormGroup>
-                                                                </Typography>
-                                                            )}
-                                                            <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                                    Security Scheme
-                                                                <FormGroup>
-                                                                    <FormControlLabel
-                                                                        control={
-                                                                            <Checkbox
-                                                                                checked={this.getAPISecurityState(
-                                                                                    securitySchemaValues.mutualSSL,
-                                                                                    securityScheme,
-                                                                                    api.securityScheme,
-                                                                                )}
-                                                                                onChange={this
-                                                                                    .handleAPISecuritySchemeChange(api.securityScheme)}
-                                                                                value={securitySchemaValues.mutualSSL}
-                                                                            />
-                                                                        }
-                                                                        label='Mutual SSL'
-                                                                    />
-                                                                </FormGroup>
-                                                            </Typography>
-                                                        </FormControl>
-                                                    </div>
-                                                </div>
-                                            )}
 
                                             {/* API Security */}
-                                            <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                                Authentication
-                                                <Tooltip
-                                                    placement='top'
-                                                    classes={{
-                                                        tooltip: classes.htmlTooltip,
-                                                    }}
-                                                    disableHoverListener
-                                                    title={
-                                                        <React.Fragment>
-                                                            OAuth2 is used as the default security schema.
-                                                        </React.Fragment>
-                                                    }
-                                                >
-                                                    <Button className={classes.helpButton}>
-                                                        <HelpOutline className={classes.helpIcon} />
-                                                    </Button>
-                                                </Tooltip>
-                                            </Typography>
-                                            <div style={{ 'padding-left': '25px' }}>
-                                                <FormControl
-                                                    required
-                                                    error={error}
-                                                    component='fieldset'
-                                                    className={classes.formControl}
-                                                >
-                                                    {this.showMandatoryOption(securityScheme, api.securityScheme) && (
-                                                        <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                                    State
-                                                            <FormGroup>
-                                                                <RadioGroup
-                                                                    name='oauthBasicAuthMandatoryState'
-                                                                    className={classes.group}
-                                                                    value={this.isAPISecurityMandatory(
-                                                                        securitySchemaValues.oauthBasicAuthMandatory,
-                                                                        securityScheme,
-                                                                        api.securityScheme,
-                                                                    )}
-                                                                    onChange={
-                                                                        this.handleAPISecurityMandatoryStateChange(api.securityScheme)
-                                                                    }
-                                                                >
-                                                                    <FormControlLabel
-                                                                        value='Mandatory'
-                                                                        control={<Radio />}
-                                                                        label='Mandatory'
-                                                                    />
-                                                                    <FormControlLabel
-                                                                        value='Optional'
-                                                                        control={<Radio />}
-                                                                        label='Optional'
-                                                                    />
-                                                                </RadioGroup>
-                                                            </FormGroup>
-                                                        </Typography>
-                                                    )}
-                                                    <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                                    Security Scheme
-                                                        <FormGroup className={classes.group}>
-                                                            <FormControlLabel
-                                                                control={
-                                                                    <Checkbox
-                                                                        checked={this.getAPISecurityState(
-                                                                            securitySchemaValues.oauth2,
-                                                                            securityScheme,
-                                                                            api.securityScheme,
-                                                                        )}
-                                                                        onChange={this
-                                                                            .handleAPISecuritySchemeChange(api.securityScheme)}
-                                                                        value={securitySchemaValues.oauth2}
-                                                                    />
-                                                                }
-                                                                label='OAuth2'
-                                                            />
-                                                            <FormControlLabel
-                                                                control={
-                                                                    <Checkbox
-                                                                        checked={this.getAPISecurityState(
-                                                                            securitySchemaValues.basicAuth,
-                                                                            securityScheme,
-                                                                            api.securityScheme,
-                                                                        )}
-                                                                        onChange={this
-                                                                            .handleAPISecuritySchemeChange(api.securityScheme)}
-                                                                        value={securitySchemaValues.basicAuth}
-                                                                    />
-                                                                }
-                                                                label='Basic Auth'
-                                                            />
-                                                        </FormGroup>
-                                                    </Typography>
-                                                    {error && (
-                                                        <FormHelperText className={classes.error}>
-                                                            Please select at least one API security schema.
-                                                        </FormHelperText>
-                                                    )}
-                                                </FormControl>
-                                            </div>
-                                            <FormHelperText className={classes.error}>
-                                                            You need to make either Mutual SSL or Authentication mandatory if used together.
-                                            </FormHelperText>
+                                            <ApiSecurity
+                                                api={api}
+                                                isTransportHttps={this.getTransportState(
+                                                    'https',
+                                                    transport,
+                                                    api.transport,
+                                                )}
+                                                securityScheme={securityScheme}
+                                                setSecurityScheme={this.setSecurityScheme}
+                                                removeFromArray={this.removeFromArray}
+                                                addToArray={this.addToArray}
+                                                error={error}
+                                                securitySchemaValues={securitySchemaValues}
+                                            />
+
                                         </div>
                                     </div>
                                     <div className={classes.imageContainer}>
