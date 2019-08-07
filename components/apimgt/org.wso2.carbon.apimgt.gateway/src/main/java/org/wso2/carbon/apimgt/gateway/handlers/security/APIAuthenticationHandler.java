@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
+import io.swagger.parser.OpenAPIParser;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -30,6 +32,7 @@ import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
@@ -88,6 +91,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private String certificateInformation;
     private String apiUUID;
     private String apiType = String.valueOf(APIConstants.ApiTypes.API); // Default API Type
+    private OpenAPI openAPI;
 
     public String getApiUUID() {
         return apiUUID;
@@ -280,7 +284,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             authenticators.add(authenticator);
         }
         if (isOAuthProtected) {
-            authenticator = new OAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory, removeOAuthHeadersFromOutMessage);
+            authenticator = new OAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory,
+                    removeOAuthHeadersFromOutMessage, apiLevelPolicy);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
@@ -302,6 +307,26 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
+        // Read OpenAPI from local entry
+        if (openAPI == null && apiUUID != null) {
+            synchronized (this) {
+                if (openAPI == null) {
+                    long startTime = System.currentTimeMillis();
+                    Entry localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get(apiUUID);
+                    if (localEntryObj != null) {
+                        OpenAPIParser parser = new OpenAPIParser();
+                        openAPI = parser.readContents(localEntryObj.getValue().toString(), null, null).getOpenAPI();
+                    }
+                    long endTime = System.currentTimeMillis();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Time to parse the swagger(ms) : " + (endTime - startTime));
+                    }
+                }
+            }
+        }
+        // Add OpenAPI to message context
+        messageContext.setProperty(APIMgtGatewayConstants.API_SWAGGER, openAPI);
+
         TracingSpan keySpan = null;
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
@@ -493,7 +518,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
         axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");
         int status;
-        if (e.getErrorCode() == APISecurityConstants.API_AUTH_GENERAL_ERROR) {
+        if (e.getErrorCode() == APISecurityConstants.API_AUTH_GENERAL_ERROR ||
+                e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_SWAGGER) {
             status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
         } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_INCORRECT_API_RESOURCE ||
                 e.getErrorCode() == APISecurityConstants.API_AUTH_FORBIDDEN ||

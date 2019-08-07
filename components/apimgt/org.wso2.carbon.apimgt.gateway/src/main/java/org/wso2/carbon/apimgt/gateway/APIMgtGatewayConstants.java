@@ -32,6 +32,7 @@ public class APIMgtGatewayConstants {
     public static final String HTTP_METHOD = "api.ut.HTTP_METHOD";
     public static final String HOST_NAME = "api.ut.hostName";
     public static final String API_PUBLISHER = "api.ut.apiPublisher";
+    public static final String API_SWAGGER = "API_SWAGGER";
     public static final String APPLICATION_NAME = "api.ut.application.name";
     public static final String APPLICATION_ID = "api.ut.application.id";
     public static final String REQUEST_START_TIME = "api.ut.requestTime";
@@ -137,5 +138,11 @@ public class APIMgtGatewayConstants {
     public static final String CORS_REQUEST_HANDLER_ERROR = "Error in CORS_Request Handler";
     public static final String API_KEY_VALIDATOR_ERROR = "Error while accessing backend services for API key validation";
     public static final String GOOGLE_ANALYTICS_ERROR = "Error in Google Analytics Handler";
+
+    /**
+     * Constants for trust store access
+     * */
+    public static final String TRUST_STORE_PASSWORD = "Security.TrustStore.Password";
+    public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
 }
 
