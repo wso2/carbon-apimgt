@@ -98,39 +98,14 @@ class CommonListing extends React.Component {
     };
 
     /**
-     * Returns the appropriate rendering depending on the type of view being used
-     *
-     * @param {string} type Listing type
-     * @param {object} apis APIs object
-     * @param {object} classes Classes prop
-     * @returns {Component}
-     * @memberof CommonListing
-     */
-    view = (type, apis, classes) => {
-        const { path } = this.props;
-        return type === 'grid' ? (
-            <Grid container className={classes.ListingWrapper}>
-                {apis.list.map(api => (
-                    <ApiThumb api={api} key={api.id} path={path} />
-                ))}
-            </Grid>
-        ) : (
-            <React.Fragment>
-                <ApiTableView apis={apis.list} />
-            </React.Fragment>
-        );
-    }
-
-    /**
      *
      * @inheritdoc
      * @returns {React.Component} @inheritdoc
      * @memberof CommonListing
      */
     render() {
-        const { apis } = this.props;
+        const { apis, kind, theme, classes } = this.props;
         const { listType } = this.state;
-        const { theme, classes } = this.props;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
 
         return (
@@ -161,15 +136,8 @@ class CommonListing extends React.Component {
                     </div>
                 </div>
 
-                <Grid container spacing={0} justify='center'>
-                    <Grid item xs={12}>
-                        {apis ? (
-                            this.view(listType, apis, classes)
-                        ) : (
-                            <Loading />
-                        )}
-                    </Grid>
-                </Grid>
+                {listType === 'grid' && <ApiTableView gridView kind={kind} />}
+                {listType === 'list' && <ApiTableView gridView={false} kind={kind} />}
             </main>
         );
     }
