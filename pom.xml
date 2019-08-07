@@ -1607,7 +1607,7 @@
         <javax.servlet.imp.pkg.version>[2.6.0, 3.0.0)</javax.servlet.imp.pkg.version>
 
         <!-- Jaggery Version -->
-        <jaggery.version>0.14.2</jaggery.version>
+        <jaggery.version>0.14.4</jaggery.version>
 
         <!-- Misc Versions -->
         <synapse.version>2.1.7-wso2v115</synapse.version>
