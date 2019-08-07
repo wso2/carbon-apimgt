@@ -55,4 +55,5 @@ function withAPI(WrappedComponent) {
 export {
     withAPI,
     APIProvider,
+    APIContext,
 };
