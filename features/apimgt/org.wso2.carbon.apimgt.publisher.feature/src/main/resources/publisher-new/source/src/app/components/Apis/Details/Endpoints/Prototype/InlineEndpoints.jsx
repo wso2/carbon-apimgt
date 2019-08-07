@@ -67,7 +67,6 @@ function InlineEndpoints(props) {
 }
 
 InlineEndpoints.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
     paths: PropTypes.shape({}).isRequired,
     updatePaths: PropTypes.func.isRequired,
 };

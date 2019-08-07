@@ -105,7 +105,6 @@ function PrototypeEndpoints(props) {
     };
     return (
         <React.Fragment>
-
             <Grid container direction='column'>
                 <Paper>
                     <Grid item className={classes.prototypeEndpointSelectorWrapper}>

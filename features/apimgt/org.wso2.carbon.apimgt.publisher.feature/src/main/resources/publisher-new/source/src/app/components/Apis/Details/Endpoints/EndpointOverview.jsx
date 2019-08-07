@@ -524,7 +524,7 @@ function EndpointOverview(props) {
                                             onClick={() => setLBConfigOpen(true)}
                                         >
                                             <Icon>
-                                                    settings
+                                                settings
                                             </Icon>
                                         </IconButton>
                                     </div>
