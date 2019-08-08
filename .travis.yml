@@ -1,5 +1,6 @@
 language: java
 sudo: true
+# In below install command , we switch to Node v8.16.0 version since we need npm v5.7 or above to run `npm ci`
 install:
   - if [ -z "${SHELLCHECK-}" ]; then nvm install v8.16.0; fi
 # Can't update to xenial distribution (ubuntu 16.04) bause of the Java JDK restriction (Not supporting )
