@@ -41,7 +41,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import API from 'AppData/api';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import ApiContext from '../components/ApiContext';
-import ApiSecurity from './APISecurity';
+import ApiSecurity from './ApiSecurity';
 
 const styles = theme => ({
     titleWrapper: {
