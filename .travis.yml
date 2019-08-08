@@ -6,7 +6,7 @@ install:
 dist: trusty
 
 # Using -q Quiet output which only show errors, to overcome TravisCI log limit issue
-script: mvn clean install -DskipTests=true -q -B -V | grep -v DEBUG; test ${PIPESTATUS[0]} -eq 0;
+script: mvn clean install -q -B -V | grep -v DEBUG; test ${PIPESTATUS[0]} -eq 0;
 
 cache:
   directories:
