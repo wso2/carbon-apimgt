@@ -57,7 +57,7 @@ const styles = theme => ({
  * @class APICreateForm
  * @extends {Component}
  */
-class APICreateForm extends Component {
+class APICreateDefault extends Component {
     /**
      * Creates an instance of APICreateForm.
      * @param {any} props @inheritDoc
@@ -144,7 +144,7 @@ class APICreateForm extends Component {
     }
 }
 
-APICreateForm.propTypes = {
+APICreateDefault.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     history: PropTypes.shape({
         push: PropTypes.func.isRequired,
@@ -160,4 +160,4 @@ APICreateForm.propTypes = {
     api: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(APICreateForm);
+export default withStyles(styles)(APICreateDefault);
