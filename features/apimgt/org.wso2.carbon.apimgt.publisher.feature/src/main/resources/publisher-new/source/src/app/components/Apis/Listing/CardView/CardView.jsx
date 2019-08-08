@@ -6,7 +6,7 @@ import ApiThumb from '../components/ImageGenerator/ApiThumb';
 
 const CardView = ({ apis, updateAPIsList }) => {
     return (
-        <Grid container justify='flex-start' spacing={8}>
+        <Grid container justify='flex-start' spacing={2}>
             {apis.list.map((api) => {
                 return <ApiThumb key={api.id} updateAPIsList={updateAPIsList} api={api} apiType={apis.apiType} />;
             })}

@@ -86,7 +86,7 @@ class APICreateDefault extends Component {
             mainTitle = <FormattedMessage id='create.new.api.product' defaultMessage='New API Product' />;
         }
         return (
-            <Grid container spacing={24} className={classes.root}>
+            <Grid container spacing={7} className={classes.root}>
                 <Grid item xs={12} md={6}>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
@@ -113,7 +113,7 @@ class APICreateDefault extends Component {
                             container
                             direction='row'
                             alignItems='flex-start'
-                            spacing={16}
+                            spacing={4}
                             className={classes.buttonSection}
                         >
                             <Grid item>

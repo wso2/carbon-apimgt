@@ -138,7 +138,7 @@ class CreateScope extends React.Component {
                 <Typography
                     className={classes.headline}
                     gutterBottom
-                    variant='headline'
+                    variant='h5'
                     component='h2'
                 >
                     <FormattedMessage

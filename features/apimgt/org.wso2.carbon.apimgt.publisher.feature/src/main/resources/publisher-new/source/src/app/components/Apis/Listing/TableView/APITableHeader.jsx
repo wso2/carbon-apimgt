@@ -11,37 +11,37 @@ import { FormattedMessage } from 'react-intl';
 const rows = [
     {
         id: 'name',
-        numeric: false,
+        numeric: false, // TODO: Remove this flag , as this is no longer supported in material-ui 4.x
         disablePadding: true,
         label: <FormattedMessage id='name' defaultMessage='Name' />,
     },
     {
         id: 'version',
-        numeric: true,
+        numeric: true, // TODO: Remove this flag , as this is no longer supported in material-ui 4.x
         disablePadding: false,
         label: <FormattedMessage id='version' defaultMessage='Version' />,
     },
     {
         id: 'context',
-        numeric: true,
+        numeric: true, // TODO: Remove this flag , as this is no longer supported in material-ui 4.x
         disablePadding: false,
         label: <FormattedMessage id='context' defaultMessage='Context' />,
     },
     {
         id: 'subscriptions',
-        numeric: true,
+        numeric: true, // TODO: Remove this flag , as this is no longer supported in material-ui 4.x
         disablePadding: false,
         label: <FormattedMessage id='subscriptions' defaultMessage='Subscriptions' />,
     },
     {
         id: 'provider',
-        numeric: true,
+        numeric: true, // TODO: Remove this flag , as this is no longer supported in material-ui 4.x
         disablePadding: false,
         label: <FormattedMessage id='provider' defaultMessage='Provider' />,
     },
     {
         id: 'status',
-        numeric: true,
+        numeric: true, // TODO: Remove this flag , as this is no longer supported in material-ui 4.x
         disablePadding: false,
         label: <FormattedMessage id='status' defaultMessage='Status' />,
     },
@@ -93,7 +93,7 @@ export default class APITableHeader extends React.Component {
                         return (
                             <TableCell
                                 key={row.id}
-                                numeric={row.numeric}
+                                align={row.numeric && 'right'}
                                 padding={row.disablePadding ? 'none' : 'default'}
                                 sortDirection={orderBy === row.id ? order : false}
                             >

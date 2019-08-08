@@ -221,7 +221,7 @@ class Scopes extends React.Component {
                 <Grid container justify='center'>
                     <Grid item sm={5}>
                         <Card className={classes.card}>
-                            <Typography className={classes.headline} gutterBottom variant='headline' component='h2'>
+                            <Typography className={classes.headline} gutterBottom variant='h5' component='h2'>
                                 <FormattedMessage
                                     id='Apis.Details.Scopes.Scopes.create.scopes.title'
                                     defaultMessage='Create Scopes'

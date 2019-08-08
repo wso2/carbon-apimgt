@@ -93,7 +93,7 @@ class TopMenu extends React.Component {
                 <div className={classes.mainTitleWrapper}>
                     {apis && (
                         <div>
-                            <Typography variant='display1' className={classes.mainTitle}>
+                            <Typography variant='h4' className={classes.mainTitle}>
                                 {apis.apiType === API.CONSTS.APIProduct ?
                                     <FormattedMessage
                                         id='Apis.Listing.components.TopMenu.apiproducts'

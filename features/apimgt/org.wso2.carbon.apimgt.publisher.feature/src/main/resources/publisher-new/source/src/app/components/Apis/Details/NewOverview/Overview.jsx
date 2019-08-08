@@ -146,7 +146,7 @@ function Overview(props) {
         loadEndpoints = <Endpoints parentClasses={classes} api={newApi} />;
     }
     return (
-        <Grid container spacing={24}>
+        <Grid container spacing={7}>
             <Grid item xs={12}>
                 <Grid container>
                     {endpointsCheckItem}
@@ -159,7 +159,7 @@ function Overview(props) {
                 </Grid>
             </Grid>
             <Grid item xs={12}>
-                <Grid container spacing={24}>
+                <Grid container spacing={7}>
                     <Grid item xs={12} md={6} lg={6}>
                         <Configuration parentClasses={classes} />
                         {loadResources}

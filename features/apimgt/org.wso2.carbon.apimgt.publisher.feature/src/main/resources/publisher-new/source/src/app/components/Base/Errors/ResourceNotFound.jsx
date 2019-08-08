@@ -28,10 +28,10 @@ const ResourceNotFound = (props) => {
     return (
         <div>
             <div className='message message-danger'>
-                <Typography variant='title' gutterBottom>
+                <Typography variant='h6' gutterBottom>
                     { message.title }
                 </Typography>
-                <Typography variant='subheading' gutterBottom>
+                <Typography variant='subtitle1' gutterBottom>
                     { message.body }
                     <span style={{ color: 'green' }}> {response ? response.statusText : ''} </span>
                 </Typography>

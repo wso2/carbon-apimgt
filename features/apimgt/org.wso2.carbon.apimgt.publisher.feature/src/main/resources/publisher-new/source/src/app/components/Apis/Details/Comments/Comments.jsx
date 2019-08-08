@@ -193,7 +193,7 @@ class Comments extends Component {
             <div className={classes.contentWrapper}>
                 <div className={classes.root}>
                     <ArrowDropDownCircleOutlined onClick={this.handleExpandClick} aria-expanded={expanded} />
-                    <Typography onClick={this.handleExpandClick} variant='display1' className={classes.titleSub}>
+                    <Typography onClick={this.handleExpandClick} variant='h4' className={classes.titleSub}>
                         Comments
                     </Typography>
                 </div>
@@ -213,11 +213,11 @@ class Comments extends Component {
                     />
                     {startCommentsToDisplay !== 0 && (
                         <div className={classes.contentWrapper}>
-                            <Grid container spacing={32} className={classes.root}>
+                            <Grid container spacing={8} className={classes.root}>
                                 <Grid item>
                                     <Typography
                                         className={classes.verticalSpace}
-                                        variant='body2'
+                                        variant='body1'
                                         onClick={this.handleLoadMoreComments}
                                     >
                                         <a className={classes.link + ' ' + classes.loadMoreLink}>
@@ -232,7 +232,7 @@ class Comments extends Component {
                                     />
                                 </Grid>
                                 <Grid item>
-                                    <Typography className={classes.verticalSpace} variant='body2'>
+                                    <Typography className={classes.verticalSpace} variant='body1'>
                                         Showing comments
                                         {totalComments + -startCommentsToDisplay + ' of ' + totalComments}
                                     </Typography>

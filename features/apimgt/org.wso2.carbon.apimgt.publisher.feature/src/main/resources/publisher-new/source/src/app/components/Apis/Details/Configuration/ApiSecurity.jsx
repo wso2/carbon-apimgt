@@ -259,7 +259,7 @@ function ApiSecurity(props) {
                 container
                 direction='row'
                 alignItems='flex-start'
-                spacing={16}
+                spacing={4}
                 className={classes.buttonSection}
             >
                 <Grid item style={{ width: '250px' }}>
