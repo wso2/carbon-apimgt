@@ -972,8 +972,7 @@ public class APIMappingUtil {
 
                 uriTemplates.add(template);
             } else {
-
-                if(model.getType().equals(APIConstants.GRAPHQL_API)){
+                if(APIConstants.GRAPHQL_API.equals(model.getType())){
                     handleException("The GRAPHQL operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
                             + "' is invalid");
                 } else {
@@ -983,7 +982,7 @@ public class APIMappingUtil {
             }
 
             if (!isHttpVerbDefined) {
-                if(model.getType().equals(APIConstants.GRAPHQL_API)) {
+                if(APIConstants.GRAPHQL_API.equals(model.getType())) {
                     handleException("Operation '" + uriTempVal + "' has global parameters without " +
                             "Operation Type");
                 } else {
@@ -1360,7 +1359,7 @@ public class APIMappingUtil {
         APIDefinitionFromOpenAPISpec definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
         Set<URITemplate> uriTemplates = api.getUriTemplates();
 
-        if (api.getType() != null && !api.getType().equals(APIConstants.GRAPHQL_API)) {
+        if (!APIConstants.GRAPHQL_API.equals(api.getType())) {
             uriTemplates = definitionFromOpenAPISpec.getURITemplates(api, swaggerDefinition);
         }
 
@@ -1423,7 +1422,7 @@ public class APIMappingUtil {
             suportMethods = RestApiConstants.SUPPORTED_METHODS;
         }
 
-        for (String verb : RestApiConstants.SUPPORTED_METHODS) {
+        for (String verb : suportMethods) {
             APIOperationsDTO operationsDTO = new APIOperationsDTO();
             operationsDTO.setTarget("/*");
             operationsDTO.setVerb(verb);

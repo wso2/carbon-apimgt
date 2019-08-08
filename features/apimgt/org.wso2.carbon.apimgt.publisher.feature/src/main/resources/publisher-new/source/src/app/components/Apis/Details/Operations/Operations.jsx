@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -234,13 +234,13 @@ class Operations extends React.Component {
     updateOperations() {
         const { api } = this.props;
         const { operationList, intl } = this.state;
-        const apiObject = api._data;
-        apiObject.operations = operationList;
+        api.operations = operationList;
         /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
         /* eslint no-param-reassign: ["error", { "props": false }] */
         if (api._data) delete api._data;
         if (api.client) delete api.client;
-        const promisedApi = this.newApi.update(api);
+        if (api.apiType) delete api.apiType;
+        const promisedApi = this.newApi.update(JSON.parse(JSON.stringify(api)));
         promisedApi
             .then(() => {
                 Alert.info(intl.formatMessage({

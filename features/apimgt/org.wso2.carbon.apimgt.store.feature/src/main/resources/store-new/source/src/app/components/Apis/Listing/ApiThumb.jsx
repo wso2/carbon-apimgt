@@ -23,6 +23,7 @@ import Chip from '@material-ui/core/Chip';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import Grid from '@material-ui/core/Grid';
 import { FormattedMessage } from 'react-intl';
 import ImageGenerator from './ImageGenerator';
 import StarRatingBar from './StarRating';

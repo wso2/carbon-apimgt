@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -92,7 +109,7 @@ class APICreateGraphQL extends React.Component {
             doValidate: false,
             graphQLBean: {},
             activeStep: 0,
-            api: new API(),
+            api: null,
             loading: false,
             valid: {
                 graphQLFile: { empty: false, invalidFile: false },
@@ -226,16 +243,15 @@ class APICreateGraphQL extends React.Component {
             // No errors so let's fill the inputs with the graphQLBean
             if (graphQLBean.info) {
                 if (graphQLBean.info.operations) {
-                    this.setState(({ api }) => {
-                        const changes = api;
-                        changes.operations = graphQLBean.info.operations;
-                        changes.gatewayEnvironments = ['Production and Sandbox'];
-                        return { api: changes };
-                    });
+                    const changes = {
+                        operations: graphQLBean.info.operations,
+                        gatewayEnvironments: ['Production and Sandbox'],
+                    };
+                    this.setState({ api: changes });
                 }
             }
             this.setState({
-                activeStep: activeStep + 1,
+                activeStep: 1,
             });
         } else if (activeStep === 1) {
             // Handling Finish step ( validating the input fields )

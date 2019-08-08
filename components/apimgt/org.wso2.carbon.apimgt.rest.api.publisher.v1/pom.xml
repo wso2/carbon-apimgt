@@ -172,9 +172,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.graphql-java</groupId>
-            <artifactId>graphql-java</artifactId>
-            <version>13.0</version>
+            <groupId>org.wso2.orbit.graphQL</groupId>
+            <artifactId>graphQL</artifactId>
+            <version>${graphql.java.version}</version>
         </dependency>
     </dependencies>
     <build>

@@ -272,8 +272,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
                         Timer timer1 = getTimer(MetricManager.name(
                                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), RESOURCE_THROTTLE));
-                        Timer.Context
-                                context1 = timer1.start();
+                        Timer.Context context1 = timer1.start();
 
                         if (conditionGroupDTOs != null && conditionGroupDTOs.length > 0) {
                             // Checking Applicability of Conditions is a relatively expensive operation. So we are
@@ -284,7 +283,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                     Map<String, List<ConditionDto>> conditionDtoMap = getThrottleDataHolder()
                                             .getConditionDtoMap(resourceLevelThrottleKey);
                                     if (log.isDebugEnabled()) {
-                                        log.debug("conditions available" + conditionDtoMap.size());
+                                        log.debug("Conditions available" + conditionDtoMap.size());
                                     }
                                     String throttledCondition = getThrottleConditionEvaluator().getThrottledInCondition
                                             (synCtx, authContext, conditionDtoMap);
@@ -295,6 +294,32 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                         String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + "_" +
                                                 throttledCondition;
 
+                                        if (log.isDebugEnabled()) {
+                                            log.debug("Checking condition : " + combinedResourceLevelThrottleKey);
+                                        }
+
+                                        if (getThrottleDataHolder().isThrottled(combinedResourceLevelThrottleKey)) {
+                                            if (!apiLevelThrottledTriggered) {
+                                                isResourceLevelThrottled = isThrottled = true;
+                                            } else {
+                                                isApiLevelThrottled = isThrottled = true;
+                                            }
+                                            long timestamp = getThrottleDataHolder().
+                                                    getThrottleNextAccessTimestamp(combinedResourceLevelThrottleKey);
+                                            synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP,
+                                                    timestamp);
+                                        }
+                                    }
+                                } else {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Evaluating Conditional Groups for " + apiLevelThrottleKey);
+                                    }
+                                    //Then we will apply resource level throttling
+                                    List<ConditionGroupDTO> applicableConditions = getThrottleConditionEvaluator()
+                                            .getApplicableConditions(synCtx, authContext, conditionGroupDTOs);
+                                    for (ConditionGroupDTO conditionGroup : applicableConditions) {
+                                        String combinedResourceLevelThrottleKey = resourceLevelThrottleKey +
+                                                conditionGroup.getConditionGroupId();
                                         if (log.isDebugEnabled()) {
                                             log.debug("Checking condition : " + combinedResourceLevelThrottleKey);
                                         }
@@ -310,31 +335,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                                     getThrottleNextAccessTimestamp(combinedResourceLevelThrottleKey);
                                             synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP,
                                                     timestamp);
-                                        }
-                                    }
-                                } else {
-                                    if (log.isDebugEnabled()) {
-                                        log.debug("Evaluating Conditional Groups");
-                                    }
-                                    //Then we will apply resource level throttling
-                                    List<ConditionGroupDTO> applicableConditions = getThrottleConditionEvaluator()
-                                            .getApplicableConditions(synCtx, authContext, conditionGroupDTOs);
-                                    for (ConditionGroupDTO conditionGroup : applicableConditions) {
-                                        String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionGroup.getConditionGroupId();
-                                        if (log.isDebugEnabled()) {
-                                            log.debug("Checking condition : " + combinedResourceLevelThrottleKey);
-                                        }
-
-                                        if (getThrottleDataHolder().
-                                                isThrottled(combinedResourceLevelThrottleKey)) {
-                                            if (!apiLevelThrottledTriggered) {
-                                                isResourceLevelThrottled = isThrottled = true;
-                                            } else {
-                                                isApiLevelThrottled = isThrottled = true;
-                                            }
-                                            long timestamp = getThrottleDataHolder().
-                                                    getThrottleNextAccessTimestamp(combinedResourceLevelThrottleKey);
-                                            synCtx.setProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP, timestamp);
                                             break;
                                         }
                                     }
@@ -458,8 +458,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                         }
                     } else {
                         if (log.isDebugEnabled()) {
-                                log.debug("Request throttled at resource level for throttle key" +
-                                        throttledResource.getRequestKey());
+                            log.debug("Request throttled at resource level for throttle key" +
+                                    throttledResource.getRequestKey());
                         }
                         //is throttled and resource level throttling
                         synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,

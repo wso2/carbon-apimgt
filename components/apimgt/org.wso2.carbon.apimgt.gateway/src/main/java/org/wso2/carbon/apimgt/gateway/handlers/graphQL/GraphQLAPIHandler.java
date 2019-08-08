@@ -32,7 +32,6 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.config.Entry;
-import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
 import org.apache.synapse.rest.AbstractHandler;
@@ -84,11 +83,11 @@ public class GraphQLAPIHandler extends AbstractHandler {
     private static final Log log = LogFactory.getLog(GraphQLAPIHandler.class);
     private static GraphQLSchema schema = null;
     private static Validator validator;
+    private String apiUUID;
 
     public GraphQLAPIHandler() {
         validator = new Validator();
     }
-    private String apiUUID;
 
     public String getApiUUID() {
         return apiUUID;
@@ -187,8 +186,8 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 }
             }
 
-            messageContext.setProperty(GRAPHQL_SCOPE_ROLE_MAPPING, scopeRoleMappingList);
-            messageContext.setProperty(GRAPHQL_SCOPE_OPERATION_MAPPING, operationScopeMappingList);
+            messageContext.setProperty(SCOPE_ROLE_MAPPING, scopeRoleMappingList);
+            messageContext.setProperty(SCOPE_OPERATION_MAPPING, operationScopeMappingList);
             messageContext.setProperty(API_TYPE, GRAPHQL_API);
 
             // Extract the operation type and operations from the payload
@@ -198,7 +197,6 @@ public class GraphQLAPIHandler extends AbstractHandler {
                     if (operation.getOperation() != null) {
                         ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                                 setProperty(Constants.Configuration.HTTP_METHOD , operation.getOperation().toString());
-//                        messageContext.setProperty(Constants.Configuration.HTTP_METHOD, operation.getOperation());
                         if (Operation.QUERY.equals(operation.getOperation())) {
                             for (Selection selection : operation.getSelectionSet().getSelections()) {
                                 if (selection instanceof Field) {

@@ -340,7 +340,7 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
 
         JSONObject pathsObject = new JSONObject();
 
-        if (api.getType().equals(APIConstants.APITransportType.GRAPHQL.toString())) {
+        if (APIConstants.GRAPHQL_API.equals(api.getType())) {
             List<String> verbList = new ArrayList<>();
             verbList.add("GET");
             verbList.add("POST");
@@ -428,7 +428,7 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         JSONParser parser = new JSONParser();
         try {
             JSONObject swaggerObj = (JSONObject) parser.parse(swagger);
-            if (!api.getType().equals(APIConstants.GRAPHQL_API)) {
+            if (!(APIConstants.GRAPHQL_API).equals(api.getType())) {
                 //Generates below model using the API's URI template
                 // path -> [verb1 -> template1, verb2 -> template2, ..]
                 Map<String, Map<String, URITemplate>> uriTemplateMap = getURITemplateMap(api);

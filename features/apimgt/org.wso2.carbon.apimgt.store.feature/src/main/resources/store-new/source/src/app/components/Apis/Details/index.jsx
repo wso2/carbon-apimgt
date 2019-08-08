@@ -184,8 +184,11 @@ class Details extends React.Component {
             let existingSubscriptions = null;
             let promisedApplications = null;
 
+            const dataApi = new Api();
+            promisedAPI = dataApi.getAPIById(this.api_uuid);
+
             if (path === '/apis') {
-                const dataApi = new Api();
+                // const dataApi = new Api();
                 promisedAPI = dataApi.getAPIById(this.api_uuid);
                 existingSubscriptions = dataApi.getSubscriptions(this.api_uuid, null);
                 promisedApplications = dataApi.getAllApplications();

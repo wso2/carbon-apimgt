@@ -1798,7 +1798,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String tenantDomain = null;
         APITemplateBuilder builder = null;
 
-        if (api.getType() != null && api.getType().equals(APIConstants.APITransportType.GRAPHQL.toString())) {
+        if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
             api.setGraphQLSchema(getGraphqlSchema(api.getId()));
         }
         api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
@@ -3376,7 +3376,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
-            if(api.getType().equals(APIConstants.GRAPHQL_API)){
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 String resourcePath = identifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
                         identifier.getApiName() + identifier.getVersion() +
                         APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;

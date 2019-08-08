@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -267,7 +267,7 @@ ProvideGraphQL.defaultProps = {
 ProvideGraphQL.propTypes = {
     updateGraphQLBean: PropTypes.func.isRequired,
     validate: PropTypes.bool.isRequired,
-    valid: PropTypes.shape({}).isRequired,
+    valid: PropTypes.shape({ name: PropTypes.string.isRequired }).isRequired,
     file: PropTypes.shape({}),
     classes: PropTypes.shape({}).isRequired,
     updateFileErrors: PropTypes.func.isRequired,

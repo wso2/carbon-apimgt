@@ -1801,6 +1801,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
+            //adding the api
+            apiProvider.addAPI(apiToAdd);
 
             //Save swagger definition of graphQL
             APIDefinitionFromOpenAPISpec apiDefinitionUsingOASParser = new APIDefinitionFromOpenAPISpec();

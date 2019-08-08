@@ -48,6 +48,9 @@ const styles = theme => ({
     scopes: {
         width: 400,
     },
+    dropDown: {
+        width: 100,
+    },
     divider: {
         marginTop: 20,
         marginBottom: 20,
@@ -137,9 +140,8 @@ class Operation extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            IsSecurity: false,
+            isSecurity: false,
         };
-        // this.toggleMethodData = this.toggleMethodData.bind(this);
         this.handleScopeChange = this.handleScopeChange.bind(this);
         this.handlePolicyChange = this.handlePolicyChange.bind(this);
         this.handleChange = this.handleChange.bind(this);
@@ -176,7 +178,7 @@ class Operation extends React.Component {
             operation.authType = 'None';
         }
         this.setState({
-            IsSecurity: checked,
+            isSecurity: checked,
         });
         this.props.handleUpdateList(operation);
     }
@@ -188,7 +190,7 @@ class Operation extends React.Component {
         const {
             operation, theme, classes, apiPolicies, scopes,
         } = this.props;
-        const { IsSecurity } = this.state;
+        const { isSecurity } = this.state;
         let chipColor = theme.custom.operationChipColor ?
             theme.custom.operationChipColor[operation.verb.toLowerCase()]
             : null;
@@ -260,7 +262,7 @@ class Operation extends React.Component {
                             return true;
                         })()}
                         onChange={this.handleChange}
-                        value={IsSecurity}
+                        value={isSecurity}
                         color='primary'
                     />
                 </TableCell>

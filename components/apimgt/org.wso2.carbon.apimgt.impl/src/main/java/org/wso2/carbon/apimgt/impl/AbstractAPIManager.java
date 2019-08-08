@@ -1074,7 +1074,7 @@ public abstract class AbstractAPIManager implements APIManager {
                         RegistryConstants.DEFAULT_CHARSET_ENCODING);
             }
         } catch (RegistryException e) {
-            String msg = "Error while getting schema file from the registry ";
+            String msg = "Error while getting schema file from the registry " + schemaResourePath;
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (IOException e) {
@@ -1105,7 +1105,7 @@ public abstract class AbstractAPIManager implements APIManager {
             resource.setMediaType(String.valueOf(ContentType.TEXT_PLAIN));
             registry.put(resourcePath, resource);
             if (log.isDebugEnabled()) {
-                log.debug("successfully imported the schema: " + schemaDefinition );
+                log.debug("Successfully imported the schema: " + schemaDefinition );
             }
         } catch (RegistryException e) {
             String msg = "Error while uploading schema to from the registry ";

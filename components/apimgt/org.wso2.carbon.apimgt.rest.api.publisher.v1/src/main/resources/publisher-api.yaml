@@ -1964,7 +1964,7 @@ paths:
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+            Empty body because the client already has the latest version of the requested resource (Will be supported in future).
         404:
           description: |
             Not Found.

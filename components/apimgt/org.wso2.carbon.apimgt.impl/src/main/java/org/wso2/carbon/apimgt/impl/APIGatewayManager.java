@@ -136,7 +136,7 @@ public class APIGatewayManager {
                     log.debug("Time taken to fetch API Data: " + (endTime - apiGetStartTime) / 1000 + "  seconds");
                 }
                 localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
-                if (api.getType() != null && api.getType().equals(APIConstants.APITransportType.GRAPHQL.toString())) {
+                if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
                     //Build schema with scopes and roles
                     definition = buildSchemaWithScopesAndRoles(api);
                     localEntryAdminClient.deleteEntry(api.getUUID() + "_graphQL");

@@ -250,7 +250,7 @@ const styles = theme => ({
         marginLeft: 30,
     },
     downloadLink: {
-        color: 'black',
+        color: 'blue',
     },
 });
 
@@ -656,36 +656,29 @@ class InfoBar extends React.Component {
                                                     </TableCell>
                                                     <TableCell>21 May 2018</TableCell>
                                                 </TableRow>
-                                                <TableRow>
-                                                    <TableCell component='th' scope='row'>
-                                                        <div className={classes.iconAligner}>
-                                                            <CloudDownloadRounded className={classes.buttonIcon} />
-                                                            <span className={classes.iconTextWrapper}>
-                                                                <FormattedMessage
-                                                                    id='Apis.Details.InfoBar.download.Schema'
-                                                                    defaultMessage='Download Schema'
-                                                                />
-                                                            </span>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <div className={classes.iconAligner}>
-                                                            <a className={classes.downloadLink} href={downloadLink} download={fileName}>
-                                                                <Button
-                                                                    variant='contained'
-                                                                    size='small'
-                                                                    color='success'
-                                                                    className={classes.margin}
-                                                                >
+                                                { api.type = 'GRAPHQL' ? (
+                                                    <TableRow>
+                                                        <TableCell component='th' scope='row'>
+                                                            <div className={classes.iconAligner}>
+                                                                <CloudDownloadRounded className={classes.buttonIcon} />
+                                                                <span className={classes.iconTextWrapper}>
                                                                     <FormattedMessage
-                                                                        id='Apis.Details.InfoBar.graphQL.schema'
-                                                                        defaultMessage='GraphQL Schema'
+                                                                        id='Apis.Details.InfoBar.download.Schema'
+                                                                        defaultMessage='Download Schema'
                                                                     />
-                                                                </Button>
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <a className={classes.downloadLink} href={downloadLink} download={fileName}>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.graphQL.schema'
+                                                                    defaultMessage='GraphQL Schema'
+                                                                />
                                                             </a>
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ) : null}
                                             </TableBody>
                                         </Table>
                                     </div>

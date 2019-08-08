@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 import org.apache.axis2.Constants;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -373,9 +374,9 @@ public class APIKeyValidator {
                 for (VerbInfoDTO verb : verbInfoList) {
                     authType = verb.getAuthType();
                     if (authType == null) {
-                        authType = APIConstants.AUTH_TYPE_NONE;
+                        authType = StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase());;
                     }
-                    if (!authType.equals(APIConstants.AUTH_TYPE_NONE)) {
+                    if (!StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase()).equals(authType)) {
                         break;
                     }
                 }
@@ -590,8 +591,6 @@ public class APIKeyValidator {
                         log.debug("Got Resource from cache for key: " + resourceCacheKey);
                     }
                     verbInfoList.add(verbInfo);
-                    //Set cache key in the message context so that it can be used by the subsequent handlers.
-                    //synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
                     return verbInfoList;
                 } else if (log.isDebugEnabled()) {
                     log.debug("Cache miss for Resource for key: " + resourceCacheKey);
@@ -652,7 +651,7 @@ public class APIKeyValidator {
                                         log.debug("Putting resource object in cache with key: " + resourceCacheKey);
                                     }
                                     getResourceCache().put(resourceCacheKey, verb);
-                                    //synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
+                                    synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
                                 }
                             }
                         }
