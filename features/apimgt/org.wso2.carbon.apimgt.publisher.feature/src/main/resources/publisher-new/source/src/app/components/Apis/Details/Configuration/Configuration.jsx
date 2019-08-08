@@ -155,7 +155,19 @@ const securitySchemaValues = {
     oauthBasicAuthMandatory: 'oauth_basic_auth_mandatory',
     mutualSSLMandatory: 'mutualssl_mandatory',
 };
+
+/**
+ *
+ *
+ * @class Configuration
+ * @extends {React.Component}
+ */
 class Configuration extends React.Component {
+    /**
+     *Creates an instance of Configuration.
+     * @param {*} props
+     * @memberof Configuration
+     */
     constructor(props) {
         super(props);
         this.state = {
