@@ -177,7 +177,7 @@ class Details extends React.Component {
          *
          * @memberof Details
          */
-        this.updateSubscriptionData = () => {
+        this.updateSubscriptionData = (callback) => {
             const { path } = this.props;
 
             let promisedAPI = null;

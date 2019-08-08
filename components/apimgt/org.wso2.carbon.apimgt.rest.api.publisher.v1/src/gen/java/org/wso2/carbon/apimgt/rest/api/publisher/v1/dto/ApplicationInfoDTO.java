@@ -2,8 +2,6 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import java.util.ArrayList;
-import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -19,12 +17,8 @@ public class ApplicationInfoDTO   {
     private String applicationId = null;
     private String name = null;
     private String subscriber = null;
-    private String throttlingPolicy = null;
     private String description = null;
-    private String status = "";
-    private List<String> groups = new ArrayList<>();
     private Integer subscriptionCount = null;
-    private Object attributes = null;
 
   /**
    **/
@@ -79,23 +73,6 @@ public class ApplicationInfoDTO   {
 
   /**
    **/
-  public ApplicationInfoDTO throttlingPolicy(String throttlingPolicy) {
-    this.throttlingPolicy = throttlingPolicy;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "Unlimited", value = "")
-  @JsonProperty("throttlingPolicy")
-  public String getThrottlingPolicy() {
-    return throttlingPolicy;
-  }
-  public void setThrottlingPolicy(String throttlingPolicy) {
-    this.throttlingPolicy = throttlingPolicy;
-  }
-
-  /**
-   **/
   public ApplicationInfoDTO description(String description) {
     this.description = description;
     return this;
@@ -109,40 +86,6 @@ public class ApplicationInfoDTO   {
   }
   public void setDescription(String description) {
     this.description = description;
-  }
-
-  /**
-   **/
-  public ApplicationInfoDTO status(String status) {
-    this.status = status;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "APPROVED", value = "")
-  @JsonProperty("status")
-  public String getStatus() {
-    return status;
-  }
-  public void setStatus(String status) {
-    this.status = status;
-  }
-
-  /**
-   **/
-  public ApplicationInfoDTO groups(List<String> groups) {
-    this.groups = groups;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "\"\"", value = "")
-  @JsonProperty("groups")
-  public List<String> getGroups() {
-    return groups;
-  }
-  public void setGroups(List<String> groups) {
-    this.groups = groups;
   }
 
   /**
@@ -162,23 +105,6 @@ public class ApplicationInfoDTO   {
     this.subscriptionCount = subscriptionCount;
   }
 
-  /**
-   **/
-  public ApplicationInfoDTO attributes(Object attributes) {
-    this.attributes = attributes;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "\"External Reference ID, Billing Tier\"", value = "")
-  @JsonProperty("attributes")
-  public Object getAttributes() {
-    return attributes;
-  }
-  public void setAttributes(Object attributes) {
-    this.attributes = attributes;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -192,17 +118,13 @@ public class ApplicationInfoDTO   {
     return Objects.equals(applicationId, applicationInfo.applicationId) &&
         Objects.equals(name, applicationInfo.name) &&
         Objects.equals(subscriber, applicationInfo.subscriber) &&
-        Objects.equals(throttlingPolicy, applicationInfo.throttlingPolicy) &&
         Objects.equals(description, applicationInfo.description) &&
-        Objects.equals(status, applicationInfo.status) &&
-        Objects.equals(groups, applicationInfo.groups) &&
-        Objects.equals(subscriptionCount, applicationInfo.subscriptionCount) &&
-        Objects.equals(attributes, applicationInfo.attributes);
+        Objects.equals(subscriptionCount, applicationInfo.subscriptionCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingPolicy, description, status, groups, subscriptionCount, attributes);
+    return Objects.hash(applicationId, name, subscriber, description, subscriptionCount);
   }
 
   @Override
@@ -213,12 +135,8 @@ public class ApplicationInfoDTO   {
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    subscriber: ").append(toIndentedString(subscriber)).append("\n");
-    sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    status: ").append(toIndentedString(status)).append("\n");
-    sb.append("    groups: ").append(toIndentedString(groups)).append("\n");
     sb.append("    subscriptionCount: ").append(toIndentedString(subscriptionCount)).append("\n");
-    sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("}");
     return sb.toString();
   }

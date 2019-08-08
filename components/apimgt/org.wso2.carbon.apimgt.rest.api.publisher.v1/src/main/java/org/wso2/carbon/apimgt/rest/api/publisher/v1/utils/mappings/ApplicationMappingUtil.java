@@ -16,30 +16,26 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
-import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApplicationInfoDTO;
 
-import java.util.Arrays;
-import java.util.Map;
-
+/**
+ * This class is responsible for mapping APIM core application related objects into REST API application related DTOs
+ */
 public class ApplicationMappingUtil {
 
+    /**
+     * Create an ApplicationInfoDTO from an Application object
+     * 
+     * @param application Application object
+     * @return ApplicationInfoDTO containing application information
+     */
     public static ApplicationInfoDTO fromApplicationToInfoDTO (Application application) {
         ApplicationInfoDTO applicationInfoDTO = new ApplicationInfoDTO();
 
         applicationInfoDTO.setApplicationId(application.getUUID());
-        applicationInfoDTO.setThrottlingPolicy(application.getTier());
         applicationInfoDTO.setDescription(application.getDescription());
-        applicationInfoDTO.setStatus(application.getStatus());
         applicationInfoDTO.setName(application.getName());
-
-        if (StringUtils.isNotEmpty(application.getGroupId())) {
-            applicationInfoDTO.setGroups(Arrays.asList(application.getGroupId().split(",")));
-        }
-
-        Map<String,String> applicationAttributes = application.getApplicationAttributes();
-        applicationInfoDTO.setAttributes(applicationAttributes);
         applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
         applicationInfoDTO.setSubscriptionCount(application.getSubscriptionCount());
 
