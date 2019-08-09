@@ -233,9 +233,7 @@ class InfoBar extends React.Component {
         if (typeof todo === 'boolean') {
             this.setState({ showOverview: todo });
         } else {
-            this.setState((prevState) => {
-                return { showOverview: !prevState.showOverview };
-            });
+            this.setState(prevState => ({ showOverview: !prevState.showOverview }));
         }
     }
 
@@ -368,8 +366,8 @@ class InfoBar extends React.Component {
                 <div className={classes.infoContentBottom}>
                     <div
                         className={classes.contentWrapper}
-                        onClick={() => this.toggleOverview()}
-                        onKeyDown={() => this.toggleOverview()}
+                        onClick={this.toggleOverview}
+                        onKeyDown={this.toggleOverview}
                     >
                         <div className={classes.buttonView}>
                             {showOverview

@@ -137,8 +137,10 @@ class ViewKeys extends React.Component {
     }
 
     /**
-     *
-     *
+     * Adding this here becasue it is not possible to add in the render method becasue isKeyJWT in state is used
+     * to clsoe the dialog box and render method will casue this to be always true and cannot close the box.
+     * Rule is ignored becasue according to react docs its ok to setstate as long as we are checking a condition
+     * https://reactjs.org/docs/react-component.html#componentdidupdate
      * @param {*} prevProps previous props
      * @memberof ViewKeys
      */
@@ -149,7 +151,6 @@ class ViewKeys extends React.Component {
             this.setState({ isKeyJWT: true });
         }
     }
-
 
     /**
      * Set accesstoken request in state

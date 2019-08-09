@@ -32,7 +32,7 @@ const applications = () => {
     return (
         <Switch>
             <Route exact path='/applications' component={Listing} />
-            <Route path='/applications/:application_uuid/' render={props => <Details {...props} />} />
+            <Route path='/applications/:application_uuid/' component={Details} />
             <Route component={PageNotFound} />
         </Switch>
     );
