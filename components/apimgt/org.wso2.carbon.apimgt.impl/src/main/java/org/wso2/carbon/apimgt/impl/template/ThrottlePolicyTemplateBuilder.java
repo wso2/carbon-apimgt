@@ -100,9 +100,9 @@ public class ThrottlePolicyTemplateBuilder {
 
         try {
             VelocityEngine velocityengine = new VelocityEngine();
+            velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                    CommonsLogLogChute.class.getName());
             if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        CommonsLogLogChute.class.getName());
                 velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
                 velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
             }
@@ -173,9 +173,9 @@ public class ThrottlePolicyTemplateBuilder {
 
         try {
             VelocityEngine velocityengine = new VelocityEngine();
+            velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                    CommonsLogLogChute.class.getName());
             if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        CommonsLogLogChute.class.getName());
                 velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
                 velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
             }
@@ -244,9 +244,9 @@ public class ThrottlePolicyTemplateBuilder {
         }
         try {
             VelocityEngine velocityengine = new VelocityEngine();
+            velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                    CommonsLogLogChute.class.getName());
             if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        CommonsLogLogChute.class.getName());
                 velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
                 velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
             }
@@ -296,9 +296,9 @@ public class ThrottlePolicyTemplateBuilder {
         }
         try {
             VelocityEngine velocityengine = new VelocityEngine();
+            velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                    CommonsLogLogChute.class.getName());
             if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        CommonsLogLogChute.class.getName());
                 velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
                 velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
             }
@@ -342,9 +342,9 @@ public class ThrottlePolicyTemplateBuilder {
         }
         try {
             VelocityEngine velocityengine = new VelocityEngine();
+            velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                    CommonsLogLogChute.class.getName());
             if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        CommonsLogLogChute.class.getName());
                 velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
                 velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
             }

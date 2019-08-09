@@ -79,7 +79,16 @@
 					<groupId>org.slf4j</groupId>
 					<artifactId>log4j-over-slf4j</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.wso2.carbon.apimgt</groupId>
+					<artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
+				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.wso2.carbon.apimgt</groupId>
+			<artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
+			<scope>test</scope>
 		</dependency>
         <dependency>
             <groupId>commons-codec</groupId>
@@ -226,7 +235,6 @@
 							!org.wso2.carbon.apimgt.keymgt.stub.types.axis2,
 							!org.wso2.carbon.apimgt.keymgt.stub.types.carbon,
 							!org.wso2.carbon.apimgt.keymgt.stub.useradmin,
-							!org.wso2.carbon.apimgt.keymgt.client,
 							org.wso2.carbon.apimgt.keymgt.*
 						</Export-Package>
 					</instructions>
