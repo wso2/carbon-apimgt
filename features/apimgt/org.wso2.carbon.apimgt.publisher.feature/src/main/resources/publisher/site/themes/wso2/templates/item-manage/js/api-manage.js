@@ -285,10 +285,10 @@ $(document).ready(function(){
         }
     });
 
-    $('.schema_validation_check').change(function(){
-            if($(this).is(":checked")){
+    $('.schema_validation_check').change(function() {
+            if ($(this).is(":checked")) {
                 $('#schema_validation_check').val($(this).val());
-            }else{
+            } else {
                 $('#schema_validation_check').val("");
             }
     });

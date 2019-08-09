@@ -52,7 +52,6 @@ public class TestSchemaValidator {
         messageContext = Mockito.mock(Axis2MessageContext.class);
         axis2MsgContext = Mockito.mock(org.apache.axis2.context.MessageContext
                 .class);
-
     }
 
     @Test

@@ -289,10 +289,9 @@ $(document).ready(function(){
     $('.more-advanced-options').click(function(){
             var id = $(this).attr('ref');
             var div = $('#'+id);
-            if(div.is(":visible")){
+            if (div.is(":visible")) {
                 $(this).text(i18n.t("Show Advanced Options"));
-            }
-            else{
+            } else {
                 $(this).text(i18n.t("Show Fewer Advanced Options"));
             }
             div.toggle('fast');

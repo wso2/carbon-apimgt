@@ -179,7 +179,7 @@
              <name>API Security</name>
       </field>
      <field type="options">
-             <name label="enableSchemaValidation">enable Schema Validation</name>
+             <name label="enableSchemaValidation">Enable Schema Validation</name>
              <values>
                 <value>false</value>
                 <value>true</value>

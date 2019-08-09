@@ -123,7 +123,7 @@ public class APIManagerComponent {
     public static final String LABELS = "Labels";
 
     public static final String API_SECURITY = "API Security";
-    public static final String ENABLE_SCHEMA_VALIDATION = "enable Schema Validation";
+    public static final String ENABLE_SCHEMA_VALIDATION = "Enable Schema Validation";
 
     @Activate
     protected void activate(ComponentContext componentContext) throws Exception {
@@ -363,7 +363,8 @@ public class APIManagerComponent {
                             }
                             // check whether the resource contains a section called 'enable Schema Validation' and
                             // add it
-                            if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
+                            Object enableValidation = resource.getContent();
+                            if (!RegistryUtils.decodeBytes((byte[]) enableValidation).
                                     contains(ENABLE_SCHEMA_VALIDATION)) {
                                 updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
                             }

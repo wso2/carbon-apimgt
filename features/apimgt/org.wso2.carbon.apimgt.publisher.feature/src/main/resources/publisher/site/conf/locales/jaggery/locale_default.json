@@ -253,7 +253,7 @@
     "Error while updating API swagger definition" : "Error while updating API swagger definition",
     "Schema Validation:": "JSON Schema Validation:",
     "JSON": "JSON",
-    "Marking an API is to be validated from the schema": "Marking an API is to be validated from the schema",
+    "Marking an API to be validated from the schema": "Marking an API to be validated from the schema",
     "Execute fault sequence": "Execute fault sequence",
     "Existing API definition will be overwritten by the imported definition.": "Existing API definition will be overwritten by the imported definition.",
     "External API Stores": "External API Stores",

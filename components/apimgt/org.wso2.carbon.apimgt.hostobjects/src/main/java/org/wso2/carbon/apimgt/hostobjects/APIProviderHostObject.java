@@ -156,6 +156,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static final String ALIAS = "alias";
     private static final String END_POINT = "endpoint";
     private static final String TIER = "tier";
+    private static final String validation = "schemaValidation";
 
     private APIProvider apiProvider;
 
@@ -903,7 +904,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String techOwnerEmail = (String) apiData.get("techOwnerEmail", apiData);
         String bizOwner = (String) apiData.get("bizOwner", apiData);
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
-        String schemaValidation = (String) apiData.get("schemaValidation", apiData);
+        String schemaValidation = (String) apiData.get(validation, apiData);
 //        String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
 //        String providerDomain = MultitenantUtils.getTenantDomain(provider);
 
@@ -995,7 +996,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setLastUpdated(new Date());
         api.setAccessControl(publisherAccessControl);
         api.setAccessControlRoles(publisherAccessControlRoles);
-        api.setEnableSchemaValidation("schemaValidation".equals(schemaValidation));
+        api.setEnableSchemaValidation(validation.equals(schemaValidation));
 
         FileHostObject wsdlFile;
         if (apiData.containsKey(APIConstants.WSDL_FILE)) {
@@ -1261,7 +1262,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String publisherAccessControl = (String) apiData.get(APIConstants.ACCESS_CONTROL_PARAMETER, apiData);
         String publisherAccessControlRoles = "";
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
-        String schemaValidation = (String) apiData.get("schemaValidation", apiData);
+        String schemaValidation = (String) apiData.get(validation, apiData);
         JSONObject properties = null;
         if (!StringUtils.isEmpty(additionalProperties)) {
             JSONParser parser = new JSONParser();
@@ -1573,7 +1574,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
         api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
-        api.setEnableSchemaValidation("schemaValidation".equals(schemaValidation));
+        api.setEnableSchemaValidation(validation.equals(schemaValidation));
 
         if (!"none".equals(inSequence)) {
             api.setInSequence(inSequence);
@@ -1849,7 +1850,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
         String visibleRoles = "";
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
-        String schemaValidation = (String) apiData.get("schemaValidation", apiData);
+        String schemaValidation = (String) apiData.get(validation, apiData);
         JSONObject properties = null;
         String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
         Object apiSecurityObject = apiData.get("apiSecurity", apiData);
@@ -2184,7 +2185,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
         api.setAsDefaultVersion("default_version".equals(defaultVersion));
-        api.setEnableSchemaValidation("schemaValidation".equals(schemaValidation));
+        api.setEnableSchemaValidation(validation.equals(schemaValidation));
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
             api.setEndpointSecured(true);

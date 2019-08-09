@@ -162,18 +162,20 @@ public class SchemaValidator extends AbstractHandler {
         logger.debug("Initializing the swagger from localEntry");
         Entry localEntryObj;
         ObjectMapper objectMapper = new ObjectMapper();
-        if (uuid != null) {
-            localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get(uuid);
-            if ((!messageContext.isResponse()) && (localEntryObj != null)) {
-                swagger = localEntryObj.getValue().toString();
-                if (swagger != null) {
-                    try {
-                        rootNode = objectMapper.readTree(swagger.getBytes());
-                    } catch (IOException e) {
-                        throw new APIManagementException("Error occurred while converting the Swagger" +
-                                " into JsonNode", e);
-                    }
-                }
+        if (uuid == null) {
+            return;
+        }
+        localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get(uuid);
+        if ((!messageContext.isResponse()) && (localEntryObj != null)) {
+            swagger = localEntryObj.getValue().toString();
+            if (swagger == null) {
+                return;
+            }
+            try {
+                rootNode = objectMapper.readTree(swagger.getBytes());
+            } catch (IOException e) {
+                throw new APIManagementException("Error occurred while converting the Swagger" +
+                        " into JsonNode", e);
             }
         }
     }
@@ -325,7 +327,7 @@ public class SchemaValidator extends AbstractHandler {
                 requestBodyPath.append(ThreatProtectorConstants.PATHS).append(resourcePath).
                         append(ThreatProtectorConstants.JSONPATH_SEPARATE).
                         append(requestMethod.toLowerCase()).append("..requestBody");
-                schema = JsonPath.read(Swagger, requestBodyPath.toString());
+                schema = JsonPath.read(Swagger, requestBodyPath.toString()).toString();
             }
         } else {
             StringBuilder schemaPath = new StringBuilder();
