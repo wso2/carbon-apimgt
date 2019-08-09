@@ -76,7 +76,6 @@ public class SchemaValidator extends AbstractHandler {
     @Override
     public boolean handleRequest(MessageContext messageContext) {
         logger.info("Validating the API request Body content..");
-
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
                 messageContext).getAxis2MessageContext();
         String contentType;
@@ -569,7 +568,6 @@ public class SchemaValidator extends AbstractHandler {
         } else {
             schemaContent = value;
             return schemaContent;
-
         }
         return schemaContent;
     }
