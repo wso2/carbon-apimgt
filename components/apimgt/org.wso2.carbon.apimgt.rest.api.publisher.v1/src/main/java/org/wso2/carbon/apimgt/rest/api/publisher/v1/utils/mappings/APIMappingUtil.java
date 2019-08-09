@@ -154,6 +154,9 @@ public class APIMappingUtil {
         if (dto.isIsDefaultVersion() != null) {
             model.setAsDefaultVersion(dto.isIsDefaultVersion());
         }
+        if (dto.isEnableSchemaValidation() != null) {
+            model.setEnableSchemaValidation(dto.isEnableSchemaValidation());
+        }
         model.setResponseCache(dto.getResponseCaching());
         if (dto.getCacheTimeout() != null) {
             model.setCacheTimeout(dto.getCacheTimeout());
@@ -544,6 +547,7 @@ public class APIMappingUtil {
         dto.setDescription(model.getDescription());
 
         dto.setIsDefaultVersion(model.isDefaultVersion());
+        dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setResponseCaching(model.getResponseCache());
         dto.setCacheTimeout(model.getCacheTimeout());
         try {

@@ -144,28 +144,7 @@ public class APIMgtGatewayConstants {
      * Constants for swagger schema validator
      */
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
-    public static final String LOCAL_ENTRY = "localentry";
     public static final String ELECTED_REQUEST_METHOD = "api.ut.HTTP_METHOD";
-    public static final String SWAGGER_PATH = "paths";
-    public static final String RESPONSE = "responses";
-    public static final String SUCCESS_RESPONSE = "200";
-    public static final String SCHEMA = "schema";
-    public static final String DEFINITION = "definition";
-    public static final String SCHEMA_REFERENCE = "$ref";
-    public static final char LAST_INDEX = '/';
-    public static final String DEFINITIONS = "definitions";
-    public static final String KEY_WORD_ALLOF = "allOf";
-    public static final String KEY_WORD_ONEOF = "oneOf";
-    public static final String KEY_WORD_ANYOF = "anyOf";
-    public static final String REST_URL = "REST_URL_POSTFIX";
-    public static final String PARAMETERS = "parameters";
-    public static final String REQUEST_BODY = "requestBody";
-    public static final String UTF = "UTF-8";
-    public static final String SCHEMA_HANDLER = "_json_schema_validator_handler_";
-    public static final String API_SWAGGER_SCHEMA = "swaggerSchemaCache";
-    public static final String COMPONENTS = "components";
-    public static final String SCHEMAS = "schemas";
-    public static final String CONTENT = "content";
 
     /**
      * Constants for trust store access

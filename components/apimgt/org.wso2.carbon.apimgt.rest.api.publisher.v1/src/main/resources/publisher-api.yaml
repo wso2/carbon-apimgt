@@ -6146,6 +6146,9 @@ definitions:
       isDefaultVersion:
         type: boolean
         example: false
+      enableSchemaValidation:
+        type: boolean
+        example: false
       type:
         type: string
         description: The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST
