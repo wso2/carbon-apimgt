@@ -40,6 +40,10 @@
             <type>war</type>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2</artifactId>
         </dependency>
@@ -120,6 +124,9 @@
                                     </propertyDef>
                                 </properties>
                             </adviceFile>
+                            <bundles>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.util:${carbon.apimgt.version}</bundleDef>
+                            </bundles>
                         </configuration>
                     </execution>
                 </executions>
