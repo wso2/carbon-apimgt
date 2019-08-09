@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 import org.apache.axis2.Constants;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.http.util.RESTUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -394,7 +395,7 @@ public class APIKeyValidatorTestCase {
         } catch (APISecurityException e) {
             e.printStackTrace();
         }
-        Assert.assertEquals(APIConstants.AUTH_TYPE_NONE, result1);
+        Assert.assertEquals(StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase()), result1);
     }
 
     /*

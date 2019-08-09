@@ -149,7 +149,7 @@ class Operation extends React.Component {
 
     /**
      *
-     * @param {*} e
+     * @param {*} e event triggered for handle  Scope Change
      */
     handleScopeChange(e) {
         const operation = JSON.parse(JSON.stringify(this.props.operation));
@@ -158,7 +158,7 @@ class Operation extends React.Component {
     }
     /**
      *
-     * @param {*} e
+     * @param {*} e event triggered for handle  policy Change
      */
     handlePolicyChange(e) {
         const operation = JSON.parse(JSON.stringify(this.props.operation));
@@ -167,7 +167,7 @@ class Operation extends React.Component {
     }
 
     /**
-     *
+     * @param {*} event event triggered for handle  policy Change
      */
     handleChange(event) {
         const operation = JSON.parse(JSON.stringify(this.props.operation));

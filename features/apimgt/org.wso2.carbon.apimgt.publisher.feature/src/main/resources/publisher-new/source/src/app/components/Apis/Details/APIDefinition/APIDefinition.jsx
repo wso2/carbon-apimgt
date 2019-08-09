@@ -245,14 +245,14 @@ class APIDefinition extends React.Component {
             .then((response) => {
                 this.setState({ graphQL: response.data });
                 Alert.success(intl.formatMessage({
-                    id: 'GraphQL.API.Definition.Updated.Successfully',
+                    id: 'Apis.Details.APIDefinition.APIDefinition.graphQLDefinition.updated.successfully',
                     defaultMessage: 'GraphQL API Definition Updated Successfully',
                 }));
             })
             .catch((err) => {
                 console.log(err);
                 Alert.error(intl.formatMessage({
-                    id: 'Error.while.updating.the.graphQL.schema',
+                    id: 'Apis.Details.APIDefinition.APIDefinition.error.updating.graphQL.schema',
                     defaultMessage: 'Error while updating graphQL schema',
                 }));
             });

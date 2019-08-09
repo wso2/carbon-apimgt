@@ -75,8 +75,8 @@ const styles = theme => ({
  */
 function getSteps() {
     const steps = [
-        <FormattedMessage id='select.graphQL' defaultMessage='Select GraphQL' />,
-        <FormattedMessage id='create.api' defaultMessage='Create API' />,
+        <FormattedMessage id='Apis.GraphQL.APICreateGraphQL.select.graphQL' defaultMessage='Select GraphQL' />,
+        <FormattedMessage id='Apis.GraphQL.APICreateGraphQL.create.api' defaultMessage='Create API' />,
     ];
     return steps;
 }
@@ -314,7 +314,7 @@ class APICreateGraphQL extends React.Component {
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
                             <FormattedMessage
-                                id='design.a.new.graphQL.api.using.SDL'
+                                id='Apis.GraphQL.APICreateGraphQL.using.SDL'
                                 defaultMessage='Design a new GraphQL API using SDL'
                             />
                         </Typography>
@@ -365,7 +365,10 @@ class APICreateGraphQL extends React.Component {
                                     {activeStep === steps.length - 1 ? (
                                         'Finish'
                                     ) : (
-                                        <FormattedMessage id='next' defaultMessage='Next' />
+                                        <FormattedMessage
+                                            id='Apis.GraphQL.APICreateGraphQL.next'
+                                            defaultMessage='Next'
+                                        />
                                     )}
                                 </Button>
                             </div>

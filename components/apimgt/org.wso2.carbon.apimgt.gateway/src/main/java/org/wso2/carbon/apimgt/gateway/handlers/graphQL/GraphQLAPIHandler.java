@@ -69,8 +69,6 @@ import javax.xml.stream.XMLStreamException;
 public class GraphQLAPIHandler extends AbstractHandler {
 
     private static final String QUERY_PATH_STRING = "/?query=";
-    private static final String GRAPHQL_SCOPE_ROLE_MAPPING = "GRAPHQL_SCOPE_ROLE_MAPPING";
-    private static final String GRAPHQL_SCOPE_OPERATION_MAPPING = "GRAPHQL_SCOPE_OPERATION_MAPPING";
     private static final String REST_SUB_REQUEST_PATH = "REST_SUB_REQUEST_PATH";
     private static final String API_TYPE = "API_TYPE";
     private static final String GRAPHQL_API = "GRAPHQL";
@@ -86,30 +84,27 @@ public class GraphQLAPIHandler extends AbstractHandler {
     private String apiUUID;
 
     public GraphQLAPIHandler() {
+
         validator = new Validator();
     }
 
     public String getApiUUID() {
+
         return apiUUID;
     }
 
     public void setApiUUID(String apiUUID) {
+
         this.apiUUID = apiUUID;
     }
 
     public boolean handleRequest(MessageContext messageContext) {
         try {
-            String validationErrorMessage;
-            String operationList = "";
             String payload;
+            String operationList = "";
             Parser parser = new Parser();
 
-            ArrayList<String> roleArrayList = new ArrayList<>();
             ArrayList<String> operationArray = new ArrayList<>();
-            ArrayList<String> validationErrorMessageList = new ArrayList<>();
-            HashMap<String, ArrayList<String>> scopeRoleMappingList = new HashMap<>();
-            HashMap<String, String> operationScopeMappingList = new HashMap<>();
-            List<ValidationError> validationErrors;
 
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                     getAxis2MessageContext();
@@ -139,89 +134,42 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
             // Validate payload with graphQLSchema
             Document document = parser.parseDocument(payload);
-            synchronized (apiUUID + CLASS_NAME_AND_METHOD) {
-                if (schema == null) {
-                    Entry localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get(apiUUID +
-                                GRAPHQL_IDENTIFIER);
-                    if (localEntryObj != null) {
-                        SchemaParser schemaParser = new SchemaParser();
-                        TypeDefinitionRegistry registry = schemaParser.parse(localEntryObj.getValue().toString());
-                        schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
-                    }
-                }
-            }
 
-            validationErrors = validator.validateDocument(schema, document);
-            if (validationErrors != null && validationErrors.size() > 0) {
-                for (ValidationError error : validationErrors) {
-                    validationErrorMessageList.add(error.getDescription());
-                }
-                validationErrorMessage = String.join(",", validationErrorMessageList);
-                handleFailure(messageContext, validationErrorMessage);
-                return false;
-            }
-
-            // To support GraphQL APIs for basic,JWT  authentication
-            // Extract the scopes and operations from local Entry and set them to Properties
-            // If the operations have scopes, scopes operation mapping and scope role mappings are added to
-            // schema as additional types before adding them to local entry
-            if (schema != null) {
-                Set<GraphQLType> additionalTypes = schema.getAdditionalTypes();
-                for (GraphQLType additionalType : additionalTypes) {
-                    String base64DecodedAdditionalType = new String(Base64.getUrlDecoder().decode(additionalType.getName().
-                            split("_", 2)[1]));
-                    for (GraphQLType type : additionalType.getChildren()) {
-                        if (additionalType.getName().contains(SCOPE_ROLE_MAPPING)) {
-                            String base64DecodedURLRole = new String(Base64.getUrlDecoder().decode(type.getName()));
-                            roleArrayList = new ArrayList<>();
-                            roleArrayList.add(base64DecodedURLRole);
-                        } else if (additionalType.getName().contains(SCOPE_OPERATION_MAPPING)) {
-                            String base64DecodedURLScope = new String(Base64.getUrlDecoder().decode(type.getName()));
-                            operationScopeMappingList.put(base64DecodedAdditionalType, base64DecodedURLScope);
-                        }
-                    }
-                    if (!roleArrayList.isEmpty()) {
-                        scopeRoleMappingList.put(base64DecodedAdditionalType, roleArrayList);
-                    }
-                }
-            }
-
-            messageContext.setProperty(SCOPE_ROLE_MAPPING, scopeRoleMappingList);
-            messageContext.setProperty(SCOPE_OPERATION_MAPPING, operationScopeMappingList);
-            messageContext.setProperty(API_TYPE, GRAPHQL_API);
-
-            // Extract the operation type and operations from the payload
-            for (Definition definition : document.getDefinitions()) {
-                if (definition instanceof OperationDefinition) {
-                    OperationDefinition operation = (OperationDefinition) definition;
-                    if (operation.getOperation() != null) {
-                        ((Axis2MessageContext) messageContext).getAxis2MessageContext().
-                                setProperty(Constants.Configuration.HTTP_METHOD , operation.getOperation().toString());
-                        if (Operation.QUERY.equals(operation.getOperation())) {
-                            for (Selection selection : operation.getSelectionSet().getSelections()) {
-                                if (selection instanceof Field) {
-                                    Field field = (Field) selection;
-                                    operationArray.add(field.getName());
-                                    log.debug("Operation - Query " + field.getName());
+            if (validatePayloadWithSchema(messageContext, document)) {
+                supportForBasicAndAuthentication(messageContext);
+                // Extract the operation type and operations from the payload
+                for (Definition definition : document.getDefinitions()) {
+                    if (definition instanceof OperationDefinition) {
+                        OperationDefinition operation = (OperationDefinition) definition;
+                        if (operation.getOperation() != null) {
+                            ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                                    setProperty(Constants.Configuration.HTTP_METHOD, operation.getOperation().toString());
+                            if (Operation.QUERY.equals(operation.getOperation())) {
+                                for (Selection selection : operation.getSelectionSet().getSelections()) {
+                                    if (selection instanceof Field) {
+                                        Field field = (Field) selection;
+                                        operationArray.add(field.getName());
+                                        log.debug("Operation - Query " + field.getName());
+                                    }
                                 }
+                                operationList = String.join(",", operationArray);
+                            } else if (operation.getOperation().equals(Operation.MUTATION)) {
+                                operationList = operation.getName();
+                                log.debug("Operation - Mutation " + operation.getName());
+                            } else if (operation.getOperation().equals(Operation.SUBSCRIPTION)) {
+                                operationList = operation.getName();
+                                log.debug("Operation - Subscription " + operation.getName());
                             }
-                            //sort them to unique the operationlistCachekey for all the combination of operations
-                            Collections.sort(operationArray);
-                            operationList = String.join(",", operationArray);
-                        } else if (operation.getOperation().equals(Operation.MUTATION)) {
-                            operationList = operation.getName();
-                            log.debug("Operation - Mutation " + operation.getName());
-                        } else if (operation.getOperation().equals(Operation.SUBSCRIPTION)) {
-                            operationList = operation.getName();
-                            log.debug("Operation - Subscription " + operation.getName());
+                            messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, operationList);
+                            return true;
                         }
-                        messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, operationList);
-                        return true;
+                    } else {
+                        handleFailure(messageContext, "Operation definition cannot be empty");
+                        return false;
                     }
-                } else {
-                    handleFailure(messageContext, "Operation definition cannot be empty");
-                    return false;
                 }
+            } else {
+                return false;
             }
         } catch (IOException | XMLStreamException | InvalidSyntaxException e) {
             log.error(e.getMessage());
@@ -230,12 +178,98 @@ public class GraphQLAPIHandler extends AbstractHandler {
         return false;
     }
 
+    /**
+     * Support GraphQL APIs for basic,JWT  authentication, this method extract the scopes and operations from
+     * local Entry and set them to properties. If the operations have scopes, scopes operation mapping and scope
+     * role mappings are added to schema as additional types before adding them to local entry
+     *
+     * @param messageContext message context of the request
+     */
+    private void supportForBasicAndAuthentication(MessageContext messageContext) {
+        ArrayList<String> roleArrayList = new ArrayList<>();
+        HashMap<String, String> operationScopeMappingList = new HashMap<>();
+        HashMap<String, ArrayList<String>> scopeRoleMappingList = new HashMap<>();
+
+        if (schema != null) {
+            Set<GraphQLType> additionalTypes = schema.getAdditionalTypes();
+            for (GraphQLType additionalType : additionalTypes) {
+                String base64DecodedAdditionalType = new String(Base64.getUrlDecoder().decode(additionalType.getName().
+                        split("_", 2)[1]));
+                for (GraphQLType type : additionalType.getChildren()) {
+                    if (additionalType.getName().contains(SCOPE_ROLE_MAPPING)) {
+                        String base64DecodedURLRole = new String(Base64.getUrlDecoder().decode(type.getName()));
+                        roleArrayList = new ArrayList<>();
+                        roleArrayList.add(base64DecodedURLRole);
+                    } else if (additionalType.getName().contains(SCOPE_OPERATION_MAPPING)) {
+                        String base64DecodedURLScope = new String(Base64.getUrlDecoder().decode(type.getName()));
+                        operationScopeMappingList.put(base64DecodedAdditionalType, base64DecodedURLScope);
+                    }
+                }
+                if (!roleArrayList.isEmpty()) {
+                    scopeRoleMappingList.put(base64DecodedAdditionalType, roleArrayList);
+                }
+            }
+        }
+
+        messageContext.setProperty(SCOPE_ROLE_MAPPING, scopeRoleMappingList);
+        messageContext.setProperty(SCOPE_OPERATION_MAPPING, operationScopeMappingList);
+        messageContext.setProperty(API_TYPE, GRAPHQL_API);
+    }
+
+    /**
+     * This method validate the payload
+     *
+     * @param messageContext message context of the request
+     * @param document       graphQL schema of the request
+     * @return true or false
+     */
+    private boolean validatePayloadWithSchema(MessageContext messageContext, Document document) {
+        ArrayList<String> validationErrorMessageList = new ArrayList<>();
+        List<ValidationError> validationErrors;
+        String validationErrorMessage;
+
+        synchronized (apiUUID + CLASS_NAME_AND_METHOD) {
+            if (schema == null) {
+                Entry localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get(apiUUID +
+                        GRAPHQL_IDENTIFIER);
+                if (localEntryObj != null) {
+                    SchemaParser schemaParser = new SchemaParser();
+                    TypeDefinitionRegistry registry = schemaParser.parse(localEntryObj.getValue().toString());
+                    schema = UnExecutableSchemaGenerator.makeUnExecutableSchema(registry);
+                }
+            }
+        }
+
+        validationErrors = validator.validateDocument(schema, document);
+        if (validationErrors != null && validationErrors.size() > 0) {
+            for (ValidationError error : validationErrors) {
+                validationErrorMessageList.add(error.getDescription());
+            }
+            validationErrorMessage = String.join(",", validationErrorMessageList);
+            handleFailure(messageContext, validationErrorMessage);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * This method handle the failure
+     *
+     * @param messageContext message context of the request
+     * @param errorMessage   error message of the failure
+     */
     private void handleFailure(MessageContext messageContext, String errorMessage) {
         OMElement payload = getFaultPayload(errorMessage);
         setFaultPayload(messageContext, payload);
         sendFault(messageContext);
     }
 
+    /**
+     * This method setFaultPayload
+     *
+     * @param messageContext message context of the request
+     * @param payload        payload of the message context
+     */
     private static void setFaultPayload(MessageContext messageContext, OMElement payload) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
@@ -267,6 +301,11 @@ public class GraphQLAPIHandler extends AbstractHandler {
         }
     }
 
+    /**
+     * This method send the failure
+     *
+     * @param messageContext message context of the request
+     */
     private static void sendFault(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
@@ -288,6 +327,10 @@ public class GraphQLAPIHandler extends AbstractHandler {
         Axis2Sender.sendBack(messageContext);
     }
 
+    /**
+     * @param message fault message
+     * @return the OMElement
+     */
     private OMElement getFaultPayload(String message) {
         OMFactory fac = OMAbstractFactory.getOMFactory();
         OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,

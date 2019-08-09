@@ -26,7 +26,7 @@ import TableRow from '@material-ui/core/TableRow';
 
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
-import Api from '../../../data/api';
+import Api from 'AppData/api';
 
 /**
  *

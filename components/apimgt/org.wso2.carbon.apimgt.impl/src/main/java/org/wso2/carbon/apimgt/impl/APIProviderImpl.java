@@ -2166,7 +2166,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             authProperties.put(APIConstants.API_UUID, api.getUUID());
 
-            if (api.getType() != null && api.getType().equals(APIConstants.GRAPHQL_API)) {
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 Map<String, String> apiUUIDProperty = new HashMap<String, String>();
                 apiUUIDProperty.put(APIConstants.API_UUID, api.getUUID());
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLAPIHandler",
@@ -5968,7 +5968,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Error while publishing to Gateway ", e);
         }
 
-        if (api.getType() != null && api.getType().equals(APIConstants.GRAPHQL_API)) {
+        if (APIConstants.GRAPHQL_API.equals(api.getType())) {
             api.setGraphQLSchema(getGraphqlSchema(api.getId()));
             api.setType(APIConstants.GRAPHQL_API);
         }

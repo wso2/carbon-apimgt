@@ -155,12 +155,7 @@ class Operations extends React.Component {
             .then((response) => {
                 let tempScopes = [];
                 if (response.obj.security && response.obj.security.length !== 0) {
-                    response.obj.security.map((object) => {
-                        if (object.OAuth2Security) {
-                            tempScopes = object.OAuth2Security;
-                        }
-                        return tempScopes;
-                    });
+                    tempScopes = response.obj.security.filter(object => object.OAuth2Security);
                 }
                 this.setState({ swagger: response.obj, scopes: tempScopes });
             })
@@ -203,7 +198,7 @@ class Operations extends React.Component {
      * @param {*} scopes
      */
     handleScopeChangeInSwaggerRoot(scopes) {
-        const { swagger } = this.state.swagger;
+        const { swagger } = this.state;
         if (swagger.security) {
             swagger.security.map((object) => {
                 if (object.OAuth2Security) {
@@ -249,11 +244,11 @@ class Operations extends React.Component {
                 }));
             })
             .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') { console.log(error); }
-                const { status } = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
+                console.error(error);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Operations.Operations.something.went.wrong.while.updating.the.api',
+                    defaultMessage: 'Error occurred while updating API',
+                }));
             });
     }
     toggleAssignScopes = () => {

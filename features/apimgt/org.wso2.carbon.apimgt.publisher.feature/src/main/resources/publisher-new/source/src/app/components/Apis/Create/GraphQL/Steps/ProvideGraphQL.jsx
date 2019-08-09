@@ -238,7 +238,7 @@ class ProvideGraphQL extends Component {
                                 <Backup className={classes.dropZoneIcon} />
                                 <div>
                                     <FormattedMessage
-                                        id='try.dropping.schema.file.here.or.click.to.select.schema.to.upload'
+                                        id='Apis.GraphQL.Steps.ProvideGraphQL.try.dropping.schema.file'
                                         defaultMessage='Try dropping schema file here, or click to select
                                         schema to upload.'
                                     />
@@ -248,10 +248,16 @@ class ProvideGraphQL extends Component {
                     </Dropzone>
                     <FormHelperText className={classes.errorMessage}>
                         {valid.graphQLFile.empty && (
-                            <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
+                            <FormattedMessage
+                                id='Apis.GraphQL.Steps.ProvideGraphQL.error.empty'
+                                defaultMessage='This field can not be empty.'
+                            />
                         )}
                         {valid.graphQLFile.invalidFile && (
-                            <FormattedMessage id='error.invalid.graphql.file' defaultMessage='Invalid GraphQL File' />
+                            <FormattedMessage
+                                id='Apis.GraphQL.Steps.ProvideGraphQL.error.invalid.graphql.file'
+                                defaultMessage='Invalid GraphQL File'
+                            />
                         )}
                     </FormHelperText>
                 </React.Fragment>
