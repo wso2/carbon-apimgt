@@ -408,7 +408,7 @@ class ThumbnailView extends Component {
                         {view}
                         <span className={classes.thumbBackdrop} />
                         <span className={classes.thumbButton}>
-                            <Typography component='span' variant='subheading' color='inherit'>
+                            <Typography component='span' variant='subtitle1' color='inherit'>
                                 <EditIcon />
                             </Typography>
                         </span>
@@ -461,7 +461,7 @@ class ThumbnailView extends Component {
 
                     <DialogContent>
                         {selectedTab === 'upload' && (
-                            <Grid container spacing={16}>
+                            <Grid container spacing={4}>
                                 <Grid item xs={3}>
                                     <div className={classes.imageContainer}>
                                         <img
@@ -494,7 +494,7 @@ class ThumbnailView extends Component {
                             </Grid>
                         )}
                         {selectedTab === 'design' && (
-                            <Grid container spacing={16}>
+                            <Grid container spacing={4}>
                                 <Grid item xs={3} className={classes.imageGenWrapper}>
                                     <ImageGenerator
                                         width={width}

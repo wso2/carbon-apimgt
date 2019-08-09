@@ -41,7 +41,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import API from 'AppData/api';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import ApiContext from '../components/ApiContext';
-import ApiSecurity from './APISecurity';
+import ApiSecurity from './ApiSecurity';
 
 const styles = theme => ({
     titleWrapper: {
@@ -155,7 +155,19 @@ const securitySchemaValues = {
     oauthBasicAuthMandatory: 'oauth_basic_auth_mandatory',
     mutualSSLMandatory: 'mutualssl_mandatory',
 };
+
+/**
+ *
+ *
+ * @class Configuration
+ * @extends {React.Component}
+ */
 class Configuration extends React.Component {
+    /**
+     *Creates an instance of Configuration.
+     * @param {*} props
+     * @memberof Configuration
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -353,7 +365,7 @@ class Configuration extends React.Component {
                 </div>
                 <ApiContext.Consumer>
                     {({ api, updateAPI }) => (
-                        <Grid container spacing={24}>
+                        <Grid container spacing={7}>
                             <Grid item xs={12}>
                                 <Paper className={classes.root} elevation={1}>
                                     <Typography component='p' variant='body1'>
@@ -968,7 +980,7 @@ class Configuration extends React.Component {
                                         container
                                         direction='row'
                                         alignItems='flex-start'
-                                        spacing={16}
+                                        spacing={4}
                                         className={classes.buttonSection}
                                     >
                                         <Grid item>

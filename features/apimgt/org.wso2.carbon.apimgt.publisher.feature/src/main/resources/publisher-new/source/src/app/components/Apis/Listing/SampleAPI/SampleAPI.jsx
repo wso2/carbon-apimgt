@@ -213,7 +213,7 @@ class SampleAPI extends Component {
         return (
             <InlineMessage type='info' height={140}>
                 <div className={classes.contentWrapper}>
-                    <Typography variant='headline' component='h3' className={classes.head}>
+                    <Typography variant='h5' component='h3' className={classes.head}>
                         <FormattedMessage
                             id='welcome.to.wso2.api.manager'
                             defaultMessage='Welcome to WSO2 API Manager'

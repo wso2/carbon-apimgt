@@ -145,26 +145,26 @@ class APIThumb extends Component {
                     api={api}
                 />
                 <CardContent className={classes.apiDetails}>
-                    <Typography gutterBottom variant='headline' component='h2'>
+                    <Typography gutterBottom variant='h5' component='h2'>
                         {api.name}
                     </Typography>
                     <Grid container>
                         <Grid item md={6}>
                             <FormattedMessage id='by' defaultMessage='By' />:
-                            <Typography className={classes.providerText} variant='body2' gutterBottom>
+                            <Typography className={classes.providerText} variant='body1' gutterBottom>
                                 {api.provider}
                             </Typography>
                         </Grid>
                         <Grid item md={6}>
                             <FormattedMessage id='context' defaultMessage='Context' />:
-                            <Typography variant='body2' gutterBottom>
+                            <Typography variant='body1' gutterBottom>
                                 {api.context}
                             </Typography>
                         </Grid>
                         {(apiType === API.CONSTS.APIProduct) ? null : (
                             <Grid item md={6}>
                                 <FormattedMessage id='version' defaultMessage='Version' />:
-                                <Typography variant='body2'>{api.version}</Typography>
+                                <Typography variant='body1'>{api.version}</Typography>
                             </Grid>
                         )}
                     </Grid>

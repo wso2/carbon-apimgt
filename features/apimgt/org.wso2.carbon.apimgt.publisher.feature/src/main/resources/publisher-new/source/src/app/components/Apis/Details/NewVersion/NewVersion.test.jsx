@@ -23,6 +23,7 @@ import Configurations from 'Config';
 import { MemoryRouter, Redirect } from 'react-router-dom';
 import { resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
+import RadioGroup from '@material-ui/core/RadioGroup';
 import { APIProvider } from 'AppComponents/Apis/Details/components/ApiContext';
 import NewVersion from './NewVersion';
 
@@ -104,7 +105,7 @@ describe('Unit test for CreateNewVersion component', () => {
         await mountedNewVersion.find('#newVersion input').simulate('change', { target: { value: 'v5.0.1' } });
         expect(mountedNewVersion.find('#newVersion input').props().value).toEqual('v5.0.1');
 
-        mountedNewVersion.find('RadioGroup').at(0).props().onChange({ target: { value: 'yes' } });
+        mountedNewVersion.find(RadioGroup).at(0).props().onChange({ target: { value: 'yes' } });
 
         await mountedNewVersion.find('#createBtn button').simulate('click');
         await mountedNewVersion.update();

@@ -184,7 +184,7 @@ class CreateNewVersion extends React.Component {
                         />
                     </Typography>
                 </div>
-                <Grid container spacing={24}>
+                <Grid container spacing={7}>
                     <Grid item xs={12}>
                         <Paper className={classes.root} elevation={1}>
                             <FormControl margin='normal' className={classes.FormControlOdd}>
@@ -281,7 +281,7 @@ class CreateNewVersion extends React.Component {
                                 container
                                 direction='row'
                                 alignItems='flex-start'
-                                spacing={16}
+                                spacing={4}
                                 className={classes.buttonSection}
                             >
                                 <Grid item>

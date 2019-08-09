@@ -49,7 +49,7 @@ RenderMethodBase.propTypes = {
     classes: PropTypes.shape({}).isRequired,
 };
 
-const RenderMethod = withTheme()(RenderMethodBase);
+const RenderMethod = withTheme(RenderMethodBase);
 
 const styles = {
     root: {

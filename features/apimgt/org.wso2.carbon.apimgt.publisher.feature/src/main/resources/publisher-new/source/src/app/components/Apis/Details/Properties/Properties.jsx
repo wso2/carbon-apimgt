@@ -431,7 +431,7 @@ class Properties extends React.Component {
                         />
                     </Button>
                 </div>
-                <Grid container spacing={24}>
+                <Grid container spacing={7}>
                     <Grid item xs={12}>
                         <Paper className={classes.paperRoot} elevation={1}>
                             <Table className={classes.table}>
@@ -525,7 +525,7 @@ class Properties extends React.Component {
                                 container
                                 direction='row'
                                 alignItems='flex-start'
-                                spacing={16}
+                                spacing={4}
                                 className={classes.buttonSection}
                             >
                                 <Grid item>

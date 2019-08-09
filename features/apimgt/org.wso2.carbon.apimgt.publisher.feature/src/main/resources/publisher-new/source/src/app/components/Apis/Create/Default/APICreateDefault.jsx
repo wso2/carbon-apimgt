@@ -57,7 +57,7 @@ const styles = theme => ({
  * @class APICreateForm
  * @extends {Component}
  */
-class APICreateForm extends Component {
+class APICreateDefault extends Component {
     /**
      * Creates an instance of APICreateForm.
      * @param {any} props @inheritDoc
@@ -86,7 +86,7 @@ class APICreateForm extends Component {
             mainTitle = <FormattedMessage id='create.new.api.product' defaultMessage='New API Product' />;
         }
         return (
-            <Grid container spacing={24} className={classes.root}>
+            <Grid container spacing={7} className={classes.root}>
                 <Grid item xs={12} md={6}>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
@@ -113,7 +113,7 @@ class APICreateForm extends Component {
                             container
                             direction='row'
                             alignItems='flex-start'
-                            spacing={16}
+                            spacing={4}
                             className={classes.buttonSection}
                         >
                             <Grid item>
@@ -144,7 +144,7 @@ class APICreateForm extends Component {
     }
 }
 
-APICreateForm.propTypes = {
+APICreateDefault.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     history: PropTypes.shape({
         push: PropTypes.func.isRequired,
@@ -160,4 +160,4 @@ APICreateForm.propTypes = {
     api: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(APICreateForm);
+export default withStyles(styles)(APICreateDefault);

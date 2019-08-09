@@ -428,7 +428,7 @@ class Details extends React.Component {
                                                 <FormattedMessage id='document' defaultMessage='Document' />
                                             </Typography>
                                             <div className={classes.downloadWrapper}>
-                                                <Typography variant='subheading' gutterBottom>
+                                                <Typography variant='subtitle1' gutterBottom>
                                                     {doc.name}.pdf
                                                 </Typography>
                                                 <a

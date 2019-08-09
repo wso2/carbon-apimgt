@@ -29,6 +29,7 @@ class API extends Resource {
         let properties = kwargs;
         if (name instanceof Object) {
             properties = name;
+            Utils.deepFreeze(properties);
         } else {
             this.name = name;
             this.version = version;
@@ -51,7 +52,6 @@ class API extends Resource {
             };
         }
         this.apiType = API.CONSTS.API;
-        Utils.deepFreeze(properties);
         this._data = properties;
         for (const key in properties) {
             if (Object.prototype.hasOwnProperty.call(properties, key)) {
