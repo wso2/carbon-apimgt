@@ -244,7 +244,7 @@ public class JMSMessageListener implements MessageListener {
         }
     }
 
-    private synchronized void handleRevokedTokenMessage(String revokedToken){
+    private void handleRevokedTokenMessage(String revokedToken){
         if (StringUtils.isEmpty(revokedToken)) {
             return;
         }
