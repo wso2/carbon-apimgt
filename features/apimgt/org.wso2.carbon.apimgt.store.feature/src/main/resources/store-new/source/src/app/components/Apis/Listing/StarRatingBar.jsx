@@ -22,11 +22,10 @@ import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Cancel from '@material-ui/icons/Cancel';
 import { StarRate } from '@material-ui/icons';
-import Alert from '../../Shared/Alert';
-import Api from '../../../data/api';
-import AuthManager from '../../../data/AuthManager';
-import StarRatingSummary from '../Details/StarRatingSummary';
-
+import Alert from 'AppComponents/Shared/Alert';
+import Api from 'AppData/api';
+import AuthManager from 'AppData/AuthManager';
+import StarRatingSummary from 'AppComponents/Apis/Details/StarRatingSummary';
 
 /**
  *
@@ -63,11 +62,10 @@ class StarRatingBar extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            rating: {
-                avgRating: 0,
-                userRating: 0,
-                count: 0,
-            },
+            avgRating: 0,
+            userRating: 0,
+            count: 0,
+            total: 0,
         };
         this.getApiRating = this.getApiRating.bind(this);
         this.removeUserRating = this.removeUserRating.bind(this);
@@ -97,7 +95,10 @@ class StarRatingBar extends React.Component {
             const promisedRating = api.getRatingFromUser(apiId, null);
             promisedRating.then((response) => {
                 this.setState({
-                    rating: response.body,
+                    avgRating: response.body.avgRating,
+                    userRating: response.body.userRating,
+                    count: response.body.count,
+                    total: response.body.pagination.total,
                 });
             });
         }
@@ -152,17 +153,22 @@ class StarRatingBar extends React.Component {
      * @memberof StarRatingBar
      */
     render() {
-        const { rating } = this.state;
+        const {
+            avgRating,
+            userRating,
+            count,
+            total,
+        } = this.state;
         const {
             classes,
             isEditable,
             showSummary,
-            avgRating,
+            apiRating,
         } = this.props;
         return (
             <React.Fragment>
                 {showSummary ? (
-                    <StarRatingSummary rating={rating} />
+                    <StarRatingSummary avgRating={avgRating} reviewCount={total} returnCount={count} />
                 ) : (
                     <React.Fragment>
                         {isEditable ? (
@@ -172,7 +178,7 @@ class StarRatingBar extends React.Component {
                                         <Link>
                                             <StarRate
                                                 key={i}
-                                                className={rating.userRating >= i
+                                                className={userRating >= i
                                                     ? classes.starRate
                                                     : classes.noStarRate
                                                 }
@@ -194,7 +200,7 @@ class StarRatingBar extends React.Component {
                                     <StarRate
                                         key={i}
                                         className={
-                                            avgRating >= (i - 0.5)
+                                            apiRating >= (i - 0.5)
                                                 ? classes.starRate
                                                 : classes.noStarRate
                                         }
@@ -210,16 +216,16 @@ class StarRatingBar extends React.Component {
 }
 
 StarRatingBar.defaultProps = {
-    avgRating: '0',
+    apiRating: '0',
 };
 
 StarRatingBar.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
-    apiId: PropTypes.shape({}).isRequired,
+    apiId: PropTypes.string.isRequired,
     isEditable: PropTypes.bool.isRequired,
     showSummary: PropTypes.bool.isRequired,
-    avgRating: PropTypes.string,
+    apiRating: PropTypes.string,
 };
 
 export default withStyles(styles, { withTheme: true })(StarRatingBar);

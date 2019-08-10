@@ -24,8 +24,8 @@ import { injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import CONSTS from 'AppData/Constants';
+import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import ImageGenerator from './ImageGenerator';
-import StarRatingBar from './StarRatingBar';
 import ApiThumb from './ApiThumb';
 import { ApiContext } from '../Details/ApiContext';
 
@@ -272,7 +272,7 @@ class ApiTableView extends React.Component {
                         if (tableMeta.rowData) {
                             const apiId = tableMeta.rowData[0];
                             const avgRating = tableMeta.rowData[7];
-                            return <StarRatingBar avgRating={avgRating} apiId={apiId} isEditable={false} showSummary={false} />;
+                            return <StarRatingBar apiRating={avgRating} apiId={apiId} isEditable={false} showSummary={false} />;
                         }
                     },
                     options: {

@@ -373,47 +373,50 @@ export default class API extends Resource {
         }
     }
 
-    getRatingFromUser(apiId, callback = null) {
+    /**
+     * Get Rating details for a partiuclar API
+     * @param {apiId} apiId of the api
+     * @returns {promise} promise
+     */
+    getRatingFromUser(apiId) {
         const promiseGet = this.client.then((client) => {
             return client.apis.Ratings.get_apis__apiId__ratings({ apiId }, this._requestMetaData());
         }).catch((error) => {
             console.error(error);
         });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
-        }
+        return promiseGet;
     }
 
-    removeRatingOfUser(apiId, callback = null) {
+    /**
+     * Remove Rating details for a partiuclar API for the logged in user
+     * @param {apiId} apiId of the api
+     * @returns {promise} promise
+     */
+    removeRatingOfUser(apiId) {
         const promiseDelete = this.client.then((client) => {
             return client.apis.Ratings.delete_apis__apiId__user_rating({ apiId }, this._requestMetaData());
         }).catch((error) => {
             console.error(error);
         });
-        if (callback) {
-            return promiseDelete.then(callback);
-        } else {
-            return promiseDelete;
-        }
+        return promiseDelete;
     }
 
-
-    addRating(apiId, ratingInfo, callback = null) {
+    /**
+     * Add Rating for a partiuclar API by the logged in user
+     * @param {apiId} apiId of the api
+     * @param {ratingInfo} ratingInfo user rating for the api
+     * @returns {promise} promise
+     */
+    addRating(apiId, ratingInfo) {
         const promise = this.client.then((client) => {
             return client.apis.Ratings.put_apis__apiId__user_rating(
                 { apiId, body: ratingInfo },
                 this._requestMetaData(),
             );
         }).catch((error) => {
-            alert('error in adding ' + error);
+            console.error(error);
         });
-        if (callback) {
-            return promise.then(callback);
-        } else {
-            return promise;
-        }
+        return promise;
     }
 
     /**

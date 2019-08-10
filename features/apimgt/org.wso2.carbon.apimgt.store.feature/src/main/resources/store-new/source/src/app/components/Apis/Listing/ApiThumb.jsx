@@ -27,8 +27,8 @@ import { FormattedMessage } from 'react-intl';
 import MaterialIcons from 'MaterialIcons';
 import CONSTS from 'AppData/Constants';
 import APIProduct from 'AppData/APIProduct';
+import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import ImageGenerator from './ImageGenerator';
-import StarRatingBar from './StarRatingBar';
 import Api from '../../../data/api';
 import { ApiContext } from '../Details/ApiContext';
 
@@ -271,7 +271,7 @@ class ApiThumb extends React.Component {
                     <div className={classes.thumbInfo}>
                         <div className={classes.thumbLeft}>
                             <Typography variant='subheading' gutterBottom align='left'>
-                                <StarRatingBar avgRating={api.avgRating} apiId={api.id} isEditable={false} showSummary={false} />
+                                <StarRatingBar apiRating={api.avgRating} apiId={api.id} isEditable={false} showSummary={false} />
                             </Typography>
                         </div>
                         <div className={classes.thumbRight}>

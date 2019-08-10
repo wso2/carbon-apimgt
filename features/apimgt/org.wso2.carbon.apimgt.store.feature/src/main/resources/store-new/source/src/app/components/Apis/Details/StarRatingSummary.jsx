@@ -40,21 +40,27 @@ const styles = theme => ({
 });
 
 function StarRatingSummary(props) {
-    const { classes, theme, rating } = props;
+    const {
+        classes,
+        theme,
+        avgRating,
+        reviewCount,
+        returnCount
+    } = props;
     return (
         <React.Fragment>
-            {rating.count > 0 ? (
+            {returnCount > 0 ? (
                 <React.Fragment>
                     <StarRate className={classes.starRate} />
                     <div className={classes.ratingSummary}>
                         <div className={classes.userRating}>
-                            <Typography variant='display1'>{rating.avgRating}</Typography>
+                            <Typography variant='display1'>{avgRating}</Typography>
                             <Typography variant='caption'>/5.0</Typography>
                         </div>
                         <Typography variant='caption' gutterBottom align='left'>
-                            {rating.pagination.total}
+                            {reviewCount}
                             {' '}
-                            {rating.pagination.total === 1
+                            {reviewCount === 1
                                 ? (
                                     <FormattedMessage
                                         defaultMessage='user'
