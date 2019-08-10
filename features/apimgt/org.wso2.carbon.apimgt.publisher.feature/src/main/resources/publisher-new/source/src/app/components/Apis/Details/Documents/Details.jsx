@@ -120,7 +120,12 @@ class Details extends React.Component {
      * @memberof Details
      */
     componentDidMount() {
-        const { api, match: { params: { apiProductUUID, documentId, apiUUID } } } = this.props;
+        const {
+            api,
+            match: {
+                params: { apiProductUUID, documentId, apiUUID },
+            },
+        } = this.props;
         let promisedDocument;
         switch (api.apiType) {
             case Api.CONSTS.APIProduct: {
@@ -265,8 +270,10 @@ class Details extends React.Component {
         const {
             notFound, doc, isEditable, files,
         } = this.state;
-        const docListingPath = api.apiType === Api.CONSTS.APIProduct ? '/api-products/' :
-            '/apis/' + this.props.match.params.apiUUID + '/documents';
+        const docListingPath =
+            api.apiType === Api.CONSTS.APIProduct
+                ? '/api-products/'
+                : '/apis/' + this.props.match.params.apiUUID + '/documents';
         if (notFound) {
             return (
                 <PageContainer pageNav={<PageNavigation />}>
@@ -394,7 +401,11 @@ class Details extends React.Component {
                                     {isEditable ? (
                                         <FormControl className='horizontal dropzone-wrapper'>
                                             <div className='dropzone'>
-                                                <Dropzone onDrop={this.onDrop} multiple={false}>
+                                                <Dropzone
+                                                    onDrop={this.onDrop}
+                                                    multiple={false}
+                                                    accept='application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/pdf'
+                                                >
                                                     <p>
                                                         <FormattedMessage
                                                             id='try.dropping.some.files.here.or.click.to.select.files.to.upload'

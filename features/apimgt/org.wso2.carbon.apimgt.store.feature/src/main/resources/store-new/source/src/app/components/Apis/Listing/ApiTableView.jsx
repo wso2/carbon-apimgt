@@ -27,10 +27,6 @@ import ImageGenerator from './ImageGenerator';
 import StarRatingBar from './StarRating';
 import ApiThumb from './ApiThumb';
 
-function LinkGenerator(props) {
-    return <Link to={'/apis/' + props.apiId}>{props.apiName}</Link>;
-}
-
 class StarRatingColumn extends React.Component {
     constructor(props) {
         super(props);
@@ -139,8 +135,8 @@ class ApiTableView extends React.Component {
 
     xhrRequest = () => {
         const { page, rowsPerPage } = this;
-        const { kind } = this.props;
-        if (kind === 'apis') {
+        const { isApiProduct } = this.props;
+        if (!isApiProduct) {
             const api = new API();
             return api.getAllAPIs({ limit: this.rowsPerPage, offset: page * rowsPerPage });
         } else {
@@ -163,14 +159,15 @@ class ApiTableView extends React.Component {
 
     setLocalStorage = () => {
         // Set the page to the localstorage
-        const { kind } = this.props;
+        const { isApiProduct } = this.props;
+        const paginationSufix = isApiProduct ? 'products' : 'apis';
         const pagination = { page: this.page, count: this.count, rowsPerPage: this.rowsPerPage };
-        window.localStorage.setItem('pagination-' + kind, JSON.stringify(pagination));
+        window.localStorage.setItem('pagination-' + paginationSufix, JSON.stringify(pagination));
     };
 
     getLocalStorage = () => {
-        const { kind } = this.props;
-        const storedPagination = window.localStorage.getItem('pagination-' + kind);
+        const { paginationSufix } = this.props;
+        const storedPagination = window.localStorage.getItem('pagination-' + paginationSufix);
         if (storedPagination) {
             const pagination = JSON.parse(storedPagination);
             if (pagination.page && pagination.count && pagination.rowsPerPage) {
@@ -215,11 +212,16 @@ class ApiTableView extends React.Component {
                     defaultMessage: 'name',
                 }),
                 options: {
-                    customBodyRender: (value, tableMeta, updateValue) => {
+                    customBodyRender: (value, tableMeta, updateValue, tableViewObj=this) => {
                         if (tableMeta.rowData) {
+                            const { isApiProduct } = tableViewObj.props;
                             const apiName = tableMeta.rowData[2];
                             const apiId = tableMeta.rowData[0];
-                            return <LinkGenerator apiName={apiName} apiId={apiId} />;
+                            if( !isApiProduct ) {
+                                return <Link to={'/apis/' + apiId}>{apiName}</Link>;
+                            } else { 
+                                return <Link to={'/api-products/' + apiId}>{apiName}</Link>;
+                            }
                         }
                     },
                     sort: false,
@@ -297,14 +299,15 @@ class ApiTableView extends React.Component {
             },
         };
         if (gridView) {
-            options.customRowRender = (data, dataIndex, rowIndex) => {
+            options.customRowRender = (data, dataIndex, rowIndex, tableViewObj=this) => {
+                const { isApiProduct } = tableViewObj.props;
                 const api = {};
                 api.id = data[0];
                 api.name = data[1].props.api;
                 api.version = data[3];
                 api.context = data[4];
                 api.provider = data[5];
-                return <ApiThumb api={api} />;
+                return <ApiThumb api={api} isApiProduct={isApiProduct} />;
             };
             options.title = false;
             options.filter = false;
