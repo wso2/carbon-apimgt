@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-"use strict";
-import APIClientFactory from "./APIClientFactory";
-import Resource from "./Resource";
-import Utils from "./Utils";
+import APIClientFactory from './APIClientFactory';
+import Resource from './Resource';
+import Utils from './Utils';
 
-/***
+/**
  * Class to expose API Product {Resource} related operations
  */
-
 export default class APIProduct extends Resource {
     constructor() {
         super();
@@ -35,10 +33,10 @@ export default class APIProduct extends Resource {
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API Product invoke promise.
      */
-    getAllAPIProducts(callback = null) {
+    getAllAPIProducts(params = {}, callback = null) {
         const promiseGetAll = this.client.then(
             (client) => {
-                return client.apis['API Products (Collection)'].get_api_products({}, this._requestMetaData());
+                return client.apis['API Products (Collection)'].get_api_products(params, this._requestMetaData());
             },
         );
         if (callback) {
@@ -110,6 +108,4 @@ export default class APIProduct extends Resource {
             return promiseGet;
         }
     }
-
 }
-

@@ -35,7 +35,6 @@ class APICreateWrapper extends Component {
                 name: { empty: false, alreadyExists: false },
                 context: { empty: false, alreadyExists: false },
                 version: { empty: false },
-                endpointConfig: { empty: false },
             },
         };
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -51,7 +50,7 @@ class APICreateWrapper extends Component {
         e.preventDefault();
         const { api: currentAPI } = this.state;
         const { type: apiType } = this.props;
-        if (!currentAPI.name || !currentAPI.context || !currentAPI.version || !currentAPI.endpointConfig) {
+        if (!currentAPI.name || !currentAPI.context || !currentAPI.version) {
             // Checking the api name,version,context undefined or empty states
             this.setState((oldState) => {
                 const { valid, api } = oldState;
@@ -59,7 +58,6 @@ class APICreateWrapper extends Component {
                 validUpdated.name.empty = !api.name;
                 validUpdated.context.empty = !api.context;
                 validUpdated.version.empty = !api.version;
-                validUpdated.endpointConfig.empty = !api.endpointConfig;
                 return { valid: validUpdated };
             });
             return;
@@ -110,7 +108,6 @@ class APICreateWrapper extends Component {
             validUpdated.name.empty = !api.name;
             validUpdated.context.empty = !api.context;
             validUpdated.version.empty = !api.version;
-            validUpdated.endpointConfig.empty = !api.endpointConfig;
             // TODO we need to add the already existing error for (context)
             // by doing an api call ( the swagger definition does not contain such api call)
             return { api: changes, valid: validUpdated };

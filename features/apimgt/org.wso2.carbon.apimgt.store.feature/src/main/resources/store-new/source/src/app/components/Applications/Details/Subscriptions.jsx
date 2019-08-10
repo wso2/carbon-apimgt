@@ -33,7 +33,7 @@ import Divider from '@material-ui/core/Divider';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Alert from '../../Shared/Alert';
 import SubscriptionTableData from './SubscriptionTableData';
-import APIList from '../../Apis/Listing/APIList';
+import APIList from '../../Apis/Listing/APICardView';
 import Subscription from '../../../data/Subscription';
 import Api from '../../../data/api';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';

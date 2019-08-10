@@ -7,13 +7,14 @@ import Landing from './components/LandingPage/Landing';
 import ApplicationCreate from './components/Shared/AppsAndKeys/ApplicationCreateForm';
 import { PageNotFound, ScopeNotFound } from './components/Base/Errors';
 import EditApp from './components/Applications/Edit/EditApp';
+
 function AppRouts(props) {
-    const { isAuthenticated, isUserFound, theme, } = props;
+    const { isAuthenticated, isUserFound, theme } = props;
     return (
         <Switch>
             <Redirect exact from='/' to={theme.custom.landingPage.active ? '/home' : '/apis'} />
             {theme.custom.landingPage.active && <Route path='/home' component={Landing} /> }
-            <Route path='/apis' component={Apis} />
+            <Route path='/(apis|api-products)' component={Apis} />
             {isAuthenticated ? (
                 <React.Fragment>
                     <Route path='/applications' component={Applications} />

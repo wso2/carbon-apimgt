@@ -23,6 +23,7 @@ import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
 import API from 'AppData/api.js';
+import APIProduct from 'AppData/APIProduct';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import AddCircle from '@material-ui/icons/AddCircle';
@@ -80,7 +81,9 @@ const styles = theme => ({
     },
 });
 function LinkGenerator(props) {
-    return <Link to={'/apis/' + props.apiId + '/documents/' + props.docId + '/details'}>{props.docName}</Link>;
+    return props.apiType === API.CONSTS.APIProduct ?
+        <Link to={'/api-products/' + props.apiId + '/documents/' + props.docId + '/details'}>{props.docName}</Link> :
+        <Link to={'/apis/' + props.apiId + '/documents/' + props.docId + '/details'}>{props.docName}</Link>;
 }
 class Listing extends React.Component {
     constructor(props) {
@@ -105,21 +108,39 @@ class Listing extends React.Component {
      Get the document list attached to current API and set it to the state
      */
     getDocumentsList() {
-        const api = new API();
-        const { intl } = this.props;
-        const docs = api.getDocuments(this.props.api.id);
-        docs.then((response) => {
-            this.setState({ docs: response.obj.list });
-        }).catch((errorResponse) => {
-            const errorData = JSON.parse(errorResponse.message);
-            const messageTxt =
-                'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
-            console.error(messageTxt);
-            Alert.error(intl.formatMessage({
-                id: 'Apis.Details.Documents.Listing.documents.listing.fetching.error.message',
-                defaultMessage: 'Error in fetching documents list of the API',
-            }));
-        });
+        const { api, intl } = this.props;
+
+        if (api.apiType === API.CONSTS.APIProduct) {
+            const apiProduct = new APIProduct();
+            const docs = apiProduct.getDocuments(api.id);
+            docs.then((response) => {
+                this.setState({ docs: response.obj.list });
+            }).catch((errorResponse) => {
+                const errorData = JSON.parse(errorResponse.message);
+                const messageTxt =
+                    'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
+                console.error(messageTxt);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Documents.Listing.documents.listing.fetching.error.message',
+                    defaultMessage: 'Error in fetching documents list of the API Product',
+                }));
+            });
+        } else {
+            const newApi = new API();
+            const docs = newApi.getDocuments(this.props.api.id);
+            docs.then((response) => {
+                this.setState({ docs: response.obj.list });
+            }).catch((errorResponse) => {
+                const errorData = JSON.parse(errorResponse.message);
+                const messageTxt =
+                    'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
+                console.error(messageTxt);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Documents.Listing.documents.listing.fetching.error.message',
+                    defaultMessage: 'Error in fetching documents list of the API',
+                }));
+            });
+        }
     }
     toggleAddDocs() {
         this.setState((oldState) => {
@@ -127,7 +148,7 @@ class Listing extends React.Component {
         });
     }
     render() {
-        const { classes } = this.props;
+        const { classes, api } = this.props;
         const { docs, showAddDocs } = this.state;
         const columns = [
             {
@@ -140,12 +161,13 @@ class Listing extends React.Component {
             {
                 name: 'name',
                 options: {
-                    customBodyRender: (value, tableMeta, api) => {
+                    customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
                             const docName = tableMeta.rowData[1];
                             const docId = tableMeta.rowData[0];
-                            return <LinkGenerator docName={docName} docId={docId} apiId={this.apiId} />;
+                            return <LinkGenerator docName={docName} docId={docId} apiId={this.apiId} apiType={api.apiType} />;
                         }
+                        return null;
                     },
                     filter: false,
                     label: <FormattedMessage
@@ -159,14 +181,14 @@ class Listing extends React.Component {
                 label: <FormattedMessage
                     id='Apis.Details.Documents.Listing.column.header.source.type'
                     defaultMessage='sourceType'
-                />
+                />,
             },
             {
                 name: 'type',
                 label: <FormattedMessage
                     id='Apis.Details.Documents.Listing.column.header.type'
                     defaultMessage='type'
-                />
+                />,
             },
             {
                 name: 'action',
@@ -175,7 +197,7 @@ class Listing extends React.Component {
                     defaultMessage='action'
                 />,
                 options: {
-                    customBodyRender: (value, tableMeta, api) => {
+                    customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
                             const docName = tableMeta.rowData[1];
                             const docId = tableMeta.rowData[0];
@@ -191,7 +213,13 @@ class Listing extends React.Component {
                                                 <Edit docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
                                             </td>
                                             <td>
-                                                <Delete docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                                <Delete
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                    apiType={api.apiType}
+                                                />
                                             </td>
                                         </tr>
                                     </table>
@@ -201,13 +229,19 @@ class Listing extends React.Component {
                                     <table className={classes.actionTable}>
                                         <tr>
                                             <td>
-                                                <TextEditor docName={docName} docId={docId} apiId={this.apiId} />
+                                                <TextEditor docName={docName} docId={docId} apiId={this.apiId} apiType={api.apiType} />
                                             </td>
                                             <td>
-                                                <Edit docName={docName}  docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                                <Edit docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
                                             </td>
                                             <td>
-                                                <Delete docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                                <Delete
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                    apiType={api.apiType}
+                                                />
                                             </td>
                                         </tr>
                                     </table>
@@ -223,13 +257,19 @@ class Listing extends React.Component {
                                                         id='Apis.Details.Documents.Listing.documents.open'
                                                         defaultMessage='Open'
                                                     />
-                                                </Button>   
+                                                </Button>
                                             </td>
                                             <td>
                                                 <Edit docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
                                             </td>
                                             <td>
-                                                <Delete docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                                <Delete
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                    apiType={api.apiType}
+                                                />
                                             </td>
                                         </tr>
                                     </table>
@@ -245,7 +285,13 @@ class Listing extends React.Component {
                                                 <Edit docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
                                             </td>
                                             <td>
-                                                <Delete docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                                <Delete
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                    apiType={api.apiType}
+                                                />
                                             </td>
                                         </tr>
                                     </table>
@@ -254,6 +300,7 @@ class Listing extends React.Component {
                                 return <span />;
                             }
                         }
+                        return null;
                     },
                     filter: false,
                 },
@@ -278,7 +325,11 @@ class Listing extends React.Component {
                 </div>
                 <div className={classes.contentWrapper}>
                     {showAddDocs && (
-                        <Create toggleAddDocs={this.toggleAddDocs} getDocumentsList={this.getDocumentsList} />
+                        <Create
+                            toggleAddDocs={this.toggleAddDocs}
+                            getDocumentsList={this.getDocumentsList}
+                            apiType={api.apiType}
+                        />
                     )}
 
                     {docs && (
@@ -293,6 +344,10 @@ class Listing extends React.Component {
 Listing.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({
+        id: PropTypes.string,
+        apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]),
+    }).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Listing));

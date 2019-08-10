@@ -23,12 +23,9 @@ import LifeCycleIcon from '@material-ui/icons/Autorenew';
 import EndpointIcon from '@material-ui/icons/GamesOutlined';
 import ResourcesIcon from '@material-ui/icons/VerticalSplit';
 import ScopesIcon from '@material-ui/icons/VpnKey';
-// import SecurityIcon from '@material-ui/icons/Security';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
-// import CommentsIcon from '@material-ui/icons/CommentRounded';
 import BusinessIcon from '@material-ui/icons/Business';
 import CodeIcon from '@material-ui/icons/Code';
-// import SubscriptionsIcon from '@material-ui/icons/Bookmarks';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
 import { withStyles } from '@material-ui/core/styles';
@@ -40,6 +37,7 @@ import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
 import { PageNotFound } from 'AppComponents/Base/Errors';
 import Api from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
@@ -57,7 +55,7 @@ import APIDefinition from './APIDefinition/APIDefinition';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
-import ApiContext from './components/ApiContext';
+import { APIProvider } from './components/ApiContext';
 import CreateNewVersion from './NewVersion/NewVersion';
 
 const styles = theme => ({
@@ -149,11 +147,12 @@ class Details extends Component {
             api: null,
             apiNotFound: false,
             active: active || 'overview',
-            updateAPI: this.updateAPI, // eslint-disable-line react/no-unused-state
+            // updateAPI: this.updateAPI,
             isAPIProduct,
         };
         this.setAPI = this.setAPI.bind(this);
         this.setAPIProduct = this.setAPIProduct.bind(this);
+        this.updateAPI = this.updateAPI.bind(this);
     }
 
     /**
@@ -226,7 +225,7 @@ class Details extends Component {
      */
     setAPIProduct() {
         const { apiProdUUID } = this.props.match.params;
-        const promisedApi = Api.getProduct(apiProdUUID);
+        const promisedApi = APIProduct.get(apiProdUUID);
         promisedApi
             .then((api) => {
                 this.setState({ api });
@@ -325,12 +324,13 @@ class Details extends Component {
             location: pageLocation,
             location: { pathname }, // nested destructuring
         } = this.props;
+
         // pageLocation renaming is to prevent es-lint errors saying can't use global name location
         if (!Details.isValidURL(pathname)) {
             return <PageNotFound location={pageLocation} />;
         }
 
-        const redirectUrl = (isAPIProduct ? '/api-products/' : '/apis/') + match.params.api_uuid + '/' + active;
+        const redirectUrl = '/' + (isAPIProduct ? 'api-products' : 'apis') + '/' + match.params.api_uuid + '/' + active;
         if (apiNotFound) {
             const { apiUUID } = match.params;
             const resourceNotFoundMessageText = defineMessages({
@@ -360,9 +360,9 @@ class Details extends Component {
 
         return (
             <React.Fragment>
-                <ApiContext.Provider value={this.state}>
+                <APIProvider value={{ api, updateAPI: this.updateAPI, isAPIProduct }}>
                     <div className={classes.LeftMenu}>
-                        <Link to={isAPIProduct ? '/api-products' : '/apis'}>
+                        <Link to={'/' + (isAPIProduct ? 'api-products' : 'apis') + '/'}>
                             <div className={classes.leftLInkMain}>
                                 <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon='api' />
                             </div>
@@ -384,7 +384,7 @@ class Details extends Component {
                             active={active}
                             Icon={<ConfigurationIcon />}
                         />
-                        {isAPIProduct ? null : (
+                        {!isAPIProduct &&
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.endpoints',
@@ -394,7 +394,7 @@ class Details extends Component {
                                 active={active}
                                 Icon={<EndpointIcon />}
                             />
-                        )}
+                        }
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.api.definition',
@@ -484,7 +484,11 @@ class Details extends Component {
                             <Switch>
                                 <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
                                 <Route
-                                    path={isAPIProduct ? Details.subPaths.OVERVIEW_PRODUCT : Details.subPaths.OVERVIEW}
+                                    path={Details.subPaths.OVERVIEW_PRODUCT}
+                                    component={() => <Overview api={api} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.OVERVIEW}
                                     component={() => <Overview api={api} />}
                                 />
                                 <Route
@@ -493,14 +497,22 @@ class Details extends Component {
                                 />
                                 <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
                                 <Route
-                                    path={isAPIProduct ?
-                                        Details.subPaths.CONFIGURATION_PRODUCT : Details.subPaths.CONFIGURATION}
+                                    path={Details.subPaths.CONFIGURATION}
+                                    component={() => <Configuration api={api} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.CONFIGURATION_PRODUCT}
                                     component={() => <Configuration api={api} />}
                                 />
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
                                 <Route path={Details.subPaths.RESOURCES} component={() => <Resources api={api} />} />
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
+                                <Route path={Details.subPaths.SCOPES_PRODUCT} component={() => <Scope api={api} />} />
                                 <Route path={Details.subPaths.DOCUMENTS} component={() => <Documents api={api} />} />
+                                <Route
+                                    path={Details.subPaths.DOCUMENTS_PRODUCT}
+                                    component={() => <Documents api={api} />}
+                                />
                                 <Route
                                     path={Details.subPaths.SUBSCRIPTIONS}
                                     component={() => <Subscriptions api={api} />}
@@ -509,14 +521,18 @@ class Details extends Component {
                                 <Route path={Details.subPaths.COMMENTS} component={() => <Comments api={api} />} />
                                 <Route
                                     path={Details.subPaths.BUSINESS_INFO}
-                                    component={() => <BusinessInformation />}
+                                    component={() => <BusinessInformation api={api} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.BUSINESS_INFO_PRODUCT}
+                                    component={() => <BusinessInformation api={api} />}
                                 />
                                 <Route path={Details.subPaths.PROPERTIES} component={() => <Properties />} />
                                 <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
                             </Switch>
                         </div>
                     </div>
-                </ApiContext.Provider>
+                </APIProvider>
             </React.Fragment>
         );
     }
@@ -538,11 +554,14 @@ Details.subPaths = {
     RESOURCES: '/apis/:api_uuid/resources',
     RESOURCES_PRODUCT: '/api_products/:apiprod_uuid/resources',
     SCOPES: '/apis/:api_uuid/scopes',
+    SCOPES_PRODUCT: '/api-products/:apiprod_uuid/scopes',
     DOCUMENTS: '/apis/:api_uuid/documents',
+    DOCUMENTS_PRODUCT: '/api-products/:apiprod_uuid/documents',
     SUBSCRIPTIONS: '/apis/:api_uuid/subscriptions',
     SECURITY: '/apis/:api_uuid/security',
     COMMENTS: '/apis/:api_uuid/comments',
     BUSINESS_INFO: '/apis/:api_uuid/business info',
+    BUSINESS_INFO_PRODUCT: '/api-products/:apiprod_uuid/business info',
     PROPERTIES: '/apis/:api_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
 };

@@ -197,7 +197,7 @@ export default class ProtectedApp extends Component {
             <IntlProvider locale={language} messages={messages}>
                 <MuiThemeProvider theme={createMuiTheme(Configurations.themes.light)}>
                     <Base>
-                        <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />    
+                        <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
                     </Base>
                 </MuiThemeProvider>
             </IntlProvider>

@@ -260,11 +260,11 @@ class TableView extends React.Component {
                                             <TableCell component='th' scope='row' padding='none'>
                                                 <Link to={overviewPath}>{api.name}</Link>
                                             </TableCell>
-                                            <TableCell numeric>{api.version}</TableCell>
-                                            <TableCell numeric>{api.context}</TableCell>
-                                            <TableCell numeric>{Math.floor(Math.random() * 20)}</TableCell>
-                                            <TableCell numeric>{api.provider}</TableCell>
-                                            <TableCell numeric>{api.lifeCycleStatus}</TableCell>
+                                            <TableCell align='right'>{api.version}</TableCell>
+                                            <TableCell align='right'>{api.context}</TableCell>
+                                            <TableCell align='right'>{Math.floor(Math.random() * 20)}</TableCell>
+                                            <TableCell align='right'>{api.provider}</TableCell>
+                                            <TableCell align='right'>{api.lifeCycleStatus}</TableCell>
                                         </TableRow>
                                     );
                                 })}
@@ -297,7 +297,7 @@ class TableView extends React.Component {
 
 TableView.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    apis: PropTypes.shape({ list: PropTypes.array }).isRequired,
+    apis: PropTypes.shape({ list: PropTypes.array, count: PropTypes.number, apiType: PropTypes.string }).isRequired,
     updateAPIsList: PropTypes.func.isRequired,
     intl: PropTypes.shape({}).isRequired,
 };

@@ -38,8 +38,10 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import ChipInput from 'material-ui-chip-input';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import API from 'AppData/api';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import ApiContext from '../components/ApiContext';
+import ApiSecurity from './ApiSecurity';
 
 const styles = theme => ({
     titleWrapper: {
@@ -146,7 +148,26 @@ const styles = theme => ({
     },
 });
 
+const securitySchemaValues = {
+    oauth2: 'oauth2',
+    mutualSSL: 'mutualssl',
+    basicAuth: 'basic_auth',
+    oauthBasicAuthMandatory: 'oauth_basic_auth_mandatory',
+    mutualSSLMandatory: 'mutualssl_mandatory',
+};
+
+/**
+ *
+ *
+ * @class Configuration
+ * @extends {React.Component}
+ */
 class Configuration extends React.Component {
+    /**
+     *Creates an instance of Configuration.
+     * @param {*} props
+     * @memberof Configuration
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -158,6 +179,7 @@ class Configuration extends React.Component {
             tags: null,
             isDefaultVersion: null,
             transport: null,
+            securityScheme: null,
             authorizationHeader: null,
             responseCaching: null,
             cacheTimeout: null,
@@ -190,6 +212,19 @@ class Configuration extends React.Component {
             return apiTransport.includes(type);
         }
     }
+    setSecurityScheme = (updatedSecurityScheme) => {
+        this.setState({ securityScheme: updatedSecurityScheme });
+    }
+    addToArray(element, array) {
+        if (!array.includes(element)) {
+            array.push(element);
+        }
+    }
+    removeFromArray(element, array) {
+        if (array.includes(element)) {
+            array.splice(array.indexOf(element), 1);
+        }
+    }
     handleChange = name => (event) => {
         let { value } = event.target;
         const { checked } = event.target;
@@ -204,10 +239,10 @@ class Configuration extends React.Component {
             [name]: value,
         });
     };
-    handleTransportChange = apiTransport => (event) => {
+    handleTransportChange = (apiTransport, apiSecurityScheme) => (event) => {
         const { value, checked } = event.target;
         this.setState((oldState) => {
-            let { transport } = oldState;
+            let { transport, securityScheme } = oldState;
             if (!transport) transport = apiTransport;
             if (checked && !transport.includes(value)) {
                 transport.push(value);
@@ -215,7 +250,13 @@ class Configuration extends React.Component {
                 transport.splice(transport.indexOf(value), 1);
             }
 
-            return { transport };
+            if (!securityScheme) securityScheme = apiSecurityScheme;
+            if (!checked && value === 'https') {
+                this.removeFromArray(securitySchemaValues.mutualSSL, securityScheme);
+                this.removeFromArray(securitySchemaValues.mutualSSLMandatory, securityScheme);
+            }
+
+            return { transport, securityScheme };
         });
     };
     handleAddChip(chip, apiTags) {
@@ -233,7 +274,7 @@ class Configuration extends React.Component {
             return { tags: [...tags] };
         });
     }
-    handleSubmit(oldAPI, updateAPI, isAPIProduct) {
+    handleSubmit(oldAPI, updateAPI) {
         const {
             description,
             accessControl,
@@ -243,11 +284,13 @@ class Configuration extends React.Component {
             tags,
             isDefaultVersion,
             transport,
+            securityScheme,
             authorizationHeader,
             responseCaching,
             cacheTimeout,
         } = this.state;
 
+        const isAPIProduct = (oldAPI.apiType === API.CONSTS.APIProduct);
         if (description) {
             oldAPI.description = description;
         }
@@ -272,6 +315,9 @@ class Configuration extends React.Component {
         if (transport) {
             oldAPI.transport = transport;
         }
+        if (securityScheme) {
+            oldAPI.securityScheme = securityScheme;
+        }
         if (authorizationHeader) {
             oldAPI.authorizationHeader = authorizationHeader;
         }
@@ -294,6 +340,7 @@ class Configuration extends React.Component {
             tags,
             isDefaultVersion,
             transport,
+            securityScheme,
             authorizationHeader,
             responseCaching,
             cacheTimeout,
@@ -301,6 +348,9 @@ class Configuration extends React.Component {
         let error = false;
         if (transport) {
             error = transport.length === 0;
+        }
+        if (securityScheme) {
+            error = securityScheme.length === 0;
         }
 
         return (
@@ -314,8 +364,8 @@ class Configuration extends React.Component {
                     </Typography>
                 </div>
                 <ApiContext.Consumer>
-                    {({ api, updateAPI, isAPIProduct }) => (
-                        <Grid container spacing={24}>
+                    {({ api, updateAPI }) => (
+                        <Grid container spacing={7}>
                             <Grid item xs={12}>
                                 <Paper className={classes.root} elevation={1}>
                                     <Typography component='p' variant='body1'>
@@ -475,7 +525,11 @@ class Configuration extends React.Component {
                                                                     transport,
                                                                     api.transport,
                                                                 )}
-                                                                onChange={this.handleTransportChange(api.transport)}
+                                                                onChange={
+                                                                    this.handleTransportChange(
+                                                                        api.transport,
+                                                                        api.securityScheme,
+                                                                    )}
                                                                 value='http'
                                                             />
                                                         }
@@ -492,7 +546,11 @@ class Configuration extends React.Component {
                                                                     transport,
                                                                     api.transport,
                                                                 )}
-                                                                onChange={this.handleTransportChange(api.transport)}
+                                                                onChange={
+                                                                    this.handleTransportChange(
+                                                                        api.transport,
+                                                                        api.securityScheme,
+                                                                    )}
                                                                 value='https'
                                                             />
                                                         }
@@ -513,6 +571,23 @@ class Configuration extends React.Component {
                                                     )}
                                                 </FormGroup>
                                             </FormControl>
+
+                                            {/* API Security */}
+                                            <ApiSecurity
+                                                api={api}
+                                                isTransportHttps={this.getTransportState(
+                                                    'https',
+                                                    transport,
+                                                    api.transport,
+                                                )}
+                                                securityScheme={securityScheme}
+                                                setSecurityScheme={this.setSecurityScheme}
+                                                removeFromArray={this.removeFromArray}
+                                                addToArray={this.addToArray}
+                                                error={error}
+                                                securitySchemaValues={securitySchemaValues}
+                                            />
+
                                         </div>
                                     </div>
                                     <div className={classes.imageContainer}>
@@ -905,7 +980,7 @@ class Configuration extends React.Component {
                                         container
                                         direction='row'
                                         alignItems='flex-start'
-                                        spacing={16}
+                                        spacing={4}
                                         className={classes.buttonSection}
                                     >
                                         <Grid item>
@@ -913,7 +988,7 @@ class Configuration extends React.Component {
                                                 <Button
                                                     variant='contained'
                                                     color='primary'
-                                                    onClick={() => this.handleSubmit(api, updateAPI, isAPIProduct)}
+                                                    onClick={() => this.handleSubmit(api, updateAPI)}
                                                 >
                                                     <FormattedMessage
                                                         id='Apis.Details.Configuration.Configuration.save'

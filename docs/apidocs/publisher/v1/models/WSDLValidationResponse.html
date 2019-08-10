@@ -1,6 +1,6 @@
 <div class="main-content">
 
-        <h2>APIDefinitionValidationResponse_wsdlInfo</h2>
+        <h2>WSDLValidationResponse</h2>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -21,28 +21,28 @@
                 <tbody>
                     <tr>
                         <td class="parameter">
-                            <p>version</p>
+                            <p>isValid</p>
                             <p class="param-required">
+                                required
                                 
-                                optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">WSDL version </p></td>
+                        <td class="parameter"><p class="marked">This attribute declares whether this definition is valid or not. </p></td>
                         <td class="parameter">
-                                <a href="#!/models#string">string</a>
+                                <a href="#!/models#boolean">boolean</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">1.1</p></td>
+                        <td class="parameter"> <p class="marked">true</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>endpoints</p>
+                            <p>errors</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">A list of endpoints the service exposes </p></td>
+                        <td class="parameter"><p class="marked">If there are more than one error list them out. For example, list out validation errors by each field. </p></td>
                         <td class="parameter">
                                 <a href="#!/models#array">array</a>
                         </td>
@@ -51,7 +51,7 @@
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>bindingInfo</p>
+                            <p>wsdlInfo</p>
                             <p class="param-required">
                                 
                                 optional
@@ -59,7 +59,7 @@
                         </td>
                         <td class="parameter"><p class="marked"></p></td>
                         <td class="parameter">
-                                <a href="#!/models#APIDefinitionValidationResponse_wsdlInfo_bindingInfo">APIDefinitionValidationResponse_wsdlInfo_bindingInfo</a>
+                                <a href="#!/models#WSDLValidationResponse_wsdlInfo">WSDLValidationResponse_wsdlInfo</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked"></p></td>

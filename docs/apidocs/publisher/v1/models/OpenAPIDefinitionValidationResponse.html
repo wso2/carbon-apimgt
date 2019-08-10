@@ -1,6 +1,6 @@
 <div class="main-content">
 
-        <h2>ExtendedSubscription</h2>
+        <h2>OpenAPIDefinitionValidationResponse</h2>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -21,67 +21,37 @@
                 <tbody>
                     <tr>
                         <td class="parameter">
-                            <p>subscriptionId</p>
+                            <p>isValid</p>
                             <p class="param-required">
                                 required
                                 
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">This attribute declares whether this definition is valid or not. </p></td>
                         <td class="parameter">
-                                <a href="#!/models#string">string</a>
+                                <a href="#!/models#boolean">boolean</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">01234567-0123-0123-0123-012345678901</p></td>
+                        <td class="parameter"> <p class="marked">true</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>applicationInfo</p>
+                            <p>content</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">OpenAPI definition content. </p></td>
                         <td class="parameter">
-                                <a href="#!/models#Application">Application</a>
+                                <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>policy</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td class="parameter"><p class="marked"></p></td>
-                        <td class="parameter">
-                                <a href="#!/models#string">string</a>
-                        </td>
-                        <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">Unlimited</p></td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <p>subscriptionStatus</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td class="parameter"><p class="marked"></p></td>
-                        <td class="parameter">
-                                <a href="#!/models#string">string</a>
-                        </td>
-                        <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">BLOCKED</p></td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <p>workflowId</p>
+                            <p>info</p>
                             <p class="param-required">
                                 
                                 optional
@@ -89,10 +59,25 @@
                         </td>
                         <td class="parameter"><p class="marked"></p></td>
                         <td class="parameter">
-                                <a href="#!/models#string">string</a>
+                                <a href="#!/models#OpenAPIDefinitionValidationResponse_info">OpenAPIDefinitionValidationResponse_info</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">01234567-0123-0123-0123-012345678901</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>errors</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">If there are more than one error list them out. For example, list out validation errors by each field. </p></td>
+                        <td class="parameter">
+                                <a href="#!/models#array">array</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                 </tbody>
             </table>

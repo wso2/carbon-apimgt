@@ -37,6 +37,8 @@ public final class RestApiConstants {
     public static final String OAUTH2_AUTHENTICATION = "oauth2";
     public static final String BASIC_AUTHENTICATION = "basic_auth";
     public static final String REST_API_SCOPE_CACHE = "REST_API_SCOPE_CACHE";
+    
+    public static final String USER_REST_API_SCOPES = "user_rest_api_scopes";
 
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
     
@@ -225,4 +227,8 @@ public final class RestApiConstants {
     public static final String HTTP_METHOD = "method";
     
     public static final String[] SUPPORTED_METHODS = {"get", "put", "post", "delete", "patch"};
+
+    public static final String RETURN_MODEL = "model";
+    public static final String RETURN_MODEL_BEFORE_ADDED = "model_before_added";
+    public static final String RETURN_DTO = "dto";
 }

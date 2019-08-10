@@ -91,12 +91,12 @@ class Listing extends React.Component {
     render() {
         const { listType } = this.state;
         const {
-            apis, notFound, isAPIProduct, classes, updateAPIsList,
+            apis, notFound, classes, updateAPIsList,
         } = this.props;
         if (notFound) {
             return (
                 <main className={classes.content}>
-                    <TopMenu setListType={this.setListType} apis={apis} isAPIProduct={isAPIProduct} />
+                    <TopMenu setListType={this.setListType} apis={apis} />
                     <div className={classes.contentInside}>
                         <ResourceNotFound />
                     </div>
@@ -106,7 +106,7 @@ class Listing extends React.Component {
         if (!apis) {
             return (
                 <main className={classes.content}>
-                    <TopMenu setListType={this.setListType} apis={apis} isAPIProduct={isAPIProduct} />
+                    <TopMenu setListType={this.setListType} apis={apis} />
                     <div className={classes.contentInside}>
                         <Progress />
                     </div>
@@ -116,7 +116,7 @@ class Listing extends React.Component {
         if (apis.list.length === 0) {
             return (
                 <main className={classes.content}>
-                    <TopMenu setListType={this.setListType} apis={apis} isAPIProduct={isAPIProduct} />
+                    <TopMenu setListType={this.setListType} apis={apis} />
                     <div className={classes.contentInside}>
                         <SampleAPI />
                     </div>
@@ -126,12 +126,12 @@ class Listing extends React.Component {
 
         return (
             <main className={classes.content}>
-                <TopMenu setListType={this.setListType} apis={apis} isAPIProduct={isAPIProduct} />
+                <TopMenu setListType={this.setListType} apis={apis} />
                 <div className={classes.contentInside}>
                     {listType === 'grid' ? (
-                        <CardView updateAPIsList={updateAPIsList} apis={apis} isAPIProduct={isAPIProduct} />
+                        <CardView updateAPIsList={updateAPIsList} apis={apis} />
                     ) : (
-                        <TableView updateAPIsList={updateAPIsList} apis={apis} isAPIProduct={isAPIProduct} />
+                        <TableView updateAPIsList={updateAPIsList} apis={apis} />
                     )}
                 </div>
             </main>
@@ -150,9 +150,8 @@ Listing.propTypes = {
     theme: PropTypes.shape({
         custom: PropTypes.string,
     }).isRequired,
-    apis: PropTypes.shape({ list: PropTypes.array, count: PropTypes.number }).isRequired,
+    apis: PropTypes.shape({ list: PropTypes.array, count: PropTypes.number, apiType: PropTypes.string }).isRequired,
     notFound: PropTypes.bool.isRequired,
-    isAPIProduct: PropTypes.bool.isRequired,
     updateAPIsList: PropTypes.func.isRequired,
 };
 

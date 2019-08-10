@@ -18,11 +18,44 @@
 
 import React from 'react';
 
-const ApiContext = React.createContext({
-    active: 'overview',
-    updateAPI: () => {},
+const APIContext = React.createContext({
     api: null,
-    isAPIProduct: false,
 });
 
-export default ApiContext;
+const { Provider: APIProvider } = APIContext;
+
+
+/**
+ * withAPI HOC can be used with class style components, To get the context with hooks useContext,
+ * use the default export. Using hooks is preferred over class components due to its contribution to wrapper hell
+ *
+ * @param {*} WrappedComponent
+ * @returns {React.Component} withAPI HOC
+ */
+function withAPI(WrappedComponent) {
+    /**
+     *
+     * Higher order component which passes the API context to its child component
+     * @param {*} props
+     * @returns
+     */
+    function HOCWithAPI(props) {
+        return (
+            <APIContext.Consumer>
+                {
+                    context => <WrappedComponent {...context} {...props} />
+                }
+            </APIContext.Consumer>
+        );
+    }
+    HOCWithAPI.displayName = `withAPI(${WrappedComponent.displayName})`;
+    return HOCWithAPI;
+}
+
+export default APIContext;
+
+export {
+    withAPI,
+    APIProvider,
+    APIContext,
+};
