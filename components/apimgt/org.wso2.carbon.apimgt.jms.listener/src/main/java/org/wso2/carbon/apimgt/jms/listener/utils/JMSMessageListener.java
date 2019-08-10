@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.jms.listener.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
@@ -32,6 +34,7 @@ import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
+import java.util.Base64;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -248,6 +251,10 @@ public class JMSMessageListener implements MessageListener {
         if (StringUtils.isEmpty(revokedToken)) {
             return;
         }
+
+        //handle JWT tokens
+        revokedToken = getSignatureIfJWT(revokedToken); //JWT signature is the cache key
+
         //Find the actual tenant domain on which the access token was cached. It is stored as a reference in
         //the super tenant cache.
         String cachedTenantDomain;
@@ -271,5 +278,23 @@ public class JMSMessageListener implements MessageListener {
         //Remove token from the token's own tenant's cache.
         Utils.removeTokenFromTenantTokenCache(revokedToken, cachedTenantDomain);
         Utils.putInvalidTokenIntoTenantInvalidTokenCache(revokedToken, cachedTenantDomain);
+    }
+
+    protected String getSignatureIfJWT(String token) {
+        if (token.contains(APIConstants.DOT)) {
+            try {
+                String[] jwtParts = token.split("\\.");
+                JSONObject jwtHeader = new JSONObject(new String(Base64.getUrlDecoder().decode(jwtParts[0])));
+                // Check if the decoded header contains type as 'JWT'.
+                if (APIConstants.JWT.equals(jwtHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
+                    if (jwtParts.length == 3) {
+                        return jwtParts[2]; //JWT signature available
+                    }
+                }
+            } catch (JSONException | IllegalArgumentException e) {
+                log.debug("Not a JWT token. Failed to decode the token header.", e);
+            }
+        }
+        return token; //Not a JWT. Treat as an opaque token
     }
 }
