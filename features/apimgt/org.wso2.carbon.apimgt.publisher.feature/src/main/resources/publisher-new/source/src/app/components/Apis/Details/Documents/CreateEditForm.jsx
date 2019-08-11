@@ -160,7 +160,6 @@ class CreateEditForm extends React.Component {
     };
 
     onDrop = (acceptedFile) => {
-        console.info(acceptedFile);
         this.setState({ file: acceptedFile });
     };
 
