@@ -29,6 +29,7 @@ class API extends Resource {
         let properties = kwargs;
         if (name instanceof Object) {
             properties = name;
+            Utils.deepFreeze(properties);
         } else {
             this.name = name;
             this.version = version;
@@ -680,14 +681,16 @@ class API extends Resource {
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
     update(api) {
-        const promised_update = this.client.then((client) => {
+        const promisedUpdate = this.client.then((client) => {
             const payload = {
                 apiId: api.id,
                 body: api
             };
             return client.apis['API (Individual)'].put_apis__apiId_(payload);
         });
-        return promised_update;
+        return promisedUpdate.then(response => {
+            return new API(response.body);
+        });
     }
 
         /**
@@ -1239,7 +1242,7 @@ class API extends Resource {
         return promisedAPIs.then((response) => {
             response.obj.apiType = API.CONSTS.API;
             return response;
-        }); 
+        });
     }
 
     /**

@@ -336,7 +336,7 @@ class APICreateWSDL extends React.Component {
             return <Progress />;
         }
         return (
-            <Grid container spacing={24} className={classes.root}>
+            <Grid container spacing={7} className={classes.root}>
                 <Grid item xs={12} xl={6}>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>

@@ -296,7 +296,7 @@ class ProvideWSDL extends Component {
                                     <FormattedMessage id='uploaded.file' defaultMessage='Uploaded file' /> :
                                 </Typography>
                                 <div className={classes.fileName}>
-                                    <Typography variant='body2' gutterBottom>
+                                    <Typography variant='body1' gutterBottom>
                                         {file.name} - {file.size} bytes
                                     </Typography>
                                 </div>
@@ -305,7 +305,7 @@ class ProvideWSDL extends Component {
                         {valid.wsdlFile.invalidFile && (
                             <div className={classes.errorMessageWrapper}>
                                 <ErrorOutline className={classes.errorIcon} />
-                                <Typography variant='body2' gutterBottom className={classes.errorMessage}>
+                                <Typography variant='body1' gutterBottom className={classes.errorMessage}>
                                     {errorMessage}
                                 </Typography>
                             </div>

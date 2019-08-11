@@ -311,7 +311,7 @@ class TableView extends React.Component {
                 const [id, name, , version, context, provider] = data;
                 const api = {
                     id,
-                    name: name.props.id,
+                    name: name.props.api,
                     version,
                     context,
                     provider,

@@ -203,7 +203,7 @@ class CommentEdit extends React.Component {
                 <Typography className={classes.commentText} align='right'>
                     {currentLength + '/' + theme.custom.maxCommentLength}
                 </Typography>
-                <Grid container spacing={8}>
+                <Grid container spacing={2}>
                     <Grid item>
                         <Button variant='contained' color='primary' onClick={() => this.handleClickUpdateComment()}>
                             Save

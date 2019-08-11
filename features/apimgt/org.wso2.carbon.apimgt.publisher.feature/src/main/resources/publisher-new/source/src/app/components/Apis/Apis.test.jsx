@@ -25,7 +25,6 @@ import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
 import APIs from './Apis';
 import ApiCreate from './Create/ApiCreate';
 
-
 import { PageNotFound } from '../Base/Errors';
 
 jest.mock('./Listing/Listing', () => () => {
