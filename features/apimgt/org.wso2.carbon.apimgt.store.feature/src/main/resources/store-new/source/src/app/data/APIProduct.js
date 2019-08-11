@@ -36,7 +36,7 @@ export default class APIProduct extends Resource {
     getAllAPIProducts(params = {}, callback = null) {
         const promiseGetAll = this.client.then(
             (client) => {
-                return client.apis['API Products (Collection)'].get_api_products(params, this._requestMetaData());
+                return client.apis['API Products'].get_api_products(params, this._requestMetaData());
             },
         );
         if (callback) {
@@ -55,7 +55,7 @@ export default class APIProduct extends Resource {
     getAPIProductById(id, callback = null) {
         const promiseGet = this.client.then(
             (client) => {
-                return client.apis['API Product (Individual)'].get_api_products__apiProductId__(
+                return client.apis['API Products'].get_api_products__apiProductId__(
                     { apiProductId: id }, this._requestMetaData(),
                 );
             },
@@ -76,7 +76,7 @@ export default class APIProduct extends Resource {
     getAllApplications(callback = null) {
         const promiseGet = this.client.then(
             (client) => {
-                return client.apis['Application (Collection)'].get_applications(
+                return client.apis['Applications'].get_applications(
                     {}, this._requestMetaData(),
                 );
             },
@@ -97,7 +97,7 @@ export default class APIProduct extends Resource {
     getSubscriptions(apiId, applicationId, callback = null) {
         const promiseGet = this.client.then(
             (client) => {
-                return client.apis['Subscription (Collection)'].get_subscriptions(
+                return client.apis['Subscriptions'].get_subscriptions(
                     { apiId, applicationId }, this._requestMetaData(),
                 );
             },

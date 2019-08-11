@@ -46,7 +46,7 @@ ClientCertificatesApiService delegate = new ClientCertificatesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates")
         })
-    }, tags={ "ClientCertificates (Individual)",  })
+    }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Alias not provided or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
@@ -64,7 +64,7 @@ ClientCertificatesApiService delegate = new ClientCertificatesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:client_certificates_update", description = "Update and delete client certificates")
         })
-    }, tags={ "ClientCertificates (Individual)",  })
+    }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The Certificate deleted successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Alias not found or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
@@ -82,7 +82,7 @@ ClientCertificatesApiService delegate = new ClientCertificatesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates")
         })
-    }, tags={ "ClientCertificates (Individual)",  })
+    }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. ", response = CertificateInfoDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Alias not found or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
@@ -100,7 +100,7 @@ ClientCertificatesApiService delegate = new ClientCertificatesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates")
         })
-    }, tags={ "ClientCertificates (Individual)",  })
+    }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The Certificate updated successfully. ", response = ClientCertMetadataDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Failure due to not providing alias. ", response = ErrorDTO.class),
@@ -118,7 +118,7 @@ ClientCertificatesApiService delegate = new ClientCertificatesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates")
         })
-    }, tags={ "ClientCertificates (Collection)",  })
+    }, tags={ "Client Certificates",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with the list of matching certificate information in the body. ", response = ClientCertificatesDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Failure due to not providing alias or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
@@ -135,7 +135,7 @@ ClientCertificatesApiService delegate = new ClientCertificatesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:client_certificates_add", description = "Add client certificates")
         })
-    }, tags={ "ClientCertificates (Individual)" })
+    }, tags={ "Client Certificates" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The Certificate added successfully. ", response = ClientCertMetadataDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Failures due to existing alias or expired certificate. ", response = ErrorDTO.class),

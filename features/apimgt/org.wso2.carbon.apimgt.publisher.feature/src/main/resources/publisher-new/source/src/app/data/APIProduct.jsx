@@ -74,7 +74,7 @@ class APIProduct extends Resource {
             'Content-Type': 'application/json',
         };
         const promiseCreate = this.client.then((client) => {
-            client.apis['API Product (Individual)'].post_api_products(payload, this._requestMetaData());
+            client.apis['API Products'].post_api_products(payload, this._requestMetaData());
         }).catch((error) => {
             console.error(error);
         });
@@ -93,7 +93,7 @@ class APIProduct extends Resource {
     static get(id) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         const promisedAPIProduct = apiClient.then((client) => {
-            return client.apis['API Product (Individual)'].get_api_products__apiProductId_({
+            return client.apis['API Products'].get_api_products__apiProductId_({
                 apiProductId: id,
             }, this._requestMetaData());
         }).catch((error) => {
@@ -120,7 +120,7 @@ class APIProduct extends Resource {
         }
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         const promisedProducts = apiClient.then((client) => {
-            return client.apis['API Product (Collection)'].get_api_products(params, Resource._requestMetaData());
+            return client.apis['API Products'].get_api_products(params, Resource._requestMetaData());
         }).catch((error) => {
             console.error(error);
         });
@@ -137,7 +137,7 @@ class APIProduct extends Resource {
      */
     getAPIProductThumbnail(id) {
         const promisedAPIThumbnail = this.client.then((client) => {
-            return client.apis['API Product (Individual)'].get_api_products__apiProductId__thumbnail(
+            return client.apis['API Products'].get_api_products__apiProductId__thumbnail(
                 {
                     apiProductId: id,
                 },
@@ -163,7 +163,7 @@ class APIProduct extends Resource {
                 file: imageFile,
                 'Content-Type': imageFile.type,
             };
-            return client.apis['API Product (Individual)'].put_api_products__apiProductId__thumbnail(
+            return client.apis['API Products'].put_api_products__apiProductId__thumbnail(
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -185,7 +185,7 @@ class APIProduct extends Resource {
     static delete(id) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return apiClient.then((client) => {
-            return client.apis['API Product (Individual)'].delete_api_products__apiProductId_({
+            return client.apis['API Products'].delete_api_products__apiProductId_({
                 apiProductId: id,
             }, this._requestMetaData());
         }).catch((error) => {
@@ -205,7 +205,7 @@ class APIProduct extends Resource {
                 body,
                 'Content-Type': 'application/json',
             };
-            return client.apis['Document (Collection)'].post_api_products__apiProductId__documents(
+            return client.apis['API Product Documents'].post_api_products__apiProductId__documents(
                 payload,
                 this._requestMetaData(),
             );
@@ -222,7 +222,7 @@ class APIProduct extends Resource {
      */
     getDocuments(id) {
         const promisedDocuments = this.client.then((client) => {
-            return client.apis['Document (Collection)'].get_api_products__apiProductId__documents(
+            return client.apis['API Product Documents'].get_api_products__apiProductId__documents(
                 {
                     apiProductId: id,
                 },
@@ -248,7 +248,7 @@ class APIProduct extends Resource {
                 documentId: docId,
                 'Content-Type': 'application/json',
             };
-            return client.apis['Document (Individual)'].put_api_products__apiProductId__documents__documentId_(
+            return client.apis['API Product Documents'].put_api_products__apiProductId__documents__documentId_(
                 payload,
                 this._requestMetaData(),
             ).catch((error) => {
@@ -266,7 +266,7 @@ class APIProduct extends Resource {
      */
     getDocument(productId, docId) {
         const promisedDocument = this.client.then((client) => {
-            return client.apis['Document (Individual)'].get_api_products__apiProductId__documents__documentId_(
+            return client.apis['API Product Documents'].get_api_products__apiProductId__documents__documentId_(
                 {
                     apiProductId: productId,
                     documentId: docId,
@@ -295,7 +295,7 @@ class APIProduct extends Resource {
                 inlineContent,
                 'Content-Type': 'application/json',
             };
-            return client.apis['Document (Individual)'].post_api_products__apiProductId__documents__documentId__content(
+            return client.apis['API Product Documents'].post_api_products__apiProductId__documents__documentId__content(
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -318,7 +318,7 @@ class APIProduct extends Resource {
                 apiProductId,
                 documentId: docId,
             };
-            return client.apis['Document (Individual)']
+            return client.apis['API Product Documents']
                 .get_api_products__apiProductId__documents__documentId__content(payload);
         }).catch((error) => {
             console.error(error);
@@ -333,7 +333,7 @@ class APIProduct extends Resource {
      */
     deleteDocument(productId, docId) {
         const promiseDeleteDocument = this.client.then((client) => {
-            return client.apis['Document (Individual)'].delete_api_products__apiProductId__documents__documentId_(
+            return client.apis['API Product Documents'].delete_api_products__apiProductId__documents__documentId_(
                 {
                     apiProductId: productId,
                     documentId: docId,
@@ -360,7 +360,7 @@ class APIProduct extends Resource {
                 file: fileToDocument,
                 'Content-Type': 'application/json',
             };
-            return client.apis['Document (Individual)'].post_api_products__apiProductId__documents__documentId__content(
+            return client.apis['API Product Documents'].post_api_products__apiProductId__documents__documentId__content(
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',

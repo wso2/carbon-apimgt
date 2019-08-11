@@ -48,7 +48,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "API Product (Individual)",  })
+    }, tags={ "API Products",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified. ", response = ErrorDTO.class),
@@ -66,7 +66,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "Document (Individual)",  })
+    }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. File or inline content returned. ", response = Void.class),
         @ApiResponse(code = 303, message = "See Other. Source can be retrived from the URL specified at the Location header. ", response = Void.class),
@@ -85,7 +85,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "Document (Individual)",  })
+    }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Document updated ", response = DocumentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
@@ -103,7 +103,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "Document (Individual)",  })
+    }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = ErrorDTO.class),
@@ -120,7 +120,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "Document (Individual)",  })
+    }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Document returned. ", response = DocumentDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -138,7 +138,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "Document (Individual)",  })
+    }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Document updated ", response = DocumentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
@@ -156,7 +156,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "Document (Collection)",  })
+    }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Document list is returned. ", response = DocumentListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -174,7 +174,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "Document (Collection)",  })
+    }, tags={ "API Product Documents",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created Document object as entity in the body. Location header contains URL of newly added document. ", response = DocumentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
@@ -191,7 +191,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "API Product (Individual)",  })
+    }, tags={ "API Products",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested API Product is returned ", response = APIProductDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -209,7 +209,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "API Product (Individual)",  })
+    }, tags={ "API Products",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with updated API product object ", response = APIProductDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
@@ -228,7 +228,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "API Product (Individual)",  })
+    }, tags={ "API Products",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested swagger document of the API is returned ", response = Void.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -246,7 +246,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "API Product (Individual)",  })
+    }, tags={ "API Products",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with updated Swagger definition ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
@@ -265,7 +265,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "API Product (Individual)",  })
+    }, tags={ "API Products",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Thumbnail image returned ", response = Void.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -283,7 +283,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "API Product (Individual)",  })
+    }, tags={ "API Products",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Image updated ", response = FileInfoDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
@@ -301,7 +301,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "API Product (Collection)",  })
+    }, tags={ "API Products",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of qualifying API Products is returned. ", response = APIProductListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -318,7 +318,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
-    }, tags={ "API Product (Individual)" })
+    }, tags={ "API Products" })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = APIProductDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),

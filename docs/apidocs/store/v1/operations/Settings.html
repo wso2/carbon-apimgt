@@ -1,15 +1,16 @@
 <div class="main-content">
-    <h1><a name="Export Configuration"></a>Export Configuration</h1>
+    <h1><a name="Settings"></a>Settings</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="exportApisGet"></a>Export information related to an API.</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/export/apis</code>
+            <h4 class="operation-heading"><a name="settingsApplicationAttributesGet"></a>Get all application attributes from configuration
+</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/settings/application-attributes</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to export information related to a particular API.
+            <p class="marked">This operation can be used to retrieve the application attributes from configuration. It will not return hidden attributes.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_view</code>
+                <code>apim:subscribe</code>
 
             <h4 class="section-heading">
                 Examples
@@ -36,20 +37,21 @@
                     <tr>
                         <td class="parameter">
                             
-                            <span class="param-in">Query </span>
                             
                             
+                            <span class="param-in">Header </span>
                             
                         </td>
                         <td class="param-name">
-                            <p>query</p>
+                            <p>If-None-Match</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">API search query
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
 </p>
                         </td>
                         <td>
@@ -59,62 +61,6 @@
                         </td>
                         <td>
                             <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            <span class="param-in">Query </span>
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>limit</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Maximum size of resource array to return.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                Integer
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">25</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            <span class="param-in">Query </span>
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>offset</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Starting point within the complete list of items qualified.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                Integer
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">0</p>
                         </td>
                     </tr>
             </table>
@@ -137,16 +83,16 @@
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. Export Configuration returned. </p></td>
+                        <td class="parameter"><p class="marked">OK. Application attributes returned. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#file">file</a>
+                                    <a href="#!/models#ApplicationAttributeList">ApplicationAttributeList</a>
                             </span>
                         </td>
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested application does not exist. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -162,9 +108,70 @@
                             </span>
                         </td>
                     </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h4 class="operation-heading"><a name="settingsGet"></a>Retreive store settings</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/settings</code>
+            <p class="marked"></p>
+
+            <p class="marked">Retreive store settings
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:store_setting</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
                     <tr>
-                        <td class="parameter"><p class="marked">412</p></td>
-                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Settings returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Settings">Settings</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested Settings does not exist. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>

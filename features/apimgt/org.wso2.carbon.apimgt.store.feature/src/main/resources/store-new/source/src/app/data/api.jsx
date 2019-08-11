@@ -76,7 +76,7 @@ export default class API extends Resource {
                 apiId: api_id,
                 documentId: docId
             };
-            return client.apis['Documents'].get_apis__apiId__documents__documentId__content(payload);
+            return client.apis['API Documents'].get_apis__apiId__documents__documentId__content(payload);
         });
         return promised_getDocContent;
     }
@@ -89,7 +89,7 @@ export default class API extends Resource {
      */
     getDocumentsByAPIId(id, callback = null) {
         const promiseGet = this.client.then((client) => {
-            return client.apis['Documents'].get_apis__apiId__documents({ apiId: id }, this._requestMetaData());
+            return client.apis['API Documents'].get_apis__apiId__documents({ apiId: id }, this._requestMetaData());
         });
         if (callback) {
             return promiseGet.then(callback);
@@ -112,7 +112,7 @@ export default class API extends Resource {
                 documentId: docId,
                 Accept: 'application/octet-stream'
             };
-            return client.apis['Documents'].get_apis__apiId__documents__documentId__content(
+            return client.apis['API Documents'].get_apis__apiId__documents__documentId__content(
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data'
@@ -238,7 +238,7 @@ export default class API extends Resource {
      */
     getAllApplicationAttributes() {
         return this.client.then((client) => {
-            return client.apis['Application Attributes'].get_settings_application_attributes(this._requestMetaData());
+            return client.apis['Settings'].get_settings_application_attributes(this._requestMetaData());
         });
     }
 

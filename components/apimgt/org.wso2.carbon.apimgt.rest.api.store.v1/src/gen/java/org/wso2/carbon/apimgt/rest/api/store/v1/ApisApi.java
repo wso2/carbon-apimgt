@@ -136,7 +136,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
-    }, tags={ "Documents",  })
+    }, tags={ "API Documents",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. File or inline content returned. ", response = Void.class),
         @ApiResponse(code = 303, message = "See Other. Source can be retrived from the URL specified at the Location header. ", response = Void.class),
@@ -155,7 +155,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
-    }, tags={ "Documents",  })
+    }, tags={ "API Documents",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Document returned. ", response = DocumentDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
@@ -173,7 +173,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
-    }, tags={ "Documents",  })
+    }, tags={ "API Documents",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Document list is returned. ", response = DocumentListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
