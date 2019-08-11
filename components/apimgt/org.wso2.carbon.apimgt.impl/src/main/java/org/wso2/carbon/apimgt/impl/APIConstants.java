@@ -1327,6 +1327,8 @@ public final class APIConstants {
     public static final String BLOCKING_CONDITIONS_USER = "USER";
     public static final String BLOCKING_CONDITIONS_IP = "IP";
 
+    public static final String REVOKED_TOKEN_KEY = "revokedToken";
+
     public static final String SEARCH_AND_TAG = "&";
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
     public static final String LCSTATE_SEARCH_KEY = "lcState";
@@ -1372,7 +1374,6 @@ public final class APIConstants {
 
         public static final String GLOBAL_POLICY_ENGINE_WS_CONFIGURATION = "GlobalPolicyEngineWSConnectionDetails";
         public static final String SERVICE_URL = "ServiceURL";
-        public static final String JMS_CONNECTION_DESTINATION = "Destination";
         public static final String JMS_CONNECTION_DETAILS = "JMSConnectionDetails";
         public static final String JMS_CONNECTION_PARAMETERS = "JMSConnectionParameters";
         public static final String JMS_PUBLISHER_PARAMETERS = "JMSEventPublisherParameters";

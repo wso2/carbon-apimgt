@@ -18,17 +18,23 @@
 
 package org.wso2.carbon.apimgt.jms.listener.utils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
-import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.util.ThrottleConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.jms.listener.APICondition;
 import org.wso2.carbon.apimgt.jms.listener.internal.ServiceReferenceHolder;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
+import java.util.Base64;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -54,9 +60,6 @@ public class JMSMessageListener implements MessageListener {
     public static final int RESOURCE_PATTERN_CONDITION_INDEX = 3;
     public static final String CONDITION_KEY = "condition";
     public static final String RESOURCE_KEY = "key";
-    public JMSMessageListener(ThrottleDataHolder throttleDataHolder) {
-    }
-
 
     public void onMessage(Message message) {
         try {
@@ -75,18 +78,16 @@ public class JMSMessageListener implements MessageListener {
                     }
 
                     if (map.get(APIConstants.THROTTLE_KEY) != null) {
-                        /**
+                        /*
                          * This message contains throttle data in map which contains Keys
                          * throttleKey - Key of particular throttling level
                          * isThrottled - Whether message has throttled or not
                          * expiryTimeStamp - When the throttling time window will expires
-
-
                          */
 
                         handleThrottleUpdateMessage(map);
                     } else if (map.get(APIConstants.BLOCKING_CONDITION_KEY) != null) {
-                        /**
+                        /*
                          * This message contains blocking condition data
                          * blockingCondition - Blocking condition type
                          * conditionValue - blocking condition value
@@ -94,14 +95,19 @@ public class JMSMessageListener implements MessageListener {
                          */
                         handleBlockingMessage(map);
                     } else if (map.get(APIConstants.POLICY_TEMPLATE_KEY) != null) {
-                        /**
+                        /*
                          * This message contains key template data
                          * keyTemplateValue - Value of key template
                          * keyTemplateState - whether key template active or not
                          */
                         handleKeyTemplateMessage(map);
+                    } else if (map.get(APIConstants.REVOKED_TOKEN_KEY) != null) {
+                        /*
+                         * This message contains revoked token data
+                         * revokedToken - Revoked Token which should be removed from the cache
+                         */
+                        handleRevokedTokenMessage((String) map.get(APIConstants.REVOKED_TOKEN_KEY));
                     }
-
                 } else {
                     log.warn("Event dropped due to unsupported message type " + message.getClass());
                 }
@@ -239,5 +245,56 @@ public class JMSMessageListener implements MessageListener {
             ServiceReferenceHolder.getInstance().getThrottleDataHolder()
                     .removeKeyTemplate(keyTemplateValue);
         }
+    }
+
+    private void handleRevokedTokenMessage(String revokedToken){
+        if (StringUtils.isEmpty(revokedToken)) {
+            return;
+        }
+
+        //handle JWT tokens
+        revokedToken = getSignatureIfJWT(revokedToken); //JWT signature is the cache key
+
+        //Find the actual tenant domain on which the access token was cached. It is stored as a reference in
+        //the super tenant cache.
+        String cachedTenantDomain;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
+                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            cachedTenantDomain = Utils.getCachedTenantDomain(revokedToken);
+            if (cachedTenantDomain == null) { //the token is not in cache
+                return;
+            }
+            //Remove the super-tenant cache entry if the token is a not a super-tenant one
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(cachedTenantDomain)) {
+                Utils.removeCacheEntryFromGatewayCache(revokedToken);
+                Utils.putInvalidTokenEntryIntoInvalidTokenCache(revokedToken, cachedTenantDomain);
+            }
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+
+        //Remove token from the token's own tenant's cache.
+        Utils.removeTokenFromTenantTokenCache(revokedToken, cachedTenantDomain);
+        Utils.putInvalidTokenIntoTenantInvalidTokenCache(revokedToken, cachedTenantDomain);
+    }
+
+    protected String getSignatureIfJWT(String token) {
+        if (token.contains(APIConstants.DOT)) {
+            try {
+                String[] jwtParts = token.split("\\.");
+                JSONObject jwtHeader = new JSONObject(new String(Base64.getUrlDecoder().decode(jwtParts[0])));
+                // Check if the decoded header contains type as 'JWT'.
+                if (APIConstants.JWT.equals(jwtHeader.getString(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
+                    if (jwtParts.length == 3) {
+                        return jwtParts[2]; //JWT signature available
+                    }
+                }
+            } catch (JSONException | IllegalArgumentException e) {
+                log.debug("Not a JWT token. Failed to decode the token header.", e);
+            }
+        }
+        return token; //Not a JWT. Treat as an opaque token
     }
 }
