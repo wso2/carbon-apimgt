@@ -15,8 +15,6 @@
  */
 
 const CONSTS = {
-    API: 'API',
-    APIProduct: 'APIProduct',
     HTTP_METHODS: ['get', 'put', 'post', 'delete', 'patch', 'head'],
 };
 

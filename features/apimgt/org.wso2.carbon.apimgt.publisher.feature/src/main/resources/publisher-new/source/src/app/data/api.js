@@ -1521,7 +1521,7 @@ class API extends Resource {
 API.CONSTS = {
     API: 'API',
     APIProduct: 'APIProduct',
-}
+};
 
 Object.freeze(API.CONSTS);
 
