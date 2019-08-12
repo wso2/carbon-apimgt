@@ -359,7 +359,7 @@ public class SchemaValidator extends AbstractHandler {
         StringBuilder responseSchemaPath = new StringBuilder();
         responseSchemaPath.append(ThreatProtectorConstants.PATHS).append(electedResource).
                 append(ThreatProtectorConstants.JSONPATH_SEPARATE).append(reqMethod.toLowerCase()).
-                append(ThreatProtectorConstants.JOHNATH_RESPONSES).append(responseStatus);
+                append(ThreatProtectorConstants.JSON_RESPONSES).append(responseStatus);
         resource = JsonPath.read(swagger, responseSchemaPath.toString());
 
         ObjectMapper mapper = new ObjectMapper();
@@ -375,7 +375,7 @@ public class SchemaValidator extends AbstractHandler {
         StringBuilder resPath = new StringBuilder();
         resPath.append(ThreatProtectorConstants.PATHS).append(electedResource).append(
                 ThreatProtectorConstants.JSONPATH_SEPARATE).append(reqMethod.toLowerCase()).
-                append(ThreatProtectorConstants.JOHNATH_RESPONSES).append(responseStatus).append(".schema");
+                append(ThreatProtectorConstants.JSON_RESPONSES).append(responseStatus).append(".schema");
         resource = JsonPath.read(swagger, resPath.toString());
         JsonNode json = mapper.convertValue(resource, JsonNode.class);
         if (json.get(0) != null && !ThreatProtectorConstants.EMPTY_ARRAY.equals(json.get(0))) {

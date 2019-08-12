@@ -84,7 +84,7 @@ public class ThreatProtectorConstants {
     public static final String PATHS = "$..paths..";
     public static final String JSON_PATH = "$.";
     public static final char JSONPATH_SEPARATE = '.';
-    public static final String JOHNATH_RESPONSES = ".responses";
+    public static final String JSON_RESPONSES = ".responses.";
     public static final String EMPTY_ARRAY = "[]";
     public static final char HASH = '#';
     public static final String EMPTY = "";
