@@ -38,6 +38,12 @@ class SubscriptionsBlock extends Component {
         this.handleChange = this.handleChange.bind(this);
     }
 
+    // enable allowShortCircuit as specified in https://eslint.org/docs/rules/no-unused-expressions
+    /* eslint no-unused-expressions: ["error", { "allowShortCircuit": true }] */
+    /**
+     * Handle onChange of subscription block
+     * @param event onChange event
+     */
     handleChange(event) {
         const { [blockType.BLOCK_ALL]: blockAll, [blockType.BLOCK_PRODUCTION]: blockProduction } = this.state;
         const {
@@ -54,8 +60,6 @@ class SubscriptionsBlock extends Component {
                 if (blockProduction === true) {
                     newBlockProduction = false;
                 }
-                // enable allowShortCircuit as specified in https://eslint.org/docs/rules/no-unused-expressions
-                /* eslint no-unused-expressions: ["error", { "allowShortCircuit": true }] */
                 blockAllSubs && blockAllSubs(subscriptionId);
             }
             if (value === blockType.BLOCK_PRODUCTION) {
@@ -63,15 +67,11 @@ class SubscriptionsBlock extends Component {
                 if (blockAll === true) {
                     newBlockAll = false;
                 }
-                // enable allowShortCircuit as specified in https://eslint.org/docs/rules/no-unused-expressions
-                /* eslint no-unused-expressions: ["error", { "allowShortCircuit": true }] */
                 blockProductionSubs && blockProductionSubs(subscriptionId);
             }
             this.setState({ [blockType.BLOCK_ALL]: newBlockAll, [blockType.BLOCK_PRODUCTION]: newBlockProduction });
         } else {
             this.setState({ [value]: checked });
-            // enable allowShortCircuit as specified in https://eslint.org/docs/rules/no-unused-expressions
-            /* eslint no-unused-expressions: ["error", { "allowShortCircuit": true }] */
             unblockSubs && unblockSubs(subscriptionId);
         }
     }
