@@ -18,6 +18,7 @@ public class SettingsDTO   {
   
     private List<String> grantTypes = new ArrayList<>();
     private List<String> scopes = new ArrayList<>();
+    private Boolean applicationSharingEnabled = false;
 
   /**
    **/
@@ -53,6 +54,23 @@ public class SettingsDTO   {
     this.scopes = scopes;
   }
 
+  /**
+   **/
+  public SettingsDTO applicationSharingEnabled(Boolean applicationSharingEnabled) {
+    this.applicationSharingEnabled = applicationSharingEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("applicationSharingEnabled")
+  public Boolean isApplicationSharingEnabled() {
+    return applicationSharingEnabled;
+  }
+  public void setApplicationSharingEnabled(Boolean applicationSharingEnabled) {
+    this.applicationSharingEnabled = applicationSharingEnabled;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -64,12 +82,13 @@ public class SettingsDTO   {
     }
     SettingsDTO settings = (SettingsDTO) o;
     return Objects.equals(grantTypes, settings.grantTypes) &&
-        Objects.equals(scopes, settings.scopes);
+        Objects.equals(scopes, settings.scopes) &&
+        Objects.equals(applicationSharingEnabled, settings.applicationSharingEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(grantTypes, scopes);
+    return Objects.hash(grantTypes, scopes, applicationSharingEnabled);
   }
 
   @Override
@@ -79,6 +98,7 @@ public class SettingsDTO   {
     
     sb.append("    grantTypes: ").append(toIndentedString(grantTypes)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("    applicationSharingEnabled: ").append(toIndentedString(applicationSharingEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }

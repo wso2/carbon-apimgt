@@ -4045,6 +4045,11 @@ definitions:
         items:
           type: string
         example: ["admin"]
+      owner:
+        description: |
+          Application created user
+        type: string
+        example: admin
 
 #-----------------------------------------------------
 # The Application Info resource
@@ -4081,6 +4086,9 @@ definitions:
       attributes:
         type: object
         example: External Reference ID, Billing Tier
+      owner:
+        type: string
+        example: admin
 
 #-----------------------------------------------------
 # The Document List resource
@@ -4940,6 +4948,9 @@ definitions:
         type: array
         items:
           type: string
+      applicationSharingEnabled:
+        type: boolean
+        default: false
 
 #-----------------------------------------------------
 # The Application Attribute resource

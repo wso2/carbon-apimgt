@@ -82,12 +82,16 @@ class NewApp extends React.Component {
                 throttlingPolicy: '',
                 description: '',
                 tokenType: 'OAUTH',
+                groups: null,
                 attributes: {},
             },
             isNameValid: true,
             throttlingPolicyList: [],
             allAppAttributes: null,
+            isApplicationSharingEnabled: true,
         };
+        this.handleAddChip = this.handleAddChip.bind(this);
+        this.handleDeleteChip = this.handleDeleteChip.bind(this);
     }
 
     /**
@@ -126,6 +130,7 @@ class NewApp extends React.Component {
                     this.setState({ notFound: true });
                 }
             });
+        this.isApplicationGroupSharingEnabled();
     }
 
     /**
@@ -254,12 +259,56 @@ class NewApp extends React.Component {
     };
 
     /**
+     * add a new group function
+     * @param {*} chip newly added group
+     * @param {*} appGroups already existing groups
+     */
+    handleAddChip = (chip, appGroups) => {
+        this.setState(() => {
+            const { applicationRequest } = this.state;
+            const newRequest = { ...applicationRequest };
+            let values = appGroups || [];
+            values = values.slice();
+            values.push(chip);
+            newRequest.groups = values;
+            return { applicationRequest: newRequest };
+        });
+    }
+
+    /**
+     * remove a group from already existing groups function
+     * @param {*} chip selected group to be removed
+     * @param {*} index selected group index to be removed
+     * @param {*} appGroups already existing groups
+     */
+    handleDeleteChip = (chip, index, appGroups) => {
+        this.setState(() => {
+            const { applicationRequest } = this.state;
+            const newRequest = { ...applicationRequest };
+            let values = appGroups || [];
+            values = values.filter(v => v !== chip);
+            newRequest.groups = values;
+            return { applicationRequest: newRequest };
+        });
+    }
+
+    /**
+     * retrieve Settings from the local storage
+     */
+    isApplicationGroupSharingEnabled = () => {
+        const settingsData = localStorage.getItem('settings');
+        const enabled = JSON.parse(settingsData).applicationSharingEnabled;
+        this.setState({ isApplicationSharingEnabled: enabled });
+    }
+
+    /**
      * @inheritdoc
      * @memberof NewApp
      */
     render() {
         const {
-            throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes,
+            throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled,
+            handleAddChip, handleDeleteChip,
         } = this.state;
         const {
             classes, open, handleClickOpen, handleClose,
@@ -310,6 +359,9 @@ class NewApp extends React.Component {
                             handleAttributesChange={this.handleAttributesChange}
                             isRequiredAttribute={this.isRequiredAttribute}
                             getAttributeValue={this.getAttributeValue}
+                            isApplicationSharingEnabled={isApplicationSharingEnabled}
+                            handleDeleteChip={this.handleDeleteChip}
+                            handleAddChip={this.handleAddChip}
                         />
                     </div>
                     <div className={classes.buttonWrapper}>

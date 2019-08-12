@@ -71,7 +71,7 @@ class AppsTableContent extends Component {
      */
     render() {
         const {
-            apps, handleAppDelete, page, rowsPerPage, order, orderBy,
+            apps, handleAppDelete, page, rowsPerPage, order, orderBy, isApplicationSharingEnabled,
         } = this.props;
         const { notFound } = this.state;
         const emptyRowsPerPage = rowsPerPage - Math.min(rowsPerPage, apps.size - page * rowsPerPage);
@@ -96,11 +96,20 @@ class AppsTableContent extends Component {
                             <TableRow key={app.applicationId}>
                                 <TableCell>
                                     {app.status === this.APPLICATION_STATES.APPROVED ? (
-                                        <Link to={'/applications/' + app.applicationId}>{app.name}</Link>
-                                    ) : (
-                                        app.name
-                                    )
-                                    }
+                                        <Link to={'/applications/' + app.applicationId}>
+                                            { (isApplicationSharingEnabled && app.groups.length !== 0) ? (
+                                                app.owner + '/' + app.name
+                                            ) : (
+                                                app.name
+                                            )}
+                                        </Link>
+                                    ) : [((isApplicationSharingEnabled && app.groups.length !== 0)
+                                        ? (app.owner + '/' + app.name)
+                                        : (
+                                            app.name
+                                        )
+                                    ),
+                                    ]}
                                 </TableCell>
                                 <TableCell>{app.throttlingPolicy}</TableCell>
                                 <TableCell>

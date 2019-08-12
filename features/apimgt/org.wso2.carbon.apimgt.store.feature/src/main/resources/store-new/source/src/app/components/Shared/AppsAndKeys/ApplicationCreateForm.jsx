@@ -28,6 +28,8 @@ import Select from '@material-ui/core/Select';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
+import { FormLabel } from '@material-ui/core';
+import ChipInput from 'material-ui-chip-input';
 
 /**
  * @inheritdoc
@@ -98,6 +100,9 @@ const ApplicationCreate = (props) => {
         getAttributeValue,
         intl,
         validateName,
+        isApplicationSharingEnabled,
+        handleAddChip,
+        handleDeleteChip,
     } = props;
     const tokenTypeList = ['JWT', 'OAUTH'];
     return (
@@ -232,6 +237,25 @@ const ApplicationCreate = (props) => {
                                     />
                                 </FormControl>
                             ) : (null)))
+                     )}
+                    {isApplicationSharingEnabled && (
+                        <FormControl margin='normal' className={classes.FormControl}>
+                            <FormLabel component='legend'>
+                                <Typography variant='caption'>
+                                    <FormattedMessage
+                                        defaultMessage='Application Groups'
+                                        id='Shared.AppsAndKeys.ApplicationCreateForm.add.groups.label'
+                                    />
+                                </Typography>
+                            </FormLabel>
+                            <ChipInput
+                                {...applicationRequest}
+                                value={applicationRequest.groups || []}
+                                onAdd={chip => props.handleAddChip(chip, applicationRequest.groups)}
+                                onDelete={(chip, index) => props.handleDeleteChip(chip,
+                                    index, applicationRequest.groups)}
+                            />
+                        </FormControl>
                     )}
                 </Grid>
             </Grid>

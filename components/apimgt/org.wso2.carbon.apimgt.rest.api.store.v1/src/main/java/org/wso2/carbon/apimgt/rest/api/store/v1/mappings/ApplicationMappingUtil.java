@@ -163,6 +163,7 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setAttributes(applicationAttributes);
         applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
         applicationInfoDTO.setSubscriptionCount(application.getSubscriptionCount());
+        applicationInfoDTO.setOwner(application.getOwner());
         return applicationInfoDTO;
     }
 

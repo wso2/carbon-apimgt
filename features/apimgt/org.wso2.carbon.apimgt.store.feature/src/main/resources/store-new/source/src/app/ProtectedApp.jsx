@@ -79,6 +79,7 @@ export default class ProtectedApp extends Component {
                 );
             });
         const user = AuthManager.getUser();
+        AuthManager.setSettings();
         if (user) {
             const hasViewScope = user.scopes.includes('apim:subscribe');
             if (hasViewScope) {
@@ -94,6 +95,7 @@ export default class ProtectedApp extends Component {
             // This could happen when OAuth code authentication took place and could send
             // user information via redirection
             const userPromise = AuthManager.getUserFromToken();
+            AuthManager.setSettings();
             userPromise
                 .then((loggedUser) => {
                     if (loggedUser != null) {
