@@ -368,7 +368,7 @@ class ViewKeys extends React.Component {
                                 </FormHelperText>
                             </FormControl>
                         </Grid>
-                        {(accessToken && !tokenType === 'JWT') && (
+                        {(accessToken && tokenType !== 'JWT') && (
                             <Grid item xs={6}>
                                 <InputLabel htmlFor='adornment-amount'>
                                     <FormattedMessage
