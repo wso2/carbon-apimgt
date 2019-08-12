@@ -290,7 +290,6 @@ public class APIDefinitionFromOpenAPISpecTest {
         uriTemplate.setThrottlingTier("Unlimited");
         uriTemplate.setThrottlingTiers("Unlimited");
         uriTemplate.setScope(null);
-//        uriTemplate.setScopes(null);
         return uriTemplate;
     }
 
