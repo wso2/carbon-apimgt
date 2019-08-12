@@ -41,9 +41,13 @@ import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
+import java.io.DataInput;
+import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -105,7 +109,8 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                             continue;
                         }
                         //Only continue for supported operations
-                        else if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+                        else if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase()) ||
+                                APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase())) {
                             isHttpVerbDefined = true;
                             JSONObject operation = (JSONObject) path.get(httpVerb);
                             URITemplate template = new URITemplate();
@@ -335,8 +340,24 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
 
         JSONObject pathsObject = new JSONObject();
 
-        for (URITemplate uriTemplate : uriTemplates) {
-            addOrUpdatePathsFromURITemplate(pathsObject, uriTemplate);
+        if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+            List<String> verbList = new ArrayList<>();
+            verbList.add("GET");
+            verbList.add("POST");
+            URITemplate swaggerTemplate = new URITemplate();
+            for (String verb : verbList) {
+                swaggerTemplate.setAuthType("Any");
+                swaggerTemplate.setHTTPVerb(verb);
+                swaggerTemplate.setHttpVerbs(verb);
+                swaggerTemplate.setUriTemplate("/*");
+                addOrUpdatePathsFromURITemplate(pathsObject, swaggerTemplate);
+            }
+            GraphQLSchemaDefinition schemaDefinition = new GraphQLSchemaDefinition();
+            schemaDefinition.addQueryParams(pathsObject);
+        } else {
+            for (URITemplate uriTemplate : uriTemplates) {
+                addOrUpdatePathsFromURITemplate(pathsObject, uriTemplate);
+            }
         }
 
         swaggerObject.put(APIConstants.SWAGGER_PATHS, pathsObject);
@@ -352,16 +373,17 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         try {
             JSONObject swaggerObj = (JSONObject) parser.parse(swagger);
 
-            //Generates below model using the API's URI template
-            // path -> [verb1 -> template1, verb2 -> template2, ..]
-            Map<String, Map<String, URITemplate>> uriTemplateMap = getURITemplateMap(api);
+            if (!(APIConstants.GRAPHQL_API).equals(api.getType())) {
+                //Generates below model using the API's URI template
+                // path -> [verb1 -> template1, verb2 -> template2, ..]
+                Map<String, Map<String, URITemplate>> uriTemplateMap = getURITemplateMap(api);
 
-            if (syncOperations) {
-                syncAPIDefinitionWithURITemplates(swaggerObj, uriTemplateMap);
-            } else {
-                setDefaultManagedInfoToAPIDefinition(api, swaggerObj);
+                if (syncOperations) {
+                    syncAPIDefinitionWithURITemplates(swaggerObj, uriTemplateMap);
+                } else {
+                    setDefaultManagedInfoToAPIDefinition(api, swaggerObj);
+                }
             }
-
             // add scope in the API object to swagger
             populateSwaggerScopeInfo(swaggerObj, api.getScopes());
             return swaggerObj.toJSONString();

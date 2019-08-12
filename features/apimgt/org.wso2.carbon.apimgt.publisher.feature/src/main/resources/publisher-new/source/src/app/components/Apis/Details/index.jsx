@@ -45,6 +45,7 @@ import Overview from './NewOverview/Overview';
 import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
+import Operations from './Operations/Operations';
 import Resources from './Resources/Resources';
 import Endpoints from './Endpoints/Endpoints';
 import Subscriptions from './Subscriptions/Subscriptions';
@@ -137,9 +138,10 @@ class Details extends Component {
     constructor(props) {
         super(props);
         this.handleMenuSelect = this.handleMenuSelect.bind(this);
-        const { location, isAPIProduct } = this.props;
+        const { location } = this.props;
         const currentLink = location.pathname.match(/[^/]+(?=\/$|$)/g);
         let active = null;
+        const isAPIProduct = null;
         if (currentLink && currentLink.length > 0) {
             [active] = currentLink;
         }
@@ -241,6 +243,53 @@ class Details extends Component {
             });
     }
 
+    getLeftMenuItemForAPIType(apiType) {
+        const { active } = this.state;
+        const { intl } = this.props;
+        switch (apiType) {
+            case 'GRAPHQL':
+                return (
+                    <React.Fragment>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.schema.definition',
+                                defaultMessage: 'Schema Definition',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<CodeIcon />}
+                        />
+                        <LeftMenuItem
+                            text='operations'
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<ResourcesIcon />}
+                        />
+                    </React.Fragment>);
+            default:
+                return (
+                    <React.Fragment>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.api.definition',
+                                defaultMessage: 'api definition',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<CodeIcon />}
+                        />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.resources',
+                                defaultMessage: 'resources',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<ResourcesIcon />}
+                        />
+                    </React.Fragment>);
+        }
+    }
     /**
      *
      *
@@ -395,24 +444,7 @@ class Details extends Component {
                                 Icon={<EndpointIcon />}
                             />
                         }
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.api.definition',
-                                defaultMessage: 'api definition',
-                            })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<CodeIcon />}
-                        />
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.resources',
-                                defaultMessage: 'resources',
-                            })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<ResourcesIcon />}
-                        />
+                        {this.getLeftMenuItemForAPIType(api.type)}
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.lifecycle',
@@ -495,6 +527,10 @@ class Details extends Component {
                                     path={Details.subPaths.API_DEFINITION}
                                     component={() => <APIDefinition api={api} />}
                                 />
+                                <Route
+                                    path={Details.subPaths.SCHEMA_DEFINITION}
+                                    component={() => <APIDefinition api={api} />}
+                                />
                                 <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION}
@@ -505,7 +541,10 @@ class Details extends Component {
                                     component={() => <Configuration api={api} />}
                                 />
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
+
+                                <Route path={Details.subPaths.OPERATIONS} component={() => <Operations api={api} />} />
                                 <Route path={Details.subPaths.RESOURCES} component={() => <Resources api={api} />} />
+
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
                                 <Route path={Details.subPaths.SCOPES_PRODUCT} component={() => <Scope api={api} />} />
                                 <Route path={Details.subPaths.DOCUMENTS} component={() => <Documents api={api} />} />
@@ -547,10 +586,12 @@ Details.subPaths = {
     OVERVIEW: '/apis/:api_uuid/overview',
     OVERVIEW_PRODUCT: '/api-products/:apiprod_uuid/overview',
     API_DEFINITION: '/apis/:api_uuid/api definition',
+    SCHEMA_DEFINITION: '/apis/:api_uuid/schema definition',
     LIFE_CYCLE: '/apis/:api_uuid/lifecycle',
     CONFIGURATION: '/apis/:api_uuid/configuration',
     CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/configuration',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
+    OPERATIONS: '/apis/:api_uuid/operations',
     RESOURCES: '/apis/:api_uuid/resources',
     RESOURCES_PRODUCT: '/api_products/:apiprod_uuid/resources',
     SCOPES: '/apis/:api_uuid/scopes',

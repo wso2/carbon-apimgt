@@ -982,6 +982,26 @@ public final class APIConstants {
     public static final String API_RESOURCE_CACHE_KEY = "API_RESOURCE_CACHE_KEY";
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
 
+    public static final String API_TYPE = "API_TYPE";
+    public static final String GRAPHQL_API = "GRAPHQL";
+    public static final String GRAPHQL_API_OPERATION_RESOURCE = "OPERATION_RESOURCE";
+    public static final String GRAPHQL_API_OPERATION_TYPE = "OPERATION_TYPE";
+    public static final String GRAPHQL_API_OPERATION_VERB_INFO_DTO = "OPERATION_VERB_INFO_DTO";
+    public static final String[] GRAPHQL_SUPPORTED_METHODS = {"QUERY", "MUTATION", "SUBSCRIPTION"};
+    public static final String API_GRAPHQL_SCHEMA_RESOURCE_LOCATION = API_APPLICATION_DATA_LOCATION + "/graphql/";
+    public static final String GRAPHQL_SCHEMA_FILE_EXTENSION = ".graphql";
+    public static final String GRAPHQL_SCHEMA_PROVIDER_SEPERATOR = "--";
+    public static final String GRAPHQL_SCHEMA_DEFINITION_SEPARATOR = "schemaDefinition=";
+    public static final String GRAPHQL_QUERY = "Query";
+    public static final String GRAPHQL_MUTATION = "Mutation";
+    public static final String GRAPHQL_SUBSCRIPTION = "Subscription";
+
+
+    //URI Authentication Schemes
+    public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
+            Collections.unmodifiableSet(new HashSet<String>(
+                    Arrays.asList(new String[]{ "QUERY", "MUTATION", "SUBSCRIPTION", "head", "options"})));
+
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
 
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
@@ -1502,7 +1522,7 @@ public final class APIConstants {
     }
 
     public enum APITransportType {
-        HTTP, WS,
+        HTTP, WS, GRAPHQL
     }
 
     public static final String JSON_GRANT_TYPES = "grant_types";

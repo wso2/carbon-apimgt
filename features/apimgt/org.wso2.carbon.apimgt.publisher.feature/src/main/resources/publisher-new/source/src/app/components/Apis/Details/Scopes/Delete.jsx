@@ -122,7 +122,7 @@ function Delete(props) {
                     values={{ scope: scopeName }}
                 />}
                 labelOk={<FormattedMessage
-                    id='Apis.Details.Documents.Delete.document.listing.label.ok'
+                    id='Apis.Details.Documents.Delete.document.listing.label.ok.yes'
                     defaultMessage='Yes'
                 />}
                 callback={runAction}

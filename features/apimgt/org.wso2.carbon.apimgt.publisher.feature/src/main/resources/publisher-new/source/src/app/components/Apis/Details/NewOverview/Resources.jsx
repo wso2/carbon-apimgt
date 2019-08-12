@@ -118,12 +118,21 @@ class Resources extends React.Component {
             <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
                 {console.info('api....', api)}
                 <div className={parentClasses.titleWrapper}>
-                    <Typography variant='h5' component='h3' className={parentClasses.title}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Resources.resources'
-                            defaultMessage='Resources'
-                        />
-                    </Typography>
+                    { api.type === 'GraphQL' ? (
+                        <Typography variant='h5' component='h3' className={parentClasses.title}>
+                            <FormattedMessage
+                                id='Apis.Details.NewOverview.Operations.operations'
+                                defaultMessage='Operation'
+                            />
+                        </Typography>) :
+                        (
+                            <Typography variant='h5' component='h3' className={parentClasses.title}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Resources.resources'
+                                    defaultMessage='Resources'
+                                />
+                            </Typography>
+                        )}
                     <Link to={'/apis/' + api.id + '/resources'}>
                         <Button variant='contained' color='default'>
                             <FormattedMessage

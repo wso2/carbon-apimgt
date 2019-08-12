@@ -174,6 +174,9 @@ class APIThumb extends Component {
                         label={(apiType === API.CONSTS.APIProduct) ? api.state : api.lifeCycleStatus}
                         color='default'
                     />
+                    {api.type === 'GRAPHQL' && (
+                        <Chip label={api.type} color='primary' />
+                    )}
                     <DeleteApiButton onClick={this.handleApiDelete} api={api} />
                     {loading && <CircularProgress className={classes.deleteProgress} />}
                 </CardActions>
