@@ -220,6 +220,15 @@ const ApplicationCreate = (props) => {
 ApplicationCreate.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
+    applicationRequest: PropTypes.shape({}).isRequired,
+    updateApplicationRequest: PropTypes.func.isRequired,
+    throttlingPolicyList: PropTypes.shape({}).isRequired,
+    isNameValid: PropTypes.func.isRequired,
+    allAppAttributes: PropTypes.shape({}).isRequired,
+    handleAttributesChange: PropTypes.func.isRequired,
+    isRequiredAttribute: PropTypes.func.isRequired,
+    getAttributeValue: PropTypes.func.isRequired,
+
 };
 
 export default injectIntl(withStyles(styles)(ApplicationCreate));
