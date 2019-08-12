@@ -19,130 +19,30 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { Progress } from 'AppComponents/Shared';
-import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import SampleAPI from './SampleAPI/SampleAPI';
-import CardView from './CardView/CardView';
 import TableView from './TableView/TableView';
-import TopMenu from './components/TopMenu';
 
-const styles = theme => ({
+const styles = {
     content: {
         flexGrow: 1,
     },
-    contentInside: {
-        maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing.unit * 3,
-        paddingTop: theme.spacing.unit * 2,
-    },
-});
+};
 /**
  * Render the APIs Listing page, This is the Default Publisher Landing page as well
  *
- * @class Listing
- * @extends {React.Component}
+ * @function Listing
+ * @returns {React.Component} @inheritdoc
  */
-class Listing extends React.Component {
-    /**
-     *Creates an instance of Listing.
-     * @param {*} props
-     * @memberof Listing
-     */
-    constructor(props) {
-        super(props);
-        this.state = {
-            apis: null,
-        };
-        this.state.listType = this.props.theme.custom.defaultApiView;
-    }
+function Listing(props) {
+    const { classes, isAPIProduct, theme } = props;
 
-    /**
-     *
-     * Switch the view between grid and list view
-     * @param {String} value UUID(ID) of the deleted API
-     * @memberof Listing
-     */
-    setListType = (value) => {
-        this.setState({ listType: value });
-    };
-    /**
-     * Update Sample API
-     *
-     * @param {String} apiUUID
-     * @memberof Listing
-     */
-    updateApi(apiUUID) {
-        const { apis } = this.state;
-        for (const apiIndex in apis.list) {
-            if (apis.list.apiIndex && apis.list[apiIndex].id === apiUUID) {
-                apis.list.splice(apiIndex, 1);
-                break;
-            }
-        }
-        this.setState({ apis });
-    }
-
-    /**
-     *
-     * @inheritdoc
-     * @returns {React.Component} @inheritdoc
-     * @memberof Listing
-     */
-    render() {
-        const { listType } = this.state;
-        const {
-            apis, notFound, classes, updateAPIsList,
-        } = this.props;
-        if (notFound) {
-            return (
-                <main className={classes.content}>
-                    <TopMenu setListType={this.setListType} apis={apis} />
-                    <div className={classes.contentInside}>
-                        <ResourceNotFound />
-                    </div>
-                </main>
-            );
-        }
-        if (!apis) {
-            return (
-                <main className={classes.content}>
-                    <TopMenu setListType={this.setListType} apis={apis} />
-                    <div className={classes.contentInside}>
-                        <Progress />
-                    </div>
-                </main>
-            );
-        }
-        if (apis.list.length === 0) {
-            return (
-                <main className={classes.content}>
-                    <TopMenu setListType={this.setListType} apis={apis} />
-                    <div className={classes.contentInside}>
-                        <SampleAPI />
-                    </div>
-                </main>
-            );
-        }
-
-        return (
-            <main className={classes.content}>
-                <TopMenu setListType={this.setListType} apis={apis} />
-                <div className={classes.contentInside}>
-                    {listType === 'grid' ? (
-                        <CardView updateAPIsList={updateAPIsList} apis={apis} />
-                    ) : (
-                        <TableView updateAPIsList={updateAPIsList} apis={apis} />
-                    )}
-                </div>
-            </main>
-        );
-    }
+    return (
+        <main className={classes.content}>
+            <TableView isAPIProduct={isAPIProduct} theme={theme} />
+        </main>
+    );
 }
 
 Listing.propTypes = {
-    history: PropTypes.shape({
-        push: PropTypes.func,
-    }).isRequired,
     classes: PropTypes.shape({
         content: PropTypes.string,
         contentInside: PropTypes.string,
@@ -150,9 +50,7 @@ Listing.propTypes = {
     theme: PropTypes.shape({
         custom: PropTypes.string,
     }).isRequired,
-    apis: PropTypes.shape({ list: PropTypes.array, count: PropTypes.number, apiType: PropTypes.string }).isRequired,
-    notFound: PropTypes.bool.isRequired,
-    updateAPIsList: PropTypes.func.isRequired,
+    isAPIProduct: PropTypes.bool.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Listing);

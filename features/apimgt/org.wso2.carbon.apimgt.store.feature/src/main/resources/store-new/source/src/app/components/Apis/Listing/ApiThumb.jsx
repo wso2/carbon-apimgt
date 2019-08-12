@@ -172,8 +172,11 @@ class ApiThumb extends React.Component {
         const {
             imageObj, selectedIcon, color, backgroundIndex, category,
         } = this.state;
-        const details_link = '/apis/' + this.props.api.id;
-        const { api, classes, theme } = this.props;
+        const { api, classes, theme, isApiProduct, } = this.props;
+        let details_link = '/apis/' + this.props.api.id;
+        if(isApiProduct) {
+            details_link = '/api-products/' + this.props.api.id;    
+        }
         const { thumbnail } = theme.custom;
         const {
             name, version, context, provider,
@@ -185,7 +188,7 @@ class ApiThumb extends React.Component {
 
         let ImageView;
         if (imageObj) {
-            ImageView = <img height={140} src={imageObj} alt='API Thumbnail' className={classes.media} />;
+            ImageView = <img height={140} src={imageObj} alt='API Product Thumbnail' className={classes.media} />;
         } else {
             ImageView = (
                 <ImageGenerator
@@ -268,6 +271,7 @@ class ApiThumb extends React.Component {
 ApiThumb.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
+    isApiProduct: PropTypes.bool.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(ApiThumb);

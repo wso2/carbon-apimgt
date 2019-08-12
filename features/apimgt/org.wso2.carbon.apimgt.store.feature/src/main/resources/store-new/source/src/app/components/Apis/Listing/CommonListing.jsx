@@ -104,7 +104,7 @@ class CommonListing extends React.Component {
      * @memberof CommonListing
      */
     render() {
-        const { apis, kind, theme, classes } = this.props;
+        const { apis, isApiProduct, theme, classes } = this.props;
         const { listType } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
 
@@ -136,8 +136,8 @@ class CommonListing extends React.Component {
                     </div>
                 </div>
 
-                {listType === 'grid' && <ApiTableView gridView kind={kind} />}
-                {listType === 'list' && <ApiTableView gridView={false} kind={kind} />}
+                {listType === 'grid' && <ApiTableView gridView isApiProduct={isApiProduct} />}
+                {listType === 'list' && <ApiTableView gridView={false} isApiProduct={isApiProduct} />}
             </main>
         );
     }

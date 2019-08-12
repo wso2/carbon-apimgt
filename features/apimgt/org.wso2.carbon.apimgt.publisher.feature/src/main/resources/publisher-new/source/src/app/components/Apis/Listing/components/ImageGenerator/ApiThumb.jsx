@@ -29,8 +29,6 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import green from '@material-ui/core/colors/green';
 import API from 'AppData/api.js';
-import CONSTS from 'AppData/Constants';
-
 import Alert from 'AppComponents/Shared/Alert';
 import DeleteApiButton from 'AppComponents/Apis/Details/components/DeleteApiButton';
 
@@ -81,18 +79,18 @@ class APIThumb extends Component {
      * @memberof Listing
      */
     handleApiDelete() {
-        const { id } = this.props.api;
+        const { id, name } = this.props.api;
         this.setState({ loading: true });
-        const { updateAPIsList, apiType } = this.props;
-        if (apiType === API.CONSTS.APIProduct) {
+        const { updateData, isAPIProduct } = this.props;
+        if (isAPIProduct) {
             const promisedDelete = API.deleteProduct(id);
             promisedDelete.then((response) => {
                 if (response.status !== 200) {
                     Alert.info('Something went wrong while deleting the API Product!');
                     return;
                 }
-                updateAPIsList(id);
-                Alert.info(`API Product ${id} deleted Successfully`);
+                updateData(id);
+                Alert.info(`API Product ${name} deleted Successfully`);
                 this.setState({ loading: false });
             });
         } else {
@@ -102,8 +100,8 @@ class APIThumb extends Component {
                     Alert.info('Something went wrong while deleting the API!');
                     return;
                 }
-                updateAPIsList(id);
-                Alert.info(`API ${id} deleted Successfully`);
+                updateData(id);
+                Alert.info(`API ${name} deleted Successfully`);
                 this.setState({ loading: false });
             });
         }
@@ -124,9 +122,12 @@ class APIThumb extends Component {
      * @memberof APIThumb
      */
     render() {
-        const { classes, api, apiType } = this.props;
+        const { classes, api, isAPIProduct } = this.props;
         const { isHover, loading } = this.state;
-        api.apiType = apiType;
+        api.apiType = API.CONSTS.API;
+        if (isAPIProduct) {
+            api.apiType = API.CONSTS.APIProduct;
+        }
 
         return (
             <Card
@@ -137,13 +138,7 @@ class APIThumb extends Component {
                 raised={isHover}
                 className={classes.card}
             >
-                <CardMedia
-                    src='None'
-                    component={ThumbnailView}
-                    height={140}
-                    title='Thumbnail'
-                    api={api}
-                />
+                <CardMedia src='None' component={ThumbnailView} height={140} title='Thumbnail' api={api} />
                 <CardContent className={classes.apiDetails}>
                     <Typography gutterBottom variant='h5' component='h2'>
                         {api.name}
@@ -161,7 +156,7 @@ class APIThumb extends Component {
                                 {api.context}
                             </Typography>
                         </Grid>
-                        {(apiType === API.CONSTS.APIProduct) ? null : (
+                        {isAPIProduct ? null : (
                             <Grid item md={6}>
                                 <FormattedMessage id='version' defaultMessage='Version' />:
                                 <Typography variant='body1'>{api.version}</Typography>
@@ -171,7 +166,7 @@ class APIThumb extends Component {
                 </CardContent>
                 <CardActions className={classes.apiActions}>
                     <Chip
-                        label={(apiType === API.CONSTS.APIProduct) ? api.state : api.lifeCycleStatus}
+                        label={(api.apiType === API.CONSTS.APIProduct) ? api.state : api.lifeCycleStatus}
                         color='default'
                     />
                     {api.type === 'GRAPHQL' && (
@@ -189,9 +184,11 @@ APIThumb.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,
+        name: PropTypes.string,
+        apiType: PropTypes.string.isRequired,
     }).isRequired,
-    updateAPIsList: PropTypes.func.isRequired,
-    apiType: PropTypes.oneOf([CONSTS.API, CONSTS.APIProduct]).isRequired,
+    updateData: PropTypes.func.isRequired,
+    isAPIProduct: PropTypes.bool.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(APIThumb));
