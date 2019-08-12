@@ -1108,7 +1108,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 log.debug("Successfully imported the schema: " + schemaDefinition );
             }
         } catch (RegistryException e) {
-            String msg = "Error while uploading schema to from the registry ";
+            String msg = "Error while uploading schema to " + resourcePath + "in the registry";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
