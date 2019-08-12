@@ -533,5 +533,4 @@ SubscriptionsTable.propTypes = {
     intl: PropTypes.shape({}).isRequired,
 };
 
-
 export default injectIntl(withStyles(styles)(SubscriptionsTable));
