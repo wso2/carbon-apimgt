@@ -23,8 +23,8 @@ import { withStyles, withTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
 import { injectIntl } from 'react-intl';
-import Api from '../../../data/api';
-import CONSTS from '../../../data/Constants';
+import Api from 'AppData/api';
+import CONSTS from 'AppData/Constants';
 
 /**
  *
