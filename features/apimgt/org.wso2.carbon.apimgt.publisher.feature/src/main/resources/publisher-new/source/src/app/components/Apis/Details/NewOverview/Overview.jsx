@@ -133,7 +133,7 @@ function Overview(props) {
     if (newApi.type !== 'WS') {
         loadScopes = <Scopes parentClasses={classes} />;
     }
-    function getResourcesClassForAPIs(apiType, api) {
+    function getResourcesClassForAPIs(apiType) {
         switch (apiType) {
             case 'GRAPHQL':
                 return <Operations parentClasses={classes} api={api} />;
@@ -163,43 +163,39 @@ function Overview(props) {
         loadEndpoints = <Endpoints parentClasses={classes} api={newApi} />;
     }
     return (
-        <ApiContext.Consumer>
-            {({ api }) => (
+        <Grid container spacing={24}>
+            {console.info(api)}
+            <Grid item xs={12}>
+                <Grid container>
+                    {endpointsCheckItem}
+                    <CheckItem itemSuccess={false} itemLabel='Policies' />
+                    {getItemSuccessLabelForAPIType(api.type)}
+                    <CheckItem itemSuccess={false} itemLabel='Scopes' />
+                    <CheckItem itemSuccess itemLabel='Resources' />
+                    {scopesCheckItem}
+                    <CheckItem itemSuccess={false} itemLabel='Documents' />
+                    <CheckItem itemSuccess={false} itemLabel='Business Information' />
+                    <CheckItem itemSuccess={false} itemLabel='Description' />
+                </Grid>
+            </Grid>
+            <Grid item xs={12}>
                 <Grid container spacing={24}>
-                    {console.info(api)}
-                    <Grid item xs={12}>
-                        <Grid container>
-                            {endpointsCheckItem}
-                            <CheckItem itemSuccess={false} itemLabel='Policies' />
-                            {getItemSuccessLabelForAPIType(api.type)}
-                            <CheckItem itemSuccess={false} itemLabel='Scopes' />
-                            <CheckItem itemSuccess itemLabel='Resources' />
-                            {scopesCheckItem}
-                            <CheckItem itemSuccess={false} itemLabel='Documents' />
-                            <CheckItem itemSuccess={false} itemLabel='Business Information' />
-                            <CheckItem itemSuccess={false} itemLabel='Description' />
-                        </Grid>
+                    <Grid item xs={12} md={6} lg={6}>
+                        <Configuration parentClasses={classes} />
+                        {getResourcesClassForAPIs(api.type)}
+                        <AdditionalProperties parentClasses={classes} />
                     </Grid>
-                    <Grid item xs={12}>
-                        <Grid container spacing={24}>
-                            <Grid item xs={12} md={6} lg={6}>
-                                <Configuration parentClasses={classes} />
-                                {getResourcesClassForAPIs(api.type, api)}
-                                <AdditionalProperties parentClasses={classes} />
-                            </Grid>
-                            <Grid item xs={12} md={6} lg={6}>
-                                <Lifecycle parentClasses={classes} />
-                                {loadEndpoints}
-                                <BusinessInformation parentClasses={classes} />
-                                {loadScopes}
-                                <Documents parentClasses={classes} api={api} />
-                                <Policies parentClasses={classes} />
-                            </Grid>
-                        </Grid>
+                    <Grid item xs={12} md={6} lg={6}>
+                        <Lifecycle parentClasses={classes} />
+                        {loadEndpoints}
+                        <BusinessInformation parentClasses={classes} />
+                        {loadScopes}
+                        <Documents parentClasses={classes} api={api} />
+                        <Policies parentClasses={classes} />
                     </Grid>
                 </Grid>
-            )}
-        </ApiContext.Consumer>
+            </Grid>
+        </Grid>
     );
 }
 
