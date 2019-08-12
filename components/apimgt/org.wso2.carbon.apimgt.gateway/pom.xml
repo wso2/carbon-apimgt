@@ -243,7 +243,7 @@
         <dependency>
             <groupId>org.wso2.orbit.graphQL</groupId>
             <artifactId>graphQL</artifactId>
-            <version>13.0.wso2v1</version>
+            <version>${graphql.java.version}</version>
         </dependency>
     </dependencies>
 

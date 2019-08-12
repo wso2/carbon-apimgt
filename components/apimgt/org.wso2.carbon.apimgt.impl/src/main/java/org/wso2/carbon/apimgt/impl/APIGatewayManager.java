@@ -16,13 +16,9 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import io.swagger.models.Swagger;
-import io.swagger.parser.SwaggerParser;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
-import java.nio.charset.Charset;
-import java.util.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +27,6 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -48,10 +43,12 @@ import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -138,7 +135,8 @@ public class APIGatewayManager {
                 localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
                 if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
                     //Build schema with scopes and roles
-                    definition = buildSchemaWithScopesAndRoles(api);
+                    GraphQLSchemaDefinition schemaDefinition = new GraphQLSchemaDefinition();
+                    definition = schemaDefinition.buildSchemaWithScopesAndRoles(api);
                     localEntryAdminClient.deleteEntry(api.getUUID() + "_graphQL");
                     localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "_graphQL" + "\">" +
                          definition + "</localEntry>");
@@ -436,111 +434,6 @@ public class APIGatewayManager {
 
         return failedEnvironmentsMap;
     }
-
-
-    /**
-     * build schema with scopes and roles
-     *
-     * @param api api object
-     * @return schemaDefinition
-     */
-    private String buildSchemaWithScopesAndRoles(API api) {
-        Swagger swagger = null;
-        Map<String, String> scopeRoleMap = new HashMap<>();
-        Map<String, String> scopeOperationMap = new HashMap<>();
-        String operationScopeType;
-        StringBuilder schemaDefinitionBuilder = new StringBuilder(api.getGraphQLSchema());
-        StringBuilder operationScopeMappingBuilder = new StringBuilder();
-        StringBuilder scopeRoleMappingBuilder = new StringBuilder();
-        SwaggerParser parser = new SwaggerParser();
-        String swaggerDef = api.getSwaggerDefinition();
-
-        if (swaggerDef != null) {
-            swagger = parser.parse(swaggerDef);
-        }
-
-        if (swagger != null) {
-            Map<String, Object> vendorExtensions = swagger.getVendorExtensions();
-            if (vendorExtensions != null) {
-                LinkedHashMap swaggerWSO2Security = (LinkedHashMap) swagger.getVendorExtensions()
-                        .get(APIConstants.SWAGGER_X_WSO2_SECURITY);
-                if (swaggerWSO2Security != null) {
-                    LinkedHashMap swaggerObjectAPIM = (LinkedHashMap) swaggerWSO2Security
-                            .get(APIConstants.SWAGGER_OBJECT_NAME_APIM);
-                    if (swaggerObjectAPIM != null) {
-                        @SuppressWarnings("unchecked")
-                        ArrayList<LinkedHashMap> scopes = (ArrayList<LinkedHashMap>) swaggerObjectAPIM
-                                .get(APIConstants.SWAGGER_X_WSO2_SCOPES);
-                        for (LinkedHashMap scope : scopes) {
-                            for (URITemplate template : api.getUriTemplates()) {
-                                String scopeInURITemplate = template.getScope() != null ?
-                                        template.getScope().getName() : null;
-                                if (scopeInURITemplate != null && scopeInURITemplate.
-                                        equals(scope.get(APIConstants.SWAGGER_SCOPE_KEY))) {
-                                    scopeOperationMap.put(template.getUriTemplate(), scopeInURITemplate);
-                                    if (!scopeRoleMap.containsKey(scopeInURITemplate)) {
-                                        scopeRoleMap.put(scopeInURITemplate,
-                                                scope.get(APIConstants.SWAGGER_ROLES).toString());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (scopeOperationMap.size() > 0) {
-                String base64EncodedURLOperationKey;
-                String base64EncodedURLScope;
-                for (Map.Entry<String, String> entry : scopeOperationMap.entrySet()) {
-                    base64EncodedURLOperationKey = Base64.getUrlEncoder().withoutPadding().
-                            encodeToString(entry.getKey().getBytes(Charset.defaultCharset()));
-                    base64EncodedURLScope = Base64.getUrlEncoder().withoutPadding().
-                            encodeToString(entry.getValue().getBytes(Charset.defaultCharset()));
-                    operationScopeType = "type ScopeOperationMapping_" +
-                            base64EncodedURLOperationKey + "{\n" + base64EncodedURLScope + ": String\n}\n";
-                    operationScopeMappingBuilder.append(operationScopeType);
-                }
-                schemaDefinitionBuilder.append(operationScopeMappingBuilder.toString());
-            }
-
-            if (scopeOperationMap.size() > 0) {
-                List<String> scopeRoles = new ArrayList<>();
-                String[] roleList;
-                String scopeType;
-                String base64EncodedURLScopeKey;
-                String scopeRoleMappingType;
-                String base64EncodedURLRole;
-                String roleField;
-
-                for (Map.Entry<String, String> entry : scopeRoleMap.entrySet()) {
-                    base64EncodedURLScopeKey = Base64.getUrlEncoder().withoutPadding().
-                            encodeToString(entry.getKey().getBytes(Charset.defaultCharset()));
-                    scopeType = "type ScopeRoleMapping_" + base64EncodedURLScopeKey + "{\n";
-                    StringBuilder scopeRoleBuilder = new StringBuilder(scopeType);
-                    roleList = entry.getValue().split(",");
-
-                    for (String role : roleList) {
-                        if (!scopeRoles.contains(role)) {
-                            base64EncodedURLRole = Base64.getUrlEncoder().withoutPadding().
-                                    encodeToString(role.getBytes(Charset.defaultCharset()));
-                            roleField = base64EncodedURLRole + ": String\n";
-                            scopeRoleBuilder.append(roleField);
-                        }
-                        scopeRoles.add(role);
-                    }
-
-                    if (!StringUtils.isEmpty(scopeRoleBuilder.toString())) {
-                        scopeRoleMappingType = scopeRoleBuilder.toString() + "}\n";
-                        scopeRoleMappingBuilder.append(scopeRoleMappingType);
-                    }
-                }
-                schemaDefinitionBuilder.append(scopeRoleMappingBuilder.toString());
-            }
-        }
-        return schemaDefinitionBuilder.toString();
-    }
-
 	/**
 	 * Removed an API from the configured Gateways
 	 * 

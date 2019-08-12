@@ -280,7 +280,7 @@ ProvideGraphQL.propTypes = {
     updateGraphQLBean: PropTypes.func.isRequired,
     validate: PropTypes.bool.isRequired,
     valid: PropTypes.shape({ name: PropTypes.string.isRequired }).isRequired,
-    file: PropTypes.shape({}),
+    file: PropTypes.shape({ name: PropTypes.string.isRequired }),
     classes: PropTypes.shape({}).isRequired,
     updateFileErrors: PropTypes.func.isRequired,
     updateGraphQLValidity: PropTypes.func.isRequired,

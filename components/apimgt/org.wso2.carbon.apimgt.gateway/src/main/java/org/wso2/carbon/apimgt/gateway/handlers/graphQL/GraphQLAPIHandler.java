@@ -37,6 +37,7 @@ import org.apache.synapse.core.axis2.Axis2Sender;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import graphql.language.Definition;
 import graphql.language.Document;
@@ -260,71 +261,8 @@ public class GraphQLAPIHandler extends AbstractHandler {
      */
     private void handleFailure(MessageContext messageContext, String errorMessage) {
         OMElement payload = getFaultPayload(errorMessage);
-        setFaultPayload(messageContext, payload);
-        sendFault(messageContext);
-    }
-
-    /**
-     * This method setFaultPayload
-     *
-     * @param messageContext message context of the request
-     * @param payload        payload of the message context
-     */
-    private static void setFaultPayload(MessageContext messageContext, OMElement payload) {
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-        JsonUtil.removeJsonPayload(axis2MC);
-        messageContext.getEnvelope().getBody().addChild(payload);
-        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        String acceptType = (String) headers.get(HttpHeaders.ACCEPT);
-        Set<String> supportedMimes = new HashSet<>(Arrays.asList("application/x-www-form-urlencoded",
-                "multipart/form-data",
-                "text/html",
-                "application/xml",
-                "text/xml",
-                "application/soap+xml",
-                "text/plain",
-                "application/json",
-                "application/json/badgerfish",
-                "text/javascript"));
-
-        // If an Accept header has been provided and is supported by the Gateway
-        if (!StringUtils.isEmpty(acceptType) && supportedMimes.contains(acceptType)) {
-            axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, acceptType);
-        } else {
-            // If there isn't Accept Header in the request, will use error_message_type property
-            // from _auth_failure_handler_.xml file
-            if (messageContext.getProperty("error_message_type") != null) {
-                axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE,
-                        messageContext.getProperty("error_message_type"));
-            }
-        }
-    }
-
-    /**
-     * This method send the failure
-     *
-     * @param messageContext message context of the request
-     */
-    private static void sendFault(MessageContext messageContext) {
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-
-        axis2MC.setProperty(NhttpConstants.HTTP_SC, HttpStatus.SC_UNPROCESSABLE_ENTITY);
-        messageContext.setResponse(true);
-        messageContext.setProperty("RESPONSE", "true");
-        messageContext.setTo(null);
-        axis2MC.removeProperty("NO_ENTITY_BODY");
-
-        // Always remove the ContentType - Let the formatter do its thing
-        axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
-        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        if (headers != null) {
-            headers.remove(HttpHeaders.AUTHORIZATION);
-            headers.remove(HttpHeaders.AUTHORIZATION);
-            headers.remove(HttpHeaders.HOST);
-        }
-        Axis2Sender.sendBack(messageContext);
+        Utils.setFaultPayload(messageContext, payload);
+        Utils.sendFault(messageContext, HttpStatus.SC_UNPROCESSABLE_ENTITY);
     }
 
     /**

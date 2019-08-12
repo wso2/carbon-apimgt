@@ -423,8 +423,8 @@ Operations.propTypes = {
     classes: PropTypes.shape({
     }).isRequired,
     api: PropTypes.shape({
-        operations: PropTypes.object,
-        scopes: PropTypes.object,
+        operations: PropTypes.array,
+        scopes: PropTypes.array,
         updateOperations: PropTypes.func,
         getSwagger: PropTypes.func,
         policies: PropTypes.func,
