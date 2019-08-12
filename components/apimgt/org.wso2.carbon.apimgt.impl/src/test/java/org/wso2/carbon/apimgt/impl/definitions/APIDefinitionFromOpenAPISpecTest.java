@@ -24,8 +24,12 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class APIDefinitionFromOpenAPISpecTest {
     @Test
@@ -286,7 +290,7 @@ public class APIDefinitionFromOpenAPISpecTest {
         uriTemplate.setThrottlingTier("Unlimited");
         uriTemplate.setThrottlingTiers("Unlimited");
         uriTemplate.setScope(null);
-        uriTemplate.setScopes(null);
+//        uriTemplate.setScopes(null);
         return uriTemplate;
     }
 
