@@ -31,7 +31,7 @@ import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeVali
 import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import LifeCycleImage from './LifeCycleImage';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 const styles = theme => ({
     buttonsWrapper: {
@@ -190,4 +190,4 @@ LifeCycleUpdate.propTypes = {
     }).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(LifeCycleUpdate);
+export default withStyles(styles, { withTheme: true })(injectIntl(LifeCycleUpdate));

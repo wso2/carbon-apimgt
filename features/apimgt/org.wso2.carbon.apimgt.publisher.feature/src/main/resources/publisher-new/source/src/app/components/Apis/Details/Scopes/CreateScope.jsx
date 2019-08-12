@@ -183,6 +183,13 @@ class CreateScope extends React.Component {
         });
     }
 
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof CreateScope
+     */
     render() {
         const { classes } = this.props;
         const url = `/apis/${this.props.api.id}/scopes`;
@@ -191,7 +198,7 @@ class CreateScope extends React.Component {
                 <Typography
                     className={classes.headline}
                     gutterBottom
-                    variant='headline'
+                    variant='h5'
                     component='h2'
                 >
                     <FormattedMessage

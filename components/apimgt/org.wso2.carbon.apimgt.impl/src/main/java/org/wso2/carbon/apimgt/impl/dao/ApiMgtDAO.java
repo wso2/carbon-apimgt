@@ -10312,6 +10312,71 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get subscription level policies specified by tier names belonging to a specific tenant
+     *
+     * @param subscriptionTiers subscription tiers
+     * @param tenantID tenantID filters the polices belongs to specific tenant
+     * @return subscriptionPolicy array list
+     */
+    public SubscriptionPolicy[] getSubscriptionPolicies(String[] subscriptionTiers, int tenantID) throws APIManagementException {
+        List<SubscriptionPolicy> policies = new ArrayList<SubscriptionPolicy>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        List<String> questionMarks = new ArrayList<>(Collections.nCopies(subscriptionTiers.length, "?"));
+        String parameterString = String.join(",", questionMarks);
+
+        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_PREFIX +
+                parameterString + SQLConstants.GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_SUFFIX;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            int i = 1;
+            for (String subscriptionTier : subscriptionTiers) {
+                ps.setString(i, subscriptionTier);
+                i++;
+            }
+            ps.setInt(i, tenantID);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                SubscriptionPolicy subPolicy = new SubscriptionPolicy(
+                        rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                setCommonPolicyDetails(subPolicy, rs);
+                subPolicy.setRateLimitCount(rs.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
+                subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+                subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
+                subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
+                subPolicy.setMonetizationPlan(rs.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
+                Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
+                monetizationPlanProperties.put(APIConstants.FIXED_PRICE,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_FIXED_RATE));
+                monetizationPlanProperties.put(APIConstants.BILLING_CYCLE,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_CYCLE));
+                monetizationPlanProperties.put(APIConstants.PRICE_PER_REQUEST,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_PRICE_PER_REQUEST));
+                monetizationPlanProperties.put(APIConstants.CURRENCY,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_CURRENCY));
+                subPolicy.setMonetizationPlanProperties(monetizationPlanProperties);
+                InputStream binary = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+                if (binary != null) {
+                    byte[] customAttrib = APIUtil.toByteArray(binary);
+                    subPolicy.setCustomAttributes(customAttrib);
+                }
+                policies.add(subPolicy);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } catch (IOException e) {
+            handleException("Error while converting input stream to byte array", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return policies.toArray(new SubscriptionPolicy[policies.size()]);
+    }
+
+    /**
      * Get all Global level policeis belongs to specific tenant
      *
      * @param tenantID

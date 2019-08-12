@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApplicationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExtendedSubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionListDTO;
@@ -52,7 +51,6 @@ public class SubscriptionMappingUtil {
             throws APIManagementException {
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
-        subscriptionDTO.setApiInfo(FromAPIIdToAPIinfoDTO(subscription.getApiId()));
         subscriptionDTO.setApplicationInfo(FromApplicationToApplicationInfoDTO(subscription.getApplication()));
         subscriptionDTO.setSubscriptionStatus(
                 SubscriptionDTO.SubscriptionStatusEnum.valueOf(subscription.getSubStatus()));
@@ -146,51 +144,6 @@ public class SubscriptionMappingUtil {
         }
 
         return fromSubscriptionListToDTO(subscribedAPIs, limit, offset);
-    }
-
-    /**
-     * Converts a SubscribedAPI object into {@link ExtendedSubscriptionDTO}. Uses {@param workflowReferenceId}.
-     *
-     * @param subscription SubscribedAPI object
-     * @param workflowReferenceId external workflow reference id
-     * @return SubscriptionDTO corresponds to SubscribedAPI object
-     */
-    public static ExtendedSubscriptionDTO fromSubscriptionToExtendedSubscriptionDTO(
-            SubscribedAPI subscription, String workflowReferenceId) throws APIManagementException{
-        ExtendedSubscriptionDTO subscriptionDTO = new ExtendedSubscriptionDTO();
-
-        subscriptionDTO.setSubscriptionId(subscription.getUUID());
-        subscriptionDTO.setApiInfo(FromAPIIdToAPIinfoDTO(subscription.getApiId()));
-        subscriptionDTO.setApplicationInfo(FromApplicationToApplicationInfoDTO(subscription.getApplication()));
-        subscriptionDTO.setSubscriptionStatus(
-                ExtendedSubscriptionDTO.SubscriptionStatusEnum.valueOf(subscription.getSubStatus()));
-        subscriptionDTO.setThrottlingPolicy(subscription.getTier() == null ? null : subscription.getTier().getName());
-
-        if (workflowReferenceId != null && SubscriptionDTO.SubscriptionStatusEnum.ON_HOLD.name()
-                .equals(subscription.getSubStatus())) {
-            subscriptionDTO.setWorkflowId(workflowReferenceId);
-        }
-
-        return subscriptionDTO;
-    }
-
-    /**
-     * Convert APIIdentifier to an APIInfoDTO
-     *
-     * @param apiId the API identifier to be converted
-     * @return APIInfoDTO corresponding to the APIIdentifier
-     * @throws APIManagementException If an error occurs when getting logged in provider or when getting lightweight API
-     */
-    private static APIInfoDTO FromAPIIdToAPIinfoDTO(APIIdentifier apiId) throws APIManagementException{
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        APIInfoDTO apiInfo = new APIInfoDTO();
-
-        if (apiId != null) {
-            API api = apiProvider.getLightweightAPI(apiId);
-            apiInfo = APIMappingUtil.fromAPIToInfoDTO(api);
-        }
-
-        return apiInfo;
     }
 
     /**

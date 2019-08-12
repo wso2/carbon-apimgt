@@ -307,7 +307,7 @@ class Resource extends React.Component {
                 </div>
                 {this.state.visible && (
                     <div>
-                        <Grid container spacing={24}>
+                        <Grid container spacing={7}>
                             <Grid item xs={12} className={classes.descriptionWrapperUp}>
                                 <Typography variant='caption' className={classes.descriptionWrapper}>
                                     <InlineEditableField

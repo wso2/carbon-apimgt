@@ -29,6 +29,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import green from '@material-ui/core/colors/green';
 import API from 'AppData/api.js';
+import CONSTS from 'AppData/Constants';
 
 import Alert from 'AppComponents/Shared/Alert';
 import DeleteApiButton from 'AppComponents/Apis/Details/components/DeleteApiButton';
@@ -144,26 +145,26 @@ class APIThumb extends Component {
                     api={api}
                 />
                 <CardContent className={classes.apiDetails}>
-                    <Typography gutterBottom variant='headline' component='h2'>
+                    <Typography gutterBottom variant='h5' component='h2'>
                         {api.name}
                     </Typography>
                     <Grid container>
                         <Grid item md={6}>
                             <FormattedMessage id='by' defaultMessage='By' />:
-                            <Typography className={classes.providerText} variant='body2' gutterBottom>
+                            <Typography className={classes.providerText} variant='body1' gutterBottom>
                                 {api.provider}
                             </Typography>
                         </Grid>
                         <Grid item md={6}>
                             <FormattedMessage id='context' defaultMessage='Context' />:
-                            <Typography variant='body2' gutterBottom>
+                            <Typography variant='body1' gutterBottom>
                                 {api.context}
                             </Typography>
                         </Grid>
                         {(apiType === API.CONSTS.APIProduct) ? null : (
                             <Grid item md={6}>
                                 <FormattedMessage id='version' defaultMessage='Version' />:
-                                <Typography variant='body2'>{api.version}</Typography>
+                                <Typography variant='body1'>{api.version}</Typography>
                             </Grid>
                         )}
                     </Grid>
@@ -187,7 +188,7 @@ APIThumb.propTypes = {
         id: PropTypes.string,
     }).isRequired,
     updateAPIsList: PropTypes.func.isRequired,
-    apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]).isRequired,
+    apiType: PropTypes.oneOf([CONSTS.API, CONSTS.APIProduct]).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(APIThumb));

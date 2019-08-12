@@ -146,7 +146,7 @@ class CommentOptions extends React.Component {
             comment.createdBy === AuthManager.getUser().name || AuthManager.getUser().name === theme.custom.adminRole;
         const canModify = comment.createdBy === AuthManager.getUser().name && comment.entryPoint === 'APIPublisher';
         return (
-            <Grid container spacing={8} className={classes.verticalSpace} key={comment.commentId}>
+            <Grid container spacing={2} className={classes.verticalSpace} key={comment.commentId}>
                 {comment.parentCommentId == null && [
                     <Grid item key='key-reply'>
                         <Typography

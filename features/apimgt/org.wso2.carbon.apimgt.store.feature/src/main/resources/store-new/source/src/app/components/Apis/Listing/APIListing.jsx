@@ -17,75 +17,15 @@
  */
 
 import React from 'react';
-import qs from 'qs';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import API from '../../../data/api';
 import CommonListing from './CommonListing';
 
-
 /**
+ * API Listing wraps the commonListing component by passing a kind param
  *
- *
- * @class APIListing
- * @extends {React.Component}
+ * @returns
  */
-class APIListing extends React.Component {
-    /**
-     * Constructor
-     *
-     * @param {*} props Properties
-     */
-    constructor(props) {
-        super(props);
-        this.state = {
-            apis: null,
-            path: props.match.path,
-        };
-    }
-
-
-    /**
-     *
-     *
-     * @memberof APIListing
-     */
-    componentDidMount() {
-        const api = new API();
-        const promisedApis = api.getAllAPIs();
-        promisedApis
-            .then((response) => {
-                this.setState({ apis: response.obj });
-            })
-            .catch((error) => {
-                const { status } = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                } else if (status === 401) {
-                    this.setState({ isAuthorize: false });
-                    const params = qs.stringify({ reference: this.props.location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
-                }
-            });
-    }
-
-
-    /**
-     *
-     * @inheritdoc
-     * @returns {React.Component} @inheritdoc
-     * @memberof APIListing
-     */
-    render() {
-        const { notFound } = this.state;
-
-        if (notFound) {
-            return <ResourceNotFound />;
-        }
-
-        const { apis, path } = this.state;
-
-        return <CommonListing apis={apis} path={path} />;
-    }
+function APIListing()  {
+    return <CommonListing kind='apis' />;
 }
 
 export default (APIListing);
