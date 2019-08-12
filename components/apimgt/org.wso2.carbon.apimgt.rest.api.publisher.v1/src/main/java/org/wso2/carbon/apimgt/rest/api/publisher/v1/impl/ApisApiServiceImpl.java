@@ -1345,9 +1345,25 @@ public class ApisApiServiceImpl implements ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(existingAPI,
-                    response.getJsonContent());
+            Set<URITemplate> uriTemplates = null;
+            try {
+                uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(existingAPI, response.getJsonContent());
+            } catch (APIManagementException e) {
+                // catch APIManagementException inside again to capture validation error
+                RestApiUtil.handleBadRequest(e.getMessage(), log);
+            }
             Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiDefinition);
+            //validating scope roles
+            for (Scope scope : scopes) {
+                for (String aRole : scope.getRoles().split(",")) {
+                    boolean isValidRole = APIUtil.isRoleNameExist(RestApiUtil.getLoggedInUsername(), aRole);
+                    if (!isValidRole) {
+                        String error = "Role '" + aRole + "' Does not exist.";
+                        RestApiUtil.handleBadRequest(error, log);
+                    }
+                }
+            }
+
             existingAPI.setUriTemplates(uriTemplates);
             existingAPI.setScopes(scopes);
 

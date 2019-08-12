@@ -186,6 +186,15 @@ public class APIMappingUtil {
             model.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
         }
         // scopes
+        for (ScopeDTO scope : dto.getScopes()) {
+            for (String aRole : scope.getBindings().getValues()) {
+                boolean isValidRole = APIUtil.isRoleNameExist(provider, aRole);
+                if (!isValidRole) {
+                    String error = "Role '" + aRole + "' Does not exist.";
+                    RestApiUtil.handleBadRequest(error, log);
+                }
+            }
+        }
         Set<Scope> scopes = getScopes(dto);
         model.setScopes(scopes);
 
@@ -940,6 +949,7 @@ public class APIMappingUtil {
                             scope.setName(definedScope.getName());
                             scope.setDescription(definedScope.getDescription());
                             scope.setRoles(definedScope.getRoles());
+                            template.setScopes(scope);
                             template.setScope(scope);
                         }
                     }
