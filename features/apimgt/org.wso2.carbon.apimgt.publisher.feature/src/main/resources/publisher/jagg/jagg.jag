@@ -757,7 +757,13 @@ var getThemeFile = function (path) {
             print({ error :true , message:msg.error.csrfError});
             return false;
         }
-    }    
+    }
+
+    var validateForScript = function (content) {
+        var startPattern = /<script.*?>/g;
+        var endPattern = /<\script>/g;
+        return content.replace(startPattern, "&lt;script &gt;").replace(endPattern, "&lt;\script&gt;");
+    };
 
     return {
         setUser:setUser,
@@ -804,7 +810,8 @@ var getThemeFile = function (path) {
 		getSiteContext:getSiteContext,
         setCSRFToken:setCSRFToken,
         isCSRFTokenValid:isCSRFTokenValid,
-        getAbsoluteReqUrl:getAbsoluteReqUrl
+        getAbsoluteReqUrl:getAbsoluteReqUrl,
+        validateForScript:validateForScript
     };
 
 }());

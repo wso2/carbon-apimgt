@@ -38,7 +38,7 @@ var addInlineContent = function (api, doc) {
     var log = new Log(),
             provider = jagg.module("manager").getAPIProviderObj();
     try {
-        provider.addInlineContent(api.provider, api.name, api.version, doc.name, doc.content);
+        provider.addInlineContent(api.provider, api.name, api.version, doc.name, jagg.validateForScript(doc.content));
         if (log.isDebugEnabled()) {
             log.debug("addInlineContent for : " + doc.name + "with the content : " + doc.content);
         }
