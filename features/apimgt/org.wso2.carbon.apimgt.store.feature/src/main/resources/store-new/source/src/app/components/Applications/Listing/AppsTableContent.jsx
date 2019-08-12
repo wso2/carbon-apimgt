@@ -31,6 +31,8 @@ import { FormattedMessage } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
+import PropTypes from 'prop-types';
+
 /**
  *
  * @param {*} order order
@@ -196,4 +198,12 @@ class AppsTableContent extends Component {
         );
     }
 }
+AppsTableContent.propTypes = {
+    handleAppDelete: PropTypes.func.isRequired,
+    page: PropTypes.number.isRequired,
+    rowsPerPage: PropTypes.number.isRequired,
+    order: PropTypes.string.isRequired,
+    orderBy: PropTypes.string.isRequired,
+    apps: PropTypes.instanceOf(Map).isRequired,
+};
 export default AppsTableContent;

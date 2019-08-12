@@ -54,6 +54,11 @@ const Configurations = {
                     patch: '#785446',
                     head: '#785446',
                 },
+                operationChipColor: {
+                    query: '#b3e6fe',
+                    mutation: '#c1dea0',
+                    subscription: '#ffcc80',
+                },
                 thumbnail: {
                     width: 240,
                     contentPictureOverlap: false,

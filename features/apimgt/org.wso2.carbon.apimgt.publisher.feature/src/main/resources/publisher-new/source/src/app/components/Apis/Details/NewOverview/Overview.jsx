@@ -26,6 +26,7 @@ import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 import CheckItem from './CheckItem';
 import Resources from './Resources';
+import Operations from './Operations';
 import ProductResources from './ProductResources';
 import Policies from './Policies';
 import Configuration from './Configuration';
@@ -125,19 +126,35 @@ const styles = theme => ({
 function Overview(props) {
     const { classes, api: newApi } = props;
     const { api } = useContext(ApiContext);
-    let loadResources;
     let loadScopes;
     let loadEndpoints;
     let endpointsCheckItem;
     let scopesCheckItem;
     if (newApi.type !== 'WS') {
-        loadResources = <Resources parentClasses={classes} api={newApi} />;
         loadScopes = <Scopes parentClasses={classes} />;
     }
+    function getResourcesClassForAPIs(apiType) {
+        switch (apiType) {
+            case 'GRAPHQL':
+                return <Operations parentClasses={classes} api={api} />;
+            case API.CONSTS.APIProduct:
+                return <ProductResources parentClasses={classes} api={api} />;
+            default:
+                return <Resources parentClasses={classes} api={api} />;
+        }
+    }
+    function getItemSuccessLabelForAPIType(apiType) {
+        switch (apiType) {
+            case 'GRAPHQL':
+                return <CheckItem itemSuccess itemLabel='Operations' />;
+            default:
+                return <CheckItem itemSuccess itemLabel='Resources' />;
+        }
+    }
+
     if (newApi.apiType === API.CONSTS.APIProduct) {
         endpointsCheckItem = null;
         scopesCheckItem = null;
-        loadResources = <ProductResources parentClasses={classes} api={newApi} />;
         loadEndpoints = null;
         loadScopes = null;
     } else if (newApi.apiType === API.CONSTS.API) {
@@ -146,11 +163,14 @@ function Overview(props) {
         loadEndpoints = <Endpoints parentClasses={classes} api={newApi} />;
     }
     return (
-        <Grid container spacing={7}>
+        <Grid container spacing={24}>
+            {console.info(api)}
             <Grid item xs={12}>
                 <Grid container>
                     {endpointsCheckItem}
                     <CheckItem itemSuccess={false} itemLabel='Policies' />
+                    {getItemSuccessLabelForAPIType(api.type)}
+                    <CheckItem itemSuccess={false} itemLabel='Scopes' />
                     <CheckItem itemSuccess itemLabel='Resources' />
                     {scopesCheckItem}
                     <CheckItem itemSuccess={false} itemLabel='Documents' />
@@ -159,10 +179,10 @@ function Overview(props) {
                 </Grid>
             </Grid>
             <Grid item xs={12}>
-                <Grid container spacing={7}>
+                <Grid container spacing={24}>
                     <Grid item xs={12} md={6} lg={6}>
                         <Configuration parentClasses={classes} />
-                        {loadResources}
+                        {getResourcesClassForAPIs(api.type)}
                         <AdditionalProperties parentClasses={classes} />
                     </Grid>
                     <Grid item xs={12} md={6} lg={6}>

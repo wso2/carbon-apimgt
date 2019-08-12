@@ -240,6 +240,11 @@
             <groupId>org.wso2.orbit.org.openapitools.swagger.parser</groupId>
             <artifactId>swagger-parser</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.graphQL</groupId>
+            <artifactId>graphQL</artifactId>
+            <version>${graphql.java.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -381,6 +386,7 @@
                             org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",
                             org.wso2.carbon.apimgt.tracing.*; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.orbit.re2j.*; version="1.2.wso2v1",
+                            graphql.*; version="${graphql.java.version}",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>
