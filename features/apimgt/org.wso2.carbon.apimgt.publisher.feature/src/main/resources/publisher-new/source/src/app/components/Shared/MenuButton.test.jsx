@@ -54,7 +54,7 @@ describe('<MenuButton/> tests', () => {
             .props()
             .onClickAway(mockedEvent);
         // Menu should be closed when clicked away from it
-        expect(wrapper.state().open).toBeTruthy();
+        expect(wrapper.state().open).toBeFalsy();
     });
 
     test('should close the menu when clicked away', () => {
