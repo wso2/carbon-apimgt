@@ -217,9 +217,9 @@ class Operations extends React.Component {
      * @param {*} newOperation
      */
     handleUpdateList(newOperation) {
-        const operationList = JSON.parse(JSON.stringify(this.state.operationList));
-        const updatedList = operationList.map(opertion => (opertion.target === newOperation.target
-            ? newOperation : opertion));
+        const { operationList } = this.state;
+        const updatedList = operationList.map(operation => (operation.target === newOperation.target
+            ? newOperation : operation));
         this.setState({ operationList: updatedList });
     }
 
@@ -252,7 +252,8 @@ class Operations extends React.Component {
             });
     }
     toggleAssignScopes = () => {
-        this.setState({ showScopes: !this.state.showScopes });
+        // this.setState({ showScopes: !this.state.showScopes });
+        this.setState(prevState => ({ showScopes: !prevState.showScopes }));
     }
 
     /**

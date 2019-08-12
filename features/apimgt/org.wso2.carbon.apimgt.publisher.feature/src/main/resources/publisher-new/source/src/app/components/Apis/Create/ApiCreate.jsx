@@ -49,7 +49,6 @@ function ApiCreate(props) {
             <Switch>
                 <Route path='/apis/create/rest' component={APICreateWrapper} />
                 <Route path='/api-products/create' component={APIProductCreateWrapper} />
-                <Route path='/apis/create/swagger' component={ApiCreateSwagger} />
                 <Route path='/apis/create/graphQL' component={ApiCreateGraphQL} />
                 <Route path='/apis/create/openapi' component={ApiCreateSwagger} />
                 <Route path='/apis/create/wsdl' component={ApiCreateWSDL} />

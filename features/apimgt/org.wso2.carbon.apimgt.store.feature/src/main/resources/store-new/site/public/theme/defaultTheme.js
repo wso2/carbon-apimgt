@@ -52,14 +52,14 @@ const Configurations = {
                     delete: '#fd5621',
                     option: '#5f7c8a',
                     patch: '#785446',
-                    head: '#785446'
+                    head: '#785446',
                 },
                 operationChipColor: {
                     query: '#b3e6fe',
                     mutation: '#c1dea0',
                     subscription: '#ffcc80',
                 },
-                imageThumbnail: {
+                thumbnail: {
                     width: 240,
                     contentPictureOverlap: false,
                     contentBackgroundColor: 'rgba(239, 239, 239, 0.5)',

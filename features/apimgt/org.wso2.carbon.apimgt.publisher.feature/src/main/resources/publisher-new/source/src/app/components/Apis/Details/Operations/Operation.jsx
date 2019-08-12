@@ -152,35 +152,41 @@ class Operation extends React.Component {
      * @param {*} e event triggered for handle  Scope Change
      */
     handleScopeChange(e) {
-        const operation = JSON.parse(JSON.stringify(this.props.operation));
-        operation.scopes = [e.target.value];
-        this.props.handleUpdateList(operation);
+        const { operation } = this.props;
+        const newoperation = {
+            ...operation,
+            scopes: [...operation.scopes],
+        };
+        newoperation.scopes = [e.target.value];
+        this.props.handleUpdateList(newoperation);
     }
     /**
      *
      * @param {*} e event triggered for handle  policy Change
      */
     handlePolicyChange(e) {
-        const operation = JSON.parse(JSON.stringify(this.props.operation));
-        operation.throttlingPolicy = e.target.value;
-        this.props.handleUpdateList(operation);
+        const { operation } = this.props;
+        const newoperation = { ...operation };
+        newoperation.throttlingPolicy = e.target.value;
+        this.props.handleUpdateList(newoperation);
     }
 
     /**
      * @param {*} event event triggered for handle  policy Change
      */
     handleChange(event) {
-        const operation = JSON.parse(JSON.stringify(this.props.operation));
+        const { operation } = this.props;
+        const newoperation = { ...operation };
         const { checked } = event.target;
         if (checked) {
-            operation.authType = 'Any';
+            newoperation.authType = 'Any';
         } else {
-            operation.authType = 'None';
+            newoperation.authType = 'None';
         }
         this.setState({
             isSecurity: checked,
         });
-        this.props.handleUpdateList(operation);
+        this.props.handleUpdateList(newoperation);
     }
 
     /**

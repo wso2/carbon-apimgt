@@ -1416,7 +1416,7 @@ public class APIMappingUtil {
         List<APIOperationsDTO> operationsDTOs = new ArrayList<>();
         String[] suportMethods = null;
 
-        if(apiType.equals(APIConstants.GRAPHQL_API)) {
+        if (apiType.equals(APIConstants.GRAPHQL_API)) {
             suportMethods = APIConstants.GRAPHQL_SUPPORTED_METHODS;
         } else {
             suportMethods = RestApiConstants.SUPPORTED_METHODS;

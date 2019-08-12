@@ -127,7 +127,7 @@ class ProvideGraphQL extends Component {
      * @param {any} nextProps New props received
      * @memberof ProvideGraphQL
      */
-    componentWillReceiveProps(nextProps) {
+    componentDidUpdate(nextProps) {
         const { validate, updateGraphQLValidity } = nextProps;
         if (validate) {
             this.validateGraphQL(updateGraphQLValidity);
@@ -181,9 +181,15 @@ class ProvideGraphQL extends Component {
                 updateFileErrors(validNew);
                 updateGraphQLBean(graphQLBean);
                 const response = error.response && error.response.obj;
+
                 const message =
-                    'Error while validating GraphQL!! ' + response && '[' + response.message + '] '
-                    + response.description;
+                    Intl.formatMessage({
+                        id: 'Apis.Details.APIDefinition.APIDefinition.file.validation.failed',
+                        defaultMessage: 'Error while validating GraphQL!! ' +
+                        response && '[' + response.message + '] '
+                        + response.description,
+                    });
+
                 this.setState({ isValid: false, errorMessage: message, loading: false });
                 console.error(error);
             });

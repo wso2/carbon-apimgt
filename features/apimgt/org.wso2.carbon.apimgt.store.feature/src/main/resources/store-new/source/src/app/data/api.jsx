@@ -584,6 +584,7 @@ export default class API extends Resource {
         });
         return promise;
     }
+
     /**
      * Get the thumnail of an API
      *
@@ -592,13 +593,11 @@ export default class API extends Resource {
     getAPIThumbnail(id) {
         const promised_getAPIThumbnail = this.client.then((client) => {
             return client.apis.APIs.get_apis__apiId__thumbnail({
-                    apiId: id
-                },
-                this._requestMetaData(),
-            );
+                apiId: id,
+            },
+            this._requestMetaData());
         });
 
         return promised_getAPIThumbnail;
     }
-
 }
