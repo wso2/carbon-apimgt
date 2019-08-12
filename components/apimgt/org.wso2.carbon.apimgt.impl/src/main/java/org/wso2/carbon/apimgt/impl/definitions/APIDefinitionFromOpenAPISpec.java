@@ -114,8 +114,11 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                             isHttpVerbDefined = true;
                             JSONObject operation = (JSONObject) path.get(httpVerb);
                             URITemplate template = new URITemplate();
-                            Scope scope = APIUtil.findScopeByKey(scopes, (String) operation.get(APIConstants
-                                    .SWAGGER_X_SCOPE));
+                            String scopeName = (String) operation.get(APIConstants.SWAGGER_X_SCOPE);
+                            Scope scope = APIUtil.findScopeByKey(scopes, scopeName);
+                            if (scopeName != null && scope == null) {
+                                throw new APIManagementException("Scope '" + scopeName + "' not found.");
+                            }
                             String authType = (String) operation.get(APIConstants.SWAGGER_X_AUTH_TYPE);
                             if ("Application & Application User".equals(authType)) {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
@@ -139,9 +142,10 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                             template.setHttpVerbs(httpVerb.toUpperCase());
                             template.setAuthType(authType);
                             template.setAuthTypes(authType);
-                            template.setScope(scope);
-                            template.setScopes(scope);
-
+                            if(scope != null) {
+                                template.setScope(scope);
+                                template.setScopes(scope);
+                            }
                             uriTemplates.add(template);
                         } else {
                             handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
