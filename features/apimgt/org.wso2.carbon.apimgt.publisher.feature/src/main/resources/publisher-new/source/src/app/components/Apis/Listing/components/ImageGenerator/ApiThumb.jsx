@@ -165,7 +165,13 @@ class APIThumb extends Component {
                     </Grid>
                 </CardContent>
                 <CardActions className={classes.apiActions}>
-                    <Chip label={isAPIProduct ? api.state : api.lifeCycleStatus} color='default' />
+                    <Chip
+                        label={(api.apiType === API.CONSTS.APIProduct) ? api.state : api.lifeCycleStatus}
+                        color='default'
+                    />
+                    {api.type === 'GRAPHQL' && (
+                        <Chip label={api.type} color='primary' />
+                    )}
                     <DeleteApiButton onClick={this.handleApiDelete} api={api} />
                     {loading && <CircularProgress className={classes.deleteProgress} />}
                 </CardActions>
@@ -179,6 +185,7 @@ APIThumb.propTypes = {
     api: PropTypes.shape({
         id: PropTypes.string,
         name: PropTypes.string,
+        apiType: PropTypes.string.isRequired,
     }).isRequired,
     updateData: PropTypes.func.isRequired,
     isAPIProduct: PropTypes.bool.isRequired,

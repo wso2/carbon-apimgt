@@ -22,15 +22,15 @@ import {
     Route, Switch, Redirect, Link,
 } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
-import Subscriptions from './Subscriptions';
-import API from '../../../data/api';
-import { PageNotFound } from '../../Base/Errors/index';
-import Loading from '../../Base/Loading/Loading';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import CustomIcon from '../../Shared/CustomIcon';
+import API from 'AppData/api';
+import { PageNotFound } from 'AppComponents/Base/Errors/index';
+import Loading from 'AppComponents/Base/Loading/Loading';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
+import TokenManager from 'AppComponents/Shared/AppsAndKeys/TokenManager';
 import InfoBar from './InfoBar';
-import LeftMenuItem from '../../Shared/LeftMenuItem';
-import TokenManager from '../../Shared/AppsAndKeys/TokenManager';
+import Subscriptions from './Subscriptions';
 /**
  *
  *
@@ -123,7 +123,6 @@ class Details extends Component {
     handleMenuSelect = (menuLink) => {
         const { history, match } = this.props;
         history.push({ pathname: '/applications/' + match.params.application_uuid + '/' + menuLink });
-        // (menuLink === "overview") ? this.infoBar.toggleOverview(true) : this.infoBar.toggleOverview(false) ;
         this.setState({ active: menuLink });
     };
 
@@ -164,7 +163,11 @@ class Details extends Component {
                                 component={() => (
                                     <TokenManager
                                         keyType='PRODUCTION'
-                                        selectedApp={{ appId: application.applicationId, label: application.name }}
+                                        selectedApp={{
+                                            appId: application.applicationId,
+                                            label: application.name,
+                                            tokenType: application.tokenType,
+                                        }}
                                     />
                                 )}
                             />
@@ -173,7 +176,11 @@ class Details extends Component {
                                 component={() => (
                                     <TokenManager
                                         keyType='SANDBOX'
-                                        selectedApp={{ appId: application.applicationId, label: application.name }}
+                                        selectedApp={{
+                                            appId: application.applicationId,
+                                            label: application.name,
+                                            tokenType: application.tokenType,
+                                        }}
                                     />
                                 )}
                             />
@@ -190,6 +197,14 @@ class Details extends Component {
 Details.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            application_uuid: PropTypes.string.isRequired,
+        }).isRequired,
+    }).isRequired,
+    history: PropTypes.shape({
+        push: PropTypes.func.isRequired,
+    }).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Details);

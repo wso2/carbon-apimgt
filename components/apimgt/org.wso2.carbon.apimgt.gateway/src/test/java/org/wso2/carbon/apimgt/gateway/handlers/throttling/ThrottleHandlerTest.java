@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Test cases for for ThrottleHandler
@@ -47,7 +48,8 @@ public class ThrottleHandlerTest {
     private AccessInformation accessInformation;
     private ConditionGroupDTO conditionGroupDTO;
     private ConditionGroupDTO[] conditionGroupDTOs;
-    private VerbInfoDTO verbInfoDTO;
+    private List<VerbInfoDTO> verbInfoDTO;
+    private VerbInfoDTO verbInfo;
     private String resourceLevelThrottleKey;
     private String apiLevelThrottleKey;
     private String apiContext = "weatherAPI";
@@ -67,11 +69,12 @@ public class ThrottleHandlerTest {
         throttleEvaluator = Mockito.mock(ThrottleConditionEvaluator.class);
         accessInformation = Mockito.mock(AccessInformation.class);
         Mockito.when(timer.start()).thenReturn(context);
-
-        verbInfoDTO = new VerbInfoDTO();
-        verbInfoDTO.setHttpVerb(httpVerb);
-        verbInfoDTO.setRequestKey(apiContext + "/" + apiVersion + resourceUri + ":" + httpVerb);
-        verbInfoDTO.setThrottling(throttlingTier);
+        verbInfoDTO = new ArrayList<>();
+        verbInfo = new VerbInfoDTO();
+        verbInfo.setHttpVerb(httpVerb);
+        verbInfo.setRequestKey(apiContext + "/" + apiVersion + resourceUri + ":" + httpVerb);
+        verbInfo.setThrottling(throttlingTier);
+        verbInfoDTO.add(verbInfo);
         conditionGroupDTO = new ConditionGroupDTO();
         conditionGroupDTO.setConditionGroupId("_default");
         conditionGroupDTOs = new ConditionGroupDTO[1];
@@ -179,7 +182,7 @@ public class ThrottleHandlerTest {
 
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
-        verbInfoDTO.setApplicableLevel("userLevel");
+        verbInfo.setApplicableLevel("userLevel");
         messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
                 .MessageContext.TRANSPORT_HEADERS);
@@ -199,7 +202,7 @@ public class ThrottleHandlerTest {
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
         //Set conditional group
-        verbInfoDTO.setConditionGroups(conditionGroupDTOs);
+        verbInfo.setConditionGroups(conditionGroupDTOs);
         messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
                 .MessageContext.TRANSPORT_HEADERS);
@@ -233,8 +236,7 @@ public class ThrottleHandlerTest {
                 (API_AUTH_CONTEXT);
         authenticationContext.setApiTier("Unlimited");
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
-
-        verbInfoDTO.setConditionGroups(conditionGroupDTOs);
+        verbInfo.setConditionGroups(conditionGroupDTOs);
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
         String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionGroupDTO.getConditionGroupId();
@@ -264,7 +266,7 @@ public class ThrottleHandlerTest {
         authenticationContext.setStopOnQuotaReach(true);
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
 
-        verbInfoDTO.setConditionGroups(conditionGroupDTOs);
+        verbInfo.setConditionGroups(conditionGroupDTOs);
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
         String subscriptionLevelThrottleKey = authenticationContext.getApplicationId() + ":" + apiContext + ":"
@@ -292,7 +294,7 @@ public class ThrottleHandlerTest {
         authenticationContext.setStopOnQuotaReach(false);
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
 
-        verbInfoDTO.setConditionGroups(conditionGroupDTOs);
+        verbInfo.setConditionGroups(conditionGroupDTOs);
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
         String subscriptionLevelThrottleKey = authenticationContext.getApplicationId() + ":" + apiContext + ":"
@@ -317,7 +319,7 @@ public class ThrottleHandlerTest {
                 (API_AUTH_CONTEXT);
         authenticationContext.setApiTier(throttlingTier);
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
-        verbInfoDTO.setConditionGroups(conditionGroupDTOs);
+        verbInfo.setConditionGroups(conditionGroupDTOs);
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
         String applicationLevelThrottleKey = authenticationContext.getApplicationId() + ":" + authenticationContext
@@ -350,7 +352,7 @@ public class ThrottleHandlerTest {
         authenticationContext.setSpikeArrestLimit(0);
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
 
-        verbInfoDTO.setConditionGroups(conditionGroupDTOs);
+        verbInfo.setConditionGroups(conditionGroupDTOs);
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
         Mockito.when(accessInformation.isAccessAllowed()).thenReturn(false);
@@ -380,7 +382,7 @@ public class ThrottleHandlerTest {
         authenticationContext.setSpikeArrestLimit(0);
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
 
-        verbInfoDTO.setConditionGroups(conditionGroupDTOs);
+        verbInfo.setConditionGroups(conditionGroupDTOs);
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
         String subscriptionLevelThrottleKey = authenticationContext.getApplicationId() + ":" + apiContext + ":"
@@ -419,7 +421,7 @@ public class ThrottleHandlerTest {
         authenticationContext.setSpikeArrestLimit(0);
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
 
-        verbInfoDTO.setConditionGroups(conditionGroupDTOs);
+        verbInfo.setConditionGroups(conditionGroupDTOs);
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
 
@@ -450,7 +452,7 @@ public class ThrottleHandlerTest {
         authenticationContext.setSpikeArrestLimit(0);
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
 
-        verbInfoDTO.setConditionGroups(conditionGroupDTOs);
+        verbInfo.setConditionGroups(conditionGroupDTOs);
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         Mockito.when(accessInformation.isAccessAllowed()).thenReturn(false);
         matchingConditions.add(conditionGroupDTO);
@@ -485,7 +487,7 @@ public class ThrottleHandlerTest {
 
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
 
-        verbInfoDTO.setConditionGroups(conditionGroupDTOs);
+        verbInfo.setConditionGroups(conditionGroupDTOs);
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
         throttleDataHolder.addKeyTemplate("$user", "$user");
@@ -521,7 +523,7 @@ public class ThrottleHandlerTest {
         authenticationContext.setSpikeArrestLimit(0);
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
 
-        verbInfoDTO.setConditionGroups(conditionGroupDTOs);
+        verbInfo.setConditionGroups(conditionGroupDTOs);
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         Mockito.when(accessInformation.isAccessAllowed()).thenReturn(false);
         matchingConditions.add(conditionGroupDTO);

@@ -300,13 +300,9 @@ class ApiTableView extends React.Component {
         };
         if (gridView) {
             options.customRowRender = (data, dataIndex, rowIndex, tableViewObj=this) => {
-                const { isApiProduct } = tableViewObj.props;
-                const api = {};
-                api.id = data[0];
-                api.name = data[1].props.api;
-                api.version = data[3];
-                api.context = data[4];
-                api.provider = data[5];
+                const { props, state } = tableViewObj;
+                const { isApiProduct } = props;
+                const api = state.data[dataIndex];
                 return <ApiThumb api={api} isApiProduct={isApiProduct} />;
             };
             options.title = false;

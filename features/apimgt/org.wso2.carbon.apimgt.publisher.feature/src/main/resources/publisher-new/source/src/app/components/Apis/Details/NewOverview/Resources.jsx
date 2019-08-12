@@ -28,6 +28,7 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Api from 'AppData/api';
+import CONSTS from 'AppData/Constants';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 
 function RenderMethodBase(props) {
@@ -113,17 +114,25 @@ class Resources extends React.Component {
                 </div>);
         }
         const { classes, parentClasses, api } = this.props;
-
         return (
             <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
                 {console.info('api....', api)}
                 <div className={parentClasses.titleWrapper}>
-                    <Typography variant='h5' component='h3' className={parentClasses.title}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Resources.resources'
-                            defaultMessage='Resources'
-                        />
-                    </Typography>
+                    { api.type === 'GraphQL' ? (
+                        <Typography variant='h5' component='h3' className={parentClasses.title}>
+                            <FormattedMessage
+                                id='Apis.Details.NewOverview.Operations.operations'
+                                defaultMessage='Operation'
+                            />
+                        </Typography>) :
+                        (
+                            <Typography variant='h5' component='h3' className={parentClasses.title}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Resources.resources'
+                                    defaultMessage='Resources'
+                                />
+                            </Typography>
+                        )}
                     <Link to={'/apis/' + api.id + '/resources'}>
                         <Button variant='contained' color='default'>
                             <FormattedMessage
@@ -143,7 +152,8 @@ class Resources extends React.Component {
                                         {key}
                                     </Typography>
                                     {Object.keys(path).map((innerKey) => {
-                                        return <RenderMethod method={innerKey} />;
+                                        return CONSTS.HTTP_METHODS.includes(innerKey) ?
+                                            <RenderMethod method={innerKey} /> : null;
                                     })}
                                 </div>
                             );
