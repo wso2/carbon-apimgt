@@ -19,6 +19,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
+import { API_TYPE, API_PRODUCT_TYPE } from 'AppData/Constants';
 import APIListing from './Listing/APIListing';
 import APIProductListing from './Listing/APIProductListing';
 import Details from './Details/index';
@@ -32,17 +33,27 @@ import { PageNotFound } from '../Base/Errors';
 function Apis() {
     return (
         <Switch>
-            <Route exact path='/apis' component={APIListing} />
-            <Route exact path='/api-products' component={APIProductListing} />
+            <Route
+                exact
+                path='/apis'
+                render={props => (
+                    <APIListing {...props} apiType={API_TYPE} />)}
+            />
+            <Route
+                exact
+                path='/api-products'
+                render={props => (
+                    <APIProductListing {...props} apiType={API_PRODUCT_TYPE} />)}
+            />
             <Route
                 path='/apis/:api_uuid/'
                 render={props => (
-                    <Details {...props} path='/apis' />)}
+                    <Details {...props} apiType={API_TYPE} />)}
             />
             <Route
                 path='/api-products/:api_uuid/'
                 render={props => (
-                    <Details {...props} path='/api-products' />)}
+                    <Details {...props} apiType={API_PRODUCT_TYPE} />)}
             />
             <Route component={PageNotFound} />
         </Switch>

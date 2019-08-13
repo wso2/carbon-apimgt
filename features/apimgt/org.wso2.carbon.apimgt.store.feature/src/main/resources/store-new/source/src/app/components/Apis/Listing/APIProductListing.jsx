@@ -19,13 +19,19 @@
 import React from 'react';
 import CommonListing from './CommonListing';
 
+// const ApiTypeContext = React.createContext({ type: Constants.API });
+
 /**
  * API Listing wraps the commonListing component by passing a kind param
  *
  * @returns
  */
-function APIProductListing()  {
+function APIProductListing() {
     return <CommonListing isApiProduct />;
 }
+
+APIProductListing.propTypes = {
+    apiType: PropTypes.string.isRequired,
+};
 
 export default (APIProductListing);

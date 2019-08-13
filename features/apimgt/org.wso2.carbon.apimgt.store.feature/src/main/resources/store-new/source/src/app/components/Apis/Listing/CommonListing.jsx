@@ -104,7 +104,9 @@ class CommonListing extends React.Component {
      * @memberof CommonListing
      */
     render() {
-        const { apis, isApiProduct, theme, classes } = this.props;
+        const {
+ apis, isApiProduct, theme, classes 
+} = this.props;
         const { listType } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
 

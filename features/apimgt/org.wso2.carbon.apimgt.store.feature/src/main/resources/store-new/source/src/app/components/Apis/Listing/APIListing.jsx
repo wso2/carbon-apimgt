@@ -24,8 +24,12 @@ import CommonListing from './CommonListing';
  *
  * @returns
  */
-function APIListing()  {
+function APIListing() {
     return <CommonListing isApiProduct={false} />;
 }
+
+APIListing.propTypes = {
+    apiType: PropTypes.string.isRequired,
+};
 
 export default (APIListing);

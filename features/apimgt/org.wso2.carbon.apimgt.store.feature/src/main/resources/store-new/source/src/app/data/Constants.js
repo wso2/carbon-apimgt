@@ -15,16 +15,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { API_TYPE } from 'AppData/Constants';
 
-export const ApiContext = React.createContext({
-    active: 'overview',
-    handleMenuSelect: () => {},
-    api: null,
-    applications: null,
-    subscribedApplications: [],
-    applicationsAvailable: [],
-    updateSubscriptionData: () => {},
-    apiType: API_TYPE,
-});
+/**
+  * Constanst definition
+  */
+
+
+export const API_TYPE = 'API';
+export const API_PRODUCT_TYPE = 'API_PRODUCT';
+
+
+// export const APITypes = Object.freeze({
+//     API: Symbol('API'),
+//     API_PRODUCT: Symbol('API_PRODUCT'),
+// });
+
+// Object.freeze(Constants.APITypes);
+
+// export default Constants.APITypes;
