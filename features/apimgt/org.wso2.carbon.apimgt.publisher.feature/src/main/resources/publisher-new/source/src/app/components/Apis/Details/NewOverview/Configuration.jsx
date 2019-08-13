@@ -29,7 +29,6 @@ import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/
 import API from 'AppData/api';
 import APIContext from '../components/ApiContext';
 
-
 /**
  *
  *
@@ -53,14 +52,15 @@ function Configuration(props) {
                         defaultMessage='Configuration'
                     />
                 </Typography>
-                <Link to={((api.apiType === API.CONSTS.APIProduct) ? '/api-products/' : '/apis/') +
-                            api.id + '/configuration'}
+                <Link
+                    to={
+                        (api.apiType === API.CONSTS.APIProduct ? '/api-products/' : '/apis/') +
+                        api.id +
+                        '/configuration'
+                    }
                 >
                     <Button variant='contained' color='default'>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.edit'
-                            defaultMessage='Edit'
-                        />
+                        <FormattedMessage id='Apis.Details.NewOverview.Configuration.edit' defaultMessage='Edit' />
                     </Button>
                 </Link>
             </div>
@@ -103,8 +103,7 @@ function Configuration(props) {
                                 {api.provider && <React.Fragment>{api.provider}</React.Fragment>}
                             </Typography>
                             {/* Type */}
-                            {(api.apiType === API.CONSTS.APIProduct) ?
-                                null :
+                            {api.apiType === API.CONSTS.APIProduct ? null : (
                                 <React.Fragment>
                                     <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                                         <FormattedMessage
@@ -117,7 +116,7 @@ function Configuration(props) {
                                         {!api.type && <React.Fragment>?</React.Fragment>}
                                     </Typography>
                                 </React.Fragment>
-                            }
+                            )}
                             {/* workflowStatus */}
                             <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                                 <FormattedMessage
@@ -163,66 +162,65 @@ function Configuration(props) {
                                 {api.context && <React.Fragment>{api.context}</React.Fragment>}
                             </Typography>
                             {/* Version */}
-                            {(api.apiType === API.CONSTS.API) &&
-                                (
-                                    <React.Fragment>
-                                        <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                                            <FormattedMessage
-                                                id='Apis.Details.NewOverview.Configuration.version'
-                                                defaultMessage='Version'
-                                            />
-                                        </Typography>
-                                        <Typography component='p' variant='body1'>
-                                            {api.version && <React.Fragment>{api.version}</React.Fragment>}
-                                        </Typography>
-                                    </React.Fragment>
-                                )
-                            }
+                            {api.apiType === API.CONSTS.API && (
+                                <React.Fragment>
+                                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                        <FormattedMessage
+                                            id='Apis.Details.NewOverview.Configuration.version'
+                                            defaultMessage='Version'
+                                        />
+                                    </Typography>
+                                    <Typography component='p' variant='body1'>
+                                        {api.version && <React.Fragment>{api.version}</React.Fragment>}
+                                    </Typography>
+                                </React.Fragment>
+                            )}
                             {/* Default Version */}
-                            {(api.apiType === API.CONSTS.API) &&
-                                (
-                                    <React.Fragment>
-                                        <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                                            <FormattedMessage
-                                                id='Apis.Details.NewOverview.Configuration.default.version'
-                                                defaultMessage='Default Version'
-                                            />
-                                            <Tooltip
-                                                placement='top'
-                                                classes={{
-                                                    tooltip: parentClasses.htmlTooltip,
-                                                }}
-                                                disableHoverListener
-                                                title={
-                                                    <React.Fragment>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.NewOverview.Configuration.tooltip'
-                                                            defaultMessage={'Marks one API version in a group as ' +
-                                                        'the default so that it can be invoked without specifying ' +
-                                                        'the version number in the URL. For example, if you mark ' +
-                                                        'http://host:port/youtube/2.0 as the default API, ' +
-                                                        'requests made to ' +
-                                                        'http://host:port/youtube/ are automatically ' +
-                                                        'routed to version 2.0.' +
-                                                        'If you mark an unpublished API as the default, ' +
-                                                        'the previous default published API will still be used' +
-                                                        ' as the default until the new default API is published.'}
-                                                        />
-                                                    </React.Fragment>
-                                                }
-                                            >
-                                                <Button className={parentClasses.helpButton}>
-                                                    <HelpOutline className={parentClasses.helpIcon} />
-                                                </Button>
-                                            </Tooltip>
-                                        </Typography>
-                                        <Typography component='p' variant='body1'>
-                                            {api.isDefaultVersion && <React.Fragment>Yes</React.Fragment>}
-                                            {!api.isDefaultVersion && <React.Fragment>No</React.Fragment>}
-                                        </Typography>
-                                    </React.Fragment>
-                                )
-                            }
+                            {api.apiType === API.CONSTS.API && (
+                                <React.Fragment>
+                                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                        <FormattedMessage
+                                            id='Apis.Details.NewOverview.Configuration.default.version'
+                                            defaultMessage='Default Version'
+                                        />
+                                        <Tooltip
+                                            placement='top'
+                                            classes={{
+                                                tooltip: parentClasses.htmlTooltip,
+                                            }}
+                                            disableHoverListener
+                                            title={
+                                                <React.Fragment>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.NewOverview.Configuration.tooltip'
+                                                        defaultMessage={
+                                                            'Marks one API version in a group as ' +
+                                                            'the default so that it can be invoked' +
+                                                            'without specifying ' +
+                                                            'the version number in the URL. For example, if you mark ' +
+                                                            'http://host:port/youtube/2.0 as the default API, ' +
+                                                            'requests made to ' +
+                                                            'http://host:port/youtube/ are automatically ' +
+                                                            'routed to version 2.0.' +
+                                                            'If you mark an unpublished API as the default, ' +
+                                                            'the previous default published API will still be used' +
+                                                            ' as the default until the new default API is published.'
+                                                        }
+                                                    />
+                                                </React.Fragment>
+                                            }
+                                        >
+                                            <Button className={parentClasses.helpButton}>
+                                                <HelpOutline className={parentClasses.helpIcon} />
+                                            </Button>
+                                        </Tooltip>
+                                    </Typography>
+                                    <Typography component='p' variant='body1'>
+                                        {api.isDefaultVersion && <React.Fragment>Yes</React.Fragment>}
+                                        {!api.isDefaultVersion && <React.Fragment>No</React.Fragment>}
+                                    </Typography>
+                                </React.Fragment>
+                            )}
                             {/* Transports */}
                             <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                                 <FormattedMessage
@@ -239,241 +237,250 @@ function Configuration(props) {
                                         <React.Fragment>
                                             <FormattedMessage
                                                 id='Apis.Details.NewOverview.Configuration.transport.tooltip'
-                                                defaultMessage={'HTTP is less secure than HTTPS and ' +
-                                                    'makes your API vulnerable to security threats.'}
-                                    />
-                                </React.Fragment>
-                            }
-                        >
-                            <Button className={parentClasses.helpButton}>
-                                <HelpOutline className={parentClasses.helpIcon} />
-                            </Button>
-                        </Tooltip>
-                    </Typography>
-                    <Typography component='p' variant='body1'>
-                        {api.transport && api.transport.length !== 0 && (
-                            <React.Fragment>
-                                {api.transport.map((item, index) => (
-                                    <span>
-                                        {item}
-                                        {api.transport.length !== index + 1 && ', '}
-                                    </span>
-                                ))}
-                            </React.Fragment>
-                        )}
-                        {!api.transport && <React.Fragment>?</React.Fragment>}
-                    </Typography>
-                    {/* API Security */}
-                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.securityScheme'
-                            defaultMessage='API Security'
-                        />
-                        <Tooltip
-                            placement='top'
-                            classes={{
-                                tooltip: parentClasses.htmlTooltip,
-                            }}
-                            disableHoverListener
-                            title={
-                                <React.Fragment>
-                                    <FormattedMessage
-                                        id='Apis.Details.NewOverview.Configuration.securityScheme.tooltip'
-                                        defaultMessage='OAuth2 is used as the default security schema.'
-                                    />
-                                </React.Fragment>
-                            }
-                        >
-                            <Button className={parentClasses.helpButton}>
-                                <HelpOutline className={parentClasses.helpIcon} />
-                            </Button>
-                        </Tooltip>
-                    </Typography>
-                    <Typography component='p' variant='body1'>
-                        {api.securityScheme && api.securityScheme.length !== 0 && (
-                            <React.Fragment>
-                                {api.securityScheme.map(item => (
-                                    item.includes('mandatory') ? (null) : (
-                                        <span>
-                                            { securitySchemeMap[item] + ', '}
-                                        </span>
-                                    )
-                                ))}
-                            </React.Fragment>
-                        )}
-                        {!api.securityScheme && <React.Fragment>?</React.Fragment>}
-                    </Typography>
-                    {/* Response Caching */}
-                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.response.caching'
-                            defaultMessage='Response Caching'
-                        />
-                        <Tooltip
-                            placement='top'
-                            classes={{
-                                tooltip: parentClasses.htmlTooltip,
-                            }}
-                            disableHoverListener
-                            title={
-                                <React.Fragment>
-                                    <FormattedMessage
-                                        id='Apis.Details.NewOverview.Configuration.response.caching.tooltip'
-                                        defaultMessage={'This option determines whether to cache the ' +
+                                                defaultMessage={
+                                                    'HTTP is less secure than HTTPS and ' +
+                                                    'makes your API vulnerable to security threats.'
+                                                }
+                                            />
+                                        </React.Fragment>
+                                    }
+                                >
+                                    <Button className={parentClasses.helpButton}>
+                                        <HelpOutline className={parentClasses.helpIcon} />
+                                    </Button>
+                                </Tooltip>
+                            </Typography>
+                            <Typography component='p' variant='body1'>
+                                {api.transport && api.transport.length !== 0 && (
+                                    <React.Fragment>
+                                        {api.transport.map((item, index) => (
+                                            <span>
+                                                {item}
+                                                {api.transport.length !== index + 1 && ', '}
+                                            </span>
+                                        ))}
+                                    </React.Fragment>
+                                )}
+                                {!api.transport && <React.Fragment>?</React.Fragment>}
+                            </Typography>
+                            {/* API Security */}
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Configuration.securityScheme'
+                                    defaultMessage='API Security'
+                                />
+                                <Tooltip
+                                    placement='top'
+                                    classes={{
+                                        tooltip: parentClasses.htmlTooltip,
+                                    }}
+                                    disableHoverListener
+                                    title={
+                                        <React.Fragment>
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.Configuration.securityScheme.tooltip'
+                                                defaultMessage='OAuth2 is used as the default security schema.'
+                                            />
+                                        </React.Fragment>
+                                    }
+                                >
+                                    <Button className={parentClasses.helpButton}>
+                                        <HelpOutline className={parentClasses.helpIcon} />
+                                    </Button>
+                                </Tooltip>
+                            </Typography>
+                            <Typography component='p' variant='body1'>
+                                {api.securityScheme && api.securityScheme.length !== 0 && (
+                                    <React.Fragment>
+                                        {api.securityScheme.map(item =>
+                                            (item.includes('mandatory') ? null : (
+                                                <span>{securitySchemeMap[item] + ', '}</span>
+                                            )))}
+                                    </React.Fragment>
+                                )}
+                                {!api.securityScheme && <React.Fragment>?</React.Fragment>}
+                            </Typography>
+                            {/* Response Caching */}
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Configuration.response.caching'
+                                    defaultMessage='Response Caching'
+                                />
+                                <Tooltip
+                                    placement='top'
+                                    classes={{
+                                        tooltip: parentClasses.htmlTooltip,
+                                    }}
+                                    disableHoverListener
+                                    title={
+                                        <React.Fragment>
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.Configuration.response.caching.tooltip'
+                                                defaultMessage={
+                                                    'This option determines whether to cache the ' +
                                                     'response messages of the API. Caching improves performance ' +
                                                     'because the backend server does not have to process the same' +
                                                     ' data multiple times. To offset the risk of stale data in' +
-                                                    'the cache, set an appropriate timeout period when prompted.'}
-                                    />
-                                </React.Fragment>
-                            }
-                        >
-                            <Button className={parentClasses.helpButton}>
-                                <HelpOutline className={parentClasses.helpIcon} />
-                            </Button>
-                        </Tooltip>
-                    </Typography>
-                    <Typography component='p' variant='body1'>
-                        {api.responseCaching && <React.Fragment>{api.responseCaching}</React.Fragment>}
-                        {!api.responseCaching && <React.Fragment>?</React.Fragment>}
-                    </Typography>
-                    {/* Authorization Header */}
-                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.authorization.header'
-                            defaultMessage='Authorization Header'
-                        />
-                        <Tooltip
-                            placement='top'
-                            classes={{
-                                tooltip: parentClasses.htmlTooltip,
-                            }}
-                            disableHoverListener
-                            title={
-                                <React.Fragment>
-                                    <FormattedMessage
-                                        id='Apis.Details.NewOverview.Configuration.authorization.header.tooltip'
-                                        defaultMessage={'A custom authorization header can be defined ' +
+                                                    'the cache, set an appropriate timeout period when prompted.'
+                                                }
+                                            />
+                                        </React.Fragment>
+                                    }
+                                >
+                                    <Button className={parentClasses.helpButton}>
+                                        <HelpOutline className={parentClasses.helpIcon} />
+                                    </Button>
+                                </Tooltip>
+                            </Typography>
+                            <Typography component='p' variant='body1'>
+                                {api.responseCaching && <React.Fragment>{api.responseCaching}</React.Fragment>}
+                                {!api.responseCaching && <React.Fragment>?</React.Fragment>}
+                            </Typography>
+                            {/* Authorization Header */}
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Configuration.authorization.header'
+                                    defaultMessage='Authorization Header'
+                                />
+                                <Tooltip
+                                    placement='top'
+                                    classes={{
+                                        tooltip: parentClasses.htmlTooltip,
+                                    }}
+                                    disableHoverListener
+                                    title={
+                                        <React.Fragment>
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.Configuration.authorization.header.tooltip'
+                                                defaultMessage={
+                                                    'A custom authorization header can be defined ' +
                                                     'as a replacement to the default Authorization header ' +
                                                     'used to send a request. If a value is specified here, ' +
                                                     'it will be used as the header field to send the access token' +
-                                                    'in a request to consume the API'}
-                                    />
-                                </React.Fragment>
-                            }
-                        >
-                            <Button className={parentClasses.helpButton}>
-                                <HelpOutline className={parentClasses.helpIcon} />
-                            </Button>
-                        </Tooltip>
-                    </Typography>
-                    <Typography component='p' variant='body1'>
-                        {api.authorizationHeader && <React.Fragment>{api.authorizationHeader}</React.Fragment>}
-                        {!api.authorizationHeader && <React.Fragment>?</React.Fragment>}
-                    </Typography>
-                    {/* Access Control */}
-                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.access.control'
-                            defaultMessage='Access Control'
-                        />
-                        <Tooltip
-                            placement='top'
-                            classes={{
-                                tooltip: parentClasses.htmlTooltip,
-                            }}
-                            disableHoverListener
-                            title={
-                                <React.Fragment>
-                                    <FormattedMessage
-                                        id='Apis.Details.NewOverview.Configuration.access.control.all.tooltip'
-                                        defaultMessage={'All : The API is viewable, ' +
-                                                    'modifiable by all the publishers and creators.'}
-                                    />
-                                    <br />
-                                    <FormattedMessage
-                                        id='Apis.Details.NewOverview.Configuration.access.control.tooltip'
-                                        defaultMessage={'Restricted by roles : The API can be viewable and' +
+                                                    'in a request to consume the API'
+                                                }
+                                            />
+                                        </React.Fragment>
+                                    }
+                                >
+                                    <Button className={parentClasses.helpButton}>
+                                        <HelpOutline className={parentClasses.helpIcon} />
+                                    </Button>
+                                </Tooltip>
+                            </Typography>
+                            <Typography component='p' variant='body1'>
+                                {api.authorizationHeader && <React.Fragment>{api.authorizationHeader}</React.Fragment>}
+                                {!api.authorizationHeader && <React.Fragment>?</React.Fragment>}
+                            </Typography>
+                            {/* Access Control */}
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Configuration.access.control'
+                                    defaultMessage='Access Control'
+                                />
+                                <Tooltip
+                                    placement='top'
+                                    classes={{
+                                        tooltip: parentClasses.htmlTooltip,
+                                    }}
+                                    disableHoverListener
+                                    title={
+                                        <React.Fragment>
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.Configuration.access.control.all.tooltip'
+                                                defaultMessage={
+                                                    'All : The API is viewable, ' +
+                                                    'modifiable by all the publishers and creators.'
+                                                }
+                                            />
+                                            <br />
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.Configuration.access.control.tooltip'
+                                                defaultMessage={
+                                                    'Restricted by roles : The API can be viewable and' +
                                                     'modifiable by only specific publishers and creators ' +
-                                                    'with the roles that you specify'}
-                                    />
-                                </React.Fragment>
-                            }
-                        >
-                            <Button className={parentClasses.helpButton}>
-                                <HelpOutline className={parentClasses.helpIcon} />
-                            </Button>
-                        </Tooltip>
-                    </Typography>
-                    <Typography component='p' variant='body1'>
-                        {api.accessControl && <React.Fragment>{api.accessControl}</React.Fragment>}
-                        {api.accessControl === 'RESTRICTED' && ' ( Visible to '}
-                        {api.accessControl === 'RESTRICTED' && api.accessControlRoles.join()}
-                        {api.accessControl === 'RESTRICTED' && ' ) '}
-                    </Typography>
-                    {/* Visibility */}
-                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.visibility.store'
-                            defaultMessage='Visibility on Store'
-                        />
-                        <Tooltip
-                            placement='top'
-                            classes={{
-                                tooltip: parentClasses.htmlTooltip,
-                            }}
-                            disableHoverListener
-                            title={
-                                <React.Fragment>
-                                    <FormattedMessage
-                                        id='Apis.Details.NewOverview.Configuration.visibility.store.all.tooltip'
-                                        defaultMessage={'Public: The API is accessible to everyone and can be' +
+                                                    'with the roles that you specify'
+                                                }
+                                            />
+                                        </React.Fragment>
+                                    }
+                                >
+                                    <Button className={parentClasses.helpButton}>
+                                        <HelpOutline className={parentClasses.helpIcon} />
+                                    </Button>
+                                </Tooltip>
+                            </Typography>
+                            <Typography component='p' variant='body1'>
+                                {api.accessControl && <React.Fragment>{api.accessControl}</React.Fragment>}
+                                {api.accessControl === 'RESTRICTED' && ' ( Visible to '}
+                                {api.accessControl === 'RESTRICTED' && api.accessControlRoles.join()}
+                                {api.accessControl === 'RESTRICTED' && ' ) '}
+                            </Typography>
+                            {/* Visibility */}
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Configuration.visibility.store'
+                                    defaultMessage='Visibility on Store'
+                                />
+                                <Tooltip
+                                    placement='top'
+                                    classes={{
+                                        tooltip: parentClasses.htmlTooltip,
+                                    }}
+                                    disableHoverListener
+                                    title={
+                                        <React.Fragment>
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.Configuration.visibility.store.all.tooltip'
+                                                defaultMessage={
+                                                    'Public: The API is accessible to everyone and can be' +
                                                     'advertised in multiple stores - a central store ' +
-                                                    'and/or non-WSO2 stores.'}
-                                    />
-                                    <br />
-                                    <FormattedMessage
-                                        id='Apis.Details.NewOverview.Configuration.visibility.store.res.tooltip'
-                                        defaultMessage={'Restricted by roles: The API is visible only ' +
-                                                    'to specific user roles in the tenant store that you specify.'}
-                                    />
-                                </React.Fragment>
-                            }
-                        >
-                            <Button className={parentClasses.helpButton}>
-                                <HelpOutline className={parentClasses.helpIcon} />
-                            </Button>
-                        </Tooltip>
-                    </Typography>
-                    <Typography component='p' variant='body1'>
-                        {api.visibility && <React.Fragment>{api.visibility}</React.Fragment>}
-                        {api.visibility === 'RESTRICTED' && ' ( Visible to '}
-                        {api.visibility === 'RESTRICTED' && api.visibleRoles.join()}
-                        {api.visibility === 'RESTRICTED' && ' ) '}
-                    </Typography>
+                                                    'and/or non-WSO2 stores.'
+                                                }
+                                            />
+                                            <br />
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.Configuration.visibility.store.res.tooltip'
+                                                defaultMessage={
+                                                    'Restricted by roles: The API is visible only ' +
+                                                    'to specific user roles in the tenant store that you specify.'
+                                                }
+                                            />
+                                        </React.Fragment>
+                                    }
+                                >
+                                    <Button className={parentClasses.helpButton}>
+                                        <HelpOutline className={parentClasses.helpIcon} />
+                                    </Button>
+                                </Tooltip>
+                            </Typography>
+                            <Typography component='p' variant='body1'>
+                                {api.visibility && <React.Fragment>{api.visibility}</React.Fragment>}
+                                {api.visibility === 'RESTRICTED' && ' ( Visible to '}
+                                {api.visibility === 'RESTRICTED' && api.visibleRoles.join()}
+                                {api.visibility === 'RESTRICTED' && ' ) '}
+                            </Typography>
+                        </div>
+                    </div>
+
+                    {api.apiType === API.CONSTS.APIProduct ? null : (
+                        <React.Fragment>
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Configuration.tags'
+                                    defaultMessage='Tags'
+                                />
+                            </Typography>
+                            <Typography variant='body1'>
+                                (
+                                {api.tags &&
+                                    api.tags.map(tag => <Chip key={tag} label={tag} className={parentClasses.chip} />)}
+                                )
+                            </Typography>
+                        </React.Fragment>
+                    )}
                 </div>
             </div>
-
-            {(api.apiType === API.CONSTS.APIProduct) ?
-                null :
-                <React.Fragment>
-                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.tags'
-                            defaultMessage='Tags'
-                        />
-                    </Typography>
-                    <Typography variant='body1'>
-                                ({api.tags && api.tags.map(tag =>
-                            (<Chip
-                                key={tag}
-                                label={tag}
-                                className={parentClasses.chip}
-                            />))
-                        })
-                    </Typography>
-                </React.Fragment>
-            }
         </Paper>
     );
 }
