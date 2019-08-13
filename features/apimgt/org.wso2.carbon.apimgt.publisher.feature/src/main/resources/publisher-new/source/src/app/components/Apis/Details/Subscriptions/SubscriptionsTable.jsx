@@ -494,7 +494,7 @@ class SubscriptionsTable extends Component {
                                 <TableFooter>
                                     <TableRow>
                                         <TablePagination
-                                            rowsPerPageOptions={[1, 5, 10, 25, 50, 100]}
+                                            rowsPerPageOptions={[5, 10, 25, 50, 100]}
                                             colSpan={3}
                                             count={selectedSubscriptions.length}
                                             rowsPerPage={rowsPerPage}
