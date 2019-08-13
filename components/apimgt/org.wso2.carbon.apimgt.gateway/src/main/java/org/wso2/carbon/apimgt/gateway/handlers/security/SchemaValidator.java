@@ -91,7 +91,7 @@ public class SchemaValidator extends AbstractHandler {
             if (!APIMgtGatewayConstants.APPLICATION_JSON.equals(contentType)) {
                 return true;
             }
-            swagger = messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_NAME).toString();
+            swagger = messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_STRING).toString();
             if (swagger  == null) {
                 return true;
             }
