@@ -206,7 +206,7 @@ public class OAuthAuthenticator implements Authenticator {
                     log.error("Swagger is missing in the gateway. " +
                             "Therefore, JWT authentication cannot be performed.");
                     return new AuthenticationResponse(false, isMandatory, true,
-                            APISecurityConstants.API_AUTH_MISSING_SWAGGER,
+                            APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF,
                             "JWT authentication cannot be performed.");
                 }
                 authenticationScheme = OpenAPIUtils.getResourceAuthenticationScheme(openAPI, synCtx);
