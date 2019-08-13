@@ -42,7 +42,7 @@
             </tr>
             <tr>
                 <td class="col-sm-3"><%=i18n.localize("Context")%></td>
-                <td id="inUrl"><%=api.context%></td>
+                <td id="inUrl"><%=encode.forHtml(api.context)%></td>
             </tr>
             <% if(endpoint_config && (endpoint_config.production_endpoints != undefined)){ %>
             <tr>
