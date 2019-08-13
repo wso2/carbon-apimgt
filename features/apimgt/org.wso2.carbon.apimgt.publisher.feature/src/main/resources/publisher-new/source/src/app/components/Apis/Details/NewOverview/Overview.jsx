@@ -171,7 +171,6 @@ function Overview(props) {
                     <CheckItem itemSuccess={false} itemLabel='Policies' />
                     {getItemSuccessLabelForAPIType(api.type)}
                     <CheckItem itemSuccess={false} itemLabel='Scopes' />
-                    <CheckItem itemSuccess itemLabel='Resources' />
                     {scopesCheckItem}
                     <CheckItem itemSuccess={false} itemLabel='Documents' />
                     <CheckItem itemSuccess={false} itemLabel='Business Information' />

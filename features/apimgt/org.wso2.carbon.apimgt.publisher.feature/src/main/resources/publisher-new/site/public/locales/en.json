@@ -499,7 +499,7 @@
   "Apis.GraphQL.APICreateGraphQL.create.api": "Create API",
   "Apis.GraphQL.APICreateGraphQL.next": "Next",
   "Apis.GraphQL.APICreateGraphQL.select.graphQL": "Select GraphQL",
-  "Apis.GraphQL.APICreateGraphQL.using.SDL": "Design a new GraphQL API using SDL",
+  "Apis.GraphQL.APICreateGraphQL.using.SDL": "Import a GraphQL SDL Definition",
   "Apis.GraphQL.Steps.ProvideGraphQL.error.empty": "This field can not be empty.",
   "Apis.GraphQL.Steps.ProvideGraphQL.error.invalid.graphql.file": "Invalid GraphQL File",
   "Apis.GraphQL.Steps.ProvideGraphQL.try.dropping.schema.file": "Try dropping schema file here, or click to select\n                                        schema to upload.",

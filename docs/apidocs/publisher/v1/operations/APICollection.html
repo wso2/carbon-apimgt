@@ -297,4 +297,281 @@ API definition is GraphQL Schema
                     </tr>
                 </tbody>
             </table>
+            <hr/>
+            <h4 class="operation-heading"><a name="searchGet"></a>Retrieve/Search APIs and API Documents by content
+</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/search</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation provides you a list of available APIs and API Documents qualifying the given keyword match.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_view</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-searchGet">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-searchGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/search?limit&#x3D;25&amp;offset&#x3D;0&amp;query&#x3D;test HTTP 1/1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-searchGet">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-searchGet" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+Content-Type: application/json
+
+{
+  &quot;count&quot; : 5,
+  &quot;list&quot; : [ {
+    &quot;id&quot; : &quot;437a11af-a1de-42a6-8ecd-82c4dcc29f34&quot;,
+    &quot;name&quot; : &quot;pizza api doc&quot;,
+    &quot;type&quot; : &quot;DOC&quot;,
+    &quot;docType&quot; : &quot;HOWTO&quot;,
+    &quot;summary&quot; : &quot;This is a sample documentation&quot;,
+    &quot;sourceType&quot; : &quot;INLINE&quot;,
+    &quot;visibility&quot; : &quot;API_LEVEL&quot;,
+    &quot;apiName&quot; : &quot;PizzaShackAPI&quot;,
+    &quot;apiVersion&quot; : &quot;1.0.0&quot;,
+    &quot;apiProvider&quot; : &quot;admin&quot;,
+    &quot;apiUUID&quot; : &quot;54b86c3a-11cd-47dc-9c7a-8140a34955da&quot;
+  }, {
+    &quot;id&quot; : &quot;54b86c3a-11cd-47dc-9c7a-8140a34955da&quot;,
+    &quot;name&quot; : &quot;PizzaShackAPI&quot;,
+    &quot;type&quot; : &quot;API&quot;,
+    &quot;description&quot; : &quot;This is a simple API for Pizza Shack online pizza delivery store.&quot;,
+    &quot;context&quot; : &quot;/pizzashack&quot;,
+    &quot;version&quot; : &quot;1.0.0&quot;,
+    &quot;provider&quot; : &quot;admin&quot;,
+    &quot;status&quot; : &quot;PUBLISHED&quot;
+  }, {
+    &quot;id&quot; : &quot;99958883-3162-4111-98e0-06fa7d472321&quot;,
+    &quot;name&quot; : &quot;test&quot;,
+    &quot;type&quot; : &quot;API&quot;,
+    &quot;context&quot; : &quot;/test&quot;,
+    &quot;version&quot; : &quot;1.0.0&quot;,
+    &quot;provider&quot; : &quot;admin&quot;,
+    &quot;status&quot; : &quot;DEPRECATED&quot;
+  }, {
+    &quot;id&quot; : &quot;895793f9-0b07-42f9-b5b2-6d5c489f10ee&quot;,
+    &quot;name&quot; : &quot;test&quot;,
+    &quot;type&quot; : &quot;API&quot;,
+    &quot;context&quot; : &quot;/test&quot;,
+    &quot;version&quot; : &quot;1.2.0&quot;,
+    &quot;provider&quot; : &quot;admin&quot;,
+    &quot;status&quot; : &quot;PUBLISHED&quot;
+  }, {
+    &quot;id&quot; : &quot;d76b563b-f6c4-432e-8d6d-dff56889e248&quot;,
+    &quot;name&quot; : &quot;test2&quot;,
+    &quot;type&quot; : &quot;API&quot;,
+    &quot;context&quot; : &quot;/test2&quot;,
+    &quot;version&quot; : &quot;1.0.0&quot;,
+    &quot;provider&quot; : &quot;admin&quot;,
+    &quot;status&quot; : &quot;CREATED&quot;
+  } ],
+  &quot;pagination&quot; : {
+    &quot;offset&quot; : 0,
+    &quot;limit&quot; : 25,
+    &quot;total&quot; : 5,
+    &quot;next&quot; : &quot;&quot;,
+    &quot;previous&quot; : &quot;&quot;
+  }
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.0/search?limit&#x3D;25&amp;offset&#x3D;0&amp;query&#x3D;test&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>limit</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Maximum size of resource array to return.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                Integer
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">25</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>offset</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Starting point within the complete list of items qualified.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                Integer
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">0</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>query</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**Search**.
+
+You can search by proving a keyword.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resource.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. List of qualifying APIs and API documents is returned. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#SearchResultList">SearchResultList</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 </div>
