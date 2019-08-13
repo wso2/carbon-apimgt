@@ -131,6 +131,21 @@ class APIProduct extends Resource {
     }
 
     /**
+     * Update an api Product via PUT HTTP method, Need to give the updated API Product object as the argument.
+     * @param apiProduct {Object} Updated API Product object(JSON) which needs to be updated
+     */
+    update(apiProduct) {
+        const promisedUpdate = this.client.then((client) => {
+            const payload = {
+                apiProductId: apiProduct.id,
+                body: apiProduct
+            };
+            return client.apis['API Product (Individual)'].put_api_products__apiProductId_(payload);
+        });
+        return promisedUpdate;
+    }
+
+    /**
      * Get the thumnail of an API Product
      *
      * @param id {string} UUID of the api product
@@ -369,6 +384,46 @@ class APIProduct extends Resource {
         });
 
         return promiseAddFileToDocument;
+    }
+
+    /**
+     * Update an api swagger via PUT HTTP method
+     * @param {*} swagger 
+     */
+    updateSwagger(swagger) {
+        const promisedUpdate = this.client.then((client) => {
+            const payload = {
+                apiProductId: this.id,
+                apiDefinition: JSON.stringify(swagger),
+                'Content-Type': 'multipart/form-data',
+            };
+            return client.apis['API Product (Individual)'].put_api_products__apiProductId__swagger(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            ).catch((error) => {
+                console.error(error);
+            });
+        });
+        return promisedUpdate.then(response => {
+            return this;
+        });
+    }
+
+    /**
+     * Get the swagger of an API Product
+     * @param id {String} UUID of the API Product in which the swagger is needed
+     */
+    getSwagger(id) {
+        const promiseGet = this.client.then((client) => {
+            return client.apis['API Product (Individual)'].get_api_products__apiProductId__swagger({
+                apiProductId: id
+            }, this._requestMetaData());
+        }).catch((error) => {
+            console.error(error);
+        });
+        return promiseGet;
     }
 }
 

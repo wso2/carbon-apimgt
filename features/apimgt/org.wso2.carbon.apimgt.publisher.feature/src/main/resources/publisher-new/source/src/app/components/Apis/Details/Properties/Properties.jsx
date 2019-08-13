@@ -37,6 +37,8 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import API from 'AppData/api.js';
+import ApiContext from '../components/ApiContext';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = theme => ({
@@ -395,6 +397,7 @@ class Properties extends React.Component {
                     handleUpdateList={this.handleUpdateList}
                     handleDelete={this.handleDelete}
                     apiAdditionalProperties={data}
+                    {...this.props}
                 />);
             }
         }
@@ -504,6 +507,12 @@ class Properties extends React.Component {
                                                         defaultMessage='Add'
                                                     />
                                                 </Button>
+                                            </div>
+                                        </Grid>
+                                        <Grid item>
+                                            <Link to={(api.apiType === API.CONSTS.APIProduct ? '/api-products/' :
+                                                '/apis/') + api.id + '/overview'}
+                                            >
                                                 <Button onClick={this.toggleAddProperty}>
                                                     <FormattedMessage
                                                         id='Apis.Details.Properties.Properties.cancel'
@@ -566,6 +575,7 @@ Properties.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,
+        apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]),
     }).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
     updateAPI: PropTypes.func.isRequired,

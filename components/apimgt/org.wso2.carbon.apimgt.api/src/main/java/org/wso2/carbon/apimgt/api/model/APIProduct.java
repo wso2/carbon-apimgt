@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -76,6 +77,9 @@ public class APIProduct {
      */
     private String accessControl;
     private String accessControlRoles;
+
+    private Date lastUpdated;
+    private Date createdTime;
 
     public APIProduct(){}
 
@@ -299,26 +303,6 @@ public class APIProduct {
         return accessControlRoles;
     }
 
-    @Override
-    public String toString() {
-        String tiers = "";
-        for (Tier tier : availableTiers) {
-            tiers += tier.getName() + " ";
-        }
-        String env = "";
-        for (String environment : environments ) {
-            env += environment + " ";
-        }
-        return "APIProduct [name=" + id.getName() + ", version=" + id.getVersion() + ", uuid=" + uuid + ", productId="
-                + productId + ", provider=" + id.getProviderName() + ", description=" + description
-                + ", availableTiers=" + tiers + ", visibility=" + visibility + ", visibleRoles=" + visibleRoles
-                + ", visibleTenants=" + visibleTenants + ", environments=" + env + ", subscriptionAvailability="
-                + subscriptionAvailability + ", subscriptionAvailableTenants=" + subscriptionAvailableTenants
-                + ", accessControl=" + accessControl + ", accessControlRoles=" + accessControlRoles + ", state=" + state
-                + ", businessOwner=" + businessOwner + ", businessOwnerEmail=" + businessOwnerEmail + ", tenantDomain="
-                + tenantDomain + ", productResources=" + productResources + "]";
-    }
-
     public String getApiSecurity() {
         return apiSecurity;
     }
@@ -341,5 +325,41 @@ public class APIProduct {
 
     public void setCorsConfiguration(CORSConfiguration corsConfiguration) {
         this.corsConfiguration = corsConfiguration;
+    }
+
+    public void setCreatedTime(Date createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public Date getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setLastUpdated(Date lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public Date getLastUpdated() {
+        return lastUpdated;
+    }
+
+    @Override
+    public String toString() {
+        String tiers = "";
+        for (Tier tier : availableTiers) {
+            tiers += tier.getName() + " ";
+        }
+        String env = "";
+        for (String environment : environments ) {
+            env += environment + " ";
+        }
+        return "APIProduct [name=" + id.getName() + ", version=" + id.getVersion() + ", uuid=" + uuid + ", productId="
+                + productId + ", provider=" + id.getProviderName() + ", description=" + description
+                + ", availableTiers=" + tiers + ", visibility=" + visibility + ", visibleRoles=" + visibleRoles
+                + ", visibleTenants=" + visibleTenants + ", environments=" + env + ", subscriptionAvailability="
+                + subscriptionAvailability + ", subscriptionAvailableTenants=" + subscriptionAvailableTenants
+                + ", accessControl=" + accessControl + ", accessControlRoles=" + accessControlRoles + ", state=" + state
+                + ", businessOwner=" + businessOwner + ", businessOwnerEmail=" + businessOwnerEmail + ", tenantDomain="
+                + tenantDomain + ", productResources=" + productResources + "]";
     }
 }

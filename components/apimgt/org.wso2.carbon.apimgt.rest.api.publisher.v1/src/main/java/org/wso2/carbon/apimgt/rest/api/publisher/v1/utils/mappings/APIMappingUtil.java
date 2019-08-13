@@ -93,12 +93,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.sql.Timestamp;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -733,6 +735,16 @@ public class APIMappingUtil {
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
         if (model.getApiSecurity() != null) {
             dto.setSecurityScheme(Arrays.asList(model.getApiSecurity().split(",")));
+        }
+        if (null != model.getLastUpdated()) {
+            Date lastUpdateDate = model.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
+            dto.setLastUpdatedTime(String.valueOf(timeStamp));
+        }
+        if (null != model.getCreatedTime()) {
+            Date createdTime = model.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(createdTime.getTime());
+            dto.setCreatedTime(String.valueOf(timeStamp));
         }
         return dto;
     }
@@ -1542,6 +1554,13 @@ public class APIMappingUtil {
             productDto.setVisibleTenants(Arrays.asList(product.getVisibleTenants().split(",")));
         }
 
+        productDto.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY.equals(product.getAccessControl()) ?
+                APIProductDTO.AccessControlEnum.RESTRICTED :
+                APIProductDTO.AccessControlEnum.NONE);
+        if (product.getAccessControlRoles() != null) {
+            productDto.setAccessControlRoles(Arrays.asList(product.getAccessControlRoles().split(",")));
+        }
+
         if (StringUtils.isEmpty(product.getTransports())) {
             List<String> transports = new ArrayList<>();
             transports.add(APIConstants.HTTPS_PROTOCOL);
@@ -1566,6 +1585,17 @@ public class APIMappingUtil {
 
         if (product.getApiSecurity() != null) {
             productDto.setSecurityScheme(Arrays.asList(product.getApiSecurity().split(",")));
+        }
+
+        if (null != product.getLastUpdated()) {
+            Date lastUpdateDate = product.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
+            productDto.setLastUpdatedTime(String.valueOf(timeStamp));
+        }
+        if (null != product.getCreatedTime()) {
+            Date createdTime = product.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(createdTime.getTime());
+            productDto.setCreatedTime(String.valueOf(timeStamp));
         }
 
         return productDto;

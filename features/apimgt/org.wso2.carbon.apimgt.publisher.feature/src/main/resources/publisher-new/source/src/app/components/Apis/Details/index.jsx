@@ -298,15 +298,20 @@ class Details extends Component {
      * @memberof Details
      */
     updateAPI(newAPI, isAPIProduct) {
-        const restAPI = new Api();
+        const restAPI = (isAPIProduct || newAPI.apiType === Api.CONSTS.APIProduct) ? new APIProduct() : new Api();
         /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
         /* eslint no-param-reassign: ["error", { "props": false }] */
         if (newAPI._data) delete newAPI._data;
         if (newAPI.client) delete newAPI.client;
+
+        const modifiedNewAPI = JSON.parse(JSON.stringify(newAPI));
+        if (modifiedNewAPI.apiType) delete modifiedNewAPI.apiType;
+
         if (isAPIProduct) {
-            const promisedApi = restAPI.updateProduct(JSON.parse(JSON.stringify(newAPI)));
+            const promisedApi = restAPI.update(modifiedNewAPI);
             promisedApi
-                .then((api) => {
+                .then((response) => {
+                    const { obj: api } = response;
                     Alert.info(`${api.name} updated successfully.`);
                     this.setState({ api });
                 })
@@ -320,9 +325,10 @@ class Details extends Component {
                     }
                 });
         } else {
-            const promisedApi = restAPI.update(JSON.parse(JSON.stringify(newAPI)));
+            const promisedApi = restAPI.update(modifiedNewAPI);
             promisedApi
-                .then((api) => {
+                .then((response) => {
+                    const { obj: api } = response;
                     Alert.info(`${api.name} updated successfully.`);
                     this.setState({ api });
                 })
@@ -566,7 +572,11 @@ class Details extends Component {
                                     path={Details.subPaths.BUSINESS_INFO_PRODUCT}
                                     component={() => <BusinessInformation api={api} />}
                                 />
-                                <Route path={Details.subPaths.PROPERTIES} component={() => <Properties />} />
+                                <Route path={Details.subPaths.PROPERTIES} component={() => <Properties api={api} />} />
+                                <Route
+                                    path={Details.subPaths.PROPERTIES_PRODUCT}
+                                    component={() => <Properties api={api} />}
+                                />
                                 <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
                             </Switch>
                         </div>
@@ -586,6 +596,7 @@ Details.subPaths = {
     OVERVIEW: '/apis/:api_uuid/overview',
     OVERVIEW_PRODUCT: '/api-products/:apiprod_uuid/overview',
     API_DEFINITION: '/apis/:api_uuid/api definition',
+    API_DEFINITION_PRODUCT: '/api-products/:apiprod_uuid/api definition',
     SCHEMA_DEFINITION: '/apis/:api_uuid/schema definition',
     LIFE_CYCLE: '/apis/:api_uuid/lifecycle',
     CONFIGURATION: '/apis/:api_uuid/configuration',
@@ -604,6 +615,7 @@ Details.subPaths = {
     BUSINESS_INFO: '/apis/:api_uuid/business info',
     BUSINESS_INFO_PRODUCT: '/api-products/:apiprod_uuid/business info',
     PROPERTIES: '/apis/:api_uuid/properties',
+    PROPERTIES_PRODUCT: '/api-products/:apiprod_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
 };
 

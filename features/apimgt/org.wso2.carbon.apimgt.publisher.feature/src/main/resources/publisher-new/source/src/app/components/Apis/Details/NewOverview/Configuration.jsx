@@ -88,132 +88,158 @@ function Configuration(props) {
                     <Typography component='p' variant='body1'>
                         {api.provider && <React.Fragment>{api.provider}</React.Fragment>}
                     </Typography>
-                    {/* Type */}
-                    {(api.apiType === API.CONSTS.APIProduct) ?
-                        null :
-                        <div>
+                    <div className={parentClasses.imageContainer}>
+                        <div className={parentClasses.imageWrapper}>
+                            {/* Thumbnail */}
+                            <ThumbnailView api={api} width={200} height={200} isEditable />
+                            {/* Provider */}
                             <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                                 <FormattedMessage
-                                    id='Apis.Details.NewOverview.Configuration.type'
-                                    defaultMessage='Type'
+                                    id='Apis.Details.NewOverview.Configuration.provider'
+                                    defaultMessage='Provider'
                                 />
                             </Typography>
                             <Typography component='p' variant='body1'>
-                                {api.type && <React.Fragment>{api.type}</React.Fragment>}
-                                {!api.type && <React.Fragment>?</React.Fragment>}
+                                {api.provider && <React.Fragment>{api.provider}</React.Fragment>}
                             </Typography>
-                        </div>
-                    }
-                    {/* workflowStatus */}
-                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.workflow.status'
-                            defaultMessage='Workflow Status'
-                        />
-                    </Typography>
-                    <Typography component='p' variant='body1'>
-                        {api.workflowStatus && <React.Fragment>{api.workflowStatus}</React.Fragment>}
-                        {!api.workflowStatus && <React.Fragment>?</React.Fragment>}
-                    </Typography>
-                    {/* Created Time */}
-                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.created.time'
-                            defaultMessage='Created Time'
-                        />
-                    </Typography>
-                    <Typography component='p' variant='body1'>
-                        {api.createdTime && <React.Fragment>{api.createdTime}</React.Fragment>}
-                        {!api.createdTime && <React.Fragment>?</React.Fragment>}
-                    </Typography>
-                    {/* Last Updated Time */}
-                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.last.updated.time'
-                            defaultMessage='Last Updated Time'
-                        />
-                    </Typography>
-                    <Typography component='p' variant='body1'>
-                        {api.lastUpdatedTime && <React.Fragment>{api.lastUpdatedTime}</React.Fragment>}
-                        {!api.lastUpdatedTime && <React.Fragment>?</React.Fragment>}
-                    </Typography>
-                </div>
-                <div>
-                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.context'
-                            defaultMessage='Context'
-                        />
-                    </Typography>
-                    <Typography component='p' variant='body1'>
-                        {api.context && <React.Fragment>{api.context}</React.Fragment>}
-                    </Typography>
-                    {/* Version */}
-                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.version'
-                            defaultMessage='Version'
-                        />
-                    </Typography>
-                    <Typography component='p' variant='body1'>
-                        {api.version && <React.Fragment>{api.version}</React.Fragment>}
-                    </Typography>
-                    {/* Default Version */}
-                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.default.version'
-                            defaultMessage='Default Version'
-                        />
-                        <Tooltip
-                            placement='top'
-                            classes={{
-                                tooltip: parentClasses.htmlTooltip,
-                            }}
-                            disableHoverListener
-                            title={
+                            {/* Type */}
+                            {(api.apiType === API.CONSTS.APIProduct) ?
+                                null :
                                 <React.Fragment>
-                                    <FormattedMessage
-                                        id='Apis.Details.NewOverview.Configuration.tooltip'
-                                        defaultMessage={'Marks one API version in a group as ' +
-                                                    'the default so that it can be invoked without specifying ' +
-                                                    'the version number in the URL. For example, if you mark ' +
-                                                    'http://host:port/youtube/2.0 as the default API, ' +
-                                                    'requests made to ' +
-                                                    'http://host:port/youtube/ are automatically ' +
-                                                    'routed to version 2.0.' +
-                                                    'If you mark an unpublished API as the default, ' +
-                                                    'the previous default published API will still be used' +
-                                                    ' as the default until the new default API is published.'}
-                                    />
+                                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                        <FormattedMessage
+                                            id='Apis.Details.NewOverview.Configuration.type'
+                                            defaultMessage='Type'
+                                        />
+                                    </Typography>
+                                    <Typography component='p' variant='body1'>
+                                        {api.type && <React.Fragment>{api.type}</React.Fragment>}
+                                        {!api.type && <React.Fragment>?</React.Fragment>}
+                                    </Typography>
                                 </React.Fragment>
                             }
-                        >
-                            <Button className={parentClasses.helpButton}>
-                                <HelpOutline className={parentClasses.helpIcon} />
-                            </Button>
-                        </Tooltip>
-                    </Typography>
-                    <Typography component='p' variant='body1'>
-                        {api.isDefaultVersion && <React.Fragment>Yes</React.Fragment>}
-                        {!api.isDefaultVersion && <React.Fragment>No</React.Fragment>}
-                    </Typography>
-                    {/* Transports */}
-                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.transports'
-                            defaultMessage='Transports'
-                        />
-                        <Tooltip
-                            placement='top'
-                            classes={{
-                                tooltip: parentClasses.htmlTooltip,
-                            }}
-                            disableHoverListener
-                            title={
-                                <React.Fragment>
-                                    <FormattedMessage
-                                        id='Apis.Details.NewOverview.Configuration.transport.tooltip'
-                                        defaultMessage={'HTTP is less secure than HTTPS and ' +
+                            {/* workflowStatus */}
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Configuration.workflow.status'
+                                    defaultMessage='Workflow Status'
+                                />
+                            </Typography>
+                            <Typography component='p' variant='body1'>
+                                {api.workflowStatus && <React.Fragment>{api.workflowStatus}</React.Fragment>}
+                                {!api.workflowStatus && <React.Fragment>?</React.Fragment>}
+                            </Typography>
+                            {/* Created Time */}
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Configuration.created.time'
+                                    defaultMessage='Created Time'
+                                />
+                            </Typography>
+                            <Typography component='p' variant='body1'>
+                                {api.createdTime && <React.Fragment>{api.createdTime}</React.Fragment>}
+                                {!api.createdTime && <React.Fragment>?</React.Fragment>}
+                            </Typography>
+                            {/* Last Updated Time */}
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Configuration.last.updated.time'
+                                    defaultMessage='Last Updated Time'
+                                />
+                            </Typography>
+                            <Typography component='p' variant='body1'>
+                                {api.lastUpdatedTime && <React.Fragment>{api.lastUpdatedTime}</React.Fragment>}
+                                {!api.lastUpdatedTime && <React.Fragment>?</React.Fragment>}
+                            </Typography>
+                        </div>
+                        <div>
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Configuration.context'
+                                    defaultMessage='Context'
+                                />
+                            </Typography>
+                            <Typography component='p' variant='body1'>
+                                {api.context && <React.Fragment>{api.context}</React.Fragment>}
+                            </Typography>
+                            {/* Version */}
+                            {(api.apiType === API.CONSTS.API) &&
+                                (
+                                    <React.Fragment>
+                                        <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.Configuration.version'
+                                                defaultMessage='Version'
+                                            />
+                                        </Typography>
+                                        <Typography component='p' variant='body1'>
+                                            {api.version && <React.Fragment>{api.version}</React.Fragment>}
+                                        </Typography>
+                                    </React.Fragment>
+                                )
+                            }
+                            {/* Default Version */}
+                            {(api.apiType === API.CONSTS.API) &&
+                                (
+                                    <React.Fragment>
+                                        <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.Configuration.default.version'
+                                                defaultMessage='Default Version'
+                                            />
+                                            <Tooltip
+                                                placement='top'
+                                                classes={{
+                                                    tooltip: parentClasses.htmlTooltip,
+                                                }}
+                                                disableHoverListener
+                                                title={
+                                                    <React.Fragment>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.NewOverview.Configuration.tooltip'
+                                                            defaultMessage={'Marks one API version in a group as ' +
+                                                        'the default so that it can be invoked without specifying ' +
+                                                        'the version number in the URL. For example, if you mark ' +
+                                                        'http://host:port/youtube/2.0 as the default API, ' +
+                                                        'requests made to ' +
+                                                        'http://host:port/youtube/ are automatically ' +
+                                                        'routed to version 2.0.' +
+                                                        'If you mark an unpublished API as the default, ' +
+                                                        'the previous default published API will still be used' +
+                                                        ' as the default until the new default API is published.'}
+                                                        />
+                                                    </React.Fragment>
+                                                }
+                                            >
+                                                <Button className={parentClasses.helpButton}>
+                                                    <HelpOutline className={parentClasses.helpIcon} />
+                                                </Button>
+                                            </Tooltip>
+                                        </Typography>
+                                        <Typography component='p' variant='body1'>
+                                            {api.isDefaultVersion && <React.Fragment>Yes</React.Fragment>}
+                                            {!api.isDefaultVersion && <React.Fragment>No</React.Fragment>}
+                                        </Typography>
+                                    </React.Fragment>
+                                )
+                            }
+                            {/* Transports */}
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Configuration.transports'
+                                    defaultMessage='Transports'
+                                />
+                                <Tooltip
+                                    placement='top'
+                                    classes={{
+                                        tooltip: parentClasses.htmlTooltip,
+                                    }}
+                                    disableHoverListener
+                                    title={
+                                        <React.Fragment>
+                                            <FormattedMessage
+                                                id='Apis.Details.NewOverview.Configuration.transport.tooltip'
+                                                defaultMessage={'HTTP is less secure than HTTPS and ' +
                                                     'makes your API vulnerable to security threats.'}
                                     />
                                 </React.Fragment>
