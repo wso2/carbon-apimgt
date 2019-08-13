@@ -33,6 +33,7 @@ public class APIMgtGatewayConstants {
     public static final String HOST_NAME = "api.ut.hostName";
     public static final String API_PUBLISHER = "api.ut.apiPublisher";
     public static final String API_SWAGGER = "API_SWAGGER";
+    public static final String SWAGGER = "SWAGGER";
     public static final String APPLICATION_NAME = "api.ut.application.name";
     public static final String APPLICATION_ID = "api.ut.application.id";
     public static final String REQUEST_START_TIME = "api.ut.requestTime";
@@ -145,6 +146,27 @@ public class APIMgtGatewayConstants {
      */
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
     public static final String ELECTED_REQUEST_METHOD = "api.ut.HTTP_METHOD";
+    public static final String HTTP_REQUEST_METHOD = "HTTP_METHOD_OBJECT";
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String REST_CONTENT_TYPE = "ContentType";
+    public static final String HTTP_RESPONSE_METHOD = "api.ut.HTTP_METHOD";
+    public static final String SCHEMA_REFERENCE = "$ref";
+    public static final String PATHS = "$..paths..";
+    public static final String JSON_PATH = "$.";
+    public static final char JSONPATH_SEPARATE = '.';
+    public static final String JSON_RESPONSES = ".responses.";
+    public static final String EMPTY_ARRAY = "[]";
+    public static final char HASH = '#';
+    public static final String EMPTY = "";
+    public static final String BACKWARD_SLASH = "\"";
+    public static final char FORWARD_SLASH = '/';
+    public static final String REQUESTBODY_SCHEMA = "components.requestBodies.";
+    public static final String CONTENT_TYPE = "synapse.internal.rest.contentType";
+    public static final String SOAP_CONTENT_TYPE = "ContentType";
+    public static final String API_CONTEXT = "REST_API_CONTEXT";
+    public static final String TEXT_XML = "text/xml";
+    public static final String APPLICATION_XML = "application/xml";
+    public static final String TEXT_JSON = "text/json";
 
     /**
      * Constants for trust store access

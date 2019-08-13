@@ -307,26 +307,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
-        // Read OpenAPI from local entry
-        if (openAPI == null && apiUUID != null) {
-            synchronized (this) {
-                if (openAPI == null) {
-                    long startTime = System.currentTimeMillis();
-                    Entry localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get(apiUUID);
-                    if (localEntryObj != null) {
-                        OpenAPIParser parser = new OpenAPIParser();
-                        openAPI = parser.readContents(localEntryObj.getValue().toString(), null, null).getOpenAPI();
-                    }
-                    long endTime = System.currentTimeMillis();
-                    if (log.isDebugEnabled()) {
-                        log.debug("Time to parse the swagger(ms) : " + (endTime - startTime));
-                    }
-                }
-            }
-        }
-        // Add OpenAPI to message context
-        messageContext.setProperty(APIMgtGatewayConstants.API_SWAGGER, openAPI);
-
         TracingSpan keySpan = null;
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =

@@ -32,7 +32,6 @@ import org.mockito.Mockito;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 
 import java.io.File;
 import java.util.Map;
@@ -73,24 +72,21 @@ public class TestSchemaValidator {
         // Mockito.when()
 
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgContext);
-        Mockito.when((String) axis2MsgContext.getProperty(ThreatProtectorConstants.REST_CONTENT_TYPE))
+        Mockito.when((String) axis2MsgContext.getProperty(APIMgtGatewayConstants.REST_CONTENT_TYPE))
                 .thenReturn(contentType);
-        Mockito.when((String) axis2MsgContext.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD)).
+        Mockito.when((String) axis2MsgContext.getProperty(APIMgtGatewayConstants.HTTP_REQUEST_METHOD)).
                 thenReturn("POST");
         Mockito.when((String)messageContext.getProperty((APIMgtGatewayConstants.API_ELECTED_RESOURCE))).
                 thenReturn("/pet");
         Mockito.when((String)messageContext.getProperty(APIMgtGatewayConstants.ELECTED_REQUEST_METHOD)).
                 thenReturn("POST");
-        Mockito.when((String) axis2MsgContext.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD)).
+        Mockito.when((String) axis2MsgContext.getProperty(APIMgtGatewayConstants.HTTP_REQUEST_METHOD)).
                 thenReturn("POST");
 
         Mockito.when(messageContext.getConfiguration()).thenReturn(synapseConfiguration);
         Mockito.when(synapseConfiguration.getLocalRegistry()).thenReturn(map);
         Mockito.when(map.get(uuid)).thenReturn(entry);
-        schemaValidator = new SchemaValidator();
-        String id = "289c4e6a-cd33-4c9b-b28f-51e1780d9bd7";
-        schemaValidator.setLocalentry(id);
-        schemaValidator.handleRequest(messageContext);
+        Mockito.when((String)messageContext.getProperty(APIMgtGatewayConstants.SWAGGER)).thenReturn(swaggerValue);
     }
 
     @Test
@@ -114,9 +110,9 @@ public class TestSchemaValidator {
         // Mockito.when()
 
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgContext);
-        Mockito.when((String) axis2MsgContext.getProperty(ThreatProtectorConstants.REST_CONTENT_TYPE))
+        Mockito.when((String) axis2MsgContext.getProperty(APIMgtGatewayConstants.REST_CONTENT_TYPE))
                 .thenReturn(contentType);
-        Mockito.when((String) axis2MsgContext.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD)).
+        Mockito.when((String) axis2MsgContext.getProperty(APIMgtGatewayConstants.HTTP_REQUEST_METHOD)).
                 thenReturn("POST");
         Mockito.when(messageContext.getConfiguration()).thenReturn(synapseConfiguration);
         Mockito.when(synapseConfiguration.getLocalRegistry()).thenReturn(map);
@@ -130,12 +126,9 @@ public class TestSchemaValidator {
         Mockito.when((String) entry.getValue()).thenReturn(swaggerValue);
         Mockito.when((String) messageContext.getProperty(APIMgtGatewayConstants.ELECTED_REQUEST_METHOD)).
                 thenReturn("POST");
-        Mockito.when((String) axis2MsgContext.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD)).
+        Mockito.when((String) axis2MsgContext.getProperty(APIMgtGatewayConstants.HTTP_REQUEST_METHOD)).
                 thenReturn("POST");
-        schemaValidator = new SchemaValidator();
-        String id = "289c4e6a-cd33-4c9b-b28f-51e1780d9bd7";
-        schemaValidator.setLocalentry(id);
-        schemaValidator.handleRequest(messageContext);
+        Mockito.when((String)messageContext.getProperty(APIMgtGatewayConstants.SWAGGER)).thenReturn(swaggerValue);
     }
 
 }

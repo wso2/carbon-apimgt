@@ -17,9 +17,12 @@
 */
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
+import io.swagger.parser.OpenAPIParser;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -27,7 +30,17 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 public class APIMgtLatencyStatsHandler extends AbstractHandler {
     private static final Log log = LogFactory.getLog(APIMgtLatencyStatsHandler.class);
+    private OpenAPI openAPI;
+    private String apiUUID;
+    private String swagger;
 
+    public String getApiUUID() {
+        return apiUUID;
+    }
+
+    public void setApiUUID(String apiUUID) {
+        this.apiUUID = apiUUID;
+    }
 
     public boolean handleRequest(MessageContext messageContext) {
         if (messageContext.getProperty(APIMgtGatewayConstants.REQUEST_EXECUTION_START_TIME) == null) {
@@ -42,6 +55,7 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
         org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MC);
         long currentTime = System.currentTimeMillis();
         messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
+        setSwaggerToMessageContext(messageContext);
         return true;
     }
 
@@ -63,6 +77,32 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
             }
         }
         return true;
+    }
+
+    private void setSwaggerToMessageContext(MessageContext messageContext) {
+        // Read OpenAPI from local entry
+        if (openAPI == null && apiUUID != null) {
+            synchronized (this) {
+                if (openAPI == null) {
+                    long startTime = System.currentTimeMillis();
+                    Entry localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get(apiUUID);
+                    if (localEntryObj != null) {
+                        swagger = localEntryObj.getValue().toString();
+                        OpenAPIParser parser = new OpenAPIParser();
+                        openAPI = parser.readContents(swagger,
+                                null, null).getOpenAPI();
+                    }
+                    long endTime = System.currentTimeMillis();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Time to parse the swagger(ms) : " + (endTime - startTime));
+                    }
+                }
+            }
+        }
+        // Add OpenAPI to message context
+        messageContext.setProperty(APIMgtGatewayConstants.API_SWAGGER, openAPI);
+        // Add swagger String to message context
+        messageContext.setProperty(APIMgtGatewayConstants.SWAGGER, swagger);
     }
 
 }
