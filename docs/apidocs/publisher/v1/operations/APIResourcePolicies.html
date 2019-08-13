@@ -1,21 +1,15 @@
 <div class="main-content">
-    <h1><a name="API Product (Individual)"></a>API Product (Individual)</h1>
+    <h1><a name="API Resource Policies"></a>API Resource Policies</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="apiProductsApiProductIdGet"></a>Get details of an API Product
-</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/api-products/{apiProductId}/</code>
+            <h4 class="operation-heading"><a name="apisApiIdResourcePoliciesGet"></a>Get the resource policy (inflow/outflow) definitions</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/resource-policies</code>
             <p class="marked"></p>
 
-            <p class="marked">Using this operation, you can retrieve complete details of a single API Product. You need to provide the Id of the API Product to retrive it.
-
-&#x60;X-WSO2-Tenant&#x60; header can be used to retrive an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
-
-**NOTE:**
-* This operation does not require an Authorization header by default. But if it is provided, it will be validated and checked for permissions of the user, hence you may be able to see APIs which are restricted for special permissions/roles. \n
+            <p class="marked">This operation can be used to retrieve conversion policy resource definitions of an API.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <p>Not required</p>
+                <code>apim:api_view</code>
 
             <h4 class="section-heading">
                 Examples
@@ -48,15 +42,96 @@
                             
                         </td>
                         <td class="param-name">
-                            <p>apiProductId</p>
+                            <p>apiId</p>
                             <p class="param-required">
                                 required
                                 
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API Product ID** consisting of the **UUID** of the API Product.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
 </p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>sequenceType</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">sequence type of the resource policy resource definition</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>resourcePath</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Resource path of the resource policy definition</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>verb</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">HTTP verb of the resource path of the resource policy definition</p>
                         </td>
                         <td>
                             <span class="param-type">
@@ -84,36 +159,7 @@
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>X-WSO2-Tenant</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-  retirieved from.
+variant of the resource.
 </p>
                         </td>
                         <td>
@@ -145,16 +191,16 @@ variant of the resourec.
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. Requested API Product is returned </p></td>
+                        <td class="parameter"><p class="marked">OK. List of resource policy definitions of the API is returned </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#APIProduct">APIProduct</a>
+                                    <a href="#!/models#ResourcePolicyList">ResourcePolicyList</a>
                             </span>
                         </td>
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     
@@ -182,20 +228,14 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apiProductsApiProductIdSwaggerGet"></a>Get swagger definition
-</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/api-products/{apiProductId}/swagger</code>
+            <h4 class="operation-heading"><a name="apisApiIdResourcePoliciesResourcePolicyIdGet"></a>Get the resource policy (inflow/outflow) definition for a given resource identifier.</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/resource-policies/{resourcePolicyId}</code>
             <p class="marked"></p>
 
-            <p class="marked">You can use this operation to retrieve the swagger definition of an API product.
-
- &#x60;X-WSO2-Tenant&#x60; header can be used to retrive the swagger definition an API product of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
-
-**NOTE:**
-* This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s swagger definition, you need to provide Authorization header.
+            <p class="marked">This operation can be used to retrieve conversion policy resource definitions of an API given the resource identifier.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <p>Not required</p>
+                <code>apim:api_view</code>
 
             <h4 class="section-heading">
                 Examples
@@ -228,14 +268,42 @@ variant of the resourec.
                             
                         </td>
                         <td class="param-name">
-                            <p>apiProductId</p>
+                            <p>apiId</p>
                             <p class="param-required">
                                 required
                                 
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API Product ID** consisting of the **UUID** of the API Product.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>resourcePolicyId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">registry resource Id
 </p>
                         </td>
                         <td>
@@ -264,36 +332,7 @@ variant of the resourec.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>X-WSO2-Tenant</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-  retirieved from.
+variant of the resource.
 </p>
                         </td>
                         <td>
@@ -325,7 +364,16 @@ variant of the resourec.
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. Requested swagger document of the API Product is returned </p></td>
+                        <td class="parameter"><p class="marked">OK. Requested resource policy definition of the API is returned for the given resource identifier. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#ResourcePolicyInfo">ResourcePolicyInfo</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     
@@ -333,11 +381,11 @@ variant of the resourec.
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+                                    <a href="#!/models#Error">Error</a>
                             </span>
                         </td>
                     </tr>
@@ -362,19 +410,14 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apiProductsApiProductIdThumbnailGet"></a>Get thumbnail image</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/api-products/{apiProductId}/thumbnail</code>
+            <h4 class="operation-heading"><a name="apisApiIdResourcePoliciesResourcePolicyIdPut"></a>Update the resource policy(inflow/outflow) definition for the given resource identifier</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/resource-policies/{resourcePolicyId}</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to download a thumbnail image of an API Product.
-
-&#x60;X-WSO2-Tenant&#x60; header can be used to retrive a thumbnail of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
-
-**NOTE:**
-* This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s thumbnail, you need to provide Authorization header.
+            <p class="marked">This operation can be used to update the resource policy(inflow/outflow) definition for the given resource identifier of an existing API. resource policy definition to be updated is passed as a body parameter &#x60;content&#x60;.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <p>Not required</p>
+                <code>apim:api_create</code>
 
             <h4 class="section-heading">
                 Examples
@@ -407,14 +450,42 @@ variant of the resourec.
                             
                         </td>
                         <td class="param-name">
-                            <p>apiProductId</p>
+                            <p>apiId</p>
                             <p class="param-required">
                                 required
                                 
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API Product ID** consisting of the **UUID** of the API Product.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>resourcePolicyId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">registry resource Id
 </p>
                         </td>
                         <td>
@@ -431,24 +502,23 @@ variant of the resourec.
                             
                             
                             
-                            <span class="param-in">Header </span>
                             
+                            <span class="param-in">Body </span>
                         </td>
                         <td class="param-name">
-                            <p>X-WSO2-Tenant</p>
+                            <p>body</p>
                             <p class="param-required">
+                                required
                                 
-                                optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-  retirieved from.
-</p>
+                            <p class="param-description marked">Content of the resource policy definition that needs to be updated</p>
                         </td>
                         <td>
                             <span class="param-type">
-                                String
+                                ResourcePolicyInfo
+                                    (<a href="#!/models#ResourcePolicyInfo">ResourcePolicyInfo</a>)
                             </span>
                         </td>
                         <td>
@@ -464,15 +534,14 @@ variant of the resourec.
                             
                         </td>
                         <td class="param-name">
-                            <p>If-None-Match</p>
+                            <p>If-Match</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
+                            <p class="param-description marked">Validator for conditional requests; based on ETag.
 </p>
                         </td>
                         <td>
@@ -504,25 +573,16 @@ variant of the resourec.
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. Thumbnail image returned </p></td>
+                        <td class="parameter"><p class="marked">OK. Successful response with updated the resource policy definition </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+                                    <a href="#!/models#ResourcePolicyInfo">ResourcePolicyInfo</a>
                             </span>
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested Document does not exist. </p></td>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -530,8 +590,26 @@ variant of the resourec.
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter"><p class="marked">403</p></td>
+                        <td class="parameter"><p class="marked">Forbidden. The request must be conditional but no condition has been specified. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. The resource to be updated does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">412</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>

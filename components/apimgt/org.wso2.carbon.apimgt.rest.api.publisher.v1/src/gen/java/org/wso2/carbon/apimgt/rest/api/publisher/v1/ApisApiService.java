@@ -76,9 +76,6 @@ public interface ApisApiService {
       public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch, MessageContext messageContext);
-      public Response apisApiIdThreatProtectionPoliciesDelete(String apiId, String policyId, MessageContext messageContext);
-      public Response apisApiIdThreatProtectionPoliciesGet(String apiId, MessageContext messageContext);
-      public Response apisApiIdThreatProtectionPoliciesPost(String apiId, String policyId, MessageContext messageContext);
       public Response apisApiIdThumbnailGet(String apiId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdWsdlPut(String apiId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext);

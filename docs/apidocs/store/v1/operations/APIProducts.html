@@ -1,15 +1,21 @@
 <div class="main-content">
-    <h1><a name="Certificates (Individual)"></a>Certificates (Individual)</h1>
+    <h1><a name="API Products"></a>API Products</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="endpointCertificatesAliasContentGet"></a>Download a certificate.</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/endpoint-certificates/{alias}/content</code>
+            <h4 class="operation-heading"><a name="apiProductsApiProductIdGet"></a>Get details of an API Product
+</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/api-products/{apiProductId}/</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to download a certificate which matches the given alias.
+            <p class="marked">Using this operation, you can retrieve complete details of a single API Product. You need to provide the Id of the API Product to retrive it.
+
+&#x60;X-WSO2-Tenant&#x60; header can be used to retrive an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
+
+**NOTE:**
+* This operation does not require an Authorization header by default. But if it is provided, it will be validated and checked for permissions of the user, hence you may be able to see APIs which are restricted for special permissions/roles. \n
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:ep_certificates_view</code>
+                <p>Not required</p>
 
             <h4 class="section-heading">
                 Examples
@@ -42,14 +48,73 @@
                             
                         </td>
                         <td class="param-name">
-                            <p>alias</p>
+                            <p>apiProductId</p>
                             <p class="param-required">
                                 required
                                 
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked"></p>
+                            <p class="param-description marked">**API Product ID** consisting of the **UUID** of the API Product.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>X-WSO2-Tenant</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
+  retirieved from.
+</p>
                         </td>
                         <td>
                             <span class="param-type">
@@ -80,7 +145,16 @@
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. </p></td>
+                        <td class="parameter"><p class="marked">OK. Requested API Product is returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#APIProduct">APIProduct</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     
@@ -88,17 +162,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. * </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Certificate for the Alias not found. </p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -106,8 +171,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">500</p></td>
-                        <td class="parameter"><p class="marked">Internal Server Error </p></td>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -117,14 +182,20 @@
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="endpointCertificatesAliasDelete"></a>Delete a certificate.</h4> <code>DELETE https://apis.wso2.com/api/am/publisher/v1.0/endpoint-certificates/{alias}</code>
+            <h4 class="operation-heading"><a name="apiProductsApiProductIdSwaggerGet"></a>Get swagger definition
+</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/api-products/{apiProductId}/swagger</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to delete an uploaded certificate.
+            <p class="marked">You can use this operation to retrieve the swagger definition of an API product.
+
+ &#x60;X-WSO2-Tenant&#x60; header can be used to retrive the swagger definition an API product of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
+
+**NOTE:**
+* This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s swagger definition, you need to provide Authorization header.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:ep_certificates_update</code>
+                <p>Not required</p>
 
             <h4 class="section-heading">
                 Examples
@@ -157,14 +228,72 @@
                             
                         </td>
                         <td class="param-name">
-                            <p>alias</p>
+                            <p>apiProductId</p>
                             <p class="param-required">
                                 required
                                 
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">The alias of the certificate that should be deleted.
+                            <p class="param-description marked">**API Product ID** consisting of the **UUID** of the API Product.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>X-WSO2-Tenant</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
+  retirieved from.
 </p>
                         </td>
                         <td>
@@ -196,7 +325,7 @@
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. The Certificate deleted successfully. </p></td>
+                        <td class="parameter"><p class="marked">OK. Requested swagger document of the API Product is returned </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     
@@ -204,17 +333,17 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request.  Invalid request or validation error. </p></td>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
+                                    
                             </span>
                         </td>
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. | Failed to delete the certificate. Certificate could not found for the given alias </p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -222,8 +351,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">500</p></td>
-                        <td class="parameter"><p class="marked">Internal Server Error </p></td>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -233,14 +362,19 @@
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="endpointCertificatesAliasGet"></a>Get the certificate information.</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/endpoint-certificates/{alias}</code>
+            <h4 class="operation-heading"><a name="apiProductsApiProductIdThumbnailGet"></a>Get thumbnail image</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/api-products/{apiProductId}/thumbnail</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to get the information about a certificate.
+            <p class="marked">This operation can be used to download a thumbnail image of an API Product.
+
+&#x60;X-WSO2-Tenant&#x60; header can be used to retrive a thumbnail of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
+
+**NOTE:**
+* This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s thumbnail, you need to provide Authorization header.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:ep_certificates_view</code>
+                <p>Not required</p>
 
             <h4 class="section-heading">
                 Examples
@@ -273,14 +407,73 @@
                             
                         </td>
                         <td class="param-name">
-                            <p>alias</p>
+                            <p>apiProductId</p>
                             <p class="param-required">
                                 required
                                 
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked"></p>
+                            <p class="param-description marked">**API Product ID** consisting of the **UUID** of the API Product.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>X-WSO2-Tenant</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
+  retirieved from.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
                         </td>
                         <td>
                             <span class="param-type">
@@ -311,25 +504,25 @@
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. </p></td>
+                        <td class="parameter"><p class="marked">OK. Thumbnail image returned </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#CertificateInfo">CertificateInfo</a>
+                                    
                             </span>
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
+                                    
                             </span>
                         </td>
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Alias not found </p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested Document does not exist. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -337,8 +530,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">500</p></td>
-                        <td class="parameter"><p class="marked">Internal Server Error </p></td>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -348,14 +541,19 @@
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="endpointCertificatesAliasPut"></a>Update a certificate.</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.0/endpoint-certificates/{alias}</code>
+            <h4 class="operation-heading"><a name="apiProductsGet"></a>Retrieve/Search API products
+</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/api-products</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to update an uploaded certificate.
+            <p class="marked">This operation provides you a list of available API products qualifying under a given search condition.
+
+Each retrieved API product is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API Product** operation.
+
+This operation supports retriving APIs of other tenants. The required tenant domain need to be specified as a header &#x60;X-WSO2-Tenant&#x60;. If not specified super tenant&#39;s APIs will be retrieved. If you used an Authorization header, the user&#39;s tenant
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:ep_certificates_update</code>
+                <p>Not required</p>
 
             <h4 class="section-heading">
                 Examples
@@ -381,190 +579,79 @@
                 </thead>
                     <tr>
                         <td class="parameter">
-                            <span class="param-in">Form </span>
                             
+                            <span class="param-in">Query </span>
                             
                             
                             
                         </td>
                         <td class="param-name">
-                            <p>certificate</p>
+                            <p>limit</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">The certificate that needs to be uploaded.</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                File
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            <span class="param-in">Path </span>
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>alias</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Alias for the certificate</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-            </table>
-
-            <h4 class="section-heading">Responses</h4>
-
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 15%;"/>
-                    <col style="width: 70%;"/>
-                    <col style="width: 15%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>HTTP Code</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. The Certificate updated successfully. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#CertMetadata">CertMetadata</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Updating certificate failed. Alias not found </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">500</p></td>
-                        <td class="parameter"><p class="marked">Internal Server Error </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <hr/>
-            <h4 class="operation-heading"><a name="endpointCertificatesPost"></a>Upload a new Certificate.</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/endpoint-certificates</code>
-            <p class="marked"></p>
-
-            <p class="marked">This operation can be used to upload a new certificate for an endpoint.
+                            <p class="param-description marked">Maximum size of resource array to return.
 </p>
-
-            <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:ep_certificates_add</code>
-
-            <h4 class="section-heading">
-                Examples
-            </h4>
-
-            <h4 class="section-heading" id="scroll-to">Parameters</h4>
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                    <col style="width: 40%;"/>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                    <th>Default</th>
-                </tr>
-                </thead>
-                    <tr>
-                        <td class="parameter">
-                            <span class="param-in">Form </span>
-                            
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>certificate</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">The certificate that needs to be uploaded.</p>
                         </td>
                         <td>
                             <span class="param-type">
-                                File
+                                Integer
                             </span>
                         </td>
                         <td>
-                            <p class="marked"></p>
+                            <p class="marked">25</p>
                         </td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <span class="param-in">Form </span>
                             
+                            <span class="param-in">Query </span>
                             
                             
                             
                         </td>
                         <td class="param-name">
-                            <p>alias</p>
+                            <p>offset</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Alias for the certificate</p>
+                            <p class="param-description marked">Starting point within the complete list of items qualified.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                Integer
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">0</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>X-WSO2-Tenant</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
+  retirieved from.
+</p>
                         </td>
                         <td>
                             <span class="param-type">
@@ -577,21 +664,67 @@
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <span class="param-in">Form </span>
                             
+                            <span class="param-in">Query </span>
                             
                             
                             
                         </td>
                         <td class="param-name">
-                            <p>endpoint</p>
+                            <p>query</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Endpoint to which the certificate should be applied.</p>
+                            <p class="param-description marked">**Search condition**.
+
+You can search in attributes by using an **&quot;&lt;attribute&gt;:&quot;** modifier.
+
+Eg.
+&quot;provider:wso2&quot; will match an API if the provider of the API is exactly &quot;wso2&quot;.
+
+Additionally you can use wildcards.
+
+Eg.
+&quot;provider:wso2*&quot; will match an API if the provider of the API starts with &quot;wso2&quot;.
+
+Supported attribute modifiers are [**version, context, status,
+description, subcontext, doc, provider, tag**]
+
+If no advanced attribute modifier has been specified, search will match the
+given query string against API Name.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
                         </td>
                         <td>
                             <span class="param-type">
@@ -622,25 +755,25 @@
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. The Certificate added successfully. </p></td>
+                        <td class="parameter"><p class="marked">OK. List of qualifying API products is returned. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#CertMetadata">CertMetadata</a>
+                                    <a href="#!/models#APIProductList">APIProductList</a>
                             </span>
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. * Failures due to existing alias or expired certificate. </p></td>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
+                                    
                             </span>
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">500</p></td>
-                        <td class="parameter"><p class="marked">Internal Server Error * Failed to add the Certificate due to an Internal Server Error </p></td>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
