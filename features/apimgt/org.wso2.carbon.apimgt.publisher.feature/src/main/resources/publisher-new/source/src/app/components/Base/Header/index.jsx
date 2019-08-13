@@ -90,7 +90,7 @@ class Header extends React.Component {
         return (
             <React.Fragment>
                 <AppBar className={classes.appBar} position='fixed'>
-                    <Toolbar className={classes.toolbar}>
+                    <Toolbar className={[classes.toolbar, 'first-step'].join(' ')}>
                         <IconButton onClick={this.toggleGlobalNavBar}>
                             <MenuIcon className={classes.menuIcon} />
                         </IconButton>

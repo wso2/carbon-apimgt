@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import Configurations from 'Config';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
@@ -28,7 +29,9 @@ import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import APIWalkthrough from 'AppComponents/Shared/APIWalkthrough';
 import APICreateMenu from '../components/APICreateMenu';
+
 
 const styles = theme => ({
     rightIcon: {
@@ -88,6 +91,9 @@ function TopMenu(props) {
     const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
     return (
         <div className={classes.root}>
+            {Configurations.app.walkThrough && count === 0 && (
+                <APIWalkthrough />
+            )}
             <div className={classes.mainIconWrapper}>
                 <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
             </div>
@@ -109,14 +115,17 @@ function TopMenu(props) {
                                 id='Apis.Listing.components.TopMenu.displaying'
                                 defaultMessage='Displaying'
                             />
-                            {count}
+                            {' '} {count} {' '}
                             {isAPIProduct ? (
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.apiproduct(s)'
                                     defaultMessage='API Product(s)'
                                 />
                             ) : (
-                                <FormattedMessage id='Apis.Listing.components.TopMenu.api(s)' defaultMessage='API(s)' />
+                                <FormattedMessage
+                                    id='Apis.Listing.components.TopMenu.api(s)'
+                                    defaultMessage='API(s)'
+                                />
                             )}
                         </Typography>
                     </div>
@@ -134,7 +143,13 @@ function TopMenu(props) {
                         </Button>
                     </Link>
                 ) : (
-                    <APICreateMenu buttonProps={{ variant: 'contained', color: 'primary', className: classes.button }}>
+                    <APICreateMenu buttonProps={
+                        {
+                            variant: 'contained',
+                            color: 'primary',
+                            className: [classes.button, 'second-step'].join(' '),
+                        }}
+                    >
                         <FormattedMessage id='Apis.Listing.components.TopMenu.create.api' defaultMessage='Create API' />
                     </APICreateMenu>
                 )}

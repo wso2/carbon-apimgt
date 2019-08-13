@@ -162,6 +162,7 @@ const Configurations = {
     },
     app: {
         context: APP_CONTEXT,
+        walkThrough: false,
     },
 };
 if (typeof module !== 'undefined') {
