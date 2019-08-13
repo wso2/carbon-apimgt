@@ -1593,7 +1593,7 @@ paths:
   # The "Import GraphQL API Schema from API Definition"  resource API
   ######################################################
 
-  /apis/import-graphQLSchema:
+  /apis/import-graphql-schema:
 
     #----------------------------------------------------------------------------
     # Import API from API Definition

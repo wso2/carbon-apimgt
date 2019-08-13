@@ -238,6 +238,9 @@ class API extends Resource {
     }
 
     getProductionEndpoint() {
+        if(!this.endpointConfig){
+            return null;
+        }
         if (!this.endpointConfig.production_endpoints) {
             return "";
         }
@@ -1024,7 +1027,7 @@ class API extends Resource {
         };
        
         promise_create = this.client.then((client) => {
-            return client.apis['API (Collection)'].post_apis_import_graphQLSchema(
+            return client.apis['API (Collection)'].post_apis_import_graphql_schema(
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data'

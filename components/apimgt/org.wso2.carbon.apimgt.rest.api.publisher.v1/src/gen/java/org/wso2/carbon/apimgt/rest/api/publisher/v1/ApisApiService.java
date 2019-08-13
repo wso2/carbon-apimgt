@@ -83,7 +83,7 @@ public interface ApisApiService {
       public Response apisCopyApiPost(String newVersion, String apiId, Boolean defaultVersion, MessageContext messageContext);
       public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, Boolean expand, String accept, String tenantDomain, MessageContext messageContext);
       public Response apisHead(String query, String ifNoneMatch, MessageContext messageContext);
-      public Response apisImportGraphQLSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail, String additionalProperties, String ifMatch, MessageContext messageContext);
+      public Response apisImportGraphqlSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail, String additionalProperties, String ifMatch, MessageContext messageContext);
       public Response apisPost(APIDTO body, MessageContext messageContext);
       public Response apisValidateGraphqlSchemaPost(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext);
       public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, MessageContext messageContext);

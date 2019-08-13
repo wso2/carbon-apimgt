@@ -132,7 +132,6 @@ class APICreateGraphQL extends React.Component {
      * @memberof APICreateGraphQL
      */
     updateGraphQLBean(graphQLBean) {
-        console.info(graphQLBean);
         this.setState({
             graphQLBean,
         });
@@ -161,16 +160,12 @@ class APICreateGraphQL extends React.Component {
                 changes[name] = value;
             }
 
-
             // Checking validity.
-
             const validUpdated = valid;
             validUpdated.name.empty = !api.name;
             validUpdated.context.empty = !api.context;
             validUpdated.version.empty = !api.version;
             validUpdated.endpointConfig.empty = !api.endpointConfig;
-            // TODO we need to add the already existing error for (context)
-            // by doing an api call ( the swagger definition does not contain such api call)
 
             return { api: changes, valid: validUpdated };
         });
@@ -243,10 +238,10 @@ class APICreateGraphQL extends React.Component {
             // No errors so let's fill the inputs with the graphQLBean
             if (graphQLBean.info) {
                 if (graphQLBean.info.operations) {
-                    const changes = {
+                    const changes = new API({
                         operations: graphQLBean.info.operations,
                         gatewayEnvironments: ['Production and Sandbox'],
-                    };
+                    });
                     this.setState({ api: changes });
                 }
             }
@@ -309,73 +304,80 @@ class APICreateGraphQL extends React.Component {
             return <Progress />;
         }
         return (
-            <Grid container spacing={24} className={classes.root}>
-                <Grid item xs={12} xl={6}>
-                    <div className={classes.titleWrapper}>
-                        <Typography variant='h4' align='left' className={classes.mainTitle}>
-                            <FormattedMessage
-                                id='Apis.GraphQL.APICreateGraphQL.using.SDL'
-                                defaultMessage='Design a new GraphQL API using SDL'
-                            />
-                        </Typography>
-                    </div>
-                    <Stepper activeStep={activeStep} className={classes.stepper}>
-                        {steps.map((label) => {
-                            const props = {};
-                            const labelProps = {};
-
-                            return (
-                                <Step key={label} {...props}>
-                                    <StepLabel {...labelProps}>{label}</StepLabel>
-                                </Step>
-                            );
-                        })}
-                    </Stepper>
-                    <div>
-                        {activeStep === 0 && (
-                            <ProvideGraphQL
-                                {...provideGraphQLProps}
-                            />
-                        )}
-                        {activeStep === 1 && (
-                            <React.Fragment>
-                                <APIInputForm api={api} handleInputChange={this.updateApiInputs} valid={valid} />
-                            </React.Fragment>
-                        )}
-                    </div>
-                    <div>
-                        <div>
-                            <div>
-                                <Button
-                                    disabled={activeStep === 0}
-                                    onClick={this.handleBack}
-                                    className={classes.button}
-                                >
-                                Back
-                                </Button>
-                                <Button
-                                    variant='contained'
-                                    color='primary'
-                                    onClick={this.handleNext}
-                                    className={classes.button}
-                                    disabled={
-                                        (valid.graphQLFile.invalidFile && uploadMethod === 'file')
-                                    }
-                                >
-                                    {activeStep === steps.length - 1 ? (
-                                        'Finish'
-                                    ) : (
-                                        <FormattedMessage
-                                            id='Apis.GraphQL.APICreateGraphQL.next'
-                                            defaultMessage='Next'
-                                        />
-                                    )}
-                                </Button>
+            <React.Fragment>
+                <Grid container spacing={7} className={classes.root}>
+                    <Grid container spacing={24} className={classes.root}>
+                        <Grid item xs={12} xl={6}>
+                            <div className={classes.titleWrapper}>
+                                <Typography variant='h4' align='left' className={classes.mainTitle}>
+                                    <FormattedMessage
+                                        id='Apis.GraphQL.APICreateGraphQL.using.SDL'
+                                        defaultMessage='Import a GraphQL SDL Definition'
+                                    />
+                                </Typography>
                             </div>
-                        </div>
-                    </div>
+                            <Stepper activeStep={activeStep} className={classes.stepper}>
+                                {steps.map((label) => {
+                                    const props = {};
+                                    const labelProps = {};
+
+                                    return (
+                                        <Step key={label} {...props}>
+                                            <StepLabel {...labelProps}>{label}</StepLabel>
+                                        </Step>
+                                    );
+                                })}
+                            </Stepper>
+                            <div>
+                                {activeStep === 0 && (
+                                    <ProvideGraphQL
+                                        {...provideGraphQLProps}
+                                    />
+                                )}
+                                {activeStep === 1 && (
+                                    <React.Fragment>
+                                        <APIInputForm
+                                            api={api}
+                                            handleInputChange={this.updateApiInputs}
+                                            valid={valid}
+                                        />
+                                    </React.Fragment>
+                                )}
+                            </div>
+                            <div>
+                                <div>
+                                    <div>
+                                        <Button
+                                            disabled={activeStep === 0}
+                                            onClick={this.handleBack}
+                                            className={classes.button}
+                                        >Back
+                                        </Button>
+                                        <Button
+                                            variant='contained'
+                                            color='primary'
+                                            onClick={this.handleNext}
+                                            className={classes.button}
+                                            disabled={
+                                                (valid.graphQLFile.invalidFile && uploadMethod === 'file')
+                                            }
+                                        >
+                                            {activeStep === steps.length - 1 ? (
+                                                'Finish'
+                                            ) : (
+                                                <FormattedMessage
+                                                    id='Apis.GraphQL.APICreateGraphQL.next'
+                                                    defaultMessage='Next'
+                                                />
+                                            )}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </Grid>
+                    </Grid>
                 </Grid>
-            </Grid>
+            </React.Fragment>
         );
     }
 }
@@ -383,6 +385,9 @@ class APICreateGraphQL extends React.Component {
 APICreateGraphQL.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func.isRequired,
+    }).isRequired,
 };
 
 export default withStyles(styles)(APICreateGraphQL);

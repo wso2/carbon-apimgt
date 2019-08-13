@@ -1775,7 +1775,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Response with GraphQL API
      */
     @Override
-    public Response apisImportGraphQLSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail,
+    public Response apisImportGraphqlSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail,
                                                 String additionalProperties, String ifMatch,
                                                 MessageContext messageContext) {
         APIDTO additionalPropertiesAPI = null;

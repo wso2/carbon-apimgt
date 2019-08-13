@@ -227,8 +227,8 @@ class Operations extends React.Component {
      *
      */
     updateOperations() {
-        const { api } = this.props;
-        const { operationList, intl } = this.state;
+        const { api, intl } = this.props;
+        const { operationList } = this.state;
         api.operations = operationList;
         /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
         /* eslint no-param-reassign: ["error", { "props": false }] */
@@ -243,8 +243,7 @@ class Operations extends React.Component {
                     defaultMessage: 'API updated successfully!',
                 }));
             })
-            .catch((error) => {
-                console.error(error);
+            .catch(() => {
                 Alert.error(intl.formatMessage({
                     id: 'Apis.Details.Operations.Operations.something.went.wrong.while.updating.the.api',
                     defaultMessage: 'Error occurred while updating API',
