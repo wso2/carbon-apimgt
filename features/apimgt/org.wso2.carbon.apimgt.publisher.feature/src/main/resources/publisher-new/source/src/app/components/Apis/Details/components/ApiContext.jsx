@@ -26,15 +26,16 @@ const { Provider: APIProvider } = APIContext;
 
 
 /**
- *
+ * withAPI HOC can be used with class style components, To get the context with hooks useContext,
+ * use the default export. Using hooks is preferred over class components due to its contribution to wrapper hell
  *
  * @param {*} WrappedComponent
- * @returns
+ * @returns {React.Component} withAPI HOC
  */
 function withAPI(WrappedComponent) {
     /**
      *
-     *
+     * Higher order component which passes the API context to its child component
      * @param {*} props
      * @returns
      */
@@ -51,6 +52,7 @@ function withAPI(WrappedComponent) {
     return HOCWithAPI;
 }
 
+export default APIContext;
 
 export {
     withAPI,

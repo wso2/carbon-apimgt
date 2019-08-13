@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -41,12 +42,18 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -113,14 +120,43 @@ public class APIGatewayManager {
                 continue;
             }
             APIGatewayAdminClient client;
+            LocalEntryAdminClient localEntryAdminClient;
+
             try {
-                client = new APIGatewayAdminClient(environment);
+                String definition;
                 String operation;
+                client = new APIGatewayAdminClient(environment);
                 long apiGetStartTime = System.currentTimeMillis();
                 APIData apiData = client.getApi(tenantDomain, api.getId());
                 endTime = System.currentTimeMillis();
                 if (debugEnabled) {
                     log.debug("Time taken to fetch API Data: " + (endTime - apiGetStartTime) / 1000 + "  seconds");
+                }
+                localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
+                if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
+                    //Build schema with scopes and roles
+                    GraphQLSchemaDefinition schemaDefinition = new GraphQLSchemaDefinition();
+                    definition = schemaDefinition.buildSchemaWithScopesAndRoles(api);
+                    localEntryAdminClient.deleteEntry(api.getUUID() + "_graphQL");
+                    localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "_graphQL" + "\">" +
+                         definition + "</localEntry>");
+
+                    Set<URITemplate> uriTemplates = new HashSet<>();
+                    URITemplate template = new URITemplate();
+                    template.setAuthType("Any");
+                    template.setHTTPVerb("POST");
+                    template.setHttpVerbs("POST");
+                    template.setHttpVerbs("GET");
+                    template.setUriTemplate("/*");
+                    uriTemplates.add(template);
+                    api.setUriTemplates(uriTemplates);
+                } else {
+                    definition = api.getSwaggerDefinition();
+                    localEntryAdminClient.deleteEntry(api.getUUID());
+                    localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "\">" +
+                                definition.replaceAll("&(?!amp;)", "&amp;").
+                                        replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                                + "</localEntry>");
                 }
                 // If the API exists in the Gateway
                 if (apiData != null) {
@@ -398,8 +434,6 @@ public class APIGatewayManager {
 
         return failedEnvironmentsMap;
     }
-
-
 	/**
 	 * Removed an API from the configured Gateways
 	 * 

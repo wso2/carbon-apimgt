@@ -30,6 +30,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
+import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
@@ -825,7 +826,7 @@ public class ApiMgtDAO {
                         .SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
                     log.error("Subscription to API/API Prouct " + identifier.getName() + " through application " +
                             applicationName + " was blocked");
-                    throw new APIManagementException("Subscription to API/API Prouct " + identifier.getName() + " through " +
+                    throw new SubscriptionBlockedException("Subscription to API/API Product " + identifier.getName() + " through " +
                             "application " + applicationName + " was blocked");
                 }
             }
@@ -5422,9 +5423,18 @@ public class ApiMgtDAO {
                 try {
                     if (!subscriptionIdMap.containsKey(info.subscriptionId)) {
                         apiId.setTier(info.tierId);
-                        String subscriptionStatus = (APIConstants.SubscriptionStatus.BLOCKED
-                                .equalsIgnoreCase(info.subscriptionStatus)) ?
-                                APIConstants.SubscriptionStatus.BLOCKED : APIConstants.SubscriptionStatus.UNBLOCKED;
+                        String subscriptionStatus;
+                        if (APIConstants.SubscriptionStatus.BLOCKED.equalsIgnoreCase(info.subscriptionStatus)) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.BLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equalsIgnoreCase(info.subscriptionStatus)) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.UNBLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equalsIgnoreCase(info.subscriptionStatus)) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.REJECTED.equalsIgnoreCase(info.subscriptionStatus)) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
+                        } else {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
+                        }
                         int subscriptionId = addSubscription(apiId, context, info.applicationId, subscriptionStatus,
                                 provider);
                         if (subscriptionId == -1) {
@@ -5450,6 +5460,8 @@ public class ApiMgtDAO {
                     // need to go forward rather throwing the exception
                 } catch (SubscriptionAlreadyExistingException e) {
                     log.error("Error while adding subscription " + e.getMessage(), e);
+                } catch (SubscriptionBlockedException e) {
+                    log.info("Subscription is blocked: " + e.getMessage());
                 }
             }
 
@@ -5464,8 +5476,19 @@ public class ApiMgtDAO {
                 if (!subscribedApplications.contains(applicationId)) {
                     apiId.setTier(rs.getString("TIER_ID"));
                     try {
-                        addSubscription(apiId, rs.getString("CONTEXT"), applicationId, APIConstants
-                                .SubscriptionStatus.UNBLOCKED, provider);
+                        String subscriptionStatus;
+                        if (APIConstants.SubscriptionStatus.BLOCKED.equalsIgnoreCase(rs.getString("SUB_STATUS"))) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.BLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equalsIgnoreCase(rs.getString("SUB_STATUS"))) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.UNBLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equalsIgnoreCase(rs.getString("SUB_STATUS"))) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.REJECTED.equalsIgnoreCase(rs.getString("SUB_STATUS"))) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
+                        } else {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
+                        }
+                        addSubscription(apiId, rs.getString("CONTEXT"), applicationId, subscriptionStatus, provider);
                         // catching the exception because when copy the api without the option "require re-subscription"
                         // need to go forward rather throwing the exception
                     } catch (SubscriptionAlreadyExistingException e) {
@@ -5473,6 +5496,11 @@ public class ApiMgtDAO {
                         //Ex: if previous version was created by another older version and if the subscriptions are
                         //Forwarded, then the third one will get same subscription from previous two versions.
                         log.info("Subscription already exists: " + e.getMessage());
+                    } catch (SubscriptionBlockedException e) {
+                        //Not handled as an error because we cannot update subscriptions for an API with blocked subscriptions
+                        //If previous version was created by another older version and if the subscriptions are
+                        //Forwarded, by catching the exception we will continue checking the other subscriptions
+                        log.info("Subscription is blocked: " + e.getMessage());
                     }
                 }
             }

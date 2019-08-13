@@ -77,6 +77,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -188,6 +189,15 @@ public class APIMappingUtil {
             model.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
         }
         // scopes
+        for (ScopeDTO scope : dto.getScopes()) {
+            for (String aRole : scope.getBindings().getValues()) {
+                boolean isValidRole = APIUtil.isRoleNameExist(provider, aRole);
+                if (!isValidRole) {
+                    String error = "Role '" + aRole + "' Does not exist.";
+                    RestApiUtil.handleBadRequest(error, log);
+                }
+            }
+        }
         Set<Scope> scopes = getScopes(dto);
         model.setScopes(scopes);
 
@@ -397,6 +407,7 @@ public class APIMappingUtil {
         APIIdentifier apiId = api.getId();
         apiInfoDTO.setName(apiId.getApiName());
         apiInfoDTO.setVersion(apiId.getVersion());
+        apiInfoDTO.setType(api.getType());
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
@@ -618,13 +629,13 @@ public class APIMappingUtil {
 
         //Get Swagger definition which has URL templates, scopes and resource details
         if (!APIDTO.TypeEnum.WS.toString().equals(model.getType())) {
+            List<APIOperationsDTO> apiOperationsDTO;
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
-            List<APIOperationsDTO> operationsDTOs = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
-            dto.setOperations(operationsDTOs);
+            apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
+            dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(scopeDTOS);
         }
-
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
         tagsToReturn.addAll(apiTags);
@@ -923,15 +934,15 @@ public class APIMappingUtil {
         Set<URITemplate> uriTemplates = new LinkedHashSet<>();
 
         if (operations == null || operations.isEmpty()) {
-            operations = getDefaultOperationsList();
+            operations = getDefaultOperationsList(model.getType());
         }
 
         for (APIOperationsDTO operation : operations) {
             URITemplate template = new URITemplate();
 
-            String uriTempVal = operation.getUritemplate();
+            String uriTempVal = operation.getTarget();
 
-            String httpVerb = operation.getHttpVerb();
+            String httpVerb = operation.getVerb();
             List<String> scopeList = operation.getScopes();
             if (scopeList != null) {
                 for (String scopeKey : scopeList) {
@@ -942,6 +953,7 @@ public class APIMappingUtil {
                             scope.setName(definedScope.getName());
                             scope.setDescription(definedScope.getDescription());
                             scope.setRoles(definedScope.getRoles());
+                            template.setScopes(scope);
                             template.setScope(scope);
                         }
                     }
@@ -949,7 +961,8 @@ public class APIMappingUtil {
 
             }
             //Only continue for supported operations
-            if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+            if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase()) ||
+                    (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))) {
                 isHttpVerbDefined = true;
                 String authType = operation.getAuthType();
                 if (APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER.equals(authType)) {
@@ -973,13 +986,23 @@ public class APIMappingUtil {
 
                 uriTemplates.add(template);
             } else {
-                handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
-                        + "' is invalid");
+                if(APIConstants.GRAPHQL_API.equals(model.getType())){
+                    handleException("The GRAPHQL operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
+                            + "' is invalid");
+                } else {
+                    handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
+                            + "' is invalid");
+                }
             }
 
             if (!isHttpVerbDefined) {
-                handleException("Resource '" + uriTempVal + "' has global parameters without " +
-                        "HTTP methods");
+                if(APIConstants.GRAPHQL_API.equals(model.getType())) {
+                    handleException("Operation '" + uriTempVal + "' has global parameters without " +
+                            "Operation Type");
+                } else {
+                    handleException("Resource '" + uriTempVal + "' has global parameters without " +
+                            "HTTP methods");
+                }
             }
         }
 
@@ -1348,7 +1371,11 @@ public class APIMappingUtil {
             throws APIManagementException {
 
         APIDefinitionFromOpenAPISpec definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-        Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(api, swaggerDefinition);
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+
+        if (!APIConstants.GRAPHQL_API.equals(api.getType())) {
+            uriTemplates = definitionFromOpenAPISpec.getURITemplates(api, swaggerDefinition);
+        }
 
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         if (!StringUtils.isEmpty(swaggerDefinition)) {
@@ -1382,8 +1409,8 @@ public class APIMappingUtil {
         } else {
             operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER);
         }
-        operationsDTO.setHttpVerb(uriTemplate.getHTTPVerb());
-        operationsDTO.setUritemplate(uriTemplate.getUriTemplate());
+        operationsDTO.setVerb(uriTemplate.getHTTPVerb());
+        operationsDTO.setTarget(uriTemplate.getUriTemplate());
         if (uriTemplate.getScope() != null) {
             operationsDTO.setScopes(new ArrayList<String>() {{
                 add(uriTemplate.getScope().getName());
@@ -1398,13 +1425,21 @@ public class APIMappingUtil {
      *
      * @return a default operations list
      */
-    private static List<APIOperationsDTO> getDefaultOperationsList() {
+    private static List<APIOperationsDTO> getDefaultOperationsList(String apiType) {
 
         List<APIOperationsDTO> operationsDTOs = new ArrayList<>();
-        for (String verb : RestApiConstants.SUPPORTED_METHODS) {
+        String[] suportMethods = null;
+
+        if (apiType.equals(APIConstants.GRAPHQL_API)) {
+            suportMethods = APIConstants.GRAPHQL_SUPPORTED_METHODS;
+        } else {
+            suportMethods = RestApiConstants.SUPPORTED_METHODS;
+        }
+
+        for (String verb : suportMethods) {
             APIOperationsDTO operationsDTO = new APIOperationsDTO();
-            operationsDTO.setUritemplate("/*");
-            operationsDTO.setHttpVerb(verb);
+            operationsDTO.setTarget("/*");
+            operationsDTO.setVerb(verb);
             operationsDTO.setThrottlingPolicy(APIConstants.UNLIMITED_TIER);
             operationsDTO.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
             operationsDTOs.add(operationsDTO);

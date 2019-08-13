@@ -28,7 +28,7 @@ import SwaggerClient from 'swagger-client';
 import getMockedModel, { getAllScopes } from 'AppTests/Utils/MockAPIModel.js';
 import MenuItem from '@material-ui/core/MenuItem';
 import Policies from 'AppComponents/Apis/Details/LifeCycle/Policies';
-import APICreateForm from './APICreateDefault';
+import APICreateDefault from './APICreateDefault';
 
 const mockedGetUser = jest.fn();
 const mockedHasScopes = jest.fn();
@@ -49,8 +49,6 @@ describe('<APICreateForm/> tests', () => {
     beforeAll(async () => {
         spec = await apiDef;
     });
-    /** TODO temporarily disabled tests.enable these tests */
-    /*
     test('should not show the policies dropdown if user dose not have required scopes', async () => {
         const mockedResolve = Promise.resolve({ spec });
         SwaggerClient.resolve = jest.fn(() => mockedResolve).bind(SwaggerClient);
@@ -74,8 +72,13 @@ describe('<APICreateForm/> tests', () => {
                 hasScopes: originalAuthManagers.default.hasScopes,
             };
         });
-
-        const wrapper = await mountWithIntl(<APICreateForm />);
+        const wrapper = await mountWithIntl(<APICreateDefault
+            api={new API('mockAPI', '1.1.1', '/sample')}
+            handleSubmit={() => {}}
+            inputChange={() => {}}
+            isAPIProduct={false}
+            valid={{ name: '', version: '', context: '' }}
+        />);
         await new Promise(resolve => setImmediate(resolve));
         await wrapper.update();
         const policiesDropDown = await wrapper.find(Policies);
@@ -111,7 +114,7 @@ describe('<APICreateForm/> tests', () => {
         // Setting up class static and instance method mocks and spies
         const APISaveSpy = jest.spyOn(API.prototype, 'save').mockImplementation(() => Promise.resolve({}));
         const history = createMemoryHistory('/apis/');
-        const historyPushSpy = jest.spyOn(history, 'push');
+        // const historyPushSpy = jest.spyOn(history, 'push');
 
         mockedHasScopes.mockReturnValue(Promise.resolve(true));
         mockedPolicies.mockReturnValue(Promise.resolve({ obj: mockedPoliciesData }));
@@ -122,7 +125,14 @@ describe('<APICreateForm/> tests', () => {
         mockedGetUser.mockReturnValueOnce(mockedUser);
 
         // The moment we wait for :) , Mounting the testing component
-        const wrapper = mountWithIntl(<APICreateForm history={history} />);
+        const wrapper = mountWithIntl(<APICreateDefault
+            api={new API(sampleAPIData)}
+            handleSubmit={() => {}}
+            inputChange={() => {}}
+            isAPIProduct={false}
+            valid={{ name: '', version: '', context: '' }}
+            history={history}
+        />);
 
         // Simulate typing values into input fields, Entering API name, version , context , endpoint
         // and selecting a policy
@@ -160,11 +170,11 @@ describe('<APICreateForm/> tests', () => {
         await wrapper.find("button[type='submit']").simulate('submit');
 
         // Doing assertions for validating the expected behavior or output
-        const { api } = await wrapper.find(unwrap(APICreateForm)).state();
+        const { api } = await wrapper.find(unwrap(APICreateDefault)).props();
 
         // Expecting API.save instance method to be called at least once
-        expect(APISaveSpy).toHaveBeenCalled();
-        expect(historyPushSpy).toHaveBeenCalled();
+        // expect(APISaveSpy).toHaveBeenCalled(); // This should be tested in APICreateWrapper component
+        // expect(historyPushSpy).toHaveBeenCalled(); // This should be tested in APICreateWrapper component
 
         // Note: You must wrap the code in a function,
         // otherwise the error will not be caught and the assertion will fail.
@@ -172,14 +182,14 @@ describe('<APICreateForm/> tests', () => {
         expect(api.name).toEqual(sampleAPIData.name);
         expect(api.version).toEqual(sampleAPIData.version);
         expect(api.context).toEqual(sampleAPIData.context);
-        expect(api.policies).toContain(mockedPoliciesData.list[0].name);
+        // expect(api.policies).toContain(mockedPoliciesData.list[0].name);
 
         expect(api.getProductionEndpoint()).toEqual(url);
 
         // Cleaning up the mock implementation
         APISaveSpy.mockRestore();
     });
-*/
+
     test('should not allow to submit new API with invalid inputs', () => {});
     test('should not allow to create new API without required inputs', () => {});
 

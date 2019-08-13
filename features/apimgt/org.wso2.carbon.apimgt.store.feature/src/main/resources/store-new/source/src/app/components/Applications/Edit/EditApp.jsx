@@ -32,7 +32,7 @@ import { Link } from 'react-router-dom';
 import API from 'AppData/api';
 import ApplicationCreateForm from 'AppComponents/Shared/AppsAndKeys/ApplicationCreateForm';
 import Alert from 'AppComponents/Shared/Alert';
-import Application from '../../../data/Application';
+import Application from 'AppData/Application';
 
 /**
  *
@@ -200,7 +200,7 @@ class EditApp extends React.Component {
         const attributeNameList = Object.keys(attributes);
         if (allAppAttributes.length > 0) {
             for (let i = 0; i < allAppAttributes.length; i++) {
-                if (allAppAttributes[i].required === 'true') {
+                if (allAppAttributes[i].required === 'true' && allAppAttributes[i].hidden === 'false') {
                     if (attributeNameList.indexOf(allAppAttributes[i].attribute) === -1) {
                         isValidAttribute = false;
                     } else if (attributeNameList.indexOf(allAppAttributes[i].attribute) > -1
@@ -353,6 +353,14 @@ class EditApp extends React.Component {
 EditApp.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            application_uuid: PropTypes.string.isRequired,
+        }).isRequired,
+    }).isRequired,
+    history: PropTypes.shape({
+        push: PropTypes.func.isRequired,
+    }).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(EditApp));

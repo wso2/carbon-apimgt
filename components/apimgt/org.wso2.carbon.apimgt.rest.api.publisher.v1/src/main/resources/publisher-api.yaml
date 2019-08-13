@@ -1207,7 +1207,7 @@ paths:
       x-examples:
         $ref: docs/examples/apis/apis_copyapi.yaml#/post
       tags:
-        - API (Individual)
+      - API (Individual)
       responses:
         201:
           description: |
@@ -1668,9 +1668,83 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Validate OpenAPI Definition" utility API
-######################################################
+
+  ######################################################
+  # The "Import GraphQL API Schema from API Definition"  resource API
+  ######################################################
+
+  /apis/import-graphQLSchema:
+
+    #----------------------------------------------------------------------------
+    # Import API from API Definition
+    #----------------------------------------------------------------------------
+    post:
+      consumes:
+      - multipart/form-data
+      security:
+      - OAuth2Security:
+        - apim:api_create
+      summary: Import API Definition
+      description: |
+        This operation can be used to create api from api definition.
+
+        API definition is GraphQL Schema
+      parameters:
+      - in: formData
+        name: type
+        description: Definition type to upload
+        type: string
+        required: false
+      - in: formData
+        name: file
+        description: Definition to uploads a file
+        type: file
+        required: false
+      - in: formData
+        name: additionalProperties
+        description: Additional attributes specified as a stringified JSON with API's schema
+        type: string
+        required: false
+      - $ref: '#/parameters/If-Match'
+      tags:
+      - API (Collection)
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          schema:
+            $ref: '#/definitions/API'
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        415:
+          description: |
+            Unsupported Media Type.
+            The entity of the request was in a not supported format.
+          schema:
+            $ref: '#/definitions/Error'
+
+  ######################################################
+  # The "Validate API Definition" utility API
+  ######################################################
 
   '/apis/validate-openapi':
     post:
@@ -1751,12 +1825,12 @@ paths:
       parameters:
         - in: formData
           name: url
-          description: WSDL definition url
+          description: Definition url
           type: string
           required: false
         - in: formData
           name: file
-          description: WSDL definition as a file (or an archive with multiple connected WSDLs)
+          description: Definition to upload as a file
           type: file
           required: false
         - in: query
@@ -1794,7 +1868,187 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#########################################################
+######################################################
+# The "Validate GRAPH_QL API Definition" utility API
+######################################################
+
+  '/apis/validate-graphql-schema':
+    post:
+      consumes:
+      - multipart/form-data
+      security:
+      - OAuth2Security:
+        - apim:api_create
+      summary: Validate GraphQL API definition and retrieve a summary
+      description: |
+        This operation can be used to validate a graphQL definition and retrieve a summary.
+      parameters:
+      - in: formData
+        name: file
+        description: Definition to upload as a file
+        type: file
+        required: true
+      tags:
+      - API (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            API definition validation information is returned
+          schema:
+            $ref: '#/definitions/GraphQLValidationResponse'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
+
+  ######################################################
+  # The GraphQL Schema Resource
+  ######################################################
+
+  /apis/{apiId}/graphql-schema:
+    #-----------------------------------------------------
+    # Retrieve the details about a certain GraphQL schema
+    #-----------------------------------------------------
+    get:
+      x-scope: apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v1.0/apis/7f82f6b0-2667-441e-af23-c0fc44cf3a17/graphql-schema\""
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/publisher/v1.0/apis/7f82f6b0-2667-441e-af23-c0fc44cf3a17/graphql-schema
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n{\r\n   \"name\": \"admin--hello1.0.0.graphql\",\r\n   \"schemaDefinition\": \"schema {\r\n  \r\n  # The query root of HackerNews GraphQL interface.\r\n  query: Query\r\n\r\n  # The root query for implementing GraphQL mutations.\r\n  mutation: Mutation\r\n}\r\n\r\ntype Link {\r\n\r\n  # ID of the link\r\n  id: ID!\r\n\r\n  # URL of the link\r\n  url: String!\r\n\r\n  # Description of the link\r\n  description: String\r\n}\r\n\r\ninput LinkFilter {\r\n\r\n  # Value to be checked whether it contains in the description\r\n  description_contains: String\r\n\r\n  # Value to be checked whether it contains in the URL\r\n  url_contains: String\r\n}\r\n\r\ntype Query {\r\n\r\n  # Fetches all the links\r\n  #\r\n  # Arguments\r\n  # filter: To filter the links according a specific criteria\r\n  # skip: Skip to a specific index in the list (default value is 0)\r\n  # first: Index of the link first to display (default value is 0)\r\n  allLinks(filter: LinkFilter, skip: Int = 0, first: Int = 0): [Link]\r\n}\r\n\r\ntype Mutation {\r\n\r\n  # Creates a new link\r\n  #\r\n  # Arguments\r\n  # url: URL of the link\r\n  # description: Description about the link\r\n  createLink(url: String!, description: String!): Link\r\n}\r\n\"\r\n}"
+      summary: Get the Schema of a GraphQL API
+      description: |
+        This operation can be used to retrieve the Schema definition of a GraphQL API.
+      parameters:
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
+      tags:
+      - GraphQL Schema (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Requested GraphQL Schema DTO object belongs to the API
+          schema:
+            $ref: '#/definitions/GraphQLSchema'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+    #-----------------------------------------------------
+    # Add a GraphQL schema to the registry
+    #-----------------------------------------------------
+    put:
+      x-scope: apim:api_create
+      x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v1.0/apis/af3f96da-9ccf-463f-8cee-13ec8530a9cd/graphql-schema\""
+      x-wso2-request: "PUT https://localhost:9443/api/am/publisher/v1.0/apis/af3f96da-9ccf-463f-8cee-13ec8530a9cd/graphql-schema\r\nContent-Type: text/plain\r\nAuthorization: Bearer 7d237cab-7011-3f81-b384-24d03e750873\r\n\r\n{\r\n   \"name\": \"admin--HackerNewsAPI1.0.0.graphql\",\r\n   \"schemaDefinition\": \"schema {\r\n  \r\n  # The query root of HackerNews GraphQL interface.\r\n  query: Query\r\n\r\n  # The root query for implementing GraphQL mutations.\r\n  mutation: Mutation\r\n}\r\n\r\ntype Link {\r\n\r\n  # ID of the link\r\n  id: ID!\r\n\r\n  # URL of the link\r\n  url: String!\r\n\r\n  # Description of the link\r\n  description: String\r\n}\r\n\r\ninput LinkFilter {\r\n\r\n  # Value to be checked whether it contains in the description\r\n  description_contains: String\r\n\r\n  # Value to be checked whether it contains in the URL\r\n  url_contains: String\r\n}\r\n\r\ntype Query {\r\n\r\n  # Fetches all the links\r\n  #\r\n  # Arguments\r\n  # filter: To filter the links according a specific criteria\r\n  # skip: Skip to a specific index in the list (default value is 0)\r\n  # first: Index of the link first to display (default value is 0)\r\n  allLinks(filter: LinkFilter, skip: Int = 0, first: Int = 0): [Link]\r\n}\r\n\r\ntype Mutation {\r\n\r\n  # Creates a new link\r\n  #\r\n  # Arguments\r\n  # url: URL of the link\r\n  # description: Description about the link\r\n  createLink(url: String!, description: String!): Link\r\n}\r\n\"\r\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n{\r\n   \"name\": \"admin--HackerNewsAPI1.0.0.graphql\",\r\n   \"schemaDefinition\": \"schema {\r\n  \r\n  # The query root of HackerNews GraphQL interface.\r\n  query: Query\r\n\r\n  # The root query for implementing GraphQL mutations.\r\n  mutation: Mutation\r\n}\r\n\r\ntype Link {\r\n\r\n  # ID of the link\r\n  id: ID!\r\n\r\n  # URL of the link\r\n  url: String!\r\n\r\n  # Description of the link\r\n  description: String\r\n}\r\n\r\ninput LinkFilter {\r\n\r\n  # Value to be checked whether it contains in the description\r\n  description_contains: String\r\n\r\n  # Value to be checked whether it contains in the URL\r\n  url_contains: String\r\n}\r\n\r\ntype Query {\r\n\r\n  # Fetches all the links\r\n  #\r\n  # Arguments\r\n  # filter: To filter the links according a specific criteria\r\n  # skip: Skip to a specific index in the list (default value is 0)\r\n  # first: Index of the link first to display (default value is 0)\r\n  allLinks(filter: LinkFilter, skip: Int = 0, first: Int = 0): [Link]\r\n}\r\n\r\ntype Mutation {\r\n\r\n  # Creates a new link\r\n  #\r\n  # Arguments\r\n  # url: URL of the link\r\n  # description: Description about the link\r\n  createLink(url: String!, description: String!): Link\r\n}\r\n\"\r\n}"
+      summary: Add a Schema to a GraphQL API
+      description: |
+        This operation can be used to add a GraphQL Schema definition to an existing GraphQL API.
+      parameters:
+      - $ref: '#/parameters/apiId'
+      - in: formData
+        name: schemaDefinition
+        description: schema definition of the GraphQL API
+        type: string
+        required: true
+      - $ref: '#/parameters/If-Match'
+      tags:
+      - GraphQL Schema (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated schema definition
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by cache, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: |
+            Forbidden.
+            The request must be conditional but no condition has been specified.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+  #########################################################
 # The "Configure Monetization" Processing Function resource API
 #########################################################
   /apis/{apiId}/monetize:
@@ -4153,7 +4407,7 @@ paths:
         - multipart/form-data
       security:
         - OAuth2Security:
-          - apim:api_create
+          - apim:api_update
       x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v1.0/import/apis"
       x-wso2-request: |
         PUT https://127.0.0.1:9443/api/am/publisher/v1.0/import/apis
@@ -6077,6 +6331,9 @@ definitions:
           If the provider value is not given, the user invoking the API will be used as the provider.
         type: string
         example: admin
+      type:
+        type: string
+        example: HTTP
       lifeCycleStatus:
         type: string
         example: CREATED
@@ -6151,11 +6408,12 @@ definitions:
         example: false
       type:
         type: string
-        description: The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST
+        description: The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
         enum:
           - HTTP
           - WS
           - SOAPTOREST
+          - GRAPHQL
         example: HTTP
         default: HTTP
       transport:
@@ -6396,26 +6654,7 @@ definitions:
       operations:
        type: array
        items:
-        properties:
-          id:
-           type: string
-           example: "postapiresource"
-          uritemplate:
-            type: string
-            default: "/*"
-          httpVerb:
-            type: string
-            default: "GET"
-          authType:
-            type: string
-            default: "Any"
-          throttlingPolicy:
-            type: string
-            example: "Unlimited"
-          scopes:
-            type: array
-            items:
-              type: string
+         $ref: '#/definitions/APIOperations'
       threatProtectionPolicies:
         properties:
           list:
@@ -6723,7 +6962,6 @@ definitions:
       groupId:
         type: string
         example: ""
-
 #-----------------------------------------------------
 # The Application Info resource
 #-----------------------------------------------------
@@ -6834,6 +7072,21 @@ definitions:
         example: 2017-02-20T13:57:16.229
       lastUpdatedBy:
         type: string
+
+  #-----------------------------------------------------
+  # The GraphQL Schema resource
+  #-----------------------------------------------------
+  GraphQLSchema:
+    title: GraphQL Schema
+    required:
+    - name
+    properties:
+      name:
+        type: string
+        example: "admin--HackerNewsAPI.graphql"
+      schemaDefinition:
+        type: string
+
 
   #-----------------------------------------------------
   # The Mediation List resource
@@ -7146,7 +7399,7 @@ definitions:
         description: |
           A detail description about the error message.
 
-  #-----------------------------------------------------
+        #-----------------------------------------------------
   # The Environment resource
   #-----------------------------------------------------
   Environment:
@@ -7419,6 +7672,26 @@ definitions:
             items:
               type: string
 
+  APIOperations :
+    title: Operation
+    properties:
+      id:
+        type: string
+        example: "postapiresource"
+      target:
+        type: string
+      verb:
+        type: string
+      authType:
+        type: string
+        default: "Any"
+      throttlingPolicy:
+        type: string
+        example: "Unlimited"
+      scopes:
+        type: array
+        items:
+          type: string
 
 #-----------------------------------------------------
 # The Scope List resource
@@ -7772,6 +8045,34 @@ definitions:
               hasSoapBinding:
                 description: Indicates whether the WSDL contains SOAP Bindings
                 type: boolean
+
+  GraphQLValidationResponse:
+    title: GraphQL API definition validation Response
+    required:
+    - isValid
+    - errorMessage
+    properties:
+      isValid:
+        description: |
+          This attribute declares whether this definition is valid or not.
+        type: boolean
+        example: true
+      errorMessage:
+        description: |
+          This attribute declares the validation error message
+        type: string
+        meesage: String
+      graphQLInfo:
+        description:
+          Summary of the GraphQL including the basic information
+        properties:
+          operations:
+            type: array
+            items:
+              $ref: '#/definitions/APIOperations'
+          graphQLSchema:
+            items:
+            $ref: '#/definitions/GraphQLSchema'
 
 #-----------------------------------------------------
 # The Threat Protection Policy List Resource

@@ -64,7 +64,7 @@ const DetailsTopMenu = ({
             <VerticalDivider height={70} />
             <ThumbnailView api={api} width={70} height={50} />
             <div style={{ marginLeft: theme.spacing.unit }}>
-                <Typography variant='display1'>
+                <Typography variant='h4'>
                     {api.name} {isAPIProduct ? '' : ':' + api.version}
                 </Typography>
                 <Typography variant='caption' gutterBottom align='left'>
@@ -73,7 +73,7 @@ const DetailsTopMenu = ({
             </div>
             <VerticalDivider height={70} />
             <div className={classes.infoItem}>
-                <Typography variant='subheading' gutterBottom>
+                <Typography variant='subtitle1' gutterBottom>
                     {isAPIProduct ? api.state : api.lifeCycleStatus}
                 </Typography>
                 <Typography variant='caption' gutterBottom align='left'>

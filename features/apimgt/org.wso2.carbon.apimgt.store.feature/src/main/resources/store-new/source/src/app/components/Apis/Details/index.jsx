@@ -179,7 +179,6 @@ class Details extends React.Component {
          */
         this.updateSubscriptionData = (callback) => {
             const { path } = this.props;
-
             let promisedAPI = null;
             let existingSubscriptions = null;
             let promisedApplications = null;

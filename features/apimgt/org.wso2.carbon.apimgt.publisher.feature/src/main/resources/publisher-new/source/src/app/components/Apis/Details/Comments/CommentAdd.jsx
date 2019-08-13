@@ -165,7 +165,7 @@ class CommentAdd extends React.Component {
         const { classes, cancelButton, theme } = this.props;
         const { category, commentText, currentLength } = this.state;
         return (
-            <Grid container spacing={24} className={classes.contentWrapper}>
+            <Grid container spacing={7} className={classes.contentWrapper}>
 
                 <Grid item xs zeroMinWidth>
                     <FormControl className={classes.category}>
@@ -192,7 +192,7 @@ class CommentAdd extends React.Component {
                     <Typography className={classes.commentText} align='right'>
                         {currentLength + '/' + theme.custom.maxCommentLength }
                     </Typography>
-                    <Grid container spacing={8}>
+                    <Grid container spacing={2}>
                         <Grid item>
                             <Button variant='contained' color='primary' onClick={() => this.handleClickAddComment()}>
                   Add Comment

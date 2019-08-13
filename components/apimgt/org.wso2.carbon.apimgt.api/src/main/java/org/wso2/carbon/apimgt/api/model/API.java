@@ -49,6 +49,8 @@ public class API implements Serializable {
     private String wsdlUrl;
     private String wsdlArchivePath;
     private String wadlUrl;
+    private String swaggerDefinition;
+    private String graphQLSchema;
     private String type;
     private String context;
     private String contextTemplate;
@@ -255,6 +257,14 @@ public class API implements Serializable {
      */
     private String accessControl;
     private String accessControlRoles;
+
+    public String getSwaggerDefinition() {return swaggerDefinition; }
+
+    public void setSwaggerDefinition(String swaggerDefinition) { this.swaggerDefinition = swaggerDefinition; }
+
+    public void setGraphQLSchema(String graphQLSchema) { this.graphQLSchema = graphQLSchema; }
+
+    public String getGraphQLSchema() {return graphQLSchema; }
 
     public Set<String> getEnvironments() {
         return environments;

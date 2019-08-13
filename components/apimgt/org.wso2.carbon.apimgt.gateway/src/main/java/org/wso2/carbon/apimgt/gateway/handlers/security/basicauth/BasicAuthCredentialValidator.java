@@ -16,8 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.basicauth;
 
-import io.swagger.models.Path;
-import io.swagger.models.Swagger;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
@@ -25,13 +24,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -55,7 +54,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * This class will validate the basic auth credentials.
@@ -113,26 +111,6 @@ public class BasicAuthCredentialValidator {
     }
 
     /**
-     * Return the resource authentication scheme of the API resource.
-     *
-     * @param swagger swagger of the API
-     * @param synCtx  The message to be authenticated
-     * @return the resource authentication scheme
-     */
-    public String getResourceAuthenticationScheme(Swagger swagger, MessageContext synCtx) {
-        String authType = null;
-        Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
-        if (vendorExtensions != null) {
-            authType = (String) vendorExtensions.get(APIConstants.SWAGGER_X_AUTH_TYPE);
-        }
-
-        if (StringUtils.isNotBlank(authType)) {
-            return authType;
-        }
-        return APIConstants.NO_MATCHING_AUTH_SCHEME;
-    }
-
-    /**
      * Validates the given username and password against the users in the user store.
      *
      * @param username given username
@@ -183,17 +161,17 @@ public class BasicAuthCredentialValidator {
      * Validates the roles of the given user against the roles of the scopes of the API resource.
      *
      * @param username given username
-     * @param swagger  swagger of the API
+     * @param openAPI  OpenAPI of the API
      * @param synCtx   The message to be authenticated
      * @return true if the validation passed
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
     @MethodStats
-    public boolean validateScopes(String username, Swagger swagger, MessageContext synCtx) throws APISecurityException {
+    public boolean validateScopes(String username, OpenAPI openAPI, MessageContext synCtx) throws APISecurityException {
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
-        if (swagger != null) {
+        if (openAPI != null) {
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) synCtx).getAxis2MessageContext();
             String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
@@ -204,24 +182,14 @@ public class BasicAuthCredentialValidator {
             } else {
                 // retrieve the user roles related to the scope of the API resource
                 String resourceRoles = null;
-                Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
-                if (vendorExtensions != null) {
-                    String resourceScope = (String) vendorExtensions.get(APIConstants.SWAGGER_X_SCOPE);
-                    if (StringUtils.isNotBlank(resourceScope)) {
-                        LinkedHashMap swaggerWSO2Security = (LinkedHashMap) swagger.getVendorExtensions()
-                                .get(APIConstants.SWAGGER_X_WSO2_SECURITY);
-                        if (swaggerWSO2Security != null) {
-                            LinkedHashMap swaggerObjectAPIM = (LinkedHashMap) swaggerWSO2Security
-                                    .get(APIConstants.SWAGGER_OBJECT_NAME_APIM);
-                            if (swaggerObjectAPIM != null) {
-                                ArrayList<LinkedHashMap> scopes = (ArrayList<LinkedHashMap>) swaggerObjectAPIM
-                                        .get(APIConstants.SWAGGER_X_WSO2_SCOPES);
-                                for (LinkedHashMap scope : scopes) {
-                                    if (resourceScope.equals(scope.get(APIConstants.SWAGGER_SCOPE_KEY))) {
-                                        resourceRoles = (String) scope.get(APIConstants.SWAGGER_ROLES);
-                                        break;
-                                    }
-                                }
+                String resourceScope = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
+                if (resourceScope != null) {
+                    ArrayList<LinkedHashMap> apiScopes = OpenAPIUtils.getScopeToRoleMappingOfApi(openAPI, synCtx);
+                    if (apiScopes != null) {
+                        for (LinkedHashMap scope : apiScopes) {
+                            if (resourceScope.equals(scope.get(APIConstants.SWAGGER_SCOPE_KEY))) {
+                                resourceRoles = (String) scope.get(APIConstants.SWAGGER_ROLES);
+                                break;
                             }
                         }
                     }
@@ -274,7 +242,7 @@ public class BasicAuthCredentialValidator {
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Basic Authentication: No swagger found in the gateway for the API: ".concat(apiContext)
+                log.debug("Basic Authentication: No OpenAPI found in the gateway for the API: ".concat(apiContext)
                         .concat(":").concat(apiVersion));
             }
             return true;
@@ -283,54 +251,6 @@ public class BasicAuthCredentialValidator {
             log.debug("Basic Authentication: Scope validation failed for the API resource: ".concat(apiElectedResource));
         }
         throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
-    }
-
-    /**
-     * Return the throttling tier of the API resource.
-     *
-     * @param swagger swagger of the API
-     * @param synCtx  The message to be authenticated
-     * @return the resource throttling tier
-     */
-    public String getResourceThrottlingTier(Swagger swagger, MessageContext synCtx) {
-        String throttlingTier = null;
-        Map<String, Object> vendorExtensions = getVendorExtensions(synCtx, swagger);
-        if (vendorExtensions != null) {
-            throttlingTier = (String) vendorExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
-        }
-        if (StringUtils.isNotBlank(throttlingTier)) {
-            return throttlingTier;
-        }
-        return APIConstants.UNLIMITED_TIER;
-    }
-
-    private Map<String, Object> getVendorExtensions(MessageContext synCtx, Swagger swagger) {
-        if (swagger != null) {
-            String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
-            org.apache.axis2.context.MessageContext axis2MessageContext =
-                    ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-            String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
-            Path path = swagger.getPath(apiElectedResource);
-            if (path != null) {
-                switch (httpMethod) {
-                    case APIConstants.HTTP_GET:
-                        return path.getGet().getVendorExtensions();
-                    case APIConstants.HTTP_POST:
-                        return path.getPost().getVendorExtensions();
-                    case APIConstants.HTTP_PUT:
-                        return path.getPut().getVendorExtensions();
-                    case APIConstants.HTTP_DELETE:
-                        return path.getDelete().getVendorExtensions();
-                    case APIConstants.HTTP_HEAD:
-                        return path.getHead().getVendorExtensions();
-                    case APIConstants.HTTP_OPTIONS:
-                        return path.getOptions().getVendorExtensions();
-                    case APIConstants.HTTP_PATCH:
-                        return path.getPatch().getVendorExtensions();
-                }
-            }
-        }
-        return null;
     }
 
     /**

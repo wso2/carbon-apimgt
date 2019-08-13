@@ -29,6 +29,7 @@ class API extends Resource {
         let properties = kwargs;
         if (name instanceof Object) {
             properties = name;
+            Utils.deepFreeze(properties);
         } else {
             this.name = name;
             this.version = version;
@@ -51,7 +52,6 @@ class API extends Resource {
             };
         }
         this.apiType = API.CONSTS.API;
-        Utils.deepFreeze(properties);
         this._data = properties;
         for (const key in properties) {
             if (Object.prototype.hasOwnProperty.call(properties, key)) {
@@ -419,6 +419,25 @@ class API extends Resource {
         }
     }
 
+       /**
+     * Get the graphQL schema of an API
+     * @param id {String} UUID of the API in which the swagger is needed
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getSchema(id, callback = null) {
+        const promise_get = this.client.then((client) => {
+            return client.apis['GraphQL Schema (Individual)'].get_apis__apiId__graphql_schema({
+                apiId: id
+            }, this._requestMetaData());
+        });
+        if (callback) {
+            return promise_get.then(callback);
+        } else {
+            return promise_get;
+        }
+    }
+
     /**
      * Get the scopes of an API
      * @param id {String} UUID of the API in which the swagger is needed
@@ -524,6 +543,29 @@ class API extends Resource {
             );
         });
         return promised_update;
+    }
+
+    /**
+     * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
+     * @param apiId {Object} Updated graphQL schema which needs to be updated
+     * @param graphQLSchema
+     * @deprecated
+     */
+    updateGraphQLAPIDefinition(apiId, graphQLSchema){
+        const promised_updateSchema = this.client.then((client) => {
+            const payload = {
+                apiId: apiId,
+                schemaDefinition: graphQLSchema,
+                'Content-Type': 'multipart/form-data',
+            };
+            return client.apis['GraphQL Schema (Individual)'].put_apis__apiId__graphql_schema(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'}
+                ),
+            );
+        });
+        return promised_updateSchema;
     }
 
     /**
@@ -951,6 +993,52 @@ class API extends Resource {
         const promised_validationResponse = this.client.then((client) => {
             return client.apis['API (Collection)'].post_apis_validate_definition({
                     type: 'WSDL',
+                    file,
+                    'Content-Type': 'multipart/form-data',
+                },
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        });
+        return promised_validationResponse;
+    }
+
+      /**
+     * Create an API from GraphQL with the given parameters and call the callback method given optional.
+     * @param {Object} api_data - API data which need to fill the placeholder values in the @get_template
+     * @param {function} callback - An optional callback method
+     * @returns {Promise} Promise after creating and optionally calling the callback method.
+     */
+    importGraphQL(api_data, callback = null) {
+        let payload;
+        let promise_create;
+        payload = {
+            type: 'GraphQL',
+            additionalProperties: api_data.additionalProperties,
+            file: api_data.file,
+            'Content-Type': 'multipart/form-data',
+        };
+       
+        promise_create = this.client.then((client) => {
+            return client.apis['API (Collection)'].post_apis_import_graphQLSchema(
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        });
+        if (callback) {
+            return promise_create.then(callback);
+        } else {
+            return promise_create;
+        }
+    }
+
+    validateGraphQLFile(file) {
+        const promised_validationResponse = this.client.then((client) => {
+            return client.apis['API (Collection)'].post_apis_validate_graphql_schema({
+                    type: 'GraphQL',
                     file,
                     'Content-Type': 'multipart/form-data',
                 },
@@ -1433,7 +1521,7 @@ class API extends Resource {
 API.CONSTS = {
     API: 'API',
     APIProduct: 'APIProduct',
-}
+};
 
 Object.freeze(API.CONSTS);
 

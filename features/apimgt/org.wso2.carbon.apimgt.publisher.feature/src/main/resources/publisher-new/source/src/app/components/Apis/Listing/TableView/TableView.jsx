@@ -1,305 +1,387 @@
+/*
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TablePagination from '@material-ui/core/TablePagination';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
-import Checkbox from '@material-ui/core/Checkbox';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
+import MUIDataTable from 'mui-datatables';
 import { injectIntl } from 'react-intl';
-
 import API from 'AppData/api';
-import Alert from 'AppComponents/Shared/Alert';
-
-import APITableHeader from './APITableHeader';
-import APITableToolBar from './APITableToolBar';
+import APIProduct from 'AppData/APIProduct';
+import Configurations from 'Config';
+import ImageGenerator from 'AppComponents/Apis/Listing/components/ImageGenerator/ImageGenerator';
+import ApiThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/ApiThumb';
+import { Progress } from 'AppComponents/Shared';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import SampleAPI from 'AppComponents/Apis/Listing/SampleAPI/SampleAPI';
+import TopMenu from 'AppComponents/Apis/Listing/components/TopMenu';
 
 const styles = theme => ({
-    root: {
-        width: '100%',
-        marginTop: theme.spacing.unit * 3,
-    },
-    table: {
-        minWidth: 1020,
-    },
-    tableWrapper: {
-        overflowX: 'auto',
+    contentInside: {
+        paddingLeft: theme.spacing.unit * 3,
+        paddingTop: theme.spacing.unit * 2,
+        '& > div[class^="MuiPaper-root-"]': {
+            boxShadow: 'none',
+            backgroundColor: 'transparent',
+        },
     },
 });
 
-/* let counter = 0;
-function createData(name, calories, fat, carbs, protein) {
-    counter += 1;
-    return {
-        id: counter,
-        name,
-        calories,
-        fat,
-        carbs,
-        protein,
-    };
-} */
-
-/* function desc(a, b, orderBy) {
-    if (b[orderBy] < a[orderBy]) {
-        return -1;
-    }
-    if (b[orderBy] > a[orderBy]) {
-        return 1;
-    }
-    return 0;
-} */
-
-/* function getSorting(order, orderBy) {
-    return order === 'desc' ? (a, b) => desc(a, b, orderBy) : (a, b) => -desc(a, b, orderBy);
-} */
-
-/**
- * Table view of the API listing
- * @class TableView @inheritdoc
- * @extends {React.Component} @inheritdoc
- */
 class TableView extends React.Component {
-    /**
-     *Creates an instance of TableView.
-     * @param {Object} props @inheritdoc
-     * @memberof TableView
-     */
     constructor(props) {
         super(props);
         this.state = {
-            order: 'asc',
-            orderBy: 'calories',
-            selected: [],
-            page: 0,
-            rowsPerPage: 5,
-            isDeleting: false,
+            apisAndApiProducts: null,
+            notFound: true,
+            listType: props.theme.custom.defaultApiView,
         };
-        this.isSelected = this.isSelected.bind(this);
-        this.handleSelectAnAPI = this.handleSelectAnAPI.bind(this);
-        this.handleSelectAllClick = this.handleSelectAllClick.bind(this);
-        this.handleDeleteAPIs = this.handleDeleteAPIs.bind(this);
-        this.handleChangePage = this.handleChangePage.bind(this);
-        this.handleChangeRowsPerPage = this.handleChangeRowsPerPage.bind(this);
+        this.page = 0;
+        this.count = 100;
+        this.rowsPerPage = 10;
+        this.getLocalStorage();
+        this.setListType = this.setListType.bind(this);
+        this.updateData = this.updateData.bind(this);
     }
 
-    handleRequestSort = (event, property) => {
-        const orderBy = property;
-        let order = 'desc';
+    componentDidMount() {
+        this.getLocalStorage();
+        this.getData();
+    }
 
-        if (this.state.orderBy === property && this.state.order === 'desc') {
-            order = 'asc';
+    componentDidUpdate(prevProps) {
+        const { isAPIProduct } = this.props;
+        if (isAPIProduct !== prevProps.isAPIProduct) {
+            this.getLocalStorage();
+            this.getData();
         }
+    }
 
-        this.setState({ order, orderBy });
+    getMuiTheme = () => {
+        const { listType } = this.state;
+        let muiTheme = {
+            overrides: {
+                MUIDataTable: {
+                    root: {
+                        backgroundColor: 'transparent',
+                        marginLeft: 40,
+                    },
+                    paper: {
+                        boxShadow: 'none',
+                        backgroundColor: 'transparent',
+                    },
+                    tableRoot: {
+                        '& tbody': {
+                            backgroundColor: '#fff',
+                        },
+                    },
+                },
+                MUIDataTableBodyCell: {
+                    root: {
+                        backgroundColor: 'transparent',
+                    },
+                },
+            },
+        };
+        if (listType === 'grid') {
+            const themeAdditions = {
+                overrides: {
+                    MUIDataTable: {
+                        tableRoot: {
+                            display: 'block',
+                            '& tbody': {
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                backgroundColor: 'transparent',
+                            },
+                            '& thead': {
+                                display: 'none',
+                            },
+                        },
+                    },
+                },
+            };
+            muiTheme = Object.assign(Configurations.themes.light, muiTheme, themeAdditions);
+        }
+        return createMuiTheme(muiTheme);
+    };
+
+    // get apisAndApiProducts
+    getData = () => {
+        this.xhrRequest().then((data) => {
+            const { body } = data;
+            const { list, pagination } = body;
+            const { total } = pagination;
+            this.count = total;
+            this.setState({ apisAndApiProducts: list, notFound: false });
+        });
+    };
+
+    getLocalStorage = () => {
+        const { isAPIProduct } = this.props;
+        const paginationSufix = isAPIProduct ? 'products' : 'apis';
+        const storedPagination = window.localStorage.getItem('pagination-' + paginationSufix);
+        if (storedPagination) {
+            const pagination = JSON.parse(storedPagination);
+            if (pagination.page && pagination.count && pagination.rowsPerPage) {
+                this.page = pagination.page;
+                this.count = pagination.count;
+                this.rowsPerPage = pagination.rowsPerPage;
+            }
+        }
     };
 
     /**
-     * Handle select all api checkbox in header
      *
-     * @param {React.SyntheticEvent} event ignored
-     * @param {Boolean} checked is the select all checkbox is selected
-     * @memberof TableView
+     * Switch the view between grid and list view
+     * @param {String} value UUID(ID) of the deleted API
+     * @memberof Listing
      */
-    handleSelectAllClick(event, checked) {
-        let selected = [];
-        if (checked) {
-            selected = this.props.apis.list.map(api => api.id);
-        }
-        this.setState({ selected });
-    }
-
-    /**
-     *
-     * Handle onClick event of checkbox for single API (One row in the APIs listing table view)
-     * @param {React.SyntheticEvent} event onClick event
-     * @memberof TableView
-     */
-    handleSelectAnAPI(event) {
-        const { id } = event.currentTarget;
-        const { selected } = this.state;
-        const selectedIndex = selected.indexOf(id);
-        let newSelected = [];
-
-        if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, id);
-        } else if (selectedIndex === 0) {
-            newSelected = newSelected.concat(selected.slice(1));
-        } else if (selectedIndex === selected.length - 1) {
-            newSelected = newSelected.concat(selected.slice(0, -1));
-        } else if (selectedIndex > 0) {
-            newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
-        }
-
-        this.setState({ selected: newSelected });
-    }
-
-    /**
-     * Provide implementation for Material UI standard TablePagination callback prop
-     * Switch to the next/previous page from the current page according to the passed page number
-     *
-     * @param {React.SyntheticEvent} event
-     * @param {Number} page Next/Previous page number
-     * @memberof TableView
-     */
-    handleChangePage(event, page) {
-        this.setState({ page });
-    }
-
-    /**
-     *
-     * Provide implementation for Material UI standard TablePagination callback prop
-     * Change the number of rows(APIs) shown in single page
-     * @param {React.SyntheticEvent} event Synthetic event for number of rows dropdown menu
-     * @memberof TableView
-     */
-    handleChangeRowsPerPage(event) {
-        this.setState({ rowsPerPage: event.target.value });
-    }
-
-    /**
-     *
-     * Delete API in `selected` list
-     * @memberof TableView
-     */
-    handleDeleteAPIs() {
-        this.setState({ isDeleting: true });
-        const { selected } = this.state;
-        const { updateAPIsList, intl } = this.props;
-        const promisedDeleteAll = selected.map(apiUUID =>
-            API.delete(apiUUID)
-                .then(() => {
-                    updateAPIsList(apiUUID);
-                    const index = selected.indexOf(apiUUID);
-                    if (index !== -1) selected.splice(index, 1);
-                })
-                .catch(() => Alert.info(`${intl.formatMessage({
-                    id: 'Apis.Listing.TableView.TableView.error.while.deleting.the.api',
-                    defaultMessage: 'Error while deleting the',
-                })} ${apiUUID}`)));
-        Promise.all(promisedDeleteAll).then((response) => {
-            Alert.info(`${response.length} + ${intl.formatMessage({
-                id: 'Apis.Listing.TableView.TableView.apis.deleted.successfully',
-                defaultMessage: 'API(s) deleted successfully!',
-            })}`);
-            this.setState({ isDeleting: false, selected });
+    setListType = (value) => {
+        this.setState({ listType: value });
+    };
+    setLocalStorage = () => {
+        // Set the page to the localstorage
+        const { isAPIProduct } = this.props;
+        const paginationSufix = isAPIProduct ? 'products' : 'apis';
+        const pagination = { page: this.page, count: this.count, rowsPerPage: this.rowsPerPage };
+        window.localStorage.setItem('pagination-' + paginationSufix, JSON.stringify(pagination));
+    };
+    changePage = (page) => {
+        this.page = page;
+        this.xhrRequest().then((data) => {
+            const { body } = data;
+            const { list } = body;
+            this.setState({
+                apisAndApiProducts: list,
+                notFound: false,
+            });
+            this.setLocalStorage();
         });
-    }
-
+    };
     /**
      *
-     * Helper method to check is the given API UUID is in the selected APIs array
-     * @param {String} id UUID of the API which needs to be checked for selected
-     * @returns {Boolean} is the given API uuid in selected list
-     * @memberof TableView
+     * Update APIs list if an API get deleted in card or table view
+     * @param {String} apiUUID UUID(ID) of the deleted API
+     * @memberof Listing
      */
-    isSelected(id) {
-        const { selected } = this.state;
-        return selected.indexOf(id) !== -1;
+    updateData() {
+        const { page, rowsPerPage, count } = this;
+        if (count - 1 === rowsPerPage * page && page !== 0) {
+            this.page = page - 1;
+        }
+        this.getData();
     }
+    xhrRequest = () => {
+        const { page, rowsPerPage } = this;
+        const { isAPIProduct } = this.props;
+        if (isAPIProduct) {
+            return APIProduct.all({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+        } else {
+            return API.all({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+        }
+    };
 
-    /**
-     *
-     * @inheritdoc
-     * @returns {React.Component} @inheritdoc
-     * @memberof TableView @inheritdoc
-     */
     render() {
-        const { classes, apis } = this.props;
-        const {
-            order, orderBy, selected, rowsPerPage, page, isDeleting,
-        } = this.state;
-        const emptyRows = rowsPerPage - Math.min(rowsPerPage, apis.list.length - (page * rowsPerPage));
+        const { intl, isAPIProduct, classes } = this.props;
+        const columns = [
+            {
+                name: 'id',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                },
+            },
+            {
+                name: 'image',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.ApiTableView.image',
+                    defaultMessage: 'image',
+                }),
+                options: {
+                    customBodyRender: (value, tableMeta) => {
+                        if (tableMeta.rowData) {
+                            const apiName = tableMeta.rowData[2];
+                            return <ImageGenerator api={apiName} width={30} height={30} />;
+                        }
+                        return <span />;
+                    },
+                    sort: false,
+                    filter: false,
+                },
+            },
+            {
+                name: 'name',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.ApiTableView.name',
+                    defaultMessage: 'name',
+                }),
+                options: {
+                    customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
+                        if (tableMeta.rowData) {
+                            const { isAPIProduct } = tableViewObj.props; // eslint-disable-line no-shadow
+                            const apiName = tableMeta.rowData[2];
+                            const apiId = tableMeta.rowData[0];
+                            if (isAPIProduct) {
+                                return <Link to={'/api-products/' + apiId + '/overview'}>{apiName}</Link>;
+                            }
+                            return <Link to={'/apis/' + apiId + '/overview'}>{apiName}</Link>;
+                        }
+                        return <span />;
+                    },
+                    sort: false,
+                    filter: false,
+                },
+            },
+            {
+                name: 'version',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.ApiTableView.version',
+                    defaultMessage: 'version',
+                }),
+                options: {
+                    sort: false,
+                },
+            },
+            {
+                name: 'context',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.ApiTableView.context',
+                    defaultMessage: 'context',
+                }),
+                options: {
+                    sort: false,
+                },
+            },
+            {
+                name: 'provider',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.ApiTableView.provider',
+                    defaultMessage: 'provider',
+                }),
+                options: {
+                    sort: false,
+                },
+            },
+        ];
+        const { page, count, rowsPerPage } = this;
+        const { apisAndApiProducts, notFound, listType } = this.state;
+        const options = {
+            filterType: 'dropdown',
+            responsive: 'stacked',
+            serverSide: true,
+            search: false,
+            count,
+            page,
+            onTableChange: (action, tableState) => {
+                switch (action) {
+                    case 'changePage':
+                        this.changePage(tableState.page);
+                        break;
+                    default:
+                        break;
+                }
+            },
+            selectableRows: 'none',
+            rowsPerPage,
+            onChangeRowsPerPage: (numberOfRows) => {
+                this.rowsPerPage = numberOfRows;
+                this.getData();
+                this.setLocalStorage();
+            },
+        };
+        if (listType === 'grid') {
+            options.customRowRender = (data, dataIndex, rowIndex, tableViewObj = this) => {
+                const { isAPIProduct } = tableViewObj.props; // eslint-disable-line no-shadow
+                const [id, name, , version, context, provider] = data;
+                const api = {
+                    id,
+                    name: name.props.api,
+                    version,
+                    context,
+                    provider,
+                };
+                return <ApiThumb api={api} isAPIProduct={isAPIProduct} updateData={tableViewObj.updateData} />;
+            };
+            options.title = false;
+            options.filter = false;
+            options.print = false;
+            options.download = false;
+            options.viewColumns = false;
+            options.customToolbar = false;
+        } else {
+            options.customRowRender = null;
+            options.title = true;
+            options.filter = true;
+            options.print = true;
+            options.download = true;
+            options.viewColumns = true;
+        }
+
+        if (!apisAndApiProducts) {
+            return <Progress />;
+        }
+        if (notFound) {
+            return <ResourceNotFound />;
+        }
+        if (apisAndApiProducts.length === 0) {
+            return (
+                <React.Fragment>
+                    <TopMenu
+                        data={apisAndApiProducts}
+                        count={count}
+                        setListType={this.setListType}
+                        isAPIProduct={isAPIProduct}
+                        listType={listType}
+                    />
+                    <div className={classes.contentInside}>
+                        <SampleAPI isAPIProduct={isAPIProduct} />;
+                    </div>
+                </React.Fragment>
+            );
+        }
 
         return (
-            <Paper className={classes.root}>
-                <APITableToolBar
-                    loading={isDeleting}
-                    handleDeleteAPIs={this.handleDeleteAPIs}
-                    numSelected={selected.length}
-                    totalAPIsCount={apis.list.length}
+            <React.Fragment>
+                <TopMenu
+                    data={apisAndApiProducts}
+                    count={count}
+                    setListType={this.setListType}
+                    isAPIProduct={isAPIProduct}
+                    listType={listType}
                 />
-                {/*
-                todo: totalAPIsCount verify /apis GET all .count returns the total number of APIs,
-                If so use that property ~tmkb
-                */}
-                <div className={classes.tableWrapper}>
-                    <Table className={classes.table} aria-labelledby='tableTitle'>
-                        <APITableHeader
-                            numSelected={selected.length}
-                            order={order}
-                            orderBy={orderBy}
-                            onSelectAllClick={this.handleSelectAllClick}
-                            onRequestSort={this.handleRequestSort}
-                            rowCount={apis.list.length}
-                        />
-                        <TableBody>
-                            {apis.list
-                                // .sort(getSorting(order, orderBy))
-                                .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
-                                .map((api) => {
-                                    const { id } = api;
-                                    const isSelected = this.isSelected(id);
-                                    const overviewPath = `apis/${id}/overview`;
-                                    return (
-                                        <TableRow
-                                            hover
-                                            role='checkbox'
-                                            aria-checked={isSelected}
-                                            tabIndex={-1}
-                                            key={id}
-                                            selected={isSelected}
-                                        >
-                                            <TableCell onClick={this.handleSelectAnAPI} id={id} padding='checkbox'>
-                                                <Checkbox checked={isSelected} />
-                                            </TableCell>
-
-                                            <TableCell component='th' scope='row' padding='none'>
-                                                <Link to={overviewPath}>{api.name}</Link>
-                                            </TableCell>
-                                            <TableCell numeric>{api.version}</TableCell>
-                                            <TableCell numeric>{api.context}</TableCell>
-                                            <TableCell numeric>{Math.floor(Math.random() * 20)}</TableCell>
-                                            <TableCell numeric>{api.provider}</TableCell>
-                                            <TableCell numeric>{api.lifeCycleStatus}</TableCell>
-                                        </TableRow>
-                                    );
-                                })}
-                            {emptyRows > 0 && (
-                                <TableRow style={{ height: 49 * emptyRows }}>
-                                    <TableCell colSpan={6} />
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                <div className={classes.contentInside}>
+                    <MuiThemeProvider theme={this.getMuiTheme()}>
+                        <MUIDataTable title='' data={apisAndApiProducts} columns={columns} options={options} />
+                    </MuiThemeProvider>
                 </div>
-                <TablePagination
-                    component='div'
-                    count={apis.list.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    backIconButtonProps={{
-                        'aria-label': 'Previous Page',
-                    }}
-                    nextIconButtonProps={{
-                        'aria-label': 'Next Page',
-                    }}
-                    onChangePage={this.handleChangePage}
-                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                />
-            </Paper>
+            </React.Fragment>
         );
     }
 }
 
+export default injectIntl(withStyles(styles)(TableView));
+
 TableView.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    apis: PropTypes.shape({ list: PropTypes.array, count: PropTypes.number, apiType: PropTypes.string }).isRequired,
-    updateAPIsList: PropTypes.func.isRequired,
     intl: PropTypes.shape({}).isRequired,
+    isAPIProduct: PropTypes.bool.isRequired,
+    theme: PropTypes.shape({
+        custom: PropTypes.string,
+    }).isRequired,
 };
-
-export default injectIntl(withStyles(styles)(TableView));

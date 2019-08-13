@@ -47,7 +47,7 @@ public class APIDTO   {
 @XmlEnum(String.class)
 public enum TypeEnum {
 
-    @XmlEnumValue("HTTP") HTTP(String.valueOf("HTTP")), @XmlEnumValue("WS") WS(String.valueOf("WS")), @XmlEnumValue("SOAPTOREST") SOAPTOREST(String.valueOf("SOAPTOREST"));
+    @XmlEnumValue("HTTP") HTTP(String.valueOf("HTTP")), @XmlEnumValue("WS") WS(String.valueOf("WS")), @XmlEnumValue("SOAPTOREST") SOAPTOREST(String.valueOf("SOAPTOREST")), @XmlEnumValue("GRAPHQL") GRAPHQL(String.valueOf("GRAPHQL"));
 
 
     private String value;
@@ -484,7 +484,7 @@ public enum EndpointImplementationTypeEnum {
   }
 
   /**
-   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST
+   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
    **/
   public APIDTO type(TypeEnum type) {
     this.type = type;
@@ -492,7 +492,7 @@ public enum EndpointImplementationTypeEnum {
   }
 
   
-  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST")
+  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;

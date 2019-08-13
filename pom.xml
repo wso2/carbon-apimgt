@@ -1529,6 +1529,11 @@
                 <version>${org.wso2.orbit.commons-text.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.orbit.graphQL</groupId>
+                <artifactId>graphQL</artifactId>
+                <version>${graphql.java.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
                 <version>${apache.felix.scr.ds.annotations.version}</version>
@@ -1565,6 +1570,7 @@
         <carbon.identity-inbound-auth-openid.version>5.3.0</carbon.identity-inbound-auth-openid.version>
         <carbon.identity-local-auth-basicauth.version>6.1.0</carbon.identity-local-auth-basicauth.version>
         <carbon.identity-outbound-auth-samlsso.version>5.1.23</carbon.identity-outbound-auth-samlsso.version>
+        <graphql.java.version>13.0.wso2v1</graphql.java.version>
 
         <carbon.governance.version>4.8.0</carbon.governance.version>
         <carbon.deployment.version>4.9.4</carbon.deployment.version>

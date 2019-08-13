@@ -22,6 +22,7 @@ public class APIInfoDTO   {
     private String context = null;
     private String version = null;
     private String provider = null;
+    private String type = null;
     private String lifeCycleStatus = null;
     private String workflowStatus = null;
     private Boolean hasThumbnail = null;
@@ -132,6 +133,23 @@ public class APIInfoDTO   {
 
   /**
    **/
+  public APIInfoDTO type(String type) {
+    this.type = type;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "HTTP", value = "")
+  @JsonProperty("type")
+  public String getType() {
+    return type;
+  }
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  /**
+   **/
   public APIInfoDTO lifeCycleStatus(String lifeCycleStatus) {
     this.lifeCycleStatus = lifeCycleStatus;
     return this;
@@ -214,6 +232,7 @@ public class APIInfoDTO   {
         Objects.equals(context, apIInfo.context) &&
         Objects.equals(version, apIInfo.version) &&
         Objects.equals(provider, apIInfo.provider) &&
+        Objects.equals(type, apIInfo.type) &&
         Objects.equals(lifeCycleStatus, apIInfo.lifeCycleStatus) &&
         Objects.equals(workflowStatus, apIInfo.workflowStatus) &&
         Objects.equals(hasThumbnail, apIInfo.hasThumbnail) &&
@@ -222,7 +241,7 @@ public class APIInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme);
+    return Objects.hash(id, name, description, context, version, provider, type, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme);
   }
 
   @Override
@@ -236,6 +255,7 @@ public class APIInfoDTO   {
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");

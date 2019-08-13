@@ -41,9 +41,13 @@ import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
+import java.io.DataInput;
+import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -105,12 +109,16 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                             continue;
                         }
                         //Only continue for supported operations
-                        else if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+                        else if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase()) ||
+                                APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase())) {
                             isHttpVerbDefined = true;
                             JSONObject operation = (JSONObject) path.get(httpVerb);
                             URITemplate template = new URITemplate();
-                            Scope scope = APIUtil.findScopeByKey(scopes, (String) operation.get(APIConstants
-                                    .SWAGGER_X_SCOPE));
+                            String scopeName = (String) operation.get(APIConstants.SWAGGER_X_SCOPE);
+                            Scope scope = APIUtil.findScopeByKey(scopes, scopeName);
+                            if (scopeName != null && scope == null) {
+                                throw new APIManagementException("Scope '" + scopeName + "' not found.");
+                            }
                             String authType = (String) operation.get(APIConstants.SWAGGER_X_AUTH_TYPE);
                             if ("Application & Application User".equals(authType)) {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
@@ -134,9 +142,10 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                             template.setHttpVerbs(httpVerb.toUpperCase());
                             template.setAuthType(authType);
                             template.setAuthTypes(authType);
-                            template.setScope(scope);
-                            template.setScopes(scope);
-
+                            if(scope != null) {
+                                template.setScope(scope);
+                                template.setScopes(scope);
+                            }
                             uriTemplates.add(template);
                         } else {
                             handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
@@ -335,8 +344,24 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
 
         JSONObject pathsObject = new JSONObject();
 
-        for (URITemplate uriTemplate : uriTemplates) {
-            addOrUpdatePathsFromURITemplate(pathsObject, uriTemplate);
+        if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+            List<String> verbList = new ArrayList<>();
+            verbList.add("GET");
+            verbList.add("POST");
+            URITemplate swaggerTemplate = new URITemplate();
+            for (String verb : verbList) {
+                swaggerTemplate.setAuthType("Any");
+                swaggerTemplate.setHTTPVerb(verb);
+                swaggerTemplate.setHttpVerbs(verb);
+                swaggerTemplate.setUriTemplate("/*");
+                addOrUpdatePathsFromURITemplate(pathsObject, swaggerTemplate);
+            }
+            GraphQLSchemaDefinition schemaDefinition = new GraphQLSchemaDefinition();
+            schemaDefinition.addQueryParams(pathsObject);
+        } else {
+            for (URITemplate uriTemplate : uriTemplates) {
+                addOrUpdatePathsFromURITemplate(pathsObject, uriTemplate);
+            }
         }
 
         swaggerObject.put(APIConstants.SWAGGER_PATHS, pathsObject);
@@ -352,16 +377,17 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         try {
             JSONObject swaggerObj = (JSONObject) parser.parse(swagger);
 
-            //Generates below model using the API's URI template
-            // path -> [verb1 -> template1, verb2 -> template2, ..]
-            Map<String, Map<String, URITemplate>> uriTemplateMap = getURITemplateMap(api);
+            if (!(APIConstants.GRAPHQL_API).equals(api.getType())) {
+                //Generates below model using the API's URI template
+                // path -> [verb1 -> template1, verb2 -> template2, ..]
+                Map<String, Map<String, URITemplate>> uriTemplateMap = getURITemplateMap(api);
 
-            if (syncOperations) {
-                syncAPIDefinitionWithURITemplates(swaggerObj, uriTemplateMap);
-            } else {
-                setDefaultManagedInfoToAPIDefinition(api, swaggerObj);
+                if (syncOperations) {
+                    syncAPIDefinitionWithURITemplates(swaggerObj, uriTemplateMap);
+                } else {
+                    setDefaultManagedInfoToAPIDefinition(api, swaggerObj);
+                }
             }
-
             // add scope in the API object to swagger
             populateSwaggerScopeInfo(swaggerObj, api.getScopes());
             return swaggerObj.toJSONString();

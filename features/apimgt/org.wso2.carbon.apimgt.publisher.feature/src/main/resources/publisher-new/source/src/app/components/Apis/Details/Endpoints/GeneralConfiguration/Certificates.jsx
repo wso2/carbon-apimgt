@@ -192,7 +192,7 @@ function Certificates(props) {
                                         secondary={cert.endpoint}
                                     />
                                     <ListItemSecondaryAction>
-                                        <IconButton
+                                        <IconButton edge='end'
                                             onClick={event => showCertificateDetails(event, cert.alias)}
                                         >
                                             <Icon>

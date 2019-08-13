@@ -767,7 +767,6 @@
         </BlockCondition>
         <JMSConnectionDetails>
             <Enabled>{{apim.throttling.enable_decision_connection}}</Enabled>
-            <Destination>{{apim.throttling.jms.destination}}</Destination>
             {% if apim.throttling.jms.start_delay is defined %}
             <InitDelay>{{apim.throttling.jms.start_delay}}</InitDelay>
             {% endif %}

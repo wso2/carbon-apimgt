@@ -24,7 +24,7 @@ import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { FormattedMessage, injectIntl, } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 
 const styles = theme => ({
@@ -192,9 +192,9 @@ class KeyConfiguration extends React.Component {
                     </div>
                     <FormHelperText>
                         <FormattedMessage
-                            defaultMessage='The application can use the following grant types to generate
-                        Access Tokens. Based on the application requirement,
-                        you can enable or disable grant types for this application.'
+                            defaultMessage={`The application can use the following grant types to generate 
+                            Access Tokens. Based on the application requirement,you can enable or disable 
+                            grant types for this application.`}
                             id='Shared.AppsAndKeys.KeyConfiguration.the.application.can'
                         />
                     </FormHelperText>
@@ -214,9 +214,9 @@ class KeyConfiguration extends React.Component {
                         />
                         <FormHelperText>
                             <FormattedMessage
-                                defaultMessage="Callback URL is a redirection URI in the client
-                            application which is used by the authorization server to send the
-                            client's user-agent (usually web browser) back after granting access."
+                                defaultMessage={`Callback URL is a redirection URI in the client
+                                application which is used by the authorization server to send the
+                                client's user-agent (usually web browser) back after granting access.`}
                                 id='Shared.AppsAndKeys.KeyConfiguration.callback.url'
                             />
                         </FormHelperText>
