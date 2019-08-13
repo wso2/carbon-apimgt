@@ -290,7 +290,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             authenticators.add(authenticator);
         }
         if (isBasicAuthProtected) {
-            authenticator = new BasicAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory, apiUUID);
+            authenticator = new BasicAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
@@ -519,7 +519,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");
         int status;
         if (e.getErrorCode() == APISecurityConstants.API_AUTH_GENERAL_ERROR ||
-                e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_SWAGGER) {
+                e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF) {
             status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
         } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_INCORRECT_API_RESOURCE ||
                 e.getErrorCode() == APISecurityConstants.API_AUTH_FORBIDDEN ||
