@@ -26,7 +26,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import FileIcon from '@material-ui/icons/Description';
 import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
 import Alert from 'AppComponents/Shared/Alert';
@@ -83,12 +83,12 @@ class Documents extends React.Component {
                 {documentsList && documentsList.length !== 0 && (
                     <List className={parentClasses.ListRoot}>
                         {documentsList.map(item => (
-                            <ListItem key={item.id}>
+                            <ListItemAvatar key={item.id}>
                                 <Avatar>
                                     <FileIcon />
                                 </Avatar>
                                 <ListItemText primary={item.name} secondary={item.summary} />
-                            </ListItem>
+                            </ListItemAvatar>
                         ))}
                     </List>
                 )}

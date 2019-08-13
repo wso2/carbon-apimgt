@@ -2804,6 +2804,17 @@ public class SQLConstants {
                     " WHERE" +
                     "   TENANT_ID =?";
 
+    public static final String GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_PREFIX =
+            " SELECT " +
+                    "   * " +
+                    "FROM " +
+                    "   AM_POLICY_SUBSCRIPTION " +
+                    " WHERE" +
+                    "  NAME IN (";
+
+    public static final String GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_SUFFIX =
+            ") AND TENANT_ID =? ;";
+
     public static final String GET_GLOBAL_POLICIES =
             " SELECT " +
                     "   * " +

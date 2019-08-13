@@ -1501,7 +1501,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 APIManagerConfiguration config = getAPIManagerConfiguration();
                 String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-
                 api.setAsPublishedDefaultVersion(
                         api.getId().getVersion().equals(apiMgtDAO.getPublishedDefaultVersion(api.getId())));
 
@@ -1798,9 +1797,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, String> failedEnvironment;
         String tenantDomain = null;
         APITemplateBuilder builder = null;
+
+        if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
+            api.setGraphQLSchema(getGraphqlSchema(api.getId()));
+        }
+        api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        } else {
+            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
 
         try {
@@ -2159,6 +2165,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT);
             }
             authProperties.put(APIConstants.API_UUID, api.getUUID());
+
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                Map<String, String> apiUUIDProperty = new HashMap<String, String>();
+                apiUUIDProperty.put(APIConstants.API_UUID, api.getUUID());
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLAPIHandler",
+                        apiUUIDProperty);
+            }
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                     authProperties);
             Map<String, String> properties = new HashMap<String, String>();
@@ -3362,6 +3375,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     registry.delete(apiProviderPath);
                 }
             }
+
+            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+                String resourcePath = identifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+                        identifier.getApiName() + identifier.getVersion() +
+                        APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+                resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
+                registry.delete(resourcePath);
+            }
+
             cleanUpPendingAPIStateChangeTask(apiId);
             //Run cleanup task for workflow
             /*
@@ -5938,12 +5960,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     protected Map<String, String> publishToGateway(API api, String tenantDomain) throws APIManagementException {
         APITemplateBuilder builder = null;
+        String definition = "";
+
         try {
             builder = getAPITemplateBuilder(api);
         } catch (Exception e) {
             handleException("Error while publishing to Gateway ", e);
         }
 
+        if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+            api.setGraphQLSchema(getGraphqlSchema(api.getId()));
+            api.setType(APIConstants.GRAPHQL_API);
+        }
+        api.setSwaggerDefinition(getOpenAPIDefinition(api.getId()));
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         return gatewayManager.publishToGateway(api, builder, tenantDomain);
     }

@@ -1,16 +1,31 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react';
 import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
-import { injectIntl, } from 'react-intl';
+import { injectIntl } from 'react-intl';
+import API from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 import ImageGenerator from './ImageGenerator';
 import StarRatingBar from './StarRating';
-import API from '../../../data/api';
-
-function LinkGenerator(props){
-    return <Link to={"/apis/" + props.apiId}>{props.apiName}</Link>
-}
+import ApiThumb from './ApiThumb';
 
 class StarRatingColumn extends React.Component {
     constructor(props) {
@@ -50,29 +65,121 @@ class StarRatingColumn extends React.Component {
 class ApiTableView extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {
+            data: [],
+        };
+        this.page = 0;
+        this.count = 100;
+        this.rowsPerPage = 10;
+        this.getLocalStorage();
     }
 
-    getMuiTheme = () => createMuiTheme({
-        overrides: {
-            MUIDataTable: {
-                root: {
-                    backgroundColor: 'transparent',
-                    marginLeft: 40,
+    getMuiTheme = () => {
+        const { gridView } = this.props;
+        let muiTheme = {
+            overrides: {
+                MUIDataTable: {
+                    root: {
+                        backgroundColor: 'transparent',
+                        marginLeft: 40,
+                    },
+                    paper: {
+                        boxShadow: 'none',
+                    },
                 },
-                paper: {
-                    boxShadow: 'none',
+                MUIDataTableBodyCell: {
+                    root: {
+                        backgroundColor: 'transparent',
+                    },
                 },
             },
-            MUIDataTableBodyCell: {
-                root: {
-                    backgroundColor: 'transparent',
+        };
+        if (gridView) {
+            const themeAdditions = {
+                overrides: {
+                    MUIDataTable: {
+                        tableRoot: {
+                            display: 'block',
+                            '& tbody': {
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                marginLeft: 40,
+                            },
+                            '& thead': {
+                                display: 'none',
+                            },
+                        },
+                    },
                 },
-            },
-        },
-    });
+            };
+            muiTheme = Object.assign(muiTheme, themeAdditions);
+        }
+        return createMuiTheme(muiTheme);
+    };
+
+    componentDidMount() {
+        this.getLocalStorage();
+        this.getData();
+    }
+
+    // get data
+    getData = () => {
+        this.xhrRequest().then((data) => {
+            const { body } = data;
+            const { list, pagination } = body;
+            const { total } = pagination;
+            this.count = total;
+            this.setState({ data: list });
+        });
+    };
+
+    xhrRequest = () => {
+        const { page, rowsPerPage } = this;
+        const { isApiProduct } = this.props;
+        if (!isApiProduct) {
+            const api = new API();
+            return api.getAllAPIs({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+        } else {
+            const apiProduct = new APIProduct();
+            return apiProduct.getAllAPIProducts({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+        }
+    };
+
+    changePage = (page) => {
+        this.page = page;
+        this.xhrRequest().then((data) => {
+            const { body } = data;
+            const { list } = body;
+            this.setState({
+                data: list,
+            });
+            this.setLocalStorage();
+        });
+    };
+
+    setLocalStorage = () => {
+        // Set the page to the localstorage
+        const { isApiProduct } = this.props;
+        const paginationSufix = isApiProduct ? 'products' : 'apis';
+        const pagination = { page: this.page, count: this.count, rowsPerPage: this.rowsPerPage };
+        window.localStorage.setItem('pagination-' + paginationSufix, JSON.stringify(pagination));
+    };
+
+    getLocalStorage = () => {
+        const { paginationSufix } = this.props;
+        const storedPagination = window.localStorage.getItem('pagination-' + paginationSufix);
+        if (storedPagination) {
+            const pagination = JSON.parse(storedPagination);
+            if (pagination.page && pagination.count && pagination.rowsPerPage) {
+                this.page = pagination.page;
+                this.count = pagination.count;
+                this.rowsPerPage = pagination.rowsPerPage;
+            }
+        }
+    };
 
     render() {
-        const { intl } = this.props;
+        const { intl, gridView } = this.props;
         const columns = [
             {
                 name: 'id',
@@ -85,7 +192,8 @@ class ApiTableView extends React.Component {
                 name: 'image',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.image',
-                    defaultMessage: 'image'}),
+                    defaultMessage: 'image',
+                }),
                 options: {
                     customBodyRender: (value, tableMeta, updateValue) => {
                         if (tableMeta.rowData) {
@@ -101,13 +209,19 @@ class ApiTableView extends React.Component {
                 name: 'name',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.name',
-                    defaultMessage: 'name'}),
+                    defaultMessage: 'name',
+                }),
                 options: {
-                    customBodyRender: (value, tableMeta, updateValue) => {
+                    customBodyRender: (value, tableMeta, updateValue, tableViewObj=this) => {
                         if (tableMeta.rowData) {
+                            const { isApiProduct } = tableViewObj.props;
                             const apiName = tableMeta.rowData[2];
                             const apiId = tableMeta.rowData[0];
-                            return <LinkGenerator apiName={apiName} apiId={apiId} />;
+                            if( !isApiProduct ) {
+                                return <Link to={'/apis/' + apiId}>{apiName}</Link>;
+                            } else { 
+                                return <Link to={'/api-products/' + apiId}>{apiName}</Link>;
+                            }
                         }
                     },
                     sort: false,
@@ -118,19 +232,35 @@ class ApiTableView extends React.Component {
                 name: 'version',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.version',
-                    defaultMessage: 'version'}),
+                    defaultMessage: 'version',
+                }),
             },
             {
                 name: 'context',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.context',
-                    defaultMessage: 'context'}),
+                    defaultMessage: 'context',
+                }),
+                options: {
+                    sort: false,
+                },
+            },
+            {
+                name: 'provider',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.ApiTableView.provider',
+                    defaultMessage: 'provider',
+                }),
+                options: {
+                    sort: false,
+                },
             },
             {
                 name: 'rating',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.rating',
-                    defaultMessage: 'rating'}),
+                    defaultMessage: 'rating',
+                }),
                 options: {
                     customBodyRender: (value, tableMeta, updateValue) => {
                         if (tableMeta.rowData) {
@@ -138,15 +268,56 @@ class ApiTableView extends React.Component {
                             return <StarRatingColumn apiId={apiId} />;
                         }
                     },
+                    options: {
+                        sort: false,
+                    },
                 },
             },
         ];
-        
-        const { apis } = this.props;
+        const { page, count, rowsPerPage } = this;
+        const { data } = this.state;
+        const options = {
+            filterType: 'dropdown',
+            responsive: 'stacked',
+            serverSide: true,
+            search: false,
+            count,
+            page,
+            onTableChange: (action, tableState) => {
+                switch (action) {
+                    case 'changePage':
+                        this.changePage(tableState.page);
+                        break;
+                }
+            },
+            selectableRows: 'none',
+            rowsPerPage,
+            onChangeRowsPerPage: (numberOfRows) => {
+                this.rowsPerPage = numberOfRows;
+                this.getData();
+                this.setLocalStorage();
+            },
+        };
+        if (gridView) {
+            options.customRowRender = (data, dataIndex, rowIndex, tableViewObj=this) => {
+                const { props, state } = tableViewObj;
+                const { isApiProduct } = props;
+                const api = state.data[dataIndex];
+                return <ApiThumb api={api} isApiProduct={isApiProduct} />;
+            };
+            options.title = false;
+            options.filter = false;
+            options.print = false;
+            options.download = false;
+            options.viewColumns = false;
+            options.customToolbar = false;
+        }
 
-        return <MuiThemeProvider theme={this.getMuiTheme()}>
-            <MUIDataTable title='' data={apis} columns={columns} options={{ selectableRows: false }} />
-        </MuiThemeProvider>;
+        return (
+            <MuiThemeProvider theme={this.getMuiTheme()}>
+                <MUIDataTable title='' data={data} columns={columns} options={options} />
+            </MuiThemeProvider>
+        );
     }
 }
 

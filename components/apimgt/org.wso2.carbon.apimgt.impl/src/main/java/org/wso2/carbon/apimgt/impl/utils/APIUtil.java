@@ -345,6 +345,7 @@ public final class APIUtil {
             api.getId().setApplicationId(Integer.toString(apiId));
             // set url
             api.setStatus(getLcStateFromArtifact(artifact));
+            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
             api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
@@ -643,7 +644,8 @@ public final class APIUtil {
                 uriTemplate.setMediationScript(mediationScript);
                 uriTemplate.setMediationScripts(method, mediationScript);
                 resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
-                uriTemplate.setScopes(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
+                Scope scope = findScopeByKey(scopes, resourceScopes.get(resourceScopeKey));
+                uriTemplate.setScope(scope);
                 //Checking for duplicate uri template names
 
                 if (uriTemplateNames.contains(uTemplate)) {
@@ -655,6 +657,7 @@ public final class APIUtil {
                             tmp.setMediationScripts(method, mediationScript);
                             resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
                             tmp.setScopes(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
+                            tmp.setScope(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
                             break;
                         }
                     }
@@ -1138,7 +1141,7 @@ public final class APIUtil {
             String apiStatus = api.getStatus();
             artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, api.getId().getVersion());
-
+            artifact.setAttribute(APIConstants.TYPE, api.getType());
             artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, String.valueOf(api.isDefaultVersion()));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());

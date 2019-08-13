@@ -389,7 +389,7 @@ class ApiCreateOpenAPI extends React.Component {
         return (
             <React.Fragment>
                 <APICreateTopMenu />
-                <Grid container spacing={24} className={classes.root}>
+                <Grid container spacing={7} className={classes.root}>
                     <Grid item xs={12} md={6}>
                         <div className={classes.titleWrapper}>
                             <Typography variant='h4' align='left' className={classes.mainTitle}>

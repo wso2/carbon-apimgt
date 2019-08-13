@@ -18,8 +18,8 @@
 
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
+import Chip from '@material-ui/core/Chip';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -172,8 +172,11 @@ class ApiThumb extends React.Component {
         const {
             imageObj, selectedIcon, color, backgroundIndex, category,
         } = this.state;
-        const details_link = '/apis/' + this.props.api.id;
-        const { api, classes, theme } = this.props;
+        const { api, classes, theme, isApiProduct, } = this.props;
+        let details_link = '/apis/' + this.props.api.id;
+        if(isApiProduct) {
+            details_link = '/api-products/' + this.props.api.id;    
+        }
         const { thumbnail } = theme.custom;
         const {
             name, version, context, provider,
@@ -185,7 +188,7 @@ class ApiThumb extends React.Component {
 
         let ImageView;
         if (imageObj) {
-            ImageView = <img height={140} src={imageObj} alt='API Thumbnail' className={classes.media} />;
+            ImageView = <img height={140} src={imageObj} alt='API Product Thumbnail' className={classes.media} />;
         } else {
             ImageView = (
                 <ImageGenerator
@@ -246,9 +249,18 @@ class ApiThumb extends React.Component {
                         </div>
                     </div>
                     <div className={classes.thumbInfo}>
-                        <Typography variant='subheading' gutterBottom align='left'>
-                            <StarRatingBar rating={rating} starColor={starColor} />
-                        </Typography>
+                        <div className={classes.thumbLeft}>
+                            <Typography variant='subheading' gutterBottom align='left'>
+                                <StarRatingBar rating={rating} starColor={starColor} />
+                            </Typography>
+                        </div>
+                        <div className={classes.thumbRight}>
+                            <Typography variant='subheading' gutterBottom align='right'>
+                                {api.type === 'GRAPHQL' && (
+                                    <Chip label={api.type} color='primary' />
+                                )}
+                            </Typography>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -259,6 +271,7 @@ class ApiThumb extends React.Component {
 ApiThumb.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
+    isApiProduct: PropTypes.bool.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(ApiThumb);

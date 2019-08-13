@@ -39,6 +39,7 @@ import TableRow from '@material-ui/core/TableRow';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api.js';
 import ApiContext from '../components/ApiContext';
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = theme => ({
     root: {
@@ -257,6 +258,14 @@ class Properties extends React.Component {
             [name]: value,
         });
     };
+
+    /**
+     *
+     *
+     * @param {*} itemValue
+     * @returns
+     * @memberof Properties
+     */
     validateEmpty(itemValue) {
         if (itemValue === null) {
             return false;
@@ -266,6 +275,14 @@ class Properties extends React.Component {
             return false;
         }
     }
+
+    /**
+     *
+     *
+     * @param {*} oldAPI
+     * @param {*} updateAPI
+     * @memberof Properties
+     */
     handleSubmit(oldAPI, updateAPI) {
         const { additionalProperties } = this.state;
 
@@ -274,6 +291,15 @@ class Properties extends React.Component {
         }
         updateAPI(oldAPI);
     }
+
+
+    /**
+     *
+     *
+     * @param {*} apiAdditionalProperties
+     * @param {*} oldKey
+     * @memberof Properties
+     */
     handleDelete(apiAdditionalProperties, oldKey) {
         this.setState((oldState) => {
             let { additionalProperties } = oldState;
@@ -286,6 +312,15 @@ class Properties extends React.Component {
             return { additionalProperties };
         });
     }
+
+    /**
+     *
+     *
+     * @param {*} apiAdditionalProperties
+     * @param {*} oldRow
+     * @param {*} newRow
+     * @memberof Properties
+     */
     handleUpdateList(apiAdditionalProperties, oldRow, newRow) {
         this.setState((oldState) => {
             let { additionalProperties } = oldState;
@@ -307,6 +342,13 @@ class Properties extends React.Component {
             return { additionalProperties };
         });
     }
+
+    /**
+     *
+     *
+     * @param {*} apiAdditionalProperties
+     * @memberof Properties
+     */
     handleAddToList(apiAdditionalProperties) {
         this.setState((oldState) => {
             const { propertyKey, propertyValue } = oldState;
@@ -318,11 +360,27 @@ class Properties extends React.Component {
             return { additionalProperties };
         });
     }
+
+    /**
+     *
+     *
+     * @memberof Properties
+     */
     handleKeyDown = apiAdditionalProperties => (event) => {
         if (event.key === 'Enter') {
             this.handleAddToList(apiAdditionalProperties);
         }
     };
+
+
+    /**
+     *
+     *
+     * @param {*} additionalProperties
+     * @param {*} apiAdditionalProperties
+     * @returns
+     * @memberof Properties
+     */
     renderAdditionalProperties(additionalProperties, apiAdditionalProperties) {
         let data = additionalProperties;
         if (data === null) {
@@ -353,7 +411,9 @@ class Properties extends React.Component {
      * @memberof Properties
      */
     render() {
-        const { classes, intl } = this.props;
+        const {
+            classes, intl, api, updateAPI,
+        } = this.props;
         const {
             additionalProperties, showAddProperty, propertyKey, propertyValue,
         } = this.state;
@@ -374,115 +434,77 @@ class Properties extends React.Component {
                         />
                     </Button>
                 </div>
-                <ApiContext.Consumer>
-                    {({ api, updateAPI }) => (
-                        <Grid container spacing={24}>
-                            <Grid item xs={12}>
-                                <Paper className={classes.paperRoot} elevation={1}>
-                                    <Table className={classes.table}>
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Properties.Properties.add.new.property.table'
-                                                        defaultMessage='Add New Property'
-                                                    />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Properties.Properties.add.new.property.value'
-                                                        defaultMessage='Property Value'
-                                                    />
-                                                </TableCell>
-                                                <TableCell />
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {showAddProperty && (
-                                                <TableRow>
-                                                    <TableCell>
-                                                        <TextField
-                                                            required
-                                                            id='outlined-required'
-                                                            label={intl.formatMessage({
-                                                                id: `Apis.Details.Properties.Properties.
+                <Grid container spacing={7}>
+                    <Grid item xs={12}>
+                        <Paper className={classes.paperRoot} elevation={1}>
+                            <Table className={classes.table}>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>
+                                            <FormattedMessage
+                                                id='Apis.Details.Properties.Properties.add.new.property.table'
+                                                defaultMessage='Add New Property'
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <FormattedMessage
+                                                id='Apis.Details.Properties.Properties.add.new.property.value'
+                                                defaultMessage='Property Value'
+                                            />
+                                        </TableCell>
+                                        <TableCell />
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {showAddProperty && (
+                                        <TableRow>
+                                            <TableCell>
+                                                <TextField
+                                                    required
+                                                    id='outlined-required'
+                                                    label={intl.formatMessage({
+                                                        id: `Apis.Details.Properties.Properties.
                                                                 show.add.property.property.name`,
-                                                                defaultMessage: 'Property Name',
-                                                            })}
-                                                            margin='normal'
-                                                            variant='outlined'
-                                                            className={classes.addProperty}
-                                                            value={propertyKey === null ? '' : propertyKey}
-                                                            onChange={this.handleChange('propertyKey')}
-                                                            onKeyDown={this.handleKeyDown(api.additionalProperties)}
-                                                            error={this.validateEmpty(propertyKey)}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <TextField
-                                                            required
-                                                            id='outlined-required'
-                                                            label={intl.formatMessage({
-                                                                id: 'Apis.Details.Properties.Properties.property.value',
-                                                                defaultMessage: 'Property Value',
-                                                            })}
-                                                            margin='normal'
-                                                            variant='outlined'
-                                                            className={classes.addProperty}
-                                                            value={propertyValue === null ? '' : propertyValue}
-                                                            onChange={this.handleChange('propertyValue')}
-                                                            onKeyDown={this.handleKeyDown(api.additionalProperties)}
-                                                            error={this.validateEmpty(propertyValue)}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell align='right'>
-                                                        <Button
-                                                            variant='contained'
-                                                            color='primary'
-                                                            disabled={!propertyValue || !propertyKey}
-                                                            onClick={() =>
-                                                                this.handleAddToList(api.additionalProperties)
-                                                            }
-                                                        >
-                                                            <FormattedMessage
-                                                                id='Apis.Details.Properties.Properties.add'
-                                                                defaultMessage='Add'
-                                                            />
-                                                        </Button>
-                                                        <Button onClick={this.toggleAddProperty}>
-                                                            <FormattedMessage
-                                                                id='Apis.Details.Properties.Properties.cancel'
-                                                                defaultMessage='Cancel'
-                                                            />
-                                                        </Button>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                            {this.renderAdditionalProperties(
-                                                additionalProperties,
-                                                api.additionalProperties,
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </Paper>
-                                <div className={classes.buttonWrapper}>
-                                    <Grid
-                                        container
-                                        direction='row'
-                                        alignItems='flex-start'
-                                        spacing={16}
-                                        className={classes.buttonSection}
-                                    >
-                                        <Grid item>
-                                            <div>
+                                                        defaultMessage: 'Property Name',
+                                                    })}
+                                                    margin='normal'
+                                                    variant='outlined'
+                                                    className={classes.addProperty}
+                                                    value={propertyKey === null ? '' : propertyKey}
+                                                    onChange={this.handleChange('propertyKey')}
+                                                    onKeyDown={this.handleKeyDown(api.additionalProperties)}
+                                                    error={this.validateEmpty(propertyKey)}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField
+                                                    required
+                                                    id='outlined-required'
+                                                    label={intl.formatMessage({
+                                                        id: 'Apis.Details.Properties.Properties.property.value',
+                                                        defaultMessage: 'Property Value',
+                                                    })}
+                                                    margin='normal'
+                                                    variant='outlined'
+                                                    className={classes.addProperty}
+                                                    value={propertyValue === null ? '' : propertyValue}
+                                                    onChange={this.handleChange('propertyValue')}
+                                                    onKeyDown={this.handleKeyDown(api.additionalProperties)}
+                                                    error={this.validateEmpty(propertyValue)}
+                                                />
+                                            </TableCell>
+                                            <TableCell align='right'>
                                                 <Button
                                                     variant='contained'
                                                     color='primary'
-                                                    onClick={() => this.handleSubmit(api, updateAPI)}
+                                                    disabled={!propertyValue || !propertyKey}
+                                                    onClick={() =>
+                                                        this.handleAddToList(api.additionalProperties)
+                                                    }
                                                 >
                                                     <FormattedMessage
-                                                        id='Apis.Details.Properties.Properties.save'
-                                                        defaultMessage='Save'
+                                                        id='Apis.Details.Properties.Properties.add'
+                                                        defaultMessage='Add'
                                                     />
                                                 </Button>
                                             </div>
@@ -491,20 +513,58 @@ class Properties extends React.Component {
                                             <Link to={(api.apiType === API.CONSTS.APIProduct ? '/api-products/' :
                                                 '/apis/') + api.id + '/overview'}
                                             >
-                                                <Button>
+                                                <Button onClick={this.toggleAddProperty}>
                                                     <FormattedMessage
                                                         id='Apis.Details.Properties.Properties.cancel'
                                                         defaultMessage='Cancel'
                                                     />
                                                 </Button>
-                                            </Link>
-                                        </Grid>
-                                    </Grid>
-                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                    {this.renderAdditionalProperties(
+                                        additionalProperties,
+                                        api.additionalProperties,
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </Paper>
+                        <div className={classes.buttonWrapper}>
+                            <Grid
+                                container
+                                direction='row'
+                                alignItems='flex-start'
+                                spacing={4}
+                                className={classes.buttonSection}
+                            >
+                                <Grid item>
+                                    <div>
+                                        <Button
+                                            variant='contained'
+                                            color='primary'
+                                            onClick={() => this.handleSubmit(api, updateAPI)}
+                                        >
+                                            <FormattedMessage
+                                                id='Apis.Details.Properties.Properties.save'
+                                                defaultMessage='Save'
+                                            />
+                                        </Button>
+                                    </div>
+                                </Grid>
+                                <Grid item>
+                                    <Link to={'/apis/' + api.id + '/overview'}>
+                                        <Button>
+                                            <FormattedMessage
+                                                id='Apis.Details.Properties.Properties.cancel'
+                                                defaultMessage='Cancel'
+                                            />
+                                        </Button>
+                                    </Link>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    )}
-                </ApiContext.Consumer>
+                        </div>
+                    </Grid>
+                </Grid>
             </div>
         );
     }
@@ -518,6 +578,7 @@ Properties.propTypes = {
         apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]),
     }).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
+    updateAPI: PropTypes.func.isRequired,
 };
 
-export default injectIntl(withStyles(styles)(Properties));
+export default withAPI(injectIntl(withStyles(styles)(Properties)));

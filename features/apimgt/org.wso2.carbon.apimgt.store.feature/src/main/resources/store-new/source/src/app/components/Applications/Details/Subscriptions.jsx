@@ -31,17 +31,17 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Divider from '@material-ui/core/Divider';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import Alert from '../../Shared/Alert';
+import Alert from 'AppComponents/Shared/Alert';
+import APIList from 'AppComponents/Apis/Listing/APICardView';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import Subscription from 'AppData/Subscription';
+import Api from 'AppData/api';
 import SubscriptionTableData from './SubscriptionTableData';
-import APIList from '../../Apis/Listing/APICardView';
-import Subscription from '../../../data/Subscription';
-import Api from '../../../data/api';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 
 /**
  *
- *
- * @param {*} theme
+ * @inheritdoc
+ * @param {*} theme theme
  */
 const styles = theme => ({
     root: {
@@ -68,6 +68,11 @@ const styles = theme => ({
  * @extends {React.Component}
  */
 class Subscriptions extends React.Component {
+    /**
+     *Creates an instance of Subscriptions.
+     * @param {*} props properties
+     * @memberof Subscriptions
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -89,7 +94,7 @@ class Subscriptions extends React.Component {
      * @memberof Subscriptions
      */
     componentDidMount() {
-        const { applicationId } = this.props.match.params;
+        const { match: { params: { applicationId } } } = this.props;
         this.updateSubscriptions(applicationId);
         this.updateUnsubscribedAPIsList();
     }
@@ -97,7 +102,7 @@ class Subscriptions extends React.Component {
     /**
      *
      * Update subscriptions list of Application
-     * @param {*} applicationId
+     * @param {*} applicationId application id
      * @memberof Subscriptions
      */
     updateSubscriptions(applicationId) {
@@ -120,7 +125,7 @@ class Subscriptions extends React.Component {
     /**
      *
      * Handle subscription deletion of application
-     * @param {*} subscriptionId
+     * @param {*} subscriptionId subscription id
      * @memberof Subscriptions
      */
     handleSubscriptionDelete(subscriptionId) {
@@ -189,8 +194,10 @@ class Subscriptions extends React.Component {
     }
 
     /**
-     *
      * Handle onClick of subscribing to an API
+     * @param {*} applicationId application id
+     * @param {*} apiId api id
+     * @param {*} policy policy
      * @memberof Subscriptions
      */
     handleSubscribe(applicationId, apiId, policy) {
@@ -233,9 +240,7 @@ class Subscriptions extends React.Component {
     }
 
     /**
-     *
-     *
-     * @returns
+     * @inheritdoc
      * @memberof Subscriptions
      */
     render() {
@@ -248,7 +253,7 @@ class Subscriptions extends React.Component {
         const {
             subscriptions, unsubscribedAPIList, apisNotFound, subscriptionsNotFound,
         } = this.state;
-        const { applicationId } = this.props.match.params;
+        const { match: { params: { applicationId } } } = this.props;
         const { classes } = this.props;
 
         if (subscriptions) {
@@ -309,15 +314,17 @@ class Subscriptions extends React.Component {
                                                         </TableRow>
                                                     </TableHead>
                                                     <TableBody>
-                                                        {subscriptions
-                                                            && subscriptions.map((subscription) => {
-                                                                return (
-                                                                    <SubscriptionTableData
-                                                                        subscription={subscription}
-                                                                        handleSubscriptionDelete={this.handleSubscriptionDelete}
-                                                                    />
-                                                                );
-                                                            })}
+                                                        {subscriptions && subscriptions.map((subscription) => {
+                                                            return (
+                                                                <SubscriptionTableData
+                                                                    key={subscription.subscriptionId}
+                                                                    subscription={subscription}
+                                                                    handleSubscriptionDelete={
+                                                                        this.handleSubscriptionDelete
+                                                                    }
+                                                                />
+                                                            );
+                                                        })}
                                                     </TableBody>
                                                 </Table>
                                             )
@@ -343,6 +350,12 @@ class Subscriptions extends React.Component {
 }
 Subscriptions.propTypes = {
     classes: PropTypes.shape({}).isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            application_uuid: PropTypes.string.isRequired,
+        }).isRequired,
+    }).isRequired,
+    intl: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Subscriptions));

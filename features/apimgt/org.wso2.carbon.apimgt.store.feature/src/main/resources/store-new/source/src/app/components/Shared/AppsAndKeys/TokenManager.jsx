@@ -25,8 +25,8 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import Application from '../../../data/Application';
-import Loading from '../../Base/Loading/Loading';
+import Loading from 'AppComponents/Base/Loading/Loading';
+import Application from 'AppData/Application';
 import KeyConfiguration from './KeyConfiguration';
 import ViewKeys from './ViewKeys';
 import WaitingForApproval from './WaitingForApproval';
@@ -72,6 +72,7 @@ class TokenManager extends React.Component {
         const { selectedApp, keyType } = this.props;
         this.state = {
             keys: null,
+            isKeyJWT: false,
             keyRequest: {
                 keyType,
                 supportedGrantTypes: ['client_credentials'],
@@ -139,7 +140,7 @@ class TokenManager extends React.Component {
      */
     generateKeys() {
         const { keyRequest, keys } = this.state;
-        const { keyType, updateSubscriptionData } = this.props;
+        const { keyType, updateSubscriptionData, selectedApp: { tokenType } } = this.props;
         this.application
             .then((application) => {
                 return application.generateKeys(keyType, keyRequest.supportedGrantTypes, keyRequest.callbackUrl);
@@ -150,8 +151,9 @@ class TokenManager extends React.Component {
                     updateSubscriptionData();
                 }
                 const newKeys = new Map([...keys]);
+                const isKeyJWT = tokenType === 'JWT';
                 newKeys.set(keyType, response);
-                this.setState({ keys: newKeys });
+                this.setState({ keys: newKeys, isKeyJWT });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -210,7 +212,9 @@ class TokenManager extends React.Component {
         const {
             classes, selectedApp, keyType,
         } = this.props;
-        const { keys, keyRequest, notFound } = this.state;
+        const {
+            keys, keyRequest, notFound, isKeyJWT,
+        } = this.state;
         if (!keys) {
             return <Loading />;
         }
@@ -227,7 +231,12 @@ class TokenManager extends React.Component {
                         id='Shared.AppsAndKeys.TokenManager.key.and.secret'
                     />
                 </Typography>
-                <ViewKeys selectedApp={selectedApp} keyType={keyType} keys={keys} />
+                <ViewKeys
+                    selectedApp={selectedApp}
+                    keyType={keyType}
+                    keys={keys}
+                    isKeyJWT={isKeyJWT}
+                />
                 <ExpansionPanel>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography className={classes.heading} variant='subtitle1'>
@@ -270,6 +279,10 @@ class TokenManager extends React.Component {
 
 TokenManager.propTypes = {
     classes: PropTypes.shape({}).isRequired,
+    selectedApp: PropTypes.shape({
+        tokenType: PropTypes.string.isRequired,
+    }).isRequired,
+    keyType: PropTypes.string.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(TokenManager));

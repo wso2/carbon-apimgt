@@ -16,14 +16,14 @@
  * under the License.
  */
 import React from 'react';
-import { unwrap } from '@material-ui/core/test-utils';
+import { createShallow } from '@material-ui/core/test-utils';
 import PublisherRootErrorBoundary from './PublisherRootErrorBoundary';
 
-const UnwrappedAppErrorBoundary = unwrap(PublisherRootErrorBoundary);
 describe('PublisherRootErrorBoundary test', () => {
     test('Should return the child element when no exception is thrown', () => {
+        const shallow = createShallow();
         const Child = <div>Testing child</div>;
-        const Test = <UnwrappedAppErrorBoundary classes={{}}>{Child}</UnwrappedAppErrorBoundary>;
+        const Test = <PublisherRootErrorBoundary classes={{}}>{Child}</PublisherRootErrorBoundary>;
         const shallowRendered = shallow(Test);
         expect(shallowRendered.contains(Child)).toBeTruthy();
     });

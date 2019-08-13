@@ -23,7 +23,8 @@ import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
-import ConfirmDialog from '../../../Shared/ConfirmDialog';
+import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
+import Api from 'AppData/api';
 
 const styles = {
     appBar: {
@@ -51,6 +52,7 @@ const styles = {
 };
 
 function Delete(props) {
+    const restApi = new Api();
     const { intl } = props;
     const [open, setOpen] = useState(false);
     const toggleOpen = () => {
@@ -71,7 +73,7 @@ function Delete(props) {
             return scope.name !== scopeName;
         });
         const setOpenLocal = setOpen; // Need to copy this to access inside the promise.then
-        const promisedUpdate = api.update(apiData);
+        const promisedUpdate = restApi.update(apiData);
         promisedUpdate
             .then(() => {
                 Alert.info(intl.formatMessage({
@@ -122,7 +124,7 @@ function Delete(props) {
                     values={{ scope: scopeName }}
                 />}
                 labelOk={<FormattedMessage
-                    id='Apis.Details.Documents.Delete.document.listing.label.ok'
+                    id='Apis.Details.Documents.Delete.document.listing.label.ok.yes'
                     defaultMessage='Yes'
                 />}
                 callback={runAction}
