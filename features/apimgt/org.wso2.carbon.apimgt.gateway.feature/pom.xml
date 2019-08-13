@@ -116,6 +116,14 @@
             <artifactId>re2j</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.json.wso2</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.everit.json</groupId>
+            <artifactId>org.everit.json.schema</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.orbit.graphQL</groupId>
             <artifactId>graphQL</artifactId>
         </dependency>
@@ -204,6 +212,8 @@
                                 <bundleDef>org.apache.commons:commons-lang3:${apache.commons.lang3.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.re2j:re2j:${re2j.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.localentry.stub:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.org.everit.json:org.everit.json.schema:${everit.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.jayway.jsonpath:json-path:${com.jayway.jsonpath.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.commons-text:commons-text:${org.wso2.orbit.commons-text.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.graphQL:graphQL:${graphql.java.version}</bundleDef>

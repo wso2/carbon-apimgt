@@ -152,6 +152,11 @@ public class API implements Serializable {
 
     private List<APIEndpoint> endpoints = new ArrayList<APIEndpoint>();
 
+    /**
+     *  Property to hold the enable/disable status of the json schema validation.
+     */
+    private boolean enableSchemaValidation = false;
+
 
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
@@ -872,6 +877,24 @@ public class API implements Serializable {
 
     public void setAuthorizationHeader(String authorizationHeader) {
         this.authorizationHeader = authorizationHeader;
+    }
+
+    /**
+     * Check the status of the Json schema validation property.
+     *
+     * @return Status of the validator property.
+     */
+    public boolean isEnabledSchemaValidation() {
+        return enableSchemaValidation;
+    }
+
+    /**
+     * To set the JSON schema validation enable/disable.
+     *
+     * @param enableSchemaValidation Given Status.
+     */
+    public void setEnableSchemaValidation(boolean enableSchemaValidation) {
+        this.enableSchemaValidation = enableSchemaValidation;
     }
 
     /**

@@ -414,6 +414,8 @@ public final class APIUtil {
             // We set the context template here
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
+            api.setEnableSchemaValidation(Boolean.parseBoolean(
+                    artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
 
 
             Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
@@ -609,7 +611,8 @@ public final class APIUtil {
             // We set the context template here
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
-
+            api.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
 
             Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
             List<String> uriTemplateNames = new ArrayList<String>();
@@ -1184,6 +1187,8 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS, api.getSandboxMaxTps());
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, api.getAuthorizationHeader());
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, api.getApiSecurity());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA,
+                    Boolean.toString(api.isEnabledSchemaValidation()));
 
             //Validate if the API has an unsupported context before setting it in the artifact
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();

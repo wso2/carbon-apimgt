@@ -55,7 +55,7 @@ public class BasicAuthAuthenticatorTest {
         axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
         Mockito.when(axis2MsgCntxt.getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME)).thenReturn("1506576365");
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
-        Mockito.when((messageContext.getProperty(APIMgtGatewayConstants.API_SWAGGER)))
+        Mockito.when((messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT)))
                 .thenReturn(Mockito.mock(OpenAPI.class));
 
         basicAuthAuthenticator = new BasicAuthAuthenticator(CUSTOM_AUTH_HEADER, true);

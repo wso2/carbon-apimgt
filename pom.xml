@@ -1493,6 +1493,17 @@
                 <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.json.wso2</groupId>
+                <artifactId>json</artifactId>
+                <version>${json.orbit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.org.everit.json</groupId>
+                <artifactId>org.everit.json.schema</artifactId>
+                <version>${everit.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.securevault</groupId>
                 <artifactId>org.wso2.securevault</artifactId>
                 <version>${wso2.securevault.version}</version>
@@ -1736,12 +1747,15 @@
         <opentracing.api.version>0.31.0</opentracing.api.version>
         <span.reporter.version>0.1.0</span.reporter.version>
         <opentracing.mock.version>0.31.0</opentracing.mock.version>
+        <aspectj.version>1.9.3</aspectj.version>
+        <everit.version>1.5.0.wso2.v1</everit.version>
+        <json.orbit.version>3.0.0.wso2v1</json.orbit.version>
         <aspectj.version>1.9.4</aspectj.version>
         <wso2.securevault.version>1.1.2</wso2.securevault.version>
         <com.jayway.jsonpath.version>2.4.0.wso2v2</com.jayway.jsonpath.version>
         <org.wso2.orbit.commons-text.version>1.6.wso2v1</org.wso2.orbit.commons-text.version>
         <commons.lang.version>2.6.0.wso2v1</commons.lang.version>
-    <apache.felix.scr.ds.annotations.version>1.2.4</apache.felix.scr.ds.annotations.version>
+        <apache.felix.scr.ds.annotations.version>1.2.4</apache.felix.scr.ds.annotations.version>
         <maven.scr.plugin.version>1.26.0</maven.scr.plugin.version>
         <org.json.version.range>[3.0.0,4.0.0)</org.json.version.range>
     </properties>
