@@ -100,9 +100,9 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
             }
         }
         // Add OpenAPI to message context
-        messageContext.setProperty(APIMgtGatewayConstants.API_SWAGGER, openAPI);
+        messageContext.setProperty(APIMgtGatewayConstants.OPEN_API_OBJECT, openAPI);
         // Add swagger String to message context
-        messageContext.setProperty(APIMgtGatewayConstants.SWAGGER, swagger);
+        messageContext.setProperty(APIMgtGatewayConstants.OPEN_API_NAME, swagger);
     }
 
 }

@@ -86,7 +86,7 @@ public class TestSchemaValidator {
         Mockito.when(messageContext.getConfiguration()).thenReturn(synapseConfiguration);
         Mockito.when(synapseConfiguration.getLocalRegistry()).thenReturn(map);
         Mockito.when(map.get(uuid)).thenReturn(entry);
-        Mockito.when((String)messageContext.getProperty(APIMgtGatewayConstants.SWAGGER)).thenReturn(swaggerValue);
+        Mockito.when((String)messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_NAME)).thenReturn(swaggerValue);
     }
 
     @Test
@@ -128,7 +128,7 @@ public class TestSchemaValidator {
                 thenReturn("POST");
         Mockito.when((String) axis2MsgContext.getProperty(APIMgtGatewayConstants.HTTP_REQUEST_METHOD)).
                 thenReturn("POST");
-        Mockito.when((String)messageContext.getProperty(APIMgtGatewayConstants.SWAGGER)).thenReturn(swaggerValue);
+        Mockito.when((String)messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_NAME)).thenReturn(swaggerValue);
     }
 
 }

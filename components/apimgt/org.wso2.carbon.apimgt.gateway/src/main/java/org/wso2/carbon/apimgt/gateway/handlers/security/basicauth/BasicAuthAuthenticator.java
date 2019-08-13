@@ -104,7 +104,7 @@ public class BasicAuthAuthenticator implements Authenticator {
             log.info("Basic Authentication initialized");
         }
 
-        openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.API_SWAGGER);
+        openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
         if (openAPI == null) {
             log.error("OpenAPI definition is missing in the gateway. Basic authentication cannot be performed.");
             return new AuthenticationResponse(false, isMandatory, true,
