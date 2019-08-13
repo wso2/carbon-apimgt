@@ -25,6 +25,7 @@ public class ApplicationInfoDTO   {
     private List<String> groups = new ArrayList<>();
     private Integer subscriptionCount = null;
     private Object attributes = null;
+    private String owner = null;
 
   /**
    **/
@@ -179,6 +180,23 @@ public class ApplicationInfoDTO   {
     this.attributes = attributes;
   }
 
+  /**
+   **/
+  public ApplicationInfoDTO owner(String owner) {
+    this.owner = owner;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "admin", value = "")
+  @JsonProperty("owner")
+  public String getOwner() {
+    return owner;
+  }
+  public void setOwner(String owner) {
+    this.owner = owner;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -197,12 +215,13 @@ public class ApplicationInfoDTO   {
         Objects.equals(status, applicationInfo.status) &&
         Objects.equals(groups, applicationInfo.groups) &&
         Objects.equals(subscriptionCount, applicationInfo.subscriptionCount) &&
-        Objects.equals(attributes, applicationInfo.attributes);
+        Objects.equals(attributes, applicationInfo.attributes) &&
+        Objects.equals(owner, applicationInfo.owner);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingPolicy, description, status, groups, subscriptionCount, attributes);
+    return Objects.hash(applicationId, name, subscriber, throttlingPolicy, description, status, groups, subscriptionCount, attributes, owner);
   }
 
   @Override
@@ -219,6 +238,7 @@ public class ApplicationInfoDTO   {
     sb.append("    groups: ").append(toIndentedString(groups)).append("\n");
     sb.append("    subscriptionCount: ").append(toIndentedString(subscriptionCount)).append("\n");
     sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
+    sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
     sb.append("}");
     return sb.toString();
   }

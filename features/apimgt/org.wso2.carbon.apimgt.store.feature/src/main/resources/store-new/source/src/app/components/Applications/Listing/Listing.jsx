@@ -122,6 +122,7 @@ class Listing extends Component {
             page: 0,
             rowsPerPage: 10,
             open: false,
+            isApplicationSharingEnabled: true,
         };
         this.handleAppDelete = this.handleAppDelete.bind(this);
     }
@@ -131,6 +132,16 @@ class Listing extends Component {
      */
     componentDidMount() {
         this.updateApps();
+        this.isApplicationGroupSharingEnabled();
+    }
+
+    /**
+     * retrieve Settings from the local storage
+     */
+    isApplicationGroupSharingEnabled = () => {
+        const settingsData = localStorage.getItem('settings');
+        const enabled = JSON.parse(settingsData).applicationSharingEnabled;
+        this.setState({ isApplicationSharingEnabled: enabled });
     }
 
     /**
@@ -235,7 +246,7 @@ class Listing extends Component {
      */
     render() {
         const {
-            data, order, orderBy, alertMessage, rowsPerPage, page, open,
+            data, order, orderBy, alertMessage, rowsPerPage, page, open, isApplicationSharingEnabled,
         } = this.state;
         if (!data) {
             return <Loading />;
@@ -330,6 +341,7 @@ class Listing extends Component {
                                         rowsPerPage={rowsPerPage}
                                         order={order}
                                         orderBy={orderBy}
+                                        isApplicationSharingEnabled={isApplicationSharingEnabled}
                                     />
                                 </Table>
                                 <TablePagination

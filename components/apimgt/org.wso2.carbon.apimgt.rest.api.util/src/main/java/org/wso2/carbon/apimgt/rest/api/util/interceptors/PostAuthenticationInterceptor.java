@@ -55,7 +55,6 @@ public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
         if (RestApiUtil.checkIfAnonymousAPI(inMessage)) {
             return;
         }
-
         String authScheme = (String) inMessage.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME);
         //check if the request does not have either the bearer or basic auth header. If so, throw 401 
         //unauthenticated error.
