@@ -140,4 +140,7 @@ const Configurations = {
             },
         },
     },
+    app: {
+        walkThrough: false,
+    },
 };
