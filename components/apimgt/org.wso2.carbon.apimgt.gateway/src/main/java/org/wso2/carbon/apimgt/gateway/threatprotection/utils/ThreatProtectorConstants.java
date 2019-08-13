@@ -74,22 +74,5 @@ public class ThreatProtectorConstants {
     public static final String MAX_ATTRIBUTE_LENGTH = "maxAttributeLength";
     public static final String ENTITY_EXPANSION_LIMIT = "entityExpansionLimit";
     public static final String CHILDREN_PER_ELEMENT = "maxChildrenPerElement";
-
-    /**
-     * Constants for schema validator
-     */
-    public static final String REST_CONTENT_TYPE = "ContentType";
-    public static final String HTTP_RESPONSE_METHOD = "api.ut.HTTP_METHOD";
-    public static final String SCHEMA_REFERENCE = "$ref";
-    public static final String PATHS = "$..paths..";
-    public static final String JSON_PATH = "$.";
-    public static final char JSONPATH_SEPARATE = '.';
-    public static final String JSON_RESPONSES = ".responses.";
-    public static final String EMPTY_ARRAY = "[]";
-    public static final char HASH = '#';
-    public static final String EMPTY = "";
-    public static final String BACKWARD_SLASH = "\"";
-    public static final char FORWARD_SLASH = '/';
-    public static final String REQUESTBODY_SCHEMA = "components.requestBodies.";
-
+    
 }
