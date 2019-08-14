@@ -17,16 +17,18 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -60,21 +62,26 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryItemDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateAvailableTransitionsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateCheckItemsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -85,15 +92,17 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.sql.Timestamp;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isEndpointURLNonEmpty;
 
 public class APIMappingUtil {
 
@@ -138,6 +147,7 @@ public class APIMappingUtil {
             handleException("Error while converting endpointConfig to json", e);
         }
 
+        model.setImplementation(dto.getEndpointImplementationType().toString());
         model.setWsdlUrl(dto.getWsdlUri());
         model.setType(dto.getType().toString());
 
@@ -146,6 +156,9 @@ public class APIMappingUtil {
         }
         if (dto.isIsDefaultVersion() != null) {
             model.setAsDefaultVersion(dto.isIsDefaultVersion());
+        }
+        if (dto.isEnableSchemaValidation() != null) {
+            model.setEnableSchemaValidation(dto.isEnableSchemaValidation());
         }
         model.setResponseCache(dto.getResponseCaching());
         if (dto.getCacheTimeout() != null) {
@@ -178,6 +191,15 @@ public class APIMappingUtil {
             model.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
         }
         // scopes
+        for (ScopeDTO scope : dto.getScopes()) {
+            for (String aRole : scope.getBindings().getValues()) {
+                boolean isValidRole = APIUtil.isRoleNameExist(provider, aRole);
+                if (!isValidRole) {
+                    String error = "Role '" + aRole + "' Does not exist.";
+                    RestApiUtil.handleBadRequest(error, log);
+                }
+            }
+        }
         Set<Scope> scopes = getScopes(dto);
         model.setScopes(scopes);
 
@@ -387,6 +409,7 @@ public class APIMappingUtil {
         APIIdentifier apiId = api.getId();
         apiInfoDTO.setName(apiId.getApiName());
         apiInfoDTO.setVersion(apiId.getVersion());
+        apiInfoDTO.setType(api.getType());
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
@@ -537,6 +560,7 @@ public class APIMappingUtil {
         dto.setDescription(model.getDescription());
 
         dto.setIsDefaultVersion(model.isDefaultVersion());
+        dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setResponseCaching(model.getResponseCache());
         dto.setCacheTimeout(model.getCacheTimeout());
         try {
@@ -607,13 +631,13 @@ public class APIMappingUtil {
 
         //Get Swagger definition which has URL templates, scopes and resource details
         if (!APIDTO.TypeEnum.WS.toString().equals(model.getType())) {
+            List<APIOperationsDTO> apiOperationsDTO;
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
-            List<APIOperationsDTO> operationsDTOs = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
-            dto.setOperations(operationsDTOs);
+            apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
+            dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(scopeDTOS);
         }
-
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
         tagsToReturn.addAll(apiTags);
@@ -715,6 +739,16 @@ public class APIMappingUtil {
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
         if (model.getApiSecurity() != null) {
             dto.setSecurityScheme(Arrays.asList(model.getApiSecurity().split(",")));
+        }
+        if (null != model.getLastUpdated()) {
+            Date lastUpdateDate = model.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
+            dto.setLastUpdatedTime(String.valueOf(timeStamp));
+        }
+        if (null != model.getCreatedTime()) {
+            Date createdTime = model.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(createdTime.getTime());
+            dto.setCreatedTime(String.valueOf(timeStamp));
         }
         return dto;
     }
@@ -912,15 +946,15 @@ public class APIMappingUtil {
         Set<URITemplate> uriTemplates = new LinkedHashSet<>();
 
         if (operations == null || operations.isEmpty()) {
-            operations = getDefaultOperationsList();
+            operations = getDefaultOperationsList(model.getType());
         }
 
         for (APIOperationsDTO operation : operations) {
             URITemplate template = new URITemplate();
 
-            String uriTempVal = operation.getUritemplate();
+            String uriTempVal = operation.getTarget();
 
-            String httpVerb = operation.getHttpVerb();
+            String httpVerb = operation.getVerb();
             List<String> scopeList = operation.getScopes();
             if (scopeList != null) {
                 for (String scopeKey : scopeList) {
@@ -939,7 +973,8 @@ public class APIMappingUtil {
 
             }
             //Only continue for supported operations
-            if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+            if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase()) ||
+                    (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))) {
                 isHttpVerbDefined = true;
                 String authType = operation.getAuthType();
                 if (APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER.equals(authType)) {
@@ -963,13 +998,23 @@ public class APIMappingUtil {
 
                 uriTemplates.add(template);
             } else {
-                handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
-                        + "' is invalid");
+                if(APIConstants.GRAPHQL_API.equals(model.getType())){
+                    handleException("The GRAPHQL operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
+                            + "' is invalid");
+                } else {
+                    handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
+                            + "' is invalid");
+                }
             }
 
             if (!isHttpVerbDefined) {
-                handleException("Resource '" + uriTempVal + "' has global parameters without " +
-                        "HTTP methods");
+                if(APIConstants.GRAPHQL_API.equals(model.getType())) {
+                    handleException("Operation '" + uriTempVal + "' has global parameters without " +
+                            "Operation Type");
+                } else {
+                    handleException("Resource '" + uriTempVal + "' has global parameters without " +
+                            "HTTP methods");
+                }
             }
         }
 
@@ -1117,6 +1162,72 @@ public class APIMappingUtil {
         return apiSecurityScheme.toString();
     }
 
+    public static OpenAPIDefinitionValidationResponseDTO getOpenAPIDefinitionValidationResponseFromModel(
+            APIDefinitionValidationResponse model, boolean returnContent) {
+
+        OpenAPIDefinitionValidationResponseDTO responseDTO = new OpenAPIDefinitionValidationResponseDTO();
+        responseDTO.setIsValid(model.isValid());
+
+        if (model.isValid()) {
+            APIDefinitionValidationResponse.Info modelInfo = model.getInfo();
+            if (modelInfo != null) {
+                OpenAPIDefinitionValidationResponseInfoDTO infoDTO =
+                        new OpenAPIDefinitionValidationResponseInfoDTO();
+                infoDTO.setOpenAPIVersion(modelInfo.getOpenAPIVersion());
+                infoDTO.setName(modelInfo.getName());
+                infoDTO.setVersion(modelInfo.getVersion());
+                infoDTO.setContext(modelInfo.getContext());
+                infoDTO.setDescription(modelInfo.getDescription());
+                responseDTO.setInfo(infoDTO);
+            }
+            if (returnContent) {
+                responseDTO.setContent(model.getContent());
+            }
+        } else {
+            responseDTO.setErrors(getErrorListItemsDTOsFromErrorHandlers(model.getErrorItems()));
+        }
+        return responseDTO;
+    }
+
+    public static List<ErrorListItemDTO> getErrorListItemsDTOsFromErrorHandlers(List<ErrorHandler> errorHandlers) {
+        List<ErrorListItemDTO> errorListItemDTOs = new ArrayList<>();
+        for (ErrorHandler handler: errorHandlers) {
+            ErrorListItemDTO dto = new ErrorListItemDTO();
+            dto.setCode(handler.getErrorCode() + "");
+            dto.setMessage(handler.getErrorMessage());
+            dto.setDescription(handler.getErrorDescription());
+            errorListItemDTOs.add(dto);
+        }
+        return errorListItemDTOs;
+    }
+
+    /**
+     * Get the ErrorDTO from a list of ErrorListItemDTOs. The first item in the list is set as the main error.
+     *
+     * @param errorListItemDTOs A list of ErrorListItemDTO objects
+     * @return ErrorDTO from a list of ErrorListItemDTOs
+     */
+    public static ErrorDTO getErrorDTOFromErrorListItems(List<ErrorListItemDTO> errorListItemDTOs) {
+        ErrorDTO errorDTO = new ErrorDTO();
+        for (int i = 0; i < errorListItemDTOs.size(); i++) {
+            if (i == 0) {
+                ErrorListItemDTO elementAt0 = errorListItemDTOs.get(0);
+                errorDTO.setCode(Long.parseLong(elementAt0.getCode()));
+                errorDTO.setMoreInfo("");
+                errorDTO.setMessage(elementAt0.getMessage());
+                errorDTO.setDescription(elementAt0.getDescription());
+            } else {
+                org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO errorListItemDTO
+                        = new org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO();
+                errorListItemDTO.setCode(errorListItemDTOs.get(i).getCode() + "");
+                errorListItemDTO.setMessage(errorListItemDTOs.get(i).getMessage());
+                errorListItemDTO.setDescription(errorListItemDTOs.get(i).getDescription());
+                errorDTO.getError().add(errorListItemDTO);
+            }
+        }
+        return errorDTO;
+    }
+
 //    /**
 //     * This method converts APIEndpoint model to corresponding APIEndpointDTO object
 //     *
@@ -1234,7 +1345,7 @@ public class APIMappingUtil {
 
     /**
      * Returns workflow state DTO from the provided information
-     * 
+     *
      * @param lifecycleStateDTO Lifecycle state DTO
      * @param stateChangeResponse workflow response from API lifecycle change
      * @return workflow state DTO
@@ -1272,7 +1383,11 @@ public class APIMappingUtil {
             throws APIManagementException {
 
         APIDefinitionFromOpenAPISpec definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-        Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(api, swaggerDefinition);
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+
+        if (!APIConstants.GRAPHQL_API.equals(api.getType())) {
+            uriTemplates = definitionFromOpenAPISpec.getURITemplates(api, swaggerDefinition);
+        }
 
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         if (!StringUtils.isEmpty(swaggerDefinition)) {
@@ -1306,8 +1421,8 @@ public class APIMappingUtil {
         } else {
             operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER);
         }
-        operationsDTO.setHttpVerb(uriTemplate.getHTTPVerb());
-        operationsDTO.setUritemplate(uriTemplate.getUriTemplate());
+        operationsDTO.setVerb(uriTemplate.getHTTPVerb());
+        operationsDTO.setTarget(uriTemplate.getUriTemplate());
         if (uriTemplate.getScope() != null) {
             operationsDTO.setScopes(new ArrayList<String>() {{
                 add(uriTemplate.getScope().getName());
@@ -1322,13 +1437,21 @@ public class APIMappingUtil {
      *
      * @return a default operations list
      */
-    private static List<APIOperationsDTO> getDefaultOperationsList() {
+    private static List<APIOperationsDTO> getDefaultOperationsList(String apiType) {
 
         List<APIOperationsDTO> operationsDTOs = new ArrayList<>();
-        for (String verb : RestApiConstants.SUPPORTED_METHODS) {
+        String[] suportMethods = null;
+
+        if (apiType.equals(APIConstants.GRAPHQL_API)) {
+            suportMethods = APIConstants.GRAPHQL_SUPPORTED_METHODS;
+        } else {
+            suportMethods = RestApiConstants.SUPPORTED_METHODS;
+        }
+
+        for (String verb : suportMethods) {
             APIOperationsDTO operationsDTO = new APIOperationsDTO();
-            operationsDTO.setUritemplate("/*");
-            operationsDTO.setHttpVerb(verb);
+            operationsDTO.setTarget("/*");
+            operationsDTO.setVerb(verb);
             operationsDTO.setThrottlingPolicy(APIConstants.UNLIMITED_TIER);
             operationsDTO.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
             operationsDTOs.add(operationsDTO);
@@ -1352,7 +1475,7 @@ public class APIMappingUtil {
                     .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
             list.add(productDto);
         }
-        
+
         listDto.setList(list);
         listDto.setCount(list.size());
         return listDto;
@@ -1369,7 +1492,7 @@ public class APIMappingUtil {
         businessInformation.setBusinessOwner(product.getBusinessOwner());
         businessInformation.setBusinessOwnerEmail(product.getBusinessOwnerEmail());
         productDto.setBusinessInformation(businessInformation );
-        
+
         productDto.setState(StateEnum.valueOf(product.getState()));
         productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                 .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
@@ -1406,7 +1529,7 @@ public class APIMappingUtil {
         }
         apis = new ArrayList<ProductAPIDTO>(aggregatedAPIs.values());
         productDto.setApis(apis);
-        
+
         String subscriptionAvailability = product.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {
             productDto.setSubscriptionAvailability(
@@ -1435,6 +1558,13 @@ public class APIMappingUtil {
             productDto.setVisibleTenants(Arrays.asList(product.getVisibleTenants().split(",")));
         }
 
+        productDto.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY.equals(product.getAccessControl()) ?
+                APIProductDTO.AccessControlEnum.RESTRICTED :
+                APIProductDTO.AccessControlEnum.NONE);
+        if (product.getAccessControlRoles() != null) {
+            productDto.setAccessControlRoles(Arrays.asList(product.getAccessControlRoles().split(",")));
+        }
+
         if (StringUtils.isEmpty(product.getTransports())) {
             List<String> transports = new ArrayList<>();
             transports.add(APIConstants.HTTPS_PROTOCOL);
@@ -1461,9 +1591,20 @@ public class APIMappingUtil {
             productDto.setSecurityScheme(Arrays.asList(product.getApiSecurity().split(",")));
         }
 
+        if (null != product.getLastUpdated()) {
+            Date lastUpdateDate = product.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
+            productDto.setLastUpdatedTime(String.valueOf(timeStamp));
+        }
+        if (null != product.getCreatedTime()) {
+            Date createdTime = product.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(createdTime.getTime());
+            productDto.setCreatedTime(String.valueOf(timeStamp));
+        }
+
         return productDto;
     }
-    
+
     private static APIProductDTO.SubscriptionAvailabilityEnum mapSubscriptionAvailabilityFromAPIProducttoDTO(
             String subscriptionAvailability) {
 
@@ -1479,7 +1620,7 @@ public class APIMappingUtil {
         }
 
     }
-    
+
     private static APIProductDTO.VisibilityEnum mapVisibilityFromAPIProducttoDTO(String visibility) {
         switch (visibility) { //public, private,controlled, restricted
             case APIConstants.API_GLOBAL_VISIBILITY :
@@ -1492,7 +1633,7 @@ public class APIMappingUtil {
                 return null; // how to handle this?
         }
     }
-    
+
     public static APIProduct fromDTOtoAPIProduct(APIProductDTO dto, String provider)
             throws APIManagementException {
         APIProduct product = new APIProduct();
@@ -1525,7 +1666,7 @@ public class APIMappingUtil {
         product.setState(state);
         Set<Tier> apiTiers = new HashSet<>();
         List<String> tiersFromDTO = dto.getPolicies();
-        
+
         if (dto.getVisibility() != null) {
             product.setVisibility(mapVisibilityFromDTOtoAPIProduct(dto.getVisibility()));
         }
@@ -1555,7 +1696,7 @@ public class APIMappingUtil {
             product.setSubscriptionAvailability(
                     mapSubscriptionAvailabilityFromDTOtoAPIProduct(dto.getSubscriptionAvailability()));
         }
-        
+
         Map<String, String> additionalProperties = dto.getAdditionalProperties();
         if (additionalProperties != null) {
             for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
@@ -1583,18 +1724,18 @@ public class APIMappingUtil {
             ProductAPIDTO res = dto.getApis().get(i);
             List<ProductAPIOperationsDTO> productAPIOperationsDTO = res.getOperations();
             for (ProductAPIOperationsDTO resourceItem : productAPIOperationsDTO) {
- 
+
                 URITemplate template = new URITemplate();
                 template.setHTTPVerb(resourceItem.getHttpVerb());
                 template.setResourceURI(resourceItem.getUritemplate());
                 template.setUriTemplate(resourceItem.getUritemplate());
-                
+
                 APIProductResource resource = new APIProductResource();
                 resource.setApiId(res.getApiId());
                 resource.setUriTemplate(template);
                 productResources.add(resource);
             }
-            
+
         }
 
         APICorsConfigurationDTO apiCorsConfigurationDTO = dto.getCorsConfiguration();
@@ -1617,7 +1758,7 @@ public class APIMappingUtil {
         product.setAuthorizationHeader(dto.getAuthorizationHeader());
         return product;
     }
-    
+
     private static String mapVisibilityFromDTOtoAPIProduct(APIProductDTO.VisibilityEnum visibility) {
         switch (visibility) {
             case PUBLIC:
@@ -1630,7 +1771,7 @@ public class APIMappingUtil {
                 return null; // how to handle this?
         }
     }
-    
+
     private static String mapSubscriptionAvailabilityFromDTOtoAPIProduct(
             APIProductDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
         switch (subscriptionAvailability) {
@@ -1773,19 +1914,25 @@ public class APIMappingUtil {
         try {
             JSONObject swaggerObj = (JSONObject) parser.parse(swagger);
             JSONObject securityObj = (JSONObject) swaggerObj.get(APIConstants.SWAGGER_X_WSO2_SECURITY);
-            JSONObject apimSecurityObj = (JSONObject) securityObj.get(APIConstants.SWAGGER_OBJECT_NAME_APIM);
-            JSONArray scopesList = (JSONArray) apimSecurityObj.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
-            scopesList.forEach((scope) -> {
-                ScopeDTO scopeDTO = new ScopeDTO();
-                JSONObject scopeObj = (JSONObject) scope;
-                scopeDTO.setName((String) scopeObj.get(APIConstants.SWAGGER_NAME));
-                scopeDTO.setDescription((String) scopeObj.get(APIConstants.SWAGGER_DESCRIPTION));
-                ScopeBindingsDTO bindingsDTO = new ScopeBindingsDTO();
-                bindingsDTO.setValues(Arrays.asList(((String) scopeObj.get(APIConstants.SWAGGER_ROLES)).split(",")));
-                scopeDTO.setBindings(bindingsDTO);
-                scopes.add(scopeDTO);
-            });
-
+            if (securityObj != null) {
+                JSONObject apimSecurityObj = (JSONObject) securityObj.get(APIConstants.SWAGGER_OBJECT_NAME_APIM);
+                JSONArray scopesList = (JSONArray) apimSecurityObj.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+                scopesList.forEach((scope) -> {
+                    ScopeDTO scopeDTO = new ScopeDTO();
+                    JSONObject scopeObj = (JSONObject) scope;
+                    scopeDTO.setName((String) scopeObj.get(APIConstants.SWAGGER_NAME));
+                    scopeDTO.setDescription((String) scopeObj.get(APIConstants.SWAGGER_DESCRIPTION));
+                    ScopeBindingsDTO bindingsDTO = new ScopeBindingsDTO();
+                    String roles = (String) scopeObj.get(APIConstants.SWAGGER_ROLES);
+                    if (roles.isEmpty()) {
+                        bindingsDTO.setValues(Collections.emptyList());
+                    } else {
+                        bindingsDTO.setValues(Arrays.asList((roles).split(",")));
+                    }
+                    scopeDTO.setBindings(bindingsDTO);
+                    scopes.add(scopeDTO);
+                });
+            }
         } catch (ParseException e) {
             throw new APIManagementException("Error occurred while parsing swagger.");
         }

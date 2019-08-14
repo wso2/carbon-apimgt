@@ -16,14 +16,17 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import green from '@material-ui/core/colors/green';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
+import API from 'AppData/api';
+import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
+
 import CheckItem from './CheckItem';
-import ApiContext from '../components/ApiContext';
 import Resources from './Resources';
+import Operations from './Operations';
 import ProductResources from './ProductResources';
 import Policies from './Policies';
 import Configuration from './Configuration';
@@ -114,45 +117,84 @@ const styles = theme => ({
     },
 });
 
+/**
+ * API Overview page
+ *
+ * @param {*} props
+ * @returns
+ */
 function Overview(props) {
-    const { classes } = props;
+    const { classes, api: newApi } = props;
+    const { api } = useContext(ApiContext);
+    let loadScopes;
+    let loadEndpoints;
+    let endpointsCheckItem;
+    let scopesCheckItem;
+    if (newApi.type !== 'WS') {
+        loadScopes = <Scopes parentClasses={classes} />;
+    }
+    function getResourcesClassForAPIs(apiType) {
+        switch (apiType) {
+            case 'GRAPHQL':
+                return <Operations parentClasses={classes} api={api} />;
+            case API.CONSTS.APIProduct:
+                return <ProductResources parentClasses={classes} api={api} />;
+            default:
+                return <Resources parentClasses={classes} api={api} />;
+        }
+    }
+    function getItemSuccessLabelForAPIType(apiType) {
+        switch (apiType) {
+            case 'GRAPHQL':
+                return <CheckItem itemSuccess itemLabel='Operations' />;
+            default:
+                return <CheckItem itemSuccess itemLabel='Resources' />;
+        }
+    }
+
+    if (newApi.apiType === API.CONSTS.APIProduct) {
+        endpointsCheckItem = null;
+        scopesCheckItem = null;
+        loadEndpoints = null;
+        loadScopes = null;
+    } else if (newApi.apiType === API.CONSTS.API) {
+        endpointsCheckItem = <CheckItem itemSuccess itemLabel='Endpoints' />;
+        scopesCheckItem = <CheckItem itemSuccess={newApi.scopes.length > 0} itemLabel='Scopes' />;
+        loadEndpoints = <Endpoints parentClasses={classes} api={newApi} />;
+    }
     return (
-        <ApiContext.Consumer>
-            {({ api, isAPIProduct }) => (
+        <Grid container spacing={24}>
+            {console.info(api)}
+            <Grid item xs={12}>
+                <Grid container>
+                    {endpointsCheckItem}
+                    <CheckItem itemSuccess={false} itemLabel='Policies' />
+                    {getItemSuccessLabelForAPIType(api.type)}
+                    <CheckItem itemSuccess={false} itemLabel='Scopes' />
+                    {scopesCheckItem}
+                    <CheckItem itemSuccess={false} itemLabel='Documents' />
+                    <CheckItem itemSuccess={false} itemLabel='Business Information' />
+                    <CheckItem itemSuccess={false} itemLabel='Description' />
+                </Grid>
+            </Grid>
+            <Grid item xs={12}>
                 <Grid container spacing={24}>
-                    {console.info(api)}
-                    <Grid item xs={12}>
-                        <Grid container>
-                            {isAPIProduct ? null : (<CheckItem itemSuccess itemLabel='Endpoints' />)}
-                            <CheckItem itemSuccess={false} itemLabel='Policies' />
-                            <CheckItem itemSuccess itemLabel='Resources' />
-                            {isAPIProduct ? null : (<CheckItem itemSuccess={false} itemLabel='Scopes' />)}
-                            <CheckItem itemSuccess={false} itemLabel='Documents' />
-                            <CheckItem itemSuccess={false} itemLabel='Business Information' />
-                            <CheckItem itemSuccess={false} itemLabel='Description' />
-                        </Grid>
+                    <Grid item xs={12} md={6} lg={6}>
+                        <Configuration parentClasses={classes} />
+                        {getResourcesClassForAPIs(api.type)}
+                        <AdditionalProperties parentClasses={classes} />
                     </Grid>
-                    <Grid item xs={12}>
-                        <Grid container spacing={24}>
-                            <Grid item xs={12} md={6} lg={6}>
-                                <Configuration parentClasses={classes} />
-                                {isAPIProduct ? <ProductResources parentClasses={classes} api={api} /> :
-                                    (<Resources parentClasses={classes} api={api} />)}
-                                <AdditionalProperties parentClasses={classes} />
-                            </Grid>
-                            <Grid item xs={12} md={6} lg={6}>
-                                <Lifecycle parentClasses={classes} />
-                                {isAPIProduct ? null : (<Endpoints parentClasses={classes} api={api} />)}
-                                <BusinessInformation parentClasses={classes} />
-                                {isAPIProduct ? null : (<Scopes parentClasses={classes} />)}
-                                <Documents parentClasses={classes} api={api} />
-                                <Policies parentClasses={classes} />
-                            </Grid>
-                        </Grid>
+                    <Grid item xs={12} md={6} lg={6}>
+                        <Lifecycle parentClasses={classes} />
+                        {loadEndpoints}
+                        <BusinessInformation parentClasses={classes} />
+                        {loadScopes}
+                        <Documents parentClasses={classes} api={api} />
+                        <Policies parentClasses={classes} />
                     </Grid>
                 </Grid>
-            )}
-        </ApiContext.Consumer>
+            </Grid>
+        </Grid>
     );
 }
 

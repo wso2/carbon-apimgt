@@ -29,7 +29,8 @@ import Dialog from '@material-ui/core/Dialog';
 import Slide from '@material-ui/core/Slide';
 import Button from '@material-ui/core/Button';
 import { FormattedMessage } from 'react-intl';
-import { ScopeValidation, resourceMethods, resourcePaths } from '../../Shared/ScopeValidation';
+import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
+import PropTypes from 'prop-types';
 
 /**
  *
@@ -38,6 +39,11 @@ import { ScopeValidation, resourceMethods, resourcePaths } from '../../Shared/Sc
  * @extends {React.Component}
  */
 class SubscriptionTableData extends React.Component {
+    /**
+     *Creates an instance of SubscriptionTableData.
+     * @param {*} props properties
+     * @memberof SubscriptionTableData
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -69,6 +75,7 @@ class SubscriptionTableData extends React.Component {
     /**
      *
      * Handle onclick for subscription delete
+     * @param {*} subscriptionId subscription id
      * @memberof SubscriptionTableData
      */
     handleRequestDelete(subscriptionId) {
@@ -80,15 +87,16 @@ class SubscriptionTableData extends React.Component {
     }
 
     /**
-    *
-    *
-    * @returns
+    * @inheritdoc
     * @memberof SubscriptionTableData
     */
     render() {
         const {
-            apiInfo, status, throttlingPolicy, subscriptionId, apiId,
-        } = this.props.subscription;
+            subscription: {
+                apiInfo, status, throttlingPolicy, subscriptionId, apiId,
+            },
+        } = this.props;
+        const { openMenu } = this.state;
         return (
             <TableRow hover>
                 <TableCell style={{ paddingLeft: 0 }}>
@@ -108,7 +116,7 @@ class SubscriptionTableData extends React.Component {
                             </IconButton>
                         </ScopeValidation>
 
-                        <Dialog open={this.state.openMenu} transition={Slide}>
+                        <Dialog open={openMenu} transition={Slide}>
                             <DialogTitle>Confirm</DialogTitle>
                             <DialogContent>
                                 <DialogContentText>
@@ -139,5 +147,16 @@ class SubscriptionTableData extends React.Component {
         );
     }
 }
-
+SubscriptionTableData.propTypes = {
+    subscription: PropTypes.shape({
+        apiInfo: PropTypes.shape({
+            name: PropTypes.string.isRequired,
+        }).isRequired,
+        throttlingPolicy: PropTypes.string.isRequired,
+        subscriptionId: PropTypes.string.isRequired,
+        apiId: PropTypes.string.isRequired,
+        status: PropTypes.string.isRequired,
+    }).isRequired,
+    handleSubscriptionDelete: PropTypes.func.isRequired,
+};
 export default SubscriptionTableData;

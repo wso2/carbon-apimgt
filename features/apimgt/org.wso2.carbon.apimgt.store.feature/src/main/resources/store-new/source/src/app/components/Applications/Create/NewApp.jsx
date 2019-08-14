@@ -27,6 +27,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import ApplicationCreateForm from 'AppComponents/Shared/AppsAndKeys/ApplicationCreateForm';
 import Alert from 'AppComponents/Shared/Alert';
@@ -76,16 +77,21 @@ class NewApp extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            open: false,
             applicationRequest: {
                 name: '',
                 throttlingPolicy: '',
                 description: '',
-                tokenType: null,
+                tokenType: 'OAUTH',
+                groups: null,
+                attributes: {},
             },
             isNameValid: true,
             throttlingPolicyList: [],
+            allAppAttributes: null,
+            isApplicationSharingEnabled: true,
         };
+        this.handleAddChip = this.handleAddChip.bind(this);
+        this.handleDeleteChip = this.handleDeleteChip.bind(this);
     }
 
     /**
@@ -97,15 +103,22 @@ class NewApp extends React.Component {
         // Get all the tires to populate the drop down.
         const api = new API();
         const promiseTiers = api.getAllTiers('application');
-        promiseTiers
+        const promisedAttributes = api.getAllApplicationAttributes();
+        Promise.all([promiseTiers, promisedAttributes])
             .then((response) => {
+                const [tierResponse, allAttributes] = response;
                 const { applicationRequest } = this.state;
-                const throttlingPolicyList = response.body.list.map(item => item.name);
+                const throttlingPolicyList = tierResponse.body.list.map(item => item.name);
                 const newRequest = { ...applicationRequest };
                 if (throttlingPolicyList.length > 0) {
                     [newRequest.throttlingPolicy] = throttlingPolicyList;
                 }
-                this.setState({ applicationRequest: newRequest, throttlingPolicyList });
+                const allAppAttributes = [];
+                allAttributes.body.list.map(item => allAppAttributes.push(item));
+                if (allAttributes.length > 0) {
+                    newRequest.attributes = allAppAttributes.filter(item => !item.hidden);
+                }
+                this.setState({ applicationRequest: newRequest, throttlingPolicyList, allAppAttributes });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -117,16 +130,87 @@ class NewApp extends React.Component {
                     this.setState({ notFound: true });
                 }
             });
+        this.isApplicationGroupSharingEnabled();
     }
 
     /**
-     * Update keyRequest state
+     * Update Application Request state
      * @param {Object} applicationRequest parameters requried for application
-     * create request
      */
     updateApplicationRequest = (applicationRequest) => {
         this.setState({ applicationRequest });
     }
+
+    /**
+     * @param {object} name application attribute name
+     * @returns {void}
+     * @memberof NewApp
+     */
+    handleAttributesChange = name => (event) => {
+        const { applicationRequest } = this.state;
+        applicationRequest.attributes[name] = event.target.value;
+        this.setState({ applicationRequest });
+    };
+
+    /**
+     * @param {object} name application attribute name
+     * @returns {Object} attribute value
+     * @memberof NewApp
+     */
+    getAttributeValue = (name) => {
+        const { applicationRequest } = this.state;
+        return applicationRequest.attributes[name];
+    };
+
+    /**
+     * @param {object} name application attribute name
+     * @returns {void}
+     * @memberof NewApp
+     */
+    isRequiredAttribute = (name) => {
+        const { allAppAttributes } = this.state;
+        if (allAppAttributes) {
+            for (let i = 0; i < allAppAttributes.length; i++) {
+                if (allAppAttributes[i].attribute === name) {
+                    return allAppAttributes[i].required === 'true';
+                }
+            }
+        }
+        return false;
+    };
+
+    /**
+     * @param {object} attributes application attributes list
+     * @returns {object}
+     * @memberof EditApp
+     */
+    validateAttributes = (attributes) => {
+        const { intl } = this.props;
+        const { allAppAttributes } = this.state;
+        let isValidAttribute = true;
+        const attributeNameList = Object.keys(attributes);
+        if (allAppAttributes.length > 0) {
+            for (let i = 0; i < allAppAttributes.length; i++) {
+                if (allAppAttributes[i].required === 'true' && allAppAttributes[i].hidden === 'false') {
+                    if (attributeNameList.indexOf(allAppAttributes[i].attribute) === -1) {
+                        isValidAttribute = false;
+                    } else if (attributeNameList.indexOf(allAppAttributes[i].attribute) > -1
+                    && (!attributes[allAppAttributes[i].attribute]
+                        || attributes[allAppAttributes[i].attribute].trim() === '')) {
+                        isValidAttribute = false;
+                    }
+                }
+            }
+        }
+        if (!isValidAttribute) {
+            return Promise.reject(new Error(intl.formatMessage({
+                id: 'Applications.Edit.app.update.error.no.required.attribute',
+                defaultMessage: 'Please fill all required application attributes',
+            })));
+        } else {
+            return Promise.resolve(true);
+        }
+    };
 
     /**
      * Validate and send the application create
@@ -135,19 +219,23 @@ class NewApp extends React.Component {
      */
     saveApplication = () => {
         const { applicationRequest } = this.state;
-        const { updateApps } = this.props;
+        const { updateApps, handleClose, intl } = this.props;
         const api = new API();
         this.validateName(applicationRequest.name)
+            .then(() => this.validateAttributes(applicationRequest.attributes))
             .then(() => api.createApplication(applicationRequest))
             .then(() => {
                 console.log('Application created successfully.');
-                this.setState({ open: false });
+                handleClose();
                 updateApps();
             })
             .catch((error) => {
                 const { response } = error;
                 if (response && response.body) {
-                    const message = response.body.description || 'Error while creating the application';
+                    const message = response.body.description || intl.formatMessage({
+                        defaultMessage: 'Error while creating the application',
+                        id: 'Applications.Create.NewApp.error.while.creating.the.application',
+                    });
                     Alert.error(message);
                 } else {
                     Alert.error(error.message);
@@ -156,28 +244,62 @@ class NewApp extends React.Component {
             });
     };
 
-    /**
-     * @memberof NewApp
-     */
-    handleClose = () => {
-        this.setState({ open: false });
-    };
-
-    /**
-     * @memberof NewApp
-     */
-    handleClickOpen = () => {
-        this.setState({ open: true });
-    };
 
     validateName = (value) => {
+        const { intl } = this.props;
         if (!value || value.trim() === '') {
             this.setState({ isNameValid: false });
-            return Promise.reject(new Error('Application name is required'));
+            return Promise.reject(new Error(intl.formatMessage({
+                id: 'Applications.Create.NewApp.app.name.required',
+                defaultMessage: 'Application name is required',
+            })));
         }
         this.setState({ isNameValid: true });
         return Promise.resolve(true);
     };
+
+    /**
+     * add a new group function
+     * @param {*} chip newly added group
+     * @param {*} appGroups already existing groups
+     */
+    handleAddChip = (chip, appGroups) => {
+        this.setState(() => {
+            const { applicationRequest } = this.state;
+            const newRequest = { ...applicationRequest };
+            let values = appGroups || [];
+            values = values.slice();
+            values.push(chip);
+            newRequest.groups = values;
+            return { applicationRequest: newRequest };
+        });
+    }
+
+    /**
+     * remove a group from already existing groups function
+     * @param {*} chip selected group to be removed
+     * @param {*} index selected group index to be removed
+     * @param {*} appGroups already existing groups
+     */
+    handleDeleteChip = (chip, index, appGroups) => {
+        this.setState(() => {
+            const { applicationRequest } = this.state;
+            const newRequest = { ...applicationRequest };
+            let values = appGroups || [];
+            values = values.filter(v => v !== chip);
+            newRequest.groups = values;
+            return { applicationRequest: newRequest };
+        });
+    }
+
+    /**
+     * retrieve Settings from the local storage
+     */
+    isApplicationGroupSharingEnabled = () => {
+        const settingsData = localStorage.getItem('settings');
+        const enabled = JSON.parse(settingsData).applicationSharingEnabled;
+        this.setState({ isApplicationSharingEnabled: enabled });
+    }
 
     /**
      * @inheritdoc
@@ -185,9 +307,12 @@ class NewApp extends React.Component {
      */
     render() {
         const {
-            throttlingPolicyList, applicationRequest, isNameValid, open,
+            throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled,
+            handleAddChip, handleDeleteChip,
         } = this.state;
-        const { classes } = this.props;
+        const {
+            classes, open, handleClickOpen, handleClose,
+        } = this.props;
         return (
             <React.Fragment>
                 <ScopeValidation resourcePath={resourcePaths.APPLICATIONS} resourceMethod={resourceMethods.POST}>
@@ -195,22 +320,31 @@ class NewApp extends React.Component {
                         variant='contained'
                         color='primary'
                         className={classes.button}
-                        onClick={this.handleClickOpen}
+                        onClick={handleClickOpen}
                     >
-                        ADD NEW APPLICATION
+                        <FormattedMessage
+                            id='Applications.Create.NewApp.add.new.application'
+                            defaultMessage='ADD NEW APPLICATION'
+                        />
                     </Button>
                 </ScopeValidation>
-                <Dialog fullScreen open={open} onClose={this.handleClose} TransitionComponent={Transition}>
+                <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
                     <AppBar className={classes.appBar}>
                         <Toolbar>
-                            <IconButton color='inherit' onClick={this.handleClose} aria-label='Close'>
+                            <IconButton color='inherit' onClick={handleClose} aria-label='Close'>
                                 <CloseIcon />
                             </IconButton>
                             <Typography variant='title' color='inherit' className={classes.flex}>
-                                Create New Application
+                                <FormattedMessage
+                                    id='Applications.Create.NewApp.create.new.application'
+                                    defaultMessage='Create New Application'
+                                />
                             </Typography>
-                            <Button color='inherit' onClick={this.handleClose}>
-                                save
+                            <Button color='inherit' onClick={handleClose}>
+                                <FormattedMessage
+                                    id='Applications.Create.NewApp.save'
+                                    defaultMessage='save'
+                                />
                             </Button>
                         </Toolbar>
                     </AppBar>
@@ -221,11 +355,21 @@ class NewApp extends React.Component {
                             updateApplicationRequest={this.updateApplicationRequest}
                             validateName={this.validateName}
                             isNameValid={isNameValid}
+                            allAppAttributes={allAppAttributes}
+                            handleAttributesChange={this.handleAttributesChange}
+                            isRequiredAttribute={this.isRequiredAttribute}
+                            getAttributeValue={this.getAttributeValue}
+                            isApplicationSharingEnabled={isApplicationSharingEnabled}
+                            handleDeleteChip={this.handleDeleteChip}
+                            handleAddChip={this.handleAddChip}
                         />
                     </div>
                     <div className={classes.buttonWrapper}>
-                        <Button variant='outlined' className={classes.button} onClick={this.handleClose}>
-                            Cancel
+                        <Button variant='outlined' className={classes.button} onClick={handleClose}>
+                            <FormattedMessage
+                                id='Applications.Create.NewApp.cancel'
+                                defaultMessage='Cancel'
+                            />
                         </Button>
                         <Button
                             variant='contained'
@@ -233,7 +377,10 @@ class NewApp extends React.Component {
                             className={classes.button}
                             onClick={this.saveApplication}
                         >
-                            ADD NEW APPLICATION
+                            <FormattedMessage
+                                id='Applications.Create.NewApp.add.new.application.button'
+                                defaultMessage='ADD NEW APPLICATION'
+                            />
                         </Button>
                     </div>
                 </Dialog>
@@ -243,7 +390,20 @@ class NewApp extends React.Component {
 }
 
 NewApp.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        appBar: PropTypes.string,
+        flex: PropTypes.string,
+        createFormWrapper: PropTypes.string,
+        buttonWrapper: PropTypes.string,
+        button: PropTypes.string,
+    }).isRequired,
+    updateApps: PropTypes.func.isRequired,
+    handleClose: PropTypes.func.isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func.isRequired,
+    }).isRequired,
+    handleClickOpen: PropTypes.func.isRequired,
+    open: PropTypes.bool.isRequired,
 };
 
-export default withStyles(styles)(NewApp);
+export default injectIntl(withStyles(styles)(NewApp));

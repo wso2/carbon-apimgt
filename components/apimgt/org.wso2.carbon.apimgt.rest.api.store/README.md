@@ -190,6 +190,7 @@ beans.xml
     <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
     <bean id="AuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor" />
     <bean id="PostAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor" />
+    <bean id="SubscriberRegistrationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.SubscriberRegistrationInterceptor" />
     <bean id="ValidationInInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.validation.ValidationInInterceptor"/>
     <bean id="ETagInInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.eTag.ETagInInterceptor"/>
     <bean id="ETagOutInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.eTag.ETagOutInterceptor"/>
@@ -198,6 +199,7 @@ beans.xml
             <ref bean="PreAuthenticationInterceptor"/>
             <ref bean="AuthenticationInterceptor"/>
             <ref bean="PostAuthenticationInterceptor"/>
+            <ref bean="SubscriberRegistrationInterceptor">
             <ref bean="ValidationInInterceptor"/>
             <ref bean="ETagInInterceptor"/>
         </cxf:inInterceptors>

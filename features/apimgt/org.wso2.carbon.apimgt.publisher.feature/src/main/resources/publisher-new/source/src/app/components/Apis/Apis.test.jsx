@@ -25,13 +25,9 @@ import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
 import APIs from './Apis';
 import ApiCreate from './Create/ApiCreate';
 
-
 import { PageNotFound } from '../Base/Errors';
 
-jest.mock('./Listing/APIProductListing', () => () => {
-    return <div>Testing Listing page</div>;
-});
-jest.mock('./Listing/APIListing', () => () => {
+jest.mock('./Listing/Listing', () => () => {
     return <div>Testing Listing page</div>;
 });
 
@@ -49,7 +45,7 @@ describe('Test APIs main routing component', () => {
                 <APIs />
             </MemoryRouter>
         );
-        const wrapper = mount(exactApisPath);
+        const wrapper = mountWithIntl(exactApisPath);
         expect(wrapper.find(Route).prop('path')).toEqual(exactPath);
         expect(wrapper.contains('Testing Listing page')).toBeTruthy();
     });
@@ -60,7 +56,7 @@ describe('Test APIs main routing component', () => {
                 <APIs />
             </MemoryRouter>
         );
-        const wrapper = mount(exactApisPath);
+        const wrapper = mountWithIntl(exactApisPath);
         expect(wrapper.find(Route).prop('path')).toEqual(exactPath);
         expect(wrapper.contains('Testing Listing page')).toBeTruthy();
     });
@@ -72,7 +68,7 @@ describe('Test APIs main routing component', () => {
             </MemoryRouter>
         );
 
-        const wrapper = mount(createAPI);
+        const wrapper = mountWithIntl(createAPI);
         expect(wrapper.find(ApiCreate)).toHaveLength(1);
 
         // Page not found is expected here, Because we are navigating to exact /apis/create path

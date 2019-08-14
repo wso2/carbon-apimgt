@@ -156,6 +156,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static final String ALIAS = "alias";
     private static final String END_POINT = "endpoint";
     private static final String TIER = "tier";
+    private static final String validation = "schemaValidation";
 
     private APIProvider apiProvider;
 
@@ -427,6 +428,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String responseCache = (String) apiData.get("responseCache", apiData);
         String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        String swagger =  (String) apiData.get("swagger", apiData);
         JSONObject properties = null;
         if (!StringUtils.isEmpty(additionalProperties)) {
             JSONParser parser = new JSONParser();
@@ -575,11 +577,8 @@ public class APIProviderHostObject extends ScriptableObject {
             } catch (UserStoreException e) {
                 handleException("Error while reading tenant information ", e);
             }
-
-
             //Save swagger in the registry
             apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get(APIConstants.SWAGGER, apiData));
-            apiProvider.addSwaggerToLocalEntry(api, (String) apiData.get(APIConstants.SWAGGER, apiData));
         }
 
         //get new key manager instance for  resource registration.
@@ -902,6 +901,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String techOwnerEmail = (String) apiData.get("techOwnerEmail", apiData);
         String bizOwner = (String) apiData.get("bizOwner", apiData);
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
+        String schemaValidation = (String) apiData.get(validation, apiData);
 //        String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
 //        String providerDomain = MultitenantUtils.getTenantDomain(provider);
 
@@ -993,6 +993,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setLastUpdated(new Date());
         api.setAccessControl(publisherAccessControl);
         api.setAccessControlRoles(publisherAccessControlRoles);
+        api.setEnableSchemaValidation(validation.equals(schemaValidation));
 
         FileHostObject wsdlFile;
         if (apiData.containsKey(APIConstants.WSDL_FILE)) {
@@ -1258,6 +1259,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String publisherAccessControl = (String) apiData.get(APIConstants.ACCESS_CONTROL_PARAMETER, apiData);
         String publisherAccessControlRoles = "";
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        String schemaValidation = (String) apiData.get(validation, apiData);
         JSONObject properties = null;
         if (!StringUtils.isEmpty(additionalProperties)) {
             JSONParser parser = new JSONParser();
@@ -1569,6 +1571,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
         api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
+        api.setEnableSchemaValidation(validation.equals(schemaValidation));
 
         if (!"none".equals(inSequence)) {
             api.setInSequence(inSequence);
@@ -1844,6 +1847,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
         String visibleRoles = "";
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        String schemaValidation = (String) apiData.get(validation, apiData);
         JSONObject properties = null;
         String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
         Object apiSecurityObject = apiData.get("apiSecurity", apiData);
@@ -2178,6 +2182,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
         api.setAsDefaultVersion("default_version".equals(defaultVersion));
+        api.setEnableSchemaValidation(validation.equals(schemaValidation));
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
             api.setEndpointSecured(true);
@@ -2941,6 +2946,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(60, myn, checkValue("basic_auth", api.getApiSecurity()));
                 myn.put(61, myn, checkValue("mutualssl_mandatory", api.getApiSecurity()));
                 myn.put(62, myn, checkValue("oauth_basic_auth_mandatory", api.getApiSecurity()));
+                myn.put(63, myn, checkValue(Boolean.toString(api.isEnabledSchemaValidation())));
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                         "-" + version);
@@ -5635,90 +5641,6 @@ public class APIProviderHostObject extends ScriptableObject {
             }
         }
         return result;
-    }
-
-    private static String addSecurityDef(String spec, Set<Scope> scopes) {
-
-        List<String> scopeNames = new ArrayList<String>();
-        Swagger swagger = new SwaggerParser().parse(spec);
-        Map<String, Path> paths = swagger.getPaths();
-        Operation operation;
-        APIManagerConfiguration config = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String revokeUrl = config.getFirstProperty(APIConstants.REVOKE_API_URL);
-        String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;
-        tokenUrl = tokenUrl != null ? tokenUrl.replace("'", "") : null;
-
-        OAuthAdminService oAuthAdminService = new OAuthAdminService();
-        String[] allowedGrantTypesArr = oAuthAdminService.getAllowedGrantTypes();
-        String allowedGrantTypes = StringUtils.join(allowedGrantTypesArr, ",");
-
-        APISecuritySchemeDefinition apiSecuritySchemeDefinition = new APISecuritySchemeDefinition();
-        apiSecuritySchemeDefinition.setType("oauth2");
-        apiSecuritySchemeDefinition.setAuthorizationUrl(tokenUrl);
-
-        apiSecuritySchemeDefinition.setFlow(allowedGrantTypes);
-
-        for (Scope s : scopes) {
-            scopeNames.add(s.getName());
-            apiSecuritySchemeDefinition.setScopes(s.getName(), s.getDescription());
-        }
-
-        String securityName = swagger.getInfo().getTitle().toLowerCase() + "_oauth";
-
-        for (Map.Entry<String, Path> entry : paths.entrySet()) {
-            operation = paths.get(entry.getKey()).getGet();
-            if (operation != null) {
-                paths.get(entry.getKey()).getGet().setSecurity(null);
-                paths.get(entry.getKey()).getGet().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getPatch();
-            if (operation != null) {
-                paths.get(entry.getKey()).getPatch().setSecurity(null);
-                paths.get(entry.getKey()).getPatch().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getDelete();
-            if (operation != null) {
-                paths.get(entry.getKey()).getDelete().setSecurity(null);
-                paths.get(entry.getKey()).getDelete().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getHead();
-            if (operation != null) {
-                paths.get(entry.getKey()).getHead().setSecurity(null);
-                paths.get(entry.getKey()).getHead().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getPost();
-            if (operation != null) {
-                paths.get(entry.getKey()).getPost().setSecurity(null);
-                paths.get(entry.getKey()).getPost().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getPut();
-            if (operation != null) {
-                paths.get(entry.getKey()).getPut().setSecurity(null);
-                paths.get(entry.getKey()).getPut().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getOptions();
-            if (operation != null) {
-                paths.get(entry.getKey()).getOptions().setSecurity(null);
-                paths.get(entry.getKey()).getOptions().addSecurity(securityName, scopeNames);
-            }
-
-        }
-
-        Map<String, SecuritySchemeDefinition> securityDefMap = new HashMap<String, SecuritySchemeDefinition>();
-
-        securityDefMap.put(securityName, apiSecuritySchemeDefinition);
-
-        swagger.setSecurityDefinitions(securityDefMap);
-
-        swagger.setPaths(paths);
-        return Json.pretty(swagger);
     }
     
     /**

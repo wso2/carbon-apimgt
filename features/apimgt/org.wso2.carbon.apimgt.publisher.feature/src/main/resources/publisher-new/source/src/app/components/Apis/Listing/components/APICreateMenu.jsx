@@ -31,7 +31,7 @@ const APICreateMenu = (props) => {
                 </ListItem>
                 <Divider />
                 <ListItem>
-                    <Link to='/apis/create/swagger'>
+                    <Link to='/apis/create/openapi'>
                         <ListItemText
                             primary={
                                 <FormattedMessage
@@ -69,7 +69,16 @@ const APICreateMenu = (props) => {
                 </ListItem>
                 <Divider />
                 <ListItem>
-                    <Link to='/apis/create/rest'>
+                    <Link to='/apis/create/graphQL'>
+                        <ListItemText
+                            primary='I Have a GraphQL SDL schema'
+                            secondary='Import a GraphQL SDL schema'
+                        />
+                    </Link>
+                </ListItem>
+                <Divider />
+                <ListItem>
+                    <Link to='/apis/create/ws'>
                         <ListItemText
                             primary={
                                 <FormattedMessage

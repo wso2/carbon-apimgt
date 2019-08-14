@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ApplicationNameWhiteSpaceValidationException;
 import org.wso2.carbon.apimgt.api.ApplicationNameWithInvalidCharactersException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
@@ -82,15 +83,18 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.validation.ConstraintViolation;
+import javax.ws.rs.core.Response;
 
 public class RestApiUtil {
 
@@ -151,6 +155,47 @@ public class RestApiUtil {
         errorDTO.setMoreInfo("");
         errorDTO.setMessage(message);
         errorDTO.setDescription(description);
+        return errorDTO;
+    }
+
+    /**
+     * Returns a generic errorDTO from an Error Handler
+     *
+     * @param errorHandler ErrorHandler object containing the error information
+     * @return A generic errorDTO with the specified details
+     */
+    public static ErrorDTO getErrorDTO(ErrorHandler errorHandler){
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setCode(errorHandler.getErrorCode());
+        errorDTO.setMoreInfo("");
+        errorDTO.setMessage(errorHandler.getErrorMessage());
+        errorDTO.setDescription(errorHandler.getErrorDescription());
+        return errorDTO;
+    }
+
+    /**
+     * Returns a generic errorDTO from a list of Error Handlers
+     *
+     * @param errorHandlers A List of error handler objects containing the error information
+     * @return A generic errorDTO with the specified details
+     */
+    public static ErrorDTO getErrorDTO(List<ErrorHandler> errorHandlers) {
+        ErrorDTO errorDTO = new ErrorDTO();
+        for (int i = 0; i < errorHandlers.size(); i++) {
+            if (i == 0) {
+                ErrorHandler elementAt0 = errorHandlers.get(0);
+                errorDTO.setCode(elementAt0.getErrorCode());
+                errorDTO.setMoreInfo("");
+                errorDTO.setMessage(elementAt0.getErrorMessage());
+                errorDTO.setDescription(elementAt0.getErrorDescription());
+            } else {
+                ErrorListItemDTO errorListItemDTO = new ErrorListItemDTO();
+                errorListItemDTO.setCode(errorHandlers.get(i).getErrorCode() + "");
+                errorListItemDTO.setMessage(errorHandlers.get(i).getErrorMessage());
+                errorListItemDTO.setDescription(errorHandlers.get(i).getErrorDescription());
+                errorDTO.getError().add(errorListItemDTO);
+            }
+        }
         return errorDTO;
     }
 
@@ -439,6 +484,51 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns a new BadRequestException
+     *
+     * @param description description of the exception
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException buildBadRequestException(String description, Throwable e) {
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400l, description);
+        return new BadRequestException(description, e, errorDTO);
+    }
+
+    /**
+     * Returns a new BadRequestException
+     *
+     * @param errorDTO ErrorDTO object containing the error information
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException buildBadRequestException(ErrorDTO errorDTO) {
+        return new BadRequestException(errorDTO);
+    }
+
+
+    /**
+     * Returns a new BadRequestException
+     *
+     * @param errorHandler ErrorHandler object containing the error information
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException buildBadRequestException(ErrorHandler errorHandler) {
+        ErrorDTO errorDTO = getErrorDTO(errorHandler.getErrorMessage(), errorHandler.getErrorCode(),
+                errorHandler.getErrorDescription());
+        return new BadRequestException(errorDTO);
+    }
+
+    /**
+     * Returns a new BadRequestException from a list of Error Handlers
+     *
+     * @param errorHandlers A List of ErrorHandler object containing the error information
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException buildBadRequestException(List<ErrorHandler> errorHandlers) {
+        ErrorDTO errorDTO = getErrorDTO(errorHandlers);
+        return new BadRequestException(errorDTO);
+    }
+
+    /**
      * Returns a new MethodNotAllowedException
      * 
      * @param method http method
@@ -554,7 +644,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a BadRequestException with specified details and throws it
-     * 
+     *
      * @param msg error message
      * @param log Log instance
      * @throws BadRequestException
@@ -562,6 +652,52 @@ public class RestApiUtil {
     public static void handleBadRequest(String msg, Log log) throws BadRequestException {
         BadRequestException badRequestException = buildBadRequestException(msg);
         log.error(msg);
+        throw badRequestException;
+    }
+
+    /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     *
+     * @param msg error message
+     * @param e throwable to log
+     * @param log Log instance
+     * @throws BadRequestException
+     */
+    public static void handleBadRequest(String msg, Throwable e, Log log) throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(msg);
+        log.error(msg, e);
+        throw badRequestException;
+    }
+
+    /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     *
+     * @param errorHandler ErrorHandler object containing the error information
+     * @param log Log instance
+     * @throws BadRequestException
+     */
+    public static void handleBadRequest(ErrorHandler errorHandler, Log log) throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(errorHandler);
+        log.error(errorHandler.getErrorMessage());
+        throw badRequestException;
+    }
+
+    /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     *
+     * @param errorHandlers A List of error handler objects containing the error information
+     * @param log Log instance
+     * @throws BadRequestException
+     */
+    public static void handleBadRequest(List<ErrorHandler> errorHandlers, Log log) throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(errorHandlers);
+
+        StringBuilder builder = new StringBuilder();
+        for (ErrorHandler handler : errorHandlers) {
+            builder.append(handler.getErrorMessage());
+            builder.append(", ");
+        }
+        log.error(builder.toString());
         throw badRequestException;
     }
 
@@ -1427,5 +1563,39 @@ public class RestApiUtil {
             ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, errorMsg);
             throw new ForbiddenException(errorDTO);
         }
+    }
+
+    /**
+     * Check if user calls an anonymous REST API.
+     *
+     * @param inMessage cxf message
+     * @return true if user calls anonymous API, false otherwise.
+     */
+    public static boolean checkIfAnonymousAPI(Message inMessage) {
+        return (inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED) != null &&
+                !((Boolean) inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED)));
+    }
+
+    /**
+     * This method is used to get the URI template set for the relevant REST API using the given base path.
+     *
+     * @param basePath Base path of the REST API
+     * @return Set of URI templates for the REST API
+     */
+    public static Set<URITemplate> getURITemplatesForBasePath(String basePath) {
+        Set<URITemplate> uriTemplates = new HashSet<>();
+        //get URI templates using the base path in the request
+        if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_0)) {
+            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_0);
+        } else if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_1)) {
+            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_1);
+        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_0)) {
+            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_0);
+        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_1)) {
+            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_1);
+        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
+            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping();
+        }
+        return uriTemplates;
     }
 }

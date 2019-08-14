@@ -10,6 +10,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import { lighten } from '@material-ui/core/styles/colorManipulator';
+import { FormattedMessage } from 'react-intl';
 
 const toolbarStyles = theme => ({
     root: {
@@ -18,11 +19,11 @@ const toolbarStyles = theme => ({
     highlight:
         theme.palette.type === 'light'
             ? {
-                color: theme.palette.secondary.main,
+                color: theme.palette.getContrastText(lighten(theme.palette.secondary.light, 0.85)),
                 backgroundColor: lighten(theme.palette.secondary.light, 0.85),
             }
             : {
-                color: theme.palette.text.primary,
+                color: theme.palette.getContrastText(theme.palette.secondary.dark),
                 backgroundColor: theme.palette.secondary.dark,
             },
     spacer: {
@@ -53,26 +54,44 @@ const EnhancedTableToolbar = (props) => {
         >
             <div className={classes.title}>
                 {numSelected > 0 ? (
-                    <Typography color='inherit' variant='subheading'>
-                        {numSelected} selected
+                    <Typography color='inherit' variant='subtitle1'>
+                        {numSelected}
+                        {' '}
+                        <FormattedMessage
+                            id='Apis.Listing.TableView.APITableToolBar.selected.number'
+                            defaultMessage='selected'
+                        />
                     </Typography>
                 ) : (
-                    <Typography variant='title' id='tableTitle'>
-                        APIS ({totalAPIsCount})
+                    <Typography variant='h6' id='tableTitle'>
+                        <FormattedMessage
+                            id='Apis.Listing.TableView.APITableToolBar.apis.title'
+                            defaultMessage='APIS'
+                        /> {' '} ({totalAPIsCount})
                     </Typography>
                 )}
             </div>
             <div className={classes.spacer} />
             <div className={classes.actions}>
                 {numSelected > 0 ? (
-                    <Tooltip title='Delete'>
+                    <Tooltip title={
+                        <FormattedMessage
+                            id='Apis.Listing.TableView.APITableToolBar.delete'
+                            defaultMessage='Delete'
+                        />}
+                    >
                         <IconButton disabled={loading} onClick={handleDeleteAPIs} aria-label='Delete'>
                             <DeleteIcon />
                             {loading && <CircularProgress className={classes.deleteProgress} />}
                         </IconButton>
                     </Tooltip>
                 ) : (
-                    <Tooltip title='Filter list'>
+                    <Tooltip title={
+                        <FormattedMessage
+                            id='Apis.Listing.TableView.APITableToolBar.filter.list'
+                            defaultMessage='Filter List'
+                        />}
+                    >
                         <IconButton aria-label='Filter list'>
                             <FilterListIcon />
                         </IconButton>

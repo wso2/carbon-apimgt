@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.5.34-SNAPSHOT</version>
+        <version>6.5.56-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -31,7 +31,6 @@
     <name>WSO2 Carbon - API Publisher Rest API Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains required bundles for API Manager Rest API for API publisher functionality</description>
-
 
     <dependencies>
         <dependency>
@@ -43,6 +42,10 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1</artifactId>
             <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
@@ -186,7 +189,8 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                            <bundleDef>org.wso2.carbon.identity.framework:org.wso2.carbon.identity.entitlement.stub:${carbon.identity.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.identity.framework:org.wso2.carbon.identity.entitlement.stub:${carbon.identity.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.util:${carbon.apimgt.version}</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

@@ -41,12 +41,13 @@ public class APIDTO   {
     private String destinationStatsEnabled = null;
     private Boolean hasThumbnail = null;
     private Boolean isDefaultVersion = null;
+    private Boolean enableSchemaValidation = null;
 
 @XmlType(name="TypeEnum")
 @XmlEnum(String.class)
 public enum TypeEnum {
 
-    @XmlEnumValue("HTTP") HTTP(String.valueOf("HTTP")), @XmlEnumValue("WS") WS(String.valueOf("WS")), @XmlEnumValue("SOAPTOREST") SOAPTOREST(String.valueOf("SOAPTOREST"));
+    @XmlEnumValue("HTTP") HTTP(String.valueOf("HTTP")), @XmlEnumValue("WS") WS(String.valueOf("WS")), @XmlEnumValue("SOAPTOREST") SOAPTOREST(String.valueOf("SOAPTOREST")), @XmlEnumValue("GRAPHQL") GRAPHQL(String.valueOf("GRAPHQL"));
 
 
     private String value;
@@ -200,6 +201,40 @@ public enum AccessControlEnum {
     private String createdTime = null;
     private String lastUpdatedTime = null;
     private Object endpointConfig = null;
+
+@XmlType(name="EndpointImplementationTypeEnum")
+@XmlEnum(String.class)
+public enum EndpointImplementationTypeEnum {
+
+    @XmlEnumValue("INLINE") INLINE(String.valueOf("INLINE")), @XmlEnumValue("ENDPOINT") ENDPOINT(String.valueOf("ENDPOINT"));
+
+
+    private String value;
+
+    EndpointImplementationTypeEnum (String v) {
+        value = v;
+    }
+
+    public String value() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    public static EndpointImplementationTypeEnum fromValue(String v) {
+        for (EndpointImplementationTypeEnum b : EndpointImplementationTypeEnum.values()) {
+            if (String.valueOf(b.value).equals(v)) {
+                return b;
+            }
+        }
+        return null;
+    }
+}
+
+    private EndpointImplementationTypeEnum endpointImplementationType = EndpointImplementationTypeEnum.ENDPOINT;
     private List<ScopeDTO> scopes = new ArrayList<>();
     private List<APIOperationsDTO> operations = new ArrayList<>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
@@ -432,7 +467,24 @@ public enum AccessControlEnum {
   }
 
   /**
-   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST
+   **/
+  public APIDTO enableSchemaValidation(Boolean enableSchemaValidation) {
+    this.enableSchemaValidation = enableSchemaValidation;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("enableSchemaValidation")
+  public Boolean isEnableSchemaValidation() {
+    return enableSchemaValidation;
+  }
+  public void setEnableSchemaValidation(Boolean enableSchemaValidation) {
+    this.enableSchemaValidation = enableSchemaValidation;
+  }
+
+  /**
+   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
    **/
   public APIDTO type(TypeEnum type) {
     this.type = type;
@@ -440,7 +492,7 @@ public enum AccessControlEnum {
   }
 
   
-  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST")
+  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;
@@ -906,6 +958,23 @@ public enum AccessControlEnum {
 
   /**
    **/
+  public APIDTO endpointImplementationType(EndpointImplementationTypeEnum endpointImplementationType) {
+    this.endpointImplementationType = endpointImplementationType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "INLINE", value = "")
+  @JsonProperty("endpointImplementationType")
+  public EndpointImplementationTypeEnum getEndpointImplementationType() {
+    return endpointImplementationType;
+  }
+  public void setEndpointImplementationType(EndpointImplementationTypeEnum endpointImplementationType) {
+    this.endpointImplementationType = endpointImplementationType;
+  }
+
+  /**
+   **/
   public APIDTO scopes(List<ScopeDTO> scopes) {
     this.scopes = scopes;
     return this;
@@ -978,6 +1047,7 @@ public enum AccessControlEnum {
         Objects.equals(destinationStatsEnabled, API.destinationStatsEnabled) &&
         Objects.equals(hasThumbnail, API.hasThumbnail) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
+        Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
         Objects.equals(type, API.type) &&
         Objects.equals(transport, API.transport) &&
         Objects.equals(tags, API.tags) &&
@@ -1005,6 +1075,7 @@ public enum AccessControlEnum {
         Objects.equals(createdTime, API.createdTime) &&
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
         Objects.equals(endpointConfig, API.endpointConfig) &&
+        Objects.equals(endpointImplementationType, API.endpointImplementationType) &&
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(operations, API.operations) &&
         Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies);
@@ -1012,7 +1083,7 @@ public enum AccessControlEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlUri, responseCaching, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, scopes, operations, threatProtectionPolicies);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlUri, responseCaching, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies);
   }
 
   @Override
@@ -1033,6 +1104,7 @@ public enum AccessControlEnum {
     sb.append("    destinationStatsEnabled: ").append(toIndentedString(destinationStatsEnabled)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
+    sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
@@ -1060,6 +1132,7 @@ public enum AccessControlEnum {
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
+    sb.append("    endpointImplementationType: ").append(toIndentedString(endpointImplementationType)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("    threatProtectionPolicies: ").append(toIndentedString(threatProtectionPolicies)).append("\n");

@@ -6,7 +6,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { FormattedMessage, injectIntl, defineMessages } from 'react-intl';
 import withStyles from '@material-ui/core/styles/withStyles';
 import PropTypes from 'prop-types';
 
@@ -238,7 +238,7 @@ class SubscriptionsTable extends Component {
             .catch((errorResponse) => {
                 console.log(errorResponse);
                 const { message } = errorResponse.response.body;
-                const messages = intl.defineMessages({
+                const messages = defineMessages({
                     errorMessage: {
                         id: 'Apis.Details.Subscriptions.SubscriptionsTable.error.subscription.block',
                         defaultMessage: 'Error: Unable to block subscription. (Reason: {message})',
@@ -269,7 +269,7 @@ class SubscriptionsTable extends Component {
             .catch((errorResponse) => {
                 console.log(errorResponse);
                 const { message } = errorResponse.response.body;
-                const messages = intl.defineMessages({
+                const messages = defineMessages({
                     errorMessage: {
                         id: 'Apis.Details.Subscriptions.SubscriptionsTable.error.subscription.block.prod.only',
                         defaultMessage: 'Error: Unable to block subscription. (Reason: {message})',
@@ -300,7 +300,7 @@ class SubscriptionsTable extends Component {
             .catch((errorResponse) => {
                 console.log(errorResponse);
                 const { message } = errorResponse.response.body;
-                const messages = intl.defineMessages({
+                const messages = defineMessages({
                     errorMessage: {
                         id: 'Apis.Details.Subscriptions.SubscriptionsTable.error.subscription.unblock',
                         defaultMessage: 'Error: Unable to unblock subscription. (Reason: {message})',
@@ -337,7 +337,7 @@ class SubscriptionsTable extends Component {
         if (subscriptions != null) {
             return (
                 <dev>
-                    <Typography className={classes.headline} gutterBottom variant='headline' component='h2'>
+                    <Typography className={classes.headline} gutterBottom variant='h5' component='h2'>
                         <FormattedMessage
                             id='Apis.Details.Subscriptions.SubscriptionsTable.manage.subscriptions'
                             defaultMessage='Manage Subscriptions'

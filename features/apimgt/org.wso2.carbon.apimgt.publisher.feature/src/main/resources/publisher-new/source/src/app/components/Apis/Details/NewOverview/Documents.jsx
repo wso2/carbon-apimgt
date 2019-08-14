@@ -26,11 +26,12 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import FileIcon from '@material-ui/icons/Description';
 import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
 import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 
 class Documents extends React.Component {
     constructor(props) {
@@ -40,9 +41,10 @@ class Documents extends React.Component {
         };
     }
     componentDidMount() {
-        const API = new Api();
-        const docs = API.getDocuments(this.props.api.id);
-        const { intl } = this.props;
+        const { api: { apiType, id }, intl } = this.props;
+        const API = apiType === Api.CONSTS.APIProduct ? new APIProduct() : new Api();
+
+        const docs = API.getDocuments(id);
         docs.then((response) => {
             this.setState({ documentsList: response.obj.list });
         }).catch((errorResponse) => {
@@ -81,12 +83,12 @@ class Documents extends React.Component {
                 {documentsList && documentsList.length !== 0 && (
                     <List className={parentClasses.ListRoot}>
                         {documentsList.map(item => (
-                            <ListItem key={item.id}>
+                            <ListItemAvatar key={item.id}>
                                 <Avatar>
                                     <FileIcon />
                                 </Avatar>
                                 <ListItemText primary={item.name} secondary={item.summary} />
-                            </ListItem>
+                            </ListItemAvatar>
                         ))}
                     </List>
                 )}
@@ -105,7 +107,10 @@ class Documents extends React.Component {
 
 Documents.propTypes = {
     parentClasses: PropTypes.shape({}).isRequired,
-    api: PropTypes.shape({ id: PropTypes.string }).isRequired,
+    api: PropTypes.shape({
+        id: PropTypes.string,
+        apiType: PropTypes.oneOf([Api.CONSTS.API, Api.CONSTS.APIProduct]),
+    }).isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,

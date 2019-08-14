@@ -87,5 +87,7 @@
     "validationMsgs.provideCompleteUrl": "validationMsgs.provideCompleteUrl",
     "validationMsgs.testUri": "validationMsgs.testUri",
     "validationMsgs.valid": "validationMsgs.valid",
-    "validationMsgs.validating": "validationMsgs.validating"
+    "validationMsgs.validating": "validationMsgs.validating",
+    "Show Advanced Options": "Show Advanced Options",
+    "Show Fewer Advanced Options": "Show Fewer Advanced Options"
 }

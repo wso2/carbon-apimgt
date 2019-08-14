@@ -157,8 +157,20 @@ class AuthManager {
     }
 
     /**
-     * Persist an user in browser local storage and in-memory, Since only one use can be logged into the application at a time,
-     * This method will override any previously persist user data.
+     * retrieve Settings from settings rest api and store in the local storage
+     */
+    static setSettings() {
+        const promisedResponse = fetch('/api/am/store/v1.0/settings', {});
+        promisedResponse
+            .then(response => response.json())
+            .then((data) => {
+                localStorage.setItem('settings', JSON.stringify(data));
+            });
+    }
+
+    /**
+     * Persist an user in browser local storage and in-memory, Since only one use can be logged
+     * into the application at a time,This method will override any previously persist user data.
      * @param {User} user : An instance of the {User} class
      * @param {string} environmentName: label of the environment to be set the user
      */
@@ -183,11 +195,14 @@ class AuthManager {
      * @memberof AuthManager
      */
     static hasScopes(resourcePath, resourceMethod) {
-        const userScopes = AuthManager.getUser().scopes;
-        const validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
-        return validScope.then((scope) => {
-            return userScopes.includes(scope);
-        });
+        const user = AuthManager.getUser();
+        if (user) {
+            const userScopes = user.scopes;
+            const validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
+            return validScope.then((scope) => {
+                return userScopes.includes(scope);
+            });
+        }
     }
 
 

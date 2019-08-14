@@ -28,21 +28,24 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefaultVersionURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEnvironmentURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -71,6 +74,7 @@ public class APIMappingUtil {
         dto.setDescription(model.getDescription());
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setLifeCycleStatus(model.getStatus());
+        dto.setType(model.getType());
 
         /* todo: created and last updated times
         if (null != model.getLastUpdated()) {
@@ -94,6 +98,17 @@ public class APIMappingUtil {
             apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
         }
         dto.setApiDefinition(apiSwaggerDefinition);
+
+        if (APIConstants.APITransportType.GRAPHQL.toString().equals(model.getType())) {
+            List<APIOperationsDTO> operationList = new ArrayList<>();
+            for (URITemplate template : model.getUriTemplates()) {
+                APIOperationsDTO operation = new APIOperationsDTO();
+                operation.setTarget(template.getUriTemplate());
+                operation.setVerb(template.getHTTPVerb());
+                operationList.add(operation);
+            }
+            dto.setOperations(operationList);
+        }
 
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -294,6 +309,7 @@ public class APIMappingUtil {
         apiInfoDTO.setVersion(apiId.getVersion());
         apiInfoDTO.setProvider(apiId.getProviderName());
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
+        apiInfoDTO.setType(api.getType());
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         Set<Tier> throttlingPolicies = api.getAvailableTiers();
@@ -336,9 +352,14 @@ public class APIMappingUtil {
         for (String environmentName : environmentsPublishedByAPI) {
             Environment environment = environments.get(environmentName);
             if (environment != null) {
-                APIEnvironmentURLsDTO environmentURLsDTO = new APIEnvironmentURLsDTO();
-                String[] gwEndpoints = environment.getApiGatewayEndpoint().split(",");
-
+                APIURLsDTO apiURLsDTO = new APIURLsDTO();
+                APIDefaultVersionURLsDTO apiDefaultVersionURLsDTO = new APIDefaultVersionURLsDTO();
+                String[] gwEndpoints = null;
+                if ("WS".equalsIgnoreCase(api.getType())) {
+                    gwEndpoints = environment.getWebsocketGatewayEndpoint().split(",");
+                } else {
+                    gwEndpoints = environment.getApiGatewayEndpoint().split(",");
+                }
                 Map<String, String> domains = new HashMap<>();
                 if (tenantDomain != null) {
                     domains = apiConsumer.getTenantDomainMappings(tenantDomain,
@@ -362,15 +383,33 @@ public class APIMappingUtil {
                     }
 
                     if (gwEndpoint.contains("http:") && apiTransports.contains("http")) {
-                        environmentURLsDTO.setHttp(endpointBuilder.toString());
+                        apiURLsDTO.setHttp(endpointBuilder.toString());
+                    } else if (gwEndpoint.contains("https:") && apiTransports.contains("https")) {
+                        apiURLsDTO.setHttps(endpointBuilder.toString());
+                    } else if (gwEndpoint.contains("ws:")) {
+                        apiURLsDTO.setWs(endpointBuilder.toString());
+                    } else if (gwEndpoint.contains("wss:")) {
+                        apiURLsDTO.setWss(endpointBuilder.toString());
                     }
-                    else if (gwEndpoint.contains("https:") && apiTransports.contains("https")) {
-                        environmentURLsDTO.setHttps(endpointBuilder.toString());
+
+                    if (api.isDefaultVersion()) {
+                        int index = endpointBuilder.indexOf(api.getId().getVersion());
+                        endpointBuilder.replace(index, endpointBuilder.length(), "");
+                        if (gwEndpoint.contains("http:") && apiTransports.contains("http")) {
+                            apiDefaultVersionURLsDTO.setHttp(endpointBuilder.toString());
+                        } else if (gwEndpoint.contains("https:") && apiTransports.contains("https")) {
+                            apiDefaultVersionURLsDTO.setHttps(endpointBuilder.toString());
+                        } else if (gwEndpoint.contains("ws:")) {
+                            apiDefaultVersionURLsDTO.setWs(endpointBuilder.toString());
+                        } else if (gwEndpoint.contains("wss:")) {
+                            apiDefaultVersionURLsDTO.setWss(endpointBuilder.toString());
+                        }
                     }
                 }
 
                 APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
-                apiEndpointURLsDTO.setEnvironmentURLs(environmentURLsDTO);
+                apiEndpointURLsDTO.setDefaultVersionURLs(apiDefaultVersionURLsDTO);
+                apiEndpointURLsDTO.setUrLs(apiURLsDTO);
 
                 apiEndpointURLsDTO.setEnvironmentName(environment.getName());
                 apiEndpointURLsDTO.setEnvironmentType(environment.getType());

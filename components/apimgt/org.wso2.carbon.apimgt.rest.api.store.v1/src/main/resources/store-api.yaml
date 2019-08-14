@@ -282,6 +282,64 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  /apis/{apiId}/graphql-schema:
+    #-----------------------------------------------------
+    # Retrieve the GraphQL schema definition
+    #-----------------------------------------------------
+    get:
+      security:
+      - OAuth2Security: []
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/store/v1.0/apis/c43a325c-260b-4302-81cb-768eafaa3aed/graphql-schema
+      x-wso2-curl: "curl https://localhost:9443/api/am/store/v1.0/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger"
+      x-wso2-curl-tenant: "curl -k -H \"X-WSO2-Tenant:test.com\" https://localhost:9443/api/am/store/v1.0/apis/c43a325c-260b-4302-81cb-768eafaa3aed/graphql-schema"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-tier\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"2.0.0\"\n   }\n}\n"
+      summary: |
+        Get graphQL definition
+      description: |
+        You can use this operation to retrieve the swagger definition of an API.
+
+         `X-WSO2-Tenant` header can be used to retrive the swagger definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+
+        **NOTE:**
+        * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
+      parameters:
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/If-None-Match'
+      - $ref: '#/parameters/requestedTenant'
+      tags:
+      - APIs
+      responses:
+        200:
+          description: |
+            OK.
+            Requested swagger document of the API is returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
 
   /apis/{apiId}/sdks/{language}:
 #-----------------------------------------------------
@@ -431,7 +489,7 @@ paths:
         - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Documents
+        - API Documents
       responses:
         200:
           description: |
@@ -492,7 +550,7 @@ paths:
         - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Documents
+        - API Documents
       responses:
         200:
           description: |
@@ -565,7 +623,7 @@ paths:
           - $ref: '#/parameters/requestedTenant'
           - $ref: '#/parameters/If-None-Match'
         tags:
-          - Documents
+          - API Documents
         responses:
           200:
             description: |
@@ -1924,181 +1982,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# Export Application Resource API
-######################################################
-  /export/applications:
-
-    get:
-      security:
-        - OAuth2Security:
-          - apim:subscribe
-      produces:
-        - application/zip
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\"
-      https://localhost:9443/api/am/store/v1.0/export/applications?appId=xxx > exported-application.zip"
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/store/v1.0/export/applications?appId=xxx
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment;
-       filename=\"exported-applications.zip\"\n  Content-Type: application/zip"
-      summary: Export details related to an Application.
-      description: |
-        This operation can be used to export details related to a perticular application.
-      parameters:
-        - name: appId
-          in: query
-          description: |
-            Application Search Query
-          required: true
-          type: string
-      tags:
-        - Import and Export Applications
-      responses:
-        200:
-          description: |
-            OK.
-            Export Configuration returned.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-          schema:
-            type: file
-        404:
-          description: |
-            Not Found.
-            Requested Application does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
-
-######################################################
-# Import Application Resource API
-######################################################
-  /import/applications:
-
-    put:
-      security:
-        - OAuth2Security:
-          - apim:subscribe
-      consumes:
-        - multipart/form-data
-      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/store/v1.0/import/applications"
-      x-wso2-request: |
-        PUT https://127.0.0.1:9443/api/am/store/v1.0/import/applications
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type:application/json\n\n{\"applicationUUID\":\"645b8e32-3643-48e5-ab42-aed853a8cd77\",\"workflowResponse\":{\"workflowStatus\":\"APPROVED\"}}"
-      summary: Imports an Updates an Application.
-      description: |
-        This operation can be used to import an existing Application.
-      parameters:
-        - name: file
-          in: formData
-          description: |
-            Zip archive consisting on exported application configuration
-          required: true
-          type: file
-      tags:
-        - Import and Export Applications
-      responses:
-        200:
-          description: |
-            OK.
-            Successful response with the updated object as entity in the body.
-          schema:
-            $ref: '#/definitions/Application'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
-    post:
-      security:
-        - OAuth2Security:
-          - apim:subscribe
-      consumes:
-        - multipart/form-data
-      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/store/v1.0/import/applications"
-      x-wso2-request: |
-        POST https://127.0.0.1:9443/api/am/store/v1.0/import/applications
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"name\":\"sampleApp2\",\"uuid\":\"5e3ac21a-cc14-4404-95f1-659900c165c4\",\"description\":\"sample app 2\",\"throttlingPolicy\":{\"uuid\":\"5b74ec82-264e-4104-91ef-fdd41b981798\",\"policyName\":\"50PerMin\",\"isDeployed\":false},\"status\":\"APPROVED\",\"createdUser\":\"admin\",\"createdTime\":{\"date\":{\"year\":2017,\"month\":11,\"day\":8},\"time\":{\"hour\":4,\"minute\":10,\"second\":4,\"nano\":434000000}}}"
-      summary: Imports an Application.
-      description: |
-        This operation can be used to import an existing Application.
-      parameters:
-        - name: file
-          in: formData
-          description: |
-            Zip archive consisting on exported application configuration
-          required: true
-          type: file
-      tags:
-        - Import and Export Applications
-      responses:
-        200:
-          description: |
-            OK.
-            Successful response with the updated object as entity in the body.
-          schema:
-            $ref: '#/definitions/Application'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
 
 ######################################################
 # The "Subscription Collection" resource APIs
@@ -2727,6 +2610,8 @@ paths:
           - apim:store_setting
       description: |
         Retreive store settings
+      tags:
+        - Settings
       responses:
         200:
           description: |
@@ -2788,7 +2673,7 @@ paths:
           type: string
         - $ref : "#/parameters/If-None-Match"
       tags:
-        - API Products (Collection)
+        - API Products
       responses:
         200:
           description: |
@@ -2844,7 +2729,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/requestedTenant'
       tags:
-        - API Product (Individual)
+        - API Products
       responses:
         200:
           description: |
@@ -2910,7 +2795,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/requestedTenant'
       tags:
-        - API Product (Individual)
+        - API Products
       responses:
         200:
           description: |
@@ -2976,7 +2861,7 @@ paths:
         - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - API Product (Individual)
+        - API Products
       responses:
         200:
           description: |
@@ -3045,7 +2930,7 @@ paths:
         - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Document (Collection)
+        - API Product Documents
       responses:
         200:
           description: |
@@ -3110,7 +2995,7 @@ paths:
         - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Document (Individual)
+        - API Product Documents
       responses:
         200:
           description: |
@@ -3191,7 +3076,7 @@ paths:
           - $ref: '#/parameters/documentId'
           - $ref: '#/parameters/If-None-Match'
         tags:
-          - Document (Individual)
+          - API Product Documents
         responses:
           200:
             description: |
@@ -3261,7 +3146,7 @@ paths:
       parameters:
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Application Attributes
+        - Settings
       responses:
         200:
           description: |
@@ -3273,7 +3158,7 @@ paths:
                 The content type of the body.
               type: string
           schema:
-            type: '#/definitions/ApplicationAttributeList'
+            $ref: '#/definitions/ApplicationAttributeList'
         404:
           description: |
             Not Found.
@@ -3581,6 +3466,9 @@ definitions:
       version:
         type: string
         example: 1.0.0
+      type:
+        type: string
+        example: WS
       provider:
         description: |
           If the provider value is not given, the user invoking the API will be used as the provider.
@@ -3654,6 +3542,10 @@ definitions:
       isDefaultVersion:
         type: boolean
         example: false
+      type:
+        type: string
+        description: This describes the transport type of the API
+        example: WS
       transport:
         type: array
         items:
@@ -3661,6 +3553,10 @@ definitions:
             Supported transports for the API (http and/or https).
           type: string
         example: ["http","https"]
+      operations:
+        type: array
+        items:
+          $ref: '#/definitions/APIOperations'
       authorizationHeader:
         type: string
         description: |
@@ -3706,7 +3602,7 @@ definitions:
             environmentType:
               type: string
               example: hybrid
-            environmentURLs:
+            URLs:
               properties:
                 http:
                   type: string
@@ -3716,6 +3612,32 @@ definitions:
                   type: string
                   description: HTTPS environment URL
                   example: "https://localhost:8243/phoneverify/1.0.0"
+                ws:
+                  type: string
+                  description: WS environment URL
+                  example: "ws://localhost:9099/phoneverify/1.0.0"
+                wss:
+                  type: string
+                  description: WSS environment URL
+                  example: "wss://localhost:9099/phoneverify/1.0.0"
+            defaultVersionURLs:
+              properties:
+                http:
+                  type: string
+                  description: HTTP environment default URL
+                  example: "http://localhost:8280/phoneverify/"
+                https:
+                  type: string
+                  description: HTTPS environment default URL
+                  example: "https://localhost:8243/phoneverify/"
+                ws:
+                  type: string
+                  description: WS environment default URL
+                  example: "ws://localhost:9099/phoneverify/"
+                wss:
+                  type: string
+                  description: WSS environment default URL
+                  example: "ws://localhost:9099/phoneverify/"
       businessInformation:
         properties:
           businessOwner:
@@ -3950,6 +3872,11 @@ definitions:
         items:
           type: string
         example: ["admin"]
+      owner:
+        description: |
+          Application created user
+        type: string
+        example: admin
 
 #-----------------------------------------------------
 # The Application Info resource
@@ -3986,6 +3913,9 @@ definitions:
       attributes:
         type: object
         example: External Reference ID, Billing Tier
+      owner:
+        type: string
+        example: admin
 
 #-----------------------------------------------------
 # The Document List resource
@@ -4675,6 +4605,17 @@ definitions:
       email:
         type: string
 
+  APIOperations:
+    title: Operation
+    properties:
+      id:
+        type: string
+        example: "apioperation"
+      target:
+        type: string
+      verb:
+        type: string
+
 #-----------------------------------------------------
 # The Result List resource
 #-----------------------------------------------------
@@ -4834,6 +4775,9 @@ definitions:
         type: array
         items:
           type: string
+      applicationSharingEnabled:
+        type: boolean
+        default: false
 
 #-----------------------------------------------------
 # The Application Attribute resource

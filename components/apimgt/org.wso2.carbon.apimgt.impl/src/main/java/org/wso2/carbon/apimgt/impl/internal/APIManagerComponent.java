@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
+import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
@@ -58,6 +59,7 @@ import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterSchema;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
+import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -121,6 +123,7 @@ public class APIManagerComponent {
     public static final String LABELS = "Labels";
 
     public static final String API_SECURITY = "API Security";
+    public static final String ENABLE_SCHEMA_VALIDATION = "Enable Schema Validation";
 
     @Activate
     protected void activate(ComponentContext componentContext) throws Exception {
@@ -214,6 +217,16 @@ public class APIManagerComponent {
                 ServiceReferenceHolder.getInstance().setApiMgtWorkflowDataPublisher(new APIMgtWorkflowDataPublisher());
             }
             APIUtil.init();
+
+            // Activating UserPostSelfRegistration handler component
+            try {
+                registration = componentContext.getBundleContext()
+                        .registerService(AbstractEventHandler.class.getName(), new UserPostSelfRegistrationHandler(),
+                                null);
+            } catch (Exception e) {
+                log.error("Error while activating UserPostSelfRegistration handler component.", e);
+            }
+
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
@@ -332,11 +345,12 @@ public class APIManagerComponent {
                 if (systemRegistry.resourceExists(resourcePath)) {
                     // Adding Authorization header to the template if not exist
                     if (API_RXT.equals(rxtPath)) {
-                        // get Registry resource
+                        //get Registry resource
                         Resource resource = systemRegistry.get(resourcePath);
                         if (resource.getContent() != null) {
                             // check whether the resource contains a field called authorization header.
-                            if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).contains(AUTHORIZATION_HEADER)) {
+                            if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
+                                    contains(AUTHORIZATION_HEADER)) {
                                 updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
                             }
                             // check whether the resource contains a section called 'Labels' and add it
@@ -345,6 +359,13 @@ public class APIManagerComponent {
                             }
                             // check whether the resource contains a section called 'API Security' and add it
                             if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).contains(API_SECURITY)) {
+                                updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
+                            }
+                            // check whether the resource contains a section called 'enable Schema Validation' and
+                            // add it
+                            Object enableValidation = resource.getContent();
+                            if (!RegistryUtils.decodeBytes((byte[]) enableValidation).
+                                    contains(ENABLE_SCHEMA_VALIDATION)) {
                                 updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
                             }
                         }

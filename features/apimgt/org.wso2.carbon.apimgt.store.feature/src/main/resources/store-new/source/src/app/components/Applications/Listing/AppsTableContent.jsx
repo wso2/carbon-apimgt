@@ -31,6 +31,8 @@ import { FormattedMessage } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
+import PropTypes from 'prop-types';
+
 /**
  *
  * @param {*} order order
@@ -69,7 +71,7 @@ class AppsTableContent extends Component {
      */
     render() {
         const {
-            apps, handleAppDelete, page, rowsPerPage, order, orderBy,
+            apps, handleAppDelete, page, rowsPerPage, order, orderBy, isApplicationSharingEnabled,
         } = this.props;
         const { notFound } = this.state;
         const emptyRowsPerPage = rowsPerPage - Math.min(rowsPerPage, apps.size - page * rowsPerPage);
@@ -94,11 +96,20 @@ class AppsTableContent extends Component {
                             <TableRow key={app.applicationId}>
                                 <TableCell>
                                     {app.status === this.APPLICATION_STATES.APPROVED ? (
-                                        <Link to={'/applications/' + app.applicationId}>{app.name}</Link>
-                                    ) : (
-                                        app.name
-                                    )
-                                    }
+                                        <Link to={'/applications/' + app.applicationId}>
+                                            { (isApplicationSharingEnabled && app.groups.length !== 0) ? (
+                                                app.owner + '/' + app.name
+                                            ) : (
+                                                app.name
+                                            )}
+                                        </Link>
+                                    ) : [((isApplicationSharingEnabled && app.groups.length !== 0)
+                                        ? (app.owner + '/' + app.name)
+                                        : (
+                                            app.name
+                                        )
+                                    ),
+                                    ]}
                                 </TableCell>
                                 <TableCell>{app.throttlingPolicy}</TableCell>
                                 <TableCell>
@@ -196,4 +207,12 @@ class AppsTableContent extends Component {
         );
     }
 }
+AppsTableContent.propTypes = {
+    handleAppDelete: PropTypes.func.isRequired,
+    page: PropTypes.number.isRequired,
+    rowsPerPage: PropTypes.number.isRequired,
+    order: PropTypes.string.isRequired,
+    orderBy: PropTypes.string.isRequired,
+    apps: PropTypes.instanceOf(Map).isRequired,
+};
 export default AppsTableContent;

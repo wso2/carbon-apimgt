@@ -21,7 +21,6 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
-import InputLabel from '@material-ui/core/InputLabel';
 import TextField from '@material-ui/core/TextField';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -42,11 +41,12 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
-import Api from 'AppData/api';
 import Resource from './Resource';
+import Api from 'AppData/api';
+import CONSTS from 'AppData/Constants';
 import { Progress } from 'AppComponents/Shared';
-import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
+import { Radio, RadioGroup} from "@material-ui/core";
 
 const styles = theme => ({
     root: {
@@ -120,6 +120,19 @@ const styles = theme => ({
     expansionPanelDetails: {
         flexDirection: 'column',
     },
+    imageContainer: {
+        display: 'flex',
+    },
+    formControl: {
+        margin: theme.unit * 3,
+    },
+    group: {
+        margin: theme.unit * 3,
+    },
+    selectWidth: {
+        margin: theme.spacing.unit * 1,
+        minWidth: 120,
+    },
 });
 
 class Resources extends React.Component {
@@ -135,7 +148,10 @@ class Resources extends React.Component {
             allChecked: false,
             notFound: false,
             showAddResource: false,
-            showScopes: false,
+            showPolicy: false,
+            apiPolicies: [],
+            selectedPolicy: props.api.apiThrottlingPolicy,
+            policyLevel: props.api.apiThrottlingPolicy ? 'perAPI' : 'perResource',
         };
         this.api = new Api();
         this.api_uuid = props.api.id;
@@ -148,6 +164,9 @@ class Resources extends React.Component {
         this.handleScopeChange = this.handleScopeChange.bind(this);
         this.handleCheckAll = this.handleCheckAll.bind(this);
         this.deleteSelected = this.deleteSelected.bind(this);
+        this.advancedPolicyTypeChange = this.advancedPolicyTypeChange.bind(this);
+        this.handlePolicyChange = this.handlePolicyChange.bind(this);
+        this.updateAPI = this.updateAPI.bind(this);
         this.childResources = [];
     }
     handleChange = name => (event) => {
@@ -193,7 +212,7 @@ class Resources extends React.Component {
         const promised_api_object = Api.get(this.api_uuid);
         promised_api_object
             .then((api) => {
-                this.setState({ api });
+                this.setState({ api, scopes: api.scopes });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -202,20 +221,25 @@ class Resources extends React.Component {
                 const status = error.status;
                 if (status === 404) {
                     this.setState({ notFound: true });
+                } else if (status === 401) {
+                    doRedirectToLogin();
                 }
             });
-        const promised_scopes_object = api.getScopes(this.api_uuid);
-        promised_scopes_object
-            .then((response) => {
-                this.setState({ apiScopes: response.obj });
+
+        const promisedResPolicies = Api.policies('api');
+        promisedResPolicies
+            .then((policies) => {
+                this.setState({ apiPolicies: policies.obj.list });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
-                    console.error(error);
+                    console.log(error);
                 }
                 const status = error.status;
                 if (status === 404) {
                     this.setState({ notFound: true });
+                } else if (status === 401) {
+                    doRedirectToLogin();
                 }
             });
 
@@ -254,7 +278,6 @@ class Resources extends React.Component {
         this.setState({ [name]: value });
     };
     addResources() {
-        const allMehtods = ['get', 'put', 'post', 'delete', 'patch', 'head'];
         const defaultGet = {
             description: '',
             parameters: [],
@@ -323,7 +346,7 @@ class Resources extends React.Component {
                 existingPathVale = tmpPaths[this.state.tmpResourceName];
             }
         }
-        allMehtods.map((method) => {
+        CONSTS.HTTP_METHODS.map((method) => {
             switch (method) {
                 case 'get':
                     if ('get' in existingPathVale) {
@@ -392,14 +415,14 @@ class Resources extends React.Component {
         tmpSwagger.paths = this.state.paths;
         const api = this.state.api;
         const { intl } = this.props;
-
         const promised_api = api.updateSwagger(this.state.swagger);
         promised_api
             .then(() => {
                 Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.Resources.Resources.api.updated.successfully',
-                    defaultMessage: 'API updated successfully!',
+                    id: 'Apis.Details.Resources.Resources.api.path.updated.successfully',
+                    defaultMessage: 'API Resources updated successfully!',
                 }));
+                this.updateAPI();
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') console.log(error);
@@ -411,6 +434,45 @@ class Resources extends React.Component {
                 }
             });
     }
+
+    updateAPI() {
+        const api = new Api();
+        const { intl, api: { id } } = this.props;
+        const { policyLevel, selectedPolicy } = this.state;
+        const promisedApi = api.get(id);
+        promisedApi
+            .then((getResponse) => {
+                const apiData = getResponse.body;
+                if ('perAPI' === policyLevel) {
+                    apiData.apiThrottlingPolicy = selectedPolicy;
+                } else {
+                    apiData.apiThrottlingPolicy = null;
+                }
+                const promisedUpdate = api.update(apiData);
+                promisedUpdate
+                    .then(() => {
+                        Alert.info(intl.formatMessage({
+                            id: 'Apis.Details.Resources.Resources.api.updated.successfully',
+                            defaultMessage: 'API updated successfully!',
+                        }));
+                    })
+                    .catch((errorResponse) => {
+                        console.error(errorResponse);
+                        Alert.error(intl.formatMessage({
+                            id: 'Apis.Details.Resources.Resources.something.went.wrong.while.updating.the.api',
+                            defaultMessage: 'Error occurred while updating API',
+                        }));
+                    });
+            })
+            .catch((errorResponse) => {
+                console.error(errorResponse);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Resources.Resources.something.went.wrong.while.getting.the.api',
+                    defaultMessage: 'Error occurred while retrieving API',
+                }));
+            });
+    }
+
     addRemoveToDeleteList(path, method) {
         const pathDeleteList = this.state.pathDeleteList;
 
@@ -494,26 +556,32 @@ class Resources extends React.Component {
         }
     };
     toggleAddResource = () => {
-        this.setState({ showAddResource: !this.state.showAddResource, showScopes: false });
+        this.setState({ showAddResource: !this.state.showAddResource });
     }
-    toggleAssignScopes = () => {
-        this.setState({ showScopes: !this.state.showScopes, showAddResource: false });
+    toggleAssignPolicy = () => {
+        this.setState({ showPolicy: !this.state.showPolicy, showAddResource: false });
+    }
+    advancedPolicyTypeChange = (event) => {
+        const { apiThrottlingPolicy } = this.props.api;
+        if ('perAPI' === event.target.value) {
+            this.setState({ selectedPolicy: apiThrottlingPolicy });
+        }
+        this.setState({ policyLevel: event.target.value });
+    }
+    handlePolicyChange = (event) =>  {
+        this.setState({ selectedPolicy: event.target.value });
     }
     render() {
         const {
-            api, showAddResource, apiScopes, showScopes, isAuthorize,
+            api, showAddResource, showPolicy, policyLevel, apiPolicies, selectedPolicy
         } = this.state;
 
-        // if (!isAuthorize) {
-        //     doRedirectToLogin();
-        // }
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
         if (!api) {
             return <Progress />;
         }
-        // const selectBefore = <span>/SwaggerPetstore/1.0.0</span>;
         const plainOptions = ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'];
         const paths = this.state.paths;
         const { classes, intl } = this.props;
@@ -527,9 +595,9 @@ class Resources extends React.Component {
                         <AddCircle className={classes.buttonIcon} />
                         <FormattedMessage id='Apis.Details.Resources.Resources.add.new.resource.button' defaultMessage='Add New Resource' />
                     </Button>
-                    <Button size='small' className={classes.button} onClick={this.toggleAssignScopes}>
+                    <Button size='small' className={classes.button} onClick={this.toggleAssignPolicy}>
                         <ScopesIcon className={classes.buttonIcon} />
-                        <FormattedMessage id='Apis.Details.Resources.Resources.assign.global.scope.for.api' defaultMessage='Assign Global Scope for API' />
+                        <FormattedMessage id='Apis.Details.Resources.Resources.assign.policies' defaultMessage='Assign Advanced Throttling Policies' />
                     </Button>
                 </div>
                 <div className={classes.contentWrapper}>
@@ -561,7 +629,10 @@ class Resources extends React.Component {
                                     <div className={classes.radioGroup}>
                                         {plainOptions.map((option, index) => (
                                             <FormGroup key={index} row>
-                                                <FormControlLabel control={<Checkbox checked={this.state.tmpMethods.indexOf(option) > -1} onChange={this.handleChange(option)} value={option} />} label={option.toUpperCase()} />
+                                                <FormControlLabel control={<Checkbox
+                                                    checked={this.state.tmpMethods.indexOf(option) > -1}
+                                                    onChange={this.handleChange(option)} value={option} />
+                                                } label={option.toUpperCase()} />
                                             </FormGroup>
                                         ))}
                                     </div>
@@ -584,53 +655,55 @@ class Resources extends React.Component {
                             </div>
                         </React.Fragment>}
 
-                    {(apiScopes && showScopes) &&
-                        <React.Fragment>
-                            <div className={classes.addNewWrapper}>
-                                <Typography className={classes.addNewHeader}>
-                                    <FormattedMessage
-                                        id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.title'
-                                        defaultMessage='Assign Global Scopes for API'
-                                    />
-                                </Typography>
-                                <Divider className={classes.divider} />
-                                <div className={classes.addNewOther}>
-                                    <FormControl className={classes.formControl}>
-                                        <InputLabel htmlFor='select-multiple'><FormattedMessage id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.input' defaultMessage='Assign Global Scopes for API' /></InputLabel>
-                                        <Select multiple value={this.state.scopes} onChange={this.handleScopeChange} className={classes.scopes}>
-                                            {apiScopes.list.map(tempScope => (
-                                                <MenuItem
-                                                    key={tempScope.name}
-                                                    value={tempScope.name}
-                                                    style={{
-                                                        fontWeight: this.state.scopes.indexOf(tempScope.name) !== -1 ? '500' : '400',
-                                                        width: 400,
-                                                    }}
-                                                >
-                                                    {tempScope.name}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                </div>
-                                <Divider className={classes.divider} />
-                                <div className={classes.addNewOther}>
-                                    <Button variant='contained' color='primary' onClick={this.handleScopeChange}>
-                                        <FormattedMessage
-                                            id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.button'
-                                            defaultMessage='Assign global scopes for API'
-                                        />
-                                    </Button>
-                                    <Button className={classes.button} onClick={this.toggleAssignScopes}>
-                                        <FormattedMessage
-                                            id='Apis.Details.Resources.Resources.cancel'
-                                            defaultMessage='Cancel'
-                                        />
-                                    </Button>
+                    {showPolicy &&
+                    <React.Fragment>
+                        <div className={classes.addNewWrapper}>
+                            <Typography className={classes.addNewHeader}>
+                                <FormattedMessage
+                                    id='Apis.Details.Resources.Resources.assign.advanced.throttling.policies'
+                                    defaultMessage='Assign advanced throttling policies'
+                                />
+                            </Typography>
+                            <Divider className={classes.divider} />
+                            <div className={classes.addNewOther}>
+                                <FormControl component="fieldset" className={classes.formControl}>
+                                    <RadioGroup
+                                        aria-label="advancedPolicyType"
+                                        name="advancedPolicyType"
+                                        className={classes.group}
+                                        value={policyLevel}
+                                        onChange={this.advancedPolicyTypeChange}
+                                    >
+                                        <FormControlLabel value="perAPI" control={<Radio />} label={intl.formatMessage({
+                                            id: 'Apis.Details.Resources.Resources.assign.advanced.throttling.perApi',
+                                            defaultMessage: 'Apply per API',
+                                        })} />
+                                        <FormControlLabel value="perResource" control={<Radio />} label={intl.formatMessage({
+                                            id: 'Apis.Details.Resources.Resources.assign.advanced.throttling.Resource',
+                                            defaultMessage: 'Apply per Resource',
+                                        })} />
+                                    </RadioGroup>
+                                </FormControl>
+                                <div className={classes.rightDataColum}>
+                                    {policyLevel==='perAPI' &&
+                                    <Select className={classes.selectWidth}
+                                        value={selectedPolicy}
+                                        onChange={this.handlePolicyChange}
+                                        fieldName='Throttling Policy'
+                                    >
+                                        {apiPolicies.map((policy) => (
+                                            <MenuItem
+                                                key={policy.name}
+                                                value={policy.name}
+                                            >
+                                                {policy.displayName}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>}
                                 </div>
                             </div>
-                        </React.Fragment>
-                    }
+                        </div>
+                    </React.Fragment>}
 
                     <List>
                         {this.state.paths && (
@@ -658,7 +731,13 @@ class Resources extends React.Component {
                                     </ExpansionPanelSummary>
                                     <ExpansionPanelDetails className={classes.expansionPanelDetails}>
                                         {Object.keys(path).map((innerKey) => {
-                                            return <Resource path={key} method={innerKey} methodData={path[innerKey]} updatePath={that.updatePath} apiScopes={apiScopes} addRemoveToDeleteList={that.addRemoveToDeleteList} onRef={ref => this.childResources.push(ref)} />;
+                                            return CONSTS.HTTP_METHODS.includes(innerKey) ?
+                                                <Resource path={key} method={innerKey} methodData={path[innerKey]}
+                                                             updatePath={that.updatePath} scopes={api.scopes}
+                                                             apiPolicies={apiPolicies}
+                                                             addRemoveToDeleteList={that.addRemoveToDeleteList}
+                                                             onRef={ref => this.childResources.push(ref)}
+                                                             policyLevel={policyLevel}/> : null;
                                         })}
                                     </ExpansionPanelDetails>
                                 </ExpansionPanel>

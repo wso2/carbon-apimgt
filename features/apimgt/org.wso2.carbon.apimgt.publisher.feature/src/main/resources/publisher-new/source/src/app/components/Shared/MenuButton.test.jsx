@@ -47,12 +47,14 @@ describe('<MenuButton/> tests', () => {
         const dropDownButton = wrapper.find(Button);
         dropDownButton.simulate('click');
         const mockedEvent = { target: wrapper.getDOMNode()[0] };
+        // Menu should be opened when clicked on it
         expect(wrapper.state().open).toBeTruthy();
         wrapper
             .find('ClickAwayListener')
             .props()
             .onClickAway(mockedEvent);
-        expect(wrapper.state().open).toBeTruthy();
+        // Menu should be closed when clicked away from it
+        expect(wrapper.state().open).toBeFalsy();
     });
 
     test('should close the menu when clicked away', () => {

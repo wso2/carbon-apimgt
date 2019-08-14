@@ -28,11 +28,17 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.apimgt.keymgt.token.APIMJWTGenerator;
+import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
+import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIMTokenIssuerUtil;
 import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
@@ -92,6 +98,31 @@ public class APIMTokenIssuer extends OauthTokenIssuerImpl {
                     jwtTokenInfoDTO.setApplication(applicationDTO);
                     jwtTokenInfoDTO.setKeyType(application.getKeyType());
                     jwtTokenInfoDTO.setConsumerKey(clientId);
+
+                    // Generate JWT token to be sent for the backend
+                    APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                            .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                    boolean backendJwtGenerationEnabled = Boolean.parseBoolean(config.getFirstProperty(
+                            APIConstants.ENABLE_JWT_GENERATION));
+                    if (log.isDebugEnabled()) {
+                        log.debug("JWT Generation for backend enabled : " + backendJwtGenerationEnabled);
+                    }
+                    if (backendJwtGenerationEnabled) {
+                        TokenGenerator jwtGenerator = APIKeyMgtDataHolder.getTokenGenerator();
+                        if (jwtGenerator != null) {
+                            TokenValidationContext validationContext = new TokenValidationContext();
+                            APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+                            apiKeyValidationInfoDTO.setEndUserName(tokReqMsgCtx.getAuthorizedUser().toFullQualifiedUsername());
+                            apiKeyValidationInfoDTO.setSubscriber(application.getOwner());
+                            apiKeyValidationInfoDTO.setApplicationName(application.getName());
+                            apiKeyValidationInfoDTO.setApplicationId(String.valueOf(application.getId()));
+                            apiKeyValidationInfoDTO.setType(application.getKeyType());
+                            apiKeyValidationInfoDTO.setApplicationTier(application.getTier());
+                            validationContext.setValidationInfoDTO(apiKeyValidationInfoDTO);
+                            jwtTokenInfoDTO.setBackendJwt(jwtGenerator.generateToken(validationContext));
+                        }
+                    }
+
                     APIMJWTGenerator apimjwtGenerator = new APIMJWTGenerator();
                     String accessToken = apimjwtGenerator.generateJWT(jwtTokenInfoDTO);
                     if (log.isDebugEnabled()) {

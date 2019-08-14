@@ -30,6 +30,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
+import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
@@ -825,7 +826,7 @@ public class ApiMgtDAO {
                         .SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
                     log.error("Subscription to API/API Prouct " + identifier.getName() + " through application " +
                             applicationName + " was blocked");
-                    throw new APIManagementException("Subscription to API/API Prouct " + identifier.getName() + " through " +
+                    throw new SubscriptionBlockedException("Subscription to API/API Product " + identifier.getName() + " through " +
                             "application " + applicationName + " was blocked");
                 }
             }
@@ -5422,9 +5423,18 @@ public class ApiMgtDAO {
                 try {
                     if (!subscriptionIdMap.containsKey(info.subscriptionId)) {
                         apiId.setTier(info.tierId);
-                        String subscriptionStatus = (APIConstants.SubscriptionStatus.BLOCKED
-                                .equalsIgnoreCase(info.subscriptionStatus)) ?
-                                APIConstants.SubscriptionStatus.BLOCKED : APIConstants.SubscriptionStatus.UNBLOCKED;
+                        String subscriptionStatus;
+                        if (APIConstants.SubscriptionStatus.BLOCKED.equalsIgnoreCase(info.subscriptionStatus)) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.BLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equalsIgnoreCase(info.subscriptionStatus)) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.UNBLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equalsIgnoreCase(info.subscriptionStatus)) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.REJECTED.equalsIgnoreCase(info.subscriptionStatus)) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
+                        } else {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
+                        }
                         int subscriptionId = addSubscription(apiId, context, info.applicationId, subscriptionStatus,
                                 provider);
                         if (subscriptionId == -1) {
@@ -5450,6 +5460,8 @@ public class ApiMgtDAO {
                     // need to go forward rather throwing the exception
                 } catch (SubscriptionAlreadyExistingException e) {
                     log.error("Error while adding subscription " + e.getMessage(), e);
+                } catch (SubscriptionBlockedException e) {
+                    log.info("Subscription is blocked: " + e.getMessage());
                 }
             }
 
@@ -5464,8 +5476,19 @@ public class ApiMgtDAO {
                 if (!subscribedApplications.contains(applicationId)) {
                     apiId.setTier(rs.getString("TIER_ID"));
                     try {
-                        addSubscription(apiId, rs.getString("CONTEXT"), applicationId, APIConstants
-                                .SubscriptionStatus.UNBLOCKED, provider);
+                        String subscriptionStatus;
+                        if (APIConstants.SubscriptionStatus.BLOCKED.equalsIgnoreCase(rs.getString("SUB_STATUS"))) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.BLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equalsIgnoreCase(rs.getString("SUB_STATUS"))) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.UNBLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equalsIgnoreCase(rs.getString("SUB_STATUS"))) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.REJECTED.equalsIgnoreCase(rs.getString("SUB_STATUS"))) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
+                        } else {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
+                        }
+                        addSubscription(apiId, rs.getString("CONTEXT"), applicationId, subscriptionStatus, provider);
                         // catching the exception because when copy the api without the option "require re-subscription"
                         // need to go forward rather throwing the exception
                     } catch (SubscriptionAlreadyExistingException e) {
@@ -5473,6 +5496,11 @@ public class ApiMgtDAO {
                         //Ex: if previous version was created by another older version and if the subscriptions are
                         //Forwarded, then the third one will get same subscription from previous two versions.
                         log.info("Subscription already exists: " + e.getMessage());
+                    } catch (SubscriptionBlockedException e) {
+                        //Not handled as an error because we cannot update subscriptions for an API with blocked subscriptions
+                        //If previous version was created by another older version and if the subscriptions are
+                        //Forwarded, by catching the exception we will continue checking the other subscriptions
+                        log.info("Subscription is blocked: " + e.getMessage());
                     }
                 }
             }
@@ -10274,6 +10302,71 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, tenantID);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                SubscriptionPolicy subPolicy = new SubscriptionPolicy(
+                        rs.getString(ThrottlePolicyConstants.COLUMN_NAME));
+                setCommonPolicyDetails(subPolicy, rs);
+                subPolicy.setRateLimitCount(rs.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
+                subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+                subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
+                subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
+                subPolicy.setMonetizationPlan(rs.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
+                Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
+                monetizationPlanProperties.put(APIConstants.FIXED_PRICE,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_FIXED_RATE));
+                monetizationPlanProperties.put(APIConstants.BILLING_CYCLE,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_CYCLE));
+                monetizationPlanProperties.put(APIConstants.PRICE_PER_REQUEST,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_PRICE_PER_REQUEST));
+                monetizationPlanProperties.put(APIConstants.CURRENCY,
+                        rs.getString(ThrottlePolicyConstants.COLUMN_CURRENCY));
+                subPolicy.setMonetizationPlanProperties(monetizationPlanProperties);
+                InputStream binary = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
+                if (binary != null) {
+                    byte[] customAttrib = APIUtil.toByteArray(binary);
+                    subPolicy.setCustomAttributes(customAttrib);
+                }
+                policies.add(subPolicy);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } catch (IOException e) {
+            handleException("Error while converting input stream to byte array", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return policies.toArray(new SubscriptionPolicy[policies.size()]);
+    }
+
+    /**
+     * Get subscription level policies specified by tier names belonging to a specific tenant
+     *
+     * @param subscriptionTiers subscription tiers
+     * @param tenantID tenantID filters the polices belongs to specific tenant
+     * @return subscriptionPolicy array list
+     */
+    public SubscriptionPolicy[] getSubscriptionPolicies(String[] subscriptionTiers, int tenantID) throws APIManagementException {
+        List<SubscriptionPolicy> policies = new ArrayList<SubscriptionPolicy>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        List<String> questionMarks = new ArrayList<>(Collections.nCopies(subscriptionTiers.length, "?"));
+        String parameterString = String.join(",", questionMarks);
+
+        String sqlQuery = SQLConstants.GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_PREFIX +
+                parameterString + SQLConstants.GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_SUFFIX;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            int i = 1;
+            for (String subscriptionTier : subscriptionTiers) {
+                ps.setString(i, subscriptionTier);
+                i++;
+            }
+            ps.setInt(i, tenantID);
             rs = ps.executeQuery();
             while (rs.next()) {
                 SubscriptionPolicy subPolicy = new SubscriptionPolicy(

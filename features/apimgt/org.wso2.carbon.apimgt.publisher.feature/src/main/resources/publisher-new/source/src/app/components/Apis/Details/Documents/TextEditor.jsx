@@ -31,6 +31,7 @@ import { EditorState, convertToRaw, ContentState, convertFromHTML } from 'draft-
 import { Editor } from 'react-draft-wysiwyg';
 import draftToHtml from 'draftjs-to-html';
 import Api from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 import Alert from 'AppComponents/Shared/Alert';
 
 const styles = {
@@ -64,7 +65,7 @@ function Transition(props) {
 }
 
 function TextEditor(props) {
-    const { intl } = props;
+    const { intl, apiType } = props;
     const [open, setOpen] = useState(false);
 
     const [editorState, setEditorState] = useState(EditorState.createEmpty());
@@ -77,12 +78,12 @@ function TextEditor(props) {
         setOpen(!open);
     };
     const addContentToDoc = () => {
-        const restAPI = new Api();
+        const restAPI = (apiType === Api.CONSTS.APIProduct) ? new APIProduct() : new Api();
         const contentToSave = draftToHtml(convertToRaw(editorState.getCurrentContent()));
         const docPromise = restAPI.addInlineContentToDocument(props.apiId, props.docId, 'INLINE', contentToSave);
         docPromise
-            .then((doc) => {
-                Alert.info(`${doc.name} ${intl.formatMessage({
+            .then((response) => {
+                Alert.info(`${response.obj.name} ${intl.formatMessage({
                     id: 'Apis.Details.Documents.TextEditor.update.success.message',
                     defaultMessage: 'updated successfully.',
                 })}`);
@@ -94,12 +95,12 @@ function TextEditor(props) {
                 }
                 Alert.info(`${error} ${intl.formatMessage({
                     id: 'Apis.Details.Documents.TextEditor.update.error.message',
-                    defaultMessage: 'updated failed.',
+                    defaultMessage: 'update failed.',
                 })}`);
             });
     };
     const updateDoc = () => {
-        const restAPI = new Api();
+        const restAPI = (apiType === Api.CONSTS.APIProduct) ? new APIProduct() : new Api();
 
         const docPromise = restAPI.getInlineContentOfDocument(props.apiId, props.docId);
         docPromise
@@ -170,6 +171,9 @@ function TextEditor(props) {
 
 TextEditor.propTypes = {
     classes: PropTypes.shape({}).isRequired,
+    apiId: PropTypes.string.isRequired,
+    docId: PropTypes.string.isRequired,
+    apiType: PropTypes.oneOf([Api.CONSTS.API, Api.CONSTS.APIProduct]).isRequired,
     intl: PropTypes.shape({}).isRequired,
 };
 

@@ -36,10 +36,12 @@ class Utils {
         for (let pair of pairs) {
             pair = pair.split('=');
             const cookieName = pair[0].trim();
-            const value = encodeURIComponent(pair[1]);
-            if (cookieName === nameWithEnv) {
-                cookie = value;
-                break;
+            if (pair[1] !== 'undefined') {
+                const value = encodeURIComponent(pair[1]);
+                if (cookieName === nameWithEnv) {
+                    cookie = value;
+                    break;
+                }
             }
         }
         return cookie;
@@ -176,7 +178,6 @@ class Utils {
         return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Utils.CONST.CONTEXT_PATH}`;
     }
 
-
     /**
      *
      * Get swagger definition URL
@@ -237,7 +238,31 @@ class Utils {
             label: 'Default',
             host: window.location.host,
             loginTokenPath: '/login/token',
+            refreshTokenPath: '/services/refresh/refresh.jag',
         };
+    }
+
+
+    /**
+     * Recursivly freez and object properties.
+     * Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze
+     * @static
+     * @param {Object} object Object that needs to be frozen
+     * @returns {Object} Completely freeze an object
+     * @memberof Utils
+     */
+    static deepFreeze(object) {
+        const trickObject = object; // This is to satisfy the es-lint rule
+        // Retrieve the property names defined on object
+        const propNames = Object.getOwnPropertyNames(object);
+
+        // Freeze properties before freezing self
+        for (const name of propNames) {
+            const value = object[name];
+            trickObject[name] = value && typeof value === 'object' ? Utils.deepFreeze(value) : value;
+        }
+
+        return Object.freeze(object);
     }
 }
 

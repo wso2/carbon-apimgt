@@ -35,7 +35,6 @@ class APICreateWrapper extends Component {
                 name: { empty: false, alreadyExists: false },
                 context: { empty: false, alreadyExists: false },
                 version: { empty: false },
-                endpointConfig: { empty: false },
             },
         };
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -50,7 +49,8 @@ class APICreateWrapper extends Component {
     handleSubmit(e) {
         e.preventDefault();
         const { api: currentAPI } = this.state;
-        if (!currentAPI.name || !currentAPI.context || !currentAPI.version || !currentAPI.endpointConfig) {
+        const { type: apiType } = this.props;
+        if (!currentAPI.name || !currentAPI.context || !currentAPI.version) {
             // Checking the api name,version,context undefined or empty states
             this.setState((oldState) => {
                 const { valid, api } = oldState;
@@ -58,10 +58,12 @@ class APICreateWrapper extends Component {
                 validUpdated.name.empty = !api.name;
                 validUpdated.context.empty = !api.context;
                 validUpdated.version.empty = !api.version;
-                validUpdated.endpointConfig.empty = !api.endpointConfig;
                 return { valid: validUpdated };
             });
             return;
+        }
+        if (apiType === 'ws') {
+            currentAPI.type = 'WS';
         }
         currentAPI
             .save()
@@ -106,7 +108,6 @@ class APICreateWrapper extends Component {
             validUpdated.name.empty = !api.name;
             validUpdated.context.empty = !api.context;
             validUpdated.version.empty = !api.version;
-            validUpdated.endpointConfig.empty = !api.endpointConfig;
             // TODO we need to add the already existing error for (context)
             // by doing an api call ( the swagger definition does not contain such api call)
             return { api: changes, valid: validUpdated };
@@ -116,6 +117,7 @@ class APICreateWrapper extends Component {
      * @inheritDoc
      */
     render() {
+        const { type } = this.props;
         return (
             <React.Fragment>
                 <APICreateTopMenu />
@@ -125,6 +127,7 @@ class APICreateWrapper extends Component {
                     inputChange={this.inputChange}
                     isAPIProduct={false}
                     valid={this.state.valid}
+                    type={type}
                 />
             </React.Fragment>);
     }

@@ -25,16 +25,13 @@ import TextField from '@material-ui/core/TextField';
 import { FileCopy } from '@material-ui/icons';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { FormattedMessage } from 'react-intl';
-import InlineMessage from '../../Shared/InlineMessage';
+import InlineMessage from '../InlineMessage';
 /**
  *
  *
  * @param {*} theme
  */
 const styles = theme => ({
-    epWrapper: {
-        display: 'flex',
-    },
     bootstrapRoot: {
         padding: 0,
         'label + &': {
@@ -48,7 +45,8 @@ const styles = theme => ({
         padding: '5px 12px',
         width: 350,
         transition: theme.transitions.create(['border-color', 'box-shadow']),
-        fontFamily: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'].join(','),
+        fontFamily: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"',
+            'Arial', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'].join(','),
         '&:focus': {
             borderColor: '#80bdff',
             boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
@@ -77,10 +75,6 @@ const styles = theme => ({
  * @extends {React.Component}
  */
 class ViewToken extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
     state = {
         tokenCopied: false,
     };
@@ -90,7 +84,7 @@ class ViewToken extends React.Component {
      *
      * @memberof ViewToken
      */
-    onCopy = name => (event) => {
+    onCopy = name => () => {
         this.setState({
             [name]: true,
         });
@@ -111,9 +105,10 @@ class ViewToken extends React.Component {
      * @memberof ViewToken
      */
     getTokeScopesString(tokenScopes) {
-        let scopeString = tokenScopes.splice(0,1);
-        tokenScopes.map(scope => scopeString +=  ", " + scope);
-        return scopeString;
+        if (tokenScopes) {
+            return tokenScopes.join(', ');
+        }
+        return '';
     }
 
     /**
@@ -124,29 +119,31 @@ class ViewToken extends React.Component {
      */
     render() {
         const { classes, token } = this.props;
+        const { tokenCopied } = this.state;
         return (
             <div className={classes.root}>
                 <InlineMessage type='warn'>
                     <Typography variant='headline' component='h3'>
-                    <FormattedMessage
-                        id='Shared.AppsAndKeys.ViewToken.please.copy'
-                        defaultMessage='Please Copy the Access Token'
-                    />
+                        <FormattedMessage
+                            id='Shared.AppsAndKeys.ViewToken.please.copy'
+                            defaultMessage='Please Copy the Access Token'
+                        />
                     </Typography>
                     <Typography component='p'>
-                    <FormattedMessage
-                        id='Shared.AppsAndKeys.ViewToken.please.copy.help'
-                        defaultMessage='Please copy this generated token value as it will be displayed only for the current browser session. ( After a page refresh, the token is not visible in the UI )'
-                    />
-                        </Typography>
+                        <FormattedMessage
+                            id='Shared.AppsAndKeys.ViewToken.please.copy.help'
+                            defaultMessage={`Please copy this generated token value as it will be displayed only for 
+                            the current browser session. ( After a page refresh, the token is not visible in the UI )`}
+                        />
+                    </Typography>
                 </InlineMessage>
                 <div className={classes.epWrapper}>
                     <Typography className={classes.prodLabel}>
-                    <FormattedMessage
-                        id='Shared.AppsAndKeys.ViewToken.access.token'
-                        defaultMessage='Access Token'
-                    />
-                        </Typography>
+                        <FormattedMessage
+                            id='Shared.AppsAndKeys.ViewToken.access.token'
+                            defaultMessage='Access Token'
+                        />
+                    </Typography>
                     <TextField
                         defaultValue={token.accessToken}
                         id='bootstrap-input'
@@ -162,14 +159,14 @@ class ViewToken extends React.Component {
                             className: classes.bootstrapFormLabel,
                         }}
                     />
-                    <Tooltip title={this.state.tokenCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
+                    <Tooltip title={tokenCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
                         <CopyToClipboard text={token.accessToken} onCopy={this.onCopy('tokenCopied')}>
                             <FileCopy color='secondary' />
                         </CopyToClipboard>
                     </Tooltip>
                 </div>
                 <FormHelperText>
-                <FormattedMessage
+                    <FormattedMessage
                         id='Shared.AppsAndKeys.ViewToken.info.first'
                         defaultMessage='Above token has a validity period of'
                     />
@@ -191,7 +188,12 @@ class ViewToken extends React.Component {
 }
 
 ViewToken.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    token: PropTypes.shape({
+        accessToken: PropTypes.string.isRequired,
+        validityTime: PropTypes.number.isRequired,
+        tokenScopes: PropTypes.array.isRequired,
+    }).isRequired,
 };
 
 export default withStyles(styles)(ViewToken);
