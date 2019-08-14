@@ -110,7 +110,10 @@ class BusinessPlans extends Component {
                 <Grid className={classes.grid} spacing={2}>
                     <Grid>
                         <Typography variant='subtitle' gutterBottom>
-                            <FormattedMessage id='commercial.policies' defaultMessage='Commercial Policies' />
+                            <FormattedMessage
+                                id='Apis.Details.Monetization.BusinessPlans.commercial.policies'
+                                defaultMessage='Commercial Policies'
+                            />
                         </Typography>
                     </Grid>
                     {
@@ -118,7 +121,7 @@ class BusinessPlans extends Component {
                             <Grid>
                                 <Typography>
                                     <FormattedMessage
-                                        id='unchecked.policies.are.not.monetized.click.save.to.monetize'
+                                        id='Apis.Details.Monetization.BusinessPlans.unchecked.policies'
                                         defaultMessage='Unchecked polices are not monetized, click save to monetize'
                                     />
                                 </Typography>
@@ -127,7 +130,7 @@ class BusinessPlans extends Component {
                             <Grid>
                                 <Typography>
                                     <FormattedMessage
-                                        id='no.commercial.policies.to.monetize'
+                                        id='Apis.Details.Monetization.BusinessPlans.no.commercial.policies.to.monetize'
                                         defaultMessage='No commercial policies to monetize'
                                     />
                                 </Typography>

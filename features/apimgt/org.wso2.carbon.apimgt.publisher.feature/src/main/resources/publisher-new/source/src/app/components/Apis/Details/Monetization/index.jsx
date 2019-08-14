@@ -69,26 +69,35 @@ class Monetization extends Component {
      * Handles the submit action for configuring monetization
      */
     handleSubmit() {
-        const { api } = this.props;
+        const { api, intl } = this.props;
         const properties = this.state.property;
         const enabled = this.state.monStatus;
-        const body = JSON.stringify({
+        const body = {
             enabled,
             properties,
-        });
+        };
         const promisedScopeAdd = api.configureMonetizationToApi(this.props.api.id, body);
         promisedScopeAdd.then((response) => {
             if (response.status !== 200) {
-                Alert.info('Something went wrong while configuring monetization');
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Details.Monetization.Index.something.went.wrong.while.configuring.monetization',
+                    defaultMessage: 'Something went wrong while configuring monetization',
+                }));
                 return;
             }
-            Alert.info('Monetization Configured Successfully');
+            Alert.info(intl.formatMessage({
+                id: 'Apis.Details.Monetization.Index.monetization.configured.successfully',
+                defaultMessage: 'Monetization Configured Successfully',
+            }));
         }).catch((error) => {
             console.error(error);
             if (error.response) {
                 Alert.error(error.response.body.message);
             } else {
-                Alert.error('Something went wrong while configuring moneization');
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Monetization.Index.something.went.wrong.while.configuring.monetization',
+                    defaultMessage: 'Something went wrong while configuring monetization',
+                }));
             }
         });
     }
@@ -126,7 +135,7 @@ class Monetization extends Component {
         return (
             <Grid item xs={6}>
                 <Typography variant='title' gutterBottom>
-                    <FormattedMessage id='monetization' defaultMessage='Monetization' />
+                    <FormattedMessage id='Apis.Details.Monetization.Index.monetization' defaultMessage='Monetization' />
                 </Typography>
                 <form method='post' onSubmit={this.handleSubmit}>
                     <FormControlLabel
@@ -146,7 +155,7 @@ class Monetization extends Component {
                             <Grid item xs={5} className={classes.grid}>
                                 <Typography variant='subtitle' gutterBottom>
                                     <FormattedMessage
-                                        id='monetization.properties'
+                                        id='Apis.Details.Monetization.Index.monetization.properties'
                                         defaultMessage='Monetization Properties'
                                     />
                                 </Typography>
@@ -156,7 +165,8 @@ class Monetization extends Component {
                                         (
                                             <Typography gutterBottom>
                                                 <FormattedMessage
-                                                    id='there.are.no.monetization.properties.configured'
+                                                    id='Apis.Details.Monetization.Index.there.are.no
+                                                        .monetization.properties.configured'
                                                     defaultMessage='There are no monetization properties configured'
                                                 />
                                             </Typography>
@@ -175,7 +185,10 @@ class Monetization extends Component {
                     </Grid>
                     <Divider className={classes.grid} />
                     <Button onClick={this.handleSubmit} color='primary' variant='contained' className={classes.button} >
-                        <FormattedMessage id='save' defaultMessage='Save' />
+                        <FormattedMessage
+                            id='Apis.Details.Monetization.Index.save'
+                            defaultMessage='Save'
+                        />
                     </Button>
                 </form>
             </Grid>
@@ -186,6 +199,9 @@ class Monetization extends Component {
 Monetization.propTypes = {
     api: PropTypes.instanceOf(API).isRequired,
     classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
 export default withStyles(styles)(Monetization);

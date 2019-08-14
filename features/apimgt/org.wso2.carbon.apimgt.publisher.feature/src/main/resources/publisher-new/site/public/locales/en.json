@@ -454,11 +454,13 @@
   "version": "Version",
   "welcome.to.wso2.api.manager": "Welcome to WSO2 API Manager",
   "you.can.define.endpoint.inline.or.pick.from.a.list.of.global.endpoints": "You can define endpoint inline or pick from a list of global endpoints",
-  "property": "property",
-  "monetization": "monetization",
-  "monetization.properties": "Monetization Properties",
-  "there.are.no.monetization.properties.configured": "There are no monetization properties configured",
-  "unchecked.policies.are.not.monetized.click.save.to.monetize":"Unchecked polices are not monetized, click save to monetize",
-  "no.commercial.policies.to.monetize": "No commercial policies to monetize",
-  "commercial.policies": "Commercial Policies"
+  "Apis.Details.Monetization.Index.something.went.wrong.while.configuring.monetization": "Something went wrong while configuring monetization",
+  "Apis.Details.Monetization.Index.monetization.configured.successfully": "Monetization Configured Successfully",
+  "Apis.Details.Monetization.Index.monetization": "Monetization",
+  "Apis.Details.Monetization.Index.monetization.properties": "Monetization Properties",
+  "Apis.Details.Monetization.Index.there.are.no.monetization.properties.configured": "There are no monetization properties configured",
+  "Apis.Details.Monetization.Index.unchecked.policies.are.not.monetized.click.save.to.monetize": "Unchecked polices are not monetized, click save to monetize",
+  "Apis.Details.Monetization.Index.no.commercial.policies.to.monetize": "No commercial policies to monetize",
+  "Apis.Details.Monetization.Index.commercial.policies": "Commercial Policies",
+  "Apis.Details.Monetization.Index.save": "Save"
 }
