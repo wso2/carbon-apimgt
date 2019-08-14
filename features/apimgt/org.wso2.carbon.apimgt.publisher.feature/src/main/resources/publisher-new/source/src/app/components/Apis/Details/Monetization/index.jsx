@@ -76,8 +76,8 @@ class Monetization extends Component {
             enabled,
             properties,
         };
-        const promisedScopeAdd = api.configureMonetizationToApi(this.props.api.id, body);
-        promisedScopeAdd.then((response) => {
+        const promisedMonetizationConf = api.configureMonetizationToApi(this.props.api.id, body);
+        promisedMonetizationConf.then((response) => {
             if (response.status !== 200) {
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Details.Monetization.Index.something.went.wrong.while.configuring.monetization',
