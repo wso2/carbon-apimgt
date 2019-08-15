@@ -614,9 +614,7 @@ public interface APIConsumer extends APIManager {
     int getUserRating(APIIdentifier apiId, String user) throws APIManagementException;
 
     JSONObject getUserRatingInfo(APIIdentifier apiId, String user) throws APIManagementException;
-
-    JSONObject getApiRatingInfoById (APIIdentifier apiId, String ratingId) throws APIManagementException;
-
+    
     float getAverageAPIRating(APIIdentifier apiId) throws APIManagementException;
 
     JSONArray getAPIRatings(APIIdentifier apiId) throws APIManagementException;

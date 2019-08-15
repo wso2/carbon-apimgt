@@ -38,7 +38,6 @@ public interface ApisApiService {
       public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdGraphqlSchemaGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext);
       public Response apisApiIdRatingsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant, MessageContext messageContext);
-      public Response apisApiIdRatingsRatingIdGet(String apiId, String ratingId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdSdksLanguageGet(String apiId, String language, MessageContext messageContext);
       public Response apisApiIdSubscriptionPoliciesGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdSwaggerGet(String apiId, String labelName, String environmentName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext);

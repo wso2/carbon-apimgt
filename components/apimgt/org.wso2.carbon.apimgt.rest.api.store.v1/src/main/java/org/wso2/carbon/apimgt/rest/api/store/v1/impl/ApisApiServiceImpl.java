@@ -386,40 +386,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response apisApiIdRatingsRatingIdGet(String apiId, String ratingId, String xWSO2Tenant, String ifNoneMatch,
-            MessageContext messageContext) {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
-        try {
-            String username = RestApiUtil.getLoggedInUsername();
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
-            }
-            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
-            APIIdentifier apiIdentifier = api.getId();
-            JSONObject obj = apiConsumer.getApiRatingInfoById(apiIdentifier, ratingId);
-            RatingDTO ratingDTO = new RatingDTO();
-            if (obj != null && !obj.isEmpty()) {
-                ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
-                ratingDTO.setApiId(apiId);
-            }
-            return Response.ok().entity(ratingDTO).build();
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(
-                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                RestApiUtil
-                        .handleInternalServerError("Error while retrieving specific rating for API " + apiId, e, log);
-            }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
-    }
-
     /**
      * Rest api implementation to downloading the client sdk for given api in given sdk language.
      *

@@ -35,8 +35,8 @@ put:
         }
     response:
       status:
-        code: 201
-        msg: Created
+        code: 200
+        msg: OK
       headers: |
         Content-Type: application/json
       body:

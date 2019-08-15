@@ -1886,14 +1886,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
     public JSONObject getUserRatingInfo(APIIdentifier apiId, String user) throws APIManagementException {
-        return apiMgtDAO.getUserRatingInfo(apiId, user);
-    }
-
-    @Override
-    public JSONObject getApiRatingInfoById(APIIdentifier apiId, String ratingId) throws APIManagementException {
-        JSONObject obj = apiMgtDAO.getApiRatingInfoById(apiId, ratingId);
+        JSONObject obj = apiMgtDAO.getUserRatingInfo(apiId, user);
         if (obj == null || obj.isEmpty()) {
-            String msg = "Failed to get API ratings for API " + apiId;
+            String msg = "Failed to get API ratings for API " + apiId + " for user " + user;
             log.error(msg);
             throw new APIMgtResourceNotFoundException(msg);
         }

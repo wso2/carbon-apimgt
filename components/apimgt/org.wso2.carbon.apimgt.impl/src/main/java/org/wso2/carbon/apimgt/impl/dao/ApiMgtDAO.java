@@ -3662,106 +3662,12 @@ public class ApiMgtDAO {
                 ratingObj.put(APIConstants.API_ID, apiId);
                 ratingObj.put(APIConstants.RATING_ID, ratingId);
                 ratingObj.put(APIConstants.USER_NAME, userId);
-                ratingObj.put(APIConstants.RATING,userRating);
+                ratingObj.put(APIConstants.RATING, userRating);
             }
         } catch (SQLException e) {
             handleException("Failed to retrieve API ratings ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, null, rs);
-        }
-        return ratingObj;
-    }
-
-     /**
-     * @param apiId           API Identifier
-     * @param ratingId        rating Id
-     * @throws APIManagementException if failed to get API Ratings by ID
-     */
-    public JSONObject getApiRatingInfoById(APIIdentifier apiId, String ratingId) throws APIManagementException {
-        Connection conn = null;
-        JSONObject userRating = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-
-            userRating = getApiRatingInfoById(apiId, ratingId, conn);
-
-            conn.commit();
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException e1) {
-                    log.error("Failed to rollback getting user ratings info ", e1);
-                }
-            }
-            handleException("Failed to get user ratings info", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, conn, null);
-        }
-        return userRating;
-    }
-
-    /**
-     * @param apiIdentifier API Identifier
-     * @param ratingId        rating Id
-     * @param conn          Database connection
-     * @throws APIManagementException if failed to get API Ratings by ID
-     */
-    private JSONObject getApiRatingInfoById(APIIdentifier apiIdentifier, String ratingId, Connection conn)
-            throws APIManagementException, SQLException {
-        PreparedStatement ps = null;
-        PreparedStatement psSubscriber = null;
-        ResultSet rs = null;
-        ResultSet rsSubscriber = null;
-        JSONObject ratingObj = new JSONObject();
-        int userRating = 0;
-        int apiId = -1;
-        int userRatingId = Integer.parseInt(ratingId);
-        int subscriberId = -1;
-        try {
-            //Get API Id
-            apiId = getAPIID(apiIdentifier, conn);
-            if (apiId == -1) {
-                String msg = "Could not load API record for: " + apiIdentifier.getApiName();
-                log.error(msg);
-                throw new APIManagementException(msg);
-            }
-            //This query to get rating information from the AM_API_RATINGS table
-            String sqlQuery = SQLConstants.GET_RATING_INFO_BY_ID_SQL;
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, userRatingId);
-            ps.setInt(2, apiId);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                apiId = rs.getInt("API_ID");
-                userRatingId = rs.getInt("RATING_ID");
-                subscriberId = rs.getInt("SUBSCRIBER_ID");
-                userRating = rs.getInt("RATING");
-            }
-            if (subscriberId != -1) {
-                // A rating record exists
-                // SQL Query to get subscriber name
-                String sqlSubscriberQuery = SQLConstants.GET_SUBSCRIBER_NAME_FROM_ID_SQL;
-
-                psSubscriber = conn.prepareStatement(sqlSubscriberQuery);
-                psSubscriber.setInt(1, subscriberId);
-                rsSubscriber = psSubscriber.executeQuery();
-                String subscriberName = null;
-                while (rsSubscriber.next()) {
-                    subscriberName = rsSubscriber.getString("USER_ID");
-                }
-                ratingObj.put(APIConstants.API_ID, apiId);
-                ratingObj.put(APIConstants.RATING_ID, userRatingId);
-                ratingObj.put(APIConstants.USER_NAME, subscriberName);
-                ratingObj.put(APIConstants.RATING,userRating);
-            }
-        } catch (SQLException e) {
-            handleException("Failed to retrieve API ratings ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, null, rs);
-            APIMgtDBUtil.closeAllConnections(psSubscriber, null, rsSubscriber);
         }
         return ratingObj;
     }
