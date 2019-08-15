@@ -23,8 +23,10 @@ import { withStyles, withTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
 import { injectIntl } from 'react-intl';
-import Api from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 import CONSTS from 'AppData/Constants';
+import Api from 'AppData/api';
+import { ApiContext } from './ApiContext';
 
 /**
  *
@@ -94,8 +96,18 @@ class Resources extends React.Component {
      */
     componentDidMount() {
         const { api } = this.props;
-        const promised_api = this.api.getSwaggerByAPIId(api.id);
-        promised_api
+        const { apiType } = this.context;
+        let promisedApi = null;
+
+        if (apiType === CONSTS.API_TYPE) {
+            const apiClient = new Api();
+            promisedApi = apiClient.getSwaggerByAPIId(api.id);
+        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            const apiProductClient = new APIProduct();
+            promisedApi = apiProductClient.getSwaggerByAPIId(api.id);
+        }
+
+        promisedApi
             .then((response) => {
                 if (response.obj.paths !== undefined) {
                     this.setState({ paths: response.obj.paths });
@@ -152,6 +164,9 @@ class Resources extends React.Component {
         );
     }
 }
+
+Resources.contextType = ApiContext;
+
 Resources.propTypes = {
     classes: PropTypes.object.isRequired,
     intl: PropTypes.shape({

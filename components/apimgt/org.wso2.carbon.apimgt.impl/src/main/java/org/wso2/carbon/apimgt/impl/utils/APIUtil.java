@@ -1625,6 +1625,11 @@ public final class APIUtil {
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
     }
 
+    public static String getAPIProductOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
+        return APIConstants.API_PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
+                apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
+    }
+
     public static String getWSDLDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
         return APIConstants.API_WSDL_RESOURCE_LOCATION + apiProvider + "--" + apiName + apiVersion + ".wsdl";
     }
@@ -1637,7 +1642,7 @@ public final class APIUtil {
     public static String getAPIProductOpenAPIDefinitionFilePath(APIProductIdentifier identifier) {
         return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
                 + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR
-                + identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + RegistryConstants.PATH_SEPARATOR
+                + identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR
                 + identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion()
                 + RegistryConstants.PATH_SEPARATOR;
     }

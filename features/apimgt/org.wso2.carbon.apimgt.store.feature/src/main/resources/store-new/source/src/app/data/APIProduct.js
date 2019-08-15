@@ -52,7 +52,7 @@ export default class APIProduct extends Resource {
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API product invoke promise.
      */
-    getAPIProductById(id, callback = null) {
+    getAPIById(id, callback = null) {
         const promiseGet = this.client.then(
             (client) => {
                 return client.apis['API Products'].get_api_products__apiProductId__(
@@ -60,6 +60,85 @@ export default class APIProduct extends Resource {
                 );
             },
         );
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get the thumnail of an API
+     *
+     * @param {string} id  UUID of the api
+     * @param {function} callback  A callback function to invoke after receiving successful response.
+     * @returns {promise} With given callback attached to the success chain else API product invoke promise.
+     */
+    getAPIThumbnail(id, callback = null) {
+        const promisedThumbnail = this.client.then((client) => {
+            return client.apis['API Product (Individual)'].get_api_products__apiProductId__thumbnail({
+                apiProductId: id,
+            },
+            this._requestMetaData());
+        });
+
+        if (callback) {
+            return promisedThumbnail.then(callback);
+        } else {
+            return promisedThumbnail;
+        }
+    }
+
+    /**
+     * Get the thumnail of an API
+     *
+     * @param {string} apiProductId  UUID of the api
+     * @param {function} callback  A callback function to invoke after receiving successful response.
+     * @returns {promise} With given callback attached to the success chain else API product invoke promise.
+     */
+    getRatingFromUser(apiProductId, callback = null) {
+        const promiseGet = this.client.then((client) => {
+            return client.apis.Ratings.get_api_products__apiProductId__ratings({ apiProductId },
+                this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get all comments for a particular API Product
+     *
+     * @param {string}  apiProductId api id of the API Product to which the comment is added
+     * @param {function} callback  A callback function to invoke after receiving successful response.
+     * @returns {promise} With given callback attached to the success chain else API product invoke promise.
+     */
+    getAllComments(apiProductId, callback = null) {
+        const promiseGet = this.client.then((client) => {
+            return client.apis.Comments.get_api_products__apiProductId__comments({ apiProductId },
+                this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get the swagger of an API
+     * @param {String} id  UUID of the API in which the swagger is needed
+     * @param {function} callback Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getSwaggerByAPIId(id, callback = null) {
+        const promiseGet = this.client.then((client) => {
+            return client.apis['API Products'].get_api_products__apiProductId__swagger(
+                { apiProductId: id }, this._requestMetaData(),
+            );
+        });
         if (callback) {
             return promiseGet.then(callback);
         } else {
@@ -76,7 +155,7 @@ export default class APIProduct extends Resource {
     getAllApplications(callback = null) {
         const promiseGet = this.client.then(
             (client) => {
-                return client.apis['Applications'].get_applications(
+                return client.apis.Applications.get_applications(
                     {}, this._requestMetaData(),
                 );
             },
@@ -97,7 +176,7 @@ export default class APIProduct extends Resource {
     getSubscriptions(apiId, applicationId, callback = null) {
         const promiseGet = this.client.then(
             (client) => {
-                return client.apis['Subscriptions'].get_subscriptions(
+                return client.apis.Subscription.get_subscriptions(
                     { apiId, applicationId }, this._requestMetaData(),
                 );
             },

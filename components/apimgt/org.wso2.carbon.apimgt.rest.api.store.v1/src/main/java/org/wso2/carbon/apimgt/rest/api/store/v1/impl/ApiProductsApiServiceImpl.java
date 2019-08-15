@@ -54,8 +54,33 @@ import javax.ws.rs.core.Response;
 public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     private static final Log log = LogFactory.getLog(ApiProductsApiServiceImpl.class);
 
+    @Override
+    public Response apiProductsApiProductIdCommentsCommentIdDelete(String commentId, String apiProductId, String ifMatch, MessageContext messageContext) {
+        return null;
+    }
+
+    @Override
+    public Response apiProductsApiProductIdCommentsCommentIdGet(String commentId, String apiProductId, String ifNoneMatch, MessageContext messageContext) {
+        return null;
+    }
+
+    @Override
+    public Response apiProductsApiProductIdCommentsCommentIdPut(String commentId, String apiProductId, CommentDTO body, String ifMatch, MessageContext messageContext) {
+        return null;
+    }
+
+    @Override
+    public Response apiProductsApiProductIdCommentsGet(String apiProductId, Integer limit, Integer offset, MessageContext messageContext) {
+        return null;
+    }
+
+    @Override
+    public Response apiProductsApiProductIdCommentsPost(String apiProductId, CommentDTO body, MessageContext messageContext) {
+        return null;
+    }
+
     @Override public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(String apiProductId,
-            String documentId, String ifNoneMatch, MessageContext messageContext) {
+                                                                                   String documentId, String ifNoneMatch, MessageContext messageContext) {
         return null;
     }
 
@@ -98,6 +123,21 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return null;
     }
 
+    @Override
+    public Response apiProductsApiProductIdRatingsGet(String apiProductId, Integer limit, Integer offset, MessageContext messageContext) {
+        return null;
+    }
+
+    @Override
+    public Response apiProductsApiProductIdRatingsRatingIdGet(String apiProductId, String ratingId, String ifNoneMatch, MessageContext messageContext) {
+        return null;
+    }
+
+    @Override
+    public Response apiProductsApiProductIdSubscriptionPoliciesGet(String apiProductId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
+        return null;
+    }
+
     @Override public Response apiProductsApiProductIdSwaggerGet(String apiProductId, String ifNoneMatch,
             String xWSO2Tenant, MessageContext messageContext) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
@@ -133,6 +173,11 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
     @Override public Response apiProductsApiProductIdThumbnailGet(String apiProductId, String xWSO2Tenant,
             String ifNoneMatch, MessageContext messageContext) {
+        return null;
+    }
+
+    @Override
+    public Response apiProductsApiProductIdUserRatingPut(String apiProductId, RatingDTO body, MessageContext messageContext) {
         return null;
     }
 

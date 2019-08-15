@@ -22,7 +22,9 @@ import ArrowDropDownCircleOutlined from '@material-ui/icons/ArrowDropDownCircleO
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import { Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid/Grid';
-import { FormattedMessage, injectIntl, } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import APIProduct from 'AppData/APIProduct';
+import CONSTS from 'AppData/Constants';
 import Alert from '../../../Shared/Alert';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
@@ -88,11 +90,19 @@ class Comments extends Component {
      * @memberof Comments
      */
     componentDidMount() {
+        const { apiType } = this.context;
         let {
             apiId, theme, match, intl,
         } = this.props;
         if (match) apiId = match.params.api_uuid;
-        const restApi = new API();
+
+        let restApi = null;
+        if (apiType === CONSTS.API_TYPE) {
+            restApi = new API();
+        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            restApi = new APIProduct();
+        }
+
         restApi
             .getAllComments(apiId)
             .then((result) => {
@@ -276,6 +286,7 @@ class Comments extends Component {
         );
     }
 }
+
 
 Comments.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,

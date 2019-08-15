@@ -1,17 +1,15 @@
 <div class="main-content">
-    <h1><a name="API (Collection)"></a>API (Collection)</h1>
+    <h1><a name="Import and Export Applications"></a>Import and Export Applications</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="apisImportGraphqlSchemaPost"></a>Import API Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/import-graphql-schema</code>
+            <h4 class="operation-heading"><a name="exportApplicationsGet"></a>Export details related to an Application.</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/export/applications</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to create api from api definition.
-
-API definition is GraphQL Schema
+            <p class="marked">This operation can be used to export details related to a perticular application.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_create</code>
+                <code>apim:subscribe</code>
 
             <h4 class="section-heading">
                 Examples
@@ -37,102 +35,21 @@ API definition is GraphQL Schema
                 </thead>
                     <tr>
                         <td class="parameter">
-                            <span class="param-in">Form </span>
                             
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>type</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Definition type to upload</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <span class="param-in">Form </span>
-                            
+                            <span class="param-in">Query </span>
                             
                             
                             
                         </td>
                         <td class="param-name">
-                            <p>file</p>
+                            <p>appId</p>
                             <p class="param-required">
+                                required
                                 
-                                optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Definition to uploads a file</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                File
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <span class="param-in">Form </span>
-                            
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>additionalProperties</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Additional attributes specified as a stringified JSON with API&#39;s schema</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-Match</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+                            <p class="param-description marked">Application Search Query
 </p>
                         </td>
                         <td>
@@ -163,17 +80,17 @@ API definition is GraphQL Schema
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="parameter"><p class="marked">201</p></td>
-                        <td class="parameter"><p class="marked">Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. </p></td>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Export Configuration returned. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#API">API</a>
+                                    <a href="#!/models#file">file</a>
                             </span>
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested Application does not exist. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -181,8 +98,17 @@ API definition is GraphQL Schema
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">415</p></td>
-                        <td class="parameter"><p class="marked">Unsupported Media Type. The entity of the request was in a not supported format. </p></td>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">412</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -192,14 +118,14 @@ API definition is GraphQL Schema
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisValidateGraphqlSchemaPost"></a>Validate GraphQL API definition and retrieve a summary</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/validate-graphql-schema</code>
+            <h4 class="operation-heading"><a name="importApplicationsPost"></a>Imports an Application.</h4> <code>POST https://apis.wso2.com/api/am/store/v1.0/import/applications</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to validate a graphQL definition and retrieve a summary.
+            <p class="marked">This operation can be used to import an existing Application.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_create</code>
+                <code>apim:subscribe</code>
 
             <h4 class="section-heading">
                 Examples
@@ -239,7 +165,8 @@ API definition is GraphQL Schema
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Definition to upload as a file</p>
+                            <p class="param-description marked">Zip archive consisting on exported application configuration
+</p>
                         </td>
                         <td>
                             <span class="param-type">
@@ -270,16 +197,16 @@ API definition is GraphQL Schema
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. API definition validation information is returned </p></td>
+                        <td class="parameter"><p class="marked">OK. Successful response with the updated object as entity in the body. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#GraphQLValidationResponse">GraphQLValidationResponse</a>
+                                    <a href="#!/models#Application">Application</a>
                             </span>
                         </td>
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -287,8 +214,133 @@ API definition is GraphQL Schema
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Workflow for the given reference in not found. </p></td>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">412</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h4 class="operation-heading"><a name="importApplicationsPut"></a>Imports an Updates an Application.</h4> <code>PUT https://apis.wso2.com/api/am/store/v1.0/import/applications</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to import an existing Application.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:subscribe</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>file</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Zip archive consisting on exported application configuration
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                File
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Successful response with the updated object as entity in the body. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Application">Application</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">412</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>

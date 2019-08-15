@@ -1040,6 +1040,26 @@ public class APIMappingUtil {
         }
         return scopeSet;
     }
+
+    /**
+     * This method returns the oauth scopes according to the given list of scopes
+     *
+     * @param apiProductDTO list of scopes
+     * @return scope set
+     */
+    private static Set<Scope> getScopes(APIProductDTO apiProductDTO) {
+
+        Set<Scope> scopeSet = new LinkedHashSet<>();
+        for (ScopeDTO scopeDTO : apiProductDTO.getScopes()) {
+            Scope scope = new Scope();
+            scope.setKey(scopeDTO.getName());
+            scope.setName(scopeDTO.getName());
+            scope.setDescription(scopeDTO.getDescription());
+            scope.setRoles(String.join(",", scopeDTO.getBindings().getValues()));
+            scopeSet.add(scope);
+        }
+        return scopeSet;
+    }
 //
 //    /**
 //     * This method returns endpoints according to the given endpoint config
@@ -1737,6 +1757,9 @@ public class APIMappingUtil {
             }
 
         }
+
+        Set<Scope> scopes = getScopes(dto);
+        product.setScopes(scopes);
 
         APICorsConfigurationDTO apiCorsConfigurationDTO = dto.getCorsConfiguration();
         CORSConfiguration corsConfiguration;
