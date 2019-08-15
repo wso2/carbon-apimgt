@@ -24,7 +24,7 @@ import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
 import { injectIntl } from 'react-intl';
 import APIProduct from 'AppData/APIProduct';
-import { API_TYPE, API_PRODUCT_TYPE } from 'AppData/Constants';
+import CONSTS from 'AppData/Constants';
 import Api from 'AppData/api';
 import { ApiContext } from './ApiContext';
 
@@ -99,10 +99,10 @@ class Resources extends React.Component {
         const { apiType } = this.context;
         let promisedApi = null;
 
-        if (apiType === API_TYPE) {
+        if (apiType === CONSTS.API_TYPE) {
             const apiClient = new Api();
             promisedApi = apiClient.getSwaggerByAPIId(api.id);
-        } else if (apiType === API_PRODUCT_TYPE) {
+        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
             const apiProductClient = new APIProduct();
             promisedApi = apiProductClient.getSwaggerByAPIId(api.id);
         }

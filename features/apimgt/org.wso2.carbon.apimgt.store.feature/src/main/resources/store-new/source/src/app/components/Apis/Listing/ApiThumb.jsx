@@ -25,7 +25,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { FormattedMessage } from 'react-intl';
 import MaterialIcons from 'MaterialIcons';
-import { API_TYPE, API_PRODUCT_TYPE } from 'AppData/Constants';
+import CONSTS from 'AppData/Constants';
 import APIProduct from 'AppData/APIProduct';
 import ImageGenerator from './ImageGenerator';
 import StarRatingBar from './StarRating';
@@ -135,9 +135,9 @@ class ApiThumb extends React.Component {
 
         let restApi = null;
 
-        if (apiType === API_TYPE) {
+        if (apiType === CONSTS.API_TYPE) {
             restApi = new Api();
-        } else if (apiType === API_PRODUCT_TYPE) {
+        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
             restApi = new APIProduct();
         }
         const promisedThumbnail = restApi.getAPIThumbnail(api.id);
@@ -185,7 +185,7 @@ class ApiThumb extends React.Component {
         const { apiType } = this.context;
 
         let path = '/apis/';
-        if (apiType === API_PRODUCT_TYPE) {
+        if (apiType === CONSTS.API_PRODUCT_TYPE) {
             path = '/api-products/';
         }
 
@@ -300,7 +300,6 @@ class ApiThumb extends React.Component {
 ApiThumb.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
-    isApiProduct: PropTypes.bool.isRequired,
 };
 
 ApiThumb.contextType = ApiContext;

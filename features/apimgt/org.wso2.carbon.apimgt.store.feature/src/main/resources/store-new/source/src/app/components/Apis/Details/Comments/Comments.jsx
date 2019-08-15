@@ -24,7 +24,7 @@ import { Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import APIProduct from 'AppData/APIProduct';
-import { API_TYPE, API_PRODUCT_TYPE } from 'AppData/Constants';
+import CONSTS from 'AppData/Constants';
 import Alert from '../../../Shared/Alert';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
@@ -97,9 +97,9 @@ class Comments extends Component {
         if (match) apiId = match.params.api_uuid;
 
         let restApi = null;
-        if (apiType === API_TYPE) {
+        if (apiType === CONSTS.API_TYPE) {
             restApi = new API();
-        } else if (apiType === API_PRODUCT_TYPE) {
+        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
             restApi = new APIProduct();
         }
 

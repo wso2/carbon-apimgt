@@ -16,7 +16,7 @@
  * under the License.
  */
 import React from 'react';
-import { API_TYPE } from 'AppData/Constants';
+import CONSTS from 'AppData/Constants';
 
 export const ApiContext = React.createContext({
     active: 'overview',
@@ -26,5 +26,5 @@ export const ApiContext = React.createContext({
     subscribedApplications: [],
     applicationsAvailable: [],
     updateSubscriptionData: () => {},
-    apiType: API_TYPE,
+    apiType: CONSTS.API_TYPE,
 });

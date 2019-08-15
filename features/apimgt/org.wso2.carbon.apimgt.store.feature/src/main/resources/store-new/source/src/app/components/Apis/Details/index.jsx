@@ -26,7 +26,7 @@ import Loadable from 'react-loadable';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import APIProduct from 'AppData/APIProduct';
 import Api from 'AppData/api';
-import { API_TYPE, API_PRODUCT_TYPE } from 'AppData/Constants';
+import CONSTS from 'AppData/Constants';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
@@ -91,7 +91,7 @@ const LoadableSwitch = Loadable.Map({
         const Sdk = loaded.Sdk.default;
 
         let path = '/apis/';
-        if (apiType === API_PRODUCT_TYPE) {
+        if (apiType === CONSTS.API_PRODUCT_TYPE) {
             path = '/api-products/';
         }
 
@@ -208,9 +208,9 @@ class Details extends React.Component {
             let promisedApplications = null;
             let restApi = null;
 
-            if (apiType === API_TYPE) {
+            if (apiType === CONSTS.API_TYPE) {
                 restApi = new Api();
-            } else if (apiType === API_PRODUCT_TYPE) {
+            } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
                 restApi = new APIProduct();
             }
 
