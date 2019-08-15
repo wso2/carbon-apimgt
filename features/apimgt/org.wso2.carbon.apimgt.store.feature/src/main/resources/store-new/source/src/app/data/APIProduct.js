@@ -135,7 +135,7 @@ export default class APIProduct extends Resource {
      */
     getSwaggerByAPIId(id, callback = null) {
         const promiseGet = this.client.then((client) => {
-            return client.apis['API Product (Individual)'].get_api_products__apiProductId__swagger(
+            return client.apis['API Products'].get_api_products__apiProductId__swagger(
                 { apiProductId: id }, this._requestMetaData(),
             );
         });
@@ -155,7 +155,7 @@ export default class APIProduct extends Resource {
     getAllApplications(callback = null) {
         const promiseGet = this.client.then(
             (client) => {
-                return client.apis['Applications'].get_applications(
+                return client.apis.Applications.get_applications(
                     {}, this._requestMetaData(),
                 );
             },

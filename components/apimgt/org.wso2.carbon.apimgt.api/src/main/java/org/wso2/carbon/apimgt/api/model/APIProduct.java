@@ -305,26 +305,6 @@ public class APIProduct {
         return accessControlRoles;
     }
 
-    @Override
-    public String toString() {
-        String tiers = "";
-        for (Tier tier : availableTiers) {
-            tiers += tier.getName() + " ";
-        }
-        String env = "";
-        for (String environment : environments ) {
-            env += environment + " ";
-        }
-        return "APIProduct [name=" + id.getName() + ", version=" + id.getVersion() + ", uuid=" + uuid + ", productId="
-                + productId + ", provider=" + id.getProviderName() + ", description=" + description
-                + ", availableTiers=" + tiers + ", visibility=" + visibility + ", visibleRoles=" + visibleRoles
-                + ", visibleTenants=" + visibleTenants + ", environments=" + env + ", subscriptionAvailability="
-                + subscriptionAvailability + ", subscriptionAvailableTenants=" + subscriptionAvailableTenants
-                + ", accessControl=" + accessControl + ", accessControlRoles=" + accessControlRoles + ", state=" + state
-                + ", businessOwner=" + businessOwner + ", businessOwnerEmail=" + businessOwnerEmail + ", tenantDomain="
-                + tenantDomain + ", productResources=" + productResources + "]";
-    }
-
     public String getApiSecurity() {
         return apiSecurity;
     }

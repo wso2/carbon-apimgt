@@ -155,7 +155,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
-    }, tags={ "API Documents",  })
+    }, tags={ "Documents",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Document returned. ", response = DocumentDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
