@@ -9729,16 +9729,24 @@ public class ApiMgtDAO {
             if (hasCustomAttrib) {
                 policyStatement.setBytes(16, policy.getCustomAttributes());
                 policyStatement.setString(17, policy.getMonetizationPlan());
-                policyStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
-                policyStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
-                policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
-                policyStatement.setString(21, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                policyStatement.setString(18,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                policyStatement.setString(19,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                policyStatement.setString(20,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                policyStatement.setString(21,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
             } else {
                 policyStatement.setString(16, policy.getMonetizationPlan());
-                policyStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
-                policyStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
-                policyStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
-                policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                policyStatement.setString(17,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                policyStatement.setString(18,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                policyStatement.setString(19,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                policyStatement.setString(20,
+                        policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
 
             }
             policyStatement.executeUpdate();
@@ -10313,13 +10321,13 @@ public class ApiMgtDAO {
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
                 subPolicy.setMonetizationPlan(rs.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
                 Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
-                monetizationPlanProperties.put(APIConstants.FIXED_PRICE,
+                monetizationPlanProperties.put(APIConstants.Monetization.FIXED_PRICE,
                         rs.getString(ThrottlePolicyConstants.COLUMN_FIXED_RATE));
-                monetizationPlanProperties.put(APIConstants.BILLING_CYCLE,
+                monetizationPlanProperties.put(APIConstants.Monetization.BILLING_CYCLE,
                         rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_CYCLE));
-                monetizationPlanProperties.put(APIConstants.PRICE_PER_REQUEST,
+                monetizationPlanProperties.put(APIConstants.Monetization.PRICE_PER_REQUEST,
                         rs.getString(ThrottlePolicyConstants.COLUMN_PRICE_PER_REQUEST));
-                monetizationPlanProperties.put(APIConstants.CURRENCY,
+                monetizationPlanProperties.put(APIConstants.Monetization.CURRENCY,
                         rs.getString(ThrottlePolicyConstants.COLUMN_CURRENCY));
                 subPolicy.setMonetizationPlanProperties(monetizationPlanProperties);
                 InputStream binary = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
@@ -10378,13 +10386,13 @@ public class ApiMgtDAO {
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
                 subPolicy.setMonetizationPlan(rs.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
                 Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
-                monetizationPlanProperties.put(APIConstants.FIXED_PRICE,
+                monetizationPlanProperties.put(APIConstants.Monetization.FIXED_PRICE,
                         rs.getString(ThrottlePolicyConstants.COLUMN_FIXED_RATE));
-                monetizationPlanProperties.put(APIConstants.BILLING_CYCLE,
+                monetizationPlanProperties.put(APIConstants.Monetization.BILLING_CYCLE,
                         rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_CYCLE));
-                monetizationPlanProperties.put(APIConstants.PRICE_PER_REQUEST,
+                monetizationPlanProperties.put(APIConstants.Monetization.PRICE_PER_REQUEST,
                         rs.getString(ThrottlePolicyConstants.COLUMN_PRICE_PER_REQUEST));
-                monetizationPlanProperties.put(APIConstants.CURRENCY,
+                monetizationPlanProperties.put(APIConstants.Monetization.CURRENCY,
                         rs.getString(ThrottlePolicyConstants.COLUMN_CURRENCY));
                 subPolicy.setMonetizationPlanProperties(monetizationPlanProperties);
                 InputStream binary = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
@@ -11273,36 +11281,52 @@ public class ApiMgtDAO {
                         lengthOfStream);
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
                     updateStatement.setString(13, policy.getMonetizationPlan());
-                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
-                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
-                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
-                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(14,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(15,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(16,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(17,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
                     updateStatement.setString(18, policy.getPolicyName());
                     updateStatement.setInt(19, policy.getTenantId());
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
                     updateStatement.setString(13, policy.getMonetizationPlan());
-                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
-                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
-                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
-                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(14,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(15,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(16,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(17,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
                     updateStatement.setString(18, policy.getUUID());
                 }
             } else {
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
                     updateStatement.setString(12, policy.getMonetizationPlan());
-                    updateStatement.setString(13, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
-                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
-                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
-                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(13,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(14,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(15,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(16,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
                     updateStatement.setString(17, policy.getPolicyName());
                     updateStatement.setInt(18, policy.getTenantId());
 
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
                     updateStatement.setString(12, policy.getMonetizationPlan());
-                    updateStatement.setString(13, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
-                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
-                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
-                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(13,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(14,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(15,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(16,
+                            policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
                     updateStatement.setString(17, policy.getUUID());
                 }
             }

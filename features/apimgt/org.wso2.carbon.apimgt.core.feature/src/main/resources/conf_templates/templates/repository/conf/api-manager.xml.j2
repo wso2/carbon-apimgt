@@ -842,15 +842,15 @@
             usgae publish job, when there is no record of the last publish time.-->
             <PublishTimeDurationInDays>{{apim.monetization.publish_duration}}</PublishTimeDurationInDays>
         </UsagePublisher>
-        {% if apim.monetization.custom_attributes is defined %}
-        <CustomAttributes>
-            {% for attribute in apim.monetization.custom_attributes %}
+        {% if apim.monetization.additional_attributes is defined %}
+        <AdditionalAttributes>
+            {% for attribute in apim.monetization.additional_attributes %}
             <Attribute required="{{attribute.required}}">
                 <Name>{{attribute.name}}</Name>
                 <Description>{{attribute.description}}</Description>
             </Attribute>
             {% endfor %}
-        </CustomAttributes>
+        </AdditionalAttributes>
         {% endif %}
     </Monetization>
 

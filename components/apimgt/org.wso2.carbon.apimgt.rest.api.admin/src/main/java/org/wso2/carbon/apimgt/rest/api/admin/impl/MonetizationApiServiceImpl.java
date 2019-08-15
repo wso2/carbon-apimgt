@@ -59,21 +59,21 @@ public class MonetizationApiServiceImpl extends MonetizationApiService {
             monetizationUsagePublishInfo = apiAdmin.getMonetizationUsagePublishInfo();
             if (monetizationUsagePublishInfo == null) {
                 monetizationUsagePublishInfo = new MonetizationUsagePublishInfo();
-                monetizationUsagePublishInfo.setId(APIConstants.MonetizationUsagePublisher.JOB_NAME);
-                monetizationUsagePublishInfo.setState(APIConstants.MonetizationUsagePublisher.INITIATED);
-                monetizationUsagePublishInfo.setStatus(APIConstants.MonetizationUsagePublisher.INPROGRESS);
+                monetizationUsagePublishInfo.setId(APIConstants.Monetization.USAGE_PUBLISHER_JOB_NAME);
+                monetizationUsagePublishInfo.setState(APIConstants.Monetization.INITIATED);
+                monetizationUsagePublishInfo.setStatus(APIConstants.Monetization.INPROGRESS);
                 //read the number of days to reduce from the current time to derive the from / last publish time
                 //when there is no record of the last publish time
                 APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().
                         getAPIManagerConfigurationService().getAPIManagerConfiguration();
                 String gap = configuration.getFirstProperty(
-                        APIConstants.MonetizationUsagePublisher.FROM_TIME_CONFIGURATION_PROPERTY);
+                        APIConstants.Monetization.USAGE_PUBLISHER_PUBLISH_TIME_DURATION);
                 //if the from time / last publish time is not set , set it to default
                 if (gap == null) {
-                    gap = APIConstants.MonetizationUsagePublisher.DEFAULT_TIME_GAP_IN_DAYS;
+                    gap = APIConstants.Monetization.USAGE_PUBLISH_DEFAULT_TIME_GAP_IN_DAYS;
                 }
-                DateFormat df = new SimpleDateFormat(APIConstants.MonetizationUsagePublisher.TIME_FORMAT);
-                df.setTimeZone(TimeZone.getTimeZone(APIConstants.MonetizationUsagePublisher.TIME_ZONE));
+                DateFormat df = new SimpleDateFormat(APIConstants.Monetization.USAGE_PUBLISH_TIME_FORMAT);
+                df.setTimeZone(TimeZone.getTimeZone(APIConstants.Monetization.USAGE_PUBLISH_TIME_FORMAT));
                 Calendar cal = Calendar.getInstance();
                 Date currentDate = cal.getTime();
                 String formattedCurrentDate = df.format(currentDate);
@@ -88,7 +88,7 @@ public class MonetizationApiServiceImpl extends MonetizationApiService {
                 monetizationUsagePublishInfo.setLastPublishTime(lastPublishedTimeStamp);
                 apiAdmin.addMonetizationUsagePublishInfo(monetizationUsagePublishInfo);
             }
-            if (!monetizationUsagePublishInfo.getState().equals(APIConstants.MonetizationUsagePublisher.RUNNING)) {
+            if (!monetizationUsagePublishInfo.getState().equals(APIConstants.Monetization.RUNNING)) {
                 executor = Executors.newSingleThreadExecutor();
                 MonetizationUsagePublishAgent agent = new MonetizationUsagePublishAgent(monetizationUsagePublishInfo);
                 executor.execute(agent);

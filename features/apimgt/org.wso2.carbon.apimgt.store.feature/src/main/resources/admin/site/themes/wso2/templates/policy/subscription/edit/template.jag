@@ -57,10 +57,10 @@
         var tierPlan = subscriptionPolicy.getBillingPlan();
         var APIConstants = Packages.org.wso2.carbon.apimgt.impl.APIConstants;
         var monetizationPlan = subscriptionPolicy.getMonetizationPlan();
-        var billingCycle = subscriptionPolicy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE);
-        var fixedPrice = subscriptionPolicy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE);
-        var pricePerRequest = subscriptionPolicy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST);
-        var currencyType = subscriptionPolicy.getMonetizationPlanProperties().get(APIConstants.CURRENCY);
+        var billingCycle = subscriptionPolicy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE);
+        var fixedPrice = subscriptionPolicy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE);
+        var pricePerRequest = subscriptionPolicy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST);
+        var currencyType = subscriptionPolicy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY);
         var isCustomAttributesExist = false;
         var customAttributes = subscriptionPolicy.getCustomAttributes();
    		var String = Packages.java.lang.String;

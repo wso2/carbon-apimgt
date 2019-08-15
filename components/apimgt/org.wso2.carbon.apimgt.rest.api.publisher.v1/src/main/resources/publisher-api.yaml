@@ -7890,6 +7890,30 @@ definitions:
         description: Map of custom properties related to monetization
         additionalProperties:
           type: string
+  MonetizationAttribute:
+    title: Monetization attribute object
+    properties:
+      required:
+        type: boolean
+        description: |
+          Is attribute required
+        example: true
+      name:
+        type: string
+        description: |
+          Name of the attribute
+      description:
+        type: string
+        description: |
+          Description of the attribute
+      hidden:
+        type: boolean
+        description: |
+          Is attribute hidden
+      default:
+        type: string
+        description: |
+          Default value of the attribute
 
   DocumentSearchResult:
     title: Document Result
@@ -7997,10 +8021,10 @@ definitions:
         type: array
         items:
           type: string
-      MonetizationProperties:
+      monetizationAttributes:
         type: array
         items:
-          type: string
+          $ref: '#/definitions/MonetizationAttribute'
 
 #-----------------------------------------------------
 # The pagination resource
