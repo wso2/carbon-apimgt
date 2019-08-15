@@ -23,19 +23,13 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
-import org.apache.axis2.Constants;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.core.axis2.Axis2Sender;
 import org.apache.synapse.rest.AbstractHandler;
-import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
@@ -58,14 +52,12 @@ import java.io.IOException;
 import java.util.Base64;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.xml.stream.XMLStreamException;
+
+import static org.apache.axis2.Constants.Configuration.*;
 
 public class GraphQLAPIHandler extends AbstractHandler {
 
@@ -73,6 +65,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
     private static final String REST_SUB_REQUEST_PATH = "REST_SUB_REQUEST_PATH";
     private static final String API_TYPE = "API_TYPE";
     private static final String GRAPHQL_API = "GRAPHQL";
+    private static final String HTTP_VERB = "HTTP_VERB";
     private static final String UNICODE_TRANSFORMATION_FORMAT = "UTF-8";
     private static final String INVALID_QUERY = "INVALID QUERY";
     private static final String SCOPE_ROLE_MAPPING = "ScopeRoleMapping";
@@ -143,8 +136,11 @@ public class GraphQLAPIHandler extends AbstractHandler {
                     if (definition instanceof OperationDefinition) {
                         OperationDefinition operation = (OperationDefinition) definition;
                         if (operation.getOperation() != null) {
+                            String httpVerb = ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                                    getProperty(HTTP_METHOD).toString();
+                            messageContext.setProperty(HTTP_VERB, httpVerb);
                             ((Axis2MessageContext) messageContext).getAxis2MessageContext().
-                                    setProperty(Constants.Configuration.HTTP_METHOD, operation.getOperation().toString());
+                                    setProperty(HTTP_METHOD, operation.getOperation().toString());
                             if (Operation.QUERY.equals(operation.getOperation())) {
                                 for (Selection selection : operation.getSelectionSet().getSelections()) {
                                     if (selection instanceof Field) {
