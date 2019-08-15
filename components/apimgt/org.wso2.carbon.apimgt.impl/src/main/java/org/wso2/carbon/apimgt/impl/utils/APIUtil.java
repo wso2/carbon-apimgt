@@ -8492,9 +8492,9 @@ public final class APIUtil {
         return new QName(IdentityCoreConstants.IDENTITY_DEFAULT_NAMESPACE, localPart);
     }
 
-    public static JSONArray getMonetizationAttributes(){
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration().getMonetizationAttributes();
+    public static JSONArray getMonetizationAttributes() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getMonetizationAttributes();
     }
 
     /**
