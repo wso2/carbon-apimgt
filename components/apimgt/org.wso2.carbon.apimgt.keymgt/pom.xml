@@ -27,7 +27,6 @@
     <name>WSO2 Carbon - API Key Mgt</name>
     <description>Key Management functionality for API Mgt/Store solution</description>
     <url>http://wso2.org</url>
-
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
