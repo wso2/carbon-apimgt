@@ -4592,6 +4592,12 @@ public final class APIUtil {
         return tenantDomains;
     }
 
+    /**
+     * Get tenants by state
+     * @param state state of the tenant
+     * @return set of tenants
+     * @throws UserStoreException
+     */
     public static Set<String> getTenantDomainsByState(String state) throws UserStoreException {
         boolean isActive = state.equalsIgnoreCase(APIConstants.TENANT_STATE_ACTIVE);
         if (isActive) {

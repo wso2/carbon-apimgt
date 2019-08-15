@@ -3813,11 +3813,8 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      x-wso2-curl: "curl -X GET \"https://localhost:9443/api/am/store/v1.0/tenants?state=active\" -H \"Authorization: Basic 3a7ecd76-4856-33ce-a703-e23e6cd24944\""
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v1.0/tenants/active-tenats?state=active
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "{\"count\":3,\"list\":[{\"domain\":\"test.com\",\"status\":\"ACTIVE\"},{\"domain\":\"carbon.super\",\"status\":\"ACTIVE\"},{\"domain\":\"abc.com\",\"status\":\"ACTIVE\"}],\"pagination\":{\"offset\":0,\"limit\":25,\"total\":3,\"next\":null,\"previous\":null}}"
+      x-examples:
+        $ref: docs/examples/tenants/tenants.yaml
       summary: |
         Get get tenants by state
       description: |
@@ -3839,7 +3836,7 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
       tags:
-        - active tenants
+        - tenants
       responses:
         200:
           description: |
@@ -4025,7 +4022,7 @@ parameters:
     name: labelName
     in: query
     description: |
-      Name of the API microgateway label.s
+      Name of the API microgateway labels
     type: string
 
 # API Gateway Environment Name

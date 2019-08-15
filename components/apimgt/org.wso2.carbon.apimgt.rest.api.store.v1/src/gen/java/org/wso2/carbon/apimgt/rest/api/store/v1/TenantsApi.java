@@ -42,7 +42,7 @@ TenantsApiService delegate = new TenantsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
-    }, tags={ "active tenants" })
+    }, tags={ "tenants" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Tenant names returned. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested application does not exist. ", response = ErrorDTO.class),

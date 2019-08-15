@@ -36,6 +36,9 @@ import javax.ws.rs.core.Response;
 import static org.wso2.carbon.apimgt.impl.APIConstants.TENANT_STATE_ACTIVE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.TENANT_STATE_INACTIVE;
 
+/**
+ * This is the rest api implementation class for tenant related operations
+ */
 public class TenantsApiServiceImpl implements TenantsApiService {
 
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
@@ -59,12 +62,7 @@ public class TenantsApiServiceImpl implements TenantsApiService {
             paginationDTO.setLimit(paginationLimit);
 
             if (!state.equalsIgnoreCase(TENANT_STATE_ACTIVE) && !state.equalsIgnoreCase(TENANT_STATE_INACTIVE)) {
-                TenantListDTO tenantList = new TenantListDTO();
-                tenantList.count(tenantDTOList.size());
-                tenantList.setList(tenantDTOList);
-                paginationDTO.setTotal(tenantDTOList.size());
-                tenantList.setPagination(paginationDTO);
-                return Response.ok().entity(tenantList).build();
+                RestApiUtil.handleBadRequest("Invalid tenant state", log);
             }
 
             String status = TENANT_STATE_ACTIVE.equalsIgnoreCase(state) ? TENANT_STATE_ACTIVE : TENANT_STATE_INACTIVE;
