@@ -676,7 +676,7 @@ class Resources extends React.Component {
                                             defaultMessage: 'Apply per API',
                                         })} />
                                         <FormControlLabel value="perResource" control={<Radio />} label={intl.formatMessage({
-                                            id: 'Apis.Details.Resources.Resources.assign.advanced.throttling.perApi',
+                                            id: 'Apis.Details.Resources.Resources.assign.advanced.throttling.perRes',
                                             defaultMessage: 'Apply per Resource',
                                         })} />
                                     </RadioGroup>

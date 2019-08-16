@@ -121,7 +121,7 @@ class Listing extends React.Component {
                     'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
                 console.error(messageTxt);
                 Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.Documents.Listing.documents.listing.fetching.error.message',
+                    id: 'Apis.Details.Documents.Listing.documents.listing.fetching.error.message.api.product',
                     defaultMessage: 'Error in fetching documents list of the API Product',
                 }));
             });
