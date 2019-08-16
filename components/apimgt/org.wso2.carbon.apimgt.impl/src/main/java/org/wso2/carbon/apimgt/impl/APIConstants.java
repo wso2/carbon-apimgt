@@ -628,6 +628,11 @@ public final class APIConstants {
     public static final String API_PUBLISHER_APIS_PER_PAGE = API_PUBLISHER + "APIsPerPage";
     public static final String WSO2_API_STORE_TYPE = "wso2";
 
+    // Constants needed for API Security Audit
+    public static final String API_SECURITY_AUDIT = "APISecurityAudit.";
+    public static final String API_SECURITY_AUDIT_API_TOKEN = API_SECURITY_AUDIT + "APIToken";
+    public static final String API_SECURITY_AUDIT_CID = API_SECURITY_AUDIT + "CollectionID";
+
     public static final String EXTERNAL_API_STORES = "ExternalAPIStores";
     public static final String LOGIN_CONFIGS = "LoginConfig";
     public static final String EXTERNAL_API_STORES_STORE_URL = "StoreURL";
