@@ -64,6 +64,7 @@ public enum TokenTypeEnum {
     private List<ApplicationKeyDTO> keys = new ArrayList<>();
     private Map<String, String> attributes = new HashMap<>();
     private List<String> subscriptionScopes = new ArrayList<>();
+    private String owner = null;
 
   /**
    **/
@@ -273,6 +274,24 @@ public enum TokenTypeEnum {
     this.subscriptionScopes = subscriptionScopes;
   }
 
+  /**
+   * Application created user 
+   **/
+  public ApplicationDTO owner(String owner) {
+    this.owner = owner;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "admin", value = "Application created user ")
+  @JsonProperty("owner")
+  public String getOwner() {
+    return owner;
+  }
+  public void setOwner(String owner) {
+    this.owner = owner;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -294,12 +313,13 @@ public enum TokenTypeEnum {
         Objects.equals(subscriptionCount, application.subscriptionCount) &&
         Objects.equals(keys, application.keys) &&
         Objects.equals(attributes, application.attributes) &&
-        Objects.equals(subscriptionScopes, application.subscriptionScopes);
+        Objects.equals(subscriptionScopes, application.subscriptionScopes) &&
+        Objects.equals(owner, application.owner);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes);
+    return Objects.hash(applicationId, name, subscriber, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner);
   }
 
   @Override
@@ -319,6 +339,7 @@ public enum TokenTypeEnum {
     sb.append("    keys: ").append(toIndentedString(keys)).append("\n");
     sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("    subscriptionScopes: ").append(toIndentedString(subscriptionScopes)).append("\n");
+    sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
     sb.append("}");
     return sb.toString();
   }

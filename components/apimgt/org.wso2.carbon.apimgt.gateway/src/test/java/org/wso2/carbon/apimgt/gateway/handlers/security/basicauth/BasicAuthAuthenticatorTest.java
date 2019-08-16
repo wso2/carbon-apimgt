@@ -17,22 +17,28 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security.basicauth;
 
 
-import io.swagger.models.Swagger;
+import io.swagger.v3.oas.models.OpenAPI;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.AdditionalMatchers;
-import org.mockito.ArgumentMatcher;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
+import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.TreeMap;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(OpenAPIUtils.class)
 public class BasicAuthAuthenticatorTest {
     private MessageContext messageContext;
     private org.apache.axis2.context.MessageContext axis2MsgCntxt;
@@ -41,12 +47,18 @@ public class BasicAuthAuthenticatorTest {
 
     @Before
     public void setup() throws APISecurityException {
+        PowerMockito.mockStatic(OpenAPIUtils.class);
+        PowerMockito.when(OpenAPIUtils.getResourceAuthenticationScheme(Mockito.any(), Mockito.any()))
+                .thenReturn(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+
         messageContext = Mockito.mock(Axis2MessageContext.class);
         axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
         Mockito.when(axis2MsgCntxt.getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME)).thenReturn("1506576365");
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when((messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT)))
+                .thenReturn(Mockito.mock(OpenAPI.class));
 
-        basicAuthAuthenticator = new BasicAuthAuthenticator(CUSTOM_AUTH_HEADER, true, null);
+        basicAuthAuthenticator = new BasicAuthAuthenticator(CUSTOM_AUTH_HEADER, true);
         BasicAuthCredentialValidator basicAuthCredentialValidator = Mockito.mock(BasicAuthCredentialValidator.class);
 
         Mockito.when(basicAuthCredentialValidator.validate(Mockito.anyString(), Mockito.anyString()))
@@ -62,7 +74,7 @@ public class BasicAuthAuthenticatorTest {
                     return false;
                 });
 
-        Mockito.when(basicAuthCredentialValidator.validateScopes(Mockito.anyString(), Mockito.any(Swagger.class),
+        Mockito.when(basicAuthCredentialValidator.validateScopes(Mockito.anyString(), Mockito.any(OpenAPI.class),
                 Mockito.any(MessageContext.class)))
                 .thenAnswer(invocationOnMock -> {
                     Object argument = invocationOnMock.getArguments()[0];

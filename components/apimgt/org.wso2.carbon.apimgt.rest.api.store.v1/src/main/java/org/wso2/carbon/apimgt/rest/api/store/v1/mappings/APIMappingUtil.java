@@ -28,11 +28,13 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductInfoDTO;
@@ -72,6 +74,7 @@ public class APIMappingUtil {
         dto.setDescription(model.getDescription());
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setLifeCycleStatus(model.getStatus());
+        dto.setType(model.getType());
 
         /* todo: created and last updated times
         if (null != model.getLastUpdated()) {
@@ -95,6 +98,17 @@ public class APIMappingUtil {
             apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
         }
         dto.setApiDefinition(apiSwaggerDefinition);
+
+        if (APIConstants.APITransportType.GRAPHQL.toString().equals(model.getType())) {
+            List<APIOperationsDTO> operationList = new ArrayList<>();
+            for (URITemplate template : model.getUriTemplates()) {
+                APIOperationsDTO operation = new APIOperationsDTO();
+                operation.setTarget(template.getUriTemplate());
+                operation.setVerb(template.getHTTPVerb());
+                operationList.add(operation);
+            }
+            dto.setOperations(operationList);
+        }
 
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -295,6 +309,7 @@ public class APIMappingUtil {
         apiInfoDTO.setVersion(apiId.getVersion());
         apiInfoDTO.setProvider(apiId.getProviderName());
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
+        apiInfoDTO.setType(api.getType());
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         Set<Tier> throttlingPolicies = api.getAvailableTiers();

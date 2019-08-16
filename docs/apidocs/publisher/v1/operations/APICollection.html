@@ -2,136 +2,20 @@
     <h1><a name="API (Collection)"></a>API (Collection)</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="apisGet"></a>Retrieve/Search APIs
-</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis</code>
+            <h4 class="operation-heading"><a name="apisImportGraphqlSchemaPost"></a>Import API Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/import-graphql-schema</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation provides you a list of available APIs qualifying under a given search condition.
+            <p class="marked">This operation can be used to create api from api definition.
 
-Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
+API definition is GraphQL Schema
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_view</code>
+                <code>apim:api_create</code>
 
             <h4 class="section-heading">
                 Examples
             </h4>
-            <h4 class="section-heading">
-                <u></u>
-            </h4>
-                <div class="pointer" data-toggle="collapse" data-target="#request-apisGet">
-                    <h5 class="section-heading">
-                        Request
-                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    </h5>
-                </div>
-                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis HTTP 1/1
-Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-</code></div>
-
-                <div class="pointer" data-toggle="collapse" data-target="#response-apisGet">
-                    <h5 class="section-heading">
-                        Response
-                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    </h5>
-                </div>
-                    <div id="response-apisGet" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
-Content-Type: application/json
-
-{
-  &quot;count&quot; : 1,
-  &quot;list&quot; : [ {
-    &quot;id&quot; : &quot;ae4eae22-3f65-387b-2323-d37eaa366fa8&quot;,
-    &quot;name&quot; : &quot;CalculatorAPI&quot;,
-    &quot;description&quot; : &quot;A calculator API that supports basic operations&quot;,
-    &quot;context&quot; : &quot;CalculatorAPI&quot;,
-    &quot;version&quot; : &quot;1.0.0&quot;,
-    &quot;provider&quot; : &quot;admin&quot;,
-    &quot;lifeCycleStatus&quot; : &quot;CREATED&quot;,
-    &quot;workflowStatus&quot; : &quot;APPROVED&quot;,
-    &quot;hasThumbnail&quot; : true,
-    &quot;securityScheme&quot; : [ &quot;oauth2&quot; ]
-  } ],
-  &quot;pagination&quot; : {
-    &quot;offset&quot; : 0,
-    &quot;limit&quot; : 1,
-    &quot;total&quot; : 1,
-    &quot;next&quot; : &quot;&quot;,
-    &quot;previous&quot; : &quot;&quot;
-  }
-}</code></div>
-
-                <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.0/apis&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
-
-            <h4 class="section-heading">
-                <u></u>
-            </h4>
-                <div class="pointer" data-toggle="collapse" data-target="#request-apisGet">
-                    <h5 class="section-heading">
-                        Request
-                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    </h5>
-                </div>
-                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis HTTP/1.1
-Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-</code></div>
-
-                <div class="pointer" data-toggle="collapse" data-target="#response-apisGet">
-                    <h5 class="section-heading">
-                        Response
-                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    </h5>
-                </div>
-                    <div id="response-apisGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-  &quot;count&quot;:2,
-  &quot;list&quot;:[
-  {
-    &quot;id&quot;:&quot;43537569-b701-4f3f-a989-e1b6f42ebcf0&quot;,
-    &quot;name&quot;:&quot;PizzaShackAPI&quot;,
-    &quot;description&quot;:&quot;This is a simple API for Pizza Shack online pizza delivery store.&quot;,
-    &quot;context&quot;:&quot;/pizzashack&quot;,
-    &quot;version&quot;:&quot;1.0.0&quot;,
-    &quot;provider&quot;:&quot;admin&quot;,
-    &quot;lifeCycleStatus&quot;:&quot;PUBLISHED&quot;,
-    &quot;workflowStatus&quot;:null,
-    &quot;hasThumbnail&quot;:true,
-    &quot;securityScheme&quot;:[
-
-    ]
-  },
-  {
-    &quot;id&quot;:&quot;740aeb01-2d3f-4721-afac-4324988a2e0b&quot;,
-    &quot;name&quot;:&quot;PizzaShackAPI&quot;,
-    &quot;description&quot;:&quot;This is a simple API for Pizza Shack online pizza delivery store.&quot;,
-    &quot;context&quot;:&quot;/pizzashack&quot;,
-    &quot;version&quot;:&quot;2.0.0&quot;,
-    &quot;provider&quot;:&quot;admin&quot;,
-    &quot;lifeCycleStatus&quot;:&quot;CREATED&quot;,
-    &quot;workflowStatus&quot;:null,
-    &quot;hasThumbnail&quot;:true,
-    &quot;securityScheme&quot;:[
-
-    ]
-  }
-  ],
-  &quot;pagination&quot;:{
-    &quot;offset&quot;:0,
-    &quot;limit&quot;:25,
-    &quot;total&quot;:2,
-    &quot;next&quot;:&quot;&quot;,
-    &quot;previous&quot;:&quot;&quot;
-  }
-}</code></div>
-
-                <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/publisher/v1.0/apis
-</code></div>
-
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -153,79 +37,21 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
+                            <span class="param-in">Form </span>
                             
-                            <span class="param-in">Query </span>
                             
                             
                             
                         </td>
                         <td class="param-name">
-                            <p>limit</p>
+                            <p>type</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Maximum size of resource array to return.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                Integer
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">25</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            <span class="param-in">Query </span>
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>offset</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Starting point within the complete list of items qualified.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                Integer
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">0</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>X-WSO2-Tenant</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-  retirieved from.
-</p>
+                            <p class="param-description marked">Definition type to upload</p>
                         </td>
                         <td>
                             <span class="param-type">
@@ -238,42 +64,48 @@ Content-Type: application/json
                     </tr>
                     <tr>
                         <td class="parameter">
+                            <span class="param-in">Form </span>
                             
-                            <span class="param-in">Query </span>
                             
                             
                             
                         </td>
                         <td class="param-name">
-                            <p>query</p>
+                            <p>file</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**Search condition**.
-
-You can search in attributes by using an **&quot;&lt;attribute&gt;:&quot;** modifier.
-
-Eg.
-&quot;provider:wso2&quot; will match an API if the provider of the API contains &quot;wso2&quot;.
-&quot;provider:&quot;wso2&quot;&quot; will match an API if the provider of the API is exactly &quot;wso2&quot;.
-&quot;status:PUBLISHED&quot; will match an API if the API is in PUBLISHED state.
-&quot;label:external&quot; will match an API if it contains a Microgateway label called &quot;external&quot;.
-
-Also you can use combined modifiers
-Eg.
-name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.
-
-Supported attribute modifiers are [**version, context, name, status,
-description, subcontext, doc, provider, label**]
-
-If no advanced attribute modifier has been specified,  the API names containing
-the search term will be returned as a result.
-
-Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl)
-</p>
+                            <p class="param-description marked">Definition to uploads a file</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                File
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>additionalProperties</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Additional attributes specified as a stringified JSON with API&#39;s schema</p>
                         </td>
                         <td>
                             <span class="param-type">
@@ -293,100 +125,14 @@ Please note that you need to use encoded URL (URL encoding) if you are using a c
                             
                         </td>
                         <td class="param-name">
-                            <p>If-None-Match</p>
+                            <p>If-Match</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resource.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            <span class="param-in">Query </span>
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>expand</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Defines whether the returned response should contain full details of API
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                Boolean
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>Accept</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Media types acceptable for the response. Default is application/json.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">application/json</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            <span class="param-in">Query </span>
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>tenantDomain</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Tenant domain, whose APIs should be retrieved. If not specified, the logged in user&#39;s tenant domain will
-be considered for this.
+                            <p class="param-description marked">Validator for conditional requests; based on ETag.
 </p>
                         </td>
                         <td>
@@ -417,179 +163,17 @@ be considered for this.
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. List of qualifying APIs is returned. </p></td>
+                        <td class="parameter"><p class="marked">201</p></td>
+                        <td class="parameter"><p class="marked">Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#APIList">APIList</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <hr/>
-            <h4 class="operation-heading"><a name="apisHead"></a>Check given API attibute name is already exist
-</h4> <code>HEAD https://apis.wso2.com/api/am/publisher/v1.0/apis</code>
-            <p class="marked"></p>
-
-            <p class="marked">Using this operation, you can check a given API context is already used. You need to provide the context name you want to check.
-</p>
-
-            <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_view</code>
-
-            <h4 class="section-heading">
-                Examples
-            </h4>
-
-            <h4 class="section-heading" id="scroll-to">Parameters</h4>
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                    <col style="width: 40%;"/>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                    <th>Default</th>
-                </tr>
-                </thead>
-                    <tr>
-                        <td class="parameter">
-                            
-                            <span class="param-in">Query </span>
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>query</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">**Search condition**.
-
-You can search in attributes by using an **&quot;&lt;attribute&gt;:&quot;** modifier.
-
-Eg.
-&quot;provider:wso2&quot; will match an API if the provider of the API is exactly &quot;wso2&quot;.
-
-Additionally you can use wildcards.
-
-Eg.
-&quot;provider:wso2*&quot; will match an API if the provider of the API starts with &quot;wso2&quot;.
-
-Supported attribute modifiers are [**version, context, lifeCycleStatus,
-description, subcontext, doc, provider**]
-
-If no advanced attribute modifier has been specified, search will match the
-given query string against API Name.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-None-Match</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resource.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-            </table>
-
-            <h4 class="section-heading">Responses</h4>
-
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 15%;"/>
-                    <col style="width: 70%;"/>
-                    <col style="width: 15%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>HTTP Code</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. Requested API attibute status is returned </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    
+                                    <a href="#!/models#API">API</a>
                             </span>
                         </td>
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">400</p></td>
-                        <td class="parameter"><p class="marked">Bad Request. Requested API attribute does not meet requiremnts. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested API attribute does not exist. </p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -597,8 +181,8 @@ variant of the resource.
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter"><p class="marked">415</p></td>
+                        <td class="parameter"><p class="marked">Unsupported Media Type. The entity of the request was in a not supported format. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -608,101 +192,18 @@ variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="searchGet"></a>Retrieve/Search APIs and API Documents by content
-</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/search</code>
+            <h4 class="operation-heading"><a name="apisValidateGraphqlSchemaPost"></a>Validate GraphQL API definition and retrieve a summary</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/validate-graphql-schema</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation provides you a list of available APIs and API Documents qualifying the given keyword match.
+            <p class="marked">This operation can be used to validate a graphQL definition and retrieve a summary.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:api_view</code>
+                <code>apim:api_create</code>
 
             <h4 class="section-heading">
                 Examples
             </h4>
-            <h4 class="section-heading">
-                <u></u>
-            </h4>
-                <div class="pointer" data-toggle="collapse" data-target="#request-searchGet">
-                    <h5 class="section-heading">
-                        Request
-                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    </h5>
-                </div>
-                    <div id="request-searchGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/search?limit&#x3D;25&amp;offset&#x3D;0&amp;query&#x3D;test HTTP 1/1
-Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-</code></div>
-
-                <div class="pointer" data-toggle="collapse" data-target="#response-searchGet">
-                    <h5 class="section-heading">
-                        Response
-                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    </h5>
-                </div>
-                    <div id="response-searchGet" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
-Content-Type: application/json
-
-{
-  &quot;count&quot; : 5,
-  &quot;list&quot; : [ {
-    &quot;id&quot; : &quot;437a11af-a1de-42a6-8ecd-82c4dcc29f34&quot;,
-    &quot;name&quot; : &quot;pizza api doc&quot;,
-    &quot;type&quot; : &quot;DOC&quot;,
-    &quot;docType&quot; : &quot;HOWTO&quot;,
-    &quot;summary&quot; : &quot;This is a sample documentation&quot;,
-    &quot;sourceType&quot; : &quot;INLINE&quot;,
-    &quot;visibility&quot; : &quot;API_LEVEL&quot;,
-    &quot;apiName&quot; : &quot;PizzaShackAPI&quot;,
-    &quot;apiVersion&quot; : &quot;1.0.0&quot;,
-    &quot;apiProvider&quot; : &quot;admin&quot;,
-    &quot;apiUUID&quot; : &quot;54b86c3a-11cd-47dc-9c7a-8140a34955da&quot;
-  }, {
-    &quot;id&quot; : &quot;54b86c3a-11cd-47dc-9c7a-8140a34955da&quot;,
-    &quot;name&quot; : &quot;PizzaShackAPI&quot;,
-    &quot;type&quot; : &quot;API&quot;,
-    &quot;description&quot; : &quot;This is a simple API for Pizza Shack online pizza delivery store.&quot;,
-    &quot;context&quot; : &quot;/pizzashack&quot;,
-    &quot;version&quot; : &quot;1.0.0&quot;,
-    &quot;provider&quot; : &quot;admin&quot;,
-    &quot;status&quot; : &quot;PUBLISHED&quot;
-  }, {
-    &quot;id&quot; : &quot;99958883-3162-4111-98e0-06fa7d472321&quot;,
-    &quot;name&quot; : &quot;test&quot;,
-    &quot;type&quot; : &quot;API&quot;,
-    &quot;context&quot; : &quot;/test&quot;,
-    &quot;version&quot; : &quot;1.0.0&quot;,
-    &quot;provider&quot; : &quot;admin&quot;,
-    &quot;status&quot; : &quot;DEPRECATED&quot;
-  }, {
-    &quot;id&quot; : &quot;895793f9-0b07-42f9-b5b2-6d5c489f10ee&quot;,
-    &quot;name&quot; : &quot;test&quot;,
-    &quot;type&quot; : &quot;API&quot;,
-    &quot;context&quot; : &quot;/test&quot;,
-    &quot;version&quot; : &quot;1.2.0&quot;,
-    &quot;provider&quot; : &quot;admin&quot;,
-    &quot;status&quot; : &quot;PUBLISHED&quot;
-  }, {
-    &quot;id&quot; : &quot;d76b563b-f6c4-432e-8d6d-dff56889e248&quot;,
-    &quot;name&quot; : &quot;test2&quot;,
-    &quot;type&quot; : &quot;API&quot;,
-    &quot;context&quot; : &quot;/test2&quot;,
-    &quot;version&quot; : &quot;1.0.0&quot;,
-    &quot;provider&quot; : &quot;admin&quot;,
-    &quot;status&quot; : &quot;CREATED&quot;
-  } ],
-  &quot;pagination&quot; : {
-    &quot;offset&quot; : 0,
-    &quot;limit&quot; : 25,
-    &quot;total&quot; : 5,
-    &quot;next&quot; : &quot;&quot;,
-    &quot;previous&quot; : &quot;&quot;
-  }
-}</code></div>
-
-                <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.0/search?limit&#x3D;25&amp;offset&#x3D;0&amp;query&#x3D;test&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
-
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -724,113 +225,25 @@ Content-Type: application/json
                 </thead>
                     <tr>
                         <td class="parameter">
+                            <span class="param-in">Form </span>
                             
-                            <span class="param-in">Query </span>
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>limit</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Maximum size of resource array to return.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                Integer
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">25</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            <span class="param-in">Query </span>
                             
                             
                             
                         </td>
                         <td class="param-name">
-                            <p>offset</p>
+                            <p>file</p>
                             <p class="param-required">
+                                required
                                 
-                                optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Starting point within the complete list of items qualified.
-</p>
+                            <p class="param-description marked">Definition to upload as a file</p>
                         </td>
                         <td>
                             <span class="param-type">
-                                Integer
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">0</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            <span class="param-in">Query </span>
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>query</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">**Search**.
-
-You can search by proving a keyword.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-None-Match</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resource.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
+                                File
                             </span>
                         </td>
                         <td>
@@ -857,25 +270,25 @@ variant of the resource.
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. List of qualifying APIs and API documents is returned. </p></td>
+                        <td class="parameter"><p class="marked">OK. API definition validation information is returned </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#SearchResultList">SearchResultList</a>
+                                    <a href="#!/models#GraphQLValidationResponse">GraphQLValidationResponse</a>
                             </span>
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    
+                                    <a href="#!/models#Error">Error</a>
                             </span>
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Workflow for the given reference in not found. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>

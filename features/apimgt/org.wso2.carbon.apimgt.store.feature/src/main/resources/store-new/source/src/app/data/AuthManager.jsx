@@ -157,6 +157,18 @@ class AuthManager {
     }
 
     /**
+     * retrieve Settings from settings rest api and store in the local storage
+     */
+    static setSettings() {
+        const promisedResponse = fetch('/api/am/store/v1.0/settings', {});
+        promisedResponse
+            .then(response => response.json())
+            .then((data) => {
+                localStorage.setItem('settings', JSON.stringify(data));
+            });
+    }
+
+    /**
      * Persist an user in browser local storage and in-memory, Since only one use can be logged
      * into the application at a time,This method will override any previously persist user data.
      * @param {User} user : An instance of the {User} class

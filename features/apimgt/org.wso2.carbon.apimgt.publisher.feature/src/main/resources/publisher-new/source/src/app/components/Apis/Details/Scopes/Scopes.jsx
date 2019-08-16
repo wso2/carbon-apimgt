@@ -97,10 +97,8 @@ class Scopes extends React.Component {
      * @memberof Scopes
      */
     render() {
-        const { intl } = this.props;
-        const { api } = this.props;
+        const { intl, classes, api } = this.props;
         const { scopes } = api;
-        const { classes } = this.props;
         const url = `/apis/${api.id}/scopes/create`;
         const editUrl = `/apis/${api.id}/scopes/edit`;
         const columns = [
@@ -115,7 +113,7 @@ class Scopes extends React.Component {
             {
                 options: {
                     customBodyRender: (value, tableMeta) => {
-                        if (tableMeta.rowData && tableMeta.rowData[1]) {
+                        if (tableMeta.rowData) {
                             const roles = value || [];
                             return (
                                 roles.join(',')
@@ -221,7 +219,7 @@ class Scopes extends React.Component {
                 <Grid container justify='center'>
                     <Grid item sm={5}>
                         <Card className={classes.card}>
-                            <Typography className={classes.headline} gutterBottom variant='headline' component='h2'>
+                            <Typography className={classes.headline} gutterBottom variant='h5' component='h2'>
                                 <FormattedMessage
                                     id='Apis.Details.Scopes.Scopes.create.scopes.title'
                                     defaultMessage='Create Scopes'

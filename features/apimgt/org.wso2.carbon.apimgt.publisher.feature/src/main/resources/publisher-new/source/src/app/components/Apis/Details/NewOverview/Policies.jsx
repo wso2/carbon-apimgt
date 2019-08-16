@@ -24,50 +24,53 @@ import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import ApiContext from '../components/ApiContext';
+import API from 'AppData/api';
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
+/**
+ *
+ *
+ * @param {*} props
+ * @returns
+ */
 function Policies(props) {
-    const { parentClasses } = props;
+    const { parentClasses, api } = props;
     return (
-        <ApiContext.Consumer>
-            {({ api }) => (
-                <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
-                    <div className={parentClasses.titleWrapper}>
-                        <Typography variant='h5' component='h3' className={parentClasses.title}>
-                            <FormattedMessage
-                                id='Apis.Details.NewOverview.Policies.throttling.policies'
-                                defaultMessage='Throttling Policies'
-                            />
-                        </Typography>
-                        <Link to={'/apis/' + api.id + '/documents'}>
-                            <Button variant='contained' color='default'>
-                                <FormattedMessage
-                                    id='Apis.Details.NewOverview.Policies.edit'
-                                    defaultMessage='Edit'
-                                />
-                            </Button>
-                        </Link>
-                    </div>
+        <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
+            <div className={parentClasses.titleWrapper}>
+                <Typography variant='h5' component='h3' className={parentClasses.title}>
+                    <FormattedMessage
+                        id='Apis.Details.NewOverview.Policies.throttling.policies'
+                        defaultMessage='Throttling Policies'
+                    />
+                </Typography>
+                <Link
+                    to={(api.apiType === API.CONSTS.APIProduct ? '/api-products/' : '/apis/') + api.id + '/documents'}
+                >
+                    <Button variant='contained' color='default'>
+                        <FormattedMessage id='Apis.Details.NewOverview.Policies.edit' defaultMessage='Edit' />
+                    </Button>
+                </Link>
+            </div>
 
-                    {/* Throttling Policies */}
-                    <Typography component='p' variant='body1'>
-                        {api.policies &&
-                            api.policies.length !== 0 &&
-                            api.policies.map((item, index) => (
-                                <span>
-                                    {item}
-                                    {api.policies.length !== index + 1 && ', '}{' '}
-                                </span>
-                            ))}
-                    </Typography>
-                </Paper>
-            )}
-        </ApiContext.Consumer>
+            {/* Throttling Policies */}
+            <Typography component='p' variant='body1'>
+                {api.policies &&
+                    api.policies.length !== 0 &&
+                    api.policies.map((item, index) => (
+                        <span>
+                            {item}
+                            {api.policies.length !== index + 1 && ', '}{' '}
+                        </span>
+                    ))}
+            </Typography>
+        </Paper>
     );
 }
 
 Policies.propTypes = {
     parentClasses: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({}).isRequired,
 };
 
-export default Policies;
+export default withAPI(Policies);

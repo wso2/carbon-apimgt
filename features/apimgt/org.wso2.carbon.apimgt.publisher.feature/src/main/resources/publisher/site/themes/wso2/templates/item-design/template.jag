@@ -11,6 +11,7 @@
         var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
         var _description = encode.forHtml(api.description);
         var _tags = encode.forHtml(api.tags);
+        var _json_schema = api.enableSchemaValidation;
     }
     else{
         var apiUrlId = "";
@@ -349,6 +350,30 @@
 																<p class="help-block" id="rolesHelp"><%=i18n.localize("Type a Tag and Enter")%></p>
 															</div>
 														</div>
+														<div class="form-group">
+                                                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 col-sm-offset-3 col-md-offset-3 col-lg-offset-3">
+                                                        		<a href="#" class="more-advanced-options but" ref="more-advanced-options-endpoints"" title="<%=i18n.localize("Show Advanced Options")%>" ><%=i18n.localize("Show Advanced Options")%></a>
+                                                        	</div>
+                                                        </div>
+                                                        	<div id="more-advanced-options-endpoints"  style="display:none">
+                                                        		<div class="form-group">
+                                                        		    <label class = "col-sm-3 control-label"><%=i18n.localize("Schema Validation:")%>
+                                                        		    <a class="help_popup" help_data="schema_validaton_help" title="schema_validaton_help" data-trigger="hover" data-placement="bottom">
+                                                        			    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                        			       <i class="fw fw-circle fw-stack-2x"></i>
+                                                                           <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                                        			    </span>
+                                                        		    </a>
+                                                        		        <p id="schema_validaton_help" class="hide"><%=i18n.localize("Marking an API to be validated from the schema")%></p>
+                                                        		    </label>
+                                                        	        <div class="controls col-sm-8">
+                                                                        <label class="checkbox">
+                                                                        <input type="checkbox" id="schemaValidation" name= "schemaValidation"  value="schemaValidation" <%if(_json_schema =="true"){%>checked<%}%>>
+                                                                        <span class="helper"></span>
+                                                                    </label>
+                                                                </div>
+                                                        	</div>
+                                                        </div>
 										  </div><!-- left -->
 
 										  <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">

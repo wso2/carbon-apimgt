@@ -198,6 +198,9 @@
     transform: rotate(360deg);
   }
 }
+body{
+  margin: 0;
+}
 /* Swagger Editor Styles */
 #swagger-editor {
     font-size: 1.3em;

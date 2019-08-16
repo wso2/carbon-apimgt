@@ -21,13 +21,11 @@ import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
 import GridIcon from '@material-ui/icons/GridOn';
-import Grid from '@material-ui/core/Grid';
 import List from '@material-ui/icons/List';
 import { withStyles } from '@material-ui/core/styles';
 import CustomIcon from '../../Shared/CustomIcon';
-import Loading from '../../Base/Loading/Loading';
-import ApiThumb from './ApiThumb';
 import ApiTableView from './ApiTableView';
+import { ApiContext } from '../Details/ApiContext';
 
 const styles = theme => ({
     rightIcon: {
@@ -98,39 +96,16 @@ class CommonListing extends React.Component {
     };
 
     /**
-     * Returns the appropriate rendering depending on the type of view being used
-     *
-     * @param {string} type Listing type
-     * @param {object} apis APIs object
-     * @param {object} classes Classes prop
-     * @returns {Component}
-     * @memberof CommonListing
-     */
-    view = (type, apis, classes) => {
-        const { path } = this.props;
-        return type === 'grid' ? (
-            <Grid container className={classes.ListingWrapper}>
-                {apis.list.map(api => (
-                    <ApiThumb api={api} key={api.id} path={path} />
-                ))}
-            </Grid>
-        ) : (
-            <React.Fragment>
-                <ApiTableView apis={apis.list} />
-            </React.Fragment>
-        );
-    }
-
-    /**
      *
      * @inheritdoc
      * @returns {React.Component} @inheritdoc
      * @memberof CommonListing
      */
     render() {
-        const { apis } = this.props;
+        const {
+            apis, apiType, theme, classes,
+        } = this.props;
         const { listType } = this.state;
-        const { theme, classes } = this.props;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
 
         return (
@@ -161,15 +136,18 @@ class CommonListing extends React.Component {
                     </div>
                 </div>
 
-                <Grid container spacing={0} justify='center'>
-                    <Grid item xs={12}>
-                        {apis ? (
-                            this.view(listType, apis, classes)
-                        ) : (
-                            <Loading />
-                        )}
-                    </Grid>
-                </Grid>
+                {listType === 'grid'
+                && (
+                    <ApiContext.Provider value={{ apiType }}>
+                        <ApiTableView gridView />
+                    </ApiContext.Provider>
+                )}
+                {listType === 'list'
+                && (
+                    <ApiContext.Provider value={{ apiType }}>
+                        <ApiTableView gridView={false} />
+                    </ApiContext.Provider>
+                )}
             </main>
         );
     }
@@ -178,6 +156,8 @@ class CommonListing extends React.Component {
 CommonListing.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
+    apiType: PropTypes.string.isRequired,
+    apis: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(CommonListing);

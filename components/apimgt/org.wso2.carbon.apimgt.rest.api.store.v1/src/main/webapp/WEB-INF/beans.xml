@@ -17,8 +17,6 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApisApi"/>
 	    <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApiProductsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ExportApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ImportApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SdkGenApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SearchApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SelfSignupApi"/>
@@ -27,7 +25,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.TagsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ThrottlingPoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SwaggerYamlApi"/>
-            
+
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
@@ -51,7 +49,7 @@
             <ref bean="AuthenticationInterceptor"/>
             <ref bean="BasicAuthenticationInterceptor"/>
             <ref bean="PostAuthenticationInterceptor"/>
-            <ref bean="SubscriberRegistrationInterceptor"/>            
+            <ref bean="SubscriberRegistrationInterceptor"/>
             <ref bean="ValidationInInterceptor"/>
             <ref bean="ETagInInterceptor"/>
         </cxf:inInterceptors>

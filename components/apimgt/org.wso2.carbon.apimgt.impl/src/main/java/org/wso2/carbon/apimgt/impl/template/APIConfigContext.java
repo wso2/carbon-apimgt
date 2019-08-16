@@ -69,6 +69,7 @@ public class APIConfigContext extends ConfigContext {
         //set the api name version and context
         context.put("apiName", this.getAPIName(api));
         context.put("apiVersion", api.getId().getVersion());
+        context.put("UUID", api.getUUID());
 
         // We set the context pattern now to support plugable version strategy
         // context.put("apiContext", api.getContext());
@@ -88,6 +89,11 @@ public class APIConfigContext extends ConfigContext {
             context.put("apiIsOauthProtected", Boolean.TRUE);
         } else {
             context.put("apiIsOauthProtected", Boolean.FALSE);
+        }
+        if (api.isEnabledSchemaValidation()) {
+            context.put("enableSchemaValidation", Boolean.TRUE);
+        } else {
+            context.put("enableSchemaValidation", Boolean.FALSE);
         }
     }
 

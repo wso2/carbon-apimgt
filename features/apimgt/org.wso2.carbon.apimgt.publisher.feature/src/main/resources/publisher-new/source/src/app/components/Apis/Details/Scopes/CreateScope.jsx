@@ -57,13 +57,26 @@ class CreateScope extends React.Component {
         super(props);
         this.api = new Api();
         this.api_uuid = props.match.params.api_uuid;
+        const valid = [];
+        valid.name = {
+            invalid: false,
+            error: '',
+        };
+        valid.description = {
+            invalid: false,
+            error: '',
+        };
         this.state = {
             apiScopes: null,
             apiScope: {},
             roles: [],
+            valid,
         };
         this.addScope = this.addScope.bind(this);
         this.handleInputs = this.handleInputs.bind(this);
+        this.validateScopeName = this.validateScopeName.bind(this);
+        this.handleScopeNameInput = this.handleScopeNameInput.bind(this);
+        this.validateScopeDescription = this.validateScopeDescription.bind(this);
     }
 
     /**
@@ -71,22 +84,28 @@ class CreateScope extends React.Component {
      * @memberof Scopes
      */
     addScope() {
-        const api = new Api();
+        const { intl, api } = this.props;
+        if (this.validateScopeName('name', this.state.apiScope.name)) {
+            // return status of the validation
+            return;
+        }
+        const restApi = new Api();
         const scope = this.state.apiScope;
-        const { intl } = this.props;
+
         scope.bindings = {
             type: 'role',
             values: this.state.roles,
         };
-        const newApi = this.props.api;
-        newApi.scopes.push(scope);
+        // temp fix to deep copy
         // eslint-disable-next-line no-underscore-dangle
-        const promisedApiUpdate = api.update(newApi._data);
+        const newApi = JSON.parse(JSON.stringify(api._data));
+        newApi.scopes.push(scope);
+        const promisedApiUpdate = restApi.update(newApi);
         promisedApiUpdate.then((response) => {
             if (response.status !== 200) {
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Details.Scopes.CreateScope.something.went.wrong.while.updating.the.scope',
-                    defaultMessage: 'Something went wrong while updating the scope',
+                    defaultMessage: 'Something went wrong while adding a scope',
                 }));
                 return;
             }
@@ -101,6 +120,13 @@ class CreateScope extends React.Component {
                 roles: [],
             });
         });
+        promisedApiUpdate.catch((error) => {
+            const { response } = error;
+            if (response.body) {
+                const { description } = response.body;
+                Alert.error(description);
+            }
+        });
     }
 
     /**
@@ -113,16 +139,57 @@ class CreateScope extends React.Component {
             this.setState({
                 roles: event,
             });
-        } else {
-            const input = event.target;
-            const { apiScope } = this.state;
-            apiScope[input.id] = input.value;
-            this.setState({
-                apiScope,
-            });
         }
     }
 
+    handleScopeNameInput({ target: { id, value } }) {
+        this.validateScopeName(id, value);
+    }
+
+    validateScopeName(id, value) {
+        const { valid, apiScope } = this.state;
+        const { api: { scopes } } = this.props;
+
+        apiScope[id] = value;
+        valid[id].invalid = !(value && value.length > 0);
+        if (valid[id].invalid) {
+            valid[id].error = 'Scope name cannot be empty';
+        }
+        const exist = scopes.find((scope) => { return scope.name === value; });
+        if (!valid[id].invalid && exist) {
+            valid[id].invalid = true;
+            valid[id].error = 'Scope name already exist';
+        }
+        if (!valid[id].invalid && /[!@#$%^&*(),.?":{}[\]|<>\t\n]/i.test(value)) {
+            valid[id].invalid = true;
+            valid[id].error = 'Field contains special characters';
+        }
+        if (!valid[id].invalid) {
+            valid[id].error = '';
+        }
+        this.setState({
+            valid, apiScope,
+        });
+        return valid[id].invalid;
+    }
+
+    validateScopeDescription({ target: { id, value } }) {
+        const { valid, apiScope } = this.state;
+        apiScope[id] = value;
+        valid[id].invalid = false;
+        valid[id].error = '';
+        this.setState({
+            valid, apiScope,
+        });
+    }
+
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof CreateScope
+     */
     render() {
         const { classes } = this.props;
         const url = `/apis/${this.props.api.id}/scopes`;
@@ -131,7 +198,7 @@ class CreateScope extends React.Component {
                 <Typography
                     className={classes.headline}
                     gutterBottom
-                    variant='headline'
+                    variant='h5'
                     component='h2'
                 >
                     <FormattedMessage
@@ -143,12 +210,14 @@ class CreateScope extends React.Component {
                     <APIPropertyField name='Name'>
                         <TextField
                             fullWidth
+                            error={this.state.valid.name.invalid}
+                            helperText={this.state.valid.name.error}
                             id='name'
                             type='text'
                             name='name'
                             margin='normal'
                             value={this.state.apiScope.name || ''}
-                            onChange={this.handleInputs}
+                            onChange={this.handleScopeNameInput}
                         />
                     </APIPropertyField>
                     <APIPropertyField name='Description'>
@@ -164,7 +233,7 @@ class CreateScope extends React.Component {
                             />}
                             margin='normal'
                             type='text'
-                            onChange={this.handleInputs}
+                            onChange={this.validateScopeDescription}
                             value={this.state.apiScope.description || ''}
                         />
                     </APIPropertyField>
@@ -180,6 +249,7 @@ class CreateScope extends React.Component {
                         color='primary'
                         onClick={this.addScope}
                         className={classes.buttonSave}
+                        disabled={this.state.valid.name.invalid}
                     >
                         <FormattedMessage
                             id='Apis.Details.Scopes.CreateScope.save'

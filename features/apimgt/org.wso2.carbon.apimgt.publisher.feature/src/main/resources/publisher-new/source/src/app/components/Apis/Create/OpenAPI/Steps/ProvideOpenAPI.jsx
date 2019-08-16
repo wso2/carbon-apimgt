@@ -188,7 +188,7 @@ class ProvideOpenAPI extends Component {
                                     </Typography>
                                     {files.map(f => (
                                         <div key={f.name} className={classes.fileName}>
-                                            <Typography variant='body2' gutterBottom>
+                                            <Typography variant='body1' gutterBottom>
                                                 {f.name} - {f.size} bytes
                                             </Typography>
                                         </div>

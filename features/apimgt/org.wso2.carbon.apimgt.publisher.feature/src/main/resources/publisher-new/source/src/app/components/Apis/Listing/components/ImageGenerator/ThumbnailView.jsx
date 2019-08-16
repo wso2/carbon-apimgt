@@ -41,6 +41,7 @@ import PropTypes from 'prop-types';
 import Dropzone from 'react-dropzone';
 import { SketchPicker } from 'react-color';
 import Api from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 import MaterialIcons from 'MaterialIcons';
 import Alert from 'AppComponents/Shared/Alert';
 import ImageGenerator from './ImageGenerator';
@@ -216,9 +217,11 @@ class ThumbnailView extends Component {
      * Load required data for showing the thubnail view
      */
     componentDidMount() {
-        const thumbApi = new Api();
-        const { api } = this.props;
-        thumbApi.getAPIThumbnail(api.id).then((response) => {
+        const { api: { apiType, id } } = this.props;
+        const promisedThumbnail = apiType === Api.CONSTS.APIProduct ? new APIProduct().getAPIProductThumbnail(id) :
+            new Api().getAPIThumbnail(id);
+
+        promisedThumbnail.then((response) => {
             if (response && response.data) {
                 if (response.headers['content-type'] === 'application/json') {
                     const iconJson = JSON.parse(response.data);
@@ -305,10 +308,12 @@ class ThumbnailView extends Component {
      * @param {File} file new thumbnail image file
      */
     uploadThumbnail(apiId, file, intl) {
-        const api = new Api();
+        const { api: { apiType, id } } = this.props;
+        const promisedThumbnail = apiType === Api.CONSTS.APIProduct ?
+            new APIProduct().addAPIProductThumbnail(id, file) :
+            new Api().addAPIThumbnail(id, file);
 
-        const thumbnailPromise = api.addAPIThumbnail(apiId, file);
-        thumbnailPromise
+        promisedThumbnail
             .then(() => {
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Listing.components.ImageGenerator.ThumbnailView.thumbnail.upload.success',
@@ -408,7 +413,7 @@ class ThumbnailView extends Component {
                         {view}
                         <span className={classes.thumbBackdrop} />
                         <span className={classes.thumbButton}>
-                            <Typography component='span' variant='subheading' color='inherit'>
+                            <Typography component='span' variant='subtitle1' color='inherit'>
                                 <EditIcon />
                             </Typography>
                         </span>
@@ -461,7 +466,7 @@ class ThumbnailView extends Component {
 
                     <DialogContent>
                         {selectedTab === 'upload' && (
-                            <Grid container spacing={16}>
+                            <Grid container spacing={4}>
                                 <Grid item xs={3}>
                                     <div className={classes.imageContainer}>
                                         <img
@@ -494,7 +499,7 @@ class ThumbnailView extends Component {
                             </Grid>
                         )}
                         {selectedTab === 'design' && (
-                            <Grid container spacing={16}>
+                            <Grid container spacing={4}>
                                 <Grid item xs={3} className={classes.imageGenWrapper}>
                                     <ImageGenerator
                                         width={width}

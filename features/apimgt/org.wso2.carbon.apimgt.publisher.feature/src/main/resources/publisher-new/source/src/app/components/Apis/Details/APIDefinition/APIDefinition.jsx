@@ -39,6 +39,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import MonacoEditor from 'react-monaco-editor';
 import yaml from 'js-yaml';
 import Alert from 'AppComponents/Shared/Alert';
+import API from 'AppData/api.js';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 
 import Dropzone from 'react-dropzone';
@@ -99,6 +100,7 @@ class APIDefinition extends React.Component {
         this.state = {
             openEditor: false,
             swagger: null,
+            graphQL: null,
             format: null,
             convertTo: null,
         };
@@ -115,6 +117,8 @@ class APIDefinition extends React.Component {
         this.openUpdateConfirmation = this.openUpdateConfirmation.bind(this);
         this.updateSwaggerDefinition = this.updateSwaggerDefinition.bind(this);
         this.validateAndUpdateApiDefinition = this.validateAndUpdateApiDefinition.bind(this);
+        this.validateAndImportSchema = this.validateAndImportSchema.bind(this);
+        this.updateGraphQLAPIDefinition = this.updateGraphQLAPIDefinition.bind(this);
     }
 
     /**
@@ -122,14 +126,27 @@ class APIDefinition extends React.Component {
      */
     componentDidMount() {
         const { api } = this.props;
-        const promisedApi = api.getSwagger(api.id);
+        let promisedApi;
+        if (api.type === 'GRAPHQL') {
+            promisedApi = api.getSchema(api.id);
+        } else {
+            promisedApi = api.getSwagger(api.id);
+        }
+
         promisedApi
             .then((response) => {
-                this.setState({
-                    swagger: json2yaml.stringify(response.obj),
-                    format: 'yaml',
-                    convertTo: this.getConvertToFormat('yaml'),
-                });
+                if (api.type === 'GRAPHQL') {
+                    this.setState({
+                        graphQL: response.obj.schemaDefinition,
+                        format: 'txt',
+                    });
+                } else {
+                    this.setState({
+                        swagger: json2yaml.stringify(response.obj),
+                        format: 'yaml',
+                        convertTo: this.getConvertToFormat('yaml'),
+                    });
+                }
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -151,11 +168,16 @@ class APIDefinition extends React.Component {
     onDrop(files) {
         const file = files[0];
         const { intl } = this.props;
+        const { graphQL } = this.state;
         if (file) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const { result } = e.target;
-                this.validateAndUpdateApiDefinition(result);
+                if (graphQL != null) {
+                    this.validateAndImportSchema(file);
+                } else {
+                    this.validateAndUpdateApiDefinition(result);
+                }
             };
             reader.readAsText(file);
         } else {
@@ -201,6 +223,55 @@ class APIDefinition extends React.Component {
      */
     getConvertToFormat(format) {
         return format === 'json' ? 'yaml' : 'json';
+    }
+
+    /**
+     * Validates the given graphQL api schema.
+     * @param {*}  file graphQL schema.
+     */
+    validateAndImportSchema(file) {
+        const { api, intl } = this.props;
+        const promisedValidation = api.validateGraphQLFile(file);
+        promisedValidation
+            .then((response) => {
+                const { isValid, graphQLInfo } = response.obj;
+                if (isValid === true) {
+                    api.operations = graphQLInfo.operations;
+                    this.updateGraphQLAPIDefinition(api, graphQLInfo.graphQLSchema.schemaDefinition);
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+                Alert.error(intl.formatMessage({
+                    id: 'Error.while.validating.the.imported.graphQLSchema',
+                    defaultMessage: 'Error while validating imported schema',
+                }));
+            });
+    }
+
+    /**
+     * Update the graphQL api with its operation
+     * @param {*}  api
+     * @param {*}  graphQLInfo
+     */
+    updateGraphQLAPIDefinition(api, graphQLSchema) {
+        const { intl } = this.props;
+        const promisedAPI = api.updateGraphQLAPIDefinition(api.id, graphQLSchema);
+        promisedAPI
+            .then((response) => {
+                this.setState({ graphQL: response.data });
+                Alert.success(intl.formatMessage({
+                    id: 'Apis.Details.APIDefinition.APIDefinition.graphQLDefinition.updated.successfully',
+                    defaultMessage: 'GraphQL API Definition Updated Successfully',
+                }));
+            })
+            .catch((err) => {
+                console.log(err);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.APIDefinition.APIDefinition.error.updating.graphQL.schema',
+                    defaultMessage: 'Error while updating graphQL schema',
+                }));
+            });
     }
 
     /**
@@ -346,11 +417,21 @@ class APIDefinition extends React.Component {
      */
     render() {
         const {
-            swagger, openEditor, openDialog, format, convertTo, notFound,
+            swagger, graphQL, openEditor, openDialog, format, convertTo, notFound,
         } = this.state;
         const { classes, resourceNotFountMessage } = this.props;
-        const downloadLink = 'data:text/' + format + ';charset=utf-8,' + encodeURIComponent(swagger);
-        const fileName = 'swagger.' + format;
+        let downloadLink;
+        let fileName;
+        let isGraphQL = 0;
+
+        if (graphQL !== null) {
+            downloadLink = 'data:text/' + format + ';charset=utf-8,' + encodeURIComponent(graphQL);
+            fileName = 'schema.graphql';
+            isGraphQL = 1;
+        } else {
+            downloadLink = 'data:text/' + format + ';charset=utf-8,' + encodeURIComponent(swagger);
+            fileName = 'swagger.' + format;
+        }
         const editorOptions = {
             selectOnLineNumbers: true,
             readOnly: true,
@@ -361,7 +442,7 @@ class APIDefinition extends React.Component {
         if (notFound) {
             return <ResourceNotFound message={resourceNotFountMessage} />;
         }
-        if (!swagger) {
+        if (!swagger && !graphQL) {
             return <Progress />;
         }
 
@@ -370,22 +451,27 @@ class APIDefinition extends React.Component {
                 <div className={classes.topBar}>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.api.definition'
-                                defaultMessage='API Definition'
-                            />
+                            {graphQL ? (
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.schema.definition'
+                                    defaultMessage='Schema Definition'
+                                />) :
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.api.definition'
+                                    defaultMessage='API Definition'
+                                /> }
                         </Typography>
-                        <Button size='small' className={classes.button} onClick={this.openEditor}>
-                            <EditRounded className={classes.buttonIcon} />
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.edit'
-                                defaultMessage='Edit'
-                            />
-                        </Button>
+                        {!graphQL && (
+                            <Button size='small' className={classes.button} onClick={this.openEditor}>
+                                <EditRounded className={classes.buttonIcon} />
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.edit'
+                                    defaultMessage='Edit'
+                                />
+                            </Button>)}
                         <Dropzone
                             multiple={false}
                             className={classes.dropzone}
-                            accept={['application/json', 'application/x-yaml']}
                             onDrop={(files) => {
                                 this.onDrop(files);
                             }}
@@ -398,6 +484,7 @@ class APIDefinition extends React.Component {
                                 />
                             </Button>
                         </Dropzone>
+
                         <a className={classes.downloadLink} href={downloadLink} download={fileName}>
                             <Button size='small' className={classes.button}>
                                 <CloudDownloadRounded className={classes.buttonIcon} />
@@ -419,6 +506,7 @@ class APIDefinition extends React.Component {
                             />
                         </Button>
                     </div>
+                    {isGraphQL === 0 &&
                     <div className={classes.converterWrapper}>
                         <Button size='small' className={classes.button} onClick={this.onChangeFormatClick}>
                             <FormattedMessage
@@ -428,13 +516,14 @@ class APIDefinition extends React.Component {
                             {convertTo}
                         </Button>
                     </div>
+                    }
                 </div>
                 <div>
                     <MonacoEditor
                         width='100%'
                         height='calc(100vh - 51px)'
                         theme='vs-dark'
-                        value={swagger}
+                        value={swagger !== null ? swagger : graphQL}
                         options={editorOptions}
                     />
                 </div>
@@ -536,6 +625,7 @@ APIDefinition.propTypes = {
         updateSwagger: PropTypes.func,
         getSwagger: PropTypes.func,
         id: PropTypes.string,
+        apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]),
     }).isRequired,
     history: PropTypes.shape({
         push: PropTypes.object,

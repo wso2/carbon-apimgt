@@ -28,6 +28,8 @@ import Select from '@material-ui/core/Select';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
+import { FormLabel } from '@material-ui/core';
+import ChipInput from 'material-ui-chip-input';
 
 /**
  * @inheritdoc
@@ -59,7 +61,6 @@ const ApplicationCreate = (props) => {
         const { applicationRequest, updateApplicationRequest } = props;
         const newRequest = { ...applicationRequest };
         const { target: currentTarget } = event;
-
         switch (field) {
             case 'name':
                 newRequest.name = currentTarget.value;
@@ -98,7 +99,12 @@ const ApplicationCreate = (props) => {
         isRequiredAttribute,
         getAttributeValue,
         intl,
+        validateName,
+        isApplicationSharingEnabled,
+        handleAddChip,
+        handleDeleteChip,
     } = props;
+    const tokenTypeList = ['JWT', 'OAUTH'];
     return (
         <form className={classes.container} noValidate autoComplete='off'>
             <Grid container spacing={24} className={classes.root}>
@@ -116,7 +122,8 @@ const ApplicationCreate = (props) => {
                             }}
                             helperText={intl.formatMessage({
                                 defaultMessage:
-                                    'Enter a name to identify the Application. You will be able to pick this application when subscribing to APIs',
+                                    `Enter a name to identify the Application. 
+                                    You will be able to pick this application when subscribing to APIs`,
                                 id: 'Shared.AppsAndKeys.ApplicationCreateForm.enter.a.name',
                             })}
                             fullWidth
@@ -128,7 +135,7 @@ const ApplicationCreate = (props) => {
                             })}
                             autoFocus
                             className={classes.inputText}
-                            onBlur={e => props.validateName(e.target.value)}
+                            onBlur={e => validateName(e.target.value)}
                             error={!isNameValid}
                         />
                     </FormControl>
@@ -154,13 +161,33 @@ const ApplicationCreate = (props) => {
                             </Select>
                             <Typography variant='caption'>
                                 <FormattedMessage
-                                    defaultMessage='Assign API request quota per access token. Allocated quota will be shared among all
-                                    the subscribed APIs of the application.'
+                                    defaultMessage={`Assign API request quota per access token. 
+                                    Allocated quota will be shared among all
+                                    the subscribed APIs of the application.`}
                                     id='Shared.AppsAndKeys.ApplicationCreateForm.assign.api.request'
                                 />
                             </Typography>
                         </FormControl>
                     )}
+                    <FormControl margin='normal' className={classes.FormControlOdd}>
+                        <InputLabel htmlFor='quota-helper' className={classes.quotaHelp}>
+                            <FormattedMessage
+                                defaultMessage='Token Type'
+                                id='Shared.AppsAndKeys.ApplicationCreateForm.token.type'
+                            />
+                        </InputLabel>
+                        <Select
+                            value={applicationRequest.tokenType}
+                            onChange={e => handleChange('tokenType', e)}
+                            input={<Input name='tokenType' id='quota-helper' />}
+                        >
+                            {tokenTypeList.map(type => (
+                                <MenuItem key={type} value={type}>
+                                    {type}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                     <FormControl margin='normal' className={classes.FormControl}>
                         <TextField
                             label='Application Description'
@@ -210,6 +237,25 @@ const ApplicationCreate = (props) => {
                                     />
                                 </FormControl>
                             ) : (null)))
+                     )}
+                    {isApplicationSharingEnabled && (
+                        <FormControl margin='normal' className={classes.FormControl}>
+                            <FormLabel component='legend'>
+                                <Typography variant='caption'>
+                                    <FormattedMessage
+                                        defaultMessage='Application Groups'
+                                        id='Shared.AppsAndKeys.ApplicationCreateForm.add.groups.label'
+                                    />
+                                </Typography>
+                            </FormLabel>
+                            <ChipInput
+                                {...applicationRequest}
+                                value={applicationRequest.groups || []}
+                                onAdd={chip => props.handleAddChip(chip, applicationRequest.groups)}
+                                onDelete={(chip, index) => props.handleDeleteChip(chip,
+                                    index, applicationRequest.groups)}
+                            />
+                        </FormControl>
                     )}
                 </Grid>
             </Grid>
@@ -219,7 +265,16 @@ const ApplicationCreate = (props) => {
 
 ApplicationCreate.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({}).isRequired,
+    applicationRequest: PropTypes.shape({}).isRequired,
+    intl: PropTypes.func.isRequired,
+    isNameValid: PropTypes.bool.isRequired,
+    allAppAttributes: PropTypes.arrayOf(PropTypes.array).isRequired,
+    handleAttributesChange: PropTypes.func.isRequired,
+    getAttributeValue: PropTypes.func.isRequired,
+    validateName: PropTypes.func.isRequired,
+    updateApplicationRequest: PropTypes.func.isRequired,
+    isRequiredAttribute: PropTypes.bool.isRequired,
+    throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(ApplicationCreate));

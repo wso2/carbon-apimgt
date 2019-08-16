@@ -85,7 +85,6 @@
   "apim.throttling.policy_deploy.password": "$ref{apim.throttling.password}",
   "apim.throttling.enable_blacklist_condition": "true",
   "apim.throttling.enable_decision_connection": true,
-  "apim.throttling.jms.destination": "throttleData",
   "apim.throttling.jms.conn_jndi_name": "TopicConnectionFactory",
   "apim.throttling.jms.destination_type": "topic",
   "apim.throttling.jms.username": "$ref{apim.throttling.username}",

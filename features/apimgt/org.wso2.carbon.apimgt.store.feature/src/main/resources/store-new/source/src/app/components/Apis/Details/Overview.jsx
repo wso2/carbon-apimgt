@@ -31,6 +31,7 @@ import { FormattedMessage } from 'react-intl';
 import CustomIcon from '../../Shared/CustomIcon';
 import { ApiContext } from './ApiContext';
 import Resources from './Resources';
+import Operations from './Operations';
 import Comments from './Comments/Comments';
 import Sdk from './Sdk';
 /**
@@ -119,6 +120,23 @@ class Overview extends React.Component {
      */
     render() {
         const { classes, theme } = this.props;
+        function getResourcesForAPIs(apiType, api) {
+            switch (apiType) {
+                case 'GRAPHQL':
+                    return <Operations api={api} />;
+                default:
+                    return <Resources api={api} />;
+            }
+        }
+
+        function getTitleForAPIOperationType(apiType) {
+            switch (apiType) {
+                case 'GRAPHQL':
+                    return <FormattedMessage id='Apis.Details.Overview.operations.title' defaultMessage='Operations' />;
+                default:
+                    return <FormattedMessage id='Apis.Details.Overview.resources.title' defaultMessage='Resources' />;
+            }
+        }
         return (
             <ApiContext.Consumer>
                 {({ api, applicationsAvailable, subscribedApplications }) => (
@@ -204,16 +222,11 @@ class Overview extends React.Component {
                                         height={24}
                                         icon='credentials'
                                     />
-
-                                    <Typography className={classes.heading} variant='h6'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Overview.resources.title'
-                                            defaultMessage='Resources'
-                                        />
-                                    </Typography>
+                                    {getTitleForAPIOperationType(api.type)}
+                                    <Typography className={classes.heading} variant='h6' />
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails className={classes.resourceWrapper}>
-                                    {api && <Resources api={api} />}
+                                    {getResourcesForAPIs(api.type, api)}
                                 </ExpansionPanelDetails>
                                 <Divider />
                                 <ExpansionPanelActions className={classes.actionPanel}>

@@ -78,175 +78,152 @@
                         <span class="class-name">API (Collection)</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-apisGet"><a href="#!/operations#APICollection#apisGet">Retrieve/Search APIs
+                                        <li id="op-apisImportGraphqlSchemaPost"><a href="#!/operations#APICollection#apisImportGraphqlSchemaPost">Import API Definition</a></li>
+                                        <li id="op-apisValidateGraphqlSchemaPost"><a href="#!/operations#APICollection#apisValidateGraphqlSchemaPost">Validate GraphQL API definition and retrieve a summary</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">API Documents</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdDocumentsDocumentIdContentGet"><a href="#!/operations#APIDocuments#apisApiIdDocumentsDocumentIdContentGet">Get the content of an API document</a></li>
+                                        <li id="op-apisApiIdDocumentsDocumentIdContentPost"><a href="#!/operations#APIDocuments#apisApiIdDocumentsDocumentIdContentPost">Upload the content of an API document</a></li>
+                                        <li id="op-apisApiIdDocumentsDocumentIdDelete"><a href="#!/operations#APIDocuments#apisApiIdDocumentsDocumentIdDelete">Delete a document of an API</a></li>
+                                        <li id="op-apisApiIdDocumentsDocumentIdGet"><a href="#!/operations#APIDocuments#apisApiIdDocumentsDocumentIdGet">Get a document of an API</a></li>
+                                        <li id="op-apisApiIdDocumentsDocumentIdPut"><a href="#!/operations#APIDocuments#apisApiIdDocumentsDocumentIdPut">Update a document of an API</a></li>
+                                        <li id="op-apisApiIdDocumentsGet"><a href="#!/operations#APIDocuments#apisApiIdDocumentsGet">Get a list of documents of an API</a></li>
+                                        <li id="op-apisApiIdDocumentsPost"><a href="#!/operations#APIDocuments#apisApiIdDocumentsPost">Add a new document to an API</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">API Lifecycle</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdLifecycleHistoryGet"><a href="#!/operations#APILifecycle#apisApiIdLifecycleHistoryGet">Get Lifecycle state change history of the API.</a></li>
+                                        <li id="op-apisApiIdLifecycleStateGet"><a href="#!/operations#APILifecycle#apisApiIdLifecycleStateGet">Get Lifecycle state data of the API.</a></li>
+                                        <li id="op-apisApiIdLifecycleStatePendingTasksDelete"><a href="#!/operations#APILifecycle#apisApiIdLifecycleStatePendingTasksDelete">Delete pending lifecycle state change tasks.</a></li>
+                                        <li id="op-apisChangeLifecyclePost"><a href="#!/operations#APILifecycle#apisChangeLifecyclePost">Change API Status</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">API Monetization</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdMonetizationGet"><a href="#!/operations#APIMonetization#apisApiIdMonetizationGet">Get monetization status for each tier in a given API</a></li>
+                                        <li id="op-apisApiIdMonetizePost"><a href="#!/operations#APIMonetization#apisApiIdMonetizePost">Configure monetization for a given API</a></li>
+                                        <li id="op-apisApiIdRevenueGet"><a href="#!/operations#APIMonetization#apisApiIdRevenueGet">Get total revenue details of a given monetized API with meterd billing.</a></li>
+                                        <li id="op-subscriptionsSubscriptionIdUsageGet"><a href="#!/operations#APIMonetization#subscriptionsSubscriptionIdUsageGet">Get details of a pending invoice for a monetized subscription with meterd billing.</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">API Product Documents</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apiProductsApiProductIdDocumentsDocumentIdContentGet"><a href="#!/operations#APIProductDocuments#apiProductsApiProductIdDocumentsDocumentIdContentGet">Get the content of an API Product document</a></li>
+                                        <li id="op-apiProductsApiProductIdDocumentsDocumentIdContentPost"><a href="#!/operations#APIProductDocuments#apiProductsApiProductIdDocumentsDocumentIdContentPost">Upload the content of an API Product document</a></li>
+                                        <li id="op-apiProductsApiProductIdDocumentsDocumentIdDelete"><a href="#!/operations#APIProductDocuments#apiProductsApiProductIdDocumentsDocumentIdDelete">Delete a document of an API Product</a></li>
+                                        <li id="op-apiProductsApiProductIdDocumentsDocumentIdGet"><a href="#!/operations#APIProductDocuments#apiProductsApiProductIdDocumentsDocumentIdGet">Get a document of an API</a></li>
+                                        <li id="op-apiProductsApiProductIdDocumentsDocumentIdPut"><a href="#!/operations#APIProductDocuments#apiProductsApiProductIdDocumentsDocumentIdPut">Update a document of an API Product</a></li>
+                                        <li id="op-apiProductsApiProductIdDocumentsGet"><a href="#!/operations#APIProductDocuments#apiProductsApiProductIdDocumentsGet">Get a list of documents of an API Product</a></li>
+                                        <li id="op-apiProductsApiProductIdDocumentsPost"><a href="#!/operations#APIProductDocuments#apiProductsApiProductIdDocumentsPost">Add a new document to an API Product</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">API Products</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apiProductsApiProductIdDelete"><a href="#!/operations#APIProducts#apiProductsApiProductIdDelete">Delete an API Product</a></li>
+                                        <li id="op-apiProductsApiProductIdGet"><a href="#!/operations#APIProducts#apiProductsApiProductIdGet">Get details of an API Product</a></li>
+                                        <li id="op-apiProductsApiProductIdPut"><a href="#!/operations#APIProducts#apiProductsApiProductIdPut">Update an API product</a></li>
+                                        <li id="op-apiProductsApiProductIdSwaggerGet"><a href="#!/operations#APIProducts#apiProductsApiProductIdSwaggerGet">Get swagger definition</a></li>
+                                        <li id="op-apiProductsApiProductIdSwaggerPut"><a href="#!/operations#APIProducts#apiProductsApiProductIdSwaggerPut">upload swagger definition</a></li>
+                                        <li id="op-apiProductsApiProductIdThumbnailGet"><a href="#!/operations#APIProducts#apiProductsApiProductIdThumbnailGet">Get thumbnail image</a></li>
+                                        <li id="op-apiProductsApiProductIdThumbnailPut"><a href="#!/operations#APIProducts#apiProductsApiProductIdThumbnailPut">Upload a thumbnail image</a></li>
+                                        <li id="op-apiProductsGet"><a href="#!/operations#APIProducts#apiProductsGet">Retrieve/Search API Products
 </a></li>
-                                        <li id="op-apisHead"><a href="#!/operations#APICollection#apisHead">Check given API attibute name is already exist
-</a></li>
-                                        <li id="op-searchGet"><a href="#!/operations#APICollection#searchGet">Retrieve/Search APIs and API Documents by content
-</a></li>
+                                        <li id="op-apiProductsPost"><a href="#!/operations#APIProducts#apiProductsPost">Create a new API Product</a></li>
                             </ul>
                         </li>
                         <hr/>
-                        <span class="class-name">API (Individual)</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-apisApiIdDelete"><a href="#!/operations#APIIndividual#apisApiIdDelete">Delete an API</a></li>
-                                        <li id="op-apisApiIdGet"><a href="#!/operations#APIIndividual#apisApiIdGet">Get details of an API</a></li>
-                                        <li id="op-apisApiIdLifecycleHistoryGet"><a href="#!/operations#APIIndividual#apisApiIdLifecycleHistoryGet">Get Lifecycle state change history of the API.</a></li>
-                                        <li id="op-apisApiIdLifecycleStateGet"><a href="#!/operations#APIIndividual#apisApiIdLifecycleStateGet">Get Lifecycle state data of the API.</a></li>
-                                        <li id="op-apisApiIdLifecycleStatePendingTasksDelete"><a href="#!/operations#APIIndividual#apisApiIdLifecycleStatePendingTasksDelete">Delete pending lifecycle state change tasks.</a></li>
-                                        <li id="op-apisApiIdMonetizationGet"><a href="#!/operations#APIIndividual#apisApiIdMonetizationGet">Get monetization status for each tier in a given API</a></li>
-                                        <li id="op-apisApiIdMonetizePost"><a href="#!/operations#APIIndividual#apisApiIdMonetizePost">Configure monetization for a given API</a></li>
-                                        <li id="op-apisApiIdPut"><a href="#!/operations#APIIndividual#apisApiIdPut">Update an API</a></li>
-                                        <li id="op-apisApiIdResourcePoliciesGet"><a href="#!/operations#APIIndividual#apisApiIdResourcePoliciesGet">Get the resource policy (inflow/outflow) definitions</a></li>
-                                        <li id="op-apisApiIdResourcePoliciesResourcePolicyIdGet"><a href="#!/operations#APIIndividual#apisApiIdResourcePoliciesResourcePolicyIdGet">Get the resource policy (inflow/outflow) definition for a given resource identifier.</a></li>
-                                        <li id="op-apisApiIdResourcePoliciesResourcePolicyIdPut"><a href="#!/operations#APIIndividual#apisApiIdResourcePoliciesResourcePolicyIdPut">Update the resource policy(inflow/outflow) definition for the given resource identifier</a></li>
-                                        <li id="op-apisApiIdRevenueGet"><a href="#!/operations#APIIndividual#apisApiIdRevenueGet">Get total revenue details of a given monetized API with meterd billing.</a></li>
-                                        <li id="op-apisApiIdSubscriptionPoliciesGet"><a href="#!/operations#APIIndividual#apisApiIdSubscriptionPoliciesGet">Get details of the subscription throttling policies of an API
-</a></li>
-                                        <li id="op-apisApiIdSwaggerGet"><a href="#!/operations#APIIndividual#apisApiIdSwaggerGet">Get swagger definition</a></li>
-                                        <li id="op-apisApiIdSwaggerPut"><a href="#!/operations#APIIndividual#apisApiIdSwaggerPut">Update swagger definition</a></li>
-                                        <li id="op-apisApiIdThreatProtectionPoliciesDelete"><a href="#!/operations#APIIndividual#apisApiIdThreatProtectionPoliciesDelete">Delete a threat protection policy from an API</a></li>
-                                        <li id="op-apisApiIdThreatProtectionPoliciesGet"><a href="#!/operations#APIIndividual#apisApiIdThreatProtectionPoliciesGet">Get all threat protection policies associated with an API</a></li>
-                                        <li id="op-apisApiIdThreatProtectionPoliciesPost"><a href="#!/operations#APIIndividual#apisApiIdThreatProtectionPoliciesPost">Add a threat protection policy to an API</a></li>
-                                        <li id="op-apisApiIdThumbnailGet"><a href="#!/operations#APIIndividual#apisApiIdThumbnailGet">Get thumbnail image</a></li>
-                                        <li id="op-apisApiIdWsdlGet"><a href="#!/operations#APIIndividual#apisApiIdWsdlGet">Get WSDL definition</a></li>
-                                        <li id="op-apisApiIdWsdlPut"><a href="#!/operations#APIIndividual#apisApiIdWsdlPut">Update WSDL definition</a></li>
-                                        <li id="op-apisChangeLifecyclePost"><a href="#!/operations#APIIndividual#apisChangeLifecyclePost">Change API Status</a></li>
-                                        <li id="op-apisCopyApiPost"><a href="#!/operations#APIIndividual#apisCopyApiPost">Create a new API version</a></li>
-                                        <li id="op-apisPost"><a href="#!/operations#APIIndividual#apisPost">Create a new API</a></li>
-                                        <li id="op-updateAPIThumbnail"><a href="#!/operations#APIIndividual#updateAPIThumbnail">Upload a thumbnail image</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
-                        <span class="class-name">API Product (Collection)</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-apiProductsGet"><a href="#!/operations#APIProductCollection#apiProductsGet">Retrieve/Search API Products
-</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
-                        <span class="class-name">API Product (Individual)</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-apiProductsApiProductIdDelete"><a href="#!/operations#APIProductIndividual#apiProductsApiProductIdDelete">Delete an API Product</a></li>
-                                        <li id="op-apiProductsApiProductIdGet"><a href="#!/operations#APIProductIndividual#apiProductsApiProductIdGet">Get details of an API Product</a></li>
-                                        <li id="op-apiProductsApiProductIdPut"><a href="#!/operations#APIProductIndividual#apiProductsApiProductIdPut">Update an API product</a></li>
-                                        <li id="op-apiProductsApiProductIdSwaggerGet"><a href="#!/operations#APIProductIndividual#apiProductsApiProductIdSwaggerGet">Get swagger definition</a></li>
-                                        <li id="op-apiProductsApiProductIdSwaggerPut"><a href="#!/operations#APIProductIndividual#apiProductsApiProductIdSwaggerPut">upload swagger definition</a></li>
-                                        <li id="op-apiProductsApiProductIdThumbnailGet"><a href="#!/operations#APIProductIndividual#apiProductsApiProductIdThumbnailGet">Get thumbnail image</a></li>
-                                        <li id="op-apiProductsApiProductIdThumbnailPut"><a href="#!/operations#APIProductIndividual#apiProductsApiProductIdThumbnailPut">Upload a thumbnail image</a></li>
-                                        <li id="op-apiProductsPost"><a href="#!/operations#APIProductIndividual#apiProductsPost">Create a new API Product</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
-                        <span class="class-name">API Resource Paths</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-apisApiIdResourcePathsGet"><a href="#!/operations#APIResourcePaths#apisApiIdResourcePathsGet">Get Resource Paths of an API</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
-                        <span class="class-name">APIs</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-importOpenAPIDefinition"><a href="#!/operations#APIs#importOpenAPIDefinition">Import an OpenAPI Definition</a></li>
-                                        <li id="op-importWSDLDefinition"><a href="#!/operations#APIs#importWSDLDefinition">Import a WSDL Definition</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
-                        <span class="class-name">Certificates (Collection)</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-endpointCertificatesGet"><a href="#!/operations#CertificatesCollection#endpointCertificatesGet">Retrieve/Search uploaded certificates.</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
-                        <span class="class-name">Certificates (Individual)</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-endpointCertificatesAliasContentGet"><a href="#!/operations#CertificatesIndividual#endpointCertificatesAliasContentGet">Download a certificate.</a></li>
-                                        <li id="op-endpointCertificatesAliasDelete"><a href="#!/operations#CertificatesIndividual#endpointCertificatesAliasDelete">Delete a certificate.</a></li>
-                                        <li id="op-endpointCertificatesAliasGet"><a href="#!/operations#CertificatesIndividual#endpointCertificatesAliasGet">Get the certificate information.</a></li>
-                                        <li id="op-endpointCertificatesAliasPut"><a href="#!/operations#CertificatesIndividual#endpointCertificatesAliasPut">Update a certificate.</a></li>
-                                        <li id="op-endpointCertificatesPost"><a href="#!/operations#CertificatesIndividual#endpointCertificatesPost">Upload a new Certificate.</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
-                        <span class="class-name">ClientCertificates (Collection)</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-clientCertificatesGet"><a href="#!/operations#ClientCertificatesCollection#clientCertificatesGet">Retrieve/ Search uploaded Client Certificates.</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
-                        <span class="class-name">ClientCertificates (Individual)</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-clientCertificatesAliasContentGet"><a href="#!/operations#ClientCertificatesIndividual#clientCertificatesAliasContentGet">Download a certificate.</a></li>
-                                        <li id="op-clientCertificatesAliasDelete"><a href="#!/operations#ClientCertificatesIndividual#clientCertificatesAliasDelete">Delete a certificate.</a></li>
-                                        <li id="op-clientCertificatesAliasGet"><a href="#!/operations#ClientCertificatesIndividual#clientCertificatesAliasGet">Get the certificate information.</a></li>
-                                        <li id="op-clientCertificatesAliasPut"><a href="#!/operations#ClientCertificatesIndividual#clientCertificatesAliasPut">Update a certificate.</a></li>
-                                        <li id="op-clientCertificatesPost"><a href="#!/operations#ClientCertificatesIndividual#clientCertificatesPost">Upload a new certificate.</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
-                        <span class="class-name">default</span>
+                        <span class="class-name">API Resource Policies</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                         <li id="op-auditapiGet"><a href="#!/operations#Default#auditapiGet">Retrieve the Security Audit Report of the Audit API</a></li>
                                         <li id="op-auditapiPost"><a href="#!/operations#Default#auditapiPost">Create new Security Audit API</a></li>
                                         <li id="op-auditapiPut"><a href="#!/operations#Default#auditapiPut">Update Swagger Definition in Security Audit API</a></li>
                                         <li id="op-settingsGet"><a href="#!/operations#Default#settingsGet">Retreive publisher settings</a></li>
+                                        <li id="op-apisApiIdResourcePoliciesGet"><a href="#!/operations#APIResourcePolicies#apisApiIdResourcePoliciesGet">Get the resource policy (inflow/outflow) definitions</a></li>
+                                        <li id="op-apisApiIdResourcePoliciesResourcePolicyIdGet"><a href="#!/operations#APIResourcePolicies#apisApiIdResourcePoliciesResourcePolicyIdGet">Get the resource policy (inflow/outflow) definition for a given resource identifier.</a></li>
+                                        <li id="op-apisApiIdResourcePoliciesResourcePolicyIdPut"><a href="#!/operations#APIResourcePolicies#apisApiIdResourcePoliciesResourcePolicyIdPut">Update the resource policy(inflow/outflow) definition for the given resource identifier</a></li>
                             </ul>
                         </li>
                         <hr/>
-                        <span class="class-name">Document (Collection)</span>
+                        <span class="class-name">API Scopes</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-apiProductsApiProductIdDocumentsGet"><a href="#!/operations#DocumentCollection#apiProductsApiProductIdDocumentsGet">Get a list of documents of an API Product</a></li>
-                                        <li id="op-apiProductsApiProductIdDocumentsPost"><a href="#!/operations#DocumentCollection#apiProductsApiProductIdDocumentsPost">Add a new document to an API Product</a></li>
-                                        <li id="op-apisApiIdDocumentsGet"><a href="#!/operations#DocumentCollection#apisApiIdDocumentsGet">Get a list of documents of an API</a></li>
-                                        <li id="op-apisApiIdDocumentsPost"><a href="#!/operations#DocumentCollection#apisApiIdDocumentsPost">Add a new document to an API</a></li>
+                                        <li id="op-apisApiIdScopesGet"><a href="#!/operations#APIScopes#apisApiIdScopesGet">Get a list of scopes of an API</a></li>
+                                        <li id="op-apisApiIdScopesNameDelete"><a href="#!/operations#APIScopes#apisApiIdScopesNameDelete">Delete a scope of an API</a></li>
+                                        <li id="op-apisApiIdScopesNameGet"><a href="#!/operations#APIScopes#apisApiIdScopesNameGet">Get a scope of an API</a></li>
+                                        <li id="op-apisApiIdScopesNamePut"><a href="#!/operations#APIScopes#apisApiIdScopesNamePut">Update a Scope of an API</a></li>
+                                        <li id="op-apisApiIdScopesPost"><a href="#!/operations#APIScopes#apisApiIdScopesPost">Add a new scope to an API</a></li>
                             </ul>
                         </li>
                         <hr/>
-                        <span class="class-name">Document (Individual)</span>
+                        <span class="class-name">APIs</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-apiProductsApiProductIdDocumentsDocumentIdContentGet"><a href="#!/operations#DocumentIndividual#apiProductsApiProductIdDocumentsDocumentIdContentGet">Get the content of an API Product document</a></li>
-                                        <li id="op-apiProductsApiProductIdDocumentsDocumentIdContentPost"><a href="#!/operations#DocumentIndividual#apiProductsApiProductIdDocumentsDocumentIdContentPost">Upload the content of an API Product document</a></li>
-                                        <li id="op-apiProductsApiProductIdDocumentsDocumentIdDelete"><a href="#!/operations#DocumentIndividual#apiProductsApiProductIdDocumentsDocumentIdDelete">Delete a document of an API Product</a></li>
-                                        <li id="op-apiProductsApiProductIdDocumentsDocumentIdGet"><a href="#!/operations#DocumentIndividual#apiProductsApiProductIdDocumentsDocumentIdGet">Get a document of an API</a></li>
-                                        <li id="op-apiProductsApiProductIdDocumentsDocumentIdPut"><a href="#!/operations#DocumentIndividual#apiProductsApiProductIdDocumentsDocumentIdPut">Update a document of an API Product</a></li>
-                                        <li id="op-apisApiIdDocumentsDocumentIdContentGet"><a href="#!/operations#DocumentIndividual#apisApiIdDocumentsDocumentIdContentGet">Get the content of an API document</a></li>
-                                        <li id="op-apisApiIdDocumentsDocumentIdContentPost"><a href="#!/operations#DocumentIndividual#apisApiIdDocumentsDocumentIdContentPost">Upload the content of an API document</a></li>
-                                        <li id="op-apisApiIdDocumentsDocumentIdDelete"><a href="#!/operations#DocumentIndividual#apisApiIdDocumentsDocumentIdDelete">Delete a document of an API</a></li>
-                                        <li id="op-apisApiIdDocumentsDocumentIdGet"><a href="#!/operations#DocumentIndividual#apisApiIdDocumentsDocumentIdGet">Get a document of an API</a></li>
-                                        <li id="op-apisApiIdDocumentsDocumentIdPut"><a href="#!/operations#DocumentIndividual#apisApiIdDocumentsDocumentIdPut">Update a document of an API</a></li>
+                                        <li id="op-apisApiIdDelete"><a href="#!/operations#APIs#apisApiIdDelete">Delete an API</a></li>
+                                        <li id="op-apisApiIdGet"><a href="#!/operations#APIs#apisApiIdGet">Get details of an API</a></li>
+                                        <li id="op-apisApiIdPut"><a href="#!/operations#APIs#apisApiIdPut">Update an API</a></li>
+                                        <li id="op-apisApiIdResourcePathsGet"><a href="#!/operations#APIs#apisApiIdResourcePathsGet">Get Resource Paths of an API</a></li>
+                                        <li id="op-apisApiIdSubscriptionPoliciesGet"><a href="#!/operations#APIs#apisApiIdSubscriptionPoliciesGet">Get details of the subscription throttling policies of an API
+</a></li>
+                                        <li id="op-apisApiIdSwaggerGet"><a href="#!/operations#APIs#apisApiIdSwaggerGet">Get swagger definition</a></li>
+                                        <li id="op-apisApiIdSwaggerPut"><a href="#!/operations#APIs#apisApiIdSwaggerPut">Update swagger definition</a></li>
+                                        <li id="op-apisApiIdThumbnailGet"><a href="#!/operations#APIs#apisApiIdThumbnailGet">Get thumbnail image</a></li>
+                                        <li id="op-apisApiIdWsdlGet"><a href="#!/operations#APIs#apisApiIdWsdlGet">Get WSDL definition</a></li>
+                                        <li id="op-apisApiIdWsdlPut"><a href="#!/operations#APIs#apisApiIdWsdlPut">Update WSDL definition</a></li>
+                                        <li id="op-apisCopyApiPost"><a href="#!/operations#APIs#apisCopyApiPost">Create a new API version</a></li>
+                                        <li id="op-apisGet"><a href="#!/operations#APIs#apisGet">Retrieve/Search APIs
+</a></li>
+                                        <li id="op-apisHead"><a href="#!/operations#APIs#apisHead">Check given API attibute name is already exist
+</a></li>
+                                        <li id="op-apisPost"><a href="#!/operations#APIs#apisPost">Create a new API</a></li>
+                                        <li id="op-importOpenAPIDefinition"><a href="#!/operations#APIs#importOpenAPIDefinition">Import an OpenAPI Definition</a></li>
+                                        <li id="op-importWSDLDefinition"><a href="#!/operations#APIs#importWSDLDefinition">Import a WSDL Definition</a></li>
+                                        <li id="op-updateAPIThumbnail"><a href="#!/operations#APIs#updateAPIThumbnail">Upload a thumbnail image</a></li>
                             </ul>
                         </li>
                         <hr/>
-                        <span class="class-name">Environment (Collection)</span>
+                        <span class="class-name">Client Certificates</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-environmentsGet"><a href="#!/operations#EnvironmentCollection#environmentsGet">Get all gateway environments</a></li>
+                                        <li id="op-clientCertificatesAliasContentGet"><a href="#!/operations#ClientCertificates#clientCertificatesAliasContentGet">Download a certificate.</a></li>
+                                        <li id="op-clientCertificatesAliasDelete"><a href="#!/operations#ClientCertificates#clientCertificatesAliasDelete">Delete a certificate.</a></li>
+                                        <li id="op-clientCertificatesAliasGet"><a href="#!/operations#ClientCertificates#clientCertificatesAliasGet">Get the certificate information.</a></li>
+                                        <li id="op-clientCertificatesAliasPut"><a href="#!/operations#ClientCertificates#clientCertificatesAliasPut">Update a certificate.</a></li>
+                                        <li id="op-clientCertificatesGet"><a href="#!/operations#ClientCertificates#clientCertificatesGet">Retrieve/ Search uploaded Client Certificates.</a></li>
+                                        <li id="op-clientCertificatesPost"><a href="#!/operations#ClientCertificates#clientCertificatesPost">Upload a new certificate.</a></li>
                             </ul>
                         </li>
                         <hr/>
-                        <span class="class-name">Export Configuration</span>
+                        <span class="class-name">Endpoint Certificates</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-exportApisGet"><a href="#!/operations#ExportConfiguration#exportApisGet">Export information related to an API.</a></li>
+                                        <li id="op-endpointCertificatesAliasContentGet"><a href="#!/operations#EndpointCertificates#endpointCertificatesAliasContentGet">Download a certificate.</a></li>
+                                        <li id="op-endpointCertificatesAliasDelete"><a href="#!/operations#EndpointCertificates#endpointCertificatesAliasDelete">Delete a certificate.</a></li>
+                                        <li id="op-endpointCertificatesAliasGet"><a href="#!/operations#EndpointCertificates#endpointCertificatesAliasGet">Get the certificate information.</a></li>
+                                        <li id="op-endpointCertificatesAliasPut"><a href="#!/operations#EndpointCertificates#endpointCertificatesAliasPut">Update a certificate.</a></li>
+                                        <li id="op-endpointCertificatesGet"><a href="#!/operations#EndpointCertificates#endpointCertificatesGet">Retrieve/Search uploaded certificates.</a></li>
+                                        <li id="op-endpointCertificatesPost"><a href="#!/operations#EndpointCertificates#endpointCertificatesPost">Upload a new Certificate.</a></li>
                             </ul>
                         </li>
                         <hr/>
-                        <span class="class-name">Import Configuration</span>
+                        <span class="class-name">GraphQL Schema (Individual)</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-importApisPost"><a href="#!/operations#ImportConfiguration#importApisPost">Imports API(s).</a></li>
-                                        <li id="op-importApisPut"><a href="#!/operations#ImportConfiguration#importApisPut">Imports API(s).</a></li>
+                                        <li id="op-apisApiIdGraphqlSchemaGet"><a href="#!/operations#GraphQLSchemaIndividual#apisApiIdGraphqlSchemaGet">Get the Schema of a GraphQL API</a></li>
+                                        <li id="op-apisApiIdGraphqlSchemaPut"><a href="#!/operations#GraphQLSchemaIndividual#apisApiIdGraphqlSchemaPut">Add a Schema to a GraphQL API</a></li>
                             </ul>
                         </li>
                         <hr/>
@@ -264,51 +241,20 @@
                             </ul>
                         </li>
                         <hr/>
-                        <span class="class-name">Scope (Collection)</span>
+                        <span class="class-name">Settings</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-apisApiIdScopesGet"><a href="#!/operations#ScopeCollection#apisApiIdScopesGet">Get a list of scopes of an API</a></li>
-                                        <li id="op-apisApiIdScopesPost"><a href="#!/operations#ScopeCollection#apisApiIdScopesPost">Add a new scope to an API</a></li>
+                                        <li id="op-settingsGatewayEnvironmentsGet"><a href="#!/operations#Settings#settingsGatewayEnvironmentsGet">Get all gateway environments</a></li>
+                                        <li id="op-settingsGet"><a href="#!/operations#Settings#settingsGet">Retreive publisher settings</a></li>
                             </ul>
                         </li>
                         <hr/>
-                        <span class="class-name">Scope (Individual)</span>
+                        <span class="class-name">Subscriptions</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-apisApiIdScopesNameDelete"><a href="#!/operations#ScopeIndividual#apisApiIdScopesNameDelete">Delete a scope of an API</a></li>
-                                        <li id="op-apisApiIdScopesNameGet"><a href="#!/operations#ScopeIndividual#apisApiIdScopesNameGet">Get a scope of an API</a></li>
-                                        <li id="op-apisApiIdScopesNamePut"><a href="#!/operations#ScopeIndividual#apisApiIdScopesNamePut">Update a Scope of an API</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
-                        <span class="class-name">Subscription (Collection)</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-subscriptionsGet"><a href="#!/operations#SubscriptionCollection#subscriptionsGet">Get all Subscriptions</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
-                        <span class="class-name">Subscription (Individual)</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-subscriptionsBlockSubscriptionPost"><a href="#!/operations#SubscriptionIndividual#subscriptionsBlockSubscriptionPost">Block a subscription</a></li>
-                                        <li id="op-subscriptionsSubscriptionIdGet"><a href="#!/operations#SubscriptionIndividual#subscriptionsSubscriptionIdGet">Get details of a subscription</a></li>
-                                        <li id="op-subscriptionsSubscriptionIdUsageGet"><a href="#!/operations#SubscriptionIndividual#subscriptionsSubscriptionIdUsageGet">Get details of a pending invoice for a monetized subscription with meterd billing.</a></li>
-                                        <li id="op-subscriptionsUnblockSubscriptionPost"><a href="#!/operations#SubscriptionIndividual#subscriptionsUnblockSubscriptionPost">Unblock a Subscription</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
-                        <span class="class-name">Threat Protection Policies</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-threatProtectionPoliciesGet"><a href="#!/operations#ThreatProtectionPolicies#threatProtectionPoliciesGet">Get All Threat Protection Policies</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
-                        <span class="class-name">Threat Protection Policy</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-threatProtectionPoliciesPolicyIdGet"><a href="#!/operations#ThreatProtectionPolicy#threatProtectionPoliciesPolicyIdGet">Get a threat protection policy</a></li>
+                                        <li id="op-subscriptionsBlockSubscriptionPost"><a href="#!/operations#Subscriptions#subscriptionsBlockSubscriptionPost">Block a subscription</a></li>
+                                        <li id="op-subscriptionsGet"><a href="#!/operations#Subscriptions#subscriptionsGet">Get all Subscriptions</a></li>
+                                        <li id="op-subscriptionsUnblockSubscriptionPost"><a href="#!/operations#Subscriptions#subscriptionsUnblockSubscriptionPost">Unblock a Subscription</a></li>
                             </ul>
                         </li>
                         <hr/>
@@ -317,6 +263,14 @@
                             <ul class="nav nav-stacked">
                                         <li id="op-getAllThrottlingPolicies"><a href="#!/operations#ThrottlingPolicies#getAllThrottlingPolicies">Get all throttling policies for the given type</a></li>
                                         <li id="op-getThrottlingPolicyByName"><a href="#!/operations#ThrottlingPolicies#getThrottlingPolicyByName">Get details of a policy</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Unified Search</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-searchGet"><a href="#!/operations#UnifiedSearch#searchGet">Retrieve/Search APIs and API Documents by content
+</a></li>
                             </ul>
                         </li>
                         <hr/>
@@ -373,6 +327,11 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-APIMonetizationUsage"><a href="#!/models#APIMonetizationUsage">APIMonetizationUsage</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIOperations"><a href="#!/models#APIOperations">APIOperations</a></li>
                             </ul>
                         </li>
                         <li class="section-box">
@@ -528,6 +487,21 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-FileInfo"><a href="#!/models#FileInfo">FileInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-GraphQLSchema"><a href="#!/models#GraphQLSchema">GraphQLSchema</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-GraphQLValidationResponse"><a href="#!/models#GraphQLValidationResponse">GraphQLValidationResponse</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-GraphQLValidationResponse_graphQLInfo"><a href="#!/models#GraphQLValidationResponse_graphQLInfo">GraphQLValidationResponse_graphQLInfo</a></li>
                             </ul>
                         </li>
                         <li class="section-box">
@@ -733,11 +707,6 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-DocumentSearchResult"><a href="#!/models#DocumentSearchResult">DocumentSearchResult</a></li>
-                            </ul>
-                        </li>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                <li id="def-ExtendedSubscription"><a href="#!/models#ExtendedSubscription">ExtendedSubscription</a></li>
                             </ul>
                         </li>
             </ul>

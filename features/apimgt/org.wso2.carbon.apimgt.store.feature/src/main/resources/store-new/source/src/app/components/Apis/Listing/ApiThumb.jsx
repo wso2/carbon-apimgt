@@ -18,16 +18,19 @@
 
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
+import Chip from '@material-ui/core/Chip';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { FormattedMessage } from 'react-intl';
 import MaterialIcons from 'MaterialIcons';
+import CONSTS from 'AppData/Constants';
+import APIProduct from 'AppData/APIProduct';
 import ImageGenerator from './ImageGenerator';
 import StarRatingBar from './StarRating';
 import Api from '../../../data/api';
+import { ApiContext } from '../Details/ApiContext';
 
 /**
  *
@@ -127,9 +130,19 @@ class ApiThumb extends React.Component {
      * @memberof ApiThumb
      */
     componentDidMount() {
-        const restApi = new Api();
+        const { apiType } = this.context;
         const { api } = this.props;
-        restApi.getAPIThumbnail(api.id).then((response) => {
+
+        let restApi = null;
+
+        if (apiType === CONSTS.API_TYPE) {
+            restApi = new Api();
+        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            restApi = new APIProduct();
+        }
+        const promisedThumbnail = restApi.getAPIThumbnail(api.id);
+
+        promisedThumbnail.then((response) => {
             if (response && response.data) {
                 if (response.headers['content-type'] === 'application/json') {
                     const iconJson = JSON.parse(response.data);
@@ -163,6 +176,23 @@ class ApiThumb extends React.Component {
     }
 
     /**
+     * Get Path Prefix depedning on the respective API Type being rendered
+     *
+     * @returns {String} path
+     * @memberof ApiThumb
+     */
+    getPathPrefix() {
+        const { apiType } = this.context;
+
+        let path = '/apis/';
+        if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            path = '/api-products/';
+        }
+
+        return path;
+    }
+
+    /**
      *
      *
      * @returns
@@ -172,7 +202,9 @@ class ApiThumb extends React.Component {
         const {
             imageObj, selectedIcon, color, backgroundIndex, category,
         } = this.state;
-        const details_link = '/apis/' + this.props.api.id;
+        const path = this.getPathPrefix();
+
+        const details_link = path + this.props.api.id;
         const { api, classes, theme } = this.props;
         const { thumbnail } = theme.custom;
         const {
@@ -185,7 +217,7 @@ class ApiThumb extends React.Component {
 
         let ImageView;
         if (imageObj) {
-            ImageView = <img height={140} src={imageObj} alt='API Thumbnail' className={classes.media} />;
+            ImageView = <img height={140} src={imageObj} alt='API Product Thumbnail' className={classes.media} />;
         } else {
             ImageView = (
                 <ImageGenerator
@@ -246,9 +278,18 @@ class ApiThumb extends React.Component {
                         </div>
                     </div>
                     <div className={classes.thumbInfo}>
-                        <Typography variant='subheading' gutterBottom align='left'>
-                            <StarRatingBar rating={rating} starColor={starColor} />
-                        </Typography>
+                        <div className={classes.thumbLeft}>
+                            <Typography variant='subheading' gutterBottom align='left'>
+                                <StarRatingBar rating={rating} starColor={starColor} />
+                            </Typography>
+                        </div>
+                        <div className={classes.thumbRight}>
+                            <Typography variant='subheading' gutterBottom align='right'>
+                                {api.type === 'GRAPHQL' && (
+                                    <Chip label={api.type} color='primary' />
+                                )}
+                            </Typography>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -260,5 +301,7 @@ ApiThumb.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
 };
+
+ApiThumb.contextType = ApiContext;
 
 export default withStyles(styles, { withTheme: true })(ApiThumb);

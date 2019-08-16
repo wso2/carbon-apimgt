@@ -337,7 +337,7 @@ class SubscriptionsTable extends Component {
         if (subscriptions != null) {
             return (
                 <dev>
-                    <Typography className={classes.headline} gutterBottom variant='headline' component='h2'>
+                    <Typography className={classes.headline} gutterBottom variant='h5' component='h2'>
                         <FormattedMessage
                             id='Apis.Details.Subscriptions.SubscriptionsTable.manage.subscriptions'
                             defaultMessage='Manage Subscriptions'

@@ -54,7 +54,7 @@ const EnhancedTableToolbar = (props) => {
         >
             <div className={classes.title}>
                 {numSelected > 0 ? (
-                    <Typography color='inherit' variant='subheading'>
+                    <Typography color='inherit' variant='subtitle1'>
                         {numSelected}
                         {' '}
                         <FormattedMessage
@@ -63,7 +63,7 @@ const EnhancedTableToolbar = (props) => {
                         />
                     </Typography>
                 ) : (
-                    <Typography variant='title' id='tableTitle'>
+                    <Typography variant='h6' id='tableTitle'>
                         <FormattedMessage
                             id='Apis.Listing.TableView.APITableToolBar.apis.title'
                             defaultMessage='APIS'

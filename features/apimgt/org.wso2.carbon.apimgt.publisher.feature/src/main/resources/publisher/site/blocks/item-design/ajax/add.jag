@@ -393,9 +393,12 @@ if(jagg.isCSRFTokenValid())
             apiData.accessControl = request.getParameter("accessControl");
             apiData.accessControlRoles = request.getParameter("accessControlRoles", "UTF-8");
             apiData.additionalProperties = request.getParameter("additionalProperties", "UTF-8");
-
             apiData.swagger = request.getParameter("swagger", "UTF-8");
-
+            if (request.getParameter("schemaValidation") == null) {
+               apiData.schemaValidation = null;
+            } else if (request.getParameter("schemaValidation") != null) {
+               apiData.schemaValidation = request.getParameter("schemaValidation");
+            }
             result = mod.updateAPIDesign(apiData);
             if(apiData.wsdl) {
                 var swag = parse(apiData.swagger);
@@ -511,7 +514,11 @@ if(jagg.isCSRFTokenValid())
             apiData.inSeqFile = request.getFile("inSeqFile");
             apiData.outSeqFile = request.getFile("outSeqFile");
             apiData.corsConfiguration=request.getParameter("corsConfiguration","UTF-8");
-
+            if (request.getParameter("schemaValidation") == null) {
+               apiData.schemaValidation = null;
+            } else if (request.getParameter("schemaValidation") != null) {
+               apiData.schemaValidation = request.getParameter("schemaValidation");
+            }
             var soapToRestInsequences = request.getParameter("sequenceMapping");
             var soapToRestOutsequences = request.getParameter("sequenceOutMapping");
 

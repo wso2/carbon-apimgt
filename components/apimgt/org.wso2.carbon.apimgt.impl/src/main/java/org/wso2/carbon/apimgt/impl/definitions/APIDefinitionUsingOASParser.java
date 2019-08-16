@@ -68,6 +68,8 @@ import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -154,6 +156,11 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
     }
 
     @Override
+    public void saveAPIDefinition(APIProduct apiProduct, String apiDefinitionJSON, Registry registry) throws APIManagementException {
+
+    }
+
+    @Override
     public String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry)
             throws APIManagementException {
         return null;
@@ -187,7 +194,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
         OAuth2Definition oAuth2Definition = new OAuth2Definition().password("https://test.com");
 
         Set<Scope> scopes = api.getScopes();
-
+        
         if (scopes != null && !scopes.isEmpty()) {
             List<Map<String,String>> xSecurityScopesArray = new ArrayList<>();
             for (Scope scope : scopes) {
@@ -212,6 +219,71 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
         swagger.setInfo(info);
 
         for (URITemplate uriTemplate : api.getUriTemplates()) {
+            addOrUpdatePathToSwagger(swagger, uriTemplate);
+        }
+
+        return getSwaggerJsonString(swagger);
+    }
+
+    @Override
+    public String generateAPIDefinition(APIProduct apiProduct) throws APIManagementException {
+        Swagger swagger = new Swagger();
+
+        //Create info object
+        Info info = new Info();
+        info.setTitle(apiProduct.getId().getName());
+        if (apiProduct.getDescription() != null) {
+            info.setDescription(apiProduct.getDescription());
+        }
+
+        Contact contact = new Contact();
+        //Create contact object and map business owner info
+        if (apiProduct.getBusinessOwner() != null) {
+            contact.setName(apiProduct.getBusinessOwner());
+        }
+        if (apiProduct.getBusinessOwnerEmail() != null) {
+            contact.setEmail(apiProduct.getBusinessOwnerEmail());
+        }
+        if (apiProduct.getBusinessOwner() != null || apiProduct.getBusinessOwnerEmail() != null) {
+            //put contact object to info object
+            info.setContact(contact);
+        }
+
+        info.setVersion(apiProduct.getId().getVersion());
+        OAuth2Definition oAuth2Definition = new OAuth2Definition().password("https://test.com");
+
+        Set<Scope> scopes = apiProduct.getScopes();
+
+        if (scopes != null && !scopes.isEmpty()) {
+            List<Map<String,String>> xSecurityScopesArray = new ArrayList<>();
+            for (Scope scope : scopes) {
+                oAuth2Definition.addScope(scope.getName(), scope.getDescription());
+
+                Map<String, String> xWso2ScopesObject = new LinkedHashMap<>();
+                xWso2ScopesObject.put(APIConstants.SWAGGER_SCOPE_KEY, scope.getKey());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_NAME, scope.getName());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_ROLES, scope.getRoles());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_DESCRIPTION, scope.getDescription());
+                xSecurityScopesArray.add(xWso2ScopesObject);
+            }
+            Map<String, Object> xWSO2Scopes = new LinkedHashMap<>();
+            xWSO2Scopes.put(APIConstants.SWAGGER_X_WSO2_SCOPES, xSecurityScopesArray);
+            Map<String, Object> xWSO2SecurityDefinitionObject = new LinkedHashMap<>();
+            xWSO2SecurityDefinitionObject.put(APIConstants.SWAGGER_OBJECT_NAME_APIM, xWSO2Scopes);
+
+            swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_SECURITY, xWSO2SecurityDefinitionObject);
+        }
+
+        swagger.addSecurityDefinition("OAuth2Security", oAuth2Definition);
+        swagger.setInfo(info);
+
+        List<APIProductResource> productResources = apiProduct.getProductResources();
+        List<URITemplate> uriTemplates = new ArrayList<>();
+        for (APIProductResource productResource : productResources) {
+            uriTemplates.add(productResource.getUriTemplate());
+        }
+
+        for (URITemplate uriTemplate : uriTemplates) {
             addOrUpdatePathToSwagger(swagger, uriTemplate);
         }
 
@@ -317,7 +389,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
 
         if (fallbackToV2) {
             SwaggerParser parser = new SwaggerParser();
-            SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(apiDefinition, false);
+            SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(apiDefinition, null, false);
             if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
                 for (String message : parseAttemptForV2.getMessages()) {
                     ErrorItem errorItem = addErrorToValidationResponse(validationResponse, message);
@@ -538,7 +610,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
 
     /**
      *  Updates managed info of a provided operation such as auth type and throttling
-     *
+     * 
      * @param uriTemplate URI template
      * @param operation swagger operation
      */

@@ -58,6 +58,11 @@ const Configurations = {
                     patch: '#785446',
                     head: '#785446',
                 },
+                operationChipColor: {
+                    query: '#b3e6fe',
+                    mutation: '#c1dea0',
+                    subscription: '#ffcc80',
+                },
                 thumbnail: {
                     backgrounds: [ // These backgrounds are use to generate the thumbnails.
                         { prime: 0x8f6bcaff, sub: 0x4fc2f8ff },
@@ -131,6 +136,11 @@ const Configurations = {
                     option: '#5f7c8a',
                     patch: '#785446',
                     head: '#785446',
+                },
+                operationChipColor: {
+                    query: '#b3e6fe',
+                    mutation: '#c1dea0',
+                    subscription: '#ffcc80',
                 },
                 thumbnail: {
                     backgrounds: [ // These backgrounds are use to generate the thumbnails.

@@ -43,7 +43,7 @@ SearchApiService delegate = new SearchApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
-    }, tags={ "API (Collection)" })
+    }, tags={ "Unified Search" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of qualifying APIs and API documents is returned. ", response = SearchResultListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),

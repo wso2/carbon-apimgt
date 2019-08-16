@@ -8,14 +8,14 @@ const APIPropertyField = (props) => {
 
     return (
         <Grid item>
-            <Grid container spacing={16} direction='row' alignItems='center'>
+            <Grid container spacing={4} direction='row' alignItems='center'>
                 <Grid item style={{ flexGrow: 1 }}>
                     <Grid container direction='row' justify='space-between'>
                         <Grid item>
-                            <Typography variant='subheading'>{name}</Typography>
+                            <Typography variant='subtitle1'>{name}</Typography>
                         </Grid>
                         <Grid item>
-                            <Typography variant='subheading'>:</Typography>
+                            <Typography variant='subtitle1'>:</Typography>
                         </Grid>
                     </Grid>
                 </Grid>

@@ -16,72 +16,23 @@
  * under the License.
  */
 
-import APIProduct from 'AppData/APIProduct';
 import React from 'react';
-import qs from 'qs';
 import CommonListing from './CommonListing';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 
+// const ApiTypeContext = React.createContext({ type: Constants.API });
 
 /**
- * API Product listing page
+ * API Listing wraps the commonListing component by passing a kind param
  *
- * @class APIProductListing
- * @extends {Component}
+ * @returns
  */
-class APIProductListing extends React.Component {
-    /**
-     * Constructor
-     *
-     * @param {*} props Properties
-     */
-    constructor(props) {
-        super(props);
-        this.state = {
-            apis: null,
-            path: props.match.path,
-        };
-    }
-
-    /**
-     * @inheritdoc
-     * @memberof APIProductListing
-     */
-    componentDidMount() {
-        const apiProduct = new APIProduct();
-        const promisedApis = apiProduct.getAllAPIProducts();
-        promisedApis
-            .then((response) => {
-                this.setState({ apis: response.obj });
-            })
-            .catch((error) => {
-                const { status } = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                } else if (status === 401) {
-                    this.setState({ isAuthorize: false });
-                    const params = qs.stringify({ reference: this.props.location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
-                }
-            });
-    }
-
-    /**
-     * @inheritdoc
-     * @returns {React.Component} @inheritdoc
-     * @memberof APIProductListing
-     */
-    render() {
-        const { notFound } = this.state;
-
-        if (notFound) {
-            return <ResourceNotFound />;
-        }
-
-        const { apis, path } = this.state;
-
-        return <CommonListing apis={apis} path={path} />;
-    }
+function APIProductListing(props) {
+    const { apiType } = props;
+    return <CommonListing isApiProduct apiType={apiType} />;
 }
+
+// APIProductListing.propTypes = {
+//     apiType: PropTypes.string.isRequired,
+// };
 
 export default (APIProductListing);

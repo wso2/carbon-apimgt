@@ -163,7 +163,7 @@ function MarkdownEditor(props) {
                     </Button>
                 </Paper>
                 <div className={classes.splitWrapper}>
-                    <Grid container spacing={24}>
+                    <Grid container spacing={7}>
                         <Grid item xs={6}>
                             <MonacoEditor
                                 width='100%'

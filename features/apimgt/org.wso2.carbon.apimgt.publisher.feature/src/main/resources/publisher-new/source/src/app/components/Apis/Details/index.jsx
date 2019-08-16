@@ -23,12 +23,9 @@ import LifeCycleIcon from '@material-ui/icons/Autorenew';
 import EndpointIcon from '@material-ui/icons/GamesOutlined';
 import ResourcesIcon from '@material-ui/icons/VerticalSplit';
 import ScopesIcon from '@material-ui/icons/VpnKey';
-// import SecurityIcon from '@material-ui/icons/Security';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
-// import CommentsIcon from '@material-ui/icons/CommentRounded';
 import BusinessIcon from '@material-ui/icons/Business';
 import CodeIcon from '@material-ui/icons/Code';
-// import SubscriptionsIcon from '@material-ui/icons/Bookmarks';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
 import { withStyles } from '@material-ui/core/styles';
@@ -48,6 +45,7 @@ import Overview from './NewOverview/Overview';
 import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
+import Operations from './Operations/Operations';
 import Resources from './Resources/Resources';
 import Endpoints from './Endpoints/Endpoints';
 import Subscriptions from './Subscriptions/Subscriptions';
@@ -58,7 +56,7 @@ import APIDefinition from './APIDefinition/APIDefinition';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
-import ApiContext from './components/ApiContext';
+import { APIProvider } from './components/ApiContext';
 import CreateNewVersion from './NewVersion/NewVersion';
 
 const styles = theme => ({
@@ -140,9 +138,10 @@ class Details extends Component {
     constructor(props) {
         super(props);
         this.handleMenuSelect = this.handleMenuSelect.bind(this);
-        const { location, isAPIProduct } = this.props;
+        const { location } = this.props;
         const currentLink = location.pathname.match(/[^/]+(?=\/$|$)/g);
         let active = null;
+        const isAPIProduct = null;
         if (currentLink && currentLink.length > 0) {
             [active] = currentLink;
         }
@@ -150,11 +149,12 @@ class Details extends Component {
             api: null,
             apiNotFound: false,
             active: active || 'overview',
-            updateAPI: this.updateAPI, // eslint-disable-line react/no-unused-state
+            // updateAPI: this.updateAPI,
             isAPIProduct,
         };
         this.setAPI = this.setAPI.bind(this);
         this.setAPIProduct = this.setAPIProduct.bind(this);
+        this.updateAPI = this.updateAPI.bind(this);
     }
 
     /**
@@ -243,6 +243,53 @@ class Details extends Component {
             });
     }
 
+    getLeftMenuItemForAPIType(apiType) {
+        const { active } = this.state;
+        const { intl } = this.props;
+        switch (apiType) {
+            case 'GRAPHQL':
+                return (
+                    <React.Fragment>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.schema.definition',
+                                defaultMessage: 'Schema Definition',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<CodeIcon />}
+                        />
+                        <LeftMenuItem
+                            text='operations'
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<ResourcesIcon />}
+                        />
+                    </React.Fragment>);
+            default:
+                return (
+                    <React.Fragment>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.api.definition',
+                                defaultMessage: 'api definition',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<CodeIcon />}
+                        />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.resources',
+                                defaultMessage: 'resources',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<ResourcesIcon />}
+                        />
+                    </React.Fragment>);
+        }
+    }
     /**
      *
      *
@@ -251,15 +298,20 @@ class Details extends Component {
      * @memberof Details
      */
     updateAPI(newAPI, isAPIProduct) {
-        const restAPI = new Api();
+        const restAPI = (isAPIProduct || newAPI.apiType === Api.CONSTS.APIProduct) ? new APIProduct() : new Api();
         /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
         /* eslint no-param-reassign: ["error", { "props": false }] */
         if (newAPI._data) delete newAPI._data;
         if (newAPI.client) delete newAPI.client;
+
+        const modifiedNewAPI = JSON.parse(JSON.stringify(newAPI));
+        if (modifiedNewAPI.apiType) delete modifiedNewAPI.apiType;
+
         if (isAPIProduct) {
-            const promisedApi = restAPI.updateProduct(JSON.parse(JSON.stringify(newAPI)));
+            const promisedApi = restAPI.update(modifiedNewAPI);
             promisedApi
-                .then((api) => {
+                .then((response) => {
+                    const { obj: api } = response;
                     Alert.info(`${api.name} updated successfully.`);
                     this.setState({ api });
                 })
@@ -273,9 +325,10 @@ class Details extends Component {
                     }
                 });
         } else {
-            const promisedApi = restAPI.update(JSON.parse(JSON.stringify(newAPI)));
+            const promisedApi = restAPI.update(modifiedNewAPI);
             promisedApi
-                .then((api) => {
+                .then((response) => {
+                    const { obj: api } = response;
                     Alert.info(`${api.name} updated successfully.`);
                     this.setState({ api });
                 })
@@ -362,7 +415,7 @@ class Details extends Component {
 
         return (
             <React.Fragment>
-                <ApiContext.Provider value={this.state}>
+                <APIProvider value={{ api, updateAPI: this.updateAPI, isAPIProduct }}>
                     <div className={classes.LeftMenu}>
                         <Link to={'/' + (isAPIProduct ? 'api-products' : 'apis') + '/'}>
                             <div className={classes.leftLInkMain}>
@@ -397,24 +450,7 @@ class Details extends Component {
                                 Icon={<EndpointIcon />}
                             />
                         }
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.api.definition',
-                                defaultMessage: 'api definition',
-                            })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<CodeIcon />}
-                        />
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.resources',
-                                defaultMessage: 'resources',
-                            })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<ResourcesIcon />}
-                        />
+                        {this.getLeftMenuItemForAPIType(api.type)}
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.lifecycle',
@@ -497,6 +533,10 @@ class Details extends Component {
                                     path={Details.subPaths.API_DEFINITION}
                                     component={() => <APIDefinition api={api} />}
                                 />
+                                <Route
+                                    path={Details.subPaths.SCHEMA_DEFINITION}
+                                    component={() => <APIDefinition api={api} />}
+                                />
                                 <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION}
@@ -507,7 +547,10 @@ class Details extends Component {
                                     component={() => <Configuration api={api} />}
                                 />
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
+
+                                <Route path={Details.subPaths.OPERATIONS} component={() => <Operations api={api} />} />
                                 <Route path={Details.subPaths.RESOURCES} component={() => <Resources api={api} />} />
+
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
                                 <Route path={Details.subPaths.SCOPES_PRODUCT} component={() => <Scope api={api} />} />
                                 <Route path={Details.subPaths.DOCUMENTS} component={() => <Documents api={api} />} />
@@ -529,12 +572,16 @@ class Details extends Component {
                                     path={Details.subPaths.BUSINESS_INFO_PRODUCT}
                                     component={() => <BusinessInformation api={api} />}
                                 />
-                                <Route path={Details.subPaths.PROPERTIES} component={() => <Properties />} />
+                                <Route path={Details.subPaths.PROPERTIES} component={() => <Properties api={api} />} />
+                                <Route
+                                    path={Details.subPaths.PROPERTIES_PRODUCT}
+                                    component={() => <Properties api={api} />}
+                                />
                                 <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
                             </Switch>
                         </div>
                     </div>
-                </ApiContext.Provider>
+                </APIProvider>
             </React.Fragment>
         );
     }
@@ -549,10 +596,13 @@ Details.subPaths = {
     OVERVIEW: '/apis/:api_uuid/overview',
     OVERVIEW_PRODUCT: '/api-products/:apiprod_uuid/overview',
     API_DEFINITION: '/apis/:api_uuid/api definition',
+    API_DEFINITION_PRODUCT: '/api-products/:apiprod_uuid/api definition',
+    SCHEMA_DEFINITION: '/apis/:api_uuid/schema definition',
     LIFE_CYCLE: '/apis/:api_uuid/lifecycle',
     CONFIGURATION: '/apis/:api_uuid/configuration',
     CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/configuration',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
+    OPERATIONS: '/apis/:api_uuid/operations',
     RESOURCES: '/apis/:api_uuid/resources',
     RESOURCES_PRODUCT: '/api_products/:apiprod_uuid/resources',
     SCOPES: '/apis/:api_uuid/scopes',
@@ -565,6 +615,7 @@ Details.subPaths = {
     BUSINESS_INFO: '/apis/:api_uuid/business info',
     BUSINESS_INFO_PRODUCT: '/api-products/:apiprod_uuid/business info',
     PROPERTIES: '/apis/:api_uuid/properties',
+    PROPERTIES_PRODUCT: '/api-products/:apiprod_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
 };
 

@@ -32,7 +32,7 @@ import { Link } from 'react-router-dom';
 import API from 'AppData/api';
 import ApplicationCreateForm from 'AppComponents/Shared/AppsAndKeys/ApplicationCreateForm';
 import Alert from 'AppComponents/Shared/Alert';
-import Application from '../../../data/Application';
+import Application from 'AppData/Application';
 
 /**
  *
@@ -91,12 +91,14 @@ class EditApp extends React.Component {
                 name: '',
                 throttlingPolicy: '',
                 description: '',
+                groups: null,
                 tokenType: null,
                 attributes: {},
             },
             isNameValid: true,
             throttlingPolicyList: [],
             allAppAttributes: [],
+            isApplicationSharingEnabled: true,
         };
     }
 
@@ -125,6 +127,7 @@ class EditApp extends React.Component {
                 newRequest.name = application.name;
                 newRequest.throttlingPolicy = application.throttlingPolicy;
                 newRequest.description = application.description;
+                newRequest.groups = application.groups;
                 newRequest.tokenType = application.tokenType;
                 newRequest.attributes = application.attributes;
                 this.setState({ applicationRequest: newRequest, throttlingPolicyList, allAppAttributes });
@@ -139,6 +142,7 @@ class EditApp extends React.Component {
                     this.setState({ notFound: true });
                 }
             });
+        this.isApplicationGroupSharingEnabled();
     }
 
     /**
@@ -200,7 +204,7 @@ class EditApp extends React.Component {
         const attributeNameList = Object.keys(attributes);
         if (allAppAttributes.length > 0) {
             for (let i = 0; i < allAppAttributes.length; i++) {
-                if (allAppAttributes[i].required === 'true') {
+                if (allAppAttributes[i].required === 'true' && allAppAttributes[i].hidden === 'false') {
                     if (attributeNameList.indexOf(allAppAttributes[i].attribute) === -1) {
                         isValidAttribute = false;
                     } else if (attributeNameList.indexOf(allAppAttributes[i].attribute) > -1
@@ -284,12 +288,56 @@ class EditApp extends React.Component {
     };
 
     /**
+     * add a new group function
+     * @param {*} chip newly added group
+     * @param {*} appGroups already existing groups
+     */
+    handleAddChip = (chip, appGroups) => {
+        this.setState(() => {
+            const { applicationRequest } = this.state;
+            const newRequest = { ...applicationRequest };
+            let values = appGroups || [];
+            values = values.slice();
+            values.push(chip);
+            newRequest.groups = values;
+            return { applicationRequest: newRequest };
+        });
+    }
+
+    /**
+     * remove a group from already existing groups function
+     * @param {*} chip selected group to be removed
+     * @param {*} index selected group index to be removed
+     * @param {*} appGroups already existing groups
+     */
+    handleDeleteChip = (chip, index, appGroups) => {
+        this.setState(() => {
+            const { applicationRequest } = this.state;
+            const newRequest = { ...applicationRequest };
+            let values = appGroups || [];
+            values = values.filter(v => v !== chip);
+            newRequest.groups = values;
+            return { applicationRequest: newRequest };
+        });
+    }
+
+    /**
+     * retrieve Settings from the local storage
+     */
+    isApplicationGroupSharingEnabled = () => {
+        const settingsData = localStorage.getItem('settings');
+        const enabled = JSON.parse(settingsData).applicationSharingEnabled;
+        this.setState({ isApplicationSharingEnabled: enabled });
+    }
+
+    /**
      * @inheritdoc
      * @memberof EditApp
      */
     render() {
         const {
             throttlingPolicyList, applicationRequest, isNameValid, open, allAppAttributes,
+            isApplicationSharingEnabled,
         } = this.state;
         const { classes } = this.props;
         return (
@@ -318,6 +366,9 @@ class EditApp extends React.Component {
                             handleAttributesChange={this.handleAttributesChange}
                             isRequiredAttribute={this.isRequiredAttribute}
                             getAttributeValue={this.getAttributeValue}
+                            isApplicationSharingEnabled={isApplicationSharingEnabled}
+                            handleDeleteChip={this.handleDeleteChip}
+                            handleAddChip={this.handleAddChip}
                         />
                     </div>
                     <div className={classes.buttonWrapper}>
@@ -353,6 +404,14 @@ class EditApp extends React.Component {
 EditApp.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            application_uuid: PropTypes.string.isRequired,
+        }).isRequired,
+    }).isRequired,
+    history: PropTypes.shape({
+        push: PropTypes.func.isRequired,
+    }).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(EditApp));

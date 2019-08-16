@@ -50,6 +50,11 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
     @Override
     public void handleMessage(Message message) {
         String username = RestApiUtil.getLoggedInUsername();
+        //by-passes the interceptor if user is an annonymous user
+        if (username.equalsIgnoreCase("wso2.anonymous.user")) {
+            return;
+        }
+
         String groupId = RestApiUtil.getLoggedInUserGroupId();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         try {
