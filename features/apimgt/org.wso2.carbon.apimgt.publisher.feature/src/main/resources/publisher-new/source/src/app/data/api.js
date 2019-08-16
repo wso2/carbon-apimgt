@@ -213,6 +213,22 @@ class API extends Resource {
     }
 
     /**
+     * Create a new API in the 42Crunch Platform
+     */
+    createNew42CrunchAPI(id, callback = null) {
+        const promise_create_42crunch_api = this.client.then((client) => {
+            return client.apis['Scope (Individual)'].post_apis_42crunch_api_({
+                id: id
+            }, this._requestMetaData());
+        });
+        if (callback) {
+            return promise_create_42crunch_api.then(callback);
+        } else {
+            return promise_create_42crunch_api_id;
+        }
+    }
+
+    /**
      * Get detailed policy information of the API
      * @returns {Promise} Promise containing policy detail request calls for all the available policies
      * @memberof API

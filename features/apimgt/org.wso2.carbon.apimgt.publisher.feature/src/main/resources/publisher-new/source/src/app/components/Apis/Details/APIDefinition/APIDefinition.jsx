@@ -23,6 +23,7 @@ import Button from '@material-ui/core/Button';
 import EditRounded from '@material-ui/icons/EditRounded';
 import CloudUploadRounded from '@material-ui/icons/CloudUploadRounded';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
+import LockRounded from '@material-ui/icons/LockRounded';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
@@ -109,6 +110,7 @@ class APIDefinition extends React.Component {
         this.closeEditor = this.closeEditor.bind(this);
         this.hasJsonStructure = this.hasJsonStructure.bind(this);
         this.getConvertToFormat = this.getConvertToFormat.bind(this);
+        this.onAuditApiClick = this.onAuditApiClick.bind(this);
         this.onChangeFormatClick = this.onChangeFormatClick.bind(this);
         this.openUpdateConfirmation = this.openUpdateConfirmation.bind(this);
         this.updateSwaggerDefinition = this.updateSwaggerDefinition.bind(this);
@@ -162,6 +164,19 @@ class APIDefinition extends React.Component {
                 defaultMessage: 'Unsupported File Type.',
             }));
         }
+    }
+
+    /**
+         * Audit the API Definition
+         * @returns {string} the swagger definition
+         */
+    onAuditApiClick() {
+        const { swagger } = this.state;
+        if (this.hasJsonStructure(swagger) === false) {
+            // Add logic to open up Report UI
+            this.onChangeFormatClick();
+        }
+        return swagger;
     }
 
     /**
@@ -392,6 +407,17 @@ class APIDefinition extends React.Component {
                                 />
                             </Button>
                         </a>
+                        {/**
+                           * Code for the Audit API button
+                           * TODO - Add onClick for the button
+                        */}
+                        <Button size='small' className={classes.button} onClick={this.onAuditApiClick}>
+                            <LockRounded className={classes.buttonIcon} />
+                            <FormattedMessage
+                                id='Apis.Details.APIDefinition.APIDefinition.audit.api'
+                                defaultMessage='Audit API'
+                            />
+                        </Button>
                     </div>
                     <div className={classes.converterWrapper}>
                         <Button size='small' className={classes.button} onClick={this.onChangeFormatClick}>
