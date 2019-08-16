@@ -5797,6 +5797,103 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ######################################################
+  # The Security Audit API List
+  ######################################################
+  /auditapi:
+    #-----------------------------------------------------
+    # Create new Security Audit API
+    #-----------------------------------------------------
+    post:
+      summary: Create new Security Audit API
+      description: |
+        Create new Security Audit API
+      parameters:
+        - $ref: "#/parameters/Accept"
+        - $ref: "#/parameters/apiId"
+        - in: body
+          name: body
+          description: |
+            API object that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/APISecurityAuditInfo'
+      responses:
+        200:
+          description: |
+            OK.
+            UUID returned
+          schema:
+            $ref: '#/definitions/SecurityAuditAPIID'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              default: application/json
+              type: string
+        404:
+          description: |
+            Not Created.
+            The Audit API was not created.
+          schema:
+            $ref: '#/definitions/Error'
+
+    #-----------------------------------------------------
+    # Update Swagger Definition in Security Audit API
+    #-----------------------------------------------------
+    put:
+      summary: Update Swagger Definition in Security Audit API
+      description: |
+        Update Swagger Definition in Security Audit API
+      parameters:
+        - $ref: "#/parameters/Accept"
+        - $ref: "#/parameters/apiId"
+      responses:
+        200:
+          description: |
+            OK.
+            Swagger Definition has been updated
+          headers:
+            Content-Type:
+              description: |
+                The content of the body.
+              default: application/json
+              type: string
+        404:
+          description: |
+            Not Found.
+            The Audit API was not found.
+          schema:
+            $ref: '#/definitions/Error'
+
+    #-----------------------------------------------------
+    # Retrieve the Security Audit Report of the Audit API
+    #-----------------------------------------------------
+    get:
+      summary: Retrieve the Security Audit Report of the Audit API
+      description: |
+        Retrieve the Security Audit Report of the Audit API
+      parameters:
+        - $ref: "#/parameters/Accept"
+        - $ref: "#/parameters/apiId"
+      responses:
+        200:
+          description: |
+            OK.
+            The Security Audit Report has been returned.
+          headers:
+            Content-Type:
+              description: |
+                The content of the body.
+              default: application/json
+              type: string
+        404:
+          description: |
+            Not Found.
+            The Security Audit Report was not found.
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -6476,6 +6573,40 @@ definitions:
                   type: string
                 priority:
                   type: integer
+
+  #-----------------------------------------------------
+  # The API Security Audit Info resource
+  #-----------------------------------------------------
+  APISecurityAuditInfo:
+    title: Resource for API Security Audit
+    properties:
+      specfile:
+        type: object
+        description: |
+          The swagger definition of the API.
+        example: swagger.json
+      cid:
+        type: string
+        description: |
+          The ID of the API collection.
+        example: 395df257-3f79-495f-23f3-0827947bdc6e
+      name:
+        type: string
+        description: |
+          The name of the API.
+        example: Swagger-Petstore
+
+  #-----------------------------------------------------
+  # The Security Audit API ID resource
+  #-----------------------------------------------------
+  SecurityAuditAPIID:
+    title: Resource for the Security Audit API ID
+    properties:
+      id:
+        type: string
+        description: |
+          The Security Audit API ID.
+        example: 1ab5e1a3-5294-4452-9768-63u273r6cbf5
 
   #-----------------------------------------------------
   # The API Product List resource
