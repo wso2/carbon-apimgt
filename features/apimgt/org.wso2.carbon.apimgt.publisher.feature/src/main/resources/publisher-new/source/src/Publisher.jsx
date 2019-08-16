@@ -29,7 +29,7 @@ import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import Configurations from 'Config';
 
 // Localization
-import { IntlProvider, addLocaleData, defineMessages } from 'react-intl';
+import { IntlProvider } from 'react-intl';
 
 const LoadableProtectedApp = Loadable({
     loader: () =>
@@ -139,14 +139,10 @@ class Publisher extends React.Component {
      *
      * @param {string} locale Locale name
      */
-    loadLocale(locale = 'en') {
+    loadLocale(locale) {
         fetch(`${Utils.CONST.CONTEXT_PATH}/site/public/locales/${locale}.json`)
             .then(resp => resp.json())
-            .then((data) => {
-                // eslint-disable-next-line global-require, import/no-dynamic-require
-                addLocaleData(require(`react-intl/locale-data/${locale}`));
-                this.setState({ messages: defineMessages({ ...data }) });
-            });
+            .then(messages => this.setState({ messages }));
     }
 
     /**
@@ -156,19 +152,20 @@ class Publisher extends React.Component {
      * @memberof Publisher
      */
     render() {
-        const { user, userResolved } = this.state;
+        const { user, userResolved, messages } = this.state;
+        const locale = languageWithoutRegionCode || language;
         if (!userResolved) {
             return <Progress />;
         }
         if (!user) {
             return (
-                <IntlProvider locale={language} messages={this.state.messages}>
+                <IntlProvider locale={locale} messages={messages}>
                     <RedirectToLogin />
                 </IntlProvider>
             );
         }
         return (
-            <IntlProvider locale={language} messages={this.state.messages}>
+            <IntlProvider locale={locale} messages={messages}>
                 <PublisherRootErrorBoundary appName='Publisher Application'>
                     <Router basename={Configurations.app.context}>
                         <Switch>
