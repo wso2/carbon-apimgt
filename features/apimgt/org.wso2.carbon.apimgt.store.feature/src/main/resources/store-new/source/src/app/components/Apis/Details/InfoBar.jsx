@@ -544,10 +544,9 @@ class InfoBar extends React.Component {
     };
 
     getSchema() {
-        const newAPI = new API();
-        const { apiId } = this.props;
+        const newAPI = new Api();
         const { api } = this.context;
-        const promisedGraphQL = newAPI.getGraphQLSchemaByAPIId(apiId);
+        const promisedGraphQL = newAPI.getGraphQLSchemaByAPIId(api.id);
         promisedGraphQL.then((response) => {
             const windowUrl = window.URL || window.webkitURL;
             const binary = new Blob([response.data]);
