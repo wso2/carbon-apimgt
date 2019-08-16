@@ -244,49 +244,31 @@ class Details extends Component {
     /**
      *
      *
-     * @param {*} newAPI
+     * @param {*} updatedProperties
      * @param {*} isAPIProduct
      * @memberof Details
      */
-    updateAPI(newAPI, isAPIProduct) {
-        const restAPI = new Api();
-        /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
-        /* eslint no-param-reassign: ["error", { "props": false }] */
-        if (newAPI._data) delete newAPI._data;
-        if (newAPI.client) delete newAPI.client;
+    updateAPI(updatedProperties, isAPIProduct) {
+        const { api } = this.state;
+        let promisedUpdate;
+        // TODO: Ideally, The state should hold the corresponding API object
+        // which we could call it's `update` method safely ~tmkb
         if (isAPIProduct) {
-            const promisedApi = restAPI.updateProduct(JSON.parse(JSON.stringify(newAPI)));
-            promisedApi
-                .then((api) => {
-                    Alert.info(`${api.name} updated successfully.`);
-                    this.setState({ api });
-                })
-                .catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.log(error);
-                    }
-                    const { status } = error;
-                    if (status === 404) {
-                        this.setState({ apiNotFound: true });
-                    }
-                });
+            const restAPI = new Api();
+            promisedUpdate = restAPI.updateProduct(JSON.parse(JSON.stringify(updatedProperties)));
         } else {
-            const promisedApi = restAPI.update(JSON.parse(JSON.stringify(newAPI)));
-            promisedApi
-                .then((api) => {
-                    Alert.info(`${api.name} updated successfully.`);
-                    this.setState({ api });
-                })
-                .catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.log(error);
-                    }
-                    const { status } = error;
-                    if (status === 404) {
-                        this.setState({ apiNotFound: true });
-                    }
-                });
+            promisedUpdate = api.update(updatedProperties);
         }
+        return promisedUpdate.then((updatedAPI) => {
+            Alert.info(`${updatedAPI.name} API updated successfully`);
+            this.setState({ api: updatedAPI });
+            return updatedAPI;
+        }).catch((error) => {
+            // TODO: Should log and handle the error case by the original callee ~tmkb
+            console.error(error);
+            Alert.error(`Something went wrong while updating the ${api.name} API!!`);
+            throw error;
+        });
     }
 
     /**
