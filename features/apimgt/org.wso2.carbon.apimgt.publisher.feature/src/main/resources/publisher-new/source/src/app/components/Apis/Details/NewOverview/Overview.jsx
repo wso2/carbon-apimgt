@@ -137,7 +137,7 @@ function Overview(props) {
         switch (apiType) {
             case 'GRAPHQL':
                 return <Operations parentClasses={classes} api={api} />;
-            case API.CONSTS.APIProduct:
+            case 'APIProduct':
                 return <ProductResources parentClasses={classes} api={api} />;
             default:
                 return <Resources parentClasses={classes} api={api} />;
@@ -153,6 +153,7 @@ function Overview(props) {
     }
 
     if (newApi.apiType === API.CONSTS.APIProduct) {
+        api.type = API.CONSTS.APIProduct;
         endpointsCheckItem = null;
         scopesCheckItem = null;
         loadEndpoints = null;
