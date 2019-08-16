@@ -18,7 +18,7 @@
 
 import React from 'react';
 import API from 'AppData/api.js';
-import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
+import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import getMockedModel from 'AppTests/Utils/MockAPIModel.js';
 import { unwrap } from '@material-ui/core/test-utils';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
