@@ -475,6 +475,7 @@
   "Apis.Details.Subscriptions.SubscriptionsTable.unblock.state.blocked": "",
   "Apis.Details.Subscriptions.SubscriptionsTable.unblock.state.prod.only": "",
   "Apis.Details.components.APIDetailsTopMenu.back.to.listing": "",
+  "Apis.Details.components.APIDetailsTopMenu.last.updated.time": "",
   "Apis.Details.components.DeleteApiButton.button.cancel": "",
   "Apis.Details.components.DeleteApiButton.button.delete": "",
   "Apis.Details.components.DeleteApiButton.text.content": "",

@@ -76,18 +76,6 @@ function Configuration(props) {
             </Typography>
             <div className={parentClasses.imageContainer}>
                 <div className={parentClasses.imageWrapper}>
-                    {/* Thumbnail */}
-                    <ThumbnailView api={api} width={200} height={200} isEditable />
-                    {/* Provider */}
-                    <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Configuration.provider'
-                            defaultMessage='Provider'
-                        />
-                    </Typography>
-                    <Typography component='p' variant='body1'>
-                        {api.provider && <React.Fragment>{api.provider}</React.Fragment>}
-                    </Typography>
                     <div className={parentClasses.imageContainer}>
                         <div className={parentClasses.imageWrapper}>
                             {/* Thumbnail */}
