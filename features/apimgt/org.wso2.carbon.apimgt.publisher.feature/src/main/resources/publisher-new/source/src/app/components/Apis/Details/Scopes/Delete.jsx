@@ -117,7 +117,7 @@ function Delete(props) {
                     defaultMessage='Confirm Delete'
                 />}
                 message={<FormattedMessage
-                    id='Apis.Details.Documents.Delete.document.listing.label.ok'
+                    id='Apis.Details.Documents.Delete.document.listing.label.ok.confirm'
                     defaultMessage='Are you sure you want to delete scope {scope} ?'
                     values={{ scope: scopeName }}
                 />}

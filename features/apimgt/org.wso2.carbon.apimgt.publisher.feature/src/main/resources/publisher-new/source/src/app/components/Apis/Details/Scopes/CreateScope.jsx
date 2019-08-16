@@ -23,6 +23,7 @@ import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import TagsInput from 'react-tagsinput';
 import Api from 'AppData/api';
+// import Scopes from 'AppData/Scopes';  // TODO move below method once Scopes resource response is fixed ~tmkb
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router';
@@ -73,17 +74,20 @@ class CreateScope extends React.Component {
     addScope() {
         const api = new Api();
         const scope = this.state.apiScope;
-        const { intl } = this.props;
+        const { intl, api: apiProp } = this.props;
         scope.bindings = {
             type: 'role',
             values: this.state.roles,
         };
-        const newApi = this.props.api;
+        const newApi = { ...apiProp.toJSON(), scopes: [...apiProp.toJSON().scopes] };
+        // TODO: Need to fix the direct mutation here // Cannot add property 0, object is not extensible ~tmkb
         newApi.scopes.push(scope);
         // eslint-disable-next-line no-underscore-dangle
-        const promisedApiUpdate = api.update(newApi._data);
+        const promisedApiUpdate = api.update(newApi);
+        // TODO move below method once Scopes resource response is fixed ~tmkb
+        // Scopes.add(apiProp.id, scope).then((response) => {
         promisedApiUpdate.then((response) => {
-            if (response.status !== 200) {
+            if (!response.id) {
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Details.Scopes.CreateScope.something.went.wrong.while.updating.the.scope',
                     defaultMessage: 'Something went wrong while updating the scope',
@@ -123,7 +127,6 @@ class CreateScope extends React.Component {
         }
     }
 
-
     /**
      *
      *
@@ -135,12 +138,7 @@ class CreateScope extends React.Component {
         const url = `/apis/${this.props.api.id}/scopes`;
         return (
             <Grid container>
-                <Typography
-                    className={classes.headline}
-                    gutterBottom
-                    variant='h5'
-                    component='h2'
-                >
+                <Typography className={classes.headline} gutterBottom variant='h5' component='h2'>
                     <FormattedMessage
                         id='Apis.Details.Scopes.CreateScope.create.new.scope'
                         defaultMessage='Create New Scope'
@@ -165,10 +163,12 @@ class CreateScope extends React.Component {
                             }}
                             id='description'
                             name='description'
-                            helperText={<FormattedMessage
-                                id='Apis.Details.Scopes.CreateScope.short.description.about.the.scope'
-                                defaultMessage='Short description about the scope'
-                            />}
+                            helperText={
+                                <FormattedMessage
+                                    id='Apis.Details.Scopes.CreateScope.short.description.about.the.scope'
+                                    defaultMessage='Short description about the scope'
+                                />
+                            }
                             margin='normal'
                             type='text'
                             onChange={this.handleInputs}
@@ -176,33 +176,14 @@ class CreateScope extends React.Component {
                         />
                     </APIPropertyField>
                     <APIPropertyField name='Roles'>
-                        <TagsInput
-                            value={this.state.roles}
-                            onChange={this.handleInputs}
-                            onlyUnique
-                        />
+                        <TagsInput value={this.state.roles} onChange={this.handleInputs} onlyUnique />
                     </APIPropertyField>
-                    <Button
-                        variant='contained'
-                        color='primary'
-                        onClick={this.addScope}
-                        className={classes.buttonSave}
-                    >
-                        <FormattedMessage
-                            id='Apis.Details.Scopes.CreateScope.save'
-                            defaultMessage='Save'
-                        />
+                    <Button variant='contained' color='primary' onClick={this.addScope} className={classes.buttonSave}>
+                        <FormattedMessage id='Apis.Details.Scopes.CreateScope.save' defaultMessage='Save' />
                     </Button>
                     <Link to={url}>
-                        <Button
-                            variant='contained'
-                            color='primary'
-                            className={classes.buttonCancel}
-                        >
-                            <FormattedMessage
-                                id='Apis.Details.Scopes.CreateScope.cancel'
-                                defaultMessage='Cancel'
-                            />
+                        <Button variant='contained' color='primary' className={classes.buttonCancel}>
+                            <FormattedMessage id='Apis.Details.Scopes.CreateScope.cancel' defaultMessage='Cancel' />
                         </Button>
                     </Link>
                 </Grid>
