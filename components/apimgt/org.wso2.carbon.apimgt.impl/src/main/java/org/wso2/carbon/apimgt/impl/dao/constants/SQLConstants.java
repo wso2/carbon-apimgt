@@ -1806,6 +1806,11 @@ public class SQLConstants {
             "SELECT API_PRODUCT_ID FROM AM_API_PRODUCT WHERE API_PRODUCT_PROVIDER = ? AND API_PRODUCT_NAME = ? "
                     + "AND API_PRODUCT_VERSION = ?";
 
+    public static final String GET_AUDIT_UUID_SQL = "SELECT MAP.AUDIT_UUID FROM SECURITY_AUDIT_UUID_MAP MAP WHERE " +
+            "API_ID = ?";
+    public static final String ADD_SECURITY_AUDIT_MAP_SQL = "INSERT INTO SECURITY_AUDIT_UUID_MAP (API_ID, AUDIT_UUID) " +
+            "VALUES (?,?)";
+
     public static final String ADD_API_LIFECYCLE_EVENT_SQL =
             " INSERT INTO AM_API_LC_EVENT (API_ID, PREVIOUS_STATE, NEW_STATE, USER_ID, TENANT_ID, EVENT_DATE)" +
             " VALUES (?,?,?,?,?,?)";
