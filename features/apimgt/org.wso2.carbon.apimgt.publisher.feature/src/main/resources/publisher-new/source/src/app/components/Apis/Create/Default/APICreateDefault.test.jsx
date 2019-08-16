@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
+import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import AuthManager from 'AppData/AuthManager';
 import User from 'AppData/User';
 import API from 'AppData/api.js';

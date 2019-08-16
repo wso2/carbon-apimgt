@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
+import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import { MemoryRouter, Link } from 'react-router-dom';
 
 import APICreateTopMenu from './APICreateTopMenu';
