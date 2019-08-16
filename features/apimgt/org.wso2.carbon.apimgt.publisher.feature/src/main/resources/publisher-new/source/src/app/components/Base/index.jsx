@@ -43,7 +43,7 @@ const styles = theme => ({
     wrapper: {
         minHeight: '100%',
         marginBottom: -50,
-        background: theme.palette.background.default + ' url(' + theme.custom.backgroundImage + ') repeat left top',
+        background: '#d3d3d326',
     },
     contentWrapper: {
         display: 'flex',
