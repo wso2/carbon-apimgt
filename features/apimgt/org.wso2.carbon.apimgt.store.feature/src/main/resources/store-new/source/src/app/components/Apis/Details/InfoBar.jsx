@@ -508,6 +508,7 @@ class InfoBar extends React.Component {
             checked: false,
             epUrl: '',
         };
+        this.getSchema = this.getSchema.bind(this);
     }
 
     /**
@@ -542,6 +543,24 @@ class InfoBar extends React.Component {
         }
     };
 
+    getSchema() {
+        const newAPI = new API();
+        const { apiId } = this.props;
+        const { api } = this.context;
+        const promisedGraphQL = newAPI.getGraphQLSchemaByAPIId(apiId);
+        promisedGraphQL.then((response) => {
+            const windowUrl = window.URL || window.webkitURL;
+            const binary = new Blob([response.data]);
+            const url = windowUrl.createObjectURL(binary);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = api.provider + '-' + api.name + '-' + api.version
+            + '.graphql';
+            anchor.click();
+            windowUrl.revokeObjectURL(url);
+        });
+    }
+
     /**
      *
      *
@@ -553,13 +572,6 @@ class InfoBar extends React.Component {
         const {
             notFound, showOverview, prodUrlCopied, sandboxUrlCopied, epUrl,
         } = this.state;
-        const format = 'txt';
-        const schema = 'text';
-        const fileName = 'schema.graphql';
-        // if (api.type === 'GRAPHQL' && graphQL === null) {
-        //     <Progress />;
-        // }
-        const downloadLink = 'data:text/' + format + ';charset=utf-8,' + encodeURIComponent(schema);
         const { resourceNotFountMessage } = this.props;
         if (notFound) {
             return <ResourceNotFound message={resourceNotFountMessage} />;
@@ -670,12 +682,13 @@ class InfoBar extends React.Component {
                                                             </div>
                                                         </TableCell>
                                                         <TableCell>
-                                                            <a className={classes.downloadLink} href={downloadLink} download={fileName}>
+                                                            <Button onClick={this.getSchema} size='small' fontSize='small' variant='outlined'>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.graphQL.schema'
                                                                     defaultMessage='GraphQL Schema'
                                                                 />
-                                                            </a>
+                                                            </Button>
+
                                                         </TableCell>
                                                     </TableRow>
                                                 ) : null}
@@ -1032,5 +1045,7 @@ InfoBar.propTypes = {
         formatMessage: PropTypes.func,
     }).isRequired,
 };
+
+InfoBar.contextType = ApiContext;
 
 export default injectIntl(withStyles(styles, { withTheme: true })(InfoBar));
