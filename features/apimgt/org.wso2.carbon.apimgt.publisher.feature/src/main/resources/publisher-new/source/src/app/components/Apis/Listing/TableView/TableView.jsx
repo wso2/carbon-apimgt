@@ -350,7 +350,7 @@ class TableView extends React.Component {
                         listType={listType}
                     />
                     <div className={classes.contentInside}>
-                        <SampleAPI isAPIProduct={isAPIProduct} />;
+                        <SampleAPI isAPIProduct={isAPIProduct} />
                     </div>
                 </React.Fragment>
             );

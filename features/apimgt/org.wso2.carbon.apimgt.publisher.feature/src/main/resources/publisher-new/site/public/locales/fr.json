@@ -76,6 +76,8 @@
   "Apis.Details.Configuration.components.SchemaValidation.description.question": "",
   "Apis.Details.Configuration.components.SchemaValidation.title": "",
   "Apis.Details.Configuration.components.StoreVisibility.dropdown.public": "",
+  "Apis.Details.Configuration.components.Tags.helper": "",
+  "Apis.Details.Configuration.components.Tags.title": "",
   "Apis.Details.Configuration.components.Transports.tooltip": "",
   "Apis.Details.Configuration.components.schema.validation.tooltip": "",
   "Apis.Details.Configuration.components.storeVisibility.dropdown.restrict": "",

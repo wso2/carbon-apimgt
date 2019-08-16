@@ -91,9 +91,11 @@ export default function APISecurity(props) {
     };
     return (
         <React.Fragment>
-            <Grid container spacing={0} alignItems='flex-start'>
+            <Grid container spacing={2} alignItems='flex-start'>
                 <Grid item>
-                    <Typography variant='subtitle1'>API Security</Typography>
+                    <Typography variant='subtitle1'>
+                        API Security
+                    </Typography>
                 </Grid>
                 <Grid item>
                     <Tooltip
@@ -118,6 +120,7 @@ export default function APISecurity(props) {
                     </Tooltip>
                 </Grid>
             </Grid>
+
             <Grid container spacing={5} alignItems='flex-start'>
                 <ApplicationLevel
                     haveMultiLevelSecurity={haveMultiLevelSecurity}
@@ -138,7 +141,6 @@ export default function APISecurity(props) {
         </React.Fragment>
     );
 }
-
 
 APISecurity.propTypes = {
     api: PropTypes.shape({}).isRequired,

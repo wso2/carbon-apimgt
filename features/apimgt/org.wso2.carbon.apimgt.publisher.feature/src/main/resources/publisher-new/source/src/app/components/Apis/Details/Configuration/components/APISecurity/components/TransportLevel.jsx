@@ -127,7 +127,7 @@ export default function TransportLevel(props) {
                         // This is half baked!!!
                         // Refactor the Certificate component to share its capabilities in here and endpoints page ~tmkb
                         <Certificates
-                            certificates={[]}
+                            certificates={{}}
                             uploadCertificate={() => {}}
                             deleteCertificate={() => {}}
                         />
@@ -140,7 +140,6 @@ export default function TransportLevel(props) {
 }
 
 TransportLevel.propTypes = {
-    api: PropTypes.shape({}).isRequired,
     configDispatcher: PropTypes.func.isRequired,
     haveMultiLevelSecurity: PropTypes.bool.isRequired,
     securityScheme: PropTypes.arrayOf(PropTypes.string).isRequired,

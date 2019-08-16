@@ -316,6 +316,8 @@ class Details extends Component {
             // TODO: Should log and handle the error case by the original callee ~tmkb
             console.error(error);
             Alert.error(`Something went wrong while updating the ${api.name} API!!`);
+            // Kinda force render,Resting API object to old one
+            this.setState({ api });
             throw error;
         });
     }

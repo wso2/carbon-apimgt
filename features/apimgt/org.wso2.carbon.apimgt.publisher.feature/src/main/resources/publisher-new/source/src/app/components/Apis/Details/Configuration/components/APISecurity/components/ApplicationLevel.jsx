@@ -139,7 +139,6 @@ export default function ApplicationLevel(props) {
 }
 
 ApplicationLevel.propTypes = {
-    api: PropTypes.shape({}).isRequired,
     configDispatcher: PropTypes.func.isRequired,
     haveMultiLevelSecurity: PropTypes.bool.isRequired,
     securityScheme: PropTypes.arrayOf(PropTypes.string).isRequired,

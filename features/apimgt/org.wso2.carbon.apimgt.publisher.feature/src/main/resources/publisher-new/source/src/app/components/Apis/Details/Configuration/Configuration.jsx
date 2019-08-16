@@ -247,11 +247,11 @@ export default function Configuration() {
                         </Grid>
 
                         <Grid item xs={12} md={9}>
-                            <Tags api={apiConfig} configDispatcher={configDispatcher} />
+                            <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />
                         </Grid>
 
                         <Grid item xs={12} md={9}>
-                            <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />
+                            <Tags api={apiConfig} configDispatcher={configDispatcher} />
                         </Grid>
                     </Grid>
                 </Grid>
