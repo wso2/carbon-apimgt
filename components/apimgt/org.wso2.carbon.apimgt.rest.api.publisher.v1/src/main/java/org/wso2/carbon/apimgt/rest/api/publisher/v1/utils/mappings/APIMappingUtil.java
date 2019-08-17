@@ -150,6 +150,7 @@ public class APIMappingUtil {
         model.setImplementation(dto.getEndpointImplementationType().toString());
         model.setWsdlUrl(dto.getWsdlUri());
         model.setType(dto.getType().toString());
+        model.setEnableSchemaValidation(dto.isEnableSchemaValidation());
 
         if (dto.getLifeCycleStatus() != null) {
             model.setStatus((dto.getLifeCycleStatus() != null) ? dto.getLifeCycleStatus().toUpperCase() : null);
