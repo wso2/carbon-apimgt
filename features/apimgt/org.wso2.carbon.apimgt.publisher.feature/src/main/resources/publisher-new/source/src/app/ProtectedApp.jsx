@@ -33,9 +33,7 @@ import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import { IntlProvider } from 'react-intl';
 
-const themes = [];
-themes.push(createMuiTheme(Configurations.themes.light));
-themes.push(createMuiTheme(Configurations.themes.dark));
+const theme = createMuiTheme(Configurations.themes.light);
 
 /**
  * Language.
@@ -54,11 +52,8 @@ export default class Protected extends Component {
      */
     constructor(props) {
         super(props);
-        this.state = {
-            themeIndex: 1,
-        };
+        this.state = {};
         this.environments = [];
-        this.toggleTheme = this.toggleTheme.bind(this);
     }
 
     /**
@@ -66,10 +61,6 @@ export default class Protected extends Component {
      * @memberof Protected
      */
     componentDidMount() {
-        const storedThemeIndex = localStorage.getItem('themeIndex');
-        if (storedThemeIndex) {
-            this.setState({ themeIndex: parseInt(storedThemeIndex, 10) });
-        }
         const user = AuthManager.getUser();
         if (user) {
             this.setState({ user });
@@ -83,20 +74,12 @@ export default class Protected extends Component {
     }
 
     /**
-     * Change the theme index incrementally
-     */
-    toggleTheme() {
-        this.state.themeIndex++;
-        localStorage.setItem('themeIndex', this.state.themeIndex);
-    }
-
-    /**
      * @returns {React.Component} @inheritDoc
      * @memberof Protected
      */
     render() {
         const user = this.state.user || AuthManager.getUser();
-        const header = <Header avatar={<Avatar toggleTheme={this.toggleTheme} user={user} />} user={user} />;
+        const header = <Header avatar={<Avatar user={user} />} user={user} />;
 
         if (!user) {
             return (
@@ -106,7 +89,7 @@ export default class Protected extends Component {
             );
         }
         return (
-            <MuiThemeProvider theme={themes[this.state.themeIndex % 2]}>
+            <MuiThemeProvider theme={theme}>
                 <AppErrorBoundary>
                     <Base header={header}>
                         <Switch>

@@ -69,6 +69,7 @@ const styles = theme => ({
         bottom: 0,
         left: 0,
         top: 0,
+        overflowY: 'auto',
     },
     leftLInkMain: {
         borderRight: 'solid 1px ' + theme.palette.background.leftMenu,

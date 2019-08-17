@@ -24,7 +24,6 @@ import MUIDataTable from 'mui-datatables';
 import { injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
-import Configurations from 'Config';
 import ImageGenerator from 'AppComponents/Apis/Listing/components/ImageGenerator/ImageGenerator';
 import ApiThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/ApiThumb';
 import { Progress } from 'AppComponents/Shared';
@@ -74,7 +73,7 @@ class TableView extends React.Component {
 
     getMuiTheme = () => {
         const { listType } = this.state;
-        let { theme } = this.props;
+        const { theme } = this.props;
         let muiTheme = {
             overrides: {
                 MUIDataTable: {
@@ -117,7 +116,7 @@ class TableView extends React.Component {
                     },
                 },
             };
-            muiTheme = Object.assign( theme, muiTheme, themeAdditions);
+            muiTheme = Object.assign(theme, muiTheme, themeAdditions);
         }
         return createMuiTheme(muiTheme);
     };

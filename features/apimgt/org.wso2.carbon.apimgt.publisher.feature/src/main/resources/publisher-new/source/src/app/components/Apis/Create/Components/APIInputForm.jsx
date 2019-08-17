@@ -28,12 +28,12 @@ import Policies from 'AppComponents/Apis/Details/LifeCycle/Policies';
 
 const styles = theme => ({
     FormControl: {
-        padding: 0,
+        padding: `0 0 0 ${theme.spacing.unit}px`,
         width: '100%',
         marginTop: 0,
     },
     FormControlOdd: {
-        padding: 0,
+        padding: `0 0 0 ${theme.spacing.unit}px`,
         backgroundColor: theme.palette.background.paper,
         width: '100%',
         marginTop: 0,

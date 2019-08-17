@@ -71,15 +71,6 @@ const DetailsTopMenu = ({
                             Created by: {api.provider}
                 </Typography>
             </div>
-            <VerticalDivider height={70} />
-            <div className={classes.infoItem}>
-                <Typography variant='subtitle1' gutterBottom>
-                    {isAPIProduct ? api.state : api.lifeCycleStatus}
-                </Typography>
-                <Typography variant='caption' gutterBottom align='left'>
-                            State
-                </Typography>
-            </div>
 
             <VerticalDivider height={70} />
 

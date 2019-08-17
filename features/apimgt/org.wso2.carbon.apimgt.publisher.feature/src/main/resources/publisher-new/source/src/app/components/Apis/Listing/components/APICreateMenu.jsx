@@ -7,12 +7,13 @@ import { Link } from 'react-router-dom';
 import MenuButton from 'AppComponents/Shared/MenuButton';
 import { FormattedMessage } from 'react-intl';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
     links: {
         textDecoration: 'none',
-        
+        color: theme.palette.getContrastText(theme.palette.background.paper),
     },
-  });
+}));
+
 const APICreateMenu = (props) => {
     const classes = useStyles();
 
