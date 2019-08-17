@@ -70,6 +70,33 @@ class API extends Resource {
         Resource._requestMetaData();
     }
 
+
+    /**
+     *
+     * Instance method of the API class to provide raw JSON object
+     * which is API body friendly to use with REST api requests
+     * Use this method instead of accessing the private _data object for
+     * converting to a JSON representation of an API object.
+     * Note: This is shallow coping
+     * Basically this is the revers operation in constructor.
+     * This method simply iterate through all the object properties
+     * and copy their values to new object excluding the properties in excludes list.
+     * So use this method sparingly!!
+     * @memberof API
+     * @param {Array} [userExcludes=[]] List of properties that are need to be excluded from the generated JSON object
+     * @returns {JSON} JSON representation of the API
+     */
+    toJSON(userExcludes = []) {
+        var copy = {},
+            excludes = ['_data', 'client', 'apiType', ...userExcludes];
+        for (var prop in this) {
+            if (!excludes.includes(prop)) {
+                copy[prop] = this[prop];
+            }
+        }
+        return copy;
+    }
+
     /**
      * Create an API with the given parameters in template and call the callback method given optional.
      * @param {Object} api_data - API data which need to fill the placeholder values in the @get_template
@@ -780,11 +807,12 @@ class API extends Resource {
      * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
-    update(api) {
+    update(updatedProperties) {
+        const updatedAPI = { ...this.toJSON(), ...updatedProperties };
         const promisedUpdate = this.client.then((client) => {
             const payload = {
-                apiId: api.id,
-                body: api
+                apiId: this.id,
+                body: updatedAPI
             };
             return client.apis['APIs'].put_apis__apiId_(payload);
         });

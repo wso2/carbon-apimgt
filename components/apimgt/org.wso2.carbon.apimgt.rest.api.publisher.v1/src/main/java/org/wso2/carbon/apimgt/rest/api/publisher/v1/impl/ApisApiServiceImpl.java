@@ -532,10 +532,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
             apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
-            apiToUpdate.setEnableSchemaValidation(originalAPI.isEnabledSchemaValidation());
+
             //attach micro-geteway labels
             assignLabelsToDTO(body, apiToUpdate);
-
             apiProvider.updateAPI(apiToUpdate);
 
             if (!isWSAPI) {
