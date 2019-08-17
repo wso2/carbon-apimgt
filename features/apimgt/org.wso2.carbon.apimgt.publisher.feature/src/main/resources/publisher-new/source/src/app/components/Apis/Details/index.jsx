@@ -28,6 +28,7 @@ import BusinessIcon from '@material-ui/icons/Business';
 import CodeIcon from '@material-ui/icons/Code';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
+import MonetizationIcon from '@material-ui/icons/LocalAtm';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl, defineMessages } from 'react-intl';
 import { Redirect, Route, Switch, Link, matchPath } from 'react-router-dom';
@@ -516,6 +517,15 @@ class Details extends Component {
                             active={active}
                             Icon={<PropertiesIcon />}
                         />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.monetization',
+                                defaultMessage: 'monetization',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<MonetizationIcon />}
+                        />
                     </div>
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} />
@@ -579,6 +589,10 @@ class Details extends Component {
                                     component={() => <Properties api={api} />}
                                 />
                                 <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
+                                <Route
+                                    path={Details.subPaths.MONETIZATION}
+                                    component={() => <Monetization api={api} />}
+                                />
                             </Switch>
                         </div>
                     </div>
@@ -618,6 +632,7 @@ Details.subPaths = {
     PROPERTIES: '/apis/:api_uuid/properties',
     PROPERTIES_PRODUCT: '/api-products/:apiprod_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
+    MONETIZATION: '/apis/:api_uuid/monetization',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum

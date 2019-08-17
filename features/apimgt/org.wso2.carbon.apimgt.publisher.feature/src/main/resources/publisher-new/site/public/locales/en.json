@@ -495,6 +495,7 @@
   "Apis.Details.index.overview": "overview",
   "Apis.Details.index.properties": "properties",
   "Apis.Details.index.resources": "resources",
+  "Apis.Details.index.monetization": "monetization",
   "Apis.Details.index.schema.definition": "Schema Definition",
   "Apis.GraphQL.APICreateGraphQL.create.api": "Create API",
   "Apis.GraphQL.APICreateGraphQL.next": "Next",
