@@ -50,7 +50,7 @@ const styles = theme => ({
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
         paddingLeft: theme.spacing.unit * 2,
-        paddingTop: theme.spacing.unig,
+        paddingTop: theme.spacing(2),
     },
 });
 
