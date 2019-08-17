@@ -35,7 +35,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import EndpointSecurity from './GeneralConfiguration/EndpointSecurity';
 import Certificates from './GeneralConfiguration/Certificates';
-import API from '../../../../data/api';
+import API from '../../../../data/api'; // TODO: Use webpack aliases instead of relative paths ~tmkb
 import Alert from '../../../Shared/Alert';
 import { endpointsToList } from './endpointUtils';
 

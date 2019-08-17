@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.util.SwaggerDeserializationResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
@@ -29,6 +33,9 @@ import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -249,6 +256,39 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         }
     }
 
+    @Override
+    public void saveAPIDefinition(APIProduct apiProduct, String apiDefinitionJSON, Registry registry) throws APIManagementException {
+        String apiName = apiProduct.getId().getName();
+        String apiVersion = apiProduct.getId().getVersion();
+        String apiProviderName = apiProduct.getId().getProviderName();
+
+        try {
+            String resourcePath = APIUtil.getAPIProductOpenAPIDefinitionFilePath(apiName, apiVersion, apiProviderName);
+            resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+            Resource resource;
+            if (!registry.resourceExists(resourcePath)) {
+                resource = registry.newResource();
+            } else {
+                resource = registry.get(resourcePath);
+            }
+            resource.setContent(apiDefinitionJSON);
+            resource.setMediaType("application/json");
+            registry.put(resourcePath, resource);
+
+            String[] visibleRoles = null;
+            if (apiProduct.getVisibleRoles() != null) {
+                visibleRoles = apiProduct.getVisibleRoles().split(",");
+            }
+
+            //Need to set anonymous if the visibility is public
+            APIUtil.clearResourcePermissions(resourcePath, apiProduct.getId(), ((UserRegistry) registry).getTenantId());
+            APIUtil.setResourcePermissions(apiProviderName, apiProduct.getVisibility(), visibleRoles, resourcePath);
+
+        } catch (RegistryException e) {
+            handleException("Error while adding Swagger Definition for " + apiName + '-' + apiVersion, e);
+        }
+    }
+
 
     /**
      * This method returns api definition json for given api
@@ -371,8 +411,74 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
     }
 
     @Override
-    public String generateAPIDefinition(API api, String swagger, boolean syncOperations)
-            throws APIManagementException {
+    public String generateAPIDefinition(APIProduct apiProduct) throws APIManagementException {
+        APIProductIdentifier identifier = apiProduct.getId();
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
+        String endpoints = environment.getApiGatewayEndpoint();
+        String[] endpointsSet = endpoints.split(",");
+
+        List<APIProductResource> productResources = apiProduct.getProductResources();
+
+        Set<URITemplate> uriTemplates = new HashSet<>();
+
+        for (APIProductResource productResource : productResources) {
+            uriTemplates.add(productResource.getUriTemplate());
+        }
+
+        if (endpointsSet.length < 1) {
+            throw new APIManagementException(
+                    "Error in creating JSON representation of the API" + identifier.getName());
+        }
+
+        JSONObject swaggerObject = new JSONObject();
+
+        //Create info object
+        JSONObject infoObject = new JSONObject();
+        infoObject.put(APIConstants.SWAGGER_TITLE, identifier.getName());
+        if (apiProduct.getDescription() != null) {
+            infoObject.put(APIConstants.SWAGGER_DESCRIPTION, apiProduct.getDescription());
+        }
+
+        //Create contact object and map business owner info
+        JSONObject contactObject = new JSONObject();
+        if (apiProduct.getBusinessOwner() != null) {
+            contactObject.put(APIConstants.SWAGGER_NAME, apiProduct.getBusinessOwner());
+        }
+        if (apiProduct.getBusinessOwnerEmail() != null) {
+            contactObject.put(APIConstants.SWAGGER_EMAIL, apiProduct.getBusinessOwnerEmail());
+        }
+        if (apiProduct.getBusinessOwner() != null || apiProduct.getBusinessOwnerEmail() != null) {
+            //put contact object to info object
+            infoObject.put(APIConstants.SWAGGER_CONTACT, contactObject);
+        }
+
+        //Create licence object # no need for this since this is not mandatory
+        //JSONObject licenceObject = new JSONObject();
+        //infoObject.put("license", licenceObject);
+
+        infoObject.put(APIConstants.SWAGGER_VER, identifier.getVersion());
+
+        //add info object to swaggerObject
+        swaggerObject.put(APIConstants.SWAGGER_INFO, infoObject);
+
+        JSONObject pathsObject = new JSONObject();
+
+        for (URITemplate uriTemplate : uriTemplates) {
+            addOrUpdatePathsFromURITemplate(pathsObject, uriTemplate);
+        }
+
+        swaggerObject.put(APIConstants.SWAGGER_PATHS, pathsObject);
+        swaggerObject.put(APIConstants.SWAGGER, APIConstants.SWAGGER_V2);
+        populateSwaggerScopeInfo(swaggerObject, apiProduct.getScopes());
+        return swaggerObject.toJSONString();
+    }
+
+    @Override
+    public String generateAPIDefinition(API api, String swagger, boolean syncOperations) 
+throws APIManagementException {
         JSONParser parser = new JSONParser();
         try {
             JSONObject swaggerObj = (JSONObject) parser.parse(swagger);
@@ -388,6 +494,7 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                     setDefaultManagedInfoToAPIDefinition(api, swaggerObj);
                 }
             }
+
             // add scope in the API object to swagger
             populateSwaggerScopeInfo(swaggerObj, api.getScopes());
             return swaggerObj.toJSONString();

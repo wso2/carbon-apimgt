@@ -1,11 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
+import Tooltip from '@material-ui/core/Tooltip';
 import { FormattedMessage } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
+import moment from 'moment';
+
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import DeleteApiButton from './DeleteApiButton';
@@ -45,9 +48,10 @@ const styles = theme => ({
     },
 });
 
-const DetailsTopMenu = ({
-    classes, theme, api, isAPIProduct,
-}) => {
+const APIDetailsTopMenu = (props) => {
+    const {
+        classes, theme, api, isAPIProduct,
+    } = props;
     // todo: need to support rev proxy ~tmkb
     return (
         <div className={classes.root}>
@@ -68,7 +72,7 @@ const DetailsTopMenu = ({
                     {api.name} {isAPIProduct ? '' : ':' + api.version}
                 </Typography>
                 <Typography variant='caption' gutterBottom align='left'>
-                            Created by: {api.provider}
+                    Created by: {api.provider}
                 </Typography>
             </div>
             <VerticalDivider height={70} />
@@ -77,7 +81,7 @@ const DetailsTopMenu = ({
                     {isAPIProduct ? api.state : api.lifeCycleStatus}
                 </Typography>
                 <Typography variant='caption' gutterBottom align='left'>
-                            State
+                    State
                 </Typography>
             </div>
 
@@ -95,19 +99,26 @@ const DetailsTopMenu = ({
                 <div className={classes.linkText}>View In store</div>
             </a>
             <VerticalDivider height={70} />
-            {isAPIProduct ? null : (
-                <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />
-            )}
+            <Tooltip title={moment(api.lastUpdatedTime).calendar()} aria-label='add'>
+                <Typography variant='caption' display='block'>
+                    <FormattedMessage
+                        id='Apis.Details.components.APIDetailsTopMenu.last.updated.time'
+                        defaultMessage='Last updated:'
+                    />{' '}
+                    {moment(api.lastUpdatedTime).fromNow()}
+                </Typography>
+            </Tooltip>
+            {isAPIProduct ? null : <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />}
             <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />
         </div>
     );
 };
 
-DetailsTopMenu.propTypes = {
+APIDetailsTopMenu.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({}).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(DetailsTopMenu);
+export default withStyles(styles, { withTheme: true })(APIDetailsTopMenu);

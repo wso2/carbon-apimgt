@@ -34,6 +34,8 @@ const styles = theme => ({
         marginTop: 0,
         paddingLeft: theme.spacing.unit * 4,
         paddingTop: theme.spacing.unit * 2,
+        paddingBottom: theme.spacing.unit * 2,
+        width: theme.custom.contentAreaWidth,
     },
     buttonProgress: {
         position: 'relative',
@@ -87,7 +89,7 @@ class APICreateDefault extends Component {
         }
         return (
             <Grid container spacing={7} className={classes.root}>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12}>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
                             {type === 'ws' ? (

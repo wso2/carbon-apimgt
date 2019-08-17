@@ -23,9 +23,11 @@ import MUIDataTable from 'mui-datatables';
 import { injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
+import CONSTS from 'AppData/Constants';
 import ImageGenerator from './ImageGenerator';
 import StarRatingBar from './StarRating';
 import ApiThumb from './ApiThumb';
+import { ApiContext } from '../Details/ApiContext';
 
 class StarRatingColumn extends React.Component {
     constructor(props) {
@@ -72,6 +74,7 @@ class ApiTableView extends React.Component {
         this.count = 100;
         this.rowsPerPage = 10;
         this.getLocalStorage();
+        this.pageType = null;
     }
 
     getMuiTheme = () => {
@@ -118,8 +121,17 @@ class ApiTableView extends React.Component {
     };
 
     componentDidMount() {
+        this.apiType = this.context.apiType;
         this.getLocalStorage();
         this.getData();
+    }
+
+    componentDidUpdate() {
+        if (this.apiType !== this.context.apiType) {
+            this.apiType = this.context.apiType;
+            this.getLocalStorage();
+            this.getData();
+        }
     }
 
     // get data
@@ -135,8 +147,8 @@ class ApiTableView extends React.Component {
 
     xhrRequest = () => {
         const { page, rowsPerPage } = this;
-        const { isApiProduct } = this.props;
-        if (!isApiProduct) {
+        const { apiType } = this.context;
+        if (apiType === CONSTS.API_TYPE) {
             const api = new API();
             return api.getAllAPIs({ limit: this.rowsPerPage, offset: page * rowsPerPage });
         } else {
@@ -159,8 +171,8 @@ class ApiTableView extends React.Component {
 
     setLocalStorage = () => {
         // Set the page to the localstorage
-        const { isApiProduct } = this.props;
-        const paginationSufix = isApiProduct ? 'products' : 'apis';
+        const { apiType } = this.context;
+        const paginationSufix = apiType === API_PRODUCT_TYPE ? 'products' : 'apis';
         const pagination = { page: this.page, count: this.count, rowsPerPage: this.rowsPerPage };
         window.localStorage.setItem('pagination-' + paginationSufix, JSON.stringify(pagination));
     };
@@ -212,14 +224,14 @@ class ApiTableView extends React.Component {
                     defaultMessage: 'name',
                 }),
                 options: {
-                    customBodyRender: (value, tableMeta, updateValue, tableViewObj=this) => {
+                    customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
                         if (tableMeta.rowData) {
-                            const { isApiProduct } = tableViewObj.props;
+                            const { apiType } = this.context;
                             const apiName = tableMeta.rowData[2];
                             const apiId = tableMeta.rowData[0];
-                            if( !isApiProduct ) {
+                            if (apiType === CONSTS.API_TYPE) {
                                 return <Link to={'/apis/' + apiId}>{apiName}</Link>;
-                            } else { 
+                            } else {
                                 return <Link to={'/api-products/' + apiId}>{apiName}</Link>;
                             }
                         }
@@ -250,6 +262,16 @@ class ApiTableView extends React.Component {
                 label: intl.formatMessage({
                     id: 'Apis.Listing.ApiTableView.provider',
                     defaultMessage: 'provider',
+                }),
+                options: {
+                    sort: false,
+                },
+            },
+            {
+                name: 'type',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.ApiTableView.type',
+                    defaultMessage: 'type',
                 }),
                 options: {
                     sort: false,
@@ -299,11 +321,15 @@ class ApiTableView extends React.Component {
             },
         };
         if (gridView) {
-            options.customRowRender = (data, dataIndex, rowIndex, tableViewObj=this) => {
-                const { props, state } = tableViewObj;
-                const { isApiProduct } = props;
-                const api = state.data[dataIndex];
-                return <ApiThumb api={api} isApiProduct={isApiProduct} />;
+            options.customRowRender = (data, dataIndex, rowIndex) => {
+                const api = {};
+                api.id = data[0];
+                api.name = data[1].props.api;
+                api.version = data[3];
+                api.context = data[4];
+                api.provider = data[5];
+                api.type = data[6];
+                return <ApiThumb api={api} />;
             };
             options.title = false;
             options.filter = false;
@@ -320,5 +346,7 @@ class ApiTableView extends React.Component {
         );
     }
 }
+
+ApiTableView.contextType = ApiContext;
 
 export default injectIntl(ApiTableView);

@@ -319,8 +319,7 @@ public enum TokenTypeEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingPolicy, description, tokenType, status, groups,
-            subscriptionCount, keys, attributes, subscriptionScopes, owner);
+    return Objects.hash(applicationId, name, subscriber, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner);
   }
 
   @Override

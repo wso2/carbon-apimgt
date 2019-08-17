@@ -668,6 +668,15 @@ public interface APIProvider extends APIManager {
     void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException;
 
     /**
+     * This method updates Swagger 2.0 resources in the registry
+     *
+     * @param apiId    id of the APIProductIdentifier
+     * @param jsonText json text to be saved in the registry
+     * @throws APIManagementException
+     */
+    void saveSwagger20Definition(APIProductIdentifier apiId, String jsonText) throws APIManagementException;
+
+    /**
      * This method updates the swagger definition in registry
      *
      * @param api   API
@@ -675,6 +684,15 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void saveSwaggerDefinition(API api, String jsonText) throws APIManagementException;
+
+    /**
+     * This method updates the swagger definition in registry
+     *
+     * @param apiProduct   APIProduct
+     * @param jsonText    openAPI definition
+     * @throws APIManagementException
+     */
+    void saveSwaggerDefinition(APIProduct apiProduct, String jsonText) throws APIManagementException;
 
     /**
      * This method validates the existence of all the resource level throttling tiers in URI templates of API
