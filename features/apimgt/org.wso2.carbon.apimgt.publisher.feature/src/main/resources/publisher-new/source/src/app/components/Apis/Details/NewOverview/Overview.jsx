@@ -23,8 +23,6 @@ import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import API from 'AppData/api';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
-
-import CheckItem from './CheckItem';
 import Resources from './Resources';
 import Operations from './Operations';
 import ProductResources from './ProductResources';
@@ -115,6 +113,9 @@ const styles = theme => ({
         color: 'green',
         marginRight: theme.spacing.unit,
     },
+    leftSideWrapper: {
+        paddingRight: theme.spacing.unit * 2,
+    },
 });
 
 /**
@@ -128,8 +129,6 @@ function Overview(props) {
     const { api } = useContext(ApiContext);
     let loadScopes;
     let loadEndpoints;
-    let endpointsCheckItem;
-    let scopesCheckItem;
     if (newApi.type !== 'WS') {
         loadScopes = <Scopes parentClasses={classes} />;
     }
@@ -143,57 +142,24 @@ function Overview(props) {
                 return <Resources parentClasses={classes} api={api} />;
         }
     }
-    function getItemSuccessLabelForAPIType(apiType) {
-        switch (apiType) {
-            case 'GRAPHQL':
-                return <CheckItem itemSuccess itemLabel='Operations' />;
-            default:
-                return <CheckItem itemSuccess itemLabel='Resources' />;
-        }
-    }
 
-    if (newApi.apiType === API.CONSTS.APIProduct) {
-        api.type = API.CONSTS.APIProduct;
-        endpointsCheckItem = null;
-        scopesCheckItem = null;
-        loadEndpoints = null;
-        loadScopes = null;
-    } else if (newApi.apiType === API.CONSTS.API) {
-        endpointsCheckItem = <CheckItem itemSuccess itemLabel='Endpoints' />;
-        scopesCheckItem = <CheckItem itemSuccess={newApi.scopes.length > 0} itemLabel='Scopes' />;
+    if (newApi.apiType === API.CONSTS.API) {
         loadEndpoints = <Endpoints parentClasses={classes} api={newApi} />;
     }
     return (
         <Grid container spacing={24}>
-            {console.info(api)}
-            <Grid item xs={12}>
-                <Grid container>
-                    {endpointsCheckItem}
-                    <CheckItem itemSuccess={false} itemLabel='Policies' />
-                    {getItemSuccessLabelForAPIType(api.type)}
-                    <CheckItem itemSuccess={false} itemLabel='Scopes' />
-                    {scopesCheckItem}
-                    <CheckItem itemSuccess={false} itemLabel='Documents' />
-                    <CheckItem itemSuccess={false} itemLabel='Business Information' />
-                    <CheckItem itemSuccess={false} itemLabel='Description' />
-                </Grid>
+            <Grid item xs={12} md={6} lg={6} className={classes.leftSideWrapper}>
+                <Configuration parentClasses={classes} />
+                {getResourcesClassForAPIs(api.type)}
+                <AdditionalProperties parentClasses={classes} />
             </Grid>
-            <Grid item xs={12}>
-                <Grid container spacing={24}>
-                    <Grid item xs={12} md={6} lg={6}>
-                        <Configuration parentClasses={classes} />
-                        {getResourcesClassForAPIs(api.type)}
-                        <AdditionalProperties parentClasses={classes} />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={6}>
-                        <Lifecycle parentClasses={classes} />
-                        {loadEndpoints}
-                        <BusinessInformation parentClasses={classes} />
-                        {loadScopes}
-                        <Documents parentClasses={classes} api={api} />
-                        <Policies parentClasses={classes} />
-                    </Grid>
-                </Grid>
+            <Grid item xs={12} md={6} lg={6}>
+                <Lifecycle parentClasses={classes} />
+                {loadEndpoints}
+                <BusinessInformation parentClasses={classes} />
+                {loadScopes}
+                <Documents parentClasses={classes} api={api} />
+                <Policies parentClasses={classes} />
             </Grid>
         </Grid>
     );

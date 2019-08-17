@@ -43,7 +43,6 @@ const styles = theme => ({
     },
     dropZoneInside: {},
     dropZone: {
-        width: '100%',
         color: theme.palette.grey[500],
         border: 'dashed 1px ' + theme.palette.grey[500],
         background: theme.palette.grey[100],
@@ -145,7 +144,7 @@ class ProvideWSDL extends Component {
         } else {
             this.setState({ uploadMethod: event.target.value });
         }
-        this.validateWSDL();
+        // this.validateWSDL();
     };
 
     handleUploadFile = (acceptedFiles) => {
@@ -272,7 +271,6 @@ class ProvideWSDL extends Component {
                                     defaultMessage='File'
                                 />
                             }
-                            checked
                             className={classes.radioGroup}
                         />
                         <FormControlLabel

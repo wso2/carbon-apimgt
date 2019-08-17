@@ -39,7 +39,6 @@ const styles = theme => ({
         marginBottom: 0,
     },
     buttonRight: {
-        alignSelf: 'flex-end',
         display: 'flex',
     },
     ListingWrapper: {
@@ -57,10 +56,11 @@ const styles = theme => ({
         paddingLeft: 35,
         paddingRight: 20,
     },
-    mainTitle: {
-        paddingTop: 10,
+    mainTitleWrapper: {
+        display: 'flex',
+        justifyContent: 'center',
+        flexDirection: 'column',
     },
-    mainTitleWrapper: {},
     APICreateMenu: {
         flexGrow: 1,
         display: 'flex',
@@ -93,8 +93,8 @@ function TopMenu(props) {
             </div>
             <div className={classes.mainTitleWrapper}>
                 {data && (
-                    <div>
-                        <Typography variant='display1' className={classes.mainTitle}>
+                    <React.Fragment>
+                        <Typography variant='display1' className={classes.mainTitle} component='div'>
                             {isAPIProduct ? (
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.apiproducts'
@@ -104,12 +104,12 @@ function TopMenu(props) {
                                 <FormattedMessage id='Apis.Listing.components.TopMenu.apis' defaultMessage='APIs' />
                             )}
                         </Typography>
-                        <Typography variant='caption' gutterBottom align='left'>
+                        <Typography variant='caption' gutterBottom align='left' component='div'>
                             <FormattedMessage
                                 id='Apis.Listing.components.TopMenu.displaying'
                                 defaultMessage='Displaying'
                             />
-                            {count}
+                            {' '} {count} {' '}
                             {isAPIProduct ? (
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.apiproduct(s)'
@@ -119,7 +119,7 @@ function TopMenu(props) {
                                 <FormattedMessage id='Apis.Listing.components.TopMenu.api(s)' defaultMessage='API(s)' />
                             )}
                         </Typography>
-                    </div>
+                    </React.Fragment>
                 )}
             </div>
             <VerticalDivider height={70} />
