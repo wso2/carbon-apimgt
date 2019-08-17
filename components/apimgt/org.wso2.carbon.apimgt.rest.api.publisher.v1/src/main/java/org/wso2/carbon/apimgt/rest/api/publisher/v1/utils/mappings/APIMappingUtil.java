@@ -557,6 +557,8 @@ public class APIMappingUtil {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
         dto.setContext(context);
+        dto.setCreatedTime(model.getCreatedTime());
+        dto.setLastUpdatedTime(Long.toString(model.getLastUpdated().getTime()));
         dto.setDescription(model.getDescription());
 
         dto.setIsDefaultVersion(model.isDefaultVersion());
@@ -1031,6 +1033,26 @@ public class APIMappingUtil {
 
         Set<Scope> scopeSet = new LinkedHashSet<>();
         for (ScopeDTO scopeDTO : apiDTO.getScopes()) {
+            Scope scope = new Scope();
+            scope.setKey(scopeDTO.getName());
+            scope.setName(scopeDTO.getName());
+            scope.setDescription(scopeDTO.getDescription());
+            scope.setRoles(String.join(",", scopeDTO.getBindings().getValues()));
+            scopeSet.add(scope);
+        }
+        return scopeSet;
+    }
+
+    /**
+     * This method returns the oauth scopes according to the given list of scopes
+     *
+     * @param apiProductDTO list of scopes
+     * @return scope set
+     */
+    private static Set<Scope> getScopes(APIProductDTO apiProductDTO) {
+
+        Set<Scope> scopeSet = new LinkedHashSet<>();
+        for (ScopeDTO scopeDTO : apiProductDTO.getScopes()) {
             Scope scope = new Scope();
             scope.setKey(scopeDTO.getName());
             scope.setName(scopeDTO.getName());
@@ -1737,6 +1759,9 @@ public class APIMappingUtil {
             }
 
         }
+
+        Set<Scope> scopes = getScopes(dto);
+        product.setScopes(scopes);
 
         APICorsConfigurationDTO apiCorsConfigurationDTO = dto.getCorsConfiguration();
         CORSConfiguration corsConfiguration;

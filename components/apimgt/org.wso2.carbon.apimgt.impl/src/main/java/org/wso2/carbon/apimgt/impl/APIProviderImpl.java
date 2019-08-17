@@ -4522,6 +4522,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public void saveSwagger20Definition(APIProductIdentifier apiId, String jsonText) throws APIManagementException {
+
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            saveSwaggerDefinition(getAPIProduct(apiId), jsonText);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    @Override
+    public void saveSwaggerDefinition(APIProduct apiProduct, String jsonText) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            definitionFromOpenAPISpec.saveAPIDefinition(apiProduct, jsonText, registry);
+
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
     public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
             throws APIManagementException, FaultGatewaysException {
 

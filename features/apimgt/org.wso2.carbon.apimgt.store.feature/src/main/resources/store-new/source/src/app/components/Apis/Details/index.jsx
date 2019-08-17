@@ -25,13 +25,14 @@ import Typography from '@material-ui/core/Typography';
 import Loadable from 'react-loadable';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import APIProduct from 'AppData/APIProduct';
+import Api from 'AppData/api';
+import CONSTS from 'AppData/Constants';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
 import InfoBar from './InfoBar';
 import RightPanel from './RightPanel';
 import { ApiContext } from './ApiContext';
-import Api from '../../../data/api';
 import Progress from '../../Shared/Progress';
 
 
@@ -81,24 +82,45 @@ const LoadableSwitch = Loadable.Map({
         ),
     },
     render(loaded, props) {
-        const { api_uuid } = props;
+        const { api_uuid, apiType } = props;
         const ApiConsole = loaded.ApiConsole.default;
         const Overview = loaded.Overview.default;
         const Documentation = loaded.Documentation.default;
         const Credentials = loaded.Credentials.default;
         const Comments = loaded.Comments.default;
         const Sdk = loaded.Sdk.default;
-        const redirectURL = '/apis/' + api_uuid + '/overview';
+
+        let path = '/apis/';
+        if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            path = '/api-products/';
+        }
+
+        const redirectURL = path + api_uuid + '/overview';
 
         return (
             <Switch>
                 <Redirect exact from='/apis/:api_uuid' to={redirectURL} />
-                <Route path='/apis/:api_uuid/overview' component={Overview} />
+                <Route
+                    path='/apis/:api_uuid/overview'
+                    render={props => (
+                        <Overview {...props} />)}
+                />
                 <Route path='/apis/:api_uuid/credentials' component={Credentials} />
                 <Route path='/apis/:api_uuid/comments' component={Comments} />
                 <Route path='/apis/:api_uuid/test' component={ApiConsole} />
                 <Route path='/apis/:api_uuid/docs' component={Documentation} />
                 <Route path='/apis/:api_uuid/sdk' component={Sdk} />
+                <Redirect exact from='/api-products/:api_uuid' to={redirectURL} />
+                <Route
+                    path='/api-products/:api_uuid/overview'
+                    render={props => (
+                        <Overview {...props} />)}
+                />
+                <Route path='/api-products/:api_uuid/credentials' component={Credentials} />
+                <Route path='/api-products/:api_uuid/comments' component={Comments} />
+                <Route path='/api-products/:api_uuid/test' component={ApiConsole} />
+                <Route path='/api-products/:api_uuid/docs' component={Documentation} />
+                <Route path='/api-products/:api_uuid/sdk' component={Sdk} />
                 <Route component={PageNotFound} />
             </Switch>
         );
@@ -178,22 +200,23 @@ class Details extends React.Component {
          * @memberof Details
          */
         this.updateSubscriptionData = (callback) => {
-            const { path } = this.props;
+            const { apiType } = this.props;
+            this.setState({ apiType });
+
             let promisedAPI = null;
             let existingSubscriptions = null;
             let promisedApplications = null;
+            let restApi = null;
 
-            if (path === '/apis') {
-                const dataApi = new Api();
-                promisedAPI = dataApi.getAPIById(this.api_uuid);
-                existingSubscriptions = dataApi.getSubscriptions(this.api_uuid, null);
-                promisedApplications = dataApi.getAllApplications();
-            } else if (path === '/api-products') {
-                const dataApiProduct = new APIProduct();
-                promisedAPI = dataApiProduct.getAPIProductById(this.api_uuid);
-                existingSubscriptions = dataApiProduct.getSubscriptions(this.api_uuid, null);
-                promisedApplications = dataApiProduct.getAllApplications();
+            if (apiType === CONSTS.API_TYPE) {
+                restApi = new Api();
+            } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+                restApi = new APIProduct();
             }
+
+            promisedAPI = restApi.getAPIById(this.api_uuid);
+            existingSubscriptions = restApi.getSubscriptions(this.api_uuid, null);
+            promisedApplications = restApi.getAllApplications();
 
             promisedAPI.then((api) => {
                 this.setState({ api: api.body });
@@ -253,6 +276,7 @@ class Details extends React.Component {
                     }
                 });
         };
+        const { apiType } = this.props;
         this.state = {
             active: 'overview',
             overviewHiden: false,
@@ -264,6 +288,7 @@ class Details extends React.Component {
             applicationsAvailable: [],
             item: 1,
             xo: null,
+            apiType,
         };
         this.setDetailsAPI = this.setDetailsAPI.bind(this);
         this.api_uuid = this.props.match.params.api_uuid;
@@ -323,10 +348,12 @@ class Details extends React.Component {
     render() {
         this.updateActiveLink();
 
-        const { classes, theme, intl } = this.props;
+        const {
+            classes, theme, intl, apiType, match,
+        } = this.props;
+        const { apiUuid } = match.params;
         const { active, api } = this.state;
-        const redirect_url = '/apis/' + this.props.match.params.api_uuid + '/overview';
-        const leftMenuIconMainSize = theme.custom.leftMenuIconMainSize;
+        const { leftMenuIconMainSize } = theme.custom;
         const globalStyle = 'body{ font-family: ' + theme.typography.fontFamily + '}';
         return (api ? (
             <ApiContext.Provider value={this.state}>
@@ -349,8 +376,8 @@ class Details extends React.Component {
                     <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
                 </div>
                 <div className={classes.content}>
-                    <InfoBar apiId={this.props.match.params.api_uuid} innerRef={node => (this.infoBar = node)} intl={intl} />
-                    <LoadableSwitch api_uuid={this.props.match.params.api_uuid} />
+                    <InfoBar apiId={apiUuid} innerRef={node => (this.infoBar = node)} intl={intl} />
+                    <LoadableSwitch api_uuid={apiUuid} apiType={apiType} />
                 </div>
                 {theme.custom.showApiHelp && <RightPanel />}
             </ApiContext.Provider>
@@ -360,8 +387,11 @@ class Details extends React.Component {
 }
 
 Details.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
+    match: PropTypes.shape({}).isRequired,
+    params: PropTypes.shape({}).isRequired,
+    apiType: PropTypes.string.isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,

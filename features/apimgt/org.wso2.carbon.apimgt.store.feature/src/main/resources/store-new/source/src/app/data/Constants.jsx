@@ -16,6 +16,8 @@
 
 const CONSTS = {
     HTTP_METHODS: ['get', 'put', 'post', 'delete', 'patch', 'head'],
+    API_TYPE: 'API',
+    API_PRODUCT_TYPE: 'API_PRODUCT',
 };
 
 export default CONSTS;
