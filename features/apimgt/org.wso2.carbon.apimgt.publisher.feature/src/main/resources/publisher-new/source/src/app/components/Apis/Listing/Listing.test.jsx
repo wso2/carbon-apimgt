@@ -39,6 +39,7 @@ jest.mock('AppData/api.js', () => {
         };
     };
 });
+const { light } = Configurations.themes;
 
 const mockedHasScopes = jest.fn();
 const mockedAll = jest.fn();
@@ -52,18 +53,22 @@ describe('APIs <Listing/> component tests', () => {
     afterEach(() => {
         mockedAll.mockReset();
     });
-    /** TODO temporarily disabled tests.enable these tests */
-    /*
+
     test('should shallow render the listing page', async () => {
-        mockedAll.mockReturnValue(Promise.resolve({ obj: { list: [] } }));
-        const UnWrappedListing = unwrap(Listing);
-        const { light } = Configurations.themes;
-        const wrapper = await shallow(<UnWrappedListing classes={{}} theme={createMuiTheme(light)} />);
+        mockedAll.mockReturnValue(Promise.resolve({ body: { list: [], pagination: { total: 0 } } }));
+        // const UnWrappedListing = unwrap(Listing);
+        // const { light } = Configurations.themes;
+        const WithStyleListing = (
+            <MuiThemeProvider theme={createMuiTheme(light)}>
+                <Listing classes={{}} theme={createMuiTheme(light)} />
+            </MuiThemeProvider>
+        );
+        let wrapper = await mountWithIntl(WithStyleListing);
+        wrapper = await wrapper.update();
         expect(wrapper.contains(<SampleAPI />)).toBeTruthy();
     });
 
-    test('should mount and render the listing page with given APIs list', async () => {
-        const { light } = Configurations.themes;
+    test.skip('should mount and render the listing page with given APIs list', async () => {
         const ThemedListing = (
             <MuiThemeProvider theme={createMuiTheme(light)}>
                 <MemoryRouter>
@@ -89,7 +94,6 @@ describe('APIs <Listing/> component tests', () => {
 
         expect(wrapper.contains('Create API')).toBeTruthy();
     });
-    */
 
     test.todo('should remove the API from listing when clicked on delete button');
     test.todo('should navigate to API overview page when clicked on API thumb');
