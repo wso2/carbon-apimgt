@@ -1159,9 +1159,19 @@ public class APIGatewayManager {
         JSONObject obj = new JSONObject(api.getEndpointConfig());
         JSONObject endpointObj = null;
         if (ENDPOINT_PRODUCTION.equalsIgnoreCase(urlType)) {
-            endpointObj = obj.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getJSONObject("config");
+            if (obj.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).get("config") instanceof JSONObject) {
+                //if config is not a JSONObject(happens when save the api without changing enpoint config at very first time)
+                endpointObj = obj.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getJSONObject("config");
+            } else {
+                return new String[]{"", "", ""};
+            }
         } else if (ENDPOINT_SANDBOX.equalsIgnoreCase(urlType)) {
-            endpointObj = obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getJSONObject("config");
+            if (obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).get("config") instanceof JSONObject) {
+                //if config is not a JSONObject(happens when save the api without changing enpoint config at very first time)
+                endpointObj = obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getJSONObject("config");
+            } else {
+                return new String[]{"", "", ""};
+            }
         }
         String duration = (endpointObj.has("actionDuration")) ? "\t\t<duration>" + endpointObj.get("actionDuration") + "</duration>\n" : "";
         String responseAction = (endpointObj.has("actionSelect")) ? "\t\t<responseAction>" + endpointObj.get("actionSelect") + "</responseAction>\n" : "";
