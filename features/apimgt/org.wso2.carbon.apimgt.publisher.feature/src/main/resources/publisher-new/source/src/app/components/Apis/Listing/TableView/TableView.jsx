@@ -42,6 +42,12 @@ const styles = theme => ({
     },
 });
 
+/**
+ *
+ *
+ * @class TableView
+ * @extends {React.Component}
+ */
 class TableView extends React.Component {
     constructor(props) {
         super(props);
@@ -197,6 +203,13 @@ class TableView extends React.Component {
         }
     };
 
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof TableView
+     */
     render() {
         const { intl, isAPIProduct, classes } = this.props;
         const columns = [
