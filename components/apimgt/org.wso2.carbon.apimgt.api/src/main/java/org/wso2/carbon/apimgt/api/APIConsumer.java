@@ -379,10 +379,18 @@ public interface APIConsumer extends APIManager {
     /**
      * @param identifier Api identifier
      * @param comment comment text
-     * @param user Username of the comment author                        
+     * @param user Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
     void addComment(APIIdentifier identifier, String comment, String user) throws APIManagementException;
+
+    /**
+     * @param identifier Api identifier
+     * @param comment comment object
+     * @param user Username of the comment author
+     * @throws APIManagementException if failed to add comment for API
+     */
+    int addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException;
 
     /**
      * @param identifier Api identifier
@@ -390,6 +398,14 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get comments for identifier
      */
     Comment[] getComments(APIIdentifier identifier) throws APIManagementException;
+
+    /**
+     * @param commentId Comment ID
+     * @param apiId API ID
+     * @return Comments
+     * @throws APIManagementException if failed to get comments for identifier
+     */
+    Comment getComment(int commentId, String apiId) throws APIManagementException;
 
     /**
      * Adds an application

@@ -937,8 +937,10 @@ paths:
         - OAuth2Security: []
       description: |
         Get a list of Comments that are already added to APIs
+      operationId: getAllCommentsOfAPI
       parameters:
         - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
       tags:
@@ -950,6 +952,12 @@ paths:
             Comments list is returned.
           schema:
             $ref: '#/definitions/CommentList'
+        401:
+          description: |
+            Un authorized.
+            The user is not authorized to view the application .
+          schema:
+            $ref: '#/definitions/Error'
         406:
           description: |
             Not Acceptable. The requested media type is not supported
@@ -965,6 +973,7 @@ paths:
         - OAuth2Security:
           - apim:subscribe
       x-scope: apim:subscribe
+      operationId: addCommentToAPI
       parameters:
         - $ref: '#/parameters/apiId'
         - in: body
@@ -999,6 +1008,12 @@ paths:
             Invalid request or validation error.
           schema:
             $ref: '#/definitions/Error'
+        401:
+          description: |
+            Un authorized.
+            The user is not authorized to view the application .
+          schema:
+            $ref: '#/definitions/Error'
         415:
           description: |
             Unsupported media type.
@@ -1022,9 +1037,11 @@ paths:
         - OAuth2Security: []
       description: |
         Get the individual comment given by a username for a certain API.
+      operationId: getCommentOfAPI
       parameters:
         - $ref: '#/parameters/commentId'
         - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/If-None-Match'
       tags:
         - Comments
@@ -1050,6 +1067,12 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
+        401:
+          description: |
+            Un authorized.
+            The user is not authorized to view the application .
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: |
             Not Found.
@@ -1074,6 +1097,7 @@ paths:
       x-scope: apim:subscribe
       description: |
         Remove a Comment
+      operationId: deleteComment
       parameters:
         - $ref: '#/parameters/commentId'
         - $ref: '#/parameters/apiId'
@@ -1085,6 +1109,12 @@ paths:
           description: |
             OK.
             Resource successfully deleted.
+        401:
+          description: |
+            Un authorized.
+            The user is not authorized to view the application .
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: |
             Not Found.
@@ -1141,6 +1171,12 @@ paths:
           description: |
             Bad Request.
             Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: |
+            Un authorized.
+            The user is not authorized to view the application .
           schema:
             $ref: '#/definitions/Error'
         404:
@@ -4038,7 +4074,7 @@ parameters:
     description: |
       Comment Id
     required: true
-    type: string
+    type: int
 
 # Rating Identifier
 # Specified as part of the path expression
@@ -4965,31 +5001,18 @@ definitions:
   Comment:
     title: Comment
     required:
-      - commentId
-      - apiId
-      - username
-      - commentText
+      - content
     properties:
-      commentId:
+      id:
         type: string
-      apiId:
-        type: string
-      username:
-        type: string
-        description: |
-          If username is not given user invoking the API will be taken as the username.
-      commentText:
+      content:
         type: string
       createdTime:
         type: string
         example: 2017-02-20T13:57:16.229
       createdBy:
         type: string
-      lastUpdatedTime:
-        type: string
-        example: 2017-02-20T13:57:16.229
-      lastUpdatedBy:
-        type: string
+
 
 #-----------------------------------------------------
 # The Comments List resource

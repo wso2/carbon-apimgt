@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
@@ -45,12 +46,14 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
@@ -139,6 +142,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+
     @Override
     public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
         return Response.ok().entity(getAPIByAPIId(apiId, xWSO2Tenant)).build();
@@ -167,33 +171,52 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+    public Response addCommentToAPI(String apiId, CommentDTO body, MessageContext messageContext) {
+
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            String requestedTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
+            Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);
+            int createdCommentId = apiConsumer.addComment(apiIdentifier, comment, username);
+
+            Comment createdComment = apiConsumer.getComment(createdCommentId, apiId);
+            CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
+
+            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + "/comments/" + createdCommentId;
+            URI comments = new URI(uriString);
+            //.replace(RestApiConstants.APIID_PARAM, apiId)
+            //.replace(RestApiConstants.DOCUMENTID_PARAM, documentId);
+            return Response.created(comments).entity(commentDTO).build();
+
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e1) {
+            e1.printStackTrace();
+        }
+        return null;
     }
 
     @Override
-    public Response apisApiIdCommentsCommentIdGet(String commentId, String apiId, String ifNoneMatch, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+    public Response apisApiIdCommentsCommentIdPut(Object commentId, String apiId, CommentDTO body, String ifMatch, MessageContext messageContext) {
+        return null;
     }
 
     @Override
-    public Response apisApiIdCommentsCommentIdPut(String commentId, String apiId, CommentDTO body, String ifMatch, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+    public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset, MessageContext messageContext) {
+        return null;
     }
 
     @Override
-    public Response apisApiIdCommentsGet(String apiId, Integer limit, Integer offset, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+    public Response getCommentOfAPI(Object commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
+        return null;
     }
 
     @Override
-    public Response apisApiIdCommentsPost(String apiId, CommentDTO body, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+    public Response deleteComment(Object commentId, String apiId, String ifMatch, MessageContext messageContext) {
+        return null;
     }
 
     @Override
