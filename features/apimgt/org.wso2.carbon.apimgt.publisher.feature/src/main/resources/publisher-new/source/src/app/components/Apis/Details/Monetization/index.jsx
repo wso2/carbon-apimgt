@@ -125,7 +125,7 @@ class Monetization extends Component {
             <TextField
                 fullWidth
                 id={property + i}
-                label={<FormattedMessage id={property} defaultMessage={property} />}
+                label={property}
                 name={property}
                 type='text'
                 margin='normal'
