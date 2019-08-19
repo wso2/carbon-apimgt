@@ -21,7 +21,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import Tooltip from '@material-ui/core/Tooltip';
-import FileCopy from '@material-ui/icons/FileCopy';
+import Icon from '@material-ui/core/Icon';
 import { FormattedMessage, injectIntl, } from 'react-intl';
 
 const styles = theme => ({
@@ -122,7 +122,7 @@ class ViewCurl extends React.Component {
                                 }
                                 onCopy={this.onCopy('tokenCopied')}
                             >
-                                <FileCopy color='secondary' />
+                                <Icon color='secondary'>file_copy</Icon>
                             </CopyToClipboard>
                         </Tooltip>
                     </div>

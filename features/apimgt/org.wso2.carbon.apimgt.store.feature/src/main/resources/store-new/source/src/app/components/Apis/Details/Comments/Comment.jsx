@@ -19,7 +19,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Typography } from '@material-ui/core/';
 import { withStyles } from '@material-ui/core/styles';
-import AccountBox from '@material-ui/icons/AccountBox';
+import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
 import { injectIntl } from 'react-intl';
 import Alert from '../../../Shared/Alert';
@@ -242,7 +242,9 @@ class Comment extends React.Component {
                         <div key={comment.commentId + '-' + index} className={classes.contentWrapper}>
                             <Grid container spacing={8} className={classes.root}>
                                 <Grid item>
-                                    <AccountBox className={classes.commentIcon} />
+                                    <Icon className={classes.commentIcon}>
+                                        account_box
+                                    </Icon>
                                 </Grid>
                                 <Grid item xs zeroMinWidth>
                                     <Typography noWrap className={classes.commentText} variant='body2'>

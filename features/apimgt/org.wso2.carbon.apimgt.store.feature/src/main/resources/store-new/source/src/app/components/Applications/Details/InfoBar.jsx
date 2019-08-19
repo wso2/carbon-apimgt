@@ -24,7 +24,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import Collapse from '@material-ui/core/Collapse';
-import CheckCircle from '@material-ui/icons/CheckCircle';
+import Icon from '@material-ui/core/Icon';
 import { FormattedMessage } from 'react-intl';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
@@ -328,7 +328,7 @@ class InfoBar extends React.Component {
                                     ))}
                                     <div className={classes.infoItem}>
                                         {application.status === 'APPROVED' ? (
-                                            <CheckCircle />
+                                            <Icon>check_circle</Icon>
                                         ) : (
                                             <Typography variant='subheading' gutterBottom>
                                                 {application.status}

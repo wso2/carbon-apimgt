@@ -27,10 +27,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import Paper from '@material-ui/core/Paper';
 import InputAdornment from '@material-ui/core/InputAdornment';
-import User from '@material-ui/icons/AccountCircle';
-import Lock from '@material-ui/icons/Lock';
-import Person from '@material-ui/icons/Person';
-import Mail from '@material-ui/icons/Mail';
+import Icon from '@material-ui/core/Icon';
 import { Link } from 'react-router-dom';
 import Checkbox from '@material-ui/core/Checkbox';
 import { FormattedMessage, injectIntl, } from 'react-intl';
@@ -376,7 +373,7 @@ class SignUp extends React.Component {
                                                         InputProps={{
                                                             startAdornment: (
                                                                 <InputAdornment position='start'>
-                                                                    <User />
+                                                                    <Icon>account_circle</Icon>
                                                                 </InputAdornment>
                                                             ),
                                                         }}
@@ -395,7 +392,7 @@ class SignUp extends React.Component {
                                                         InputProps={{
                                                             startAdornment: (
                                                                 <InputAdornment position='start'>
-                                                                    <Lock />
+                                                                    <Icon>lock</Icon>
                                                                 </InputAdornment>
                                                             ),
                                                         }}
@@ -436,7 +433,7 @@ class SignUp extends React.Component {
                                                         InputProps={{
                                                             startAdornment: (
                                                                 <InputAdornment position='start'>
-                                                                    <Person />
+                                                                    <Icon>person</Icon>
                                                                 </InputAdornment>
                                                             ),
                                                         }}
@@ -472,7 +469,7 @@ class SignUp extends React.Component {
                                                         InputProps={{
                                                             startAdornment: (
                                                                 <InputAdornment position='start'>
-                                                                    <Mail />
+                                                                    <Icon>mail</Icon>
                                                                 </InputAdornment>
                                                             ),
                                                         }}

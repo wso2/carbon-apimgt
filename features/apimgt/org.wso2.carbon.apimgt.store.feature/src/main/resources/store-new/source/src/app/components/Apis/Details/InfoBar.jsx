@@ -23,9 +23,8 @@ import {
 } from '@material-ui/icons';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
+import Icon from '@material-ui/core/Icon';
 import TextField from '@material-ui/core/TextField';
-import HighlightOff from '@material-ui/icons/HighlightOff';
 import { Link } from 'react-router-dom';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -34,18 +33,10 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import CalendarViewDay from '@material-ui/icons/CalendarViewDay';
-import AccountBalanceWallet from '@material-ui/icons/AccountBalanceWallet';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import CheckCircle from '@material-ui/icons/CheckCircle';
-import Cloud from '@material-ui/icons/Cloud';
-import Build from '@material-ui/icons/Build';
-import Update from '@material-ui/icons/Update';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Grid from '@material-ui/core/Grid';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import VerticalDivider from '../../Shared/VerticalDivider';
 import ImageGenerator from '../Listing/ImageGenerator';
@@ -430,7 +421,7 @@ class StarRatingBar extends React.Component {
                 <div className={classes.ratingBoxWrapper}>
                     {showRateNow && (
                         <div className={classes.ratingBox}>
-                            <HighlightOff />
+                            <Icon>highlight_off</Icon>
                             <VerticalDivider height={32} />
                             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
                                 <StarRate
@@ -612,7 +603,7 @@ class InfoBar extends React.Component {
                                                 <TableRow>
                                                     <TableCell component='th' scope='row' className={classes.leftCol}>
                                                         <div className={classes.iconAligner}>
-                                                            <CalendarViewDay className={classes.iconOdd} />
+                                                            <Icon className={classes.iconOdd}>calendar_view_day</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.list.version'
@@ -628,7 +619,7 @@ class InfoBar extends React.Component {
                                                 <TableRow>
                                                     <TableCell component='th' scope='row'>
                                                         <div className={classes.iconAligner}>
-                                                            <AccountBalanceWallet className={classes.iconEven} />
+                                                            <Icon className={classes.iconEven}>account_balance_wallet</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.list.context'
@@ -642,7 +633,7 @@ class InfoBar extends React.Component {
                                                 <TableRow>
                                                     <TableCell component='th' scope='row'>
                                                         <div className={classes.iconAligner}>
-                                                            <AccountCircle className={classes.iconOdd} />
+                                                            <Icon className={classes.iconOdd}>account_circle</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.provider'
@@ -656,7 +647,7 @@ class InfoBar extends React.Component {
                                                 <TableRow>
                                                     <TableCell component='th' scope='row'>
                                                         <div className={classes.iconAligner}>
-                                                            <Update className={classes.iconEven} />
+                                                            <Icon className={classes.iconEven}>update</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.last.updated'
@@ -671,7 +662,7 @@ class InfoBar extends React.Component {
                                                     <TableRow>
                                                         <TableCell component='th' scope='row'>
                                                             <div className={classes.iconAligner}>
-                                                                <CloudDownloadRounded className={classes.buttonIcon} />
+                                                                <Icon className={classes.buttonIcon}>cloud_download</Icon>
                                                                 <span className={classes.iconTextWrapper}>
                                                                     <FormattedMessage
                                                                         id='Apis.Details.InfoBar.download.Schema'
@@ -708,19 +699,19 @@ class InfoBar extends React.Component {
                                                 <Grid key={endpoint} item xs={6}>
                                                     <ExpansionPanel>
                                                         <ExpansionPanelSummary
-                                                            expandIcon={<ExpandMoreIcon />}
+                                                            expandIcon={<Icon>expand_more</Icon>}
                                                             aria-controls='panel1a-content'
                                                             id='panel1a-header'
                                                         >
                                                             <div className={classes.iconAligner}>
                                                                 {endpoint.environmentType === 'hybrid' && (
-                                                                    <Cloud className={classes.iconEven} />
+                                                                    <Icon className={classes.iconEven}>cloud</Icon>
                                                                 )}
                                                                 {endpoint.environmentType === 'production' && (
-                                                                    <CheckCircle className={classes.iconEven} />
+                                                                    <Icon className={classes.iconEven}>check_circle</Icon>
                                                                 )}
                                                                 {endpoint.environmentType === 'sandbox' && (
-                                                                    <Build className={classes.iconEven} />
+                                                                    <Icon className={classes.iconEven}>Build</Icon>
                                                                 )}
                                                                 <span className={classes.iconTextWrapper}>
                                                                     <Typography className={classes.heading}>

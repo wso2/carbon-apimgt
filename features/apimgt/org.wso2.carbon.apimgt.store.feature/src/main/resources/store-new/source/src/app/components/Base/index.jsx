@@ -27,13 +27,11 @@ import { Menu as MenuIcon } from '@material-ui/icons';
 import {
     MenuItem, MenuList, ListItemIcon, ListItemText, Divider,
 } from '@material-ui/core';
-import NightMode from '@material-ui/icons/Brightness2';
-
+import Icon from '@material-ui/core/Icon';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { findDOMNode } from 'react-dom';
 import Typography from '@material-ui/core/Typography';
-import Person from '@material-ui/icons/Person';
 import Popper from '@material-ui/core/Popper';
 import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
@@ -286,7 +284,7 @@ class Layout extends React.Component {
                                         onClick={this.handleToggleUserMenu}
                                         className={classes.userLink}
                                     >
-                                        <Person />
+                                        <Icon>person</Icon>
                                         {user.name}
                                     </Button>
                                     <Popper
@@ -340,7 +338,7 @@ class Layout extends React.Component {
                                                             >
                                                                 <ListItemText primary='Night Mode' />
                                                                 <ListItemIcon className={classes.icon}>
-                                                                    <NightMode />
+                                                                    <Icon>brightness_low</Icon>
                                                                 </ListItemIcon>
                                                             </MenuItem>
                                                         </MenuList>
@@ -360,7 +358,7 @@ class Layout extends React.Component {
                                      </Link> */}
                                     <a href='/store-new/services/configs'>
                                         <Button className={classes.userLink}>
-                                            <Person />
+                                            <Icon>person</Icon>
                                             <FormattedMessage id='Base.index.sign.in' defaultMessage=' Sign-in' />
                                         </Button>
                                     </a>

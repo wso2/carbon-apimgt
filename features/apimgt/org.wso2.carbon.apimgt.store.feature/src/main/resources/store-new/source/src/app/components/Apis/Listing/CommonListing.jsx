@@ -20,8 +20,7 @@ import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
-import GridIcon from '@material-ui/icons/GridOn';
-import List from '@material-ui/icons/List';
+import Icon from '@material-ui/core/Icon';
 import { withStyles } from '@material-ui/core/styles';
 import CustomIcon from '../../Shared/CustomIcon';
 import ApiTableView from './ApiTableView';
@@ -128,10 +127,10 @@ class CommonListing extends React.Component {
                     </div>
                     <div className={classes.buttonRight}>
                         <IconButton className={classes.button} onClick={() => this.setListType('list')}>
-                            <List color={listType === 'list' ? 'primary' : 'default'} />
+                            <Icon color={listType === 'list' ? 'primary' : 'default'}>list</Icon>
                         </IconButton>
                         <IconButton className={classes.button} onClick={() => this.setListType('grid')}>
-                            <GridIcon color={listType === 'grid' ? 'primary' : 'default'} />
+                            <Icon color={listType === 'grid' ? 'primary' : 'default'}>grid_on</Icon>
                         </IconButton>
                     </div>
                 </div>
