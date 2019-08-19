@@ -23,7 +23,6 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import Hidden from '@material-ui/core/Hidden';
-import { Menu as MenuIcon } from '@material-ui/icons';
 import {
     MenuItem, MenuList, ListItemIcon, ListItemText, Divider,
 } from '@material-ui/core';
@@ -230,7 +229,7 @@ class Layout extends React.Component {
                         <Toolbar className={classes.toolbar}>
                             <Hidden mdUp>
                                 <IconButton onClick={this.toggleGlobalNavBar} color='inherit'>
-                                    <MenuIcon className={classes.menuIcon} />
+                                    <Icon className={classes.menuIcon}>menu</Icon>
                                 </IconButton>
                             </Hidden>
                             <Link to='/'>

@@ -18,9 +18,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import {
-    KeyboardArrowLeft, StarRate, FileCopy, ArrowDropDownOutlined, ArrowDropUpOutlined,
-} from '@material-ui/icons';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
@@ -397,7 +394,7 @@ class StarRatingBar extends React.Component {
             <React.Fragment>
                 {rate.count > 0 ? (
                     <React.Fragment>
-                        <StarRate className={classes.starRate} />
+                        <Icon className={classes.starRate}>star_rate</Icon>
                         <div className={classes.ratingSummery}>
                             <div className={classes.userRating}>
                                 <Typography variant='display1'>{rate.avgRating * 2}</Typography>
@@ -411,11 +408,11 @@ class StarRatingBar extends React.Component {
                         </div>
                     </React.Fragment>
                 ) : (
-                    <StarRate
+                    <Icon
                         onClick={this.showRateBox}
                         className={classes.starRate}
                         style={{ color: theme.palette.grey.A200 }}
-                    />
+                    >star_rate</Icon>
                 )}
                 <VerticalDivider height={32} />
                 <div className={classes.ratingBoxWrapper}>
@@ -424,7 +421,7 @@ class StarRatingBar extends React.Component {
                             <Icon>highlight_off</Icon>
                             <VerticalDivider height={32} />
                             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
-                                <StarRate
+                                <Icon
                                     color={
                                         i <= rate.userRating * 2 || i <= dummyRateValue
                                             ? 'primary'
@@ -433,13 +430,13 @@ class StarRatingBar extends React.Component {
                                     onMouseOver={() => this.highlightUs(i)}
                                     onMouseLeave={() => this.unhighlightUs()}
                                     onClick={() => this.doRate(i)}
-                                />
+                                >star_rate</Icon>
                             ))}
                         </div>
                     )}
                     {rate.userRating ? (
                         <React.Fragment>
-                            <StarRate className={classes.starRateMy} onClick={this.showRateBox} />
+                            <Icon className={classes.starRateMy} onClick={this.showRateBox}>star_rate</Icon>
                             <div className={classes.ratingSummery} onClick={this.showRateBox}>
                                 <Typography variant='display1'>{rate.userRating * 2}</Typography>
                                 <Typography variant='caption' gutterBottom align='left'>
@@ -449,11 +446,11 @@ class StarRatingBar extends React.Component {
                         </React.Fragment>
                     ) : (
                         <React.Fragment>
-                            <StarRate
+                            <Icon
                                 onClick={this.showRateBox}
                                 className={classes.starRate}
                                 style={{ color: theme.palette.grey.A200 }}
-                            />
+                            >star_rate</Icon>
                             <Typography onClick={this.showRateBox} className={classes.rateLink}>
                                 <FormattedMessage
                                     id='Apis.Details.InfoBar.rate.this.api'
@@ -573,7 +570,7 @@ class InfoBar extends React.Component {
                     <div className={classes.infoBarMain}>
                         <div className={classes.root}>
                             <Link to='/apis' className={classes.backLink}>
-                                <KeyboardArrowLeft className={classes.backIcon} />
+                                <Icon className={classes.backIcon}>keyboard_arrow_left</Icon>
                                 <div className={classes.backText}>
                                     <FormattedMessage id='Apis.Details.InfoBar.back.to' defaultMessage='BACK TO' />
                                     <br />
@@ -759,7 +756,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -790,7 +787,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -821,7 +818,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -852,7 +849,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -894,7 +891,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -925,7 +922,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -956,7 +953,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -987,7 +984,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -1017,7 +1014,7 @@ class InfoBar extends React.Component {
                                             />
                                         </Typography>
                                     )}
-                                    {showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined />}
+                                    {showOverview ? <Icon>arrow_drop_up_circle</Icon> : <Icon>arrow_drop_down_circle</Icon>}
                                 </div>
                             </div>
                         </div>
