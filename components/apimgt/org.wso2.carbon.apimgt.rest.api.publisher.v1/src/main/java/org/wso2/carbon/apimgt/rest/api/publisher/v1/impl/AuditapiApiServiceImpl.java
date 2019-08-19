@@ -134,11 +134,19 @@ public class AuditapiApiServiceImpl implements AuditapiApiService {
               try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil.getHttpClient(auditUrl.getPort(), auditUrl.getProtocol())) {
                   HttpPost httpPost = new HttpPost(String.valueOf(auditUrl));
 
+                  // Construct the JSON String to be passed in the request
+                  StringBuilder bodyString = new StringBuilder();
+                  bodyString.append("{ \n");
+                  bodyString.append("   \"specfile\": ").append(body.getSpecfile()).append("\n");
+                  bodyString.append("   \"cid\": ").append(body.getCid()).append("\n");
+                  bodyString.append("   \"name\": ").append(body.getName()).append("\n");
+                  bodyString.append("}");
+
                   // Set the header properties of the request
                   httpPost.setHeader(HEADER_ACCEPT, HEADER_APPLICATION_JSON);
                   httpPost.setHeader(HEADER_CONTENT_TYPE, HEADER_APPLICATION_JSON);
                   httpPost.setHeader(HEADER_API_TOKEN, apiToken);
-                  httpPost.setEntity(new StringEntity(body.toString()));
+                  httpPost.setEntity(new StringEntity(bodyString.toString()));
 
                   // Code block for the processing of the response
                   try(CloseableHttpResponse response = httpClient.execute(httpPost)) {

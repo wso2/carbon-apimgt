@@ -95,10 +95,11 @@ public class APISecurityAuditInfoDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("{\n");
-    sb.append("    \"specfile\": ").append(toIndentedString(specfile)).append("\n");
-    sb.append("    \"cid\": ").append(toIndentedString(cid)).append("\n");
-    sb.append("    \"name\": ").append(toIndentedString(name)).append("\n");
+    sb.append("class APISecurityAuditInfoDTO {\n");
+    
+    sb.append("    specfile: ").append(toIndentedString(specfile)).append("\n");
+    sb.append("    cid: ").append(toIndentedString(cid)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("}");
     return sb.toString();
   }
