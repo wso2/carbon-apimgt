@@ -4,6 +4,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Carousel from './Carousel';
+import ApiTagCloud from './ApiTagCloud';
 import ApisWithTag from './ApisWithTag';
 import ParallaxScroll from './ParallaxScroll';
 import Contact from './Contact';
@@ -28,7 +29,6 @@ function Landing(props) {
     const listByTagActive = theme.custom.landingPage.listByTag.active;
     const parallaxActive = theme.custom.landingPage.parallax.active;
     const listByTagContent = theme.custom.landingPage.listByTag.content;
-
     return (
         <div className={classes.superRoot}>
             <div className={classes.root}>
@@ -38,6 +38,7 @@ function Landing(props) {
                             <Carousel />
                         </Grid>
                     )}
+                    <ApiTagCloud />
                     {listByTagActive && listByTagContent.length > 0 && (
                         <Grid item xs={12}>
                             <Typography variant='h2' gutterBottom>
