@@ -24,7 +24,6 @@ import MUIDataTable from 'mui-datatables';
 import { injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
-import Configurations from 'Config';
 import ImageGenerator from 'AppComponents/Apis/Listing/components/ImageGenerator/ImageGenerator';
 import ApiThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/ApiThumb';
 import { Progress } from 'AppComponents/Shared';
@@ -34,7 +33,7 @@ import TopMenu from 'AppComponents/Apis/Listing/components/TopMenu';
 
 const styles = theme => ({
     contentInside: {
-        paddingLeft: theme.spacing.unit * 3,
+        padding: theme.spacing.unit * 3,
         paddingTop: theme.spacing.unit * 2,
         '& > div[class^="MuiPaper-root-"]': {
             boxShadow: 'none',
@@ -43,6 +42,12 @@ const styles = theme => ({
     },
 });
 
+/**
+ *
+ *
+ * @class TableView
+ * @extends {React.Component}
+ */
 class TableView extends React.Component {
     constructor(props) {
         super(props);
@@ -74,6 +79,7 @@ class TableView extends React.Component {
 
     getMuiTheme = () => {
         const { listType } = this.state;
+        const { theme } = this.props;
         let muiTheme = {
             overrides: {
                 MUIDataTable: {
@@ -116,7 +122,7 @@ class TableView extends React.Component {
                     },
                 },
             };
-            muiTheme = Object.assign(Configurations.themes.light, muiTheme, themeAdditions);
+            muiTheme = Object.assign(theme, muiTheme, themeAdditions);
         }
         return createMuiTheme(muiTheme);
     };
@@ -197,6 +203,13 @@ class TableView extends React.Component {
         }
     };
 
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof TableView
+     */
     render() {
         const { intl, isAPIProduct, classes } = this.props;
         const columns = [
@@ -350,7 +363,7 @@ class TableView extends React.Component {
                         listType={listType}
                     />
                     <div className={classes.contentInside}>
-                        <SampleAPI isAPIProduct={isAPIProduct} />;
+                        <SampleAPI isAPIProduct={isAPIProduct} />
                     </div>
                 </React.Fragment>
             );

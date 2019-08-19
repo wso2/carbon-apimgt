@@ -18,7 +18,7 @@
 
 import React from 'react';
 import { getExampleBodyById, getExampleResponseById } from 'AppTests/Utils/MockAPIModel.js';
-import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
+import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import Configurations from 'Config';
 import { MemoryRouter, Redirect } from 'react-router-dom';
 import { resourceMethod, resourcePath } from 'AppData/ScopeValidation';

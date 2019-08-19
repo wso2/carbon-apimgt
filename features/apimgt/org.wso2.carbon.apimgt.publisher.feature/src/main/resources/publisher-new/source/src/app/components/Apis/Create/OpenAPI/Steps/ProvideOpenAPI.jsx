@@ -16,13 +16,7 @@
  * under the License.
  */
 import React, { Component } from 'react';
-import {
-    withStyles,
-    RadioGroup,
-    Radio,
-    FormControl,
-    FormControlLabel,
-} from '@material-ui/core';
+import { withStyles, RadioGroup, Radio, FormControl, FormControlLabel } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import PropTypes from 'prop-types';
@@ -38,7 +32,6 @@ const styles = theme => ({
     },
     dropZoneInside: {},
     dropZone: {
-        width: '100%',
         color: theme.palette.grey[500],
         border: 'dashed 1px ' + theme.palette.grey[500],
         background: theme.palette.grey[100],
@@ -181,10 +174,7 @@ class ProvideOpenAPI extends Component {
                             {files && files.length > 0 && (
                                 <div className={classes.fileNameWrapper}>
                                     <Typography variant='subtitle2' gutterBottom>
-                                        <FormattedMessage
-                                            id='uploaded.file'
-                                            defaultMessage='Uploaded file'
-                                        /> :
+                                        <FormattedMessage id='uploaded.file' defaultMessage='Uploaded file' /> :
                                     </Typography>
                                     {files.map(f => (
                                         <div key={f.name} className={classes.fileName}>
@@ -215,10 +205,7 @@ class ProvideOpenAPI extends Component {
                             </Dropzone>
                             {valid.openAPIFile.empty && (
                                 <Typography variant='caption' gutterBottom className={classes.dropZoneError}>
-                                    <FormattedMessage
-                                        id='error.empty'
-                                        defaultMessage='This field can not be empty.'
-                                    />
+                                    <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
                                 </Typography>
                             )}
                         </FormControl>

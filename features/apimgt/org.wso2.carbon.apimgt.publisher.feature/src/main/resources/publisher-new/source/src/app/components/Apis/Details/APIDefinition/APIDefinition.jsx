@@ -419,14 +419,14 @@ class APIDefinition extends React.Component {
         const {
             swagger, graphQL, openEditor, openDialog, format, convertTo, notFound,
         } = this.state;
-        const { classes, resourceNotFountMessage } = this.props;
+        const { classes, resourceNotFountMessage, api } = this.props;
         let downloadLink;
         let fileName;
         let isGraphQL = 0;
 
         if (graphQL !== null) {
             downloadLink = 'data:text/' + format + ';charset=utf-8,' + encodeURIComponent(graphQL);
-            fileName = 'schema.graphql';
+            fileName = api.provider + '-' + api.name + '-' + api.version + '.graphql';
             isGraphQL = 1;
         } else {
             downloadLink = 'data:text/' + format + ';charset=utf-8,' + encodeURIComponent(swagger);

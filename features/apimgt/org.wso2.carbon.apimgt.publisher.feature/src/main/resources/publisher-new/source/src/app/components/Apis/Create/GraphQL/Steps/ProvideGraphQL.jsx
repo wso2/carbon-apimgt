@@ -38,7 +38,6 @@ const styles = theme => ({
     },
     dropZoneInside: {},
     dropZone: {
-        width: '100%',
         color: theme.palette.grey[500],
         border: 'dashed 1px ' + theme.palette.grey[500],
         background: theme.palette.grey[100],
