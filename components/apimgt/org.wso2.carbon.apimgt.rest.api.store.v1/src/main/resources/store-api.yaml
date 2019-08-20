@@ -4074,7 +4074,7 @@ parameters:
     description: |
       Comment Id
     required: true
-    type: int
+    type: integer
 
 # Rating Identifier
 # Specified as part of the path expression

@@ -46,7 +46,6 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -172,29 +171,30 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response addCommentToAPI(String apiId, CommentDTO body, MessageContext messageContext) {
-
+        String username = RestApiUtil.getLoggedInUsername();
+        String requestedTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         try {
-            String username = RestApiUtil.getLoggedInUsername();
-            String requestedTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
+
             Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);
             int createdCommentId = apiConsumer.addComment(apiIdentifier, comment, username);
-
-            Comment createdComment = apiConsumer.getComment(createdCommentId, apiId);
+            Comment createdComment = apiConsumer.getComment(apiIdentifier, createdCommentId);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 
-            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + "/comments/" + createdCommentId;
+            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
+                    RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + createdCommentId;
             URI comments = new URI(uriString);
-            //.replace(RestApiConstants.APIID_PARAM, apiId)
-            //.replace(RestApiConstants.DOCUMENTID_PARAM, documentId);
             return Response.created(comments).entity(commentDTO).build();
-
         } catch (APIManagementException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e1) {
-            e1.printStackTrace();
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to add comment to the API " + apiId, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving comment content location for API " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -205,17 +205,88 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset, MessageContext messageContext) {
+    public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset,
+                                        MessageContext messageContext) {
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
+
+            Comment[] createdComment = apiConsumer.getComments(apiIdentifier);
+            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(createdComment, limit, offset);
+
+            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
+                    RestApiConstants.RESOURCE_PATH_COMMENTS;
+            URI comments = new URI(uriString);
+            return Response.created(comments).entity(commentDTO).build();
+
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to get comments of API " + apiId, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving comments content location for API " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
         return null;
     }
 
     @Override
-    public Response getCommentOfAPI(Object commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
+    public Response getCommentOfAPI(Integer commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
+
+            Comment createdComment = apiConsumer.getComment(apiIdentifier, commentId);
+
+            if (createdComment != null) {
+                CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
+                String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
+                        RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
+                URI comments = new URI(uriString);
+                return Response.created(comments).entity(commentDTO).build();
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
+                        String.valueOf(commentId), log);
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving comment for API : " + apiId + "with comment ID " + commentId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving comment content location : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
         return null;
     }
 
     @Override
-    public Response deleteComment(Object commentId, String apiId, String ifMatch, MessageContext messageContext) {
+    public Response deleteComment(Integer commentId, String apiId, String ifMatch, MessageContext messageContext) {
+        String requestedTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
+
+            apiConsumer.deleteComment(apiIdentifier, commentId);
+            return Response.ok("The comment has been deleted").build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while deleting comment " + commentId + "for API " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
         return null;
     }
 
@@ -361,7 +432,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
     public Response apisApiIdRatingsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant,
             MessageContext messageContext) {
         //pre-processing

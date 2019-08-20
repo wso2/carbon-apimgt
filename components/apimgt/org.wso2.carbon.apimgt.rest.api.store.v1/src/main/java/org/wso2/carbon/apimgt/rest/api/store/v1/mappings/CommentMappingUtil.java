@@ -18,12 +18,19 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommentMappingUtil {
+
+    private static final Logger log = LoggerFactory.getLogger(CommentMappingUtil.class);
 
     /**
      * Converts a Comment object into corresponding REST API CommentDTO object
@@ -39,7 +46,6 @@ public class CommentMappingUtil {
         commentDTO.setCreatedBy(comment.getUser());
         commentDTO.setCreatedTime(comment.getCreatedTime().toString());
         return commentDTO;
-
     }
 
     /**
@@ -58,5 +64,31 @@ public class CommentMappingUtil {
         return comment;
     }
 
+    /**
+     * Wraps a List of Comments to a CommentListDTO
+     *
+     * @param commentList list of comments
+     * @param limit       maximum comments to return
+     * @param offset      starting position of the pagination
+     * @return CommentListDTO
+     */
+    public static CommentListDTO fromCommentListToDTO(Comment[] commentList, int limit, int offset) {
+        CommentListDTO commentListDTO = new CommentListDTO();
+        List<CommentDTO> listOfCommentDTOs = new ArrayList<>();
+        commentListDTO.setCount(commentList.length);
+
+        int start = offset < commentList.length && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = offset + limit - 1 <= commentList.length - 1 ? offset + limit - 1 : commentList.length - 1;
+
+        for (int i = start; i <= end; i++) {
+            try {
+                listOfCommentDTOs.add(fromCommentToDTO(commentList[i]));
+            } catch (APIManagementException e) {
+                log.error("Error while creating comments list", e);
+            }
+        }
+        commentListDTO.setList(listOfCommentDTOs);
+        return commentListDTO;
+    }
 
 }

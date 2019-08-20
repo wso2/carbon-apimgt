@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
@@ -7481,9 +7482,9 @@ public class ApiMgtDAO {
     /**
      * Adds a comment for an API
      *
-     * @param identifier  API Identifier
-     * @param comment Commented Text
-     * @param user        User who did the comment
+     * @param identifier API Identifier
+     * @param comment    Commented Text
+     * @param user       User who did the comment
      * @return Comment ID
      */
     public int addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException {
@@ -7515,7 +7516,7 @@ public class ApiMgtDAO {
                 throw new APIManagementException(msg);
             }
 
-            /*This query to update the AM_API_COMMENTS table */
+            /*This query is to update the AM_API_COMMENTS table */
             String addCommentQuery = SQLConstants.ADD_COMMENT_SQL;
 
             /*Adding data to the AM_API_COMMENTS table*/
@@ -7551,8 +7552,6 @@ public class ApiMgtDAO {
         return commentId;
     }
 
-
-
     /**
      * Returns all the Comments on an API
      *
@@ -7576,6 +7575,7 @@ public class ApiMgtDAO {
             resultSet = prepStmt.executeQuery();
             while (resultSet.next()) {
                 Comment comment = new Comment();
+                comment.setId(resultSet.getString("COMMENT_ID"));
                 comment.setText(resultSet.getString("COMMENT_TEXT"));
                 comment.setUser(resultSet.getString("COMMENTED_USER"));
                 comment.setCreatedTime(new java.util.Date(resultSet.getTimestamp("DATE_COMMENTED").getTime()));
@@ -7600,12 +7600,12 @@ public class ApiMgtDAO {
     /**
      * Returns a specific comment of on an API
      *
-     * @param commentId Comment ID
-     * @param apiId     API ID
+     * @param commentId  Comment ID
+     * @param identifier API identifier
      * @return Comment Array
      * @throws APIManagementException
      */
-    public Comment getComment(int commentId, String apiId) throws APIManagementException {
+    public Comment getComment(APIIdentifier identifier, int commentId) throws APIManagementException {
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Comment comment = new Comment();
@@ -7613,13 +7613,15 @@ public class ApiMgtDAO {
         ResultSet resultSet = null;
         PreparedStatement prepStmt = null;
 
-        String sqlQuery = "SELECT AM_API_COMMENTS.COMMENT_ID AS COMMENT_ID, AM_API_COMMENTS.COMMENT_TEXT AS COMMENT_TEXT, AM_API_COMMENTS.COMMENTED_USER AS COMMENTED_USER, " +
-                "AM_API_COMMENTS.DATE_COMMENTED AS DATE_COMMENTED, AM_API_COMMENTS.API_ID AS API_ID  FROM AM_API_COMMENTS WHERE AM_API_COMMENTS.COMMENT_ID = ?";
+        String getCommentQuery = SQLConstants.GET_COMMENT_SQL;
 
         try {
             connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setInt(1, commentId);
+            prepStmt = connection.prepareStatement(getCommentQuery);
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            prepStmt.setString(2, identifier.getApiName());
+            prepStmt.setString(3, identifier.getVersion());
+            prepStmt.setInt(4, commentId);
             resultSet = prepStmt.executeQuery();
 
             if (resultSet.next()) {
@@ -7627,25 +7629,51 @@ public class ApiMgtDAO {
                 comment.setText(resultSet.getString("COMMENT_TEXT"));
                 comment.setUser(resultSet.getString("COMMENTED_USER"));
                 comment.setCreatedTime(formatter.parse(resultSet.getString("DATE_COMMENTED")));
-                comment.setApiId(resultSet.getString("API_ID"));
+                return comment;
             }
-            return comment;
-
         } catch (SQLException e) {
             try {
                 if (connection != null) {
                     connection.rollback();
                 }
             } catch (SQLException e1) {
-                log.error("Failed to retrieve comments ", e1);
+                log.error("Failed to retrieve comment ", e1);
             }
-            handleException("Failed to retrieve comments for API " + apiId + "with comment ID " + commentId, e);
+            handleException("Failed to retrieve comment for API " + identifier.getApiName() + "with comment ID " + commentId, e);
+
         } catch (ParseException e) {
             log.error("Failed to retrieve the created time of the comment ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
         }
         return null;
+    }
+
+    /**
+     * Delete a comment
+     *
+     * @param identifier API Identifier
+     * @param commentId Comment ID
+     * @throws APIManagementException
+     */
+    public void deleteComment(APIIdentifier identifier, int commentId) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+
+        String deleteCommentQuery = SQLConstants.DELETE_COMMENT_SQL;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(deleteCommentQuery);
+            prepStmt.setInt(1, commentId);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting comment " + commentId + " from the database", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
     }
 
     public boolean isContextExist(String context) {

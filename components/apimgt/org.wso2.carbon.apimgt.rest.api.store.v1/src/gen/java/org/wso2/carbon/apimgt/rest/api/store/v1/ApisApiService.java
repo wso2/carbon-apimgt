@@ -46,7 +46,7 @@ public interface ApisApiService {
       public Response apisApiIdUserRatingPut(String apiId, RatingDTO body, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response deleteComment(Object commentId, String apiId, String ifMatch, MessageContext messageContext);
+      public Response deleteComment(Integer commentId, String apiId, String ifMatch, MessageContext messageContext);
       public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset, MessageContext messageContext);
-      public Response getCommentOfAPI(Object commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
+      public Response getCommentOfAPI(Integer commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
 }
