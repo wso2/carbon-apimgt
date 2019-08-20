@@ -1173,8 +1173,8 @@ public class APIGatewayManager {
                 return new String[]{"", "", ""};
             }
         }
-        String duration = (endpointObj.has("actionDuration")) ? "\t\t<duration>" + endpointObj.get("actionDuration") + "</duration>\n" : "";
-        String responseAction = (endpointObj.has("actionSelect")) ? "\t\t<responseAction>" + endpointObj.get("actionSelect") + "</responseAction>\n" : "";
+        String duration = endpointObj.has("actionDuration") ? "\t\t<duration>" + endpointObj.get("actionDuration") + "</duration>\n" : "";
+        String responseAction = endpointObj.has("actionSelect") ? "\t\t<responseAction>" + endpointObj.get("actionSelect") + "</responseAction>\n" : "";
         String timeout = duration + "\n" + responseAction;
         String retryErrorCode;
         String suspendErrorCode ;
@@ -1203,9 +1203,9 @@ public class APIGatewayManager {
         } else {
             suspendErrorCode = "";
         }
-        String suspendDuration = (endpointObj.has("suspendDuration")) ? "\t\t<initialDuration>" + endpointObj.get("suspendDuration").toString() + "</initialDuration>" : "";
-        String suspendMaxDuration = (endpointObj.has("suspendMaxDuration")) ? "\t\t<maximumDuration>" + endpointObj.get("suspendMaxDuration") + "</maximumDuration>" : "";
-        String factor = (endpointObj.has("factor")) ? "\t\t<progressionFactor>" + endpointObj.get("factor") + "</progressionFactor>" : "";
+        String suspendDuration = endpointObj.has("suspendDuration") ? "\t\t<initialDuration>" + endpointObj.get("suspendDuration").toString() + "</initialDuration>" : "";
+        String suspendMaxDuration = endpointObj.has("suspendMaxDuration") ? "\t\t<maximumDuration>" + endpointObj.get("suspendMaxDuration") + "</maximumDuration>" : "";
+        String factor = endpointObj.has("factor") ? "\t\t<progressionFactor>" + endpointObj.get("factor") + "</progressionFactor>" : "";
         String suspendOnFailure = suspendErrorCode + "\n" + suspendDuration + "\n" + suspendMaxDuration + "\n" + factor;
         if (endpointObj.has("retryErroCode")) {
             //When there are/is multiple/single retry error codes
@@ -1221,8 +1221,8 @@ public class APIGatewayManager {
         } else {
             retryErrorCode = "";
         }
-        String retryTimeOut = (endpointObj.has("retryTimeOut")) ? "\t\t<retriesBeforeSuspension>" + endpointObj.get("retryTimeOut") + "</retriesBeforeSuspension>" : "";
-        String retryDelay = (endpointObj.has("retryDelay")) ? "\t\t<retryDelay>" + endpointObj.get("retryDelay") + "</retryDelay>" : "";
+        String retryTimeOut = endpointObj.has("retryTimeOut") ? "\t\t<retriesBeforeSuspension>" + endpointObj.get("retryTimeOut") + "</retriesBeforeSuspension>" : "";
+        String retryDelay = endpointObj.has("retryDelay") ? "\t\t<retryDelay>" + endpointObj.get("retryDelay") + "</retryDelay>" : "";
         String markForSuspension = retryErrorCode + "\n" + retryTimeOut + "\n" + retryDelay;
         return new String[]{timeout, suspendOnFailure, markForSuspension};
     }
