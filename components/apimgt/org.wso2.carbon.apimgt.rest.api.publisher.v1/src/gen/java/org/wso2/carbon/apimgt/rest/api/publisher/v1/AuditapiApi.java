@@ -2,7 +2,6 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APISecurityAuditInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAPIIDDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.AuditapiApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.AuditapiApiServiceImpl;
 
@@ -56,13 +55,13 @@ AuditapiApiService delegate = new AuditapiApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Create new Security Audit API", notes = "Create new Security Audit API ", response = SecurityAuditAPIIDDTO.class, authorizations = {
+    @ApiOperation(value = "Create new Security Audit API", notes = "Create new Security Audit API ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. UUID returned ", response = SecurityAuditAPIIDDTO.class),
+        @ApiResponse(code = 200, message = "OK. UUID returned ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Created. The Audit API was not created. ", response = ErrorDTO.class) })
     public Response auditapiPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "API object that needs to be added " ,required=true) APISecurityAuditInfoDTO body, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) {
         return delegate.auditapiPost(apiId, body, accept, securityContext);

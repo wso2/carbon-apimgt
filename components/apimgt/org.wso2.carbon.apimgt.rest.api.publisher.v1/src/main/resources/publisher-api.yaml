@@ -5715,8 +5715,6 @@ paths:
           description: |
             OK.
             UUID returned
-          schema:
-            $ref: '#/definitions/SecurityAuditAPIID'
         404:
           description: |
             Not Created.
@@ -6469,18 +6467,6 @@ definitions:
         description: |
           The name of the API.
         example: Swagger-Petstore
-
-  #-----------------------------------------------------
-  # The Security Audit API ID resource
-  #-----------------------------------------------------
-  SecurityAuditAPIID:
-    title: Resource for the Security Audit API ID
-    properties:
-      id:
-        type: string
-        description: |
-          The Security Audit API ID.
-        example: 1ab5e1a3-5294-4452-9768-63u273r6cbf5
 
   #-----------------------------------------------------
   # The API Product List resource
