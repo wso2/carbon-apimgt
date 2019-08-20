@@ -1,5 +1,7 @@
 <%
 include("/jagg/jagg.jag");
+var encode = require('encode');
+encode = new encode.Encode();
 
 if(jagg.isCSRFTokenValid())
 (function () {
