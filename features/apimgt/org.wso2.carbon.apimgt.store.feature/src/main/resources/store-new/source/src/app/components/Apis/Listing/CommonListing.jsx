@@ -63,6 +63,9 @@ const styles = theme => ({
     content: {
         flexGrow: 1,
     },
+    listContentWrapper: {
+        padding: `0 ${theme.spacing.unit * 3}px`,
+    }
 });
 
 /**
@@ -134,19 +137,20 @@ class CommonListing extends React.Component {
                         </IconButton>
                     </div>
                 </div>
-
-                {listType === 'grid'
-                && (
-                    <ApiContext.Provider value={{ apiType }}>
-                        <ApiTableView gridView />
-                    </ApiContext.Provider>
-                )}
-                {listType === 'list'
-                && (
-                    <ApiContext.Provider value={{ apiType }}>
-                        <ApiTableView gridView={false} />
-                    </ApiContext.Provider>
-                )}
+                <div className={classes.listContentWrapper}>
+                    {listType === 'grid'
+                    && (
+                        <ApiContext.Provider value={{ apiType }}>
+                            <ApiTableView gridView />
+                        </ApiContext.Provider>
+                    )}
+                    {listType === 'list'
+                    && (
+                        <ApiContext.Provider value={{ apiType }}>
+                            <ApiTableView gridView={false} />
+                        </ApiContext.Provider>
+                    )}
+                </div>
             </main>
         );
     }
