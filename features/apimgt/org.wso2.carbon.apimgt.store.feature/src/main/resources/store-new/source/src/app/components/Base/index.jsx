@@ -265,7 +265,7 @@ class Layout extends React.Component {
                             </Hidden>
                             <VerticalDivider height={32} />
                             <GenericSearch />
-                            <VerticalDivider height={72} />
+                            <VerticalDivider height={64} />
                             {/* Environment menu */}
                             <EnvironmentMenu
                                 environments={this.state.environments}

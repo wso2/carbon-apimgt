@@ -19,7 +19,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import {
-    Route, Switch, Redirect, Link,
+    Route, Switch, Redirect, Link, withRouter,
 } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Loadable from 'react-loadable';
@@ -36,7 +36,7 @@ import { ApiContext } from './ApiContext';
 import Progress from '../../Shared/Progress';
 
 
-const LoadableSwitch = Loadable.Map({
+const LoadableSwitch = withRouter(Loadable.Map({
     loader: {
         ApiConsole: () => import(
             // eslint-disable-line function-paren-newline
@@ -82,19 +82,18 @@ const LoadableSwitch = Loadable.Map({
         ),
     },
     render(loaded, props) {
-        const { api_uuid, apiType } = props;
+        const { apiType, match } = props;
         const ApiConsole = loaded.ApiConsole.default;
         const Overview = loaded.Overview.default;
         const Documentation = loaded.Documentation.default;
         const Credentials = loaded.Credentials.default;
         const Comments = loaded.Comments.default;
         const Sdk = loaded.Sdk.default;
-
+        const api_uuid = match.params.api_uuid;
         let path = '/apis/';
         if (apiType === CONSTS.API_PRODUCT_TYPE) {
             path = '/api-products/';
         }
-
         const redirectURL = path + api_uuid + '/overview';
 
         return (
@@ -128,7 +127,7 @@ const LoadableSwitch = Loadable.Map({
     loading() {
         return <Progress />;
     },
-});
+}));
 
 /**
  *
