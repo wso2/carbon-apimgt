@@ -79,6 +79,12 @@
         {
           "description": "",
           "roles": "admin",
+          "name": "apim:api_import_export",
+          "key": "apim:api_import_export"
+        },
+        {
+          "description": "",
+          "roles": "admin",
           "name": "apim:label_manage",
           "key": "apim:label_manage"
         },
@@ -1932,6 +1938,13 @@
             "description": "Owner of the Application\n",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "withKeys",
+            "in": "query",
+            "description": "Export application keys\n",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [
@@ -2009,6 +2022,20 @@
             "in": "query",
             "description": "Expected Owner of the Application in the Import Environment\n",
             "type": "string"
+          },
+          {
+            "name": "skipApplicationKeys",
+            "in": "query",
+            "description": "Skip importing Keys of the Application\n",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "update",
+            "in": "query",
+            "description": "Update if application exists\n",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [
@@ -2041,6 +2068,157 @@
           },
           "406": {
             "description": "Not Acceptable.\nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/import/api": {
+      "post": {
+        "x-scope": "apim:api_import_export",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v0.14/import/api?preserveProvider=false&overwrite=false",
+        "x-wso2-request": "POST https://localhost:9443/api/am/admin/v0.14/import/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\nAPI imported successfully.",
+        "summary": "Import an API",
+        "description": "This operation can be used to import an API.\n",
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "Zip archive consisting on exported api configuration\n",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "preserveProvider",
+            "in": "query",
+            "description": "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider.\n",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "overwrite",
+            "in": "query",
+            "description": "Whether to update the API or not. This is used when updating already existing APIs.\n",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "API (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "Created.\nAPI Imported Successfully.\n"
+          },
+          "403": {
+            "description": "Forbidden\nNot Authorized to import.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested API to update not found.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Conflict.\nAPI to import already exists.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.\nError in importing API.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/export/api": {
+      "get": {
+        "x-scope": "apim:api_import_export",
+        "produces": [
+          "application/zip"
+        ],
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET https://localhost:9443/api/am/admin/v0.14/export/api?name=PizzaShackAPI&version=1.0.0&providerName=admin > exportAPI.zip",
+        "x-wso2-request": "GET https://localhost:9443/api/am/admin/v0.14/export/api?name=SampleAPI&version=1.0.0&providerName=admin\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-api.zip\"\n  Content-Type: application/zip",
+        "summary": "Export an API",
+        "description": "This operation can be used to export the details of a particular API as a zip file.\n",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "API Name\n",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "Version of the API\n",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "providerName",
+            "in": "query",
+            "description": "Provider name of the API\n",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Format of output documents. Can be YAML or JSON.\n",
+            "type": "string",
+            "enum": [
+              "JSON",
+              "YAML"
+            ],
+            "required": true
+          },
+          {
+            "name": "preserveStatus",
+            "in": "query",
+            "description": "Preserve API Status on export\n",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "API (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nExport Successful.\n",
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "type": "file"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.\nError in exporting API.\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
