@@ -68,7 +68,7 @@
 								<bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.authenticator.oidc.stub</bundleDef>
 							</bundles>
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.core.ui:${carbon.kernel.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.core.ui:${carbon.kernel.feature.version}</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>

@@ -431,6 +431,10 @@
                             <name>axis2.xml</name>
                             <value>${basedir}/src/test/resources/axis2_client.xml</value>
                         </property>
+                        <property>
+                            <name>carbon.home</name>
+                            <value>${basedir}/src/test/resources</value>
+                        </property>
                     </systemProperties>
                 </configuration>
                 <dependencies>
