@@ -25,7 +25,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import CloseIcon from '@material-ui/icons/Close';
+import Icon from '@material-ui/core/Icon';
 import Slide from '@material-ui/core/Slide';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -347,7 +347,7 @@ class EditApp extends React.Component {
                         <Toolbar>
                             <Link to='/applications' className={classes.buttonRight}>
                                 <IconButton color='inherit' onClick={this.handleClose} aria-label='Close'>
-                                    <CloseIcon />
+                                    <Icon>close</Icon>
                                 </IconButton>
                             </Link>
                             <Typography variant='title' color='inherit' className={classes.flex}>

@@ -18,14 +18,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import {
-    KeyboardArrowLeft, StarRate, FileCopy, ArrowDropDownOutlined, ArrowDropUpOutlined,
-} from '@material-ui/icons';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
+import Icon from '@material-ui/core/Icon';
 import TextField from '@material-ui/core/TextField';
-import HighlightOff from '@material-ui/icons/HighlightOff';
 import { Link } from 'react-router-dom';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -34,18 +30,10 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import CalendarViewDay from '@material-ui/icons/CalendarViewDay';
-import AccountBalanceWallet from '@material-ui/icons/AccountBalanceWallet';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import CheckCircle from '@material-ui/icons/CheckCircle';
-import Cloud from '@material-ui/icons/Cloud';
-import Build from '@material-ui/icons/Build';
-import Update from '@material-ui/icons/Update';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Grid from '@material-ui/core/Grid';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import VerticalDivider from '../../Shared/VerticalDivider';
 import ImageGenerator from '../Listing/ImageGenerator';
@@ -406,7 +394,7 @@ class StarRatingBar extends React.Component {
             <React.Fragment>
                 {rate.count > 0 ? (
                     <React.Fragment>
-                        <StarRate className={classes.starRate} />
+                        <Icon className={classes.starRate}>star_rate</Icon>
                         <div className={classes.ratingSummery}>
                             <div className={classes.userRating}>
                                 <Typography variant='display1'>{rate.avgRating * 2}</Typography>
@@ -420,20 +408,20 @@ class StarRatingBar extends React.Component {
                         </div>
                     </React.Fragment>
                 ) : (
-                    <StarRate
+                    <Icon
                         onClick={this.showRateBox}
                         className={classes.starRate}
                         style={{ color: theme.palette.grey.A200 }}
-                    />
+                    >star_rate</Icon>
                 )}
                 <VerticalDivider height={32} />
                 <div className={classes.ratingBoxWrapper}>
                     {showRateNow && (
                         <div className={classes.ratingBox}>
-                            <HighlightOff />
+                            <Icon>highlight_off</Icon>
                             <VerticalDivider height={32} />
                             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
-                                <StarRate
+                                <Icon
                                     color={
                                         i <= rate.userRating * 2 || i <= dummyRateValue
                                             ? 'primary'
@@ -442,13 +430,13 @@ class StarRatingBar extends React.Component {
                                     onMouseOver={() => this.highlightUs(i)}
                                     onMouseLeave={() => this.unhighlightUs()}
                                     onClick={() => this.doRate(i)}
-                                />
+                                >star_rate</Icon>
                             ))}
                         </div>
                     )}
                     {rate.userRating ? (
                         <React.Fragment>
-                            <StarRate className={classes.starRateMy} onClick={this.showRateBox} />
+                            <Icon className={classes.starRateMy} onClick={this.showRateBox}>star_rate</Icon>
                             <div className={classes.ratingSummery} onClick={this.showRateBox}>
                                 <Typography variant='display1'>{rate.userRating * 2}</Typography>
                                 <Typography variant='caption' gutterBottom align='left'>
@@ -458,11 +446,11 @@ class StarRatingBar extends React.Component {
                         </React.Fragment>
                     ) : (
                         <React.Fragment>
-                            <StarRate
+                            <Icon
                                 onClick={this.showRateBox}
                                 className={classes.starRate}
                                 style={{ color: theme.palette.grey.A200 }}
-                            />
+                            >star_rate</Icon>
                             <Typography onClick={this.showRateBox} className={classes.rateLink}>
                                 <FormattedMessage
                                     id='Apis.Details.InfoBar.rate.this.api'
@@ -582,7 +570,7 @@ class InfoBar extends React.Component {
                     <div className={classes.infoBarMain}>
                         <div className={classes.root}>
                             <Link to='/apis' className={classes.backLink}>
-                                <KeyboardArrowLeft className={classes.backIcon} />
+                                <Icon className={classes.backIcon}>keyboard_arrow_left</Icon>
                                 <div className={classes.backText}>
                                     <FormattedMessage id='Apis.Details.InfoBar.back.to' defaultMessage='BACK TO' />
                                     <br />
@@ -612,7 +600,7 @@ class InfoBar extends React.Component {
                                                 <TableRow>
                                                     <TableCell component='th' scope='row' className={classes.leftCol}>
                                                         <div className={classes.iconAligner}>
-                                                            <CalendarViewDay className={classes.iconOdd} />
+                                                            <Icon className={classes.iconOdd}>calendar_view_day</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.list.version'
@@ -628,7 +616,7 @@ class InfoBar extends React.Component {
                                                 <TableRow>
                                                     <TableCell component='th' scope='row'>
                                                         <div className={classes.iconAligner}>
-                                                            <AccountBalanceWallet className={classes.iconEven} />
+                                                            <Icon className={classes.iconEven}>account_balance_wallet</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.list.context'
@@ -642,7 +630,7 @@ class InfoBar extends React.Component {
                                                 <TableRow>
                                                     <TableCell component='th' scope='row'>
                                                         <div className={classes.iconAligner}>
-                                                            <AccountCircle className={classes.iconOdd} />
+                                                            <Icon className={classes.iconOdd}>account_circle</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.provider'
@@ -656,7 +644,7 @@ class InfoBar extends React.Component {
                                                 <TableRow>
                                                     <TableCell component='th' scope='row'>
                                                         <div className={classes.iconAligner}>
-                                                            <Update className={classes.iconEven} />
+                                                            <Icon className={classes.iconEven}>update</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.last.updated'
@@ -671,7 +659,7 @@ class InfoBar extends React.Component {
                                                     <TableRow>
                                                         <TableCell component='th' scope='row'>
                                                             <div className={classes.iconAligner}>
-                                                                <CloudDownloadRounded className={classes.buttonIcon} />
+                                                                <Icon className={classes.buttonIcon}>cloud_download</Icon>
                                                                 <span className={classes.iconTextWrapper}>
                                                                     <FormattedMessage
                                                                         id='Apis.Details.InfoBar.download.Schema'
@@ -708,19 +696,19 @@ class InfoBar extends React.Component {
                                                 <Grid key={endpoint} item xs={6}>
                                                     <ExpansionPanel>
                                                         <ExpansionPanelSummary
-                                                            expandIcon={<ExpandMoreIcon />}
+                                                            expandIcon={<Icon>expand_more</Icon>}
                                                             aria-controls='panel1a-content'
                                                             id='panel1a-header'
                                                         >
                                                             <div className={classes.iconAligner}>
                                                                 {endpoint.environmentType === 'hybrid' && (
-                                                                    <Cloud className={classes.iconEven} />
+                                                                    <Icon className={classes.iconEven}>cloud</Icon>
                                                                 )}
                                                                 {endpoint.environmentType === 'production' && (
-                                                                    <CheckCircle className={classes.iconEven} />
+                                                                    <Icon className={classes.iconEven}>check_circle</Icon>
                                                                 )}
                                                                 {endpoint.environmentType === 'sandbox' && (
-                                                                    <Build className={classes.iconEven} />
+                                                                    <Icon className={classes.iconEven}>Build</Icon>
                                                                 )}
                                                                 <span className={classes.iconTextWrapper}>
                                                                     <Typography className={classes.heading}>
@@ -768,7 +756,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -799,7 +787,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -830,7 +818,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -861,7 +849,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -903,7 +891,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -934,7 +922,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -965,7 +953,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -996,7 +984,7 @@ class InfoBar extends React.Component {
                                                                                 text={epUrl}
                                                                                 onCopy={() => this.onCopy('prodUrlCopied')}
                                                                             >
-                                                                                <FileCopy color='secondary' />
+                                                                                <Icon color='secondary'>file_copy</Icon>
                                                                             </CopyToClipboard>
                                                                         </Tooltip>
                                                                     </Grid>
@@ -1026,7 +1014,7 @@ class InfoBar extends React.Component {
                                             />
                                         </Typography>
                                     )}
-                                    {showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined />}
+                                    {showOverview ? <Icon>arrow_drop_up_circle</Icon> : <Icon>arrow_drop_down_circle</Icon>}
                                 </div>
                             </div>
                         </div>

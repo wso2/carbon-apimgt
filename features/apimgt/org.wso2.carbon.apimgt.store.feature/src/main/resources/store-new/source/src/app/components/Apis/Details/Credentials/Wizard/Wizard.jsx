@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
+import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
 import AppBar from '@material-ui/core/AppBar';
 import { Typography } from '@material-ui/core';
@@ -208,7 +208,7 @@ handleReset = () => {
                                     onClick={() => handleClickToggle('openNew', updateSubscriptionData)}
                                     aria-label='Close'
                                 >
-                                    <CloseIcon />
+                                    <Icon>close</Icon>
                                 </IconButton>
                                 <div className={classes.subscribeTitle}>
                                     <Typography variant='h6'>

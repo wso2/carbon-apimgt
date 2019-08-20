@@ -21,12 +21,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
-
-import Info from '@material-ui/icons/Info';
-import Error from '@material-ui/icons/Error';
-import Warning from '@material-ui/icons/Warning';
-import Done from '@material-ui/icons/Done';
+import Icon from '@material-ui/core/Icon';
 import { CircularProgress as Loading } from '@material-ui/core';
 
 const styles = {
@@ -45,7 +40,7 @@ const Message = (props) => {
     const {
         classes, message, handleClose, type,
     } = props;
-    const Icon = Message.iconTypes[type];
+    const MessageIcon = Message.iconTypes[type];
     return (
         <div>
             <Snackbar
@@ -60,13 +55,13 @@ const Message = (props) => {
                 }}
                 message={(
                     <span id='message-id'>
-                        {Icon}
+                        {MessageIcon}
                         {message}
                     </span>
                 )}
                 action={[
                     <IconButton key='close' aria-label='Close' color='default' className={classes.close} onClick={handleClose}>
-                        <CloseIcon />
+                        <Icon>close</Icon>
                     </IconButton>,
                 ]}
             />
@@ -75,10 +70,10 @@ const Message = (props) => {
 };
 /* TODO: Need to add color accordingly ~tmkb */
 Message.iconTypes = {
-    info: <Info color='primary' />,
-    success: <Done />,
-    error: <Error color='error' />,
-    warning: <Warning />,
+    info: <Icon color='primary'>info</Icon>,
+    success: <Icon>done</Icon>,
+    error: <Icon color='error'>error</Icon>,
+    warning: <Icon>warning</Icon>,
     loading: <Loading />,
 };
 

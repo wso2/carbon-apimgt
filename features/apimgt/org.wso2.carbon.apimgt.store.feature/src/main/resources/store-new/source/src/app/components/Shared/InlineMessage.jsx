@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
-import InfoOutlined from '@material-ui/icons/InfoOutlined';
+import Icon from '@material-ui/core/Icon';
 import VerticalDivider from './VerticalDivider';
 /**
  * Main style object
@@ -51,8 +51,8 @@ class InlineMessage extends React.Component {
         const messgeType = type || 'info';
         return (
             <Paper className={classes.root} elevation={1} {...this.props}>
-                {messgeType === 'info' && <InfoOutlined className={classes.iconItem} />}
-                {messgeType === 'warn' && <InfoOutlined className={classes.iconItem} />}
+                {messgeType === 'info' && <Icon className={classes.iconItem}>info</Icon>}
+                {messgeType === 'warn' && <Icon className={classes.iconItem}>warning</Icon>}
                 <VerticalDivider height={100} />
                 <div className={classes.content}>{this.props.children}</div>
             </Paper>
