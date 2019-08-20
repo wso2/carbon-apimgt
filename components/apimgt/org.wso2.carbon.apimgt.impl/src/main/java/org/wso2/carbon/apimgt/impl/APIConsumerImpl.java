@@ -2504,7 +2504,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Map<String, Object> keyDetails = new HashMap<String, Object>();
 
         if (tokenInfo != null) {
-            keyDetails.put("validityTime", Long.toString(tokenInfo.getValidityPeriod()));
+            keyDetails.put("validityTime", tokenInfo.getValidityPeriod());
             keyDetails.put("accessToken", tokenInfo.getAccessToken());
             keyDetails.put("tokenDetails", tokenInfo.getJSONString());
         }
