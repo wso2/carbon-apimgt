@@ -5607,6 +5607,63 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+######################################################
+# Check role existence in user-store
+######################################################
+  /roles/{roleId}:
+#-----------------------------------------------------
+# The role name existence check resource
+#-----------------------------------------------------
+    head:
+      security:
+        - OAuth2Security:
+            - apim:api_create
+      summary:
+        Check given role name is already exist
+      description: |
+            Using this operation, user can check a given role name exists or not.
+      parameters:
+        - $ref : '#/parameters/roleId'
+      tags:
+        - Roles
+      responses:
+        200:
+          description:
+            OK.
+            Requested role name exists.
+        404:
+          description:
+            Not Found.
+            Requested role name does not exist.
+
+######################################################
+# Check role existence for the logged-in user
+######################################################
+  /me/roles/{roleId}:
+#-----------------------------------------------------
+# Validate role against logged-in user
+#-----------------------------------------------------
+    head:
+      security:
+        - OAuth2Security:
+            - apim:api_create
+      summary:
+        Validate whether the logged-in user has the given role
+      description: |
+        Using this operation, logged-in user can check whether he has given role.
+      parameters:
+        - $ref : '#/parameters/roleId'
+      tags:
+        - roles
+      responses:
+        200:
+          description:
+            OK.
+            Requested user has the role.
+        404:
+          description:
+            Not Found.
+            Requested user does not have the role.
 
 ######################################################
 # The Publisher settings List
@@ -5936,6 +5993,16 @@ parameters:
     in: path
     description: |
       The UUID of a Policy
+    required: true
+    type: string
+
+# Role ID
+  roleId:
+    name: roleId
+    in: path
+    description: |
+      The Base 64 URL encoded role name. If the role existed in secondary user-store, role name should be specified as
+      {user-store-name}/{role-name}.
     required: true
     type: string
 

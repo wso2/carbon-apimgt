@@ -8688,4 +8688,23 @@ public final class APIUtil {
                 APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
     }
 
+    /**
+     * Check whether the user has the given role
+     *
+     * @param username Logged-in username
+     * @param roleName role that needs to be checked
+     * @throws UserStoreException
+     */
+    public static boolean checkIfUserInRole(String username, String roleName) throws UserStoreException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
+        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .getTenantId(tenantDomain);
+
+        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+        UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
+        org.wso2.carbon.user.core.UserStoreManager manager = realm.getUserStoreManager();
+        AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
+        return abstractManager.isUserInRole(tenantAwareUserName, roleName);
+    }
 }
