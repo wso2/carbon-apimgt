@@ -101,6 +101,7 @@ public final class APIImportUtil {
      */
     private static String getLifeCycleAction(String tenantDomain, String currentStatus, String targetStatus,
                                              APIProvider provider) throws APIImportExportException {
+
         LifeCycle lifeCycle = new LifeCycle();
         // Parse DOM of APILifeCycle
         try {
@@ -169,20 +170,17 @@ public final class APIImportUtil {
      * @throws IOException When swagger document not found
      */
     private static String loadSwaggerFile(String pathToArchive) throws IOException {
-        if (CommonUtil.checkFileExistence(pathToArchive
-                + APIImportExportConstants.YAML_SWAGGER_DEFINITION_LOCATION)) {
+
+        if (CommonUtil.checkFileExistence(pathToArchive + APIImportExportConstants.YAML_SWAGGER_DEFINITION_LOCATION)) {
             if (log.isDebugEnabled()) {
-                log.debug("Found swagger file " + pathToArchive
-                        + APIImportExportConstants.YAML_SWAGGER_DEFINITION_LOCATION);
+                log.debug("Found swagger file " + pathToArchive + APIImportExportConstants.YAML_SWAGGER_DEFINITION_LOCATION);
             }
             String yamlContent = FileUtils.readFileToString(
                     new File(pathToArchive + APIImportExportConstants.YAML_SWAGGER_DEFINITION_LOCATION));
             return CommonUtil.yamlToJson(yamlContent);
-        } else if (CommonUtil.checkFileExistence(pathToArchive
-                + APIImportExportConstants.JSON_SWAGGER_DEFINITION_LOCATION)) {
+        } else if (CommonUtil.checkFileExistence(pathToArchive + APIImportExportConstants.JSON_SWAGGER_DEFINITION_LOCATION)) {
             if (log.isDebugEnabled()) {
-                log.debug("Found swagger file " + pathToArchive
-                        + APIImportExportConstants.JSON_SWAGGER_DEFINITION_LOCATION);
+                log.debug("Found swagger file " + pathToArchive + APIImportExportConstants.JSON_SWAGGER_DEFINITION_LOCATION);
             }
             return FileUtils.readFileToString(
                     new File(pathToArchive + APIImportExportConstants.JSON_SWAGGER_DEFINITION_LOCATION));
@@ -356,11 +354,9 @@ public final class APIImportUtil {
                     if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))
                             && apiProvider.isScopeKeyAssigned(importedApi.getId(), scope.getKey(), tenantId)) {
                         String errorMessage =
-                                "Error in adding API. Scope " + scope.getKey() + " is already assigned "
-                                        + "by another API.";
+                                "Error in adding API. Scope " + scope.getKey() + " is already assigned by another API.";
                         log.error(errorMessage);
                         throw new APIImportExportException(errorMessage);
-
                     }
                 }
                 importedApi.setUriTemplates(uriTemplates);
@@ -424,17 +420,15 @@ public final class APIImportUtil {
                 !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(previousDomain)) {
             importedApi.setContext(importedApi.getContext().replace(APIConstants.TENANT_PREFIX + previousDomain,
                     StringUtils.EMPTY));
-            importedApi.setContextTemplate(importedApi.getContextTemplate().replace(
-                    APIConstants.TENANT_PREFIX + previousDomain, StringUtils.EMPTY));
+            importedApi.setContextTemplate(importedApi.getContextTemplate().replace(APIConstants.TENANT_PREFIX
+                    + previousDomain, StringUtils.EMPTY));
         } else if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(currentDomain) &&
                 MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(previousDomain)) {
             importedApi.setContext(APIConstants.TENANT_PREFIX + currentDomain + importedApi.getContext());
-            importedApi.setContextTemplate(APIConstants.TENANT_PREFIX + currentDomain + importedApi
-                    .getContextTemplate());
+            importedApi.setContextTemplate(APIConstants.TENANT_PREFIX + currentDomain + importedApi.getContextTemplate());
         } else if (!StringUtils.equalsIgnoreCase(currentDomain, previousDomain)) {
             importedApi.setContext(importedApi.getContext().replace(previousDomain, currentDomain));
-            importedApi.setContextTemplate(importedApi.getContextTemplate().replace
-                    (previousDomain, currentDomain));
+            importedApi.setContextTemplate(importedApi.getContextTemplate().replace(previousDomain, currentDomain));
         }
     }
 
@@ -469,6 +463,7 @@ public final class APIImportUtil {
      * @param apiProvider API Provider
      */
     private static void updateAPIWithThumbnail(File imageFile, API importedApi, APIProvider apiProvider) {
+
         APIIdentifier apiIdentifier = importedApi.getId();
         String mimeType = URLConnection.guessContentTypeFromName(imageFile.getName());
         try (FileInputStream inputStream = new FileInputStream(imageFile.getAbsolutePath())) {
@@ -477,8 +472,7 @@ public final class APIImportUtil {
             String thumbnailUrl = apiProvider.addResourceFile(thumbPath, apiImage);
             importedApi.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl,
                     apiIdentifier.getProviderName()));
-            APIUtil.setResourcePermissions(apiIdentifier.getProviderName(), null, null,
-                    thumbPath);
+            APIUtil.setResourcePermissions(apiIdentifier.getProviderName(), null, null, thumbPath);
             apiProvider.updateAPI(importedApi);
         } catch (FaultGatewaysException e) {
             //This is logged and process is continued because icon is optional for an API
@@ -506,7 +500,6 @@ public final class APIImportUtil {
         APIIdentifier apiIdentifier = importedApi.getId();
         Documentation[] documentations;
         String docDirectoryPath = pathToArchive + File.separator + APIImportExportConstants.DOCUMENT_DIRECTORY;
-
         try {
             //load document file if exists
             if (CommonUtil.checkFileExistence(pathToYamlFile)) {
@@ -634,10 +627,10 @@ public final class APIImportUtil {
      */
     private static void addAPISpecificSequences(String pathToArchive, API importedApi, Registry registry) {
 
-        String regResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                importedApi.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                importedApi.getId().getApiName() + RegistryConstants.PATH_SEPARATOR +
-                importedApi.getId().getVersion() + RegistryConstants.PATH_SEPARATOR;
+        String regResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
+                + importedApi.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR
+                + importedApi.getId().getApiName() + RegistryConstants.PATH_SEPARATOR
+                + importedApi.getId().getVersion() + RegistryConstants.PATH_SEPARATOR;
 
         String inSequenceFileName = importedApi.getInSequence();
         String inSequenceFileLocation = pathToArchive + APIImportExportConstants.IN_SEQUENCE_LOCATION
@@ -645,8 +638,8 @@ public final class APIImportUtil {
 
         //Adding in-sequence, if any
         if (CommonUtil.checkFileExistence(inSequenceFileLocation)) {
-            String inSequencePath = APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN +
-                    RegistryConstants.PATH_SEPARATOR + inSequenceFileName;
+            String inSequencePath = APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN + RegistryConstants.PATH_SEPARATOR
+                    + inSequenceFileName;
             addSequenceToRegistry(true, registry, inSequenceFileLocation, regResourcePath + inSequencePath);
         }
 
@@ -656,8 +649,8 @@ public final class APIImportUtil {
 
         //Adding out-sequence, if any
         if (CommonUtil.checkFileExistence(outSequenceFileLocation)) {
-            String outSequencePath = APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT +
-                    RegistryConstants.PATH_SEPARATOR + outSequenceFileName;
+            String outSequencePath = APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT + RegistryConstants.PATH_SEPARATOR
+                    + outSequenceFileName;
             addSequenceToRegistry(true, registry, outSequenceFileLocation, regResourcePath + outSequencePath);
         }
 
@@ -667,8 +660,8 @@ public final class APIImportUtil {
 
         //Adding fault-sequence, if any
         if (CommonUtil.checkFileExistence(faultSequenceFileLocation)) {
-            String faultSequencePath = APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT +
-                    RegistryConstants.PATH_SEPARATOR + faultSequenceFileName;
+            String faultSequencePath = APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT + RegistryConstants.PATH_SEPARATOR
+                    + faultSequenceFileName;
             addSequenceToRegistry(true, registry, faultSequenceFileLocation, regResourcePath + faultSequencePath);
         }
     }
@@ -797,7 +790,6 @@ public final class APIImportUtil {
                 log.debug("No certificate file found to be added, skipping certificate import.");
                 return;
             }
-
             JsonElement configElement = new JsonParser().parse(jsonContent);
             JsonArray certificates = configElement.getAsJsonArray().getAsJsonArray();
             certificates.forEach(certificate -> updateAPIWithCertificate(certificate, apiProvider, importedApi,

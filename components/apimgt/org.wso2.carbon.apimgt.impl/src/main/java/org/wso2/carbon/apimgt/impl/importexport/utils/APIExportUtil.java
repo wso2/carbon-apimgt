@@ -193,7 +193,6 @@ public class APIExportUtil {
                 log.debug("Thumbnail URL [" + thumbnailUrl + "] does not exists in registry for API: "
                         + apiIdentifier.getApiName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
                         + apiIdentifier.getVersion() + ". Skipping thumbnail export.");
-
             }
         } catch (RegistryException e) {
             log.error("Error while retrieving API Thumbnail " + thumbnailUrl, e);
@@ -366,8 +365,7 @@ public class APIExportUtil {
                 AbstractMap.SimpleEntry<String, OMElement> sequenceDetails;
                 String sequenceName = sequence.getValue();
                 String direction = sequence.getKey();
-                String pathToExportedSequence = seqArchivePath + File.separator + direction + "-sequence"
-                        + File.separator;
+                String pathToExportedSequence = seqArchivePath + File.separator + direction + "-sequence" + File.separator;
                 if (sequenceName != null) {
                     sequenceDetails = getCustomSequence(sequenceName, direction, registry);
                     if (sequenceDetails == null) {
@@ -411,7 +409,7 @@ public class APIExportUtil {
     }
 
     /**
-     * Retrieve API Specific sequence details from the registry
+     * Retrieve API Specific sequence details from the registry.
      *
      * @param sequenceName Name of the sequence
      * @param type         Sequence type
@@ -424,10 +422,9 @@ public class APIExportUtil {
                                                                                      Registry registry)
             throws APIImportExportException {
 
-        String regPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + api
-                .getProviderName() + RegistryConstants.PATH_SEPARATOR + api.getApiName() +
-                RegistryConstants.PATH_SEPARATOR + api.getVersion() + RegistryConstants.PATH_SEPARATOR + type;
-
+        String regPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + api.getProviderName()
+                + RegistryConstants.PATH_SEPARATOR + api.getApiName() + RegistryConstants.PATH_SEPARATOR
+                + api.getVersion() + RegistryConstants.PATH_SEPARATOR + type;
         return getSeqDetailsFromRegistry(sequenceName, regPath, registry);
     }
 
