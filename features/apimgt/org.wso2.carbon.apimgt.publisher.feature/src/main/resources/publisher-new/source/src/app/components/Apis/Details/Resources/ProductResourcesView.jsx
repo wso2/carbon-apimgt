@@ -168,9 +168,7 @@ class ProductResourcesView extends React.Component {
         const {
             swagger, policyLevel, apiPolicies, scopes, paths,
         } = this.state;
-
         const { classes, api } = this.props;
-
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
@@ -178,16 +176,16 @@ class ProductResourcesView extends React.Component {
             return <Progress />;
         }
         const apiResources = api.apis
-            .map((i) => {
-                const operations = i.operations.map(item => item.uritemplate);
-                const x = Object.keys(paths).filter(i2 => operations.includes(i2))
-                const out  = x.reduce((acc,cur) => {
+            .map((key) => {
+                const operations = key.operations.map(item => item.uritemplate);
+                const paths = Object.keys(paths).filter(item => operations.includes(item))
+                const filteredPaths  = paths.reduce((acc,cur) => {
                     acc[cur] = paths[cur]
                     return acc;
                 },{})
                 return {
-                    name:i.name,
-                    paths:out
+                    name:operations.name,
+                    paths:filteredPaths
                 }
             })
         return (
