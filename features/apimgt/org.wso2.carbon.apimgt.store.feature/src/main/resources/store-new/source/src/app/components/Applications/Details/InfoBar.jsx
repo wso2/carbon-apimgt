@@ -19,12 +19,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { KeyboardArrowLeft, ArrowDropDownOutlined, ArrowDropUpOutlined } from '@material-ui/icons';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import Collapse from '@material-ui/core/Collapse';
-import CheckCircle from '@material-ui/icons/CheckCircle';
+import Icon from '@material-ui/core/Icon';
 import { FormattedMessage } from 'react-intl';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
@@ -261,7 +260,7 @@ class InfoBar extends React.Component {
             <div className={classes.infoBarMain}>
                 <div className={classes.root}>
                     <Link to='/applications' className={classes.backLink}>
-                        <KeyboardArrowLeft className={classes.backIcon} />
+                        <Icon className={classes.backIcon}>keyboard_arrow_left</Icon>
                         <div className={classes.backText}>
                             <FormattedMessage
                                 id='Applications.Details.InfoBar.new.back.to'
@@ -328,7 +327,7 @@ class InfoBar extends React.Component {
                                     ))}
                                     <div className={classes.infoItem}>
                                         {application.status === 'APPROVED' ? (
-                                            <CheckCircle />
+                                            <Icon>check_circle</Icon>
                                         ) : (
                                             <Typography variant='subheading' gutterBottom>
                                                 {application.status}
@@ -389,7 +388,7 @@ class InfoBar extends React.Component {
                                         />
                                     </Typography>
                                 )}
-                            {showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined />}
+                            {showOverview ? <Icon>arrow_drop_up_circle</Icon> : <Icon>arrow_drop_down_circle</Icon>}
                         </div>
                     </div>
                 </div>

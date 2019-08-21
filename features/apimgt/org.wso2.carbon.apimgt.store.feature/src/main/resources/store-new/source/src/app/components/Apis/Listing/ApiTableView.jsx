@@ -88,7 +88,21 @@ class ApiTableView extends React.Component {
                     },
                     paper: {
                         boxShadow: 'none',
+                        backgroundColor: 'transparent',
                     },
+                    tableRoot: {
+                        border: 'solid 1px #fff',
+                        '& a': {
+                            display: 'flex',
+                            alignItems: 'center',
+                        },
+                        '& a > div': {
+                            paddingRight: 10,
+                        },
+                        '& tr:nth-child(even)': {
+                            backgroundColor: '#fff',
+                        },
+                    }
                 },
                 MUIDataTableBodyCell: {
                     root: {
@@ -111,6 +125,10 @@ class ApiTableView extends React.Component {
                             '& thead': {
                                 display: 'none',
                             },
+                        },
+                        paper: {
+                            boxShadow: 'none',
+                            backgroundColor: 'transparent',
                         },
                     },
                 },
@@ -215,6 +233,7 @@ class ApiTableView extends React.Component {
                     },
                     sort: false,
                     filter: false,
+                    display: 'excluded',
                 },
             },
             {
@@ -230,9 +249,9 @@ class ApiTableView extends React.Component {
                             const apiName = tableMeta.rowData[2];
                             const apiId = tableMeta.rowData[0];
                             if (apiType === CONSTS.API_TYPE) {
-                                return <Link to={'/apis/' + apiId}>{apiName}</Link>;
+                                return <Link to={'/apis/' + apiId + '/overview'}><ImageGenerator api={apiName} width={30} height={30} />{apiName}</Link>;
                             } else {
-                                return <Link to={'/api-products/' + apiId}>{apiName}</Link>;
+                                return <Link to={'/api-products/' + apiId + '/overview'}><ImageGenerator api={apiName} width={30} height={30} />{apiName}</Link>;
                             }
                         }
                     },
@@ -338,7 +357,9 @@ class ApiTableView extends React.Component {
             options.viewColumns = false;
             options.customToolbar = false;
         }
-
+        if(page === 0 && data.length < rowsPerPage){
+            options.pagination = false;
+        }
         return (
             <MuiThemeProvider theme={this.getMuiTheme()}>
                 <MUIDataTable title='' data={data} columns={columns} options={options} />

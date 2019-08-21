@@ -25,7 +25,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import CloseIcon from '@material-ui/icons/Close';
+import Icon from '@material-ui/core/Icon';
 import Slide from '@material-ui/core/Slide';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api';
@@ -332,7 +332,7 @@ class NewApp extends React.Component {
                     <AppBar className={classes.appBar}>
                         <Toolbar>
                             <IconButton color='inherit' onClick={handleClose} aria-label='Close'>
-                                <CloseIcon />
+                                <Icon>close</Icon>
                             </IconButton>
                             <Typography variant='title' color='inherit' className={classes.flex}>
                                 <FormattedMessage

@@ -25,12 +25,10 @@ import InputLabel from '@material-ui/core/InputLabel';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
-import Visibility from '@material-ui/icons/Visibility';
-import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import Tooltip from '@material-ui/core/Tooltip';
-import FileCopy from '@material-ui/icons/FileCopy';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -320,7 +318,7 @@ class ViewKeys extends React.Component {
                                     placement='right'
                                 >
                                     <CopyToClipboard text={consumerKey} onCopy={() => this.onCopy('keyCopied')}>
-                                        <FileCopy color='secondary' />
+                                        <Icon color='secondary'>file_copy</Icon>
                                     </CopyToClipboard>
                                 </Tooltip>
                             </div>
@@ -350,14 +348,14 @@ class ViewKeys extends React.Component {
                                                 onClick={() => this.handleShowHidden('showCS')}
                                                 onMouseDown={this.handleMouseDownGeneric}
                                             >
-                                                {showCS ? <VisibilityOff /> : <Visibility />}
+                                                {showCS ? <Icon>visibility_off</Icon> : <Icon>visibility</Icon>}
                                             </IconButton>
                                         </InputAdornment>
                                     )}
                                 />
                                 <Tooltip title={secretCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
                                     <CopyToClipboard text={consumerSecret} onCopy={() => this.onCopy('secretCopied')}>
-                                        <FileCopy color='secondary' />
+                                        <Icon color='secondary'>file_copy</Icon>
                                     </CopyToClipboard>
                                 </Tooltip>
                             </div>
@@ -388,7 +386,7 @@ class ViewKeys extends React.Component {
                                     />
                                     <Tooltip title={tokenCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
                                         <CopyToClipboard text={accessToken} onCopy={() => this.onCopy('tokenCopied')}>
-                                            <FileCopy color='secondary' />
+                                            <Icon color='secondary'>file_copy</Icon>
                                         </CopyToClipboard>
                                     </Tooltip>
                                 </div>

@@ -23,7 +23,7 @@ import Typography from '@material-ui/core/Typography';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Icon from '@material-ui/core/Icon';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import Application from 'AppData/Application';
@@ -238,7 +238,7 @@ class TokenManager extends React.Component {
                     isKeyJWT={isKeyJWT}
                 />
                 <ExpansionPanel>
-                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                    <ExpansionPanelSummary expandIcon={<Icon>expand_more</Icon>}>
                         <Typography className={classes.heading} variant='subtitle1'>
                             <FormattedMessage
                                 defaultMessage='Key Configuration'

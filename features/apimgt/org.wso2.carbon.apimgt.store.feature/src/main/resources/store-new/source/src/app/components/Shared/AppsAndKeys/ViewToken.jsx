@@ -22,7 +22,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
-import { FileCopy } from '@material-ui/icons';
+import Icon from '@material-ui/core/Icon';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { FormattedMessage } from 'react-intl';
 import InlineMessage from '../InlineMessage';
@@ -161,7 +161,7 @@ class ViewToken extends React.Component {
                     />
                     <Tooltip title={tokenCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
                         <CopyToClipboard text={token.accessToken} onCopy={this.onCopy('tokenCopied')}>
-                            <FileCopy color='secondary' />
+                            <Icon color='secondary'>file_copy</Icon>
                         </CopyToClipboard>
                     </Tooltip>
                 </div>

@@ -22,7 +22,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Grid from '@material-ui/core/Grid';
-import CloseIcon from '@material-ui/icons/Close';
+import Icon from '@material-ui/core/Icon';
 import { Typography } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import SubscribeToApi from 'AppComponents/Shared/AppsAndKeys/SubscribeToApi';
@@ -87,7 +87,7 @@ const subscrbeToApps = (props) => {
                                 onClick={() => handleClickToggle('openAvailable')}
                                 aria-label='Close'
                             >
-                                <CloseIcon />
+                                <Icon>close</Icon>
                             </IconButton>
                             <div className={classes.subscribeTitle}>
                                 <Typography variant='h6'>
