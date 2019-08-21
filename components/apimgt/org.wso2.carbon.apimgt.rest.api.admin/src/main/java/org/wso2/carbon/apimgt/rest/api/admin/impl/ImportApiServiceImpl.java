@@ -26,10 +26,13 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportManager;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.ImportApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.APIInfoListDTO;
@@ -64,6 +67,52 @@ public class ImportApiServiceImpl extends ImportApiService {
     private static final String REDIRECT_URIS = "redirect_uris";
     private static final String DEFAULT_TOKEN_SCOPE = "am_application_scope default";
     private static final int DEFAULT_VALIDITY_PERIOD = 3600;
+
+    /**
+     * Import an API by uploading an archive file. All relevant API data will be included upon the creation of
+     * the API. Depending on the choice of the user, provider of the imported API will be preserved or modified.
+     *
+     * @param fileInputStream  uploadedInputStream input stream from the REST request
+     * @param fileDetail       file details as Attachment
+     * @param preserveProvider user choice to keep or replace the API provider
+     * @param overwrite        whether to update the API or not. This is used when updating already existing APIs.
+     * @return API import response
+     */
+    @Override
+    public Response importApiPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider,
+                                  Boolean overwrite) {
+
+        //Check if the URL parameter value is specified, otherwise the default value is true.
+        if (preserveProvider == null) {
+            preserveProvider = true;
+        }
+        //Check whether to update. If not specified, default value is false.
+        if (overwrite == null) {
+            overwrite = false;
+        }
+
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String userName = RestApiUtil.getLoggedInUsername();
+            APIImportExportManager apiImportExportManager = new APIImportExportManager(apiProvider, userName);
+            apiImportExportManager.importAPIArchive(fileInputStream, preserveProvider, overwrite);
+            return Response.status(Response.Status.OK).entity("API imported successfully.").build();
+        } catch (APIImportExportException | APIManagementException e) {
+            if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
+                String errorMessage = "Error occurred while importing. Duplicate API already exists.";
+                RestApiUtil.handleResourceAlreadyExistsError(errorMessage, e, log);
+            } else if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                //Auth failure occurs when cross tenant accessing APIs with preserve provider true.
+                String errorMessage = "Not Authorized to import cross tenant APIs with preserveProvider true.";
+                RestApiUtil.handleAuthorizationFailure(errorMessage, e, log);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError("Requested " + RestApiConstants.RESOURCE_API
+                        + " not found", e, log);
+            }
+            RestApiUtil.handleInternalServerError("Error while importing API", e, log);
+        }
+        return null;
+    }
 
     /**
      * Import an Application which has been exported to a zip file
