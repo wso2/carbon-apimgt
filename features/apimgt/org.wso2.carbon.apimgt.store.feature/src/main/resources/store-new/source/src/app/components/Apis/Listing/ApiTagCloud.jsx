@@ -20,6 +20,8 @@ import React from 'react';
 import { TagCloud } from 'react-tagcloud';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import ApiThumb from 'AppComponents/Apis/Listing/ApiThumb';
@@ -63,7 +65,9 @@ class ApiTagCloud extends React.Component {
         const promisedTags = api.getAllTags();
         promisedTags
             .then((response) => {
-                this.setState({ allTags: response.body.list });
+                if (response.body.count !== 0) {
+                    this.setState({ allTags: response.body.list });
+                }
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -105,15 +109,19 @@ class ApiTagCloud extends React.Component {
         };
         return (
             <div>
-                <h1>Tags</h1>
                 {allTags && (
-                    <TagCloud
-                        minSize={12}
-                        maxSize={35}
-                        colorOptions={options}
-                        tags={allTags}
-                        onClick={tag => this.handleOnClick(tag)}
-                    />
+                    <div>
+                        <Typography variant='display1' className={classes.mainTitle}>
+                            <FormattedMessage defaultMessage='Tags' id='Apis.Listing.ApiTagCloud.tags.heading' />
+                        </Typography>
+                        <TagCloud
+                            minSize={12}
+                            maxSize={35}
+                            colorOptions={options}
+                            tags={allTags}
+                            onClick={tag => this.handleOnClick(tag)}
+                        />
+                    </div>
                 )}
                 { apis && (
                     <div>
