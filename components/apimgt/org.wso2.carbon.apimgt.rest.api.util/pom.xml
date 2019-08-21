@@ -12,7 +12,8 @@
     limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
@@ -199,7 +200,9 @@
                             <outputDirectory>src/main/resources/</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/src/main/resources</directory>
+                                    <directory>
+                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/src/main/resources
+                                    </directory>
                                     <includes>
                                         <include>publisher-api.yaml</include>
                                     </includes>
@@ -217,7 +220,9 @@
                             <outputDirectory>src/main/resources/</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/src/main/resources</directory>
+                                    <directory>
+                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/src/main/resources
+                                    </directory>
                                     <includes>
                                         <include>store-api.yaml</include>
                                     </includes>

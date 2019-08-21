@@ -14,7 +14,8 @@
  ~ See the License for the specific language governing permissions and
  ~ limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
@@ -107,29 +108,29 @@
             <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
         </dependency>
         <dependency>
-             <groupId>org.wso2.carbon</groupId>
-             <artifactId>org.wso2.carbon.utils</artifactId>       			 
-         </dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+        </dependency>
         <dependency>
-           <groupId>org.wso2.carbon.mediation</groupId>
+            <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.sequences.stub</artifactId>
         </dependency>
-		<dependency>
-			<groupId>org.wso2.carbon.mediation</groupId>
-			<artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.wso2.carbon.mediation</groupId>
-			<artifactId>org.wso2.carbon.mediation.dependency.mgt</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.wso2.carbon.mediation</groupId>
-			<artifactId>org.wso2.carbon.mediation.registry</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.wso2.carbon.mediation</groupId>
-			<artifactId>org.wso2.carbon.rest.api.stub</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.mediation</groupId>
+            <artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.mediation</groupId>
+            <artifactId>org.wso2.carbon.mediation.dependency.mgt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.mediation</groupId>
+            <artifactId>org.wso2.carbon.mediation.registry</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.mediation</groupId>
+            <artifactId>org.wso2.carbon.rest.api.stub</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-kernel</artifactId>
@@ -203,8 +204,8 @@
             </exclusions>
         </dependency>
         <dependency>
-                <groupId>slf4j.wso2</groupId>
-                <artifactId>slf4j</artifactId>
+            <groupId>slf4j.wso2</groupId>
+            <artifactId>slf4j</artifactId>
             <version>1.5.10.wso2v1</version>
         </dependency>
         <dependency>
@@ -251,7 +252,7 @@
             <artifactId>jackson-databind</artifactId>
             <scope>provided</scope>
         </dependency>
-       <dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <scope>provided</scope>
@@ -317,9 +318,9 @@
                     </execution>
                 </executions>
                 <configuration>
-                     <className>
-                         org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin
-                     </className>
+                    <className>
+                        org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin
+                    </className>
                 </configuration>
             </plugin>
             <plugin>
@@ -333,7 +334,7 @@
                     </excludes>
                 </configuration>
             </plugin>
-<plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>

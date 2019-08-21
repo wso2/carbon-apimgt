@@ -15,7 +15,8 @@
  ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
@@ -144,35 +145,61 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.hostobjects.sso</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.registry.cache.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.client:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.identity.framework:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.statsupdate.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tier.cache.stub:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.registry.cache.stub:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.client:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.identity.framework:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.statsupdate.stub:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.stub:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tier.cache.stub:${carbon.apimgt.version}
+                                </bundleDef>
                                 <bundleDef>org.apache.woden.wso2:woden</bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                                 <bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
                                 <bundleDef>org.json.wso2:json:${orbit.version.json}</bundleDef>
                                 <bundleDef>org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.localentry.stub:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.localentry.stub:${carbon.apimgt.version}
+                                </bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.feature.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.registry.core:${carbon.registry.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.feature.version}
+                                </importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.registry.core:${carbon.registry.version}
+                                </importFeatureDef>
                             </importFeatures>
                             <importBundles>
-                                <importBundleDef>org.wso2.orbit.io.swagger:swagger-codegen:${swagger.codegen.version}</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.hostobjects.sso</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.localentry.stub:${carbon.mediation.version}</importBundleDef>
+                                <importBundleDef>org.wso2.orbit.io.swagger:swagger-codegen:${swagger.codegen.version}
+                                </importBundleDef>
+                                <importBundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.hostobjects.sso
+                                </importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}
+                                </importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon.mediation:org.wso2.carbon.localentry.stub:${carbon.mediation.version}
+                                </importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:pdfbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:fontbox:${pdfbox.version}</importBundleDef>
                                 <importBundleDef>org.apache.pdfbox:jempbox:${pdfbox.version}</importBundleDef>
-                                <importBundleDef>org.wso2.orbit.com.github.dblock.waffle:waffle-jna:${waffle-jna.version}</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.ganalytics.publisher:${carbon.commons.version}</importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.orbit.com.github.dblock.waffle:waffle-jna:${waffle-jna.version}
+                                </importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon.commons:org.wso2.carbon.ganalytics.publisher:${carbon.commons.version}
+                                </importBundleDef>
                             </importBundles>
                         </configuration>
                     </execution>

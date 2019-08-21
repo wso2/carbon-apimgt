@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
@@ -12,7 +13,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.core</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - API Management Core </name>
+    <name>WSO2 Carbon - API Management Core</name>
 
 
     <dependencies>
@@ -46,7 +47,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-    <dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <scope>provided</scope>
@@ -88,6 +89,6 @@
                     </instructions>
                 </configuration>
             </plugin>
-</plugins>
+        </plugins>
     </build>
 </project>
