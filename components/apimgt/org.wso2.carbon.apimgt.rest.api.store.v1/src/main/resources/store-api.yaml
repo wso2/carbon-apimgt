@@ -3803,6 +3803,65 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ######################################################
+  # The tenant resource APIs
+  ######################################################
+  '/tenants':
+    #--------------------------------------------------------
+    # Retrieve tenants by state
+    #--------------------------------------------------------
+    get:
+      security:
+        - OAuth2Security: []
+      x-examples:
+        $ref: docs/examples/tenants/tenants.yaml
+      summary: |
+        Get get tenants by state
+      description: |
+        This operation is to get tenants by state
+      parameters:
+        - name: state
+          description: |
+            The state represents the current state of the tenant
+
+            Supported states are [ active, inactive]
+
+          in: query
+          type: string
+          required: false
+          default: 'active'
+          enum:
+            - active
+            - inactive
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+      tags:
+        - tenants
+      responses:
+        200:
+          description: |
+            OK.
+            Tenant names returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            type: '#/definitions/TenantList'
+        404:
+          description: |
+            Not Found.
+            Requested application does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -3963,7 +4022,7 @@ parameters:
     name: labelName
     in: query
     description: |
-      Name of the API microgateway label.
+      Name of the API microgateway labels
     type: string
 
 # API Gateway Environment Name
@@ -5449,6 +5508,39 @@ definitions:
         items:
           $ref: '#/definitions/ApplicationAttribute'
 
+#-----------------------------------------------------
+# The Tenant resource
+#-----------------------------------------------------
+  Tenant :
+    title: Tenant
+    properties:
+      domain:
+        type: string
+        description: tenant domain
+        example: "wso2.com"
+      status:
+        type: string
+        description: current status of the tenant active/inactive
+        example: "active"
+
+
+#-----------------------------------------------------
+# The Tenant List resource
+#-----------------------------------------------------
+  TenantList :
+    title: Tenant list
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of tenants returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Tenant'
+      pagination:
+        $ref: '#/definitions/Pagination'
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------
