@@ -30,7 +30,7 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import EditIcon from '@material-ui/icons/edit';
+import Icon from '@material-ui/core/Icon';
 import { FormattedMessage } from 'react-intl';
 import Resource from './Resource';
 
@@ -177,7 +177,7 @@ class ProductResourcesView extends React.Component {
         }
         const apiResources = api.apis
             .map((key) => {
-                const operations = key.operations.map(item => item.uritemplate);
+                const operations = key.operations.map(item => item.target);
                 const paths = Object.keys(paths).filter(item => operations.includes(item))
                 const filteredPaths  = paths.reduce((acc,cur) => {
                     acc[cur] = paths[cur]
@@ -195,7 +195,7 @@ class ProductResourcesView extends React.Component {
                         <FormattedMessage id='Apis.Details.Resources.Resources.resources' defaultMessage='Resources' />
                     </Typography>
                     <Button size='small' className={classes.button}>
-                        <EditIcon className={classes.buttonIcon} />
+                        <Icon className={classes.buttonIcon}>edit</Icon>
                         <FormattedMessage
                             id='Apis.Details.Resources.Resources.edit.resources.button'
                             defaultMessage='Edit Resources'
