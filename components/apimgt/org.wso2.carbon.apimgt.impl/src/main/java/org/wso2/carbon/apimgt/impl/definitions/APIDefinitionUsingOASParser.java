@@ -194,7 +194,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
         OAuth2Definition oAuth2Definition = new OAuth2Definition().password("https://test.com");
 
         Set<Scope> scopes = api.getScopes();
-        
+
         if (scopes != null && !scopes.isEmpty()) {
             List<Map<String,String>> xSecurityScopesArray = new ArrayList<>();
             for (Scope scope : scopes) {
@@ -389,7 +389,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
 
         if (fallbackToV2) {
             SwaggerParser parser = new SwaggerParser();
-            SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(apiDefinition, null, false);
+            SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(apiDefinition);
             if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
                 for (String message : parseAttemptForV2.getMessages()) {
                     ErrorItem errorItem = addErrorToValidationResponse(validationResponse, message);
@@ -610,7 +610,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
 
     /**
      *  Updates managed info of a provided operation such as auth type and throttling
-     * 
+     *
      * @param uriTemplate URI template
      * @param operation swagger operation
      */
