@@ -745,7 +745,6 @@ paths:
       security:
         - OAuth2Security:
           - apim:subscribe
-      x-scope: apim:subscribe
       summary: Get API ratings
       description: |
         This operation can be used to get the list of ratings of an API.
@@ -793,7 +792,6 @@ paths:
       security:
         - OAuth2Security:
           - apim:subscribe
-      x-scope: apim:subscribe
       summary: Get user API rating
       description: |
         This operation can be used to get the user rating of an API.
@@ -849,7 +847,6 @@ paths:
       security:
         - OAuth2Security:
           - apim:subscribe
-      x-scope: apim:subscribe
       summary: Add or update logged in user's rating for an API
       description: |
         This operation can be used to add or update an API rating.
@@ -902,7 +899,6 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscribe
-      x-scope: apim:subscribe
       summary: Delete user API rating
       description: |
         This operation can be used to delete logged in user API rating.
