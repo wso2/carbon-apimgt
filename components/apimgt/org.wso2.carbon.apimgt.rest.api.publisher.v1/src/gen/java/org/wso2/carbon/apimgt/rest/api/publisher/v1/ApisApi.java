@@ -4,6 +4,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APISecurityAuditInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
@@ -56,6 +57,54 @@ public class ApisApi  {
 
 ApisApiService delegate = new ApisApiServiceImpl();
 
+
+    @GET
+    @Path("/{apiId}/auditapi")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve the Security Audit Report of the Audit API", notes = "Retrieve the Security Audit Report of the Audit API ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. The Security Audit Report has been returned. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The Security Audit Report was not found. ", response = ErrorDTO.class) })
+    public Response apisApiIdAuditapiGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) {
+        return delegate.apisApiIdAuditapiGet(apiId, accept, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/auditapi")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Create new Security Audit API", notes = "Create new Security Audit API ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. UUID returned ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Created. The Audit API was not created. ", response = ErrorDTO.class) })
+    public Response apisApiIdAuditapiPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "API object that needs to be added " ,required=true) APISecurityAuditInfoDTO body, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) {
+        return delegate.apisApiIdAuditapiPost(apiId, body, accept, securityContext);
+    }
+
+    @PUT
+    @Path("/{apiId}/auditapi")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update Swagger Definition in Security Audit API", notes = "Update Swagger Definition in Security Audit API ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Swagger Definition has been updated ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The Audit API was not found. ", response = ErrorDTO.class) })
+    public Response apisApiIdAuditapiPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) {
+        return delegate.apisApiIdAuditapiPut(apiId, accept, securityContext);
+    }
 
     @DELETE
     @Path("/{apiId}")

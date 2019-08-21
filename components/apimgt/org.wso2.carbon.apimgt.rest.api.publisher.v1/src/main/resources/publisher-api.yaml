@@ -3389,6 +3389,104 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ######################################################
+  # The Security Audit API List
+  ######################################################
+  /apis/{apiId}/auditapi:
+    #-----------------------------------------------------
+    # Create new Security Audit API
+    #-----------------------------------------------------
+    post:
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      summary: Create new Security Audit API
+      description: |
+        Create new Security Audit API
+      parameters:
+        - $ref: "#/parameters/Accept"
+        - $ref: "#/parameters/apiId"
+        - in: body
+          name: body
+          description: |
+            API object that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/APISecurityAuditInfo'
+      responses:
+        200:
+          description: |
+            OK.
+            UUID returned
+        404:
+          description: |
+            Not Created.
+            The Audit API was not created.
+          schema:
+            $ref: '#/definitions/Error'
+
+    #-----------------------------------------------------
+    # Update Swagger Definition in Security Audit API
+    #-----------------------------------------------------
+    put:
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      summary: Update Swagger Definition in Security Audit API
+      description: |
+        Update Swagger Definition in Security Audit API
+      parameters:
+        - $ref: "#/parameters/Accept"
+        - $ref: "#/parameters/apiId"
+      responses:
+        200:
+          description: |
+            OK.
+            Swagger Definition has been updated
+          headers:
+            Content-Type:
+              description: |
+                The content of the body.
+              default: application/json
+              type: string
+        404:
+          description: |
+            Not Found.
+            The Audit API was not found.
+          schema:
+            $ref: '#/definitions/Error'
+
+    #-----------------------------------------------------
+    # Retrieve the Security Audit Report of the Audit API
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      summary: Retrieve the Security Audit Report of the Audit API
+      description: |
+        Retrieve the Security Audit Report of the Audit API
+      parameters:
+        - $ref: "#/parameters/Accept"
+        - $ref: "#/parameters/apiId"
+      responses:
+        200:
+          description: |
+            OK.
+            The Security Audit Report has been returned.
+          headers:
+            Content-Type:
+              description: |
+                The content of the body.
+              default: application/json
+              type: string
+        404:
+          description: |
+            Not Found.
+            The Security Audit Report was not found.
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # The "Subscription Collection" resource APIs
 ######################################################
@@ -5686,95 +5784,6 @@ paths:
           description: |
             Not Found.
             Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-
-  ######################################################
-  # The Security Audit API List
-  ######################################################
-  /auditapi:
-    #-----------------------------------------------------
-    # Create new Security Audit API
-    #-----------------------------------------------------
-    post:
-      summary: Create new Security Audit API
-      description: |
-        Create new Security Audit API
-      parameters:
-        - $ref: "#/parameters/Accept"
-        - $ref: "#/parameters/apiId"
-        - in: body
-          name: body
-          description: |
-            API object that needs to be added
-          required: true
-          schema:
-            $ref: '#/definitions/APISecurityAuditInfo'
-      responses:
-        200:
-          description: |
-            OK.
-            UUID returned
-        404:
-          description: |
-            Not Created.
-            The Audit API was not created.
-          schema:
-            $ref: '#/definitions/Error'
-
-    #-----------------------------------------------------
-    # Update Swagger Definition in Security Audit API
-    #-----------------------------------------------------
-    put:
-      summary: Update Swagger Definition in Security Audit API
-      description: |
-        Update Swagger Definition in Security Audit API
-      parameters:
-        - $ref: "#/parameters/Accept"
-        - $ref: "#/parameters/apiId"
-      responses:
-        200:
-          description: |
-            OK.
-            Swagger Definition has been updated
-          headers:
-            Content-Type:
-              description: |
-                The content of the body.
-              default: application/json
-              type: string
-        404:
-          description: |
-            Not Found.
-            The Audit API was not found.
-          schema:
-            $ref: '#/definitions/Error'
-
-    #-----------------------------------------------------
-    # Retrieve the Security Audit Report of the Audit API
-    #-----------------------------------------------------
-    get:
-      summary: Retrieve the Security Audit Report of the Audit API
-      description: |
-        Retrieve the Security Audit Report of the Audit API
-      parameters:
-        - $ref: "#/parameters/Accept"
-        - $ref: "#/parameters/apiId"
-      responses:
-        200:
-          description: |
-            OK.
-            The Security Audit Report has been returned.
-          headers:
-            Content-Type:
-              description: |
-                The content of the body.
-              default: application/json
-              type: string
-        404:
-          description: |
-            Not Found.
-            The Security Audit Report was not found.
           schema:
             $ref: '#/definitions/Error'
 

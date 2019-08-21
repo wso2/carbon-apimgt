@@ -208,6 +208,11 @@ public final class APIConstants {
 
     public static final String WORKFLOW_MEDIA_TYPE = "workflow-config";
 
+    // Constants used in API Security Audit feature
+    public static final String HEADER_ACCEPT = "Accept";
+    public static final String HEADER_CONTENT_TYPE = "Content-Type";
+    public static final String HEADER_API_TOKEN = "X-API-KEY";
+
     //registry resource containing the self signup user config
     public static final String SELF_SIGN_UP_CONFIG_LOCATION = API_APPLICATION_DATA_LOCATION + "/sign-up-config.xml";
     public static final String SELF_SIGN_UP_CONFIG_MEDIA_TYPE = "signup-config";

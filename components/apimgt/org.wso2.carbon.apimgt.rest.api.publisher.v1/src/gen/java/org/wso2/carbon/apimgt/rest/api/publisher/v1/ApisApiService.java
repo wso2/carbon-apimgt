@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APISecurityAuditInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
@@ -41,6 +42,9 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApisApiService {
+      public Response apisApiIdAuditapiGet(String apiId, String accept, MessageContext messageContext);
+      public Response apisApiIdAuditapiPost(String apiId, APISecurityAuditInfoDTO body, String accept, MessageContext messageContext);
+      public Response apisApiIdAuditapiPut(String apiId, String accept, MessageContext messageContext);
       public Response apisApiIdDelete(String apiId, String ifMatch, MessageContext messageContext);
       public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String ifNoneMatch, MessageContext messageContext);
       public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId, InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext);

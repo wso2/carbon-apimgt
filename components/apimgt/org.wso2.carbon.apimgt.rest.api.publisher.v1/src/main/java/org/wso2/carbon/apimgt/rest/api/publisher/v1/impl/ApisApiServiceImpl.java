@@ -30,6 +30,7 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
+import org.apache.axis2.util.URL;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +39,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -63,19 +74,19 @@ import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
@@ -89,27 +100,7 @@ import java.util.Set;
 import java.util.Map;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.DocumentationMappingUtil;
@@ -561,6 +552,230 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdAuditapiGet(String apiId, String accept, MessageContext messageContext) {
+        boolean isDebugEnabled = log.isDebugEnabled();
+
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = api.getId();
+
+            // Get configuration file and retrieve API token
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            String apiToken = config.getFirstProperty(APIConstants.API_SECURITY_AUDIT_API_TOKEN);
+
+            // Retrieve the uuid from the database
+            String uuid = ApiMgtDAO.getInstance().getAuditApiId(apiIdentifier);
+
+            // Logic for the HTTP request
+            URL auditURL = new URL("https://platform.42crunch.com/api/v1/apis/" + uuid + "/assessmentreport");
+            try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil.getHttpClient(auditURL.getPort(), auditURL.getProtocol())) {
+                HttpGet httpGet = new HttpGet(String.valueOf(auditURL));
+
+                // Set the header properties of the request
+                httpGet.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                httpGet.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                httpGet.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
+
+                // Code block for the processing of the response
+                try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+                    if (isDebugEnabled) {
+                        log.debug("HTTP status " + response.getStatusLine().getStatusCode());
+                    }
+                    if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                        BufferedReader reader = new BufferedReader(
+                                new InputStreamReader(response.getEntity().getContent()));
+                        String inputLine;
+                        StringBuilder responseString = new StringBuilder();
+
+                        while ((inputLine = reader.readLine()) != null) {
+                            responseString.append(inputLine);
+                        }
+                        return Response.ok().entity(responseString.toString()).build();
+                    }
+                }
+            } catch (IOException e) {
+                log.error("Error occurred while getting HttpClient instance");
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving Security Audit Report for API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdAuditapiPost(String apiId, APISecurityAuditInfoDTO body, String accept, MessageContext messageContext) {
+        boolean isDebugEnabled = log.isDebugEnabled();
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = api.getId();
+            String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+
+            // Get configuration file and retrieve API token and Collection ID
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            String apiToken = config.getFirstProperty(APIConstants.API_SECURITY_AUDIT_API_TOKEN);
+            String collectionId = config.getFirstProperty(APIConstants.API_SECURITY_AUDIT_CID);
+
+            // Initiate JSON parser.
+            JSONParser parser = new JSONParser();
+            JSONObject jsonObject;
+
+            // Parse JSON String of API Definition
+            jsonObject = (JSONObject) parser.parse(apiDefinition);
+
+            // Set properties to be attached in the body of the request
+            body.setName(apiIdentifier.getApiName());
+            body.setCid(collectionId);
+            body.setSpecfile(jsonObject);
+
+            // Logic for HTTP Request
+            URL auditUrl = new URL("https://platform.42crunch.com/api/v1/apis");
+            try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil.getHttpClient(auditUrl.getPort(), auditUrl.getProtocol())) {
+                HttpPost httpPost = new HttpPost(String.valueOf(auditUrl));
+
+                // Construct the JSON String to be passed in the request
+                StringBuilder bodyString = new StringBuilder();
+                bodyString.append("{ \n");
+                bodyString.append("   \"specfile\": ").append(body.getSpecfile()).append("\n");
+                bodyString.append("   \"cid\": ").append(body.getCid()).append("\n");
+                bodyString.append("   \"name\": ").append(body.getName()).append("\n");
+                bodyString.append("}");
+
+                // Set the header properties of the request
+                httpPost.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                httpPost.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                httpPost.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
+                httpPost.setEntity(new StringEntity(bodyString.toString()));
+
+                // Code block for the processing of the response
+                try(CloseableHttpResponse response = httpClient.execute(httpPost)) {
+                    if (isDebugEnabled) {
+                        log.debug("HTTP status " + response.getStatusLine().getStatusCode());
+                    }
+                    if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                        BufferedReader reader = new BufferedReader(
+                                new InputStreamReader(response.getEntity().getContent()));
+                        String inputLine;
+                        StringBuilder responseString = new StringBuilder();
+
+                        while((inputLine = reader.readLine()) != null) {
+                            responseString.append(inputLine);
+                        }
+                        JSONObject responseObject;
+                        responseObject = (JSONObject) parser.parse(responseString.toString());
+                        String newAuditAPIId = (String)((JSONObject) responseObject.get("desc")).get("id");
+                        ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, newAuditAPIId);
+
+                        return Response.ok().entity(newAuditAPIId).build();
+                    } else {
+                        throw new APIManagementException(
+                                "Error while retrieving data from " + auditUrl + ". Found http status " + response
+                                        .getStatusLine());
+                    }
+                } finally {
+                    httpPost.releaseConnection();
+                }
+            } catch (IOException e) {
+                log.error("Error occurred while getting HttpClient instance");
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while creating new Audit API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (ParseException e) {
+            log.error("API Definition String could not be parsed into JSONObject.");
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdAuditapiPut(String apiId, String accept, MessageContext messageContext) {
+        boolean isDebugEnabled = log.isDebugEnabled();
+
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = api.getId();
+            String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+
+            // Get configuration file and retrieve API token
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            String apiToken = config.getFirstProperty(APIConstants.API_SECURITY_AUDIT_API_TOKEN);
+
+            // Initiate JSON Parser
+            JSONParser parser = new JSONParser();
+            JSONObject jsonObject;
+
+            // Parse JSON String of API Definition
+            jsonObject = (JSONObject) parser.parse(apiDefinition);
+
+            // Set the property to be attached in the body of the request
+            // Attach API Definition to property called specfile to be sent in the request
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("{\n");
+            stringBuilder.append("  \"specfile\":   ").append(jsonObject).append("\n");
+            stringBuilder.append("}");
+
+            // Retrieve the uuid from the database
+            String uuid = ApiMgtDAO.getInstance().getAuditApiId(apiIdentifier);
+
+            // Logic for HTTP Request
+            URL auditURL = new URL("https://platform.42crunch.com/api/v1/apis/" + uuid);
+            try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil.getHttpClient(auditURL.getPort(), auditURL.getProtocol())) {
+                HttpPut httpPut = new HttpPut(String.valueOf(auditURL));
+
+                // Set the header properties of the request
+                httpPut.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                httpPut.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                httpPut.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
+                httpPut.setEntity(new StringEntity(stringBuilder.toString()));
+
+                // Code block for processing the response
+                try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
+                    if (isDebugEnabled) {
+                        log.debug("HTTP status " + response.getStatusLine().getStatusCode());
+                    }
+                    if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                        BufferedReader reader = new BufferedReader(
+                                new InputStreamReader(response.getEntity().getContent()));
+                        String inputLine;
+                        StringBuilder responseString = new StringBuilder();
+
+                        while ((inputLine = reader.readLine()) != null) {
+                            responseString.append(inputLine);
+                        }
+
+                        return Response.ok().entity(responseString.toString()).build();
+                    } else {
+                        throw new APIManagementException("Error while sending data to " + auditURL +
+                                ". Found http status " + response.getStatusLine());
+                    }
+                } finally {
+                    httpPut.releaseConnection();
+                }
+            } catch (IOException e) {
+                log.error("Error occurred while getting HttpClient instance");
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while updating Audit API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (ParseException e) {
+            log.error("API Definition String could not be parsed into JSONObject");
         }
         return null;
     }
