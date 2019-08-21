@@ -36,6 +36,7 @@ import Transports from './components/Transports';
 import Description from './components/Description';
 import AccessControl from './components/AccessControl';
 import StoreVisibility from './components/StoreVisibility';
+import CORSConfiguration from './components/CORSConfiguration';
 import Tags from './components/Tags';
 import SchemaValidation from './components/SchemaValidation';
 
@@ -77,6 +78,13 @@ function copyAPIConfig(api) {
         tags: [...api.tags],
         transport: [...api.transport],
         securityScheme: [...api.securityScheme],
+        corsConfiguration: {
+            corsConfigurationEnabled: api.corsConfiguration.corsConfigurationEnabled,
+            accessControlAllowCredentials: api.corsConfiguration.accessControlAllowCredentials,
+            accessControlAllowOrigins: [...api.corsConfiguration.accessControlAllowOrigins],
+            accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
+            accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
+        },
     };
 }
 /**
@@ -96,6 +104,7 @@ export default function Configuration() {
      */
     function configReducer(state, configAction) {
         const { action, value, event } = configAction;
+        const nextState = { ...copyAPIConfig(state) };
         switch (action) {
             case 'description':
             case 'isDefaultVersion':
@@ -105,7 +114,8 @@ export default function Configuration() {
             case 'accessControl':
             case 'visibility':
             case 'tags':
-                return { ...copyAPIConfig(state), [action]: value };
+                nextState[action] = value;
+                return nextState;
             case 'accessControlRoles':
                 // TODO: need to do the role validation here ~tmkb
                 return { ...copyAPIConfig(state), [action]: value.split(',') };
@@ -146,15 +156,13 @@ export default function Configuration() {
                             newState[action].includes(API_SECURITY_BASIC_AUTH)
                         )
                     ) {
-                        const noMandatoryOAuthBasicAuth = newState[action]
-                            .filter(schema => schema !== API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+                        const noMandatoryOAuthBasicAuth = newState[action].filter(schema => schema !== API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
                         return {
                             ...newState,
                             [action]: noMandatoryOAuthBasicAuth,
                         };
                     } else if (!newState[action].includes(API_SECURITY_MUTUAL_SSL)) {
-                        const noMandatoryMutualSSL = newState[action]
-                            .filter(schema => schema !== API_SECURITY_MUTUAL_SSL_MANDATORY);
+                        const noMandatoryMutualSSL = newState[action].filter(schema => schema !== API_SECURITY_MUTUAL_SSL_MANDATORY);
                         return {
                             ...newState,
                             [action]: noMandatoryMutualSSL,
@@ -174,7 +182,19 @@ export default function Configuration() {
                         transport: state.transport.filter(transport => transport !== event.value),
                     };
                 }
-
+            case 'accessControlAllowHeaders':
+            case 'accessControlAllowMethods':
+            case 'accessControlAllowCredentials':
+            case 'corsConfigurationEnabled':
+                nextState.corsConfiguration[action] = value;
+                return nextState;
+            case 'accessControlAllowOrigins':
+                if (event.checked) {
+                    nextState.corsConfiguration[action] = [event.value];
+                } else {
+                    nextState.corsConfiguration[action] = event.checked === false ? [] : event.value;
+                }
+                return nextState;
             default:
                 return state;
         }
@@ -248,6 +268,10 @@ export default function Configuration() {
 
                         <Grid item xs={12} md={9}>
                             <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />
+                        </Grid>
+
+                        <Grid item xs={12} md={9}>
+                            <CORSConfiguration api={apiConfig} configDispatcher={configDispatcher} />
                         </Grid>
 
                         <Grid item xs={12} md={9}>
