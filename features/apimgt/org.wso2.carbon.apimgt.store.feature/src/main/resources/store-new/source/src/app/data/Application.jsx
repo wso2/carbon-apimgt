@@ -168,6 +168,26 @@ export default class Application extends Resource {
         });
     }
 
+    /**
+     * Provide Consumer Key and Secret of Existing OAuth Apps
+     *
+     * @param keyType           key type, either PRODUCTION or SANDBOX
+     * @param consumerKey       consumer key of the OAuth app
+     * @param consumerSecret    consumer secret of the OAuth app
+     * @returns {*}
+     */
+    provideKeys(keyType, consumerKey, consumerSecret) {
+        const promisedKeys = this.client.then((client) => {
+            const requestContent = { consumerKey, consumerSecret, keyType };
+            const payload = { applicationId: this.id, body: requestContent };
+            return client.apis['Application Keys'].post_applications__applicationId__map_keys(payload);
+        });
+        return promisedKeys.then((keysResponse) => {
+            this.keys.set(keyType, keysResponse.obj);
+            return this.keys.get(keyType);
+        });
+    }
+
     static get(id) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
         const promised_get = apiClient.client.then(
