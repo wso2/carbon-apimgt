@@ -427,6 +427,9 @@
             </ApplicationAttributes>
         </ApplicationConfiguration>
         {% endif %}
+
+        <!--This parameter specifies whether Provisioning Out-of-Band OAuth Clients is enabled-->
+        <MapExistingAuthApps>{{apim.store.enable_map_auth}}</MapExistingAuthApps>
     </APIStore>
 
     <APIPublisher>
