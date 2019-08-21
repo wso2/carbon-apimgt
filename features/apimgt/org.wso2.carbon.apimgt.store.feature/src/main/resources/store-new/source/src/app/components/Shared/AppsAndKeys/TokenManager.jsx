@@ -263,6 +263,7 @@ class TokenManager extends React.Component {
         if (key && (key.keyState === this.keyStates.CREATED || key.keyState === this.keyStates.REJECTED)) {
             return <WaitingForApproval keyState={key.keyState} states={this.keyStates} />;
         }
+        // todo replace use of localStorage with useContext
         const settingsData = localStorage.getItem('settings');
         const { mapExistingAuthApps } = JSON.parse(settingsData);
 
