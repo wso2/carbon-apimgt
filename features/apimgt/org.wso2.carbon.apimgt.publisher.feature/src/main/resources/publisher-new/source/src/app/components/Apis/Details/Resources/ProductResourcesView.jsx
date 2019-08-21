@@ -214,7 +214,6 @@ class ProductResourcesView extends React.Component {
                                     {Object.keys(resource.paths).map((key) => {
                                         const path = resource.paths[key];
                                         const that = this;
-                                        console.info(path);
                                         return (
                                             <div>
                                                 <ExpansionPanel defaultExpanded className={classes.expansionPanel}>
@@ -225,7 +224,6 @@ class ProductResourcesView extends React.Component {
                                                     </ExpansionPanelSummary>
                                                     <ExpansionPanelDetails className={classes.expansionPanelDetails}>
                                                         {Object.keys(path).map((innerKey) => {
-                                                             console.info("Hi");
                                                             return CONSTS.HTTP_METHODS.includes(innerKey) ? (
                                                                 <Resource
                                                                     path={key}
