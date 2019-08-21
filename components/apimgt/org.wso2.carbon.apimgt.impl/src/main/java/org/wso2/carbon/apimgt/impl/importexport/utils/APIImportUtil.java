@@ -282,8 +282,8 @@ public final class APIImportUtil {
                 APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), apiName, apiVersion);
                 // Checking whether the API exists
                 if (!apiProvider.isAPIAvailable(apiIdentifier)) {
-                    String errorMessage = "Error occurred while updating. API: " + apiName + " version: " + apiVersion
-                            + " not found";
+                    String errorMessage = "Error occurred while updating. API: " + apiName + StringUtils.SPACE
+                            + APIConstants.API_DATA_VERSION + ": " + apiVersion + " not found";
                     throw new APIMgtResourceNotFoundException(errorMessage);
                 }
                 targetApi = apiProvider.getAPI(apiIdentifier);
@@ -402,7 +402,8 @@ public final class APIImportUtil {
         } catch (APIManagementException e) {
             String errorMessage = "Error while importing API: ";
             if (importedApi != null) {
-                errorMessage += importedApi.getId().getApiName() + " version: " + importedApi.getId().getVersion();
+                errorMessage += importedApi.getId().getApiName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION
+                        + ": " + importedApi.getId().getVersion();
             }
             log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
@@ -756,7 +757,7 @@ public final class APIImportUtil {
             apiProvider.saveSwagger20Definition(apiId, swaggerContent);
         } catch (APIManagementException e) {
             String errorMessage = "Error in adding Swagger definition for the API: " + apiId.getApiName()
-                    + " version: " + apiId.getVersion();
+                    + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiId.getVersion();
             log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }

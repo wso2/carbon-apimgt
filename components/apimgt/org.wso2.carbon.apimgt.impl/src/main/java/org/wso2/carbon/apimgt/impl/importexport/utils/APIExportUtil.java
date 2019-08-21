@@ -117,8 +117,7 @@ public class APIExportUtil {
             if (!docList.isEmpty()) {
                 exportAPIDocumentation(archivePath, docList, apiIDToReturn, registry, exportFormat);
             } else if (log.isDebugEnabled()) {
-                log.debug("No documentation found for API: " + apiIDToReturn
-                        + ". Skipping API documentation export.");
+                log.debug("No documentation found for API: " + apiIDToReturn + ". Skipping API documentation export.");
             }
 
             //export wsdl
@@ -182,7 +181,8 @@ public class APIExportUtil {
                         IOUtils.copy(imageDataStream, outputStream);
                         if (log.isDebugEnabled()) {
                             log.debug("Thumbnail image retrieved successfully for API: " + apiIdentifier.getApiName()
-                                    + " version: " + apiIdentifier.getVersion());
+                                    + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
+                                    + apiIdentifier.getVersion());
                         }
                     }
                 } else {
@@ -191,8 +191,8 @@ public class APIExportUtil {
                 }
             } else if (log.isDebugEnabled()) {
                 log.debug("Thumbnail URL [" + thumbnailUrl + "] does not exists in registry for API: "
-                        + apiIdentifier.getApiName() + " version: " + apiIdentifier.getVersion()
-                        + ". Skipping thumbnail export.");
+                        + apiIdentifier.getApiName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
+                        + apiIdentifier.getVersion() + ". Skipping thumbnail export.");
 
             }
         } catch (RegistryException e) {
@@ -279,16 +279,17 @@ public class APIExportUtil {
 
             if (log.isDebugEnabled()) {
                 log.debug("API Documentation retrieved successfully for API: " + apiIdentifier.getApiName()
-                        + " version: " + apiIdentifier.getVersion());
+                        + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiIdentifier.getVersion());
             }
         } catch (IOException e) {
             String errorMessage = "I/O error while writing API documentation to file for API: "
-                    + apiIdentifier.getApiName() + " version: " + apiIdentifier.getVersion();
+                    + apiIdentifier.getApiName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
+                    + apiIdentifier.getVersion();
             log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (RegistryException e) {
             String errorMessage = "Error while retrieving documentation for API: " + apiIdentifier.getApiName()
-                    + " version: " + apiIdentifier.getVersion();
+                    + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiIdentifier.getVersion();
             log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
@@ -373,14 +374,15 @@ public class APIExportUtil {
                         //If sequence doesn't exist in 'apimgt/customsequences/{in/out/fault}' directory check in API
                         //specific registry path
                         sequenceDetails = getAPISpecificSequence(api.getId(), sequenceName, direction, registry);
-                        pathToExportedSequence += "Custom";
+                        pathToExportedSequence += APIImportExportConstants.CUSTOM_TYPE;
                     }
                     writeSequenceToFile(pathToExportedSequence, sequenceDetails, apiIdentifier);
                 }
             }
         } else if (log.isDebugEnabled()) {
-            log.debug("No custom sequences available for API: " + apiIdentifier.getApiName() + " version: "
-                    + apiIdentifier.getVersion() + ". Skipping custom sequence export.");
+            log.debug("No custom sequences available for API: " + apiIdentifier.getApiName() + StringUtils.SPACE
+                    + APIConstants.API_DATA_VERSION + ": " + apiIdentifier.getVersion()
+                    + ". Skipping custom sequence export.");
         }
     }
 
@@ -564,17 +566,18 @@ public class APIExportUtil {
 
                 if (log.isDebugEnabled()) {
                     log.debug("Meta information retrieved successfully for API: " + apiToReturn.getId().getApiName()
-                            + " version: " + apiToReturn.getId().getVersion());
+                            + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiToReturn.getId().getVersion());
                 }
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Swagger definition for API: "
-                    + apiToReturn.getId().getApiName() + " version: " + apiToReturn.getId().getVersion();
+                    + apiToReturn.getId().getApiName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
+                    + apiToReturn.getId().getVersion();
             log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         } catch (IOException e) {
             String errorMessage = "Error while retrieving saving as YAML for API: " + apiToReturn.getId().getApiName()
-                    + " version: " + apiToReturn.getId().getVersion();
+                    + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiToReturn.getId().getVersion();
             log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
@@ -650,8 +653,8 @@ public class APIExportUtil {
                                 element);
                 }
             } else if (log.isDebugEnabled()) {
-                log.debug("No endpoint certificates available for API: " + api.getId().getApiName() + " version: "
-                        + api.getId().getVersion() + ". Skipping certificate export.");
+                log.debug("No endpoint certificates available for API: " + api.getId().getApiName() + StringUtils.SPACE
+                        + APIConstants.API_DATA_VERSION + ": " + api.getId().getVersion() + ". Skipping certificate export.");
             }
         } catch (JSONException e) {
             String errorMsg = "Error in converting Endpoint config to JSON object in API: " + api.getId().getApiName();
