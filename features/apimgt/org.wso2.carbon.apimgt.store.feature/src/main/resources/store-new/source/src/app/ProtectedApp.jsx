@@ -21,14 +21,13 @@ import qs from 'qs';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { addLocaleData, defineMessages, IntlProvider } from 'react-intl';
 import Configurations from 'Config';
+import Tenants from 'AppData/Tenants';
 import Base from './components/Base/index';
 import AuthManager from './data/AuthManager';
 import Loading from './components/Base/Loading/Loading';
-// import 'typeface-roboto'
 import Utils from './data/Utils';
 import ConfigManager from './data/ConfigManager';
 import AppRouts from './AppRouts';
-
 /**
  * Language.
  * @type {string}
@@ -57,6 +56,7 @@ export default class ProtectedApp extends Component {
             messages: {},
             userResolved: false,
             scopesFound: false,
+            hasTenants: false,
         };
         this.environments = [];
         this.loadLocale = this.loadLocale.bind(this);
@@ -67,6 +67,8 @@ export default class ProtectedApp extends Component {
      *  Check if data available ,if not get the user info from existing token information
      */
     componentDidMount() {
+        const tenantApi = new Tenants();
+        tenantApi.getTenantsByState();
         ConfigManager.getConfigs()
             .environments.then((response) => {
                 this.environments = response.data.environments;
@@ -177,7 +179,7 @@ export default class ProtectedApp extends Component {
      * @returns {Component}
      */
     render() {
-        const { userResolved } = this.state;
+        const { userResolved, hasTenants } = this.state;
         if (!userResolved) {
             return <Loading />;
         }
@@ -197,7 +199,7 @@ export default class ProtectedApp extends Component {
             <IntlProvider locale={language} messages={messages}>
                 <MuiThemeProvider theme={createMuiTheme(Configurations.themes.light)}>
                     <Base>
-                        <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
+                        <AppRouts hasTenants={hasTenants} isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
                     </Base>
                 </MuiThemeProvider>
             </IntlProvider>
