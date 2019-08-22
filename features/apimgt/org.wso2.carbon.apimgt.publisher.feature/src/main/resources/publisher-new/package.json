@@ -40,6 +40,7 @@
         "mui-datatables": "^2.3.0",
         "prop-types": "^15.5.10",
         "qs": "^6.4.0",
+	"query-string": "6.8.2",
         "rc-notification": "^3.0.1",
         "react": "^16.8.6",
         "react-autosuggest": "^9.3.4",
