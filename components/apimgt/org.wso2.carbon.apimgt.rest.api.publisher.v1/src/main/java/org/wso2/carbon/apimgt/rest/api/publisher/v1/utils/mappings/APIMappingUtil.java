@@ -1557,22 +1557,25 @@ public class APIMappingUtil {
             if(aggregatedAPIs.containsKey(uuid)) {
                 ProductAPIDTO productAPI = aggregatedAPIs.get(uuid);
                 URITemplate template = apiProductResource.getUriTemplate();
-                List<ProductAPIOperationsDTO> operations = productAPI.getOperations();
-                ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
-                operation.setHttpVerb(template.getHTTPVerb());
-                operation.setUritemplate(template.getResourceURI());
+                List<APIOperationsDTO> operations = productAPI.getOperations();
+                APIOperationsDTO operation = new APIOperationsDTO();
+                operation.setVerb(template.getHTTPVerb());
+                operation.setTarget(template.getResourceURI());
+                operation.setAuthType(template.getAuthType());
+                operation.setThrottlingPolicy(template.getThrottlingTier());
                 operations.add(operation);
-
             } else {
                 ProductAPIDTO productAPI = new ProductAPIDTO();
                 productAPI.setApiId(uuid);
                 productAPI.setName(apiProductResource.getApiName());
-                List<ProductAPIOperationsDTO> operations = new ArrayList<ProductAPIOperationsDTO>();
+                List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
                 URITemplate template = apiProductResource.getUriTemplate();
 
-                ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
-                operation.setHttpVerb(template.getHTTPVerb());
-                operation.setUritemplate(template.getResourceURI());
+                APIOperationsDTO operation = new APIOperationsDTO();
+                operation.setVerb(template.getHTTPVerb());
+                operation.setTarget(template.getResourceURI());
+                operation.setAuthType(template.getAuthType());
+                operation.setThrottlingPolicy(template.getThrottlingTier());
                 operations.add(operation);
 
                 productAPI.setOperations(operations);
@@ -1774,13 +1777,14 @@ public class APIMappingUtil {
 
         for (int i = 0; i < dto.getApis().size(); i++) {
             ProductAPIDTO res = dto.getApis().get(i);
-            List<ProductAPIOperationsDTO> productAPIOperationsDTO = res.getOperations();
-            for (ProductAPIOperationsDTO resourceItem : productAPIOperationsDTO) {
+            List<APIOperationsDTO> productAPIOperationsDTO = res.getOperations();
+            for (APIOperationsDTO resourceItem : productAPIOperationsDTO) {
 
                 URITemplate template = new URITemplate();
-                template.setHTTPVerb(resourceItem.getHttpVerb());
-                template.setResourceURI(resourceItem.getUritemplate());
-                template.setUriTemplate(resourceItem.getUritemplate());
+                template.setHTTPVerb(resourceItem.getVerb());
+                template.setResourceURI(resourceItem.getTarget());
+                template.setUriTemplate(resourceItem.getAuthType());
+                template.setThrottlingTier(resourceItem.getThrottlingPolicy());
 
                 APIProductResource resource = new APIProductResource();
                 resource.setApiId(res.getApiId());

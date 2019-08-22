@@ -735,9 +735,10 @@ class Resources extends React.Component {
                                                 <Resource path={key} method={innerKey} methodData={path[innerKey]}
                                                              updatePath={that.updatePath} scopes={api.scopes}
                                                              apiPolicies={apiPolicies}
+                                                             isAPIProduct={false}
                                                              addRemoveToDeleteList={that.addRemoveToDeleteList}
                                                              onRef={ref => this.childResources.push(ref)}
-                                                             policyLevel={policyLevel}/> : null;
+                                                             policyLevel={policyLevel}/> : null;            
                                         })}
                                     </ExpansionPanelDetails>
                                 </ExpansionPanel>
