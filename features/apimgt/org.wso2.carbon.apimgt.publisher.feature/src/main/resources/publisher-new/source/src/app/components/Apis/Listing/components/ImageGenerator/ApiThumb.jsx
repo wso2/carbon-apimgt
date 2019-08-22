@@ -128,6 +128,9 @@ class APIThumb extends Component {
         if (isAPIProduct) {
             api.apiType = API.CONSTS.APIProduct;
         }
+        if (!api.lifeCycleStatus) {
+            api.lifeCycleStatus = api.status;
+        }
 
         return (
             <Card
