@@ -23,8 +23,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
-import Alert from 'AppComponents/Shared/Alert';
-import ApiThumb from 'AppComponents/Apis/Listing/ApiThumb';
+import ApiTableView from './ApiTableView';
 
 /**
  * @returns {Object}
@@ -51,8 +50,8 @@ class ApiTagCloud extends React.Component {
         super(props);
         this.state = {
             allTags: null,
-            apis: null,
             selectedTag: null,
+            clicked: false,
         };
         this.handleOnClick = this.handleOnClick.bind(this);
     }
@@ -82,18 +81,7 @@ class ApiTagCloud extends React.Component {
      * @memberof ApiTagCloud
      */
     handleOnClick = (tag) => {
-        const api = new API();
-        const promisedApis = api.getAllAPIs({ query: 'tag:' + tag.value });
-        promisedApis
-            .then((response) => {
-                this.setState({ apis: response.obj, selectedTag: tag.value });
-            })
-            .catch((error) => {
-                Alert('Error retrieving APIs for tag ' + tag.value);
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-            });
+        this.setState({ clicked: true, selectedTag: tag.value });
     };
 
     /**
@@ -102,7 +90,7 @@ class ApiTagCloud extends React.Component {
      */
     render() {
         const { classes } = this.props;
-        const { allTags, apis, selectedTag } = this.state;
+        const { allTags, selectedTag, clicked } = this.state;
         const options = {
             luminosity: 'light',
             hue: 'blue',
@@ -123,7 +111,7 @@ class ApiTagCloud extends React.Component {
                         />
                     </div>
                 )}
-                { apis && (
+                {clicked && (
                     <div>
                         <h1>
                             {' ('}
@@ -131,9 +119,7 @@ class ApiTagCloud extends React.Component {
                             {') '}
                         </h1>
                         <div className={classes.tagedApisWrapper}>
-                            {apis.list.map(api => (
-                                <ApiThumb api={api} key={api.id} />
-                            ))}
+                            <ApiTableView tagSelected selectedTag={selectedTag} gridView />
                         </div>
                     </div>
                 )}
