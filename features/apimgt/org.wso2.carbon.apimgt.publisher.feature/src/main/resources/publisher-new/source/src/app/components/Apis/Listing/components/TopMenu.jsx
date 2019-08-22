@@ -77,6 +77,33 @@ const styles = theme => ({
 
 /**
  *
+ * @param props
+ * @returns {*}
+ */
+function getTitleForArtifactType(props) {
+    const {
+        isAPIProduct, query,
+    } = props;
+    if (query) {
+        return (
+            <FormattedMessage id='Apis.Listing.components.TopMenu.search.results' defaultMessage='Search Result(s)' />
+        );
+    } else if (isAPIProduct) {
+        return (
+            <FormattedMessage
+                id='Apis.Listing.components.TopMenu.apiproduct(s)'
+                defaultMessage='API Product(s)'
+            />
+        );
+    } else {
+        return (
+            <FormattedMessage id='Apis.Listing.components.TopMenu.api(s)' defaultMessage='API(s)' />
+        );
+    }
+}
+
+/**
+ *
  * Renders the top menu
  * @param {*} props
  * @returns JSX
@@ -110,14 +137,7 @@ function TopMenu(props) {
                                 defaultMessage='Displaying'
                             />
                             {' '} {count} {' '}
-                            {isAPIProduct ? (
-                                <FormattedMessage
-                                    id='Apis.Listing.components.TopMenu.apiproduct(s)'
-                                    defaultMessage='API Product(s)'
-                                />
-                            ) : (
-                                <FormattedMessage id='Apis.Listing.components.TopMenu.api(s)' defaultMessage='API(s)' />
-                            )}
+                            {getTitleForArtifactType(props)}
                         </Typography>
                     </React.Fragment>
                 )}
@@ -140,12 +160,7 @@ function TopMenu(props) {
                 )}
             </div>
             <div className={classes.buttonRight}>
-                <IconButton
-                    className={classes.button}
-                    onClick={() => {
-                        setListType('list');
-                    }}
-                >
+                <IconButton className={classes.button} onClick={() => setListType('list')}>
                     <List color={listType === 'list' ? 'primary' : 'default'} />
                 </IconButton>
                 <IconButton className={classes.button} onClick={() => setListType('grid')}>
