@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import javax.validation.constraints.*;
 
 
@@ -19,7 +19,7 @@ public class ProductAPIDTO   {
   
     private String name = null;
     private String apiId = null;
-    private List<ProductAPIOperationsDTO> operations = new ArrayList<>();
+    private List<APIOperationsDTO> operations = new ArrayList<>();
 
   /**
    **/
@@ -58,7 +58,7 @@ public class ProductAPIDTO   {
 
   /**
    **/
-  public ProductAPIDTO operations(List<ProductAPIOperationsDTO> operations) {
+  public ProductAPIDTO operations(List<APIOperationsDTO> operations) {
     this.operations = operations;
     return this;
   }
@@ -66,10 +66,10 @@ public class ProductAPIDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("operations")
-  public List<ProductAPIOperationsDTO> getOperations() {
+  public List<APIOperationsDTO> getOperations() {
     return operations;
   }
-  public void setOperations(List<ProductAPIOperationsDTO> operations) {
+  public void setOperations(List<APIOperationsDTO> operations) {
     this.operations = operations;
   }
 

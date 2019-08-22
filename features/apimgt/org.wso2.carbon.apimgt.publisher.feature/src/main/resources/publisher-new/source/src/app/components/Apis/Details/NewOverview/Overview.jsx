@@ -146,6 +146,10 @@ function Overview(props) {
     if (newApi.apiType === API.CONSTS.API) {
         loadEndpoints = <Endpoints parentClasses={classes} api={newApi} />;
     }
+
+    if (newApi.apiType === API.CONSTS.APIProduct) {
+        api.type = API.CONSTS.APIProduct;
+    }
     return (
         <Grid container spacing={24}>
             <Grid item xs={12} md={6} lg={6} className={classes.leftSideWrapper}>
