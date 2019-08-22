@@ -103,16 +103,14 @@ class ProductResources extends React.PureComponent {
                                     <Typography className={classes.heading} variant='body1'>
                                         {resource.name}
                                     </Typography>
-
                                     {Object.keys(resource.operations).map((innerKey) => {
                                         const operation = (resource.operations)[innerKey];
                                         return (
                                             <div className={classes.resourceRow}>
-
                                                 <Typography className={classes.heading} variant='body1'>
-                                                    {operation.uritemplate}
+                                                    {operation.target}
                                                 </Typography>
-                                                <RenderMethod method={operation.httpVerb} />
+                                                <RenderMethod method={operation.verb} />
 
                                             </div>
                                         );
