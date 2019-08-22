@@ -79,10 +79,9 @@ class ImageGenerator extends PureComponent {
             randomBackgroundIndex = (str.charCodeAt(0) + str.charCodeAt(str.length - 1)) % colorPairs.length;
             colorPair = colorPairs[randomBackgroundIndex];
         }
-
         return (
             <div className={classes.iconWrapper} style={{ width }}>
-                <Icon className={classes.icon} style={{ fontSize: height, marginLeft: -height / 2, color }}>
+                <Icon className={classes.icon} style={{ fontSize: height + 'px', marginLeft: -height / 2, color }}>
                     {IconElement}
                 </Icon>
                 <Background width={width} height={height} colorPair={colorPair} />
