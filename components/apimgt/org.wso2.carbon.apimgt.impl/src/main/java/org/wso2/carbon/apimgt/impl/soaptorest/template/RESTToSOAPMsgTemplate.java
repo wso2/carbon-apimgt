@@ -22,6 +22,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.log.CommonsLogLogChute;
+import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -43,8 +45,6 @@ public class RESTToSOAPMsgTemplate {
     private String velocityLogPath = null;
     private static final String IN_SEQ_TEMPLATE_FILE = "soap_to_rest_in_seq_template";
     private static final String OUT_SEQ_TEMPLATE_FILE = "soap_to_rest_out_seq_template";
-    private static final String VELOCITY_RUNTIME_LOG_CLASS = "org.apache.velocity.runtime.log.Log4JLogChute";
-    private static final String VELOCITY_RUNTIME_LOG_PROPERTY = "runtime.log.logsystem.log4j.logger";
 
     /**
      * gets in sequence for the soap operation
@@ -68,8 +68,10 @@ public class RESTToSOAPMsgTemplate {
 
             VelocityEngine velocityengine = new VelocityEngine();
             if (!SOAPToRESTConstants.Template.NOT_DEFINED.equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, VELOCITY_RUNTIME_LOG_CLASS);
-                velocityengine.setProperty(VELOCITY_RUNTIME_LOG_PROPERTY, getVelocityLogger());
+                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                        CommonsLogLogChute.class.getName());
+                velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
+                velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
             }
             velocityengine.init();
             org.apache.velocity.Template t = velocityengine.getTemplate(this.getInSeqTemplatePath());
@@ -95,8 +97,10 @@ public class RESTToSOAPMsgTemplate {
 
             VelocityEngine velocityengine = new VelocityEngine();
             if (!SOAPToRESTConstants.Template.NOT_DEFINED.equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, VELOCITY_RUNTIME_LOG_CLASS);
-                velocityengine.setProperty(VELOCITY_RUNTIME_LOG_PROPERTY, getVelocityLogger());
+                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                        CommonsLogLogChute.class.getName());
+                velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
+                velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
             }
 
             velocityengine.init();

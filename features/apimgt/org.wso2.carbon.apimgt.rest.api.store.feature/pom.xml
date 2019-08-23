@@ -17,7 +17,8 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
@@ -30,7 +31,8 @@
     <packaging>pom</packaging>
     <name>WSO2 Carbon - API Store Rest API Feature</name>
     <url>http://wso2.org</url>
-    <description>This feature contains required bundles for API Manager Rest API for API publisher functionality</description>
+    <description>This feature contains required bundles for API Manager Rest API for API publisher functionality
+    </description>
 
 
     <dependencies>
@@ -138,7 +140,9 @@
                             <outputDirectory>src/main/resources/api-docs/docs/</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates</directory>
+                                    <directory>
+                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates
+                                    </directory>
                                     <excludes>
                                         <exclude>**/*.mustache</exclude>
                                     </excludes>
@@ -156,7 +160,9 @@
                             <outputDirectory>src/main/resources/api-docs/docs/</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.store/src/main/resources/documentation</directory>
+                                    <directory>
+                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.store/src/main/resources/documentation
+                                    </directory>
                                     <includes>
                                         <include>*</include>
                                     </includes>
@@ -190,8 +196,12 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon.identity.framework:org.wso2.carbon.identity.entitlement.stub:${carbon.identity.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.util:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.identity.framework:org.wso2.carbon.identity.entitlement.stub:${carbon.identity.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.util:${carbon.apimgt.version}
+                                </bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
@@ -208,9 +218,13 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.store/src/main/resources/store-api.yaml</inputSpec>
+                            <inputSpec>
+                                ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.store/src/main/resources/store-api.yaml
+                            </inputSpec>
                             <language>org.wso2.carbon.apimgt.rest.api.util.codegen.DynamicHtmlGen</language>
-                            <templateDirectory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates</templateDirectory>
+                            <templateDirectory>
+                                ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates
+                            </templateDirectory>
                             <output>src/main/resources/api-docs</output>
                         </configuration>
                     </execution>

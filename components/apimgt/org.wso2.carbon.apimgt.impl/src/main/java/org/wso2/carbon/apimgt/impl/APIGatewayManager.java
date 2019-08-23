@@ -140,7 +140,7 @@ public class APIGatewayManager {
                     definition = schemaDefinition.buildSchemaWithScopesAndRoles(api);
                     localEntryAdminClient.deleteEntry(api.getUUID() + "_graphQL");
                     localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "_graphQL" + "\">" +
-                         definition + "</localEntry>");
+                            definition + "</localEntry>");
 
                     Set<URITemplate> uriTemplates = new HashSet<>();
                     URITemplate template = new URITemplate();
@@ -151,13 +151,13 @@ public class APIGatewayManager {
                     template.setUriTemplate("/*");
                     uriTemplates.add(template);
                     api.setUriTemplates(uriTemplates);
-                } else {
+                } else if (api.getType() != null && APIConstants.APITransportType.HTTP.toString().equals(api.getType())) {
                     definition = api.getSwaggerDefinition();
                     localEntryAdminClient.deleteEntry(api.getUUID());
                     localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "\">" +
-                                definition.replaceAll("&(?!amp;)", "&amp;").
-                                        replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-                                + "</localEntry>");
+                            definition.replaceAll("&(?!amp;)", "&amp;").
+                                    replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                            + "</localEntry>");
                 }
                 // If the API exists in the Gateway
                 if (apiData != null) {

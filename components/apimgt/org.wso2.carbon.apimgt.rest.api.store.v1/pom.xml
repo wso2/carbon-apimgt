@@ -15,7 +15,8 @@
  ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
@@ -220,7 +221,9 @@
                                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
                             </configOptions>
                             <output>.</output>
-                            <templateDirectory>../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-templates</templateDirectory>
+                            <templateDirectory>
+                                ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-templates
+                            </templateDirectory>
                             <skipOverwrite>true</skipOverwrite>
                             <modelNameSuffix>DTO</modelNameSuffix>
                         </configuration>
@@ -233,7 +236,9 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/store-api.yaml</inputSpec>
                             <language>org.wso2.carbon.apimgt.rest.api.util.codegen.DynamicHtmlGen</language>
-                            <templateDirectory>../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates</templateDirectory>
+                            <templateDirectory>
+                                ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates
+                            </templateDirectory>
                             <output>${project.build.directory}/apidocs</output>
                         </configuration>
                     </execution>
@@ -270,7 +275,9 @@
                             <outputDirectory>${project.parent.parent.basedir}/docs/apidocs/store/v1</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates</directory>
+                                    <directory>
+                                        ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates
+                                    </directory>
                                     <excludes>
                                         <exclude>**/*.mustache</exclude>
                                     </excludes>
@@ -297,14 +304,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
