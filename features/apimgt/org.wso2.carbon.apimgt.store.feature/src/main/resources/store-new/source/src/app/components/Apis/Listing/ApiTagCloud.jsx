@@ -23,18 +23,26 @@ import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
+import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
 import ApiTableView from './ApiTableView';
 
-/**
- * @returns {Object}
- */
-const styles = {
-    tagedApisWrapper: {
+const styles = theme => ({
+    tagCloudWrapper: {
         display: 'flex',
         flexDirection: 'row',
         flexWrap: 'wrap',
+        paddingLeft: theme.spacing.unit * 3,
     },
-};
+    listContentWrapper: {
+        padding: `0 ${theme.spacing.unit * 3}px`,
+    },
+    mainTitle: {
+        paddingTop: 10,
+    },
+    tags: {
+        paddingLeft: theme.spacing.unit * 3,
+    },
+});
 
 /**
  * Component used to handle API Tag Cloud
@@ -51,7 +59,6 @@ class ApiTagCloud extends React.Component {
         this.state = {
             allTags: null,
             selectedTag: null,
-            clicked: false,
         };
         this.handleOnClick = this.handleOnClick.bind(this);
     }
@@ -81,7 +88,7 @@ class ApiTagCloud extends React.Component {
      * @memberof ApiTagCloud
      */
     handleOnClick = (tag) => {
-        this.setState({ clicked: true, selectedTag: tag.value });
+        this.setState({ selectedTag: tag.value });
     };
 
     /**
@@ -89,8 +96,8 @@ class ApiTagCloud extends React.Component {
      * @memberof ApiTagCloud
      */
     render() {
-        const { classes } = this.props;
-        const { allTags, selectedTag, clicked } = this.state;
+        const { classes, listType, apiType } = this.props;
+        const { allTags, selectedTag } = this.state;
         const options = {
             luminosity: 'light',
             hue: 'blue',
@@ -98,31 +105,46 @@ class ApiTagCloud extends React.Component {
         return (
             <div>
                 {allTags && (
-                    <div>
+                    <div className={classes.tags}>
                         <Typography variant='display1' className={classes.mainTitle}>
                             <FormattedMessage defaultMessage='Tags' id='Apis.Listing.ApiTagCloud.tags.heading' />
                         </Typography>
-                        <TagCloud
-                            minSize={12}
-                            maxSize={35}
-                            colorOptions={options}
-                            tags={allTags}
-                            onClick={tag => this.handleOnClick(tag)}
-                        />
-                    </div>
-                )}
-                {clicked && (
-                    <div>
-                        <h1>
-                            {' ('}
-                            {selectedTag}
-                            {') '}
-                        </h1>
-                        <div className={classes.tagedApisWrapper}>
-                            <ApiTableView tagSelected selectedTag={selectedTag} gridView />
+                        <div className={classes.tagCloudWrapper}>
+                            <TagCloud
+                                minSize={12}
+                                maxSize={35}
+                                colorOptions={options}
+                                tags={allTags}
+                                onClick={tag => this.handleOnClick(tag)}
+                            />
                         </div>
                     </div>
                 )}
+                { selectedTag && (
+                    <div className={classes.tags}>
+                        <Typography variant='display1' className={classes.mainTitle}>
+                            {' ('}
+                            {selectedTag}
+                            {') '}
+                        </Typography>
+                    </div>
+                )}
+                <div>
+                    <div className={classes.listContentWrapper}>
+                        {listType === 'grid'
+                            && (
+                                <ApiContext.Provider value={{ apiType }}>
+                                    <ApiTableView selectedTag={selectedTag} gridView />
+                                </ApiContext.Provider>
+                            )}
+                        {listType === 'list'
+                            && (
+                                <ApiContext.Provider value={{ apiType }}>
+                                    <ApiTableView selectedTag={selectedTag} gridView={false} />
+                                </ApiContext.Provider>
+                            )}
+                    </div>
+                </div>
             </div>
         );
     }
@@ -131,6 +153,8 @@ class ApiTagCloud extends React.Component {
 ApiTagCloud.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     tag: PropTypes.shape({}).isRequired,
+    listType: PropTypes.string.isRequired,
+    apiType: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(ApiTagCloud);

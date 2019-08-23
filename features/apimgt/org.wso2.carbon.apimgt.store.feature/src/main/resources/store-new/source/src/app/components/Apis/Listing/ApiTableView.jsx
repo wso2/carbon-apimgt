@@ -172,19 +172,23 @@ class ApiTableView extends React.Component {
     };
 
     xhrRequest = () => {
-        const { tagSelected, selectedTag } = this.props;
+        const { selectedTag } = this.props;
         const { page, rowsPerPage } = this;
         const { apiType } = this.context;
         if (apiType === CONSTS.API_TYPE) {
             const api = new API();
-            if (tagSelected) {
+            if (selectedTag) {
                 return api.getAllAPIs({ query: 'tag:' + selectedTag, limit: this.rowsPerPage, offset: page * rowsPerPage });
             } else {
                 return api.getAllAPIs({ limit: this.rowsPerPage, offset: page * rowsPerPage });
             }
         } else {
             const apiProduct = new APIProduct();
-            return apiProduct.getAllAPIProducts({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+            if (selectedTag) {
+                return apiProduct.getAllAPIProducts({ query: 'tag:' + selectedTag, limit: this.rowsPerPage, offset: page * rowsPerPage });
+            } else {
+                return apiProduct.getAllAPIProducts({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+            }
         }
     };
 

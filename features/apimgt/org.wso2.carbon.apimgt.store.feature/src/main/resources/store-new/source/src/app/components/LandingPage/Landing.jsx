@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import ApiTagCloud from 'AppComponents/Apis/Listing/ApiTagCloud';
 import Carousel from './Carousel';
 import ApisWithTag from './ApisWithTag';
 import ParallaxScroll from './ParallaxScroll';
@@ -38,7 +37,6 @@ function Landing(props) {
                             <Carousel />
                         </Grid>
                     )}
-                    <ApiTagCloud />
                     {listByTagActive && listByTagContent.length > 0 && (
                         <Grid item xs={12}>
                             <Typography variant='h2' gutterBottom>
