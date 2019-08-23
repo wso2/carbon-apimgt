@@ -48,38 +48,9 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryItemDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateAvailableTransitionsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateCheckItemsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -418,6 +389,66 @@ public class APIMappingUtil {
             apiInfoDTO.setHasThumbnail(false);
         }
         return apiInfoDTO;
+    }
+
+    /**
+     * Creates  a list of conversion policies into a DTO
+     *
+     * @param conversionPolicyStr conversion policies
+     * @return ConversionPolicyListDTO object containing ConversionPolicyInfoDTOs
+     * @throws APIManagementException
+     */
+    public static ResourcePolicyListDTO fromResourcePolicyStrToDTO(String conversionPolicyStr)
+            throws APIManagementException {
+        ResourcePolicyListDTO policyListDTO = new ResourcePolicyListDTO();
+        List<ResourcePolicyInfoDTO> policyInfoDTOs = policyListDTO.getList();
+        if (StringUtils.isNotEmpty(conversionPolicyStr)) {
+            try {
+                JSONObject conversionPolicyObj = (JSONObject) new JSONParser().parse(conversionPolicyStr);
+                for (Object key : conversionPolicyObj.keySet()) {
+                    JSONObject policyInfo = (JSONObject) conversionPolicyObj.get(key);
+                    String keyStr = ((String) key);
+                    ResourcePolicyInfoDTO policyInfoDTO = new ResourcePolicyInfoDTO();
+                    policyInfoDTO.setId(policyInfo.get(RestApiConstants.SEQUENCE_ARTIFACT_ID).toString());
+                    policyInfoDTO.setHttpVerb(policyInfo.get(RestApiConstants.HTTP_METHOD).toString());
+                    policyInfoDTO.setResourcePath(keyStr.substring(0, keyStr.lastIndexOf("_")));
+                    policyInfoDTO.setContent(policyInfo.get(RestApiConstants.SEQUENCE_CONTENT).toString());
+                    policyInfoDTOs.add(policyInfoDTO);
+                }
+            } catch (ParseException e) {
+                throw new APIManagementException("Couldn't parse the conversion policy string.", e);
+            }
+        }
+        policyListDTO.setCount(policyInfoDTOs.size());
+        return policyListDTO;
+    }
+
+    /**
+     * Creates a DTO consisting a single conversion policy
+     *
+     * @param conversionPolicyStr conversion policy string
+     * @return ConversionPolicyInfoDTO consisting given conversion policy string
+     * @throws APIManagementException
+     */
+    public static ResourcePolicyInfoDTO fromResourcePolicyStrToInfoDTO(String conversionPolicyStr)
+            throws APIManagementException {
+        ResourcePolicyInfoDTO policyInfoDTO = new ResourcePolicyInfoDTO();
+        if (StringUtils.isNotEmpty(conversionPolicyStr)) {
+            try {
+                JSONObject conversionPolicyObj = (JSONObject) new JSONParser().parse(conversionPolicyStr);
+                for (Object key : conversionPolicyObj.keySet()) {
+                    JSONObject policyInfo = (JSONObject) conversionPolicyObj.get(key);
+                    String keyStr = ((String) key);
+                    policyInfoDTO.setId(policyInfo.get(RestApiConstants.SEQUENCE_ARTIFACT_ID).toString());
+                    policyInfoDTO.setHttpVerb(policyInfo.get(RestApiConstants.HTTP_METHOD).toString());
+                    policyInfoDTO.setResourcePath(keyStr.substring(0, keyStr.lastIndexOf("_")));
+                    policyInfoDTO.setContent(policyInfo.get(RestApiConstants.SEQUENCE_CONTENT).toString());
+                }
+            } catch (ParseException e) {
+                throw new APIManagementException("Couldn't parse the conversion policy string.", e);
+            }
+        }
+        return policyInfoDTO;
     }
 
     /**
@@ -1526,22 +1557,25 @@ public class APIMappingUtil {
             if(aggregatedAPIs.containsKey(uuid)) {
                 ProductAPIDTO productAPI = aggregatedAPIs.get(uuid);
                 URITemplate template = apiProductResource.getUriTemplate();
-                List<ProductAPIOperationsDTO> operations = productAPI.getOperations();
-                ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
-                operation.setHttpVerb(template.getHTTPVerb());
-                operation.setUritemplate(template.getResourceURI());
+                List<APIOperationsDTO> operations = productAPI.getOperations();
+                APIOperationsDTO operation = new APIOperationsDTO();
+                operation.setVerb(template.getHTTPVerb());
+                operation.setTarget(template.getResourceURI());
+                operation.setAuthType(template.getAuthType());
+                operation.setThrottlingPolicy(template.getThrottlingTier());
                 operations.add(operation);
-
             } else {
                 ProductAPIDTO productAPI = new ProductAPIDTO();
                 productAPI.setApiId(uuid);
                 productAPI.setName(apiProductResource.getApiName());
-                List<ProductAPIOperationsDTO> operations = new ArrayList<ProductAPIOperationsDTO>();
+                List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
                 URITemplate template = apiProductResource.getUriTemplate();
 
-                ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
-                operation.setHttpVerb(template.getHTTPVerb());
-                operation.setUritemplate(template.getResourceURI());
+                APIOperationsDTO operation = new APIOperationsDTO();
+                operation.setVerb(template.getHTTPVerb());
+                operation.setTarget(template.getResourceURI());
+                operation.setAuthType(template.getAuthType());
+                operation.setThrottlingPolicy(template.getThrottlingTier());
                 operations.add(operation);
 
                 productAPI.setOperations(operations);
@@ -1743,13 +1777,14 @@ public class APIMappingUtil {
 
         for (int i = 0; i < dto.getApis().size(); i++) {
             ProductAPIDTO res = dto.getApis().get(i);
-            List<ProductAPIOperationsDTO> productAPIOperationsDTO = res.getOperations();
-            for (ProductAPIOperationsDTO resourceItem : productAPIOperationsDTO) {
+            List<APIOperationsDTO> productAPIOperationsDTO = res.getOperations();
+            for (APIOperationsDTO resourceItem : productAPIOperationsDTO) {
 
                 URITemplate template = new URITemplate();
-                template.setHTTPVerb(resourceItem.getHttpVerb());
-                template.setResourceURI(resourceItem.getUritemplate());
-                template.setUriTemplate(resourceItem.getUritemplate());
+                template.setHTTPVerb(resourceItem.getVerb());
+                template.setResourceURI(resourceItem.getTarget());
+                template.setUriTemplate(resourceItem.getAuthType());
+                template.setThrottlingTier(resourceItem.getThrottlingPolicy());
 
                 APIProductResource resource = new APIProductResource();
                 resource.setApiId(res.getApiId());

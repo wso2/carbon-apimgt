@@ -256,7 +256,7 @@
   "Apis.Details.Monetization.Index.monetization.properties": "Monetization Properties",
   "Apis.Details.Monetization.Index.save": "Save",
   "Apis.Details.Monetization.Index.something.went.wrong.while.configuring.monetization": "Something went wrong while configuring monetization",
-  "Apis.Details.Monetization.Index.there.are.no.monetization.properties.configured": "There are no monetization properties configured",
+  "Apis.Details.Monetization.Index.there.are.no\n                                                        .monetization.properties.configured": "There are no monetization properties configured",
   "Apis.Details.NewOverview.AdditionalProperties.additional.properties": "Additional Properties",
   "Apis.Details.NewOverview.AdditionalProperties.edit": "Edit",
   "Apis.Details.NewOverview.BusinessInformation.business.email.not.configured": "Not Configured",

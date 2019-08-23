@@ -48,6 +48,7 @@ import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
 import Operations from './Operations/Operations';
 import Resources from './Resources/Resources';
+import ProductResourcesView from './Resources/ProductResourcesView';
 import Endpoints from './Endpoints/Endpoints';
 import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
@@ -187,8 +188,9 @@ class Details extends Component {
     componentDidUpdate() {
         const { api } = this.state;
         const { apiUUID } = this.props.match.params;
+        const { apiProdUUID } = this.props.match.params;
         const { isAPIProduct } = this.props.isAPIProduct;
-        if (!api || api.id === apiUUID) {
+        if (!api || (api.id === apiUUID || api.id === apiProdUUID)) {
             return;
         }
         if (isAPIProduct) {
@@ -230,9 +232,11 @@ class Details extends Component {
      */
     setAPIProduct() {
         const { apiProdUUID } = this.props.match.params;
+        const { isAPIProduct } = this.props;
         const promisedApi = APIProduct.get(apiProdUUID);
         promisedApi
             .then((api) => {
+                this.setState({ isAPIProduct });
                 this.setState({ api });
             })
             .catch((error) => {
@@ -505,6 +509,7 @@ class Details extends Component {
                             active={active}
                             Icon={<MonetizationIcon />}
                         />
+
                     </div>
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} />
@@ -539,6 +544,12 @@ class Details extends Component {
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
 
                                 <Route path={Details.subPaths.OPERATIONS} component={() => <Operations api={api} />} />
+                                <Route
+                                    path={Details.subPaths.RESOURCES_PRODUCT}
+                                    component={() =>
+                                        <ProductResourcesView api={api} />}
+                                />
+
                                 <Route path={Details.subPaths.RESOURCES} component={() => <Resources api={api} />} />
 
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
@@ -598,7 +609,7 @@ Details.subPaths = {
     ENDPOINTS: '/apis/:api_uuid/endpoints',
     OPERATIONS: '/apis/:api_uuid/operations',
     RESOURCES: '/apis/:api_uuid/resources',
-    RESOURCES_PRODUCT: '/api_products/:apiprod_uuid/resources',
+    RESOURCES_PRODUCT: '/api-products/:apiprod_uuid/resources',
     SCOPES: '/apis/:api_uuid/scopes',
     SCOPES_PRODUCT: '/api-products/:apiprod_uuid/scopes',
     DOCUMENTS: '/apis/:api_uuid/documents',

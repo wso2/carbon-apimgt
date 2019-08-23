@@ -211,7 +211,7 @@ class Scopes extends React.Component {
                     return op.scopes.includes(scope.name);
                 })
                 .map((op) => {
-                    return op.uritemplate + ' ' + op.httpVerb;
+                    return op.target + ' ' + op.verb;
                 });
             aScope.push(resources);
             return aScope;

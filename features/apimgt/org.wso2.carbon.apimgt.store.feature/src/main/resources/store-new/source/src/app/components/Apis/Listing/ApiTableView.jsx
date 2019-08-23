@@ -25,8 +25,8 @@ import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import CONSTS from 'AppData/Constants';
 import Configurations from 'Config';
+import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import ImageGenerator from './ImageGenerator';
-import StarRatingBar from './StarRating';
 import ApiThumb from './ApiThumb';
 import { ApiContext } from '../Details/ApiContext';
 
@@ -285,12 +285,20 @@ class ApiTableView extends React.Component {
                     customBodyRender: (value, tableMeta, updateValue) => {
                         if (tableMeta.rowData) {
                             const apiId = tableMeta.rowData[0];
-                            return <StarRatingColumn apiId={apiId} />;
+                            const avgRating = tableMeta.rowData[7];
+                            return <StarRatingBar apiRating={avgRating} apiId={apiId} isEditable={false} showSummary={false} />;
                         }
                     },
                     options: {
                         sort: false,
                     },
+                },
+            },
+            {
+                name: 'avgRating',
+                options: {
+                    display: 'excluded',
+                    filter: false,
                 },
             },
         ];

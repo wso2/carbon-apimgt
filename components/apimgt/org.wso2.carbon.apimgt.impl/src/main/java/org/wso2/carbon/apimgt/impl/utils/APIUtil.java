@@ -184,6 +184,7 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.tenant.TenantConstants;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -4591,6 +4592,26 @@ public final class APIUtil {
         return tenantDomains;
     }
 
+    /**
+     * Get tenants by state
+     * @param state state of the tenant
+     * @return set of tenants
+     * @throws UserStoreException
+     */
+    public static Set<String> getTenantDomainsByState(String state) throws UserStoreException {
+        boolean isActive = state.equalsIgnoreCase(APIConstants.TENANT_STATE_ACTIVE);
+        if (isActive) {
+            return getActiveTenantDomains();
+        }
+        Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
+        Set<String> tenantDomains = new HashSet<>();
+        for (Tenant tenant : tenants) {
+            if (!tenant.isActive()) {
+                tenantDomains.add(tenant.getDomain());
+            }
+        }
+        return tenantDomains;
+    }
 
     /**
      * Retrieves the role list of system

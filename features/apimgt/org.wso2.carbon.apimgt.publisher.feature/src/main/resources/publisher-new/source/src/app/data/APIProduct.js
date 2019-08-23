@@ -397,7 +397,7 @@ class APIProduct extends Resource {
                 apiDefinition: JSON.stringify(swagger),
                 'Content-Type': 'multipart/form-data',
             };
-            return client.apis['API Product (Individual)'].put_api_products__apiProductId__swagger(
+            return client.apis['API Products'].put_api_products__apiProductId__swagger(
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data'
@@ -417,7 +417,7 @@ class APIProduct extends Resource {
      */
     getSwagger(id) {
         const promiseGet = this.client.then((client) => {
-            return client.apis['API Product (Individual)'].get_api_products__apiProductId__swagger({
+            return client.apis['API Products'].get_api_products__apiProductId__swagger({
                 apiProductId: id
             }, this._requestMetaData());
         }).catch((error) => {

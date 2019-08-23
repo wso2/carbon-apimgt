@@ -39,11 +39,13 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -289,6 +291,28 @@ public class RestApiPublisherUtils {
         } finally {
             IOUtils.closeQuietly(docInputStream);
         }
+    }
+
+    /**
+     * This method will validate the given xml content for the syntactical correctness
+     *
+     * @param xmlContent string of xml content
+     * @return true if the xml content is valid, false otherwise
+     * @throws APIManagementException
+     */
+    public static boolean validateXMLSchema(String xmlContent) throws APIManagementException {
+        xmlContent = "<xml>" + xmlContent + "</xml>";
+        DocumentBuilderFactory factory = APIUtil.getSecuredDocumentBuilder();
+        factory.setValidating(false);
+        factory.setNamespaceAware(false);
+        try {
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            builder.parse(new InputSource(new StringReader(xmlContent)));
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            log.error("Error occurred while parsing the provided xml content.", e);
+            return false;
+        }
+        return true;
     }
 
 }
