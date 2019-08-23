@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>org.wso2.carbon.apimgt.hybrid.gateway</artifactId>
-        <version>6.5.60-SNAPSHOT</version>
+        <version>6.5.62-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -41,8 +41,8 @@
             <artifactId>org.wso2.carbon.utils</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.commons</groupId>
@@ -144,7 +144,7 @@
             <artifactId>slf4j-api</artifactId>
             <scope>test</scope>
         </dependency>
-    <dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <scope>provided</scope>
@@ -179,8 +179,9 @@
                             org.osgi.service.component.*,
                             org.apache.commons.logging; version="${commons.logging.imp.pkg.version}",
                             org.wso2.carbon.tenant.mgt.services.*; version="${carbon.multitenancy.version}",
-                            org.wso2.carbon.context.*;  version="${carbon.kernel.package.import.version.range}",
-                            org.wso2.carbon.core.multitenancy.*;  version="${carbon.kernel.package.import.version.range}",
+                            org.wso2.carbon.context.*; version="${carbon.kernel.package.import.version.range}",
+                            org.wso2.carbon.core.multitenancy.*;
+                            version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.stratos.common.*; version="${carbon.commons.imp.pkg.version}",
                             org.wso2.carbon.core.*; version="${carbon.kernel.package.import.version.range}",
                             org.osgi.framework.*,
@@ -204,18 +205,7 @@
                     </instructions>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>

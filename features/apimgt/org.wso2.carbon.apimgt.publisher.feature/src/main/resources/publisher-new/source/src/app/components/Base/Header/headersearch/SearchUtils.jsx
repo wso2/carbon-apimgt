@@ -29,6 +29,7 @@ import APIsIcon from '@material-ui/icons/SettingsApplicationsOutlined';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 
 import API from 'AppData/api';
+import SearchParser from './SearchParser';
 /* Utility methods defined here are described in
 * react-autosuggest documentation https://github.com/moroshko/react-autosuggest
 */
@@ -40,7 +41,7 @@ import API from 'AppData/api';
  */
 function renderInput(inputProps) {
     const {
-        classes, ref, isLoading, ...other
+        classes, ref, isLoading, onChange, ...other
     } = inputProps; // `isLoading` has destructured here to prevent passing unintended prop to TextField
     return (
         <TextField
@@ -54,6 +55,7 @@ function renderInput(inputProps) {
                         <SearchOutlined />
                     </InputAdornment>
                 ),
+                onChange,
                 ...other,
             }}
         />
@@ -112,19 +114,29 @@ function getSuggestionValue(suggestion) {
 }
 
 /**
+ * Build the search query from the user input
+ * @param searchText
+ * @returns {string}
+ */
+function buildSearchQuery(searchText){
+    const inputValue = searchText.trim().toLowerCase();
+    return SearchParser.parse(inputValue);
+}
+
+/**
  * Called for any input change to get the results set
  *
  * @param {String} value current value in input element
  * @returns {Promise} If no input text, return a promise which resolve to empty array, else return the API.all response
  */
 function getSuggestions(value) {
-    const inputValue = value.trim().toLowerCase();
-    const inputLength = inputValue.length;
-    if (inputLength === 0 || /:(\s+|(?![\s\S]))/g.test(inputValue)) {
+    const modifiedSearchQuery = buildSearchQuery(value);
+
+    if (value.trim().length === 0 || !modifiedSearchQuery) {
         return new Promise(resolve => resolve({ obj: { list: [] } }));
     } else {
-        return API.search({ query: inputValue, limit: 8 });
+        return API.search({ query: modifiedSearchQuery, limit: 8 });
     }
 }
 
-export { renderInput, renderSuggestion, getSuggestions, getSuggestionValue };
+export { renderInput, renderSuggestion, getSuggestions, getSuggestionValue, buildSearchQuery };

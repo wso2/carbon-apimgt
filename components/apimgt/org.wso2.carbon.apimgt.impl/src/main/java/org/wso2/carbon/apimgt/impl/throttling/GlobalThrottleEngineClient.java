@@ -23,7 +23,8 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
@@ -37,7 +38,7 @@ import java.rmi.RemoteException;
 
 public class GlobalThrottleEngineClient {
     private AuthenticationAdminStub authenticationAdminStub = null;
-    private static final Logger log = Logger.getLogger(GlobalThrottleEngineClient.class);
+    private static final Log log = LogFactory.getLog(GlobalThrottleEngineClient.class);
     ThrottleProperties.PolicyDeployer policyDeployerConfiguration = getPolicyDeployer();
 
     protected ThrottleProperties.PolicyDeployer getPolicyDeployer() {

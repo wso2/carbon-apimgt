@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.5.60-SNAPSHOT</version>
+        <version>6.5.62-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -234,7 +234,9 @@
                                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
                             </configOptions>
                             <output>.</output>
-                            <templateDirectory>../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-templates</templateDirectory>
+                            <templateDirectory>
+                                ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-templates
+                            </templateDirectory>
                             <skipOverwrite>true</skipOverwrite>
                             <modelNameSuffix>DTO</modelNameSuffix>
                         </configuration>
@@ -247,7 +249,9 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/publisher-api.yaml</inputSpec>
                             <language>org.wso2.carbon.apimgt.rest.api.util.codegen.DynamicHtmlGen</language>
-                            <templateDirectory>../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates</templateDirectory>
+                            <templateDirectory>
+                                ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates
+                            </templateDirectory>
                             <output>${project.build.directory}/apidocs</output>
                         </configuration>
                     </execution>
@@ -263,7 +267,8 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.parent.parent.basedir}/docs/apidocs/publisher/v1</outputDirectory>
+                            <outputDirectory>${project.parent.parent.basedir}/docs/apidocs/publisher/v1
+                            </outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.build.directory}/apidocs/docs</directory>
@@ -281,10 +286,13 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.parent.parent.basedir}/docs/apidocs/publisher/v1</outputDirectory>
+                            <outputDirectory>${project.parent.parent.basedir}/docs/apidocs/publisher/v1
+                            </outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates</directory>
+                                    <directory>
+                                        ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates
+                                    </directory>
                                     <excludes>
                                         <exclude>**/*.mustache</exclude>
                                     </excludes>
@@ -299,7 +307,8 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.parent.parent.basedir}/docs/apidocs/publisher/v1</outputDirectory>
+                            <outputDirectory>${project.parent.parent.basedir}/docs/apidocs/publisher/v1
+                            </outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}/src/main/resources/docs/static</directory>
@@ -322,14 +331,6 @@
                         <version>${maven.surefire.plugin.version}</version>
                     </dependency>
                 </dependencies>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

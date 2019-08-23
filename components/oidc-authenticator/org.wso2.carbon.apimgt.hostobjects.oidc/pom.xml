@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>oidc-authenticator</artifactId>
-        <version>6.5.60-SNAPSHOT</version>
+        <version>6.5.62-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -35,9 +35,9 @@
             <groupId>rhino.wso2</groupId>
             <artifactId>js</artifactId>
         </dependency>
-		<dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
+        <dependency>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-codec.wso2</groupId>
@@ -55,7 +55,7 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>org.apache.httpcomponents.wso2</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
@@ -72,7 +72,7 @@
             <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>
 
-    <dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <scope>provided</scope>
@@ -81,10 +81,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-            </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>

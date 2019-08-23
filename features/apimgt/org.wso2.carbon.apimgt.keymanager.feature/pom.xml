@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.5.60-SNAPSHOT</version>
+        <version>6.5.62-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -73,7 +73,7 @@
 
     <build>
         <plugins>
-	        <plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.1</version>
@@ -187,31 +187,54 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt:${carbon.apimgt.version}
+                                </bundleDef>
 
-                                <bundleDef>org.wso2.carbon.identity.framework:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}</bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.identity.framework:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}
+                                </bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                                 <bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
                                 <bundleDef>org.json.wso2:json:${orbit.version.json}</bundleDef>
-                                <bundleDef>org.wso2.uri.template:wso2-uri-templates:${wso2-uri-templates.version}</bundleDef>
-                                <bundleDef>com.fasterxml.jackson.core:jackson-core:${fasterxml.jackson.version}</bundleDef>
+                                <bundleDef>org.wso2.uri.template:wso2-uri-templates:${wso2-uri-templates.version}
+                                </bundleDef>
+                                <bundleDef>com.fasterxml.jackson.core:jackson-core:${fasterxml.jackson.version}
+                                </bundleDef>
                             </bundles>
                             <importBundles>
-                                <importBundleDef>org.wso2.carbon.identity.framework:org.wso2.carbon.identity.authenticator.thrift:${carbon.identity.version}</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.event-processing:org.wso2.carbon.event.processor.stub:${event.processor.stub.version}</importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon.identity.framework:org.wso2.carbon.identity.authenticator.thrift:${carbon.identity.version}
+                                </importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon.event-processing:org.wso2.carbon.event.processor.stub:${event.processor.stub.version}
+                                </importBundleDef>
                             </importBundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.oauth.server:${carbon.identity-inbound-auth-oauth.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.identity-user-ws.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.feature.version}
+                                </importFeatureDef>
+                                <importFeatureDef>
+                                    org.wso2.carbon.identity.oauth.server:${carbon.identity-inbound-auth-oauth.version}
+                                </importFeatureDef>
+                                <importFeatureDef>
+                                    org.wso2.carbon.um.ws.service.server:${carbon.identity-user-ws.version}
+                                </importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.core.feature:${carbon.apimgt.version}</includedFeatureDef>
+                                <includedFeatureDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.core.feature:${carbon.apimgt.version}
+                                </includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>
