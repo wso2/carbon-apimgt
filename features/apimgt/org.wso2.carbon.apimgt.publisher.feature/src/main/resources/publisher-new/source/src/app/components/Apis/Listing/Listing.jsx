@@ -33,11 +33,12 @@ const styles = {
  * @returns {React.Component} @inheritdoc
  */
 function Listing(props) {
-    const { classes, isAPIProduct, theme } = props;
-
+    const {
+        classes, isAPIProduct, theme, location: { search },
+    } = props;
     return (
         <main className={classes.content}>
-            <TableView isAPIProduct={isAPIProduct} theme={theme} />
+            <TableView isAPIProduct={isAPIProduct} theme={theme} query={search} />
         </main>
     );
 }
@@ -51,6 +52,15 @@ Listing.propTypes = {
         custom: PropTypes.string,
     }).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
+    location: PropTypes.shape({
+        search: PropTypes.string,
+    }),
+};
+
+Listing.defaultProps = {
+    location: PropTypes.shape({
+        search: '',
+    }),
 };
 
 export default withStyles(styles, { withTheme: true })(Listing);

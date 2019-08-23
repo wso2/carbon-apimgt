@@ -214,29 +214,31 @@ class ThumbnailView extends Component {
     }
 
     /**
-     * Load required data for showing the thubnail view
+     * Load required data for showing the thumbnail view
      */
     componentDidMount() {
-        const { api: { apiType, id } } = this.props;
-        const promisedThumbnail = apiType === Api.CONSTS.APIProduct ? new APIProduct().getAPIProductThumbnail(id) :
-            new Api().getAPIThumbnail(id);
+        const { api: { apiType, id, type } } = this.props;
+        if (type !== 'DOC') {
+            const promisedThumbnail = apiType === Api.CONSTS.APIProduct ? new APIProduct().getAPIProductThumbnail(id) :
+                new Api().getAPIThumbnail(id);
 
-        promisedThumbnail.then((response) => {
-            if (response && response.data) {
-                if (response.headers['content-type'] === 'application/json') {
-                    const iconJson = JSON.parse(response.data);
-                    this.setState({
-                        selectedIcon: iconJson.key,
-                        category: iconJson.category,
-                        color: iconJson.color,
-                        backgroundIndex: iconJson.backgroundIndex,
-                    });
-                } else if (response && response.data.size > 0) {
-                    const url = windowURL.createObjectURL(response.data);
-                    this.setState({ thumbnail: url });
+            promisedThumbnail.then((response) => {
+                if (response && response.data) {
+                    if (response.headers['content-type'] === 'application/json') {
+                        const iconJson = JSON.parse(response.data);
+                        this.setState({
+                            selectedIcon: iconJson.key,
+                            category: iconJson.category,
+                            color: iconJson.color,
+                            backgroundIndex: iconJson.backgroundIndex,
+                        });
+                    } else if (response && response.data.size > 0) {
+                        const url = windowURL.createObjectURL(response.data);
+                        this.setState({ thumbnail: url });
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -379,8 +381,13 @@ class ThumbnailView extends Component {
         } = this.state;
         let { category } = this.state;
         if (!category) category = MaterialIcons.categories[0].name;
-        const overviewPath = (api.apiType === Api.CONSTS.APIProduct) ?
-            `/api-products/${api.id}/overview` : `/apis/${api.id}/overview`;
+        let overviewPath = '';
+        if (api.apiType) {
+            overviewPath = (api.apiType === Api.CONSTS.APIProduct) ?
+                `/api-products/${api.id}/overview` : `/apis/${api.id}/overview`;
+        } else {
+            overviewPath = `/apis/${api.apiUUID}/documents/${api.id}/details`;
+        }
         let view;
 
         if (thumbnail) {
