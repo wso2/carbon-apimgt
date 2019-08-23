@@ -15,13 +15,12 @@
   ~  limitations under the License.
   -->
 
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-stubs</artifactId>
-        <version>6.5.61-SNAPSHOT</version>
+        <version>6.5.61</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -47,16 +46,13 @@
                         <configuration>
                             <tasks>
                                 <path id="wsdl2java.classpath">
-                                    <pathelement
-                                            location="${settings.localRepository}/org/apache/ws/commons/axiom/wso2/axiom/${orbit.version.axiom}/axiom-${orbit.version.axiom}.jar"/>
-                                    <pathelement
-                                            location="${settings.localRepository}/org/apache/axis2/wso2/axis2-client/${axis2.wso2.version}/axis2-client-${axis2.wso2.version}.jar"/>
-                                    <pathelement
-                                            location="${settings.localRepository}/org/apache/axis2/wso2/axis2/${axis2.wso2.version}/axis2-${axis2.wso2.version}.jar"/>
+                                    <pathelement location="${settings.localRepository}/org/apache/ws/commons/axiom/wso2/axiom/${orbit.version.axiom}/axiom-${orbit.version.axiom}.jar" />
+                                    <pathelement location="${settings.localRepository}/org/apache/axis2/wso2/axis2-client/${axis2.wso2.version}/axis2-client-${axis2.wso2.version}.jar" />
+                                    <pathelement location="${settings.localRepository}/org/apache/axis2/wso2/axis2/${axis2.wso2.version}/axis2-${axis2.wso2.version}.jar" />
                                 </path>
                                 <java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
-                                    <arg line="-uri src/main/resources/APILocalEntryAdmin.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.apimgt.localentry.stub -ns2p http://service.gateway.apimgt.carbon.wso2.org=org.wso2.carbon.apimgt.localentry.stub"/>
-                                    <classpath refid="wsdl2java.classpath"/>
+                                    <arg line="-uri src/main/resources/APILocalEntryAdmin.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.apimgt.localentry.stub -ns2p http://service.gateway.apimgt.carbon.wso2.org=org.wso2.carbon.apimgt.localentry.stub" />
+                                    <classpath refid="wsdl2java.classpath" />
                                 </java>
                             </tasks>
                         </configuration>

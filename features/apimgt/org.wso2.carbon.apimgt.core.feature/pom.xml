@@ -15,13 +15,12 @@
  ~ limitations under the License.
 -->
 
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.5.61-SNAPSHOT</version>
+        <version>6.5.61</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -59,7 +58,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <delete file="src/main/resources/repository/database/WSO2AM_DB.mv.db"/>
+                                <delete file="src/main/resources/repository/database/WSO2AM_DB.mv.db" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -72,18 +71,16 @@
                         <configuration>
                             <tasks>
                                 <path id="h2.classpath">
-                                    <path refid="maven.compile.classpath"/>
+                                    <path refid="maven.compile.classpath" />
                                 </path>
-                                <echo message="########### Creating API Manager Database ##############"/>
-                                <sql driver="org.h2.Driver"
-                                     url="jdbc:h2:${basedir}/src/main/resources/repository/database/WSO2AM_DB;create=true"
-                                     userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
+                                <echo message="########### Creating API Manager Database ##############" />
+                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/src/main/resources/repository/database/WSO2AM_DB;create=true" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
                                     <classpath>
-                                        <path refid="h2.classpath"/>
+                                        <path refid="h2.classpath" />
                                     </classpath>
-                                    <fileset file="${basedir}/src/main/resources/sql/h2.sql"/>
+                                    <fileset file="${basedir}/src/main/resources/sql/h2.sql" />
                                 </sql>
-                                <echo message="##################### END ########################"/>
+                                <echo message="##################### END ########################" />
                             </tasks>
                         </configuration>
                     </execution>

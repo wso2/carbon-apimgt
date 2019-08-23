@@ -16,14 +16,13 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-stubs</artifactId>
-        <version>6.5.61-SNAPSHOT</version>
+        <version>6.5.61</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -50,24 +49,21 @@
                         <configuration>
                             <tasks>
                                 <path id="wsdl2java.classpath">
-                                    <pathelement
-                                            location="${settings.localRepository}/org/apache/ws/commons/axiom/wso2/axiom/${orbit.version.axiom}/axiom-${orbit.version.axiom}.jar"/>
-                                    <pathelement
-                                            location="${settings.localRepository}/org/apache/axis2/wso2/axis2-client/${axis2.wso2.version}/axis2-client-${axis2.wso2.version}.jar"/>
-                                    <pathelement
-                                            location="${settings.localRepository}/org/apache/axis2/wso2/axis2/${axis2.wso2.version}/axis2-${axis2.wso2.version}.jar"/>
+                                    <pathelement location="${settings.localRepository}/org/apache/ws/commons/axiom/wso2/axiom/${orbit.version.axiom}/axiom-${orbit.version.axiom}.jar" />
+                                    <pathelement location="${settings.localRepository}/org/apache/axis2/wso2/axis2-client/${axis2.wso2.version}/axis2-client-${axis2.wso2.version}.jar" />
+                                    <pathelement location="${settings.localRepository}/org/apache/axis2/wso2/axis2/${axis2.wso2.version}/axis2-${axis2.wso2.version}.jar" />
                                 </path>
                                 <java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
-                                    <arg line="-uri src/main/resources/APIKeyMgtProviderService.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.apimgt.keymgt.stub.provider -ns2p http://service.keymgt.apimgt.carbon.wso2.org=org.wso2.carbon.apimgt.keymgt.stub.provider,http://keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.carbon,http://org.apache.axis2/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.axis2,http://dto.keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.dto"/>
-                                    <classpath refid="wsdl2java.classpath"/>
+                                    <arg line="-uri src/main/resources/APIKeyMgtProviderService.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.apimgt.keymgt.stub.provider -ns2p http://service.keymgt.apimgt.carbon.wso2.org=org.wso2.carbon.apimgt.keymgt.stub.provider,http://keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.carbon,http://org.apache.axis2/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.axis2,http://dto.keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.dto" />
+                                    <classpath refid="wsdl2java.classpath" />
                                 </java>
                                 <java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
-                                    <arg line="-uri src/main/resources/APIKeyMgtSubscriberService.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.apimgt.keymgt.stub.subscriber -ns2p http://service.keymgt.apimgt.carbon.wso2.org=org.wso2.carbon.apimgt.keymgt.stub.subscriber,http://keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.carbon,http://org.apache.axis2/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.axis2,http://dto.keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.dto"/>
-                                    <classpath refid="wsdl2java.classpath"/>
+                                    <arg line="-uri src/main/resources/APIKeyMgtSubscriberService.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.apimgt.keymgt.stub.subscriber -ns2p http://service.keymgt.apimgt.carbon.wso2.org=org.wso2.carbon.apimgt.keymgt.stub.subscriber,http://keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.carbon,http://org.apache.axis2/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.axis2,http://dto.keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.dto" />
+                                    <classpath refid="wsdl2java.classpath" />
                                 </java>
                                 <java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
-                                    <arg line="-uri src/main/resources/APIKeyValidationService.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.apimgt.keymgt.stub.validator -ns2p http://service.keymgt.apimgt.carbon.wso2.org=org.wso2.carbon.apimgt.keymgt.stub.validator,http://keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.carbon,http://org.apache.axis2/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.axis2,http://dto.keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.dto"/>
-                                    <classpath refid="wsdl2java.classpath"/>
+                                    <arg line="-uri src/main/resources/APIKeyValidationService.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.apimgt.keymgt.stub.validator -ns2p http://service.keymgt.apimgt.carbon.wso2.org=org.wso2.carbon.apimgt.keymgt.stub.validator,http://keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.carbon,http://org.apache.axis2/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.axis2,http://dto.keymgt.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.dto" />
+                                    <classpath refid="wsdl2java.classpath" />
                                 </java>
                             </tasks>
                         </configuration>
