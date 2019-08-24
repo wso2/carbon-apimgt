@@ -21,12 +21,18 @@ import { TagCloud } from 'react-tagcloud';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
+import { Link } from 'react-router-dom';
+import Paper from '@material-ui/core/Paper';
 import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
 import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
 import ApiTableView from './ApiTableView';
 
 const styles = theme => ({
+    root: {
+        marginTop: theme.spacing.unit * 2,
+        padding: theme.spacing.unit * 3,
+    },
     tagCloudWrapper: {
         display: 'flex',
         flexDirection: 'row',
@@ -38,9 +44,17 @@ const styles = theme => ({
     },
     mainTitle: {
         paddingTop: 10,
+        paddingBottom: theme.spacing.unit * 3,
     },
     tags: {
         paddingLeft: theme.spacing.unit * 3,
+        width: theme.spacing.unit * 30,
+    },
+    selectedTagSpacing: {
+        paddingLeft: theme.spacing.unit * 3,
+    },
+    clickablePointer: {
+        cursor: 'pointer',
     },
 });
 
@@ -99,29 +113,35 @@ class ApiTagCloud extends React.Component {
         const { classes, listType, apiType } = this.props;
         const { allTags, selectedTag } = this.state;
         const options = {
-            luminosity: 'light',
+            luminosity: 'dark',
             hue: 'blue',
         };
         return (
-            <div>
+            <div className={classes.tagCloudWrapper}>
                 {allTags && (
-                    <div className={classes.tags}>
-                        <Typography variant='display1' className={classes.mainTitle}>
-                            <FormattedMessage defaultMessage='Tags' id='Apis.Listing.ApiTagCloud.tags.heading' />
-                        </Typography>
-                        <div className={classes.tagCloudWrapper}>
-                            <TagCloud
-                                minSize={12}
-                                maxSize={35}
-                                colorOptions={options}
-                                tags={allTags}
-                                onClick={tag => this.handleOnClick(tag)}
-                            />
+                    <Paper className={classes.root}>
+                        <div className={classes.tags}>
+                            <div>
+                                <Typography variant='display1' className={classes.mainTitle}>
+                                    <FormattedMessage defaultMessage='Tags' id='Apis.Listing.ApiTagCloud.tags.heading' />
+                                </Typography>
+                            </div>
+                            <div>
+                                <TagCloud
+                                    minSize={12}
+                                    maxSize={35}
+                                    colorOptions={options}
+                                    tags={allTags}
+                                    shuffle={false}
+                                    className={classes.clickablePointer}
+                                    onClick={tag => this.handleOnClick(tag)}
+                                />
+                            </div>
                         </div>
-                    </div>
+                    </Paper>
                 )}
                 { selectedTag && (
-                    <div className={classes.tags}>
+                    <div className={classes.selectedTagSpacing}>
                         <Typography variant='display1' className={classes.mainTitle}>
                             {' ('}
                             {selectedTag}
