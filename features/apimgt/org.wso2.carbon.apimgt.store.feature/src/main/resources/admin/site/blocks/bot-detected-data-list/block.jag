@@ -1,0 +1,25 @@
+<%
+var log = new Log()
+include("/jagg/jagg.jag");
+
+jagg.block("bot-detected-data-list", {
+    initializer:function (data) {},
+
+    getInputs:function () {
+        return {};
+    },
+
+    getOutputs:function (inputs) {
+        var alertData, result;
+        result = jagg.module("bot-detected-data").getAlert();
+        alertData = result.alertData;
+
+        // we put results to the session.
+       // session.put("alertData", alertData);
+
+        return {
+            "alertData":alertData
+        };
+    }
+});
+%>

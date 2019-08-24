@@ -306,10 +306,8 @@
     "Client IP" : "Client IP",
     "Remove" : "Remove",
     "No Alert triggered" : "No Alert triggered",
-    "HoneyPot API ALert List": "HoneyPot API ALert List",
-    "Alert List": "Alert List",
-    "Email Alert configuring": "Email Alert configuring",
-    "Email Notification": "Email Notification",
+    "Configure Emails": "Configure Emails",
     "Bot Detection": "Bot Detection",
-    "Bot Detection Alert List": "Bot Detection Alert List"
+    "Bot Detected Data List": "Bot Detected Data List",
+    "Bot Detected Data": "Bot Detected Data"
 }

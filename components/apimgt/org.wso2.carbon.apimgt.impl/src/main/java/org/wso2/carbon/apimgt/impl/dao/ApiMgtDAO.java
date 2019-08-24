@@ -77,7 +77,7 @@ import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 =======
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.honeypotAPI.HoneyPotAPIAlertData;
+import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectedData;
 import org.wso2.carbon.apimgt.api.model.policy.*;
 >>>>>>> 6a2cb72309... added local part of UI
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -13923,74 +13923,74 @@ public class ApiMgtDAO {
      *
      * @return HoneyPotAPIAlertdata ArrayList
      */
-    public List<HoneyPotAPIAlertData> getAlerts() throws APIManagementException {
-        List<HoneyPotAPIAlertData> alertData = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String getHoneypotApiAlertsQuery = SQLConstants.HoneyPotAPIDataConstants.GET_HONEYPOT_API_ALERTS;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(getHoneypotApiAlertsQuery);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                HoneyPotAPIAlertData honeyPotAPIAlertData = new HoneyPotAPIAlertData();
-                honeyPotAPIAlertData.setCurrentTime(rs.getLong("REQUEST_TIME"));
-                honeyPotAPIAlertData.setMessageID(rs.getString("MESSAGE_ID"));
-                honeyPotAPIAlertData.setApiMethod(rs.getString("HTTP_METHOD"));
-                honeyPotAPIAlertData.setHeaderSet(rs.getString("HEADERS"));
-                honeyPotAPIAlertData.setMessageBody(rs.getString("MESSAGE_BODY"));
-                honeyPotAPIAlertData.setClientIp(rs.getString("CLIENT_IP"));
-                alertData.add(honeyPotAPIAlertData);
-            }
-        } catch (SQLException e) {
-            handleException("Error while executing SQL", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return alertData;
-    }
+//    public List<BotDetectedData> getAlerts() throws APIManagementException {
+//        List<BotDetectedData> alertData = new ArrayList<>();
+//        Connection conn = null;
+//        PreparedStatement ps = null;
+//        ResultSet rs = null;
+//        String getHoneypotApiAlertsQuery = SQLConstants.BotDataConstants.GET_HONEYPOT_API_ALERTS;
+//        try {
+//            conn = APIMgtDBUtil.getConnection();
+//            ps = conn.prepareStatement(getHoneypotApiAlertsQuery);
+//            rs = ps.executeQuery();
+//            while (rs.next()) {
+//                BotDetectedData honeyPotAPIAlertData = new BotDetectedData();
+//                honeyPotAPIAlertData.setCurrentTime(rs.getLong("REQUEST_TIME"));
+//                honeyPotAPIAlertData.setMessageID(rs.getString("MESSAGE_ID"));
+//                honeyPotAPIAlertData.setApiMethod(rs.getString("HTTP_METHOD"));
+//                honeyPotAPIAlertData.setHeaderSet(rs.getString("HEADERS"));
+//                honeyPotAPIAlertData.setMessageBody(rs.getString("MESSAGE_BODY"));
+//                honeyPotAPIAlertData.setClientIp(rs.getString("CLIENT_IP"));
+//                alertData.add(honeyPotAPIAlertData);
+//            }
+//        } catch (SQLException e) {
+//            handleException("Error while executing SQL", e);
+//        } finally {
+//            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+//        }
+//        return alertData;
+//    }
 
     /**
      * Delete Honey Pot API alert basd on message ID from the DB
      */
-    public void deleteHoneyPotAlert(String messageID) throws SQLException, APIManagementException {
-
-        Connection connection = APIMgtDBUtil.getConnection();
-        try {
-            PreparedStatement statement = connection.prepareStatement(SQLConstants.HoneyPotAPIDataConstants.DELETE_HONEYPOT_API_ALERT_SQL);
-            initialAutoCommit = connection.getAutoCommit();
-            connection.setAutoCommit(false);
-            statement.setString(1, messageID);
-            statement.executeUpdate();
-            connection.commit();
-        } catch (SQLException e) {
-            connection.rollback();
-            handleException("Failed to delete alert message : " + messageID, e);
-        } finally {
-            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
-        }
-
-    }
+//    public void deleteHoneyPotAlert(String messageID) throws SQLException, APIManagementException {
+//
+//        Connection connection = APIMgtDBUtil.getConnection();
+//        try {
+//            PreparedStatement statement = connection.prepareStatement(SQLConstants.BotDataConstants.DELETE_HONEYPOT_API_ALERT_SQL);
+//            initialAutoCommit = connection.getAutoCommit();
+//            connection.setAutoCommit(false);
+//            statement.setString(1, messageID);
+//            statement.executeUpdate();
+//            connection.commit();
+//        } catch (SQLException e) {
+//            connection.rollback();
+//            handleException("Failed to delete alert message : " + messageID, e);
+//        } finally {
+//            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+//        }
+//
+//    }
 
     /**
      * Configure email list
      * modify email list by adding or removing emails
      */
-    public void addHoneyPotAPiEmailAlertConfiguration(String email) throws SQLException, APIManagementException {
+    public void addBotDataEmailConfiguration(String email) throws SQLException, APIManagementException {
         Connection connection;
         PreparedStatement ps = null;
         ResultSet rs = null;
         connection = APIMgtDBUtil.getConnection();
         connection.setAutoCommit(false);
         try {
-                String emailListSaveQuery = SQLConstants.HoneyPotAPIDataConstants.ADD_NOTIFICATION;
+                String emailListSaveQuery = SQLConstants.BotDataConstants.ADD_NOTIFICATION;
                 ps = connection.prepareStatement(emailListSaveQuery);
                 UUID uuid = UUID.randomUUID();
                 String randomUUIDString = uuid.toString();
                 String category = "Bot-Detection";
                 String notificationType = "email";
-                //HoneyPotAPIAlertData honeyPotAPIAlertData = new HoneyPotAPIAlertData();
+                //BotDetectedData botDetectedData = new BotDetectedData();
                 ps.setString(1,randomUUIDString);
                 ps.setString(2,category);
                 ps.setString(3, notificationType);
@@ -14005,28 +14005,28 @@ public class ApiMgtDAO {
     }
 
     /**
-     * retrieve email list which configured for HoneyPot Api alert
+     * retrieve email list which configured for BotDetectedData Api alert
      */
-    public List<HoneyPotAPIAlertData> retrieveSavedHoneyPotAPIAlertEmailList()
+    public List<BotDetectedData> retrieveSavedBotDataEmailList()
             throws APIManagementException {
 
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        List<HoneyPotAPIAlertData> list = new ArrayList<>();
+        List<BotDetectedData> list = new ArrayList<>();
 
         try {
             String sqlQuery;
             conn = APIMgtDBUtil.getConnection();
-            sqlQuery = SQLConstants.HoneyPotAPIDataConstants.GET_SAVED_ALERT_EMAILS;
+            sqlQuery = SQLConstants.BotDataConstants.GET_SAVED_ALERT_EMAILS;
             ps = conn.prepareStatement(sqlQuery);
             //ps.setString(1, tenantDomain);
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
-                HoneyPotAPIAlertData honeyPotAPIAlertData = new HoneyPotAPIAlertData();
-                honeyPotAPIAlertData.setUuid(resultSet.getString("UUID"));
-                honeyPotAPIAlertData.setEmail(resultSet.getString("SUBSCRIBER_ADDRESS"));
-                list.add(honeyPotAPIAlertData);
+                BotDetectedData botDetectedData = new BotDetectedData();
+                botDetectedData.setUuid(resultSet.getString("UUID"));
+                botDetectedData.setEmail(resultSet.getString("SUBSCRIBER_ADDRESS"));
+                list.add(botDetectedData);
             }
         } catch (SQLException e) {
             handleException("Failed to retrieve saved email types by tenant Name. ", e);
@@ -14040,7 +14040,7 @@ public class ApiMgtDAO {
     /**
      * Delete email list from the database by using the tenantDomain
      */
-    public void deleteHoneyPotAPIAlertEmailList(String uuid) throws APIManagementException, SQLException {
+    public void deleteBotDataEmailList(String uuid) throws APIManagementException, SQLException {
 
         Connection connection;
         PreparedStatement ps = null;
@@ -14050,7 +14050,7 @@ public class ApiMgtDAO {
 
         try {
             connection.setAutoCommit(false);
-            String deleteEmail = SQLConstants.HoneyPotAPIDataConstants.DELETE_EMAIL_BY_UUID;
+            String deleteEmail = SQLConstants.BotDataConstants.DELETE_EMAIL_BY_UUID;
             ps = connection.prepareStatement(deleteEmail);
             ps.setString(1, uuid);
             ps.execute();

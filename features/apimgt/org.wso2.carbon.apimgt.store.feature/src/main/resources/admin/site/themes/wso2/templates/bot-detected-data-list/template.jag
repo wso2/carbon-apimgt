@@ -1,0 +1,60 @@
+<% jagg.template("bot-detected-data-list", function(inputs, outputs, jagg) { %>
+
+<div id="listing">
+    <div class="page-header">
+        <h2>Bot Detected Data</h2>
+    </div>
+    <div class="content-section shadow-up">
+    <div class="content-data">
+
+    <%
+    var log = new Log();
+    if(outputs.alertData.length != 0) { %>
+    <table class="table table-responsive table-striped" >
+        <thead>
+            <tr>
+                <th class=""><b>Record Time</b></th>
+                <th class=""><b>Message ID<b></th>
+                <th class=""><b>API Method</b></th>
+                <th class=""><b>Headers Set</b></th>
+                <th class=""><b>Message Body</b></th>
+                <th class=""><b>Client IP</b></th>
+            </tr>
+        </thead>
+
+       <%
+         var ArrayList = Packages.java.util.ArrayList;
+         var alertInfo = outputs.alertData;
+         var alertData=outputs['alertData'];
+         var len=alertData.length.toFixed(0);
+         for(var j=0;j<alertData.length;j++){
+            //log.info(j);
+            //log.info(alertData[j]['records']);
+         }
+
+        for(var i=0; i<alertData.length;i++) {
+            var time = alertData[i]['records']['REQUEST_TIME'];
+            var recordTime = new Date(time).toLocaleString();
+        %>
+
+        <tr>
+            <td><b><%print(recordTime);%></b></td>
+            <td><%print(alertData[i]['records']['MESSAGE_ID']);%></td>
+            <td><%print(alertData[i]['records']['HTTP_METHOD']);%></td>
+            <td><%print(alertData[i]['records']['HEADERS']);%></td>
+            <td><%print(alertData[i]['records']['MESSAGE_BODY']);%></td>
+            <td><%print(alertData[i]['records']['CLIENT_IP']);%></td>
+         </tr>
+         <%}%>
+    </table>
+    <%} else {%>
+    <div class="message message-info">
+   	    <h4><i class="icon fw fw-info"></i><%=i18n.localize("No Alert triggered")%></h4>
+   		<p><%=i18n.localize("No Alert triggered")%></p>
+   	</div>
+   <% }%>
+
+    </div>
+    </div>
+</div>
+<% }); %>

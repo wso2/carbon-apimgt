@@ -25,7 +25,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
-import org.wso2.carbon.apimgt.api.model.honeypotAPI.HoneyPotAPIAlertData;
+import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectedData;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -161,6 +161,22 @@ public class APIAdminImpl implements APIAdmin {
     public MonetizationUsagePublishInfo getMonetizationUsagePublishInfo() throws APIManagementException {
         return apiMgtDAO.getMonetizationUsagePublishInfo();
     }
+    /*
+    Get alert
+    list which
+    cominf from
+    botData API
+     */
+//    public List<BotDetectedData> getAlert() throws APIManagementException {
+//        return apiMgtDAO.getAlerts();
+//    }
+
+    /**
+     * delete botData api alert my using the messageID
+     */
+//    public void deleteHoneyPotAlert(String messageID) throws APIManagementException, SQLException {
+//        apiMgtDAO.deleteHoneyPotAlert(messageID);
+//    }
 
     /**
      * Updates info about monetization usage publish job
@@ -170,65 +186,50 @@ public class APIAdminImpl implements APIAdmin {
     public void updateMonetizationUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
             throws APIManagementException {
         apiMgtDAO.updateUsagePublishInfo(monetizationUsagePublishInfo);
-    }
-
-    /**
-     * Add info about monetization usage publish job
-     *
-     * @throws APIManagementException
-     */
-    public static List<HoneyPotAPIAlertData> retrieveSavedHoneyPotAPIAlertEmailList() throws APIManagementException {
-
-        List<HoneyPotAPIAlertData> list;
-        list = ApiMgtDAO.getInstance().retrieveSavedHoneyPotAPIAlertEmailList();
-        return list;
-    }
-
-    /**
-     * The method converts the date into timestamp
-     *
-     * @param date
-     * @return Timestamp in long format
-     */
-    public long getTimestamp(String date) {
-
-        SimpleDateFormat formatter = new SimpleDateFormat(APIConstants.Monetization.USAGE_PUBLISH_TIME_FORMAT);
-        formatter.setTimeZone(TimeZone.getTimeZone(APIConstants.Monetization.USAGE_PUBLISH_TIME_ZONE));
-        long time = 0;
-        Date parsedDate = null;
-        try {
-            parsedDate = formatter.parse(date);
-            time = parsedDate.getTime();
-        } catch (java.text.ParseException e) {
-            log.error("Error while parsing the date ", e);
+        public void addBotDataEmailConfiguration (String email) throws APIManagementException, SQLException {
+            apiMgtDAO.addBotDataEmailConfiguration(email);
         }
-        return time;
+
+        /**
+         * Add info about monetization usage publish job
+         *
+         * @throws APIManagementException
+         */
+        public static List<BotDetectedData> retrieveSavedBotDataEmailList () throws APIManagementException {
+
+            List<BotDetectedData> list;
+            list = ApiMgtDAO.getInstance().retrieveSavedBotDataEmailList();
+            return list;
+        }
+
+        /**
+         * The method converts the date into timestamp
+         *
+         * @param date
+         * @return Timestamp in long format
+         */
+        public long getTimestamp (String date){
+
+            SimpleDateFormat formatter = new SimpleDateFormat(APIConstants.Monetization.USAGE_PUBLISH_TIME_FORMAT);
+            formatter.setTimeZone(TimeZone.getTimeZone(APIConstants.Monetization.USAGE_PUBLISH_TIME_ZONE));
+            long time = 0;
+            Date parsedDate = null;
+            try {
+                parsedDate = formatter.parse(date);
+                time = parsedDate.getTime();
+            } catch (java.text.ParseException e) {
+                log.error("Error while parsing the date ", e);
+            }
+            return time;
+        }
         /*
          *get Honeypot API alerts from the database
          */
         public List<HoneyPotAPIAlertData> getAlert () throws APIManagementException {
             return apiMgtDAO.getAlerts();
         }
-
-        public void deleteHoneyPotAlert (String messageID) throws APIManagementException, SQLException {
-            apiMgtDAO.deleteHoneyPotAlert(messageID);
-        }
-
-        public void addHoneyPotAPiEmailAlertConfiguration (String emailList, String tenantDomain) throws
-        APIManagementException, SQLException {
-            apiMgtDAO.addHoneyPotAPiEmailAlertConfiguration(emailList, tenantDomain);
-        }
-
-        public static List<String> retrieveSavedHoneyPotAPIAlertEmailList (String userName) throws
-        APIManagementException {
-
-            List<String> list;
-            list = ApiMgtDAO.getInstance().retrieveSavedHoneyPotAPIAlertEmailList(userName);
-
-            return list;
-        }
-
-        public void deleteHoneyPotAPIAlertEmailList (String tenantDomain) throws APIManagementException, SQLException {
-            apiMgtDAO.deleteHoneyPotAPIAlertEmailList(tenantDomain);
+        public void deleteBotDataEmailList (String uuid) throws APIManagementException, SQLException {
+            apiMgtDAO.deleteBotDataEmailList(uuid);
         }
     }
+}
