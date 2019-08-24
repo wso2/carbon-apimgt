@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.apimgt.usage.publisher;
 
 import org.apache.commons.logging.Log;
@@ -31,9 +31,9 @@ import org.wso2.carbon.databridge.commons.exception.TransportException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublisher{
+public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublisher {
 
-    private static final Log log   = LogFactory.getLog(APIMgtUsageDataBridgeDataPublisher.class);
+    private static final Log log = LogFactory.getLog(APIMgtUsageDataBridgeDataPublisher.class);
 
     protected DataPublisher dataPublisher;
     private static DataPublisher dataPublisherStatics;
@@ -118,7 +118,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
                                 serverPassword);
                     }
                 }
-            }  catch (DataEndpointConfigurationException e) {
+            } catch (DataEndpointConfigurationException e) {
                 log.error("Error while creating data publisher", e);
             } catch (DataEndpointException e) {
                 log.error("Error while creating data publisher", e);
@@ -136,6 +136,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
 
     /**
      * This method will publish event for alert types configurations.
+     *
      * @param alertTypeDTO DTO object.
      * @throws APIManagementException
      */
@@ -148,7 +149,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getAlertTypeStreamName() + ":" +
                     DataPublisherUtil.getApiManagerAnalyticsConfiguration().getAlertTypeStreamVersion();
 
-            dataPublisher.tryPublish(streamID,System.currentTimeMillis(), null, null,
+            dataPublisher.tryPublish(streamID, System.currentTimeMillis(), null, null,
                     (Object[]) dataBridgeAlertTypesPublisherDTO.createPayload());
         } catch (Exception e) {
             log.error("Error while publishing alert types events.", e);
@@ -166,14 +167,14 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
                         + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion();
                 //Publish Request Data
                 dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
-                        (Object[]) dataBridgeRequestStreamPublisherDTO.createMetaData(), null,
+                        dataBridgeRequestStreamPublisherDTO.createMetaData(), null,
                         (Object[]) dataBridgeRequestStreamPublisherDTO.createPayload());
-            } catch(Exception e){
+            } catch (Exception e) {
                 log.error("Error while publishing Request event", e);
             }
         } else {
             log.error("RequestResponse event dropped due to unavailability of mandatory data: "
-            + missingMandatoryValues.toString() + " in event: " + dataBridgeRequestStreamPublisherDTO.toString());
+                    + missingMandatoryValues.toString() + " in event: " + dataBridgeRequestStreamPublisherDTO.toString());
         }
     }
 
@@ -185,12 +186,12 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             try {
                 String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getBotDataStreamName() + ":"
                         + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getBotStreamVersion();
-                dataPublisher.tryPublish(streamID, null,(Object[]) dataBridgeBotDataDTO.createPayload(),
+                dataPublisher.tryPublish(streamID, null, (Object[]) dataBridgeBotDataDTO.createPayload(),
                         null);
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.error("Error while publishing Request event", e);
             }
-        }else {
+        } else {
             log.error("RequestResponse event dropped due to unavailability of mandatory data: "
                     + missingMandatoryValues.toString() + " in event: " + dataBridgeBotDataDTO.toString());
         }

@@ -2099,83 +2099,15 @@
         }
       }
     },
-    "/honeyPot/getAlertData": {
+    "/botData/getEmailList": {
       "get": {
-        "x-scope": "apim:honey_api",
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer 7469aa7c-5e29-3d2b-a144-5d8160c91176\" -H \"accept: application/json\" https://localhost:9443/api/am/admin/v0.14/honeyPot/getAlertData",
-        "produces": [
-          "application/json"
-        ],
-        "summary": "Get all Honeypot API alert data\n",
-        "description": "Get all triggered Honeypot API alert data\n",
-        "responses": {
-          "200": {
-            "description": "OK.\nExport Successful.\n"
-          },
-          "400": {
-            "description": "Bad Request.\nInvalid request or validation error\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Not Found.\nRequested Data does not exist.\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "406": {
-            "description": "Not Acceptable.\nThe requested media type is not supported\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/honeyPot/deleteAlertData": {
-      "delete": {
-        "x-scope": "apim:honey_api",
-        "x-wso2-curl": "curl -k -X DELETE -H \"Authorization: Bearer 7469aa7c-5e29-3d2b-a144-5d8160c91176\" https://localhost:9443/api/am/admin/v0.14/honeyPot/deleteAlertData?messageID=urn:uuid:f44c5ad5-c5af-42b3-8823-360b72afa27b -H \"accept: application/json\"",
-        "summary": "Delete an alert data.",
-        "description": "Get a alert record by the messageID and remove it from DB.\n",
-        "parameters": [
-          {
-            "name": "messageID",
-            "in": "query",
-            "description": "Pass the messageID to remove the record\n",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK.\nResource successfully deleted.\n"
-          },
-          "404": {
-            "description": "Not Found.\nResource to be deleted does not exist.\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "412": {
-            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/honeyPot/getEmailList": {
-      "get": {
-        "x-scope": "apim:honey_api",
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer 8739edc7-7c95-34d5-895a-398fe5dd5972\" https://localhost:9443/api/am/admin/v0.14/honeyPot/getEmailList -H \"accept: application/json\"",
+        "x-scope": "apim:bot_data",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer 8739edc7-7c95-34d5-895a-398fe5dd5972\" https://localhost:9443/api/am/admin/v0.14/botData/getEmailList -H \"accept: application/json\"",
         "produces": [
           "application/json"
         ],
         "summary": "Get all configured email list\n",
-        "description": "Get all email list which configured to trigger for Honeypot api email alert\n",
+        "description": "Get all email list which configured to trigger for BotData api email alert\n",
         "parameters": [
           {
             "name": "tenantDomain",
@@ -2210,10 +2142,10 @@
         }
       }
     },
-    "/honeyPot/email": {
+    "/botData/deleteEmail": {
       "delete": {
-        "x-scope": "apim:honey_api",
-        "x-wso2-curl": "curl -k -X DELETE -H \"Authorization: Bearer 7469aa7c-5e29-3d2b-a144-5d8160c91176\" https://localhost:9443/api/am/admin/v0.14/honeyPot/email?uuid=23a2a896-bd58-46ec-83c7-2f2b5cc09284 -H \"accept: application/json\"",
+        "x-scope": "apim:bot_data",
+        "x-wso2-curl": "curl -k -X DELETE -H \"Authorization: Bearer 7469aa7c-5e29-3d2b-a144-5d8160c91176\" https://localhost:9443/api/am/admin/v0.14/botData/deleteEmail?uuid=23a2a896-bd58-46ec-83c7-2f2b5cc09284 -H \"accept: application/json\"",
         "summary": "Delete an configured email.",
         "description": "Delete an configured email from DB by pasing uuid.\n",
         "parameters": [
@@ -2244,9 +2176,9 @@
         }
       }
     },
-    "/honeyPot/addEmail": {
+    "/botData/addEmail": {
       "post": {
-        "x-scope": "apim:honey_api",
+        "x-scope": "apim:bot_data",
         "summary": "Add an Email",
         "description": "Here we can use this to configure email\n",
         "parameters": [

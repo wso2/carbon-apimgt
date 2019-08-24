@@ -81,9 +81,7 @@ public class APIManagerAnalyticsConfiguration {
                 log.error("Request stream name or version is null. Check api-manager.xml");
             }
             botDataStreamName = config.getFirstProperty("Analytics.Streams.botData.Name");
-            log.info(botDataStreamName);
             botDataStreamVersion = config.getFirstProperty("Analytics.Streams.botData.Version");
-            log.info(botDataStreamVersion);
 
             responseStreamName = config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_NAME);
             responseStreamVersion = config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_VERSION);

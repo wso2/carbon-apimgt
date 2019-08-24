@@ -206,6 +206,10 @@
                 <Name>org.wso2.analytics.apim.alertStakeholderInfo</Name>
                 <Version>1.0.1</Version>
             </AlertTypes>
+            <botData>
+                <Name>org.wso2.botDetectedData.request.stream</Name>
+                <Version>1.0.0</Version>
+            </botData>
         </Streams>
 
     </Analytics>

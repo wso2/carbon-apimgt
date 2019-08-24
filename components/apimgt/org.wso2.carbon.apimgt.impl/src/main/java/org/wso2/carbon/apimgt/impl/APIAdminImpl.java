@@ -22,7 +22,7 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.honeypotAPI.HoneyPotAPIAlertData;
+import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectedData;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
 import java.sql.SQLException;
@@ -116,41 +116,41 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     /**
-     * Get alert list which cominf from honeypot API
+     * Get alert list which cominf from botData API
      */
-    public List<HoneyPotAPIAlertData> getAlert() throws APIManagementException {
-        return apiMgtDAO.getAlerts();
-    }
+//    public List<BotDetectedData> getAlert() throws APIManagementException {
+//        return apiMgtDAO.getAlerts();
+//    }
 
     /**
-     * delete honeypot api alert my using the messageID
+     * delete botData api alert my using the messageID
      */
-    public void deleteHoneyPotAlert(String messageID) throws APIManagementException, SQLException {
-        apiMgtDAO.deleteHoneyPotAlert(messageID);
-    }
+//    public void deleteHoneyPotAlert(String messageID) throws APIManagementException, SQLException {
+//        apiMgtDAO.deleteHoneyPotAlert(messageID);
+//    }
 
     /**
      * configure email list which need to send alert
      * update email list as adding more or remove
      */
-    public void addHoneyPotAPiEmailAlertConfiguration(String email) throws APIManagementException, SQLException {
-        apiMgtDAO.addHoneyPotAPiEmailAlertConfiguration(email);
+    public void addBotDataEmailConfiguration(String email) throws APIManagementException, SQLException {
+        apiMgtDAO.addBotDataEmailConfiguration(email);
     }
 
     /**
      * retrieve email lit which configured above
      */
-    public static List<HoneyPotAPIAlertData> retrieveSavedHoneyPotAPIAlertEmailList() throws APIManagementException {
+    public static List<BotDetectedData> retrieveSavedBotDataEmailList() throws APIManagementException {
 
-        List<HoneyPotAPIAlertData> list;
-        list = ApiMgtDAO.getInstance().retrieveSavedHoneyPotAPIAlertEmailList();
+        List<BotDetectedData> list;
+        list = ApiMgtDAO.getInstance().retrieveSavedBotDataEmailList();
         return list;
     }
 
     /**
      * remove all configured email list
      */
-    public void deleteHoneyPotAPIAlertEmailList(String uuid) throws APIManagementException, SQLException {
-        apiMgtDAO.deleteHoneyPotAPIAlertEmailList(uuid);
+    public void deleteBotDataEmailList(String uuid) throws APIManagementException, SQLException {
+        apiMgtDAO.deleteBotDataEmailList(uuid);
     }
 }

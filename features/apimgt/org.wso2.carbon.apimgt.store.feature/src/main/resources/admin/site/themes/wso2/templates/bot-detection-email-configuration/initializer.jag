@@ -1,0 +1,14 @@
+<%
+jagg.initializer("bot-detection-email-configuration", {
+    preInitialize:function (){
+        jagg.addHeaderJS("bot-detection-email-configuration", "bot-detection-email-configuration",
+         "templates/bot-detection-email-configuration/js/manage.js");
+        jagg.addFooterJS("bot-detection-email-configuration", "bot-detection-email-configuration",
+         "templates/bot-detection-email-configuration/js/bootstrap-tagsinput.min.js");
+        jagg.addHeaderCSS("bot-detection-email-configuration", "bot-detection-email-configuration",
+        "templates/bot-detection-email-configuration/css/bootstrap-tagsinput.css");
+        jagg.addFooterCSS("bot-detection-email-configuration", "bot-detection-email-configuration",
+        "templates/bot-detection-email-configuration/css/manageAlerts.css");
+    }
+});
+%>
