@@ -29,6 +29,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Alert from 'AppComponents/Shared/Alert';
+import Progress from 'AppComponents/Shared/Progress';
 import API from 'AppData/api';
 
 const styles = theme => ({
@@ -42,7 +43,7 @@ const styles = theme => ({
     },
     gridLabel: {
         marginTop: theme.spacing.unit * 1.5,
-    }
+    },
 });
 
 /**
@@ -55,6 +56,7 @@ class SubscriptionPoliciesManage extends Component {
         this.state = {
             subscriptionPolicies: {},
             selectedSubscriptionPolicies: props.api.policies,
+            updateInProgress: false,
         };
         this.handleChange = this.handleChange.bind(this);
     }
@@ -77,6 +79,8 @@ class SubscriptionPoliciesManage extends Component {
      * @param event onChange event
      */
     handleChange(event) {
+        this.setState({ updateInProgress: true });
+
         const apiClient = new API();
         const { name, checked } = event.target;
         const { selectedSubscriptionPolicies } = this.state;
@@ -93,7 +97,7 @@ class SubscriptionPoliciesManage extends Component {
         apiClient.update(updatedAPI.id, updatedAPI)
             .then((res) => {
                 this.api = res._data;
-                this.setState({ selectedSubscriptionPolicies: updatedSelectedPolicies });
+                this.setState({ selectedSubscriptionPolicies: updatedSelectedPolicies, updateInProgress: false });
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Details.Subscriptions.SubscriptionPoliciesManage.policy.update.success',
                     defaultMessage: 'API subscription policies updated successfully',
@@ -103,6 +107,7 @@ class SubscriptionPoliciesManage extends Component {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
+                this.setState({ updateInProgress: false });
                 Alert.error(intl.formatMessage({
                     id: 'Apis.Details.Subscriptions.SubscriptionPoliciesManage.policy.update.error',
                     defaultMessage: 'Error occurred while updating subscription policies',
@@ -112,10 +117,12 @@ class SubscriptionPoliciesManage extends Component {
 
     render() {
         const { classes } = this.props;
-        const { subscriptionPolicies, selectedSubscriptionPolicies } = this.state;
+        const { subscriptionPolicies, selectedSubscriptionPolicies, updateInProgress } = this.state;
+
 
         return (
             <Paper className={classes.subscriptionPoliciesPaper}>
+                { updateInProgress && <Progress /> }
                 <FormControl className={classes.formControl}>
                     <Grid container spacing={2} className={classes.grid}>
                         <Grid item xs={4} className={classes.gridLabel}>
@@ -131,6 +138,7 @@ class SubscriptionPoliciesManage extends Component {
                                 { subscriptionPolicies && Object.entries(subscriptionPolicies).map(([key, value]) => (
                                     <FormControlLabel
                                         control={<Checkbox
+                                            color='primary'
                                             checked={selectedSubscriptionPolicies.includes(value.name)}
                                             onChange={e => this.handleChange(e)}
                                             name={value.name}
