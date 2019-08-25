@@ -127,7 +127,6 @@ class Operations extends React.Component {
 
         this.newApi = new Api();
         this.handleUpdateList = this.handleUpdateList.bind(this);
-        this.toggleAssignScopes = this.toggleAssignScopes.bind(this);
         this.updateOperations = this.updateOperations.bind(this);
     }
 
