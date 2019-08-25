@@ -52,6 +52,7 @@ import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
+@Deprecated
 public class APIDefinitionFromOpenAPISpec extends APIDefinition {
 
     private static final Log log = LogFactory.getLog(APIDefinitionFromOpenAPISpec.class);
@@ -211,7 +212,6 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
      * @param registry          user registry
      * @throws APIManagementException
      */
-    @Override
     public void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry) throws APIManagementException {
         String apiName = api.getId().getApiName();
         String apiVersion = api.getId().getVersion();
@@ -253,7 +253,6 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
      * @return api definition json as json string
      * @throws APIManagementException
      */
-    @Override
     public String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException {
         String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getApiName(),
                 apiIdentifier.getVersion(), apiIdentifier.getProviderName());
@@ -382,7 +381,6 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
      * @return
      * @throws APIManagementException
      */
-    @Override
     public Map<String, String> getAPIOpenAPIDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry)
             throws APIManagementException {
         Map<String, String> timeStampMap = new HashMap<String, String>();
@@ -416,7 +414,6 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         return null;
     }
 
-    @Override
     public APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, boolean returnJsonContent) {
         return null;
     }

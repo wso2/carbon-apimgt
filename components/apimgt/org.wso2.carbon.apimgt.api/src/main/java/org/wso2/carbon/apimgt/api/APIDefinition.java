@@ -58,24 +58,6 @@ public abstract class APIDefinition {
     public abstract Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
 
     /**
-     * This method saves the API definition
-     *
-     * @param api               API to be saved
-     * @param apiDefinitionJSON API definition as JSON string
-     * @param registry          user registry
-     */
-    public abstract void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry) throws APIManagementException;
-
-    /**
-     * This method reads the API definition from registry
-     *
-     * @param apiIdentifier api identifier
-     * @param registry      user registry
-     * @return API definition
-     */
-    public abstract String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException;
-
-    /**
      * This method generates API definition to the given api
      *
      * @param api api
@@ -102,15 +84,6 @@ public abstract class APIDefinition {
      */
     public abstract String generateAPIDefinition(API api, String swagger, boolean syncOperations)
             throws APIManagementException;
-
-    /**
-     * This method returns the timestamps for a given API
-     * @param apiIdentifier
-     * @param registry
-     * @return
-     * @throws APIManagementException
-     */
-    public abstract Map<String ,String> getAPIOpenAPIDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException;
 
     /**
      * Extract and return path parameters in the given URI template
@@ -160,14 +133,5 @@ public abstract class APIDefinition {
     public abstract APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition,
             boolean returnJsonContent) throws APIManagementException;
 
-    /**
-     * This method validates the given OpenAPI definition by URL
-     *
-     * @param url URL of the API definition
-     * @param returnJsonContent whether to return the converted json form of the
-     * @return APIDefinitionValidationResponse object with validation information
-     */
-    public abstract APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, boolean returnJsonContent)
-            throws APIManagementException;
 
 }

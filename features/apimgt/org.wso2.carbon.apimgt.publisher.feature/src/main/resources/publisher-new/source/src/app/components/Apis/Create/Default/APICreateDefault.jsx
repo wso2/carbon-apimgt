@@ -26,6 +26,11 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import APIInputForm from 'AppComponents/Apis/Create/Components/APIInputForm';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
 
 const styles = theme => ({
     root: {
@@ -77,7 +82,7 @@ class APICreateDefault extends Component {
      */
     render() {
         const {
-            classes, type, handleSubmit, isAPIProduct, inputChange, api, valid,
+            classes, type, handleSubmit, isAPIProduct, inputChange, api, valid, oasVersion, handleOASVersionChange,
         } = this.props;
         const { loading } = this.state;
         let mainTitle = <FormattedMessage id='create.new.rest.api' defaultMessage='New REST API' />;
@@ -103,6 +108,19 @@ class APICreateDefault extends Component {
                         </Typography>
                     </div>
                     <form onSubmit={handleSubmit}>
+                        <FormControl component='fieldset' className={classes.formControl}>
+                            <FormLabel component='legend'>Open API version</FormLabel>
+                            <RadioGroup
+                                aria-label='oas_version'
+                                name='oas_version'
+                                className={classes.group}
+                                value={oasVersion}
+                                onChange={handleOASVersionChange}
+                            >
+                                <FormControlLabel value='v3' control={<Radio />} label='OpenAPI 3' />
+                                <FormControlLabel value='v2' control={<Radio />} label='OpenAPI 2' />
+                            </RadioGroup>
+                        </FormControl>
                         <APIInputForm
                             api={api}
                             handleInputChange={inputChange}
@@ -158,6 +176,8 @@ APICreateDefault.propTypes = {
     inputChange: PropTypes.func.isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
     api: PropTypes.shape({}).isRequired,
+    oasVersion: PropTypes.string.isRequired,
+    handleOASVersionChange: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(APICreateDefault);

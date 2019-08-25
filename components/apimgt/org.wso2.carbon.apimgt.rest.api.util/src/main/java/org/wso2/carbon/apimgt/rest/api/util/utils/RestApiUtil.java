@@ -50,8 +50,7 @@ import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -79,6 +78,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -1192,10 +1192,24 @@ public class RestApiUtil {
      */
     public static boolean registerResource(API api, String swagger) {
 
-        APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+        APIDefinition oasParser;
+        try {
+            Optional<APIDefinition> optional = OASParserUtil.getOASParser(swagger);
+            if (optional.isPresent()) {
+                oasParser = optional.get();
+            } else {
+                log.error("Error occurred while parsing swagger definition");
+                return false;
+            }
+        } catch (APIManagementException e) {
+            log.error("Error occurred while parsing swagger definition");
+            return false;
+        }
+
+
         Set<URITemplate> uriTemplates = null;
         try {
-            uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(api, swagger);
+            uriTemplates = oasParser.getURITemplates(api, swagger);
         } catch (APIManagementException e) {
             log.error("Error while parsing swagger content to get URI Templates", e);
         }
@@ -1273,18 +1287,23 @@ public class RestApiUtil {
         } else {
             try {
                 String definition;
-                APIDefinition apiDefinitionFromOpenAPISpec;
                 if (RestApiConstants.REST_API_STORE_VERSION_0.equals(version)) {
                     definition = IOUtils
                             .toString(RestApiUtil.class.getResourceAsStream("/store-api.json"), "UTF-8");
-                    apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
                 } else {
                     definition = IOUtils
                             .toString(RestApiUtil.class.getResourceAsStream("/store-api.yaml"), "UTF-8");
-                    apiDefinitionFromOpenAPISpec = new APIDefinitionUsingOASParser();
+                }
+                Optional<APIDefinition> optional = OASParserUtil.getOASParser(definition);
+                APIDefinition oasParser;
+                if(optional.isPresent()){
+                    oasParser = optional.get();
+                } else {
+                    log.error("Error occurred while parsing swagger definition");
+                    return Collections.EMPTY_SET;
                 }
                 //Get URL templates from swagger content w created
-                storeResourceMappings = apiDefinitionFromOpenAPISpec.getURITemplates(api, definition);
+                storeResourceMappings = oasParser.getURITemplates(api, definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
@@ -1311,18 +1330,23 @@ public class RestApiUtil {
         } else {
             try {
                 String definition;
-                APIDefinition apiDefinitionFromOpenAPISpec;
                 if (RestApiConstants.REST_API_PUBLISHER_VERSION_0.equals(version)) {
                     definition = IOUtils
                             .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.json"), "UTF-8");
-                    apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
                 } else {
                     definition = IOUtils
                             .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.yaml"), "UTF-8");
-                    apiDefinitionFromOpenAPISpec = new APIDefinitionUsingOASParser();
+                }
+                Optional<APIDefinition> optional = OASParserUtil.getOASParser(definition);
+                APIDefinition oasParser;
+                if(optional.isPresent()){
+                    oasParser = optional.get();
+                } else {
+                    log.error("Error occurred while parsing swagger definition");
+                    return Collections.EMPTY_SET;
                 }
                 //Get URL templates from swagger content we created
-                publisherResourceMappings = apiDefinitionFromOpenAPISpec.getURITemplates(api, definition);
+                publisherResourceMappings = oasParser.getURITemplates(api, definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
@@ -1350,9 +1374,16 @@ public class RestApiUtil {
             try {
                 String definition = IOUtils
                         .toString(RestApiUtil.class.getResourceAsStream("/admin-api.json"), "UTF-8");
-                APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+                Optional<APIDefinition> optional = OASParserUtil.getOASParser(definition);
+                APIDefinition oasParser;
+                if(optional.isPresent()){
+                    oasParser = optional.get();
+                } else {
+                    log.error("Error occurred while parsing swagger definition");
+                    return Collections.EMPTY_SET;
+                }
                 //Get URL templates from swagger content we created
-                adminAPIResourceMappings = apiDefinitionFromOpenAPISpec.getURITemplates(api, definition);
+                adminAPIResourceMappings = oasParser.getURITemplates(api, definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {

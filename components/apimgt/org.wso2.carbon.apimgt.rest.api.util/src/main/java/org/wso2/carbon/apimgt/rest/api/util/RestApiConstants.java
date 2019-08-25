@@ -231,4 +231,7 @@ public final class RestApiConstants {
     public static final String RETURN_MODEL = "model";
     public static final String RETURN_MODEL_BEFORE_ADDED = "model_before_added";
     public static final String RETURN_DTO = "dto";
+
+    public static final String OAS_VERSION_2 = "v2";
+    public static final String OAS_VERSION_3 = "v3";
 }

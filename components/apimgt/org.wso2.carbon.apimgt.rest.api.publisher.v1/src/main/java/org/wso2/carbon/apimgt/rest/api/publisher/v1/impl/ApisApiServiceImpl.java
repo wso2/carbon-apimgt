@@ -54,8 +54,9 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
+import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
+import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
@@ -72,6 +73,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Map;
 
@@ -181,7 +183,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisPost(APIDTO body, MessageContext messageContext) {
+    public Response apisPost(APIDTO body, String oasVersion, MessageContext messageContext) {
         URI createdApiUri;
         APIDTO createdApiDTO;
         try {
@@ -210,8 +212,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleInternalServerError(errorMessage, log);
                 }
             } else if (!isWSAPI) {
-                APIDefinitionFromOpenAPISpec apiDefinitionUsingOASParser = new APIDefinitionFromOpenAPISpec();
-                String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(apiToAdd);
+                APIDefinition oasParser;
+                if(RestApiConstants.OAS_VERSION_2.equalsIgnoreCase(oasVersion)) {
+                    oasParser = new OAS2Parser();
+                } else {
+                    oasParser = new OAS3Parser();
+                }
+                String apiDefinition = oasParser.generateAPIDefinition(apiToAdd);
                 apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
             }
 
@@ -432,8 +439,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             if (!isWSAPI) {
                 String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
-                APIDefinitionFromOpenAPISpec definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-                String newDefinition = definitionFromOpenAPISpec.generateAPIDefinition(apiToUpdate, oldDefinition,
+                Optional<APIDefinition> definitionOptional = OASParserUtil.getOASParser(oldDefinition);
+                if(!definitionOptional.isPresent()) {
+                    RestApiUtil.handleInternalServerError("Error occurred while getting swagger parser.", log);
+                    return null;
+                }
+                APIDefinition apiDefinition = definitionOptional.get();
+                String newDefinition = apiDefinition.generateAPIDefinition(apiToUpdate, oldDefinition,
                         true);
                 apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
             }
@@ -1227,7 +1239,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch, MessageContext messageContext) {
         try {
-            APIDefinitionValidationResponse response = new APIDefinitionUsingOASParser()
+            APIDefinitionValidationResponse response = OASParserUtil
                     .validateAPIDefinition(apiDefinition, true);
             if (!response.isValid()) {
                 RestApiUtil.handleBadRequest(response.getErrorItems(), log);
@@ -1236,15 +1248,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+            APIDefinition oasParser = response.getParser();
             Set<URITemplate> uriTemplates = null;
             try {
-                uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(existingAPI, response.getJsonContent());
+                uriTemplates = oasParser.getURITemplates(existingAPI, response.getJsonContent());
             } catch (APIManagementException e) {
                 // catch APIManagementException inside again to capture validation error
                 RestApiUtil.handleBadRequest(e.getMessage(), log);
             }
-            Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiDefinition);
+            Set<Scope> scopes = oasParser.getScopes(apiDefinition);
             //validating scope roles
             for (Scope scope : scopes) {
                 for (String aRole : scope.getRoles().split(",")) {
@@ -1364,12 +1376,17 @@ public class ApisApiServiceImpl implements ApisApiService {
             //for multiple http methods
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(api.getId());
             if (!org.apache.commons.lang3.StringUtils.isEmpty(apiSwaggerDefinition)) {
-                APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-                Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(api, apiSwaggerDefinition);
+                Optional<APIDefinition> definitionOptional = OASParserUtil.getOASParser(apiSwaggerDefinition);
+                if(!definitionOptional.isPresent()) {
+                    RestApiUtil.handleInternalServerError("Error occurred while getting swagger parser.", log);
+                    return null;
+                }
+                APIDefinition apiDefinition = definitionOptional.get();
+                Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(api, apiSwaggerDefinition);
                 api.setUriTemplates(uriTemplates);
 
                 // scopes
-                Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiSwaggerDefinition);
+                Set<Scope> scopes = apiDefinition.getScopes(apiSwaggerDefinition);
                 api.setScopes(scopes);
             }
 
@@ -1515,12 +1532,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             String definitionToAdd;
             boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
             // Rearrange paths according to the API payload and save the OpenAPI definition
-            APIDefinitionFromOpenAPISpec definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-            definitionToAdd = definitionFromOpenAPISpec.generateAPIDefinition(apiToAdd,
+
+            APIDefinition apiDefinition = validationResponse.getParser();
+
+            definitionToAdd = apiDefinition.generateAPIDefinition(apiToAdd,
                     validationResponse.getJsonContent(), syncOperations);
 
-            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(apiToAdd, definitionToAdd);
-            Set<Scope> scopes = definitionFromOpenAPISpec.getScopes(definitionToAdd);
+            Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(apiToAdd, definitionToAdd);
+            Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
             apiToAdd.setUriTemplates(uriTemplates);
             apiToAdd.setScopes(scopes);
 
@@ -1732,14 +1751,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             throws APIManagementException {
         handleInvalidParams(fileInputStream, url);
         OpenAPIDefinitionValidationResponseDTO responseDTO;
-        APIDefinition apiDefinition = new APIDefinitionUsingOASParser();
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         if (url != null) {
-            validationResponse = apiDefinition.validateAPIDefinitionByURL(url, returnContent);
+            validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, returnContent);
         } else if (fileInputStream != null) {
             try {
                 String openAPIContent = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
-                validationResponse = apiDefinition.validateAPIDefinition(openAPIContent, returnContent);
+                validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
             } catch (IOException e) {
                 RestApiUtil.handleInternalServerError("Error while reading file content", e, log);
             }

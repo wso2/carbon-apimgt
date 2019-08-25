@@ -24,7 +24,7 @@ import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -56,8 +56,15 @@ public class SettingsMappingUtil {
         } catch (IOException e) {
             log.error("Error while reading the swagger definition", e);
         }
-        APIDefinition apiDefinitionUsingOASParser = new APIDefinitionUsingOASParser();
-        Set<Scope> scopeSet = apiDefinitionUsingOASParser.getScopes(definition);
+        Optional<APIDefinition> optional = OASParserUtil.getOASParser(definition);
+        APIDefinition oasParser;
+        if(optional.isPresent()){
+            oasParser = optional.get();
+        } else {
+            log.error("Error occurred while parsing swagger definition");
+            throw new APIManagementException("Error occurred while parsing swagger definition");
+        }
+        Set<Scope> scopeSet = oasParser.getScopes(definition);
         List<String> scopeList = new ArrayList<>();
         for (Scope entry : scopeSet) {
             scopeList.add(entry.getKey());

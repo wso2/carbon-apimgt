@@ -260,6 +260,11 @@ class API extends Resource {
     }
 
     save() {
+        return save('v3');
+    }
+
+    save(query) {
+        console.log(query);
         const promisedAPIResponse = this.client.then((client) => {
             const properties = client.spec.definitions.API.properties;
             const data = {};
@@ -270,14 +275,14 @@ class API extends Resource {
             });
             const payload = {
                 body: data,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                oas_version: query,
             };
             return client.apis['API (Individual)'].post_apis(payload, this._requestMetaData());
         });
         return promisedAPIResponse.then(response => {
-            return new API(response.body);
+                return new API(response.body);
         });
-
     }
 
     saveProduct() {

@@ -284,6 +284,10 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/API'
+        - in: query
+          name: oas_version
+          description: Open api version
+          type: string
       tags:
         - API (Individual)
       responses:

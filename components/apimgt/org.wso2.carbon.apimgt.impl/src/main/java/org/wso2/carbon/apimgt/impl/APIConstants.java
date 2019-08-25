@@ -1141,6 +1141,8 @@ public final class APIConstants {
     public static final String OPEN_API_V3 = "3.0.x";
     public static final String OPEN_API = "openapi";
     public static final String OPEN_API_VERSION_REGEX = "3\\.0\\.\\d{1,}";
+    public static final String SWAGGER_IS_MISSING_MSG = "swagger is missing";
+    public static final String OPENAPI_IS_MISSING_MSG = "openapi is missing";
 
     //swagger v1.2 constants
     public static final String SWAGGER_RESOURCES = "resources";

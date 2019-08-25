@@ -95,6 +95,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -1153,7 +1155,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
 
-                apiJSON = definitionFromOpenAPISpec.getAPIDefinition(apiId, registry); //apiProvider.getSwagger12Definition(apiId);
+                apiJSON = OASParserUtil.getAPIDefinition(apiId, registry); //apiProvider.getSwagger12Definition(apiId);
             } catch (RegistryException e) {
                 handleException("Error when create registry instance ", e);
             } catch (UserStoreException e) {

@@ -21,10 +21,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -46,7 +46,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
@@ -97,6 +97,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
@@ -1353,8 +1354,9 @@ public class APIMappingUtil {
     private static List<APIOperationsDTO> getOperationsFromSwaggerDef(API api, String swaggerDefinition)
             throws APIManagementException {
 
-        APIDefinitionFromOpenAPISpec definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-        Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(api, swaggerDefinition);
+        Optional<APIDefinition> apiDefinitionOptional = OASParserUtil.getOASParser(swaggerDefinition);
+        APIDefinition apiDefinition = apiDefinitionOptional.get();
+        Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(api, swaggerDefinition);
 
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         if (!StringUtils.isEmpty(swaggerDefinition)) {
@@ -1849,35 +1851,28 @@ public class APIMappingUtil {
      * @throws APIManagementException throw if parsing exception occur
      */
     private static List<ScopeDTO> getScopesFromSwagger(String swagger) throws APIManagementException {
-
-        JSONParser parser = new JSONParser();
-        List<ScopeDTO> scopes = new ArrayList<>();
-        try {
-            JSONObject swaggerObj = (JSONObject) parser.parse(swagger);
-            JSONObject securityObj = (JSONObject) swaggerObj.get(APIConstants.SWAGGER_X_WSO2_SECURITY);
-            if (securityObj != null) {
-                JSONObject apimSecurityObj = (JSONObject) securityObj.get(APIConstants.SWAGGER_OBJECT_NAME_APIM);
-                JSONArray scopesList = (JSONArray) apimSecurityObj.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
-                scopesList.forEach((scope) -> {
-                    ScopeDTO scopeDTO = new ScopeDTO();
-                    JSONObject scopeObj = (JSONObject) scope;
-                    scopeDTO.setName((String) scopeObj.get(APIConstants.SWAGGER_NAME));
-                    scopeDTO.setDescription((String) scopeObj.get(APIConstants.SWAGGER_DESCRIPTION));
-                    ScopeBindingsDTO bindingsDTO = new ScopeBindingsDTO();
-                    String roles = (String) scopeObj.get(APIConstants.SWAGGER_ROLES);
-                    if (roles.isEmpty()) {
-                        bindingsDTO.setValues(Collections.emptyList());
-                    } else {
-                        bindingsDTO.setValues(Arrays.asList((roles).split(",")));
-                    }
-                    scopeDTO.setBindings(bindingsDTO);
-                    scopes.add(scopeDTO);
-                });
-            }
-        } catch (ParseException e) {
-            throw new APIManagementException("Error occurred while parsing swagger.");
+        Optional<APIDefinition> apiDefinitionOptional = OASParserUtil.getOASParser(swagger);
+        if (!apiDefinitionOptional.isPresent()) {
+            throw new APIManagementException("Error occurred while parsing swagger definition");
         }
-        return scopes;
+        APIDefinition apiDefinition = apiDefinitionOptional.get();
+        Set<Scope> scopes = apiDefinition.getScopes(swagger);
+        List<ScopeDTO> scopeDTOS = new ArrayList<>();
+        for (Scope aScope : scopes) {
+            ScopeDTO scopeDTO = new ScopeDTO();
+            scopeDTO.setName(aScope.getName());
+            scopeDTO.setDescription(aScope.getDescription());
+            ScopeBindingsDTO bindingsDTO = new ScopeBindingsDTO();
+            String roles = aScope.getRoles();
+            if (roles.isEmpty()) {
+                bindingsDTO.setValues(Collections.emptyList());
+            } else {
+                bindingsDTO.setValues(Arrays.asList((roles).split(",")));
+            }
+            scopeDTO.setBindings(bindingsDTO);
+            scopeDTOS.add(scopeDTO);
+        }
+        return scopeDTOS;
     }
 
 }
