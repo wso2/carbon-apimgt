@@ -6,7 +6,7 @@
     "scripts": {
         "test": "jest",
         "test:coverage": "jest --coverage",
-        "build:prod": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules;npm run i18n",
+        "build:prod": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
         "build:dev": "NODE_ENV=development webpack -d --watch ",
         "analysis": "NODE_ENV=development webpack --env.analysis -p --progress",
         "lint": "eslint source",
@@ -47,7 +47,7 @@
         "react-color": "^2.17.3",
         "react-dom": "^16.8.6",
         "react-draft-wysiwyg": "^1.13.2",
-        "react-dropzone": "^3.13.4",
+        "react-dropzone": "^v10.1.7",
         "react-intl": "v3.1.6",
         "react-loadable": "^5.5.0",
         "react-markdown": "^4.0.8",
