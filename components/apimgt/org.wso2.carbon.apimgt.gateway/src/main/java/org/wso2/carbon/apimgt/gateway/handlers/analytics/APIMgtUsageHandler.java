@@ -16,11 +16,13 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 
+import org.apache.axis2.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
+import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -45,6 +47,14 @@ public class APIMgtUsageHandler extends AbstractHandler {
     public boolean handleRequest(MessageContext mc) {
 
         TracingSpan span = null;
+
+        String apiType = mc.getProperty(APIConstants.API_TYPE).toString();
+        if (APIConstants.GRAPHQL_API.equals(apiType)) {
+            ((Axis2MessageContext) mc).getAxis2MessageContext().
+                    setProperty(Constants.Configuration.HTTP_METHOD, mc.getProperty(APIConstants.HTTP_VERB));
+            mc.setProperty(APIConstants.API_ELECTED_RESOURCE, "/*");
+        }
+
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan = (TracingSpan) mc.getProperty(APIMgtGatewayConstants.RESPONSE_LATENCY);
             TracingTracer tracer = Util.getGlobalTracer();

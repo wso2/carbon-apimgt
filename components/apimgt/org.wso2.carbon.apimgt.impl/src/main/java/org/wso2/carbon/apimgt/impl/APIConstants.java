@@ -989,7 +989,9 @@ public final class APIConstants {
     public static final String API_RESOURCE_CACHE_KEY = "API_RESOURCE_CACHE_KEY";
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
 
+    // GraphQL related constants
     public static final String API_TYPE = "API_TYPE";
+    public static final String HTTP_VERB = "HTTP_VERB";
     public static final String GRAPHQL_API = "GRAPHQL";
     public static final String GRAPHQL_API_OPERATION_RESOURCE = "OPERATION_RESOURCE";
     public static final String GRAPHQL_API_OPERATION_TYPE = "OPERATION_TYPE";
@@ -1002,7 +1004,6 @@ public final class APIConstants {
     public static final String GRAPHQL_QUERY = "Query";
     public static final String GRAPHQL_MUTATION = "Mutation";
     public static final String GRAPHQL_SUBSCRIPTION = "Subscription";
-
 
     //URI Authentication Schemes
     public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
