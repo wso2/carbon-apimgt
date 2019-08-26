@@ -21,16 +21,13 @@ import { MemoryRouter, Route } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Configurations from 'Config';
-import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
+import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import APIs from './Apis';
 import ApiCreate from './Create/ApiCreate';
 
 import { PageNotFound } from '../Base/Errors';
 
-jest.mock('./Listing/APIProductListing', () => () => {
-    return <div>Testing Listing page</div>;
-});
-jest.mock('./Listing/APIListing', () => () => {
+jest.mock('./Listing/Listing', () => () => {
     return <div>Testing Listing page</div>;
 });
 

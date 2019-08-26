@@ -24,12 +24,14 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
+import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
@@ -825,7 +827,7 @@ public class ApiMgtDAO {
                         .SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
                     log.error("Subscription to API/API Prouct " + identifier.getName() + " through application " +
                             applicationName + " was blocked");
-                    throw new APIManagementException("Subscription to API/API Prouct " + identifier.getName() + " through " +
+                    throw new SubscriptionBlockedException("Subscription to API/API Product " + identifier.getName() + " through " +
                             "application " + applicationName + " was blocked");
                 }
             }
@@ -3364,8 +3366,9 @@ public class ApiMgtDAO {
 
     /**
      * @param apiIdentifier API Identifier
+     * @param rating        Rating
      * @param userId        User Id
-     * @throws APIManagementException if failed to add Application
+     * @throws APIManagementException if failed to add Rating
      */
     public void addRating(APIIdentifier apiIdentifier, int rating, String userId, Connection conn)
             throws APIManagementException, SQLException {
@@ -3452,7 +3455,7 @@ public class ApiMgtDAO {
     /**
      * @param apiIdentifier API Identifier
      * @param userId        User Id
-     * @throws APIManagementException if failed to add Application
+     * @throws APIManagementException if failed to remove API user Rating
      */
     public void removeAPIRating(APIIdentifier apiIdentifier, String userId, Connection conn)
             throws APIManagementException, SQLException {
@@ -3536,7 +3539,7 @@ public class ApiMgtDAO {
     /**
      * @param apiIdentifier API Identifier
      * @param userId        User Id
-     * @throws APIManagementException if failed to add Application
+     * @throws APIManagementException if failed to get User API Rating
      */
     public int getUserRating(APIIdentifier apiIdentifier, String userId, Connection conn)
             throws APIManagementException, SQLException {
@@ -3579,6 +3582,186 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, null, rs);
         }
         return userRating;
+    }
+
+    /**
+     * @param apiId API Identifier
+     * @param user        User name
+     * @throws APIManagementException if failed to get user API Ratings
+     */
+    public JSONObject getUserRatingInfo(APIIdentifier apiId, String user) throws APIManagementException {
+        Connection conn = null;
+        JSONObject userRating = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            userRating = getUserRatingInfo(apiId, user, conn);
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback getting user ratings info ", e1);
+                }
+            }
+            handleException("Failed to get user ratings info", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, conn, null);
+        }
+        return userRating;
+    }
+
+    /**
+     * @param apiIdentifier API Identifier
+     * @param userId        User Id
+     * @param conn          Database connection
+     * @throws APIManagementException if failed to get user API Ratings
+     */
+    private JSONObject getUserRatingInfo(APIIdentifier apiIdentifier, String userId, Connection conn)
+            throws APIManagementException, SQLException {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        JSONObject ratingObj = new JSONObject();
+        int userRating = 0;
+        int apiId = -1;
+        int ratingId = -1;
+        try {
+            int tenantId;
+            tenantId = APIUtil.getTenantId(userId);
+            //Get subscriber Id
+            Subscriber subscriber = getSubscriber(userId, tenantId, conn);
+            if (subscriber == null) {
+                String msg = "Could not load Subscriber records for: " + userId;
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+            //Get API Id
+            apiId = getAPIID(apiIdentifier, conn);
+            if (apiId == -1) {
+                String msg = "Could not load API record for: " + apiIdentifier.getApiName();
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+            //This query to get rating information from the AM_API_RATINGS table
+            String sqlQuery = SQLConstants.GET_RATING_INFO_SQL;
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, subscriber.getId());
+            ps.setInt(2, apiId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                apiId = rs.getInt("API_ID");
+                ratingId = rs.getInt("RATING_ID");
+                userRating = rs.getInt("RATING");
+            }
+            if (ratingId != -1) {
+                // A rating record exists
+                ratingObj.put(APIConstants.API_ID, apiId);
+                ratingObj.put(APIConstants.RATING_ID, ratingId);
+                ratingObj.put(APIConstants.USER_NAME, userId);
+                ratingObj.put(APIConstants.RATING, userRating);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve API ratings ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, rs);
+        }
+        return ratingObj;
+    }
+
+    /**
+     * @param apiId API Identifier
+     * @throws APIManagementException if failed to get API Ratings
+     */
+    public JSONArray getAPIRatings(APIIdentifier apiId) throws APIManagementException {
+        Connection conn = null;
+        JSONArray apiRatings = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            apiRatings = getAPIRatings(apiId, conn);
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback getting user ratings info ", e1);
+                }
+            }
+            handleException("Failed to get user ratings info", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, conn, null);
+        }
+        return apiRatings;
+    }
+
+    /**
+     * @param apiIdentifier API Identifier
+     * @param conn          Database connection
+     * @throws APIManagementException if failed to get API Ratings
+     */
+    private JSONArray getAPIRatings(APIIdentifier apiIdentifier, Connection conn)
+            throws APIManagementException, SQLException {
+        PreparedStatement ps = null;
+        PreparedStatement psSubscriber = null;
+        ResultSet rs = null;
+        ResultSet rsSubscriber = null;
+        JSONArray ratingArray = new JSONArray();
+        int userRating = 0;
+        int ratingId = -1;
+        int apiId = -1;
+        int subscriberId = -1;
+        try {
+            //Get API Id
+            apiId = getAPIID(apiIdentifier, conn);
+            if (apiId == -1) {
+                String msg = "Could not load API record for: " + apiIdentifier.getApiName();
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+            //This query to get rating information from the AM_API_RATINGS table
+            String sqlQuery = SQLConstants.GET_API_ALL_RATINGS_SQL;
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, apiId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                JSONObject ratingObj = new JSONObject();
+                String subscriberName = null;
+                apiId = rs.getInt("API_ID");
+                ratingId = rs.getInt("RATING_ID");
+                subscriberId = rs.getInt("SUBSCRIBER_ID");
+                userRating = rs.getInt("RATING");
+                ratingObj.put(APIConstants.API_ID, apiId);
+                ratingObj.put(APIConstants.RATING_ID, ratingId);
+                // SQL Query to get subscriber name
+                String sqlSubscriberQuery = SQLConstants.GET_SUBSCRIBER_NAME_FROM_ID_SQL;
+
+                psSubscriber = conn.prepareStatement(sqlSubscriberQuery);
+                psSubscriber.setInt(1, subscriberId);
+                rsSubscriber = psSubscriber.executeQuery();
+
+                while (rsSubscriber.next()) {
+                    subscriberName = rsSubscriber.getString("USER_ID");
+                }
+
+                ratingObj.put(APIConstants.USER_NAME, subscriberName);
+                ratingObj.put(APIConstants.RATING,userRating);
+                ratingArray.add(ratingObj);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve API ratings ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, rs);
+            APIMgtDBUtil.closeAllConnections(psSubscriber, null, rsSubscriber);
+        }
+        return ratingArray;
     }
 
     public float getAverageRating(APIIdentifier apiId) throws APIManagementException {
@@ -5422,9 +5605,18 @@ public class ApiMgtDAO {
                 try {
                     if (!subscriptionIdMap.containsKey(info.subscriptionId)) {
                         apiId.setTier(info.tierId);
-                        String subscriptionStatus = (APIConstants.SubscriptionStatus.BLOCKED
-                                .equalsIgnoreCase(info.subscriptionStatus)) ?
-                                APIConstants.SubscriptionStatus.BLOCKED : APIConstants.SubscriptionStatus.UNBLOCKED;
+                        String subscriptionStatus;
+                        if (APIConstants.SubscriptionStatus.BLOCKED.equalsIgnoreCase(info.subscriptionStatus)) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.BLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equalsIgnoreCase(info.subscriptionStatus)) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.UNBLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equalsIgnoreCase(info.subscriptionStatus)) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.REJECTED.equalsIgnoreCase(info.subscriptionStatus)) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
+                        } else {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
+                        }
                         int subscriptionId = addSubscription(apiId, context, info.applicationId, subscriptionStatus,
                                 provider);
                         if (subscriptionId == -1) {
@@ -5450,6 +5642,8 @@ public class ApiMgtDAO {
                     // need to go forward rather throwing the exception
                 } catch (SubscriptionAlreadyExistingException e) {
                     log.error("Error while adding subscription " + e.getMessage(), e);
+                } catch (SubscriptionBlockedException e) {
+                    log.info("Subscription is blocked: " + e.getMessage());
                 }
             }
 
@@ -5464,8 +5658,19 @@ public class ApiMgtDAO {
                 if (!subscribedApplications.contains(applicationId)) {
                     apiId.setTier(rs.getString("TIER_ID"));
                     try {
-                        addSubscription(apiId, rs.getString("CONTEXT"), applicationId, APIConstants
-                                .SubscriptionStatus.UNBLOCKED, provider);
+                        String subscriptionStatus;
+                        if (APIConstants.SubscriptionStatus.BLOCKED.equalsIgnoreCase(rs.getString("SUB_STATUS"))) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.BLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equalsIgnoreCase(rs.getString("SUB_STATUS"))) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.UNBLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equalsIgnoreCase(rs.getString("SUB_STATUS"))) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED;
+                        } else if (APIConstants.SubscriptionStatus.REJECTED.equalsIgnoreCase(rs.getString("SUB_STATUS"))) {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
+                        } else {
+                            subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
+                        }
+                        addSubscription(apiId, rs.getString("CONTEXT"), applicationId, subscriptionStatus, provider);
                         // catching the exception because when copy the api without the option "require re-subscription"
                         // need to go forward rather throwing the exception
                     } catch (SubscriptionAlreadyExistingException e) {
@@ -5473,6 +5678,11 @@ public class ApiMgtDAO {
                         //Ex: if previous version was created by another older version and if the subscriptions are
                         //Forwarded, then the third one will get same subscription from previous two versions.
                         log.info("Subscription already exists: " + e.getMessage());
+                    } catch (SubscriptionBlockedException e) {
+                        //Not handled as an error because we cannot update subscriptions for an API with blocked subscriptions
+                        //If previous version was created by another older version and if the subscriptions are
+                        //Forwarded, by catching the exception we will continue checking the other subscriptions
+                        log.info("Subscription is blocked: " + e.getMessage());
                     }
                 }
             }

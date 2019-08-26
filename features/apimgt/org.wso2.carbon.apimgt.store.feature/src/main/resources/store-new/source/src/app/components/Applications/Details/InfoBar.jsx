@@ -19,17 +19,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { KeyboardArrowLeft, ArrowDropDownOutlined, ArrowDropUpOutlined } from '@material-ui/icons';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import Collapse from '@material-ui/core/Collapse';
-import CheckCircle from '@material-ui/icons/CheckCircle';
+import Icon from '@material-ui/core/Icon';
 import { FormattedMessage } from 'react-intl';
-import Loading from '../../Base/Loading/Loading';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import API from '../../../data/api';
-import VerticalDivider from '../../Shared/VerticalDivider';
+import Loading from 'AppComponents/Base/Loading/Loading';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
+import API from 'AppData/api';
 
 /**
  * @param {*} theme theme details
@@ -130,7 +129,6 @@ const styles = theme => ({
         borderRadius: '5px',
         display: 'flex',
         position: 'absolute',
-        left: '-310px',
         top: 14,
         height: '40px',
         color: theme.palette.getContrastText(theme.palette.background.leftMenu),
@@ -234,7 +232,7 @@ class InfoBar extends React.Component {
         if (typeof todo === 'boolean') {
             this.setState({ showOverview: todo });
         } else {
-            this.setState({ showOverview: !this.state.showOverview });
+            this.setState(prevState => ({ showOverview: !prevState.showOverview }));
         }
     }
 
@@ -262,7 +260,7 @@ class InfoBar extends React.Component {
             <div className={classes.infoBarMain}>
                 <div className={classes.root}>
                     <Link to='/applications' className={classes.backLink}>
-                        <KeyboardArrowLeft className={classes.backIcon} />
+                        <Icon className={classes.backIcon}>keyboard_arrow_left</Icon>
                         <div className={classes.backText}>
                             <FormattedMessage
                                 id='Applications.Details.InfoBar.new.back.to'
@@ -329,7 +327,7 @@ class InfoBar extends React.Component {
                                     ))}
                                     <div className={classes.infoItem}>
                                         {application.status === 'APPROVED' ? (
-                                            <CheckCircle />
+                                            <Icon>check_circle</Icon>
                                         ) : (
                                             <Typography variant='subheading' gutterBottom>
                                                 {application.status}
@@ -365,7 +363,11 @@ class InfoBar extends React.Component {
                     </Collapse>
                 )}
                 <div className={classes.infoContentBottom}>
-                    <div className={classes.contentWrapper} onClick={() => this.toggleOverview()}>
+                    <div
+                        className={classes.contentWrapper}
+                        onClick={this.toggleOverview}
+                        onKeyDown={this.toggleOverview}
+                    >
                         <div className={classes.buttonView}>
                             {showOverview
                                 ? (
@@ -386,7 +388,7 @@ class InfoBar extends React.Component {
                                         />
                                     </Typography>
                                 )}
-                            {showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined />}
+                            {showOverview ? <Icon>arrow_drop_up_circle</Icon> : <Icon>arrow_drop_down_circle</Icon>}
                         </div>
                     </div>
                 </div>
@@ -398,6 +400,8 @@ class InfoBar extends React.Component {
 InfoBar.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
+    resourceNotFountMessage: PropTypes.string.isRequired,
+    applicationId: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(InfoBar);

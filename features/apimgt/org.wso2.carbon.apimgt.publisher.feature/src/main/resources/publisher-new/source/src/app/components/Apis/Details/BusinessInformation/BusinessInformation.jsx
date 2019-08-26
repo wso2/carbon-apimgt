@@ -27,6 +27,7 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { FormattedMessage } from 'react-intl';
 import FormControl from '@material-ui/core/FormControl';
+import API from 'AppData/api.js';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = theme => ({
@@ -50,7 +51,6 @@ const styles = theme => ({
     },
 });
 
-
 /**
  *
  *
@@ -66,7 +66,10 @@ class BusinessInformation extends React.Component {
     constructor(props) {
         super(props);
         const {
-            businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail,
+            businessOwner,
+            businessOwnerEmail,
+            technicalOwner,
+            technicalOwnerEmail,
         } = this.props.api.businessInformation;
         this.state = {
             businessOwner,
@@ -75,7 +78,6 @@ class BusinessInformation extends React.Component {
             technicalOwnerEmail,
         };
     }
-
 
     handleChange = name => (event) => {
         let { value } = event.target;
@@ -119,7 +121,6 @@ class BusinessInformation extends React.Component {
         updateAPI(oldAPI);
     }
 
-
     /**
      *
      * @inheritdoc
@@ -149,16 +150,24 @@ class BusinessInformation extends React.Component {
                                 <TextField
                                     fullWidth
                                     id='name'
-                                    label={<FormattedMessage
-                                        id={'Apis.Details.BusinessInformation.BusinessInformation' +
-                                                '.business.owner.name'}
-                                        defaultMessage='Business Owner'
-                                    />}
-                                    helperText={<FormattedMessage
-                                        id={'Apis.Details.BusinessInformation.BusinessInformation' +
-                                                '.business.owner.name.helper.text'}
-                                        defaultMessage='Provide the name of the business owner'
-                                    />}
+                                    label={
+                                        <FormattedMessage
+                                            id={
+                                                'Apis.Details.BusinessInformation.BusinessInformation' +
+                                                '.business.owner.name'
+                                            }
+                                            defaultMessage='Business Owner'
+                                        />
+                                    }
+                                    helperText={
+                                        <FormattedMessage
+                                            id={
+                                                'Apis.Details.BusinessInformation.BusinessInformation' +
+                                                '.business.owner.name.helper.text'
+                                            }
+                                            defaultMessage='Provide the name of the business owner'
+                                        />
+                                    }
                                     type='text'
                                     name='name'
                                     margin='normal'
@@ -174,16 +183,24 @@ class BusinessInformation extends React.Component {
                                 <TextField
                                     fullWidth
                                     id='name'
-                                    label={<FormattedMessage
-                                        id={'Apis.Details.BusinessInformation.BusinessInformation.' +
-                                                'business.owner.email'}
-                                        defaultMessage='Business Owner Email'
-                                    />}
-                                    helperText={<FormattedMessage
-                                        id={'Apis.Details.BusinessInformation.BusinessInformation' +
-                                                '.business.owner.email.helper.text'}
-                                        defaultMessage='Provide the email of the business owner'
-                                    />}
+                                    label={
+                                        <FormattedMessage
+                                            id={
+                                                'Apis.Details.BusinessInformation.BusinessInformation.' +
+                                                'business.owner.email'
+                                            }
+                                            defaultMessage='Business Owner Email'
+                                        />
+                                    }
+                                    helperText={
+                                        <FormattedMessage
+                                            id={
+                                                'Apis.Details.BusinessInformation.BusinessInformation' +
+                                                '.business.owner.email.helper.text'
+                                            }
+                                            defaultMessage='Provide the email of the business owner'
+                                        />
+                                    }
                                     type='text'
                                     name='name'
                                     margin='normal'
@@ -199,16 +216,24 @@ class BusinessInformation extends React.Component {
                                 <TextField
                                     fullWidth
                                     id='name'
-                                    label={<FormattedMessage
-                                        id={'Apis.Details.BusinessInformation.BusinessInformation' +
-                                                '.technical.owner.name'}
-                                        defaultMessage='Technical Owner'
-                                    />}
-                                    helperText={<FormattedMessage
-                                        id={'Apis.Details.BusinessInformation.BusinessInformation' +
-                                                '.technical.owner.name.helper.text'}
-                                        defaultMessage='Provide the name of the technical owner'
-                                    />}
+                                    label={
+                                        <FormattedMessage
+                                            id={
+                                                'Apis.Details.BusinessInformation.BusinessInformation' +
+                                                '.technical.owner.name'
+                                            }
+                                            defaultMessage='Technical Owner'
+                                        />
+                                    }
+                                    helperText={
+                                        <FormattedMessage
+                                            id={
+                                                'Apis.Details.BusinessInformation.BusinessInformation' +
+                                                '.technical.owner.name.helper.text'
+                                            }
+                                            defaultMessage='Provide the name of the technical owner'
+                                        />
+                                    }
                                     type='text'
                                     name='name'
                                     margin='normal'
@@ -224,16 +249,24 @@ class BusinessInformation extends React.Component {
                                 <TextField
                                     fullWidth
                                     id='name'
-                                    label={<FormattedMessage
-                                        id={'Apis.Details.BusinessInformation.BusinessInformation' +
-                                                '.technical.owner.email'}
-                                        defaultMessage='Technical Owner Email'
-                                    />}
-                                    helperText={<FormattedMessage
-                                        id={'Apis.Details.BusinessInformation.BusinessInformation' +
-                                                '.technical.owner.email.helper.text'}
-                                        defaultMessage='Provide the email of the technical owner'
-                                    />}
+                                    label={
+                                        <FormattedMessage
+                                            id={
+                                                'Apis.Details.BusinessInformation.BusinessInformation' +
+                                                '.technical.owner.email'
+                                            }
+                                            defaultMessage='Technical Owner Email'
+                                        />
+                                    }
+                                    helperText={
+                                        <FormattedMessage
+                                            id={
+                                                'Apis.Details.BusinessInformation.BusinessInformation' +
+                                                '.technical.owner.email.helper.text'
+                                            }
+                                            defaultMessage='Provide the email of the technical owner'
+                                        />
+                                    }
                                     type='text'
                                     name='name'
                                     margin='normal'
@@ -266,7 +299,13 @@ class BusinessInformation extends React.Component {
                                     </div>
                                 </Grid>
                                 <Grid item>
-                                    <Link to={'/apis/' + api.id + '/overview'}>
+                                    <Link
+                                        to={
+                                            (api.apiType === API.CONSTS.APIProduct ? '/api-products/' : '/apis/') +
+                                            api.id +
+                                            '/overview'
+                                        }
+                                    >
                                         <Button>
                                             <FormattedMessage id='cancel' defaultMessage='Cancel' />
                                         </Button>

@@ -133,11 +133,9 @@ class DeleteApiButton extends React.Component {
      * @memberof DeleteApiButton
      */
     render() {
-        const {
-            api, onClick, classes,
-        } = this.props;
-        const type = (api.apiType === API.CONSTS.APIProduct) ? 'API Product ' : 'API ';
-        const version = (api.apiType === API.CONSTS.APIProduct) ? null : '-' + api.version;
+        const { api, onClick, classes } = this.props;
+        const type = api.apiType === API.CONSTS.APIProduct ? 'API Product ' : 'API ';
+        const version = api.apiType === API.CONSTS.APIProduct ? null : '-' + api.version;
         const deleteHandler = onClick || this.handleApiDelete;
         return (
             <React.Fragment>
@@ -174,7 +172,15 @@ class DeleteApiButton extends React.Component {
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button dense variant='outlined' color='secondary' onClick={deleteHandler}>
+                        <Button
+                            dense
+                            variant='outlined'
+                            color='secondary'
+                            onClick={() => {
+                                deleteHandler();
+                                this.handleRequestClose();
+                            }}
+                        >
                             <FormattedMessage
                                 id='Apis.Details.components.DeleteApiButton.button.delete'
                                 defaultMessage='Delete'

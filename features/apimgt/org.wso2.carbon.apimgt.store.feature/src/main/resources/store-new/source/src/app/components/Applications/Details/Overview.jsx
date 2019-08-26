@@ -19,15 +19,15 @@
 import React, { Component } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-
+import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import { FormattedMessage } from 'react-intl';
-import Loading from '../../Base/Loading/Loading';
-import API from '../../../data/api';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
+import Loading from 'AppComponents/Base/Loading/Loading';
+import API from 'AppData/data/api';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 
 /**
  *
@@ -36,6 +36,11 @@ import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
  * @extends {Component}
  */
 class Overview extends Component {
+    /**
+     *Creates an instance of Overview.
+     * @param {*} props properties
+     * @memberof Overview
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -52,12 +57,13 @@ class Overview extends Component {
      */
     componentDidMount() {
         const client = new API();
+        const { match } = this.props;
         // Get application
-        const promised_application = client.getApplication(this.props.match.params.applicationId);
-        promised_application
+        const promisedApplication = client.getApplication(match.params.applicationId);
+        promisedApplication
             .then((response) => {
-                const promised_tier = client.getTierByName(response.obj.throttlingTier, 'application');
-                return Promise.all([response, promised_tier]);
+                const promisedTier = client.getTierByName(response.obj.throttlingTier, 'application');
+                return Promise.all([response, promisedTier]);
             })
             .then((response) => {
                 const [application, tier] = response.map(data => data.obj);
@@ -67,7 +73,7 @@ class Overview extends Component {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
@@ -81,7 +87,6 @@ class Overview extends Component {
      * @memberof Overview
      */
     render() {
-        const redirect_url = '/applications/' + this.props.match.params.application_uuid + '/overview';
         const { application, tierDescription, notFound } = this.state;
         if (notFound) {
             return <ResourceNotFound />;
@@ -134,4 +139,12 @@ class Overview extends Component {
         );
     }
 }
+
+Overview.propTypes = {
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            application_uuid: PropTypes.string.isRequired,
+        }).isRequired,
+    }).isRequired,
+};
 export default Overview;

@@ -290,7 +290,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             authenticators.add(authenticator);
         }
         if (isBasicAuthProtected) {
-            authenticator = new BasicAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory, apiUUID);
+            authenticator = new BasicAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
@@ -307,26 +307,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
-        // Read OpenAPI from local entry
-        if (openAPI == null && apiUUID != null) {
-            synchronized (this) {
-                if (openAPI == null) {
-                    long startTime = System.currentTimeMillis();
-                    Entry localEntryObj = (Entry) messageContext.getConfiguration().getLocalRegistry().get(apiUUID);
-                    if (localEntryObj != null) {
-                        OpenAPIParser parser = new OpenAPIParser();
-                        openAPI = parser.readContents(localEntryObj.getValue().toString(), null, null).getOpenAPI();
-                    }
-                    long endTime = System.currentTimeMillis();
-                    if (log.isDebugEnabled()) {
-                        log.debug("Time to parse the swagger(ms) : " + (endTime - startTime));
-                    }
-                }
-            }
-        }
-        // Add OpenAPI to message context
-        messageContext.setProperty(APIMgtGatewayConstants.API_SWAGGER, openAPI);
-
         TracingSpan keySpan = null;
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
@@ -519,7 +499,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");
         int status;
         if (e.getErrorCode() == APISecurityConstants.API_AUTH_GENERAL_ERROR ||
-                e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_SWAGGER) {
+                e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF) {
             status = HttpStatus.SC_INTERNAL_SERVER_ERROR;
         } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_INCORRECT_API_RESOURCE ||
                 e.getErrorCode() == APISecurityConstants.API_AUTH_FORBIDDEN ||

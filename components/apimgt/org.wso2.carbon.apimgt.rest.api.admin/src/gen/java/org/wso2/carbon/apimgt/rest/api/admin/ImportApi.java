@@ -7,8 +7,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.factories.ImportApiServiceFactory;
 import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationInfoDTO;
 import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.APIInfoListDTO;
 
 import java.util.List;
@@ -28,6 +28,29 @@ public class ImportApi  {
 
    private final ImportApiService delegate = ImportApiServiceFactory.getImportApi();
 
+    @POST
+    @Path("/api")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Import an API", notes = "This operation can be used to import an API.\n", response = void.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Created.\nAPI Imported Successfully.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 403, message = "Forbidden\nNot Authorized to import.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested API to update not found.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 409, message = "Conflict.\nAPI to import already exists.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error.\nError in importing API.\n") })
+
+    public Response importApiPost(@ApiParam(value = "Zip archive consisting on exported api configuration\n") @Multipart(value = "file") InputStream fileInputStream,
+    @ApiParam(value = "Zip archive consisting on exported api configuration\n : details") @Multipart(value = "file" ) Attachment fileDetail,
+    @ApiParam(value = "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider.\n") @QueryParam("preserveProvider")  Boolean preserveProvider,
+    @ApiParam(value = "Whether to update the API or not. This is used when updating already existing APIs.\n") @QueryParam("overwrite")  Boolean overwrite)
+    {
+    return delegate.importApiPost(fileInputStream,fileDetail,preserveProvider,overwrite);
+    }
     @POST
     @Path("/applications")
     @Consumes({ "multipart/form-data" })

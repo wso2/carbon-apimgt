@@ -144,7 +144,6 @@ Avatar.propTypes = {
         accountIcon: PropTypes.string,
     }).isRequired,
     user: PropTypes.shape({ name: PropTypes.string.isRequired }).isRequired,
-    toggleTheme: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(Avatar);

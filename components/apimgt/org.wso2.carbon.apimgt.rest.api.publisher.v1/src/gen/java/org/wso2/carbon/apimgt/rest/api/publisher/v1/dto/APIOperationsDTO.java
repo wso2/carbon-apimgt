@@ -17,8 +17,8 @@ import javax.xml.bind.annotation.*;
 public class APIOperationsDTO   {
   
     private String id = null;
-    private String uritemplate = "/_*";
-    private String httpVerb = "GET";
+    private String target = null;
+    private String verb = null;
     private String authType = "Any";
     private String throttlingPolicy = null;
     private List<String> scopes = new ArrayList<>();
@@ -42,36 +42,36 @@ public class APIOperationsDTO   {
 
   /**
    **/
-  public APIOperationsDTO uritemplate(String uritemplate) {
-    this.uritemplate = uritemplate;
+  public APIOperationsDTO target(String target) {
+    this.target = target;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("uritemplate")
-  public String getUritemplate() {
-    return uritemplate;
+  @JsonProperty("target")
+  public String getTarget() {
+    return target;
   }
-  public void setUritemplate(String uritemplate) {
-    this.uritemplate = uritemplate;
+  public void setTarget(String target) {
+    this.target = target;
   }
 
   /**
    **/
-  public APIOperationsDTO httpVerb(String httpVerb) {
-    this.httpVerb = httpVerb;
+  public APIOperationsDTO verb(String verb) {
+    this.verb = verb;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("httpVerb")
-  public String getHttpVerb() {
-    return httpVerb;
+  @JsonProperty("verb")
+  public String getVerb() {
+    return verb;
   }
-  public void setHttpVerb(String httpVerb) {
-    this.httpVerb = httpVerb;
+  public void setVerb(String verb) {
+    this.verb = verb;
   }
 
   /**
@@ -136,8 +136,8 @@ public class APIOperationsDTO   {
     }
     APIOperationsDTO apIOperations = (APIOperationsDTO) o;
     return Objects.equals(id, apIOperations.id) &&
-        Objects.equals(uritemplate, apIOperations.uritemplate) &&
-        Objects.equals(httpVerb, apIOperations.httpVerb) &&
+        Objects.equals(target, apIOperations.target) &&
+        Objects.equals(verb, apIOperations.verb) &&
         Objects.equals(authType, apIOperations.authType) &&
         Objects.equals(throttlingPolicy, apIOperations.throttlingPolicy) &&
         Objects.equals(scopes, apIOperations.scopes);
@@ -145,7 +145,7 @@ public class APIOperationsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, uritemplate, httpVerb, authType, throttlingPolicy, scopes);
+    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes);
   }
 
   @Override
@@ -154,8 +154,8 @@ public class APIOperationsDTO   {
     sb.append("class APIOperationsDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    uritemplate: ").append(toIndentedString(uritemplate)).append("\n");
-    sb.append("    httpVerb: ").append(toIndentedString(httpVerb)).append("\n");
+    sb.append("    target: ").append(toIndentedString(target)).append("\n");
+    sb.append("    verb: ").append(toIndentedString(verb)).append("\n");
     sb.append("    authType: ").append(toIndentedString(authType)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");

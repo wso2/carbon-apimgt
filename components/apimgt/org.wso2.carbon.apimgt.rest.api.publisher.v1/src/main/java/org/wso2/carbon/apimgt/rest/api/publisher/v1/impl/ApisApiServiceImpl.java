@@ -18,8 +18,20 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import graphql.language.FieldDefinition;
+import graphql.language.ObjectTypeDefinition;
+import graphql.language.TypeDefinition;
+import graphql.schema.GraphQLSchema;
+import graphql.schema.idl.SchemaParser;
+import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.schema.idl.UnExecutableSchemaGenerator;
+import graphql.schema.idl.errors.SchemaProblem;
+import graphql.schema.validation.SchemaValidationError;
+import graphql.schema.validation.SchemaValidator;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +40,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -49,6 +64,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -60,15 +76,20 @@ import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
+import org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
+import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -82,6 +103,10 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
@@ -92,6 +117,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
@@ -188,6 +214,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO createdApiDTO;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String username = RestApiUtil.getLoggedInUsername();
+            boolean isGraphQL = APIDTO.TypeEnum.GRAPHQL == body.getType();
             boolean isWSAPI = APIDTO.TypeEnum.WS == body.getType();
             boolean isSoapToRestConvertedApi = APIDTO.TypeEnum.SOAPTOREST == body.getType();
 
@@ -378,6 +406,95 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity(apiToReturn).build();
     }
 
+    /**
+     * Get GraphQL Schema of given API
+     *
+     * @param apiId          apiId
+     * @param accept
+     * @param ifNoneMatch If--Match header value
+     * @param messageContext message context
+     * @return Response with GraphQL Schema
+     */
+    @Override
+    public Response apisApiIdGraphqlSchemaGet(String apiId, String accept, String ifNoneMatch, MessageContext messageContext) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId,
+                    tenantDomain);
+            String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
+            GraphQLSchemaDTO dto = new GraphQLSchemaDTO();
+            dto.setSchemaDefinition(schemaContent);
+            dto.setName(apiIdentifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+                    apiIdentifier.getApiName() + apiIdentifier.getVersion() + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION);
+            return Response.ok().entity(dto).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while retrieving schema of API: " + apiId, e,
+                                log);
+            } else {
+                String errorMessage = "Error while retrieving schema of API: " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Update GraphQL Schema
+     * @param apiId api Id
+     * @param schemaDefinition graphQL schema definition
+     * @param ifMatch
+     * @param messageContext
+     * @return
+     */
+    @Override
+    public Response apisApiIdGraphqlSchemaPut(String apiId, String schemaDefinition, String ifMatch, MessageContext messageContext) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId,
+                    tenantDomain);
+
+            API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            schemaDefinition = URLDecoder.decode(schemaDefinition.split
+                    (APIConstants.GRAPHQL_SCHEMA_DEFINITION_SEPARATOR)[1], StandardCharsets.UTF_8.name());
+            List<APIOperationsDTO> operationArray = extractGraphQLOperationList(schemaDefinition);
+            Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationArray);
+            originalAPI.setUriTemplates(uriTemplates);
+
+            String resourcePath = apiIdentifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+                    apiIdentifier.getApiName() + apiIdentifier.getVersion() +
+                    APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+            resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
+            apiProvider.uploadGraphqlSchema(resourcePath, schemaDefinition);
+            apiProvider.updateAPI(originalAPI);
+
+            String schema = apiProvider.getGraphqlSchema(apiIdentifier);
+            return Response.ok().entity(schema).build();
+        } catch (APIManagementException | UnsupportedEncodingException | FaultGatewaysException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while retrieving schema of API: " + apiId, e,
+                                log);
+            } else {
+                String errorMessage = "Error while uploading schema of the API: " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
     @Override
     public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) {
         APIDTO updatedApiDTO;
@@ -434,7 +551,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //attach micro-geteway labels
             assignLabelsToDTO(body, apiToUpdate);
-
             apiProvider.updateAPI(apiToUpdate);
 
             if (!isWSAPI) {
@@ -915,7 +1031,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Retrieves API Lifecycle state information
-     *
+     * 
      * @param apiId API Id
      * @param ifNoneMatch If-None-Match header value
      * @return API Lifecycle state information
@@ -1106,25 +1222,158 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.serverError().build();
     }
 
+    /**
+     * Get the resource policies(inflow/outflow).
+     *
+     * @param apiId           API ID
+     * @param sequenceType    sequence type('in' or 'out')
+     * @param resourcePath    api resource path
+     * @param verb            http verb
+     * @param ifNoneMatch     If-None-Match header value
+     * @return json response of the resource policies according to the resource path
+     */
     @Override
     public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String resourcePath,
             String verb, String ifNoneMatch, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            boolean isSoapToRESTApi = SOAPOperationBindingUtils
+                    .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
+                            apiIdentifier.getProviderName());
+            if (isSoapToRESTApi) {
+                if (StringUtils.isEmpty(sequenceType) || !(RestApiConstants.IN_SEQUENCE.equals(sequenceType)
+                        || RestApiConstants.OUT_SEQUENCE.equals(sequenceType))) {
+                    String errorMessage = "Sequence type should be either of the values from 'in' or 'out'";
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+                String resourcePolicy = SequenceUtils
+                        .getRestToSoapConvertedSequence(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
+                                apiIdentifier.getProviderName(), sequenceType);
+                if (StringUtils.isEmpty(resourcePath) && StringUtils.isEmpty(verb)) {
+                    ResourcePolicyListDTO resourcePolicyListDTO = APIMappingUtil
+                            .fromResourcePolicyStrToDTO(resourcePolicy);
+                    return Response.ok().entity(resourcePolicyListDTO).build();
+                }
+                if (StringUtils.isNotEmpty(resourcePath) && StringUtils.isNotEmpty(verb)) {
+                    JSONObject sequenceObj = (JSONObject) new JSONParser().parse(resourcePolicy);
+                    JSONObject resultJson = new JSONObject();
+                    String key = resourcePath + "_" + verb;
+                    JSONObject sequenceContent = (JSONObject) sequenceObj.get(key);
+                    if (sequenceContent == null) {
+                        String errorMessage = "Cannot find any resource policy for Resource path : " + resourcePath +
+                                " with type: " + verb;
+                        RestApiUtil.handleResourceNotFoundError(errorMessage, log);
+                    }
+                    resultJson.put(key, sequenceObj.get(key));
+                    ResourcePolicyListDTO resourcePolicyListDTO = APIMappingUtil
+                            .fromResourcePolicyStrToDTO(resultJson.toJSONString());
+                    return Response.ok().entity(resourcePolicyListDTO).build();
+                } else if (StringUtils.isEmpty(resourcePath)) {
+                    String errorMessage = "Resource path cannot be empty for the defined verb: " + verb;
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                } else if (StringUtils.isEmpty(verb)) {
+                    String errorMessage = "HTTP verb cannot be empty for the defined resource path: " + resourcePath;
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            } else {
+                String errorMessage = "The provided api with id: " + apiId + " is not a soap to rest converted api.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving the API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (ParseException e) {
+            String errorMessage = "Error while retrieving the resource policies for the API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
+    /**
+     * Get the resource policy given the resource id.
+     *
+     * @param apiId           API ID
+     * @param resourcePolicyId      resource policy id
+     * @param ifNoneMatch     If-None-Match header value
+     * @return json response of the resource policy for the resource id given
+     */
     @Override
     public Response apisApiIdResourcePoliciesResourcePolicyIdGet(String apiId, String resourcePolicyId,
             String ifNoneMatch, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            boolean isSoapToRESTApi = SOAPOperationBindingUtils
+                    .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
+                            apiIdentifier.getProviderName());
+            if (isSoapToRESTApi) {
+                if (StringUtils.isEmpty(resourcePolicyId)) {
+                    String errorMessage = "Resource id should not be empty to update a resource policy.";
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+                String policyContent = SequenceUtils
+                        .getResourcePolicyFromRegistryResourceId(apiIdentifier, resourcePolicyId);
+                ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
+                        .fromResourcePolicyStrToInfoDTO(policyContent);
+                return Response.ok().entity(resourcePolicyInfoDTO).build();
+            } else {
+                String errorMessage = "The provided api with id: " + apiId + " is not a soap to rest converted api.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving the API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
+    /**
+     * Update the resource policies(inflow/outflow) given the resource id.
+     *
+     * @param apiId  API ID
+     * @param resourcePolicyId resource policy id
+     * @param body resource policy content
+     * @param ifMatch If-Match header value
+     * @return json response of the updated sequence content
+     */
     @Override
     public Response apisApiIdResourcePoliciesResourcePolicyIdPut(String apiId, String resourcePolicyId,
             ResourcePolicyInfoDTO body, String ifMatch, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            boolean isSoapToRESTApi = SOAPOperationBindingUtils
+                    .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
+                            apiIdentifier.getProviderName());
+            if (isSoapToRESTApi) {
+                if (StringUtils.isEmpty(resourcePolicyId)) {
+                    String errorMessage = "Resource id should not be empty to update a resource policy.";
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+                boolean isValidSchema = RestApiPublisherUtils.validateXMLSchema(body.getContent());
+                if (isValidSchema) {
+                    SequenceUtils
+                            .updateResourcePolicyFromRegistryResourceId(apiIdentifier, resourcePolicyId, body.getContent());
+                    String updatedPolicyContent = SequenceUtils
+                            .getResourcePolicyFromRegistryResourceId(apiIdentifier, resourcePolicyId);
+                    ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
+                            .fromResourcePolicyStrToInfoDTO(updatedPolicyContent);
+                    return Response.ok().entity(resourcePolicyInfoDTO).build();
+                } else {
+                    String errorMessage =
+                            "Error while validating the resource policy xml content for the API : " + apiId;
+                    RestApiUtil.handleInternalServerError(errorMessage, log);
+                }
+            } else {
+                String errorMessage = "The provided api with id: " + apiId + " is not a soap to rest converted api.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving the API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     /**
@@ -1296,23 +1545,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
-    public Response apisApiIdThreatProtectionPoliciesDelete(String apiId, String policyId, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
-    }
-
-    @Override
-    public Response apisApiIdThreatProtectionPoliciesGet(String apiId, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
-    }
-
-    @Override
-    public Response apisApiIdThreatProtectionPoliciesPost(String apiId, String policyId, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
-    }
     /**
      * Retrieves the thumbnail image of an API specified by API identifier
      *
@@ -1476,7 +1708,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 (OpenAPIDefinitionValidationResponseDTO)validationResponseMap.get(RestApiConstants.RETURN_DTO);
         return Response.ok().entity(validationResponseDTO).build();
     }
-
     /**
      * Importing an OpenAPI definition and create an API
      *
@@ -1565,7 +1796,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    @Override
     public Response validateWSDLDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
           Boolean returnContent, MessageContext messageContext) {
         return Response.ok().entity("magic!").build();
@@ -1574,7 +1804,44 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response importWSDLDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
                                          String additionalProperties, String implementationType, MessageContext messageContext) {
-        return Response.ok().entity("magic!").build();
+        try {
+
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIDTO additionalPropertiesAPI = null;
+            APIDTO createdApiDTO;
+            URI createdApiUri;
+
+            // Minimum requirement name, version, context and endpointConfig.
+            additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
+            additionalPropertiesAPI.setProvider(RestApiUtil.getLoggedInUsername());
+            additionalPropertiesAPI.setType(APIDTO.TypeEnum.SOAPTOREST);
+            API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
+            //adding the api
+            apiProvider.addAPI(apiToAdd);
+
+            boolean isSoapToRestConvertedApi = APIDTO.TypeEnum.SOAPTOREST.equals(implementationType);
+            // TODO: First-cut only support URL SOAPToREST remove this todo if it's not
+            if (isSoapToRestConvertedApi && StringUtils.isNotBlank(url)) {
+                if (StringUtils.isNotBlank(url)) {
+                    String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(url);
+                    apiProvider.saveSwagger20Definition(apiToAdd.getId(), swaggerStr);
+                    SequenceGenerator.generateSequencesFromSwagger(swaggerStr, new Gson().toJson(additionalPropertiesAPI));
+                } else {
+                    String errorMessage =
+                            "Error while generating the swagger since the wsdl url is null for: " + apiProvider;
+                    RestApiUtil.handleInternalServerError(errorMessage, log);
+                }
+            }
+            APIIdentifier createdApiId = apiToAdd.getId();
+            //Retrieve the newly added API to send in the response payload
+            API createdApi = apiProvider.getAPI(createdApiId);
+            createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
+            //This URI used to set the location header of the POST response
+            createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
+            return Response.created(createdApiUri).entity(createdApiDTO).build();
+        } catch (APIManagementException | IOException | URISyntaxException e) {
+            return Response.serverError().entity(e.getMessage()).build();
+        }
     }
 
     @Override
@@ -1692,6 +1959,167 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisHead(String query, String ifNoneMatch, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
+    }
+
+    /**
+     * Import a GraphQL Schema
+     * @param type APIType
+     * @param fileInputStream input file
+     * @param fileDetail file Detail
+     * @param additionalProperties api object as string format
+     * @param ifMatch If--Match header value
+     * @param messageContext messageContext
+     * @return Response with GraphQL API
+     */
+    @Override
+    public Response apisImportGraphqlSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail,
+                                                String additionalProperties, String ifMatch,
+                                                MessageContext messageContext) {
+        APIDTO additionalPropertiesAPI = null;
+        String schema = "";
+
+        try {
+            if (fileInputStream == null || StringUtils.isBlank(additionalProperties)) {
+                String errorMessage = "GraphQL schema and api details cannot be empty.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            } else {
+                schema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
+            }
+
+            if (!StringUtils.isBlank(additionalProperties) && !StringUtils.isBlank(schema)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Deseriallizing additionalProperties: " + additionalProperties + "/n"
+                            + "importing schema: " + schema);
+                }
+            }
+
+            additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
+            additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
+            //adding the api
+            apiProvider.addAPI(apiToAdd);
+
+            //Save swagger definition of graphQL
+            APIDefinitionFromOpenAPISpec apiDefinitionUsingOASParser = new APIDefinitionFromOpenAPISpec();
+            String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(apiToAdd);
+            apiProvider.saveSwagger20Definition(apiToAdd.getId(), apiDefinition);
+
+            APIIdentifier createdApiId = apiToAdd.getId();
+
+            //Retrieve the newly added API to send in the response payload
+            API createdApi = apiProvider.getAPI(createdApiId);
+
+            String resourcePath = createdApiId.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+                    createdApiId.getApiName() + createdApiId.getVersion() +
+                    APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+            resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
+
+            if (apiProvider.checkIfResourceExists(resourcePath)) {
+                RestApiUtil.handleConflict("schema resource already exists for the API " +
+                        additionalPropertiesAPI.getId(), log);
+            }
+            apiProvider.uploadGraphqlSchema(resourcePath, schema);
+            APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
+
+            //This URI used to set the location header of the POST response
+            URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
+            return Response.created(createdApiUri).entity(createdApiDTO).build();
+
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while adding new API : " + additionalPropertiesAPI.getProvider() + "-" +
+                additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion() + " - " + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving API location : " + additionalPropertiesAPI.getProvider() + "-" +
+                additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+    } catch (IOException e) {
+            String errorMessage = "Error while retrieving content from file : " + additionalPropertiesAPI.getProvider()
+                    + "-" + additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion()
+                    + "-" /*+ body.getEndpointConfig()*/;
+                    RestApiUtil.handleInternalServerError(errorMessage, e, log);
+    }
+        return null;
+    }
+    /**
+     * Validate graphQL Schema
+     * @param fileInputStream  input file
+     * @param fileDetail file Detail
+     * @param messageContext messageContext
+     * @return Validation response
+     */
+    @Override
+    public Response apisValidateGraphqlSchemaPost(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
+
+        String errorMessage = "";
+        String schema;
+        TypeDefinitionRegistry typeRegistry;
+        Set<SchemaValidationError> validationErrors;
+        boolean isValid = false;
+        SchemaParser schemaParser = new SchemaParser();
+        GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
+
+        try {
+            schema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
+
+            if (schema.isEmpty()) {
+                errorMessage = "GraphQL Schema cannot be empty or null to validate it";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+
+            typeRegistry = schemaParser.parse(schema);
+            GraphQLSchema graphQLSchema = UnExecutableSchemaGenerator.makeUnExecutableSchema(typeRegistry);
+            SchemaValidator schemaValidation = new SchemaValidator();
+            validationErrors = schemaValidation.validateSchema(graphQLSchema);
+
+            if (validationErrors.toArray().length > 0) {
+                errorMessage = "InValid Schema";
+            } else {
+                isValid = true;
+                validationResponse.setIsValid(isValid);
+                GraphQLValidationResponseGraphQLInfoDTO graphQLInfo = new GraphQLValidationResponseGraphQLInfoDTO();
+                List<APIOperationsDTO> operationArray = extractGraphQLOperationList(schema);
+                graphQLInfo.setOperations(operationArray);
+                GraphQLSchemaDTO schemaObj = new GraphQLSchemaDTO();
+                schemaObj.setSchemaDefinition(schema);
+                graphQLInfo.setGraphQLSchema(schemaObj);
+                validationResponse.setGraphQLInfo(graphQLInfo);
+            }
+        } catch (SchemaProblem | IOException e) {
+            errorMessage = e.getMessage();
+        }
+
+        if(!isValid) {
+            validationResponse.setIsValid(isValid);
+            validationResponse.setErrorMessage(errorMessage);
+        }
+        return Response.ok().entity(validationResponse).build();
+    }
+
+    /**
+     * Extract GraphQL Operations from given schema
+     * @param schema graphQL Schema
+     * @return the arrayList of APIOperationsDTO
+     */
+    private List<APIOperationsDTO> extractGraphQLOperationList(String schema) {
+        List<APIOperationsDTO> operationArray = new ArrayList<>();
+        SchemaParser schemaParser = new SchemaParser();
+        TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
+        Map<java.lang.String, graphql.language.TypeDefinition> operationList = typeRegistry.types();
+        for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
+            if (entry.getValue().getName().equals(APIConstants.GRAPHQL_QUERY) ||
+                    entry.getValue().getName().equals(APIConstants.GRAPHQL_MUTATION)
+                    || entry.getValue().getName().equals(APIConstants.GRAPHQL_SUBSCRIPTION)) {
+                for (FieldDefinition fieldDef : ((ObjectTypeDefinition) entry.getValue()).getFieldDefinitions()) {
+                    APIOperationsDTO operation = new APIOperationsDTO();
+                    operation.setVerb(entry.getKey());
+                    operation.setTarget(fieldDef.getName());
+                    operationArray.add(operation);
+                }
+            }
+        }
+        return operationArray;
     }
 
     @Override

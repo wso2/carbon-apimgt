@@ -18,8 +18,6 @@
 import React from 'react';
 import { unwrap } from '@material-ui/core/test-utils';
 import { Typography } from '@material-ui/core';
-import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
-import ArrowDropDownCircleOutlined from '@material-ui/icons/ArrowDropDownCircleOutlined';
 import Comments from '../../src/app/components/Apis/Details/Comments/Comments';
 import Comment from '../../src/app/components/Apis/Details/Comments/Comment';
 import CommentAdd from '../../src/app/components/Apis/Details/Comments/CommentAdd';

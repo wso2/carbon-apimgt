@@ -23,17 +23,14 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import Hidden from '@material-ui/core/Hidden';
-import { Menu as MenuIcon } from '@material-ui/icons';
 import {
     MenuItem, MenuList, ListItemIcon, ListItemText, Divider,
 } from '@material-ui/core';
-import NightMode from '@material-ui/icons/Brightness2';
-
+import Icon from '@material-ui/core/Icon';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { findDOMNode } from 'react-dom';
 import Typography from '@material-ui/core/Typography';
-import Person from '@material-ui/icons/Person';
 import Popper from '@material-ui/core/Popper';
 import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
@@ -232,7 +229,7 @@ class Layout extends React.Component {
                         <Toolbar className={classes.toolbar}>
                             <Hidden mdUp>
                                 <IconButton onClick={this.toggleGlobalNavBar} color='inherit'>
-                                    <MenuIcon className={classes.menuIcon} />
+                                    <Icon className={classes.menuIcon}>menu</Icon>
                                 </IconButton>
                             </Hidden>
                             <Link to='/'>
@@ -268,7 +265,7 @@ class Layout extends React.Component {
                             </Hidden>
                             <VerticalDivider height={32} />
                             <GenericSearch />
-                            <VerticalDivider height={72} />
+                            <VerticalDivider height={64} />
                             {/* Environment menu */}
                             <EnvironmentMenu
                                 environments={this.state.environments}
@@ -286,7 +283,7 @@ class Layout extends React.Component {
                                         onClick={this.handleToggleUserMenu}
                                         className={classes.userLink}
                                     >
-                                        <Person />
+                                        <Icon>person</Icon>
                                         {user.name}
                                     </Button>
                                     <Popper
@@ -340,7 +337,7 @@ class Layout extends React.Component {
                                                             >
                                                                 <ListItemText primary='Night Mode' />
                                                                 <ListItemIcon className={classes.icon}>
-                                                                    <NightMode />
+                                                                    <Icon>brightness_low</Icon>
                                                                 </ListItemIcon>
                                                             </MenuItem>
                                                         </MenuList>
@@ -360,7 +357,7 @@ class Layout extends React.Component {
                                      </Link> */}
                                     <a href='/store-new/services/configs'>
                                         <Button className={classes.userLink}>
-                                            <Person />
+                                            <Icon>person</Icon>
                                             <FormattedMessage id='Base.index.sign.in' defaultMessage=' Sign-in' />
                                         </Button>
                                     </a>

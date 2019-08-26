@@ -18,12 +18,15 @@
 
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
-import { withStyles } from '@material-ui/core/styles';
-import { withTheme } from '@material-ui/core/styles';
+import { withStyles, withTheme } from '@material-ui/core/styles';
+
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
 import { injectIntl } from 'react-intl';
-import Api from '../../../data/api';
+import APIProduct from 'AppData/APIProduct';
+import CONSTS from 'AppData/Constants';
+import Api from 'AppData/api';
+import { ApiContext } from './ApiContext';
 
 /**
  *
@@ -32,14 +35,11 @@ import Api from '../../../data/api';
  * @returns
  */
 function RenderMethodBase(props) {
-    const { theme, method, intl } = props;
+    const { theme, method } = props;
     let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[method] : null;
     let chipTextColor = '#000000';
     if (!chipColor) {
-        console.log(intl.formatMessage({
-            defaultMessage: 'Check the theme settings. The resourceChipColors is not populated properlly',
-            id: 'Apis.Details.Resources.check.the.theme',
-        }));
+        console.log('Check the theme settings. The resourceChipColors is not populated properly');
         chipColor = '#cccccc';
     } else {
         chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[method]);
@@ -96,8 +96,18 @@ class Resources extends React.Component {
      */
     componentDidMount() {
         const { api } = this.props;
-        const promised_api = this.api.getSwaggerByAPIId(api.id);
-        promised_api
+        const { apiType } = this.context;
+        let promisedApi = null;
+
+        if (apiType === CONSTS.API_TYPE) {
+            const apiClient = new Api();
+            promisedApi = apiClient.getSwaggerByAPIId(api.id);
+        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            const apiProductClient = new APIProduct();
+            promisedApi = apiProductClient.getSwaggerByAPIId(api.id);
+        }
+
+        promisedApi
             .then((response) => {
                 if (response.obj.paths !== undefined) {
                     this.setState({ paths: response.obj.paths });
@@ -143,7 +153,8 @@ class Resources extends React.Component {
                                     {key}
                                 </Typography>
                                 {Object.keys(path).map((innerKey) => {
-                                    return <RenderMethod method={innerKey} />;
+                                    return CONSTS.HTTP_METHODS.includes(innerKey)
+                                        ? <RenderMethod method={innerKey} /> : null;
                                 })}
                             </div>
                         );
@@ -153,6 +164,9 @@ class Resources extends React.Component {
         );
     }
 }
+
+Resources.contextType = ApiContext;
+
 Resources.propTypes = {
     classes: PropTypes.object.isRequired,
     intl: PropTypes.shape({

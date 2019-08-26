@@ -44,7 +44,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscription_block", description = "Block Subscription")
         })
-    }, tags={ "Subscription (Individual)",  })
+    }, tags={ "Subscriptions",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Subscription was blocked successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
@@ -62,7 +62,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscription_view", description = "View Subscription")
         })
-    }, tags={ "Subscription (Collection)",  })
+    }, tags={ "Subscriptions",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Subscription list returned. ", response = SubscriptionListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -79,7 +79,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscription_view", description = "View Subscription")
         })
-    }, tags={ "Subscription (Individual)",  })
+    }, tags={ "API Monetization",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Details of a pending invoice returned. ", response = APIMonetizationUsageDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
@@ -96,7 +96,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscription_block", description = "Block Subscription")
         })
-    }, tags={ "Subscription (Individual)" })
+    }, tags={ "Subscriptions" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Subscription was unblocked successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),

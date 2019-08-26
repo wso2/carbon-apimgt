@@ -22,7 +22,7 @@ import { MemoryRouter } from 'react-router-dom';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Configurations from 'Config';
-import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
+import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import API from 'AppData/api.js';
 import AuthManager from 'AppData/AuthManager';
 import { getExampleBodyById } from 'AppTests/Utils/MockAPIModel';
@@ -77,7 +77,7 @@ describe('Publisher <HeaderSearch> component tests', () => {
         await wrapper.find('#searchQuery input').simulate('change', { target: { value: 'test' } });
         expect(wrapper.find('#searchQuery input').props().value).toEqual('test');
         await wrapper.update();
-        expect(mockedSearch).toHaveBeenCalledWith({ limit: 8, query: 'test' });
+        expect(mockedSearch).toHaveBeenCalledWith({ limit: 8, query: 'content:test' });
     });
     test('search results should be displayed for the user provided search query', async () => {
         const wrapper = await mountHeaderSearchComponent();

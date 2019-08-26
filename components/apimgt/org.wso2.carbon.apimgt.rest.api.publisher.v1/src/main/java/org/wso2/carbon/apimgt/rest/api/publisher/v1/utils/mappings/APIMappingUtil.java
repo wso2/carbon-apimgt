@@ -48,37 +48,9 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryItemDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateAvailableTransitionsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateCheckItemsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -92,6 +64,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -99,6 +72,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.sql.Timestamp;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -148,12 +122,14 @@ public class APIMappingUtil {
         model.setImplementation(dto.getEndpointImplementationType().toString());
         model.setWsdlUrl(dto.getWsdlUri());
         model.setType(dto.getType().toString());
-
         if (dto.getLifeCycleStatus() != null) {
             model.setStatus((dto.getLifeCycleStatus() != null) ? dto.getLifeCycleStatus().toUpperCase() : null);
         }
         if (dto.isIsDefaultVersion() != null) {
             model.setAsDefaultVersion(dto.isIsDefaultVersion());
+        }
+        if (dto.isEnableSchemaValidation() != null) {
+            model.setEnableSchemaValidation(dto.isEnableSchemaValidation());
         }
         model.setResponseCache(dto.getResponseCaching());
         if (dto.getCacheTimeout() != null) {
@@ -404,6 +380,7 @@ public class APIMappingUtil {
         APIIdentifier apiId = api.getId();
         apiInfoDTO.setName(apiId.getApiName());
         apiInfoDTO.setVersion(apiId.getVersion());
+        apiInfoDTO.setType(api.getType());
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
@@ -413,6 +390,66 @@ public class APIMappingUtil {
             apiInfoDTO.setHasThumbnail(false);
         }
         return apiInfoDTO;
+    }
+
+    /**
+     * Creates  a list of conversion policies into a DTO
+     *
+     * @param conversionPolicyStr conversion policies
+     * @return ConversionPolicyListDTO object containing ConversionPolicyInfoDTOs
+     * @throws APIManagementException
+     */
+    public static ResourcePolicyListDTO fromResourcePolicyStrToDTO(String conversionPolicyStr)
+            throws APIManagementException {
+        ResourcePolicyListDTO policyListDTO = new ResourcePolicyListDTO();
+        List<ResourcePolicyInfoDTO> policyInfoDTOs = policyListDTO.getList();
+        if (StringUtils.isNotEmpty(conversionPolicyStr)) {
+            try {
+                JSONObject conversionPolicyObj = (JSONObject) new JSONParser().parse(conversionPolicyStr);
+                for (Object key : conversionPolicyObj.keySet()) {
+                    JSONObject policyInfo = (JSONObject) conversionPolicyObj.get(key);
+                    String keyStr = ((String) key);
+                    ResourcePolicyInfoDTO policyInfoDTO = new ResourcePolicyInfoDTO();
+                    policyInfoDTO.setId(policyInfo.get(RestApiConstants.SEQUENCE_ARTIFACT_ID).toString());
+                    policyInfoDTO.setHttpVerb(policyInfo.get(RestApiConstants.HTTP_METHOD).toString());
+                    policyInfoDTO.setResourcePath(keyStr.substring(0, keyStr.lastIndexOf("_")));
+                    policyInfoDTO.setContent(policyInfo.get(RestApiConstants.SEQUENCE_CONTENT).toString());
+                    policyInfoDTOs.add(policyInfoDTO);
+                }
+            } catch (ParseException e) {
+                throw new APIManagementException("Couldn't parse the conversion policy string.", e);
+            }
+        }
+        policyListDTO.setCount(policyInfoDTOs.size());
+        return policyListDTO;
+    }
+
+    /**
+     * Creates a DTO consisting a single conversion policy
+     *
+     * @param conversionPolicyStr conversion policy string
+     * @return ConversionPolicyInfoDTO consisting given conversion policy string
+     * @throws APIManagementException
+     */
+    public static ResourcePolicyInfoDTO fromResourcePolicyStrToInfoDTO(String conversionPolicyStr)
+            throws APIManagementException {
+        ResourcePolicyInfoDTO policyInfoDTO = new ResourcePolicyInfoDTO();
+        if (StringUtils.isNotEmpty(conversionPolicyStr)) {
+            try {
+                JSONObject conversionPolicyObj = (JSONObject) new JSONParser().parse(conversionPolicyStr);
+                for (Object key : conversionPolicyObj.keySet()) {
+                    JSONObject policyInfo = (JSONObject) conversionPolicyObj.get(key);
+                    String keyStr = ((String) key);
+                    policyInfoDTO.setId(policyInfo.get(RestApiConstants.SEQUENCE_ARTIFACT_ID).toString());
+                    policyInfoDTO.setHttpVerb(policyInfo.get(RestApiConstants.HTTP_METHOD).toString());
+                    policyInfoDTO.setResourcePath(keyStr.substring(0, keyStr.lastIndexOf("_")));
+                    policyInfoDTO.setContent(policyInfo.get(RestApiConstants.SEQUENCE_CONTENT).toString());
+                }
+            } catch (ParseException e) {
+                throw new APIManagementException("Couldn't parse the conversion policy string.", e);
+            }
+        }
+        return policyInfoDTO;
     }
 
     /**
@@ -551,9 +588,12 @@ public class APIMappingUtil {
             context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
         }
         dto.setContext(context);
+        dto.setCreatedTime(model.getCreatedTime());
+        dto.setLastUpdatedTime(Long.toString(model.getLastUpdated().getTime()));
         dto.setDescription(model.getDescription());
 
         dto.setIsDefaultVersion(model.isDefaultVersion());
+        dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setResponseCaching(model.getResponseCache());
         dto.setCacheTimeout(model.getCacheTimeout());
         try {
@@ -624,13 +664,13 @@ public class APIMappingUtil {
 
         //Get Swagger definition which has URL templates, scopes and resource details
         if (!APIDTO.TypeEnum.WS.toString().equals(model.getType())) {
+            List<APIOperationsDTO> apiOperationsDTO;
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
-            List<APIOperationsDTO> operationsDTOs = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
-            dto.setOperations(operationsDTOs);
+            apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
+            dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(scopeDTOS);
         }
-
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
         tagsToReturn.addAll(apiTags);
@@ -732,6 +772,16 @@ public class APIMappingUtil {
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
         if (model.getApiSecurity() != null) {
             dto.setSecurityScheme(Arrays.asList(model.getApiSecurity().split(",")));
+        }
+        if (null != model.getLastUpdated()) {
+            Date lastUpdateDate = model.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
+            dto.setLastUpdatedTime(String.valueOf(timeStamp));
+        }
+        if (null != model.getCreatedTime()) {
+            Date createdTime = model.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(createdTime.getTime());
+            dto.setCreatedTime(String.valueOf(timeStamp));
         }
         return dto;
     }
@@ -929,15 +979,15 @@ public class APIMappingUtil {
         Set<URITemplate> uriTemplates = new LinkedHashSet<>();
 
         if (operations == null || operations.isEmpty()) {
-            operations = getDefaultOperationsList();
+            operations = getDefaultOperationsList(model.getType());
         }
 
         for (APIOperationsDTO operation : operations) {
             URITemplate template = new URITemplate();
 
-            String uriTempVal = operation.getUritemplate();
+            String uriTempVal = operation.getTarget();
 
-            String httpVerb = operation.getHttpVerb();
+            String httpVerb = operation.getVerb();
             List<String> scopeList = operation.getScopes();
             if (scopeList != null) {
                 for (String scopeKey : scopeList) {
@@ -956,7 +1006,8 @@ public class APIMappingUtil {
 
             }
             //Only continue for supported operations
-            if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
+            if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase()) ||
+                    (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))) {
                 isHttpVerbDefined = true;
                 String authType = operation.getAuthType();
                 if (APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER.equals(authType)) {
@@ -980,13 +1031,23 @@ public class APIMappingUtil {
 
                 uriTemplates.add(template);
             } else {
-                handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
-                        + "' is invalid");
+                if(APIConstants.GRAPHQL_API.equals(model.getType())){
+                    handleException("The GRAPHQL operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
+                            + "' is invalid");
+                } else {
+                    handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
+                            + "' is invalid");
+                }
             }
 
             if (!isHttpVerbDefined) {
-                handleException("Resource '" + uriTempVal + "' has global parameters without " +
-                        "HTTP methods");
+                if(APIConstants.GRAPHQL_API.equals(model.getType())) {
+                    handleException("Operation '" + uriTempVal + "' has global parameters without " +
+                            "Operation Type");
+                } else {
+                    handleException("Resource '" + uriTempVal + "' has global parameters without " +
+                            "HTTP methods");
+                }
             }
         }
 
@@ -1003,6 +1064,26 @@ public class APIMappingUtil {
 
         Set<Scope> scopeSet = new LinkedHashSet<>();
         for (ScopeDTO scopeDTO : apiDTO.getScopes()) {
+            Scope scope = new Scope();
+            scope.setKey(scopeDTO.getName());
+            scope.setName(scopeDTO.getName());
+            scope.setDescription(scopeDTO.getDescription());
+            scope.setRoles(String.join(",", scopeDTO.getBindings().getValues()));
+            scopeSet.add(scope);
+        }
+        return scopeSet;
+    }
+
+    /**
+     * This method returns the oauth scopes according to the given list of scopes
+     *
+     * @param apiProductDTO list of scopes
+     * @return scope set
+     */
+    private static Set<Scope> getScopes(APIProductDTO apiProductDTO) {
+
+        Set<Scope> scopeSet = new LinkedHashSet<>();
+        for (ScopeDTO scopeDTO : apiProductDTO.getScopes()) {
             Scope scope = new Scope();
             scope.setKey(scopeDTO.getName());
             scope.setName(scopeDTO.getName());
@@ -1358,6 +1439,10 @@ public class APIMappingUtil {
         APIDefinition apiDefinition = apiDefinitionOptional.get();
         Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(api, swaggerDefinition);
 
+        if (!APIConstants.GRAPHQL_API.equals(api.getType())) {
+            uriTemplates = apiDefinition.getURITemplates(api, swaggerDefinition);
+        }
+
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         if (!StringUtils.isEmpty(swaggerDefinition)) {
             for (URITemplate uriTemplate : uriTemplates) {
@@ -1390,8 +1475,8 @@ public class APIMappingUtil {
         } else {
             operationsDTO.setAuthType(APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER);
         }
-        operationsDTO.setHttpVerb(uriTemplate.getHTTPVerb());
-        operationsDTO.setUritemplate(uriTemplate.getUriTemplate());
+        operationsDTO.setVerb(uriTemplate.getHTTPVerb());
+        operationsDTO.setTarget(uriTemplate.getUriTemplate());
         if (uriTemplate.getScope() != null) {
             operationsDTO.setScopes(new ArrayList<String>() {{
                 add(uriTemplate.getScope().getName());
@@ -1406,13 +1491,21 @@ public class APIMappingUtil {
      *
      * @return a default operations list
      */
-    private static List<APIOperationsDTO> getDefaultOperationsList() {
+    private static List<APIOperationsDTO> getDefaultOperationsList(String apiType) {
 
         List<APIOperationsDTO> operationsDTOs = new ArrayList<>();
-        for (String verb : RestApiConstants.SUPPORTED_METHODS) {
+        String[] suportMethods = null;
+
+        if (apiType.equals(APIConstants.GRAPHQL_API)) {
+            suportMethods = APIConstants.GRAPHQL_SUPPORTED_METHODS;
+        } else {
+            suportMethods = RestApiConstants.SUPPORTED_METHODS;
+        }
+
+        for (String verb : suportMethods) {
             APIOperationsDTO operationsDTO = new APIOperationsDTO();
-            operationsDTO.setUritemplate("/*");
-            operationsDTO.setHttpVerb(verb);
+            operationsDTO.setTarget("/*");
+            operationsDTO.setVerb(verb);
             operationsDTO.setThrottlingPolicy(APIConstants.UNLIMITED_TIER);
             operationsDTO.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
             operationsDTOs.add(operationsDTO);
@@ -1466,22 +1559,25 @@ public class APIMappingUtil {
             if(aggregatedAPIs.containsKey(uuid)) {
                 ProductAPIDTO productAPI = aggregatedAPIs.get(uuid);
                 URITemplate template = apiProductResource.getUriTemplate();
-                List<ProductAPIOperationsDTO> operations = productAPI.getOperations();
-                ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
-                operation.setHttpVerb(template.getHTTPVerb());
-                operation.setUritemplate(template.getResourceURI());
+                List<APIOperationsDTO> operations = productAPI.getOperations();
+                APIOperationsDTO operation = new APIOperationsDTO();
+                operation.setVerb(template.getHTTPVerb());
+                operation.setTarget(template.getResourceURI());
+                operation.setAuthType(template.getAuthType());
+                operation.setThrottlingPolicy(template.getThrottlingTier());
                 operations.add(operation);
-
             } else {
                 ProductAPIDTO productAPI = new ProductAPIDTO();
                 productAPI.setApiId(uuid);
                 productAPI.setName(apiProductResource.getApiName());
-                List<ProductAPIOperationsDTO> operations = new ArrayList<ProductAPIOperationsDTO>();
+                List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
                 URITemplate template = apiProductResource.getUriTemplate();
 
-                ProductAPIOperationsDTO operation = new ProductAPIOperationsDTO();
-                operation.setHttpVerb(template.getHTTPVerb());
-                operation.setUritemplate(template.getResourceURI());
+                APIOperationsDTO operation = new APIOperationsDTO();
+                operation.setVerb(template.getHTTPVerb());
+                operation.setTarget(template.getResourceURI());
+                operation.setAuthType(template.getAuthType());
+                operation.setThrottlingPolicy(template.getThrottlingTier());
                 operations.add(operation);
 
                 productAPI.setOperations(operations);
@@ -1519,6 +1615,13 @@ public class APIMappingUtil {
             productDto.setVisibleTenants(Arrays.asList(product.getVisibleTenants().split(",")));
         }
 
+        productDto.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY.equals(product.getAccessControl()) ?
+                APIProductDTO.AccessControlEnum.RESTRICTED :
+                APIProductDTO.AccessControlEnum.NONE);
+        if (product.getAccessControlRoles() != null) {
+            productDto.setAccessControlRoles(Arrays.asList(product.getAccessControlRoles().split(",")));
+        }
+
         if (StringUtils.isEmpty(product.getTransports())) {
             List<String> transports = new ArrayList<>();
             transports.add(APIConstants.HTTPS_PROTOCOL);
@@ -1543,6 +1646,17 @@ public class APIMappingUtil {
 
         if (product.getApiSecurity() != null) {
             productDto.setSecurityScheme(Arrays.asList(product.getApiSecurity().split(",")));
+        }
+
+        if (null != product.getLastUpdated()) {
+            Date lastUpdateDate = product.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
+            productDto.setLastUpdatedTime(String.valueOf(timeStamp));
+        }
+        if (null != product.getCreatedTime()) {
+            Date createdTime = product.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(createdTime.getTime());
+            productDto.setCreatedTime(String.valueOf(timeStamp));
         }
 
         return productDto;
@@ -1665,13 +1779,14 @@ public class APIMappingUtil {
 
         for (int i = 0; i < dto.getApis().size(); i++) {
             ProductAPIDTO res = dto.getApis().get(i);
-            List<ProductAPIOperationsDTO> productAPIOperationsDTO = res.getOperations();
-            for (ProductAPIOperationsDTO resourceItem : productAPIOperationsDTO) {
+            List<APIOperationsDTO> productAPIOperationsDTO = res.getOperations();
+            for (APIOperationsDTO resourceItem : productAPIOperationsDTO) {
 
                 URITemplate template = new URITemplate();
-                template.setHTTPVerb(resourceItem.getHttpVerb());
-                template.setResourceURI(resourceItem.getUritemplate());
-                template.setUriTemplate(resourceItem.getUritemplate());
+                template.setHTTPVerb(resourceItem.getVerb());
+                template.setResourceURI(resourceItem.getTarget());
+                template.setUriTemplate(resourceItem.getAuthType());
+                template.setThrottlingTier(resourceItem.getThrottlingPolicy());
 
                 APIProductResource resource = new APIProductResource();
                 resource.setApiId(res.getApiId());
@@ -1680,6 +1795,9 @@ public class APIMappingUtil {
             }
 
         }
+
+        Set<Scope> scopes = getScopes(dto);
+        product.setScopes(scopes);
 
         APICorsConfigurationDTO apiCorsConfigurationDTO = dto.getCorsConfiguration();
         CORSConfiguration corsConfiguration;

@@ -54,8 +54,9 @@ class ImageGenerator extends PureComponent {
         const {
             category, key, color, backgroundIndex,
         } = fixedIcon;
-
-        const str = api.name;
+        let str = api;
+        if (typeof api === 'object') str = api.name;
+        if (!str) str = 'default';
         let count;
         let colorPair;
         let randomBackgroundIndex;
@@ -65,20 +66,23 @@ class ImageGenerator extends PureComponent {
         // Creating the icon
         if (key && category) {
             IconElement = key;
+        } else if (api.type === 'DOC') {
+            IconElement = theme.custom.thumbnail.document.icon;
         } else {
             count = MaterialIcons.categories[0].icons.length;
             const randomIconIndex = (str.charCodeAt(0) + str.charCodeAt(str.length - 1)) % count;
             IconElement = MaterialIcons.categories[0].icons[randomIconIndex].id;
         }
 
-        // Obtain or generate background color pair
-        if (backgroundIndex && colorPairs.length > backgroundIndex) {
+        if (api.type === 'DOC') {
+            colorPair = theme.custom.thumbnail.document.backgrounds;
+        } else if (backgroundIndex && colorPairs.length > backgroundIndex) {
+            // Obtain or generate background color pair
             colorPair = colorPairs[backgroundIndex];
         } else {
             randomBackgroundIndex = (str.charCodeAt(0) + str.charCodeAt(str.length - 1)) % colorPairs.length;
             colorPair = colorPairs[randomBackgroundIndex];
         }
-
         return (
             <div className={classes.iconWrapper} style={{ width }}>
                 <Icon className={classes.icon} style={{ fontSize: height, marginLeft: -height / 2, color }}>

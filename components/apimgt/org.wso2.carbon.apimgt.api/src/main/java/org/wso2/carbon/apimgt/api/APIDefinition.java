@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.registry.api.Registry;
@@ -58,6 +59,16 @@ public abstract class APIDefinition {
     public abstract Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
 
     /**
+     * This method saves the APIProduct definition
+     *
+     * @param apiProduct               API to be saved
+     * @param apiDefinitionJSON API definition as JSON string
+     * @param registry          user registry
+     */
+    public abstract void saveAPIDefinition(APIProduct apiProduct, String apiDefinitionJSON, Registry registry)
+            throws APIManagementException;
+
+    /**
      * This method generates API definition to the given api
      *
      * @param api api
@@ -65,6 +76,15 @@ public abstract class APIDefinition {
      * @throws APIManagementException
      */
     public abstract String generateAPIDefinition(API api) throws APIManagementException;
+
+    /**
+     * This method generates API definition to the given apiProduct
+     *
+     * @param apiProduct apiProduct
+     * @return API definition in string format
+     * @throws APIManagementException
+     */
+    public abstract String generateAPIDefinition(APIProduct apiProduct) throws APIManagementException;
 
     /**
      * This method generates API definition using the given api's URI templates and the swagger.

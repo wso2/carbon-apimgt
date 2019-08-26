@@ -176,6 +176,8 @@ public enum SubscriptionAvailabilityEnum {
     private Map<String, String> additionalProperties = new HashMap<>();
     private APIProductBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
+    private String createdTime = null;
+    private String lastUpdatedTime = null;
     private List<ProductAPIDTO> apis = new ArrayList<>();
     private List<ScopeDTO> scopes = new ArrayList<>();
 
@@ -570,6 +572,40 @@ public enum SubscriptionAvailabilityEnum {
   }
 
   /**
+   **/
+  public APIProductDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  @JsonProperty("createdTime")
+  public String getCreatedTime() {
+    return createdTime;
+  }
+  public void setCreatedTime(String createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  /**
+   **/
+  public APIProductDTO lastUpdatedTime(String lastUpdatedTime) {
+    this.lastUpdatedTime = lastUpdatedTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
+  @JsonProperty("lastUpdatedTime")
+  public String getLastUpdatedTime() {
+    return lastUpdatedTime;
+  }
+  public void setLastUpdatedTime(String lastUpdatedTime) {
+    this.lastUpdatedTime = lastUpdatedTime;
+  }
+
+  /**
    * APIs and resources in the API Product. 
    **/
   public APIProductDTO apis(List<ProductAPIDTO> apis) {
@@ -636,13 +672,15 @@ public enum SubscriptionAvailabilityEnum {
         Objects.equals(additionalProperties, apIProduct.additionalProperties) &&
         Objects.equals(businessInformation, apIProduct.businessInformation) &&
         Objects.equals(corsConfiguration, apIProduct.corsConfiguration) &&
+        Objects.equals(createdTime, apIProduct.createdTime) &&
+        Objects.equals(lastUpdatedTime, apIProduct.lastUpdatedTime) &&
         Objects.equals(apis, apIProduct.apis) &&
         Objects.equals(scopes, apIProduct.scopes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, transport, policies, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, corsConfiguration, apis, scopes);
+    return Objects.hash(id, name, context, description, provider, thumbnailUri, state, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, transport, policies, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes);
   }
 
   @Override
@@ -672,6 +710,8 @@ public enum SubscriptionAvailabilityEnum {
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    apis: ").append(toIndentedString(apis)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("}");

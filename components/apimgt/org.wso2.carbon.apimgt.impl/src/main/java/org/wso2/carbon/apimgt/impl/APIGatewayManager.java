@@ -22,11 +22,13 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -41,12 +43,18 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -113,14 +121,43 @@ public class APIGatewayManager {
                 continue;
             }
             APIGatewayAdminClient client;
+            LocalEntryAdminClient localEntryAdminClient;
+
             try {
-                client = new APIGatewayAdminClient(environment);
+                String definition;
                 String operation;
+                client = new APIGatewayAdminClient(environment);
                 long apiGetStartTime = System.currentTimeMillis();
                 APIData apiData = client.getApi(tenantDomain, api.getId());
                 endTime = System.currentTimeMillis();
                 if (debugEnabled) {
                     log.debug("Time taken to fetch API Data: " + (endTime - apiGetStartTime) / 1000 + "  seconds");
+                }
+                localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
+                if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
+                    //Build schema with scopes and roles
+                    GraphQLSchemaDefinition schemaDefinition = new GraphQLSchemaDefinition();
+                    definition = schemaDefinition.buildSchemaWithScopesAndRoles(api);
+                    localEntryAdminClient.deleteEntry(api.getUUID() + "_graphQL");
+                    localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "_graphQL" + "\">" +
+                            definition + "</localEntry>");
+
+                    Set<URITemplate> uriTemplates = new HashSet<>();
+                    URITemplate template = new URITemplate();
+                    template.setAuthType("Any");
+                    template.setHTTPVerb("POST");
+                    template.setHttpVerbs("POST");
+                    template.setHttpVerbs("GET");
+                    template.setUriTemplate("/*");
+                    uriTemplates.add(template);
+                    api.setUriTemplates(uriTemplates);
+                } else if (api.getType() != null && APIConstants.APITransportType.HTTP.toString().equals(api.getType())) {
+                    definition = api.getSwaggerDefinition();
+                    localEntryAdminClient.deleteEntry(api.getUUID());
+                    localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "\">" +
+                            definition.replaceAll("&(?!amp;)", "&amp;").
+                                    replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                            + "</localEntry>");
                 }
                 // If the API exists in the Gateway
                 if (apiData != null) {
@@ -398,8 +435,6 @@ public class APIGatewayManager {
 
         return failedEnvironmentsMap;
     }
-
-
 	/**
 	 * Removed an API from the configured Gateways
 	 * 
@@ -579,10 +614,25 @@ public class APIGatewayManager {
      * @param url
      * @return
      */
-    public String createSeqString(API api, String url, String urltype) {
+    public String createSeqString(API api, String url, String urltype) throws JSONException  {
 
         String context = api.getContext();
         context = urltype + context;
+        String[] endpointConfig = websocketEndpointConfig(api, urltype);
+        String timeout = endpointConfig[0];
+        String suspendOnFailure = endpointConfig[1];
+        String markForSuspension = endpointConfig[2];
+        String endpointConf = "<default>\n" +
+                "\t<timeout>\n" +
+                timeout +
+                "\t</timeout>\n" +
+                "\t<suspendOnFailure>\n" +
+                suspendOnFailure + "\n" +
+                "\t</suspendOnFailure>\n" +
+                "\t<markForSuspension>\n" +
+                markForSuspension +
+                "\t</markForSuspension>\n" +
+                "</default>";
         String seq = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"" +
                 context.replace('/', '-') + "\">\n" +
@@ -610,7 +660,7 @@ public class APIGatewayManager {
                 "           expression=\"$ctx:fullUrl\"/>\n" +
                 "   <send>\n" +
                 "      <endpoint>\n" +
-                "         <default/>\n" +
+                endpointConf + "\n" +
                 "      </endpoint>\n" +
                 "   </send>\n" +
                 "</sequence>";
@@ -1128,4 +1178,86 @@ public class APIGatewayManager {
 			}
 		}
 	}
+    /**
+     * Construct the timeout, suspendOnFailure, markForSuspension to add suspend
+     * configuration to the websocket endpoint (Simply assign config values according to the endpoint-template)
+     *
+     * @param api
+     *
+     * @param urlType
+     *            - Whether production or sandbox
+     * @return timeout, suspendOnFailure, markForSuspension which will use to construct the endpoint configuration
+     *
+     */
+    private String[] websocketEndpointConfig(API api, String urlType) throws JSONException {
+        JSONObject obj = new JSONObject(api.getEndpointConfig());
+        JSONObject endpointObj = null;
+        if (ENDPOINT_PRODUCTION.equalsIgnoreCase(urlType)) {
+            if (obj.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).get("config") instanceof JSONObject) {
+                //if config is not a JSONObject(happens when save the api without changing enpoint config at very first time)
+                endpointObj = obj.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getJSONObject("config");
+            } else {
+                return new String[]{"", "", ""};
+            }
+        } else if (ENDPOINT_SANDBOX.equalsIgnoreCase(urlType)) {
+            if (obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).get("config") instanceof JSONObject) {
+                //if config is not a JSONObject(happens when save the api without changing enpoint config at very first time)
+                endpointObj = obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getJSONObject("config");
+            } else {
+                return new String[]{"", "", ""};
+            }
+        }
+        String duration = endpointObj.has("actionDuration") ? "\t\t<duration>" + endpointObj.get("actionDuration") + "</duration>\n" : "";
+        String responseAction = endpointObj.has("actionSelect") ? "\t\t<responseAction>" + endpointObj.get("actionSelect") + "</responseAction>\n" : "";
+        String timeout = duration + "\n" + responseAction;
+        String retryErrorCode;
+        String suspendErrorCode ;
+        if (endpointObj.has("suspendDuration")) {
+            //Avoid suspending the endpoint when suspend duration is zero
+            if (Integer.parseInt(endpointObj.get("suspendDuration").toString()) == 0) {
+                String suspendOnFailure = "\t\t<errorCodes>-1</errorCodes>\n" +
+                        "\t\t<initialDuration>0</initialDuration>\n" +
+                        "\t\t<progressionFactor>1.0</progressionFactor>\n" +
+                        "\t\t<maximumDuration>0</maximumDuration>";
+                String markForSuspension = "\t\t<errorCodes>-1</errorCodes>";
+                return new String[]{timeout, suspendOnFailure, markForSuspension};
+            }
+        }
+        if (endpointObj.has("suspendErrorCode")) {
+            //When there are/is multiple/single suspend error codes
+            if (endpointObj.get("suspendErrorCode") instanceof JSONArray) {
+                String suspendCodeList = "";
+                for (int i = 0; i < endpointObj.getJSONArray("suspendErrorCode").length(); i++) {
+                    suspendCodeList = suspendCodeList + endpointObj.getJSONArray("suspendErrorCode").get(i).toString() + ",";
+                }
+                suspendErrorCode = "\t\t<errorCodes>" + suspendCodeList.substring(0, suspendCodeList.length() - 1) + "</errorCodes>";
+            } else {
+                suspendErrorCode = "\t\t<errorCodes>" + endpointObj.get("suspendErrorCode") + "</errorCodes>";
+            }
+        } else {
+            suspendErrorCode = "";
+        }
+        String suspendDuration = endpointObj.has("suspendDuration") ? "\t\t<initialDuration>" + endpointObj.get("suspendDuration").toString() + "</initialDuration>" : "";
+        String suspendMaxDuration = endpointObj.has("suspendMaxDuration") ? "\t\t<maximumDuration>" + endpointObj.get("suspendMaxDuration") + "</maximumDuration>" : "";
+        String factor = endpointObj.has("factor") ? "\t\t<progressionFactor>" + endpointObj.get("factor") + "</progressionFactor>" : "";
+        String suspendOnFailure = suspendErrorCode + "\n" + suspendDuration + "\n" + suspendMaxDuration + "\n" + factor;
+        if (endpointObj.has("retryErroCode")) {
+            //When there are/is multiple/single retry error codes
+            if (endpointObj.get("retryErroCode") instanceof JSONArray) {
+                String retryCodeList = "";
+                for (int i = 0; i < endpointObj.getJSONArray("retryErroCode").length(); i++) {
+                    retryCodeList = retryCodeList + endpointObj.getJSONArray("retryErroCode").get(i).toString() + ",";
+                }
+                retryErrorCode = "\t\t<errorCodes>" + retryCodeList.substring(0, retryCodeList.length() - 1) + "</errorCodes>";
+            } else {
+                retryErrorCode = "\t\t<errorCodes>" + endpointObj.get("retryErroCode") + "</errorCodes>";
+            }
+        } else {
+            retryErrorCode = "";
+        }
+        String retryTimeOut = endpointObj.has("retryTimeOut") ? "\t\t<retriesBeforeSuspension>" + endpointObj.get("retryTimeOut") + "</retriesBeforeSuspension>" : "";
+        String retryDelay = endpointObj.has("retryDelay") ? "\t\t<retryDelay>" + endpointObj.get("retryDelay") + "</retryDelay>" : "";
+        String markForSuspension = retryErrorCode + "\n" + retryTimeOut + "\n" + retryDelay;
+        return new String[]{timeout, suspendOnFailure, markForSuspension};
+    }
 }

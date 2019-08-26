@@ -17,23 +17,27 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
+import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import AuthManager from 'AppData/AuthManager';
 import User from 'AppData/User';
 import API from 'AppData/api.js';
 import { unwrap } from '@material-ui/core/test-utils';
 import { createMemoryHistory } from 'history';
 import SwaggerClient from 'swagger-client';
+import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
+import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 
 import getMockedModel, { getAllScopes } from 'AppTests/Utils/MockAPIModel.js';
 import MenuItem from '@material-ui/core/MenuItem';
 import Policies from 'AppComponents/Apis/Details/LifeCycle/Policies';
+import Configurations from 'Config';
 import APICreateDefault from './APICreateDefault';
 
 const mockedGetUser = jest.fn();
 const mockedHasScopes = jest.fn();
 
 AuthManager.getUser = mockedGetUser.bind(AuthManager);
+const theme = createMuiTheme(Configurations.themes.light);
 
 describe('<APICreateForm/> tests', () => {
     let spec;
@@ -72,13 +76,13 @@ describe('<APICreateForm/> tests', () => {
                 hasScopes: originalAuthManagers.default.hasScopes,
             };
         });
-        const wrapper = await mountWithIntl(<APICreateDefault
+        const wrapper = await mountWithIntl(<MuiThemeProvider theme={theme}><APICreateDefault
             api={new API('mockAPI', '1.1.1', '/sample')}
             handleSubmit={() => {}}
             inputChange={() => {}}
             isAPIProduct={false}
             valid={{ name: '', version: '', context: '' }}
-        />);
+        /></MuiThemeProvider>);
         await new Promise(resolve => setImmediate(resolve));
         await wrapper.update();
         const policiesDropDown = await wrapper.find(Policies);
@@ -125,14 +129,14 @@ describe('<APICreateForm/> tests', () => {
         mockedGetUser.mockReturnValueOnce(mockedUser);
 
         // The moment we wait for :) , Mounting the testing component
-        const wrapper = mountWithIntl(<APICreateDefault
+        const wrapper = mountWithIntl(<MuiThemeProvider theme={theme}><APICreateDefault
             api={new API(sampleAPIData)}
             handleSubmit={() => {}}
             inputChange={() => {}}
             isAPIProduct={false}
             valid={{ name: '', version: '', context: '' }}
             history={history}
-        />);
+        /></MuiThemeProvider>);
 
         // Simulate typing values into input fields, Entering API name, version , context , endpoint
         // and selecting a policy

@@ -21,24 +21,16 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
-import Grid from '@material-ui/core/Grid';
-import Card from '@material-ui/core/Card';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
-import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { Link } from 'react-router-dom';
-import {
-    List,
-    ListItem,
-    ListItemText,
-} from '@material-ui/core';
+import { List, ListItem, ListItemText } from '@material-ui/core';
 import AddCircle from '@material-ui/icons/AddCircle';
 import MUIDataTable from 'mui-datatables';
 import Icon from '@material-ui/core/Icon';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Delete from './Delete';
 
 const styles = theme => ({
@@ -60,17 +52,24 @@ const styles = theme => ({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
+        marginBottom: theme.spacing.unit * 2,
     },
     mainTitle: {
         paddingLeft: 0,
     },
     button: {
-        marginLeft: theme.spacing.unit * 2,
         textTransform: theme.custom.leftMenuTextStyle,
+        textDecoration: 'none',
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     buttonIcon: {
         marginRight: 10,
+    },
+    content: {
+        margin: `${theme.spacing.unit * 2}px 0 ${theme.spacing.unit * 2}px 0`,
+    },
+    head: {
+        fontWeight: 200,
     },
 });
 /**
@@ -115,17 +114,17 @@ class Scopes extends React.Component {
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
                             const roles = value || [];
-                            return (
-                                roles.join(',')
-                            );
+                            return roles.join(',');
                         }
                         return false;
                     },
                     filter: false,
-                    label: <FormattedMessage
-                        id='Apis.Details.Scopes.Scopes.table.header.roles'
-                        defaultMessage='Applying Roles'
-                    />,
+                    label: (
+                        <FormattedMessage
+                            id='Apis.Details.Scopes.Scopes.table.header.roles'
+                            defaultMessage='Applying Roles'
+                        />
+                    ),
                 },
             },
             {
@@ -145,10 +144,12 @@ class Scopes extends React.Component {
                         return false;
                     },
                     filter: false,
-                    label: <FormattedMessage
-                        id='Apis.Details.Scopes.Scopes.table.header.usages'
-                        defaultMessage='Used In'
-                    />,
+                    label: (
+                        <FormattedMessage
+                            id='Apis.Details.Scopes.Scopes.table.header.usages'
+                            defaultMessage='Used In'
+                        />
+                    ),
                 },
             },
             {
@@ -160,12 +161,13 @@ class Scopes extends React.Component {
                                 <table className={classes.actionTable}>
                                     <tr>
                                         <td>
-                                            <Link to={{
-                                                pathname: editUrl,
-                                                state: {
-                                                    scopeName,
-                                                },
-                                            }}
+                                            <Link
+                                                to={{
+                                                    pathname: editUrl,
+                                                    state: {
+                                                        scopeName,
+                                                    },
+                                                }}
                                             >
                                                 <Button>
                                                     <Icon>edit</Icon>
@@ -186,12 +188,15 @@ class Scopes extends React.Component {
                         return false;
                     },
                     filter: false,
-                    label: <FormattedMessage
-                        id='Apis.Details.Scopes.Scopes.table.header.actions'
-                        defaultMessage='Actions'
-                    />,
+                    label: (
+                        <FormattedMessage
+                            id='Apis.Details.Scopes.Scopes.table.header.actions'
+                            defaultMessage='Actions'
+                        />
+                    ),
                 },
-            }];
+            },
+        ];
         const options = {
             filterType: 'multiselect',
             selectableRows: false,
@@ -201,11 +206,13 @@ class Scopes extends React.Component {
             aScope.push(scope.name);
             aScope.push(scope.description);
             aScope.push(scope.bindings.values);
-            const resources = api.operations.filter((op) => {
-                return op.scopes.includes(scope.name);
-            }).map((op) => {
-                return op.uritemplate + ' ' + op.httpVerb;
-            });
+            const resources = api.operations
+                .filter((op) => {
+                    return op.scopes.includes(scope.name);
+                })
+                .map((op) => {
+                    return op.target + ' ' + op.verb;
+                });
             aScope.push(resources);
             return aScope;
         });
@@ -216,38 +223,35 @@ class Scopes extends React.Component {
 
         if (scopes.length === 0) {
             return (
-                <Grid container justify='center'>
-                    <Grid item sm={5}>
-                        <Card className={classes.card}>
-                            <Typography className={classes.headline} gutterBottom variant='h5' component='h2'>
-                                <FormattedMessage
-                                    id='Apis.Details.Scopes.Scopes.create.scopes.title'
-                                    defaultMessage='Create Scopes'
-                                />
-                            </Typography>
-                            <Divider />
-                            <CardContent>
-                                <Typography align='justify' component='p'>
+                <InlineMessage type='info' height={140}>
+                    <div className={classes.contentWrapper}>
+                        <Typography variant='h5' component='h3' className={classes.head}>
+                            <FormattedMessage
+                                id='Apis.Details.Scopes.Scopes.create.scopes.title'
+                                defaultMessage='Create Scopes'
+                            />
+                        </Typography>
+                        <Typography component='p' className={classes.content}>
+                            <FormattedMessage
+                                id='Apis.Details.Scopes.Scopes.scopes.enable.fine.gained.access.control'
+                                defaultMessage={
+                                    'Scopes enable fine-grained access control to API resources' +
+                                    ' based on user roles.'
+                                }
+                            />
+                        </Typography>
+                        <div className={classes.actions}>
+                            <Link to={url}>
+                                <Button variant='contained' color='primary' className={classes.button}>
                                     <FormattedMessage
-                                        id='Apis.Details.Scopes.Scopes.scopes.enable.fine.gained.access.control'
-                                        defaultMessage={'Scopes enable fine-grained access control to API resources'
-                                            + ' based on user roles.'}
+                                        id='Apis.Details.Scopes.Scopes.create.scopes.button'
+                                        defaultMessage='Create Scopes'
                                     />
-                                </Typography>
-                            </CardContent>
-                            <CardActions>
-                                <Link to={url}>
-                                    <Button variant='contained' color='primary' className={classes.button}>
-                                        <FormattedMessage
-                                            id='Apis.Details.Scopes.Scopes.create.scopes.button'
-                                            defaultMessage='Create Scopes'
-                                        />
-                                    </Button>
-                                </Link>
-                            </CardActions>
-                        </Card>
-                    </Grid>
-                </Grid>
+                                </Button>
+                            </Link>
+                        </div>
+                    </div>
+                </InlineMessage>
             );
         }
 
@@ -280,8 +284,6 @@ class Scopes extends React.Component {
                     columns={columns}
                     options={options}
                 />
-
-
             </div>
         );
     }

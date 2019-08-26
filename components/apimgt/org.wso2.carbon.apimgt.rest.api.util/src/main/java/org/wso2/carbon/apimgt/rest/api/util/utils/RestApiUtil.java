@@ -1072,6 +1072,20 @@ public class RestApiUtil {
         return paginatedURL;
     }
 
+    /** Returns the paginated url for API ratings
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getRatingPaginatedURL(Integer offset, Integer limit, String apiId) {
+        String paginatedURL = RestApiConstants.RATINGS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
+        return paginatedURL;
+    }
+
     /** Returns the paginated url for tiers
      *
      * @param tierLevel tier level (api/application or resource)

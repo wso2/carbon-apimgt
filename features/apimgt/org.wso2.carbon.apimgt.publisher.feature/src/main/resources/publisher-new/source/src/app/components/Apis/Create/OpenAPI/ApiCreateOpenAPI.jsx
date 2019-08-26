@@ -30,12 +30,11 @@ import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import green from '@material-ui/core/colors/green';
 import Typography from '@material-ui/core/Typography';
-
+import Paper from '@material-ui/core/Paper';
 import APIInputForm from 'AppComponents/Apis/Create/Components/APIInputForm';
 import Alert from 'AppComponents/Shared/Alert';
 import ProvideOpenAPI from './Steps/ProvideOpenAPI';
 import APICreateTopMenu from '../Components/APICreateTopMenu';
-
 
 const styles = theme => ({
     root: {
@@ -59,55 +58,7 @@ const styles = theme => ({
     },
     subTitle: {
         color: theme.palette.grey[500],
-    },
-    FormControl: {
-        padding: 0,
-        width: '100%',
-        marginTop: 0,
-    },
-    FormControlOdd: {
-        padding: 0,
-        backgroundColor: theme.palette.background.paper,
-        width: '100%',
-        marginTop: 0,
-    },
-    radioWrapper: {
-        display: 'flex',
-        flexDirection: 'row',
-    },
-    dropZoneInside: {},
-    dropZone: {
-        width: '100%',
-        color: theme.palette.grey[500],
-        border: 'dashed 1px ' + theme.palette.grey[500],
-        background: theme.palette.grey[100],
-        padding: theme.spacing.unit * 4,
-        textAlign: 'center',
-        cursor: 'pointer',
-    },
-    dropZoneIcon: {
-        color: theme.palette.grey[500],
-        width: 100,
-        height: 100,
-    },
-    dropZoneError: {
-        color: theme.palette.error.main,
-    },
-    dropZoneErrorBox: {
-        border: 'dashed 1px ' + theme.palette.error.main,
-    },
-    fileNameWrapper: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        '& div': {
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-        },
-    },
-    buttonSection: {
-        paddingTop: theme.spacing.unit * 2,
+        marginBottom: theme.spacing.unit * 2,
     },
     stepper: {
         paddingLeft: 0,
@@ -164,10 +115,7 @@ class ApiCreateOpenAPI extends React.Component {
                 id='Apis.Create.OpenAPI.ApiCreateOpenAPI.select.openapi'
                 defaultMessage='Select OpenAPI Definition'
             />,
-            <FormattedMessage
-                id='Apis.Create.OpenAPI.ApiCreateOpenAPI.create.api'
-                defaultMessage='Create API'
-            />,
+            <FormattedMessage id='Apis.Create.OpenAPI.ApiCreateOpenAPI.create.api' defaultMessage='Create API' />,
         ];
     }
 
@@ -216,15 +164,13 @@ class ApiCreateOpenAPI extends React.Component {
         }
         this.setState({ loading: true });
         if (uploadMethod === 'file') {
-            api.validateOpenAPIByFile(openAPIFile)
-                .then((response) => {
-                    this.handleOpenAPIValidationResponse(response);
-                });
+            api.validateOpenAPIByFile(openAPIFile).then((response) => {
+                this.handleOpenAPIValidationResponse(response);
+            });
         } else if (uploadMethod === 'url') {
-            api.validateOpenAPIByUrl(openAPIUrl)
-                .then((response) => {
-                    this.handleOpenAPIValidationResponse(response);
-                });
+            api.validateOpenAPIByUrl(openAPIUrl).then((response) => {
+                this.handleOpenAPIValidationResponse(response);
+            });
         } else {
             this.handleInvalidInputMethod();
         }
@@ -390,7 +336,7 @@ class ApiCreateOpenAPI extends React.Component {
             <React.Fragment>
                 <APICreateTopMenu />
                 <Grid container spacing={7} className={classes.root}>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={12}>
                         <div className={classes.titleWrapper}>
                             <Typography variant='h4' align='left' className={classes.mainTitle}>
                                 <FormattedMessage
@@ -398,28 +344,48 @@ class ApiCreateOpenAPI extends React.Component {
                                     defaultMessage='Import an OpenAPI Definition'
                                 />
                             </Typography>
-                            {activeStep === 1 && (
-                                <Typography variant='h5' align='left' className={classes.subTitle} hidden>
-                                    <FormattedMessage
-                                        id='Apis.Create.Default.APICreateDefault.gateway.url'
-                                        defaultMessage='Gateway_URL/'
-                                    />
-                                    {substitutedContext}
-                                </Typography>
-                            )}
+                            <Typography variant='caption' align='left' className={classes.subTitle} component='div'>
+                                {activeStep === 1 ? (
+                                    <React.Fragment>
+                                        <FormattedMessage
+                                            id='Apis.Create.Default.APICreateDefault.gateway.url'
+                                            defaultMessage='Gateway_URL/'
+                                        />
+                                        {substitutedContext}
+                                    </React.Fragment>
+                                ) : (
+                                    <React.Fragment>
+                                        {uploadMethod === 'file' && (
+                                            <FormattedMessage
+                                                id='Apis.Create.OpenAPI.ApiCreateOpenAPI.import.api.help.file'
+                                                defaultMessage='Provide an api definition file'
+                                            />
+                                        )}
+                                        {uploadMethod === 'url' && (
+                                            <FormattedMessage
+                                                id='Apis.Create.OpenAPI.ApiCreateOpenAPI.import.api.help.url'
+                                                defaultMessage='Provide a url for the api deninition'
+                                            />
+                                        )}
+                                    </React.Fragment>
+                                )}
+                            </Typography>
                         </div>
-                        <Stepper activeStep={activeStep} className={classes.stepper}>
-                            {steps.map((label) => {
-                                const props = {};
-                                const labelProps = {};
 
-                                return (
-                                    <Step key={label} {...props}>
-                                        <StepLabel {...labelProps}>{label}</StepLabel>
-                                    </Step>
-                                );
-                            })}
-                        </Stepper>
+                        <Paper>
+                            <Stepper activeStep={activeStep} className={classes.stepper}>
+                                {steps.map((label) => {
+                                    const props = {};
+                                    const labelProps = {};
+
+                                    return (
+                                        <Step key={label} {...props}>
+                                            <StepLabel {...labelProps}>{label}</StepLabel>
+                                        </Step>
+                                    );
+                                })}
+                            </Stepper>
+                        </Paper>
                         <div>
                             {activeStep === 0 && (
                                 <ProvideOpenAPI
@@ -438,11 +404,7 @@ class ApiCreateOpenAPI extends React.Component {
                             )}
                         </div>
                         <div>
-                            <Button
-                                disabled={activeStep === 0}
-                                onClick={this.handleBack}
-                                className={classes.button}
-                            >
+                            <Button disabled={activeStep === 0} onClick={this.handleBack} className={classes.button}>
                                 Back
                             </Button>
                             {activeStep !== steps.length - 1 ? (
@@ -467,9 +429,7 @@ class ApiCreateOpenAPI extends React.Component {
                                     color='primary'
                                     onClick={this.handleFinish}
                                     className={classes.button}
-                                    disabled={
-                                        valid.name.empty || valid.version.empty || valid.context.empty
-                                    }
+                                    disabled={valid.name.empty || valid.version.empty || valid.context.empty}
                                 >
                                     <FormattedMessage
                                         id='Apis.Create.OpenAPI.ApiCreateOpenAPI.finish'
@@ -477,7 +437,7 @@ class ApiCreateOpenAPI extends React.Component {
                                     />
                                 </Button>
                             )}
-                            { loading && (<CircularProgress size={24} className={classes.buttonProgress} />)}
+                            {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
                         </div>
                     </Grid>
                 </Grid>

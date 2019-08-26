@@ -162,7 +162,7 @@ paths:
           required: false
           type: string
       tags:
-        - API (Collection)
+        - APIs
       responses:
         200:
           description: |
@@ -232,7 +232,7 @@ paths:
           type: string
         - $ref : "#/parameters/If-None-Match"
       tags:
-        - API (Collection)
+        - APIs
       responses:
         200:
           description: |
@@ -289,7 +289,7 @@ paths:
           description: Open api version
           type: string
       tags:
-        - API (Individual)
+        - APIs
       responses:
         201:
           description: |
@@ -351,7 +351,7 @@ paths:
         - OAuth2Security:
             - apim:api_view
       tags:
-        - API (Individual)
+        - APIs
       responses:
         200:
           description: |
@@ -416,7 +416,7 @@ paths:
             $ref: '#/definitions/API'
         - $ref: '#/parameters/If-Match'
       tags:
-        - API (Individual)
+        - APIs
       responses:
         200:
           description: |
@@ -486,7 +486,7 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-Match'
       tags:
-        - API (Individual)
+        - APIs
       responses:
         200:
           description: |
@@ -535,7 +535,7 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - API (Individual)
+        - APIs
       responses:
         200:
           schema:
@@ -609,7 +609,7 @@ paths:
           required: true
         - $ref: '#/parameters/If-Match'
       tags:
-        - API (Individual)
+        - APIs
       responses:
         200:
           description: |
@@ -697,7 +697,7 @@ paths:
         required: true
       - $ref: '#/parameters/If-None-Match'
       tags:
-      - API (Individual)
+      - API Resource Policies
       responses:
         200:
           description: |
@@ -761,7 +761,7 @@ paths:
       - $ref: '#/parameters/resourcePolicyId'
       - $ref: '#/parameters/If-None-Match'
       tags:
-      - API (Individual)
+      - API Resource Policies
       responses:
         200:
           description: |
@@ -839,7 +839,7 @@ paths:
         required: true
       - $ref: '#/parameters/If-Match'
       tags:
-      - API (Individual)
+      - API Resource Policies
       responses:
         200:
           description: |
@@ -914,7 +914,7 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - API (Individual)
+        - APIs
       responses:
         200:
           description: |
@@ -989,7 +989,7 @@ paths:
           required: true
         - $ref: '#/parameters/If-Match'
       tags:
-        - API (Individual)
+        - APIs
       responses:
         200:
           description: |
@@ -1035,86 +1035,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Threat Protection" resource API
-######################################################
-  /apis/{apiId}/threat-protection-policies:
-    post:
-      security:
-        - OAuth2Security:
-          - apim:threat_protection_policy_create
-      summary: Add a threat protection policy to an API
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - name: policyId
-          in: query
-          description: Threat protection policy id
-          type: string
-          required: true
-      tags:
-        - API (Individual)
-      responses:
-        200:
-          description: Ok. Policy added succesfuly.
-        500:
-          description: Internal server error while adding policy
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: Specified API or Policy not found
-          schema:
-            $ref: '#/definitions/Error'
-
-    get:
-      summary: Get all threat protection policies associated with an API
-      security:
-        - OAuth2Security:
-            - apim:api_view
-      parameters:
-        - $ref: '#/parameters/apiId'
-      tags:
-        - API (Individual)
-      responses:
-        200:
-          description: Ok. List of policy ids is returned
-          schema:
-            type: array
-            items:
-              type: string
-        404:
-          description: Specified API was not found.
-          schema:
-            $ref: '#/definitions/Error'
-        500:
-          description: Error retrieving threat protection policies
-          schema:
-            $ref: '#/definitions/Error'
-
-    delete:
-      security:
-        - OAuth2Security:
-          - apim:threat_protection_policy_manage
-      summary: Delete a threat protection policy from an API
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - name: policyId
-          in: query
-          description: Threat protection policy id
-          type: string
-          required: true
-      tags:
-        - API (Individual)
-      responses:
-        200:
-          description: Ok. Policy deleted successfully.
-        404:
-          description: Specified API or Policy not found
-          schema:
-            $ref: '#/definitions/Error'
-        500:
-          description: Error while deleting the policy
-          schema:
-            $ref: '#/definitions/Error'
 
 ######################################################
 # The "API Throttling Policy" resource APIs
@@ -1144,7 +1064,7 @@ paths:
         - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - API (Individual)
+        - APIs
       responses:
         200:
           description: |
@@ -1211,7 +1131,7 @@ paths:
       x-examples:
         $ref: docs/examples/apis/apis_copyapi.yaml#/post
       tags:
-        - API (Individual)
+        - APIs
       responses:
         201:
           description: |
@@ -1296,7 +1216,7 @@ paths:
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/If-Match'
       tags:
-        - API (Individual)
+        - API Lifecycle
       responses:
         200:
           description: |
@@ -1371,7 +1291,7 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - API (Individual)
+        - API Lifecycle
       responses:
         200:
           description: |
@@ -1425,7 +1345,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
 
       tags:
-        - API (Individual)
+        - API Lifecycle
       responses:
         200:
           description: |
@@ -1487,7 +1407,7 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
       tags:
-        - API (Individual)
+        - API Lifecycle
       responses:
         200:
           description: |
@@ -1672,9 +1592,83 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Validate OpenAPI Definition" utility API
-######################################################
+
+  ######################################################
+  # The "Import GraphQL API Schema from API Definition"  resource API
+  ######################################################
+
+  /apis/import-graphql-schema:
+
+    #----------------------------------------------------------------------------
+    # Import API from API Definition
+    #----------------------------------------------------------------------------
+    post:
+      consumes:
+      - multipart/form-data
+      security:
+      - OAuth2Security:
+        - apim:api_create
+      summary: Import API Definition
+      description: |
+        This operation can be used to create api from api definition.
+
+        API definition is GraphQL Schema
+      parameters:
+      - in: formData
+        name: type
+        description: Definition type to upload
+        type: string
+        required: false
+      - in: formData
+        name: file
+        description: Definition to uploads a file
+        type: file
+        required: false
+      - in: formData
+        name: additionalProperties
+        description: Additional attributes specified as a stringified JSON with API's schema
+        type: string
+        required: false
+      - $ref: '#/parameters/If-Match'
+      tags:
+      - API (Collection)
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          schema:
+            $ref: '#/definitions/API'
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        415:
+          description: |
+            Unsupported Media Type.
+            The entity of the request was in a not supported format.
+          schema:
+            $ref: '#/definitions/Error'
+
+  ######################################################
+  # The "Validate API Definition" utility API
+  ######################################################
 
   '/apis/validate-openapi':
     post:
@@ -1755,12 +1749,12 @@ paths:
       parameters:
         - in: formData
           name: url
-          description: WSDL definition url
+          description: Definition url
           type: string
           required: false
         - in: formData
           name: file
-          description: WSDL definition as a file (or an archive with multiple connected WSDLs)
+          description: Definition to upload as a file
           type: file
           required: false
         - in: query
@@ -1798,7 +1792,187 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#########################################################
+######################################################
+# The "Validate GRAPH_QL API Definition" utility API
+######################################################
+
+  '/apis/validate-graphql-schema':
+    post:
+      consumes:
+      - multipart/form-data
+      security:
+      - OAuth2Security:
+        - apim:api_create
+      summary: Validate GraphQL API definition and retrieve a summary
+      description: |
+        This operation can be used to validate a graphQL definition and retrieve a summary.
+      parameters:
+      - in: formData
+        name: file
+        description: Definition to upload as a file
+        type: file
+        required: true
+      tags:
+      - API (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            API definition validation information is returned
+          schema:
+            $ref: '#/definitions/GraphQLValidationResponse'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
+
+  ######################################################
+  # The GraphQL Schema Resource
+  ######################################################
+
+  /apis/{apiId}/graphql-schema:
+    #-----------------------------------------------------
+    # Retrieve the details about a certain GraphQL schema
+    #-----------------------------------------------------
+    get:
+      x-scope: apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v1.0/apis/7f82f6b0-2667-441e-af23-c0fc44cf3a17/graphql-schema\""
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/publisher/v1.0/apis/7f82f6b0-2667-441e-af23-c0fc44cf3a17/graphql-schema
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n{\r\n   \"name\": \"admin--hello1.0.0.graphql\",\r\n   \"schemaDefinition\": \"schema {\r\n  \r\n  # The query root of HackerNews GraphQL interface.\r\n  query: Query\r\n\r\n  # The root query for implementing GraphQL mutations.\r\n  mutation: Mutation\r\n}\r\n\r\ntype Link {\r\n\r\n  # ID of the link\r\n  id: ID!\r\n\r\n  # URL of the link\r\n  url: String!\r\n\r\n  # Description of the link\r\n  description: String\r\n}\r\n\r\ninput LinkFilter {\r\n\r\n  # Value to be checked whether it contains in the description\r\n  description_contains: String\r\n\r\n  # Value to be checked whether it contains in the URL\r\n  url_contains: String\r\n}\r\n\r\ntype Query {\r\n\r\n  # Fetches all the links\r\n  #\r\n  # Arguments\r\n  # filter: To filter the links according a specific criteria\r\n  # skip: Skip to a specific index in the list (default value is 0)\r\n  # first: Index of the link first to display (default value is 0)\r\n  allLinks(filter: LinkFilter, skip: Int = 0, first: Int = 0): [Link]\r\n}\r\n\r\ntype Mutation {\r\n\r\n  # Creates a new link\r\n  #\r\n  # Arguments\r\n  # url: URL of the link\r\n  # description: Description about the link\r\n  createLink(url: String!, description: String!): Link\r\n}\r\n\"\r\n}"
+      summary: Get the Schema of a GraphQL API
+      description: |
+        This operation can be used to retrieve the Schema definition of a GraphQL API.
+      parameters:
+      - $ref: '#/parameters/apiId'
+      - $ref: '#/parameters/Accept'
+      - $ref: '#/parameters/If-None-Match'
+      tags:
+      - GraphQL Schema (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Requested GraphQL Schema DTO object belongs to the API
+          schema:
+            $ref: '#/definitions/GraphQLSchema'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+    #-----------------------------------------------------
+    # Add a GraphQL schema to the registry
+    #-----------------------------------------------------
+    put:
+      x-scope: apim:api_create
+      x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v1.0/apis/af3f96da-9ccf-463f-8cee-13ec8530a9cd/graphql-schema\""
+      x-wso2-request: "PUT https://localhost:9443/api/am/publisher/v1.0/apis/af3f96da-9ccf-463f-8cee-13ec8530a9cd/graphql-schema\r\nContent-Type: text/plain\r\nAuthorization: Bearer 7d237cab-7011-3f81-b384-24d03e750873\r\n\r\n{\r\n   \"name\": \"admin--HackerNewsAPI1.0.0.graphql\",\r\n   \"schemaDefinition\": \"schema {\r\n  \r\n  # The query root of HackerNews GraphQL interface.\r\n  query: Query\r\n\r\n  # The root query for implementing GraphQL mutations.\r\n  mutation: Mutation\r\n}\r\n\r\ntype Link {\r\n\r\n  # ID of the link\r\n  id: ID!\r\n\r\n  # URL of the link\r\n  url: String!\r\n\r\n  # Description of the link\r\n  description: String\r\n}\r\n\r\ninput LinkFilter {\r\n\r\n  # Value to be checked whether it contains in the description\r\n  description_contains: String\r\n\r\n  # Value to be checked whether it contains in the URL\r\n  url_contains: String\r\n}\r\n\r\ntype Query {\r\n\r\n  # Fetches all the links\r\n  #\r\n  # Arguments\r\n  # filter: To filter the links according a specific criteria\r\n  # skip: Skip to a specific index in the list (default value is 0)\r\n  # first: Index of the link first to display (default value is 0)\r\n  allLinks(filter: LinkFilter, skip: Int = 0, first: Int = 0): [Link]\r\n}\r\n\r\ntype Mutation {\r\n\r\n  # Creates a new link\r\n  #\r\n  # Arguments\r\n  # url: URL of the link\r\n  # description: Description about the link\r\n  createLink(url: String!, description: String!): Link\r\n}\r\n\"\r\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n{\r\n   \"name\": \"admin--HackerNewsAPI1.0.0.graphql\",\r\n   \"schemaDefinition\": \"schema {\r\n  \r\n  # The query root of HackerNews GraphQL interface.\r\n  query: Query\r\n\r\n  # The root query for implementing GraphQL mutations.\r\n  mutation: Mutation\r\n}\r\n\r\ntype Link {\r\n\r\n  # ID of the link\r\n  id: ID!\r\n\r\n  # URL of the link\r\n  url: String!\r\n\r\n  # Description of the link\r\n  description: String\r\n}\r\n\r\ninput LinkFilter {\r\n\r\n  # Value to be checked whether it contains in the description\r\n  description_contains: String\r\n\r\n  # Value to be checked whether it contains in the URL\r\n  url_contains: String\r\n}\r\n\r\ntype Query {\r\n\r\n  # Fetches all the links\r\n  #\r\n  # Arguments\r\n  # filter: To filter the links according a specific criteria\r\n  # skip: Skip to a specific index in the list (default value is 0)\r\n  # first: Index of the link first to display (default value is 0)\r\n  allLinks(filter: LinkFilter, skip: Int = 0, first: Int = 0): [Link]\r\n}\r\n\r\ntype Mutation {\r\n\r\n  # Creates a new link\r\n  #\r\n  # Arguments\r\n  # url: URL of the link\r\n  # description: Description about the link\r\n  createLink(url: String!, description: String!): Link\r\n}\r\n\"\r\n}"
+      summary: Add a Schema to a GraphQL API
+      description: |
+        This operation can be used to add a GraphQL Schema definition to an existing GraphQL API.
+      parameters:
+      - $ref: '#/parameters/apiId'
+      - in: formData
+        name: schemaDefinition
+        description: schema definition of the GraphQL API
+        type: string
+        required: true
+      - $ref: '#/parameters/If-Match'
+      tags:
+      - GraphQL Schema (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated schema definition
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by cache, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: |
+            Forbidden.
+            The request must be conditional but no condition has been specified.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+  #########################################################
 # The "Configure Monetization" Processing Function resource API
 #########################################################
   /apis/{apiId}/monetize:
@@ -1825,7 +1999,7 @@ paths:
           schema:
             $ref: '#/definitions/APIMonetizationInfo'
       tags:
-        - API (Individual)
+        - API Monetization
       responses:
         201:
           description: |
@@ -1870,7 +2044,7 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
       tags:
-        - API (Individual)
+        - API Monetization
       responses:
         200:
           description: |
@@ -1914,7 +2088,7 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
       tags:
-        - API (Individual)
+        - API Monetization
       responses:
         200:
           description: |
@@ -1969,7 +2143,7 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Document (Collection)
+        - API Documents
       responses:
         200:
           description: |
@@ -2027,7 +2201,7 @@ paths:
             $ref: '#/definitions/Document'
         - $ref: '#/parameters/If-Match'
       tags:
-        - Document (Collection)
+        - API Documents
       responses:
         201:
           description: |
@@ -2086,7 +2260,7 @@ paths:
         - $ref: '#/parameters/documentId'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Document (Individual)
+        - API Documents
       responses:
         200:
           description: |
@@ -2151,7 +2325,7 @@ paths:
             $ref: '#/definitions/Document'
         - $ref: '#/parameters/If-Match'
       tags:
-        - Document (Individual)
+        - API Documents
       responses:
         200:
           description: |
@@ -2217,7 +2391,7 @@ paths:
         - $ref: '#/parameters/documentId'
         - $ref: '#/parameters/If-Match'
       tags:
-        - Document (Individual)
+        - API Documents
       responses:
         200:
           description: |
@@ -2275,7 +2449,7 @@ paths:
         - $ref: '#/parameters/documentId'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Document (Individual)
+        - API Documents
       responses:
         200:
           description: |
@@ -2369,7 +2543,7 @@ paths:
           required: false
         - $ref: '#/parameters/If-Match'
       tags:
-        - Document (Individual)
+        - API Documents
       responses:
         200:
           description: |
@@ -2748,7 +2922,7 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - API (Individual)
+        - APIs
       responses:
         200:
           description: |
@@ -2815,7 +2989,7 @@ paths:
           required: true
         - $ref: '#/parameters/If-Match'
       tags:
-        - API (Individual)
+        - APIs
       responses:
         200:
           description: |
@@ -2888,7 +3062,7 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Scope (Collection)
+        - API Scopes
       responses:
         200:
           description: |
@@ -2946,7 +3120,7 @@ paths:
             $ref: '#/definitions/Scope'
         - $ref: '#/parameters/If-Match'
       tags:
-        - Scope (Collection)
+        - API Scopes
       responses:
         201:
           description: |
@@ -3005,7 +3179,7 @@ paths:
         - $ref: '#/parameters/scopeName'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Scope (Individual)
+        - API Scopes
       responses:
         200:
           description: |
@@ -3070,7 +3244,7 @@ paths:
             $ref: '#/definitions/Scope'
         - $ref: '#/parameters/If-Match'
       tags:
-        - Scope (Individual)
+        - API Scopes
       responses:
         200:
           description: |
@@ -3136,7 +3310,7 @@ paths:
         - $ref: '#/parameters/scopeName'
         - $ref: '#/parameters/If-Match'
       tags:
-        - Scope (Individual)
+        - API Scopes
       responses:
         200:
           description: |
@@ -3179,7 +3353,7 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - API Resource Paths
+        - APIs
       responses:
         200:
           description: |
@@ -3251,7 +3425,7 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Subscription (Collection)
+        - Subscriptions
       responses:
         200:
           description: |
@@ -3298,7 +3472,7 @@ paths:
       parameters:
         - $ref: '#/parameters/subscriptionId'
       tags:
-        - Subscription (Individual)
+        - API Monetization
       responses:
         200:
           description: |
@@ -3363,7 +3537,7 @@ paths:
             - PROD_ONLY_BLOCKED
         - $ref: '#/parameters/If-Match'
       tags:
-        - Subscription (Individual)
+        - Subscriptions
       responses:
         200:
           description: |
@@ -3423,7 +3597,7 @@ paths:
       description: |
         This operation can be used to unblock a subscription specifying the subscription Id. The subscription will be fully unblocked after performing this operation.
       tags:
-        - Subscription (Individual)
+        - Subscriptions
       responses:
         200:
           description: |
@@ -3582,58 +3756,6 @@ paths:
             $ref: '#/definitions/Error'
 
 
-  ######################################################
-  # The "Environment Collection" resource API
-  ######################################################
-  /environments:
-
-    #-----------------------------------------------------
-    # Retrieve the list of environments configured for a certain API
-    #-----------------------------------------------------
-    get:
-      security:
-        - OAuth2Security:
-          - apim:api_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v0.14/environments\""
-      x-wso2-request: |
-        GET https://localhost:9443/api/am/publisher/v0.14/environments
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"list\": [   {\n      \"showInApiConsole\": true,\n      \"serverUrl\": \"https://localhost:9443/services/\",\n      \"endpoints\":       {\n         \"http\": \"http://localhost:8280\",\n         \"https\": \"https://localhost:8243\"\n      },\n      \"name\": \"Production and Sandbox\",\n      \"type\": \"hybrid\"\n   }],\n   \"count\": 1\n}"
-      summary: Get all gateway environments
-      description: |
-        This operation can be used to retrieve the list of gateway environments available.
-      parameters:
-        - $ref: '#/parameters/apiId-Q'
-      tags:
-        - Environment (Collection)
-      responses:
-        200:
-          description: |
-            OK.
-            Environment list is returned.
-          schema:
-            $ref: '#/definitions/EnvironmentList'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              type: string
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-        404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-
   /mediation-policies:
 
     #-----------------------------------------------------------------------------------------
@@ -3716,7 +3838,7 @@ paths:
       description: |
         This operation can be used to retrieve and search the uploaded client certificates.
       tags:
-        - ClientCertificates (Collection)
+        - Client Certificates
       parameters:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
@@ -3810,7 +3932,7 @@ paths:
           required: true
           type: string
       tags:
-        - ClientCertificates (Individual)
+        - Client Certificates
       responses:
         '200':
           description: |
@@ -3879,7 +4001,7 @@ paths:
           required: false
           type: string
       tags:
-        - ClientCertificates (Individual)
+        - Client Certificates
       responses:
         '200':
           description: |
@@ -3940,7 +4062,7 @@ paths:
           required: true
           type: string
       tags:
-        - ClientCertificates (Individual)
+        - Client Certificates
       responses:
         '200':
           description: |
@@ -4001,7 +4123,7 @@ paths:
           type: string
           required: true
       tags:
-        - ClientCertificates (Individual)
+        - Client Certificates
       responses:
         '200':
           description: |
@@ -4058,7 +4180,7 @@ paths:
           type: string
           required: true
       tags:
-        - ClientCertificates (Individual)
+        - Client Certificates
       responses:
         '200':
           description: |
@@ -4085,236 +4207,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-
-######################################################
-# Export Resource API
-######################################################
-  /export/apis:
-
-    get:
-      produces:
-        - application/zip
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v1.0/export/apis?query=xxx > exported-apis.zip"
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/export/apis?query=xxx
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-apis.zip\"\n  Content-Type: application/zip"
-      summary: Export information related to an API.
-      description: |
-        This operation can be used to export information related to a particular API.
-      security:
-        - OAuth2Security:
-            - apim:api_view
-      parameters:
-        - name: query
-          in: query
-          description: |
-            API search query
-          required: true
-          type: string
-        - $ref: '#/parameters/limit'
-        - $ref: '#/parameters/offset'
-      tags:
-        - Export Configuration
-      responses:
-        200:
-          description: |
-            OK.
-            Export Configuration returned.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-          schema:
-            type: file
-        404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
-######################################################
-# Import Resource API
-######################################################
-  /import/apis:
-
-    put:
-      consumes:
-        - multipart/form-data
-      security:
-        - OAuth2Security:
-          - apim:api_create
-      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v1.0/import/apis"
-      x-wso2-request: |
-        PUT https://127.0.0.1:9443/api/am/publisher/v1.0/import/apis
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"count\":2,\"list\":[{\"id\":\"4df90edc-f76b-4b19-bf57-7d161fa04467\",\"name\":\"testApi2\",\"context\":\"/test2\",\"version\":\"2.0.3\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"},{\"id\":\"4066bc9e-1d87-4296-bcca-f6e38d3da6d0\",\"name\":\"testApi\",\"context\":\"/testApi\",\"version\":\"1.0.0\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"}]}"
-      summary: Imports API(s).
-      description: |
-        This operation can be used to import one or more existing APIs.
-      parameters:
-        - name: file
-          in: formData
-          description: |
-            Zip archive consisting on exported api configuration
-          required: true
-          type: file
-        - name: provider
-          in: query
-          description: |
-            If defined, updates the existing provider of each API with the specified provider.
-            This is to cater scenarios where the current API provider does not exist in the environment
-            that the API is imported to.
-          required: false
-          type: string
-      tags:
-        - Import Configuration
-      responses:
-        200:
-          description: |
-            OK.
-            Successful response with the updated object as entity in the body.
-          schema:
-            $ref: '#/definitions/APIList'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
-    post:
-      consumes:
-        - multipart/form-data
-      security:
-        - OAuth2Security:
-          - apim:api_create
-      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v1.0/import/apis"
-      x-wso2-request: |
-        POST https://127.0.0.1:9443/api/am/publisher/v1.0/import/apis
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"count\":2,\"list\":[{\"id\":\"4df90edc-f76b-4b19-bf57-7d161fa04467\",\"name\":\"testApi2\",\"context\":\"/test2\",\"version\":\"2.0.3\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"},{\"id\":\"4066bc9e-1d87-4296-bcca-f6e38d3da6d0\",\"name\":\"testApi\",\"context\":\"/testApi\",\"version\":\"1.0.0\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"}]}"
-      summary: Imports API(s).
-      description: |
-        This operation can be used to import one or more existing APIs.
-      parameters:
-        - name: file
-          in: formData
-          description: |
-            Zip archive consisting on exported api configuration
-          required: true
-          type: file
-        - name: provider
-          in: query
-          description: |
-            If defined, updates the existing provider of each API with the specified provider.
-            This is to cater scenarios where the current API provider does not exist in the environment
-            that the API is imported to.
-          required: false
-          type: string
-      tags:
-        - Import Configuration
-      responses:
-        200:
-          description: |
-            OK.
-            Successful response with the updated object as entity in the body.
-          schema:
-            $ref: '#/definitions/APIList'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
-######################################################
-# The "Threat Protection Policies" resource API (Global)
-######################################################
-  /threat-protection-policies:
-    get:
-      security:
-        - OAuth2Security:
-          - apim:api_view
-      summary: Get All Threat Protection Policies
-      description: This can be used to get all defined threat protection policies
-      tags:
-        - Threat Protection Policies
-      responses:
-        200:
-          description: Ok. List of policies is returned
-          schema:
-            $ref: '#/definitions/ThreatProtectionPolicyList'
-
-######################################################
-# The "Threat Protection Policy" individual resource API
-######################################################
-  /threat-protection-policies/{policyId}:
-    get:
-      security:
-        - OAuth2Security:
-          - apim:api_view
-      summary: Get a threat protection policy
-      parameters:
-        - $ref: '#/parameters/threatProtectionPolicyId'
-      tags:
-        - Threat Protection Policy
-      responses:
-        200:
-          description: Ok. Policy is returned
-          schema:
-            $ref: '#/definitions/ThreatProtectionPolicy'
-        404:
-          description: No policy found for given policy ID
-
   ######################################################
   # The "Certificate Management" resource APIs
   ######################################################
@@ -4336,7 +4228,7 @@ paths:
       description: |
         This operation can be used to retrieve and search the uploaded certificates.
       tags:
-        - Certificates (Collection)
+        - Endpoint Certificates
       parameters:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
@@ -4417,7 +4309,7 @@ paths:
           required: true
           type: string
       tags:
-        - Certificates (Individual)
+        - Endpoint Certificates
       responses:
         '200':
           description: |
@@ -4476,7 +4368,7 @@ paths:
           required: true
           type: string
       tags:
-        - Certificates (Individual)
+        - Endpoint Certificates
       responses:
         '200':
           description: |
@@ -4533,7 +4425,7 @@ paths:
           required: true
           type: string
       tags:
-        - Certificates (Individual)
+        - Endpoint Certificates
       responses:
         '200':
           description: |
@@ -4585,7 +4477,7 @@ paths:
           type: string
           required: true
       tags:
-        - Certificates (Individual)
+        - Endpoint Certificates
       responses:
         '200':
           description: |
@@ -4635,7 +4527,7 @@ paths:
           type: string
           required: true
       tags:
-        - Certificates (Individual)
+        - Endpoint Certificates
       responses:
         '200':
           description: |
@@ -4697,7 +4589,7 @@ paths:
           type: string
         - $ref : "#/parameters/If-None-Match"
       tags:
-        - API (Collection)
+        - Unified Search
       responses:
         200:
           description: |
@@ -4755,7 +4647,7 @@ paths:
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
       tags:
-        - API Product (Collection)
+        - API Products
       responses:
         200:
           description: |
@@ -4791,7 +4683,7 @@ paths:
           - apim:api_publish
       summary: Create a new API Product
       description: |
-        This operation can be used to create a new API Product specifying the details of the API Product in the payload. 
+        This operation can be used to create a new API Product specifying the details of the API Product in the payload.
       parameters:
         - in: body
           name: body
@@ -4801,7 +4693,7 @@ paths:
           schema:
             $ref: '#/definitions/APIProduct'
       tags:
-        - API Product (Individual)
+        - API Products
       responses:
         201:
           description: |
@@ -4835,7 +4727,7 @@ paths:
             The entity of the request was in a not supported format.
           schema:
             $ref: '#/definitions/Error'
-            
+
   /api-products/{apiProductId}:
     delete:
       security:
@@ -4848,7 +4740,7 @@ paths:
         - $ref: '#/parameters/apiProductId'
         - $ref: '#/parameters/If-Match'
       tags:
-        - API Product (Individual)
+        - API Products
       responses:
         200:
           description: |
@@ -4888,7 +4780,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - API Product (Individual)
+        - API Products
       responses:
         200:
           description: |
@@ -4926,7 +4818,7 @@ paths:
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
-            
+
     #-----------------------------------------------------
     # Update the definition of an API product
     #-----------------------------------------------------
@@ -4949,7 +4841,7 @@ paths:
             $ref: '#/definitions/APIProduct'
         - $ref: '#/parameters/If-Match'
       tags:
-        - API Product (Individual)
+        - API Products
       responses:
         200:
           description: |
@@ -4999,7 +4891,7 @@ paths:
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
-            
+
   /api-products/{apiProductId}/thumbnail:
     #-------------------------------------------------------------------------------------------------
     # Downloads a thumbnail image of an API Product
@@ -5016,7 +4908,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - API Product (Individual)
+        - API Products
       responses:
         200:
           description: |
@@ -5075,7 +4967,7 @@ paths:
           required: true
         - $ref: '#/parameters/If-Match'
       tags:
-        - API Product (Individual)
+        - API Products
       responses:
         200:
           description: |
@@ -5140,7 +5032,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - API Product (Individual)
+        - API Products
       responses:
         200:
           description: |
@@ -5198,7 +5090,7 @@ paths:
           required: true
         - $ref: '#/parameters/If-Match'
       tags:
-        - API Product (Individual)
+        - API Products
       responses:
         200:
           description: |
@@ -5274,7 +5166,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Document (Collection)
+        - API Product Documents
       responses:
         200:
           description: |
@@ -5331,7 +5223,7 @@ paths:
           schema:
             $ref: '#/definitions/Document'
       tags:
-        - Document (Collection)
+        - API Product Documents
       responses:
         201:
           description: |
@@ -5391,7 +5283,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Document (Individual)
+        - API Product Documents
       responses:
         200:
           description: |
@@ -5456,7 +5348,7 @@ paths:
             $ref: '#/definitions/Document'
         - $ref: '#/parameters/If-Match'
       tags:
-        - Document (Individual)
+        - API Product Documents
       responses:
         200:
           description: |
@@ -5522,7 +5414,7 @@ paths:
         - $ref: '#/parameters/documentId'
         - $ref: '#/parameters/If-Match'
       tags:
-        - Document (Individual)
+        - API Product Documents
       responses:
         200:
           description: |
@@ -5579,7 +5471,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Document (Individual)
+        - API Product Documents
       responses:
         200:
           description: |
@@ -5673,7 +5565,7 @@ paths:
           required: false
         - $ref: '#/parameters/If-Match'
       tags:
-        - Document (Individual)
+        - API Product Documents
       responses:
         200:
           description: |
@@ -5734,6 +5626,8 @@ paths:
           - apim:publisher_setting
       description: |
         Retreive publisher settings
+      tags:
+        - Settings
       responses:
         200:
           description: |
@@ -5745,6 +5639,58 @@ paths:
           description: |
             Not Found.
             Requested Settings does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+  ######################################################
+  # The "Environment Collection" resource API
+  ######################################################
+  /settings/gateway-environments:
+
+    #-----------------------------------------------------
+    # Retrieve the list of environments configured for a certain API
+    #-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+          - apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v0.14/environments\""
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/publisher/v0.14/environments
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"list\": [   {\n      \"showInApiConsole\": true,\n      \"serverUrl\": \"https://localhost:9443/services/\",\n      \"endpoints\":       {\n         \"http\": \"http://localhost:8280\",\n         \"https\": \"https://localhost:8243\"\n      },\n      \"name\": \"Production and Sandbox\",\n      \"type\": \"hybrid\"\n   }],\n   \"count\": 1\n}"
+      summary: Get all gateway environments
+      description: |
+        This operation can be used to retrieve the list of gateway environments available.
+      parameters:
+        - $ref: '#/parameters/apiId-Q'
+      tags:
+        - Settings
+      responses:
+        200:
+          description: |
+            OK.
+            Environment list is returned.
+          schema:
+            $ref: '#/definitions/EnvironmentList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
 
@@ -6081,6 +6027,9 @@ definitions:
           If the provider value is not given, the user invoking the API will be used as the provider.
         type: string
         example: admin
+      type:
+        type: string
+        example: HTTP
       lifeCycleStatus:
         type: string
         example: CREATED
@@ -6150,13 +6099,17 @@ definitions:
       isDefaultVersion:
         type: boolean
         example: false
+      enableSchemaValidation:
+        type: boolean
+        example: false
       type:
         type: string
-        description: The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST
+        description: The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
         enum:
           - HTTP
           - WS
           - SOAPTOREST
+          - GRAPHQL
         example: HTTP
         default: HTTP
       transport:
@@ -6397,26 +6350,7 @@ definitions:
       operations:
        type: array
        items:
-        properties:
-          id:
-           type: string
-           example: "postapiresource"
-          uritemplate:
-            type: string
-            default: "/*"
-          httpVerb:
-            type: string
-            default: "GET"
-          authType:
-            type: string
-            default: "Any"
-          throttlingPolicy:
-            type: string
-            example: "Unlimited"
-          scopes:
-            type: array
-            items:
-              type: string
+         $ref: '#/definitions/APIOperations'
       threatProtectionPolicies:
         properties:
           list:
@@ -6617,6 +6551,12 @@ definitions:
         $ref: '#/definitions/APIProductBusinessInformation'
       corsConfiguration:
         $ref: '#/definitions/APICorsConfiguration'
+      createdTime:
+        type: string
+        example: 2017-02-20T13:57:16.229
+      lastUpdatedTime:
+        type: string
+        example: 2017-02-20T13:57:16.229
       apis:
         description: |
           APIs and resources in the API Product.
@@ -6629,26 +6569,22 @@ definitions:
           $ref: '#/definitions/Scope'
   #-----------------------------------------------------
   # The API and its resources in a API Product resource
-  #-----------------------------------------------------              
+  #-----------------------------------------------------
   ProductAPI:
     title: ProductAPI
     required:
       - apiId
     properties:
-      name: 
+      name:
         type: string
         example: CalculatorAPI
       apiId:
         type: string
         example: 01234567-0123-0123-0123-012345678901
       operations:
-       type: array
-       items:
-        properties:
-          uritemplate:
-            type: string
-          httpVerb:
-            type: string
+        type: array
+        items:
+          $ref: '#/definitions/APIOperations'
 
   #-----------------------------------------------------
   # The Resource Path resource
@@ -6724,7 +6660,6 @@ definitions:
       groupId:
         type: string
         example: ""
-
 #-----------------------------------------------------
 # The Application Info resource
 #-----------------------------------------------------
@@ -6835,6 +6770,21 @@ definitions:
         example: 2017-02-20T13:57:16.229
       lastUpdatedBy:
         type: string
+
+  #-----------------------------------------------------
+  # The GraphQL Schema resource
+  #-----------------------------------------------------
+  GraphQLSchema:
+    title: GraphQL Schema
+    required:
+    - name
+    properties:
+      name:
+        type: string
+        example: "admin--HackerNewsAPI.graphql"
+      schemaDefinition:
+        type: string
+
 
   #-----------------------------------------------------
   # The Mediation List resource
@@ -7147,7 +7097,7 @@ definitions:
         description: |
           A detail description about the error message.
 
-  #-----------------------------------------------------
+        #-----------------------------------------------------
   # The Environment resource
   #-----------------------------------------------------
   Environment:
@@ -7420,6 +7370,26 @@ definitions:
             items:
               type: string
 
+  APIOperations :
+    title: Operation
+    properties:
+      id:
+        type: string
+        example: "postapiresource"
+      target:
+        type: string
+      verb:
+        type: string
+      authType:
+        type: string
+        default: "Any"
+      throttlingPolicy:
+        type: string
+        example: "Unlimited"
+      scopes:
+        type: array
+        items:
+          type: string
 
 #-----------------------------------------------------
 # The Scope List resource
@@ -7773,6 +7743,34 @@ definitions:
               hasSoapBinding:
                 description: Indicates whether the WSDL contains SOAP Bindings
                 type: boolean
+
+  GraphQLValidationResponse:
+    title: GraphQL API definition validation Response
+    required:
+    - isValid
+    - errorMessage
+    properties:
+      isValid:
+        description: |
+          This attribute declares whether this definition is valid or not.
+        type: boolean
+        example: true
+      errorMessage:
+        description: |
+          This attribute declares the validation error message
+        type: string
+        meesage: String
+      graphQLInfo:
+        description:
+          Summary of the GraphQL including the basic information
+        properties:
+          operations:
+            type: array
+            items:
+              $ref: '#/definitions/APIOperations'
+          graphQLSchema:
+            items:
+            $ref: '#/definitions/GraphQLSchema'
 
 #-----------------------------------------------------
 # The Threat Protection Policy List Resource

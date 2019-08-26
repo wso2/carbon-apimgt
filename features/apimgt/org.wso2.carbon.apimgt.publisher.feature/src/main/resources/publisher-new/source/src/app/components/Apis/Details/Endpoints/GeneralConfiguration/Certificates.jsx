@@ -87,6 +87,8 @@ const styles = theme => ({
     },
 });
 /**
+ * TODO: Generalize this component to work in Configuration page , upload mutual SSL certificates action
+ * in source/src/app/components/Apis/Details/Configuration/components/APISecurity/components/TransportLevel.jsx ~tmkb
  * The base component for advanced endpoint configurations.
  * @param {any} props The input props.
  * @returns {any} The HTML representation of the Certificates.

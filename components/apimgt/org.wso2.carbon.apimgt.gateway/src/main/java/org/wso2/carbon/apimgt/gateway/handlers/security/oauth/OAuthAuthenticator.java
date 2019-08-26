@@ -180,7 +180,7 @@ public class OAuthAuthenticator implements Authenticator {
         String authenticationScheme;
         try {
             //Initial guess of a JWT token using the presence of a DOT.
-            if (apiKey.contains(APIConstants.DOT)) {
+            if (StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
                 try {
                     JSONObject decodedHeader = new JSONObject(new String(Base64.getUrlDecoder()
                             .decode(apiKey.split("\\.")[0])));
@@ -201,12 +201,12 @@ public class OAuthAuthenticator implements Authenticator {
             // Find the resource authentication scheme based on the token type
             if (isJwtToken) {
                 // If a JWT token
-                openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.API_SWAGGER);
+                openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
                 if (openAPI == null) {
                     log.error("Swagger is missing in the gateway. " +
                             "Therefore, JWT authentication cannot be performed.");
                     return new AuthenticationResponse(false, isMandatory, true,
-                            APISecurityConstants.API_AUTH_MISSING_SWAGGER,
+                            APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF,
                             "JWT authentication cannot be performed.");
                 }
                 authenticationScheme = OpenAPIUtils.getResourceAuthenticationScheme(openAPI, synCtx);

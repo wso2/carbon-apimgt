@@ -184,6 +184,7 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.tenant.TenantConstants;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -345,6 +346,7 @@ public final class APIUtil {
             api.getId().setApplicationId(Integer.toString(apiId));
             // set url
             api.setStatus(getLcStateFromArtifact(artifact));
+            api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
             api.setWadlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WADL));
@@ -413,6 +415,8 @@ public final class APIUtil {
             // We set the context template here
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
+            api.setEnableSchemaValidation(Boolean.parseBoolean(
+                    artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
 
 
             Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
@@ -608,7 +612,8 @@ public final class APIUtil {
             // We set the context template here
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
-
+            api.setEnableSchemaValidation(Boolean.parseBoolean(artifact.getAttribute(
+                    APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA)));
 
             Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
             List<String> uriTemplateNames = new ArrayList<String>();
@@ -643,7 +648,8 @@ public final class APIUtil {
                 uriTemplate.setMediationScript(mediationScript);
                 uriTemplate.setMediationScripts(method, mediationScript);
                 resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
-                uriTemplate.setScopes(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
+                Scope scope = findScopeByKey(scopes, resourceScopes.get(resourceScopeKey));
+                uriTemplate.setScope(scope);
                 //Checking for duplicate uri template names
 
                 if (uriTemplateNames.contains(uTemplate)) {
@@ -655,6 +661,7 @@ public final class APIUtil {
                             tmp.setMediationScripts(method, mediationScript);
                             resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
                             tmp.setScopes(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
+                            tmp.setScope(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
                             break;
                         }
                     }
@@ -1138,7 +1145,7 @@ public final class APIUtil {
             String apiStatus = api.getStatus();
             artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, api.getId().getVersion());
-
+            artifact.setAttribute(APIConstants.TYPE, api.getType());
             artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, String.valueOf(api.isDefaultVersion()));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());
@@ -1181,6 +1188,8 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS, api.getSandboxMaxTps());
             artifact.setAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER, api.getAuthorizationHeader());
             artifact.setAttribute(APIConstants.API_OVERVIEW_API_SECURITY, api.getApiSecurity());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ENABLE_JSON_SCHEMA,
+                    Boolean.toString(api.isEnabledSchemaValidation()));
 
             //Validate if the API has an unsupported context before setting it in the artifact
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -1617,6 +1626,11 @@ public final class APIUtil {
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
     }
 
+    public static String getAPIProductOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
+        return APIConstants.API_PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
+                apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
+    }
+
     public static String getWSDLDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
         return APIConstants.API_WSDL_RESOURCE_LOCATION + apiProvider + "--" + apiName + apiVersion + ".wsdl";
     }
@@ -1629,7 +1643,7 @@ public final class APIUtil {
     public static String getAPIProductOpenAPIDefinitionFilePath(APIProductIdentifier identifier) {
         return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
                 + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR
-                + identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + RegistryConstants.PATH_SEPARATOR
+                + identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR
                 + identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion()
                 + RegistryConstants.PATH_SEPARATOR;
     }
@@ -4578,6 +4592,26 @@ public final class APIUtil {
         return tenantDomains;
     }
 
+    /**
+     * Get tenants by state
+     * @param state state of the tenant
+     * @return set of tenants
+     * @throws UserStoreException
+     */
+    public static Set<String> getTenantDomainsByState(String state) throws UserStoreException {
+        boolean isActive = state.equalsIgnoreCase(APIConstants.TENANT_STATE_ACTIVE);
+        if (isActive) {
+            return getActiveTenantDomains();
+        }
+        Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
+        Set<String> tenantDomains = new HashSet<>();
+        for (Tenant tenant : tenants) {
+            if (!tenant.isActive()) {
+                tenantDomains.add(tenant.getDomain());
+            }
+        }
+        return tenantDomains;
+    }
 
     /**
      * Retrieves the role list of system
@@ -7930,6 +7964,54 @@ public final class APIUtil {
     }
 
     /**
+     * To set the resource properties to the API Product.
+     *
+     * @param apiProduct          API Product that need to set the resource properties.
+     * @param registry     Registry to get the resource from.
+     * @param artifactPath Path of the API Product artifact.
+     * @return Updated API.
+     * @throws RegistryException Registry Exception.
+     */
+    private static APIProduct setResourceProperties(APIProduct apiProduct, Registry registry, String artifactPath) throws RegistryException {
+        Resource productResource = registry.get(artifactPath);
+        Properties properties = productResource.getProperties();
+        if (properties != null) {
+            Enumeration propertyNames = properties.propertyNames();
+            while (propertyNames.hasMoreElements()) {
+                String propertyName = (String) propertyNames.nextElement();
+                if (log.isDebugEnabled()) {
+                    log.debug("API Product '" + apiProduct.getId().toString() + "' " + "has the property " + propertyName);
+                }
+                if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                    apiProduct.addProperty(propertyName.substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length()),
+                            productResource.getProperty(propertyName));
+                }
+            }
+        }
+        apiProduct.setAccessControl(productResource.getProperty(APIConstants.ACCESS_CONTROL));
+
+        String accessControlRoles = null;
+
+        String displayPublisherRoles = productResource.getProperty(APIConstants.DISPLAY_PUBLISHER_ROLES);
+        if (displayPublisherRoles == null) {
+
+            String publisherRoles = productResource.getProperty(APIConstants.PUBLISHER_ROLES);
+
+            if (publisherRoles != null) {
+                accessControlRoles = APIConstants.NULL_USER_ROLE_LIST.equals(
+                        productResource.getProperty(APIConstants.PUBLISHER_ROLES)) ?
+                        null : productResource.getProperty(APIConstants.PUBLISHER_ROLES);
+            }
+        } else {
+            accessControlRoles = APIConstants.NULL_USER_ROLE_LIST.equals(displayPublisherRoles) ?
+                    null : displayPublisherRoles;
+        }
+
+        apiProduct.setAccessControlRoles(accessControlRoles);
+        return apiProduct;
+    }
+
+    /**
      * This method is used to get the authorization configurations from the tenant registry or from api-manager.xml if 
      * config is not available in tenant registry
      *
@@ -8453,18 +8535,20 @@ public final class APIUtil {
 
         APIProduct apiProduct;
         try {
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String productName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String productVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName, productVersion);
-            int apiId = ApiMgtDAO.getInstance().getAPIProductID(apiProductIdentifier, null);
+            int apiProductId = ApiMgtDAO.getInstance().getAPIProductID(apiProductIdentifier, null);
 
-            if (apiId == -1) {
+            if (apiProductId == -1) {
                 return null;
             }
 
             apiProduct = new APIProduct(apiProductIdentifier);
-            apiProduct.setProductId(apiId);
+            setResourceProperties(apiProduct, registry, artifactPath);
+            apiProduct.setProductId(apiProductId);
             //set uuid
             apiProduct.setUuid(artifact.getId());
             apiProduct.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
@@ -8482,6 +8566,8 @@ public final class APIUtil {
             apiProduct.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
             apiProduct.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
             apiProduct.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            apiProduct.setCreatedTime(registry.get(artifactPath).getCreatedTime());
+            apiProduct.setLastUpdated(registry.get(artifactPath).getLastModified());
 
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()

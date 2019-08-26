@@ -25,11 +25,9 @@ import TextField from '@material-ui/core/TextField';
 import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
-import Visibility from '@material-ui/icons/Visibility';
-import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import Icon from '@material-ui/core/Icon';
 import AuthManager from 'AppData/AuthManager';
 import Paper from '@material-ui/core/Paper';
-import WarningIcon from '@material-ui/icons/Warning';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -326,7 +324,7 @@ class ApiConsole extends React.Component {
                         <Grid item md={6}>
                             <Paper className={classes.userNotificationPaper}>
                                 <Typography variant='h5' component='h3'>
-                                    <WarningIcon />
+                                    <Icon>warning</Icon>
                                     {' '}
                                     <FormattedMessage id='notice' defaultMessage='Notice' />
                                 </Typography>
@@ -461,7 +459,7 @@ class ApiConsole extends React.Component {
                                                 aria-label='Toggle token visibility'
                                                 onClick={this.handleClickShowToken}
                                             >
-                                                {showToken ? <VisibilityOff /> : <Visibility />}
+                                                {showToken ? <Icon>visibility_off</Icon> : <Icon>visibility</Icon>}
                                             </IconButton>
                                         </InputAdornment>
                                     ),

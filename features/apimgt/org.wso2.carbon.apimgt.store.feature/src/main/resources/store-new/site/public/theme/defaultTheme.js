@@ -21,6 +21,7 @@ const Configurations = {
                     leftMenu: '#1a1f2f',
                     leftMenuActive: '#000000',
                     drawer: '#1a1f2f',
+                    activeMenuItem: '#000000',
                 },
             },
             typography: {
@@ -53,6 +54,11 @@ const Configurations = {
                     option: '#5f7c8a',
                     patch: '#785446',
                     head: '#785446',
+                },
+                operationChipColor: {
+                    query: '#b3e6fe',
+                    mutation: '#c1dea0',
+                    subscription: '#ffcc80',
                 },
                 thumbnail: {
                     width: 240,

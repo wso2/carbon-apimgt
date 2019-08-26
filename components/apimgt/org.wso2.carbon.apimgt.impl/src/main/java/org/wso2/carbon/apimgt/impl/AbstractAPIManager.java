@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ApplicationNameWhiteSpaceValidationException;
 import org.wso2.carbon.apimgt.api.ApplicationNameWithInvalidCharactersException;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
@@ -108,7 +109,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -122,6 +125,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+import java.net.URLDecoder;
 
 /**
  * The basic abstract implementation of the core APIManager interface. This implementation uses
@@ -1042,6 +1046,65 @@ public abstract class AbstractAPIManager implements APIManager {
             registry.put(resourcePath,resource);
         } catch (RegistryException e) {
             String msg = "Error while updating the existing wsdl ";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Returns the graphQL content in registry specified by the wsdl name
+     *
+     * @param apiId Api Identifier
+     * @return graphQL content matching name if exist else null
+     */
+    @Override
+    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
+        String schemaDoc = null;
+        String schemaName = apiId.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR + apiId.getApiName() +
+                apiId.getVersion() + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+        String schemaResourePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + schemaName;
+        try {
+            if (registry.resourceExists(schemaResourePath)) {
+                Resource schemaResource = registry.get(schemaResourePath);
+                schemaDoc = IOUtils.toString(schemaResource.getContentStream(),
+                        RegistryConstants.DEFAULT_CHARSET_ENCODING);
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while getting schema file from the registry " + schemaResourePath;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (IOException e) {
+            String error = "Error occurred while getting the content of schema " + schemaName;
+            log.error(error);
+            throw new APIManagementException(error, e);
+        }
+        return schemaDoc;
+    }
+
+    /**
+     * Create a graphql schema in the path specified.
+     *
+     * @param resourcePath   Registry path of the resource
+     * @param schemaDefinition wsdl content
+     */
+    @Override
+    public void uploadGraphqlSchema(String resourcePath, String schemaDefinition)
+            throws APIManagementException {
+        try {
+            Resource resource;
+            if (!registry.resourceExists(resourcePath)) {
+                resource = registry.newResource();
+            } else {
+                resource = registry.get(resourcePath);
+            }
+            resource.setContent(schemaDefinition);
+            resource.setMediaType(String.valueOf(ContentType.TEXT_PLAIN));
+            registry.put(resourcePath, resource);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully imported the schema: " + schemaDefinition );
+            }
+        } catch (RegistryException e) {
+            String msg = "Error while uploading schema to " + resourcePath + "in the registry";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }

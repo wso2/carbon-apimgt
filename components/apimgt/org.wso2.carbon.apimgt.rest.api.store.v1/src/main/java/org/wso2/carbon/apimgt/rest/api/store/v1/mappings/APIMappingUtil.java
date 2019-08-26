@@ -28,11 +28,13 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductInfoDTO;
@@ -46,6 +48,8 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -72,6 +76,8 @@ public class APIMappingUtil {
         dto.setDescription(model.getDescription());
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setLifeCycleStatus(model.getStatus());
+        dto.setType(model.getType());
+        dto.setAvgRating(String.valueOf(model.getRating()));
 
         /* todo: created and last updated times
         if (null != model.getLastUpdated()) {
@@ -95,6 +101,17 @@ public class APIMappingUtil {
             apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
         }
         dto.setApiDefinition(apiSwaggerDefinition);
+
+        if (APIConstants.APITransportType.GRAPHQL.toString().equals(model.getType())) {
+            List<APIOperationsDTO> operationList = new ArrayList<>();
+            for (URITemplate template : model.getUriTemplates()) {
+                APIOperationsDTO operation = new APIOperationsDTO();
+                operation.setTarget(template.getUriTemplate());
+                operation.setVerb(template.getHTTPVerb());
+                operationList.add(operation);
+            }
+            dto.setOperations(operationList);
+        }
 
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -236,6 +253,81 @@ public class APIMappingUtil {
     }
 
     /**
+     * Converts a JSONObject to corresponding RatingDTO
+     *
+     * @param  obj JSON Object to be converted
+     * @return RatingDTO object
+     */
+    public static RatingDTO fromJsonToRatingDTO(JSONObject obj) {
+        RatingDTO ratingDTO = new RatingDTO();
+        if (obj != null) {
+            ratingDTO.setApiId(String.valueOf(obj.get(APIConstants.API_ID)));
+            ratingDTO.setRatingId(String.valueOf(obj.get(APIConstants.RATING_ID)));
+            ratingDTO.setUsername((String) obj.get(APIConstants.USERNAME));
+            ratingDTO.setRating((Integer) obj.get(APIConstants.RATING));
+        }
+        return ratingDTO;
+    }
+
+    /**
+     * Converts a List object of Ratings into a DTO
+     *
+     * @param ratings        List of Ratings
+     * @param limit          maximum number of ratings to be returned
+     * @param offset         starting index
+     * @return RatingListDTO object containing Rating DTOs
+     */
+    public static RatingListDTO fromRatingListToDTO(List<RatingDTO> ratings, int offset, int limit) {
+        RatingListDTO ratingListDTO = new RatingListDTO();
+        List<RatingDTO> ratingDTOs = ratingListDTO.getList();
+        if (ratingDTOs == null) {
+            ratingDTOs = new ArrayList<>();
+            ratingListDTO.setList(ratingDTOs);
+        }
+
+        //add the required range of objects to be returned
+        int start = offset < ratings.size() && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = offset + limit - 1 <= ratings.size() - 1 ? offset + limit - 1 : ratings.size() - 1;
+        for (int i = start; i <= end; i++) {
+            ratingDTOs.add(ratings.get(i));
+        }
+        ratingListDTO.setCount(ratingDTOs.size());
+        return ratingListDTO;
+    }
+
+    /**
+     * Sets pagination urls for a RatingListDTO object given pagination parameters and url parameters
+     *
+     * @param ratingListDTO   a RatingListDTO object
+     * @param limit           max number of objects returned
+     * @param offset          starting index
+     * @param size            max offset
+     */
+    public static void setRatingPaginationParams(RatingListDTO ratingListDTO, String apiId, int offset, int limit,
+            int size) {
+        //acquiring pagination parameters and setting pagination urls
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiUtil
+                    .getRatingPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), apiId);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiUtil
+                    .getRatingPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), apiId);
+        }
+
+        PaginationDTO paginationDTO = CommonMappingUtil
+                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
+        ratingListDTO.setPagination(paginationDTO);
+    }
+
+    /**
      * Converts a List object of APIs into a DTO
      *
      * @param apiList List of APIs
@@ -295,6 +387,8 @@ public class APIMappingUtil {
         apiInfoDTO.setVersion(apiId.getVersion());
         apiInfoDTO.setProvider(apiId.getProviderName());
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
+        apiInfoDTO.setType(api.getType());
+        apiInfoDTO.setAvgRating(String.valueOf(api.getRating()));
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         Set<Tier> throttlingPolicies = api.getAvailableTiers();

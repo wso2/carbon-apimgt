@@ -37,6 +37,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import API from 'AppData/api.js';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = theme => ({
@@ -194,16 +195,16 @@ function EditableRow(props) {
             <TableCell align='right'>
                 {editMode ? (
                     <React.Fragment>
-                        <a className={classes.link} onClick={saveRow} onKeyDown={() => { }}>
+                        <a className={classes.link} onClick={saveRow} onKeyDown={() => {}}>
                             <SaveIcon className={classes.buttonIcon} />
                         </a>
                     </React.Fragment>
                 ) : (
-                    <a className={classes.link} onClick={updateEditMode} onKeyDown={() => { }}>
+                    <a className={classes.link} onClick={updateEditMode} onKeyDown={() => {}}>
                         <EditIcon className={classes.buttonIcon} />
                     </a>
                 )}
-                <a className={classes.link} onClick={deleteRow} onKeyDown={() => { }}>
+                <a className={classes.link} onClick={deleteRow} onKeyDown={() => {}}>
                     <DeleteForeverIcon className={classes.buttonIcon} />
                 </a>
             </TableCell>
@@ -290,7 +291,6 @@ class Properties extends React.Component {
         updateAPI(oldAPI);
     }
 
-
     /**
      *
      *
@@ -370,7 +370,6 @@ class Properties extends React.Component {
         }
     };
 
-
     /**
      *
      *
@@ -395,6 +394,7 @@ class Properties extends React.Component {
                     handleUpdateList={this.handleUpdateList}
                     handleDelete={this.handleDelete}
                     apiAdditionalProperties={data}
+                    {...this.props}
                 />);
             }
         }
@@ -495,28 +495,33 @@ class Properties extends React.Component {
                                                     variant='contained'
                                                     color='primary'
                                                     disabled={!propertyValue || !propertyKey}
-                                                    onClick={() =>
-                                                        this.handleAddToList(api.additionalProperties)
-                                                    }
+                                                    onClick={() => this.handleAddToList(api.additionalProperties)}
                                                 >
                                                     <FormattedMessage
                                                         id='Apis.Details.Properties.Properties.add'
                                                         defaultMessage='Add'
                                                     />
                                                 </Button>
-                                                <Button onClick={this.toggleAddProperty}>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Properties.Properties.cancel'
-                                                        defaultMessage='Cancel'
-                                                    />
-                                                </Button>
+                                                <Link
+                                                    to={
+                                                        (api.apiType === API.CONSTS.APIProduct
+                                                            ? '/api-products/'
+                                                            : '/apis/') +
+                                                        api.id +
+                                                        '/overview'
+                                                    }
+                                                >
+                                                    <Button onClick={this.toggleAddProperty}>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Properties.Properties.cancel'
+                                                            defaultMessage='Cancel'
+                                                        />
+                                                    </Button>
+                                                </Link>
                                             </TableCell>
                                         </TableRow>
                                     )}
-                                    {this.renderAdditionalProperties(
-                                        additionalProperties,
-                                        api.additionalProperties,
-                                    )}
+                                    {this.renderAdditionalProperties(additionalProperties, api.additionalProperties)}
                                 </TableBody>
                             </Table>
                         </Paper>
@@ -566,6 +571,7 @@ Properties.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,
+        apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]),
     }).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
     updateAPI: PropTypes.func.isRequired,

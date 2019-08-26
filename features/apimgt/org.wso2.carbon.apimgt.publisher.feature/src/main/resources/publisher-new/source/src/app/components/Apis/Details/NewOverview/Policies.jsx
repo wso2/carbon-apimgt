@@ -24,8 +24,8 @@ import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import API from 'AppData/api';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-
 
 /**
  *
@@ -44,12 +44,11 @@ function Policies(props) {
                         defaultMessage='Throttling Policies'
                     />
                 </Typography>
-                <Link to={'/apis/' + api.id + '/documents'}>
+                <Link
+                    to={(api.apiType === API.CONSTS.APIProduct ? '/api-products/' : '/apis/') + api.id + '/documents'}
+                >
                     <Button variant='contained' color='default'>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.Policies.edit'
-                            defaultMessage='Edit'
-                        />
+                        <FormattedMessage id='Apis.Details.NewOverview.Policies.edit' defaultMessage='Edit' />
                     </Button>
                 </Link>
             </div>
@@ -57,13 +56,13 @@ function Policies(props) {
             {/* Throttling Policies */}
             <Typography component='p' variant='body1'>
                 {api.policies &&
-                            api.policies.length !== 0 &&
-                            api.policies.map((item, index) => (
-                                <span>
-                                    {item}
-                                    {api.policies.length !== index + 1 && ', '}{' '}
-                                </span>
-                            ))}
+                    api.policies.length !== 0 &&
+                    api.policies.map((item, index) => (
+                        <span>
+                            {item}
+                            {api.policies.length !== index + 1 && ', '}{' '}
+                        </span>
+                    ))}
             </Typography>
         </Paper>
     );
