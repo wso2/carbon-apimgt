@@ -79,6 +79,7 @@ class LifeCycleUpdate extends Component {
                 this.props.handleUpdate(true);
                 let newState = response.body.lifecycleState.state;
                 this.setState({ newState });
+                const { intl } = this.props;
 
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success',
@@ -88,7 +89,7 @@ class LifeCycleUpdate extends Component {
             })
             .catch(error_response => {
                 console.log(error_response);
-                Alert.error(JSON.stringify(error_response));
+                Alert.error(JSON.stringify(error_response.message));
             });
     }
 
