@@ -45,8 +45,7 @@ public class ErrorItem implements ErrorHandler {
         this.statusCode = statusCode;
     }
 
-    public ErrorItem(){
-
+    public ErrorItem() {
     }
 
     public ErrorItem (String message, String description, long errorCode, int statusCode) {
