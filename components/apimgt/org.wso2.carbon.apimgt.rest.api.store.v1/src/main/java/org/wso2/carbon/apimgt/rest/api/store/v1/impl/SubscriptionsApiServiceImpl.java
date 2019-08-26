@@ -170,7 +170,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, body.getApiId(), log);
                 }
                 identifier = RestAPIStoreUtils.getAPIIdentifierFromUUID(body.getApiId(), tenantDomain);
-            } else if (body.getType() != null && TypeEnum.APIPRODUCT == body.getType()
+            } else if (body.getType() != null && TypeEnum.API_PRODUCT == body.getType()
                     && body.getApiProductId() != null) {
 
                 String uuid = body.getApiProductId();

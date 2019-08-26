@@ -15,6 +15,7 @@
  */
 
 
+import CONSTS from 'AppData/Constants';
 import APIClientFactory from './APIClientFactory';
 import Resource from './Resource';
 import Utils from './Utils';
@@ -257,7 +258,7 @@ export default class API extends Resource {
      */
     getAllApplicationAttributes() {
         return this.client.then((client) => {
-            return client.apis['Settings'].get_settings_application_attributes(this._requestMetaData());
+            return client.apis.Settings.get_settings_application_attributes(this._requestMetaData());
         });
     }
 
@@ -509,17 +510,26 @@ export default class API extends Resource {
 
     /**
      * Create a subscription
-     * @param apiId id of the API that needs to be subscribed
-     * @param applicationId id of the application that needs to be subscribed
-     * @param policy throttle policy applicable for the subscription
-     * @param callback callback url
-     * @param apiType API type
+     * @param {string} apiId id of the API that needs to be subscribed
+     * @param {string} applicationId id of the application that needs to be subscribed
+     * @param {string} policy throttle policy applicable for the subscription
+     * @param {string} apiType API type
+     * @param {function} callback callback url
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    subscribe(apiId, applicationId, policy, callback = null, apiType = 'API') {
+    subscribe(apiId, applicationId, policy, apiType = CONSTS.API_TYPE, callback = null) {
         const promiseCreateSubscription = this.client.then((client) => {
-            const subscriptionData = {
-                apiId, applicationId, throttlingPolicy: policy, type: apiType,
-            };
+            let subscriptionData = null;
+
+            if (apiType === CONSTS.API_TYPE) {
+                subscriptionData = {
+                    apiId, applicationId, throttlingPolicy: policy, type: apiType,
+                };
+            } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+                subscriptionData = {
+                    apiProductId: apiId, applicationId, throttlingPolicy: policy, type: apiType,
+                };
+            }
             const payload = { body: subscriptionData };
             return client.apis.Subscriptions.post_subscriptions(payload, { 'Content-Type': 'application/json' });
         });

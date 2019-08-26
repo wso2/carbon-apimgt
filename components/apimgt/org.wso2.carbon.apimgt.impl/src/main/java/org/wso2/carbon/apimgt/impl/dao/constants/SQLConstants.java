@@ -785,6 +785,7 @@ public class SQLConstants {
 
     public static final String GET_PAGINATED_SUBSCRIBED_APIS_SQL =
             " SELECT " +
+            "'" + APIConstants.API_IDENTIFIER_TYPE + "' AS TYPE, " +
             "   SUBS.UUID AS SUB_UUID, " +
             "   SUBS.SUBSCRIPTION_ID, " +
             "   API.API_PROVIDER AS API_PROVIDER, " +
@@ -810,6 +811,34 @@ public class SQLConstants {
             "   AND APP.NAME= ? " +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
+    public static final String GET_PAGINATED_SUBSCRIBED_API_PRODUCTS_SQL =
+            " SELECT " +
+            "'" + APIConstants.API_PRODUCT_IDENTIFIER_TYPE + "' AS TYPE, " +
+            "   SUBS.UUID AS SUB_UUID, " +
+            "   SUBS.SUBSCRIPTION_ID, " +
+            "   API_PRODUCT.API_PRODUCT_PROVIDER AS API_PROVIDER, " +
+            "   API_PRODUCT.API_PRODUCT_NAME AS API_NAME, " +
+            "   API_PRODUCT.API_PRODUCT_VERSION AS API_VERSION, " +
+            "   SUBS.TIER_ID AS TIER_ID, " +
+            "   APP.APPLICATION_ID AS APP_ID, " +
+            "   APP.UUID AS APP_UUID, " +
+            "   SUBS.SUB_STATUS AS SUB_STATUS, " +
+            "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+            "   APP.NAME AS APP_NAME, " +
+            "   APP.CALLBACK_URL AS CALLBACK_URL " +
+            " FROM " +
+            "   AM_SUBSCRIBER SUB," +
+            "   AM_APPLICATION APP, " +
+            "   AM_SUBSCRIPTION SUBS, " +
+            "   AM_API_PRODUCT API_PRODUCT " +
+            " WHERE " +
+            "   SUB.TENANT_ID = ? " +
+            "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
+            "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+            "   AND API_PRODUCT.API_PRODUCT_ID=SUBS.API_PRODUCT_ID " +
+            "   AND APP.NAME= ? " +
+            "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
     public static final String GET_PAGINATED_SUBSCRIBED_APIS_BY_APP_ID_SQL =
             " SELECT " +
                     "   SUBS.SUBSCRIPTION_ID, " +
@@ -826,12 +855,15 @@ public class SQLConstants {
                     "   AM_SUBSCRIBER SUB," +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIPTION SUBS, " +
-                    "   AM_API API " +
+                    "   AM_API API, " +
+                    "   AM_API_PRODUCT API_PRODUCT " +
                     " WHERE " +
                     "   SUB.TENANT_ID = ? " +
                     "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
                     "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
-                    "   AND API.API_ID=SUBS.API_ID" +
+                    "   AND " +
+                    "   (API.API_ID=SUBS.API_ID " +
+                    "    OR API_PRODUCT.API_PRODUCT_ID=SUBS.API_PRODUCT_ID) " +
                     "   AND APP.APPLICATION_ID= ? " +
                     "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
@@ -855,12 +887,15 @@ public class SQLConstants {
             "   AM_SUBSCRIBER SUB," +
             "   AM_APPLICATION APP, " +
             "   AM_SUBSCRIPTION SUBS, " +
-            "   AM_API API " +
+            "   AM_API API, " +
+            "   AM_API_PRODUCT API_PRODUCT " +
             " WHERE " +
             "   SUB.TENANT_ID = ? " +
             "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID" +
-            "   AND API.API_ID=SUBS.API_ID" +
+            "   AND " +
+            "   (API.API_ID=SUBS.API_ID " +
+            "    OR API_PRODUCT.API_PRODUCT_ID=SUBS.API_PRODUCT_ID) " +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
     public static final String GET_API_KEY_BY_SUBSCRIPTION_SQL =
