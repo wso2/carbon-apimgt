@@ -132,6 +132,12 @@ class SubscriptionPoliciesManage extends Component {
                                     defaultMessage='Subscription Policies'
                                 /> { ' : '}
                             </FormLabel>
+                            <FormHelperText>
+                                <FormattedMessage
+                                    id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.policies.update'
+                                    defaultMessage='Add/remove subscription policies'
+                                />
+                            </FormHelperText>
                         </Grid>
                         <Grid item xs={8}>
                             <FormGroup>
@@ -147,12 +153,6 @@ class SubscriptionPoliciesManage extends Component {
                                     />
                                 ))}
                             </FormGroup>
-                            <FormHelperText>
-                                <FormattedMessage
-                                    id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.policies.update'
-                                    defaultMessage='Add/remove API subscription policies'
-                                />
-                            </FormHelperText>
                         </Grid>
                     </Grid>
 
