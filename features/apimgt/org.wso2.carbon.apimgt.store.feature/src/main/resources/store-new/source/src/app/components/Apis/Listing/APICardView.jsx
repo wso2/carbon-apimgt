@@ -51,9 +51,9 @@ class APICardView extends React.Component {
      * @memberof APICardView
      */
     render() {
-        const { APIsNotFound } = this.props;
+        const { apisNotFound } = this.props;
 
-        if (APIsNotFound) {
+        if (apisNotFound) {
             return <ResourceNotFound />;
         }
 

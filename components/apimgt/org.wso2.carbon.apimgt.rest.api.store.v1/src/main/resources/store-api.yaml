@@ -4444,6 +4444,12 @@ definitions:
       thumbnailUri:
         type: string
         example: /api-products/01234567-0123-0123-0123-012345678901/thumbnail
+      throttlingPolicies:
+        type: array
+        description: The subscription tiers selected for the particular API product
+        items:
+          type: string
+        example: ["Unlimited"]
 
 #-----------------------------------------------------
 # The API resource
@@ -4855,8 +4861,8 @@ definitions:
       type:
         type: string
         enum:
-          - api
-          - apiProduct
+          - API
+          - API_PRODUCT
       status:
         type: string
         enum:

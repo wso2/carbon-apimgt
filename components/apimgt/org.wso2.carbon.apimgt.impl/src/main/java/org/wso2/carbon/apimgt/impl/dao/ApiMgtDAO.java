@@ -1681,99 +1681,142 @@ public class ApiMgtDAO {
                                                          int startSubIndex, int endSubIndex, String groupingId)
             throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet result = null;
+        String sqlQuery =
+                appendSubscriptionQueryWhereClause(groupingId, SQLConstants.GET_PAGINATED_SUBSCRIBED_APIS_SQL)
+                + " UNION " +
+                appendSubscriptionQueryWhereClause(groupingId, SQLConstants.GET_PAGINATED_SUBSCRIBED_API_PRODUCTS_SQL);
 
-        String sqlQuery = SQLConstants.GET_PAGINATED_SUBSCRIBED_APIS_SQL;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sqlQuery)) {
+            setSubscriptionQueryParameters(groupingId, subscriber, applicationName, ps);
 
-        String whereClause = " AND  SUB.USER_ID = ? ";
-        String whereClauseForceCaseInsensitiveComp = " AND LOWER(SUB.USER_ID) = LOWER(?)  ";
-        String whereClauseWithGroupId = " AND (APP.GROUP_ID = ? OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL)"
-                + " AND SUB.USER_ID = ?))";
-        String whereClauseWithGroupIdorceCaseInsensitiveComp = " AND (APP.GROUP_ID = ?"
-                + " OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL) AND LOWER(SUB.USER_ID) = LOWER(?)))";
+            try (ResultSet result = ps.executeQuery()) {
+                int index = 0;
+                while (result.next()) {
+                    if (index >= startSubIndex && index < endSubIndex) {
+                        String apiType = result.getString("TYPE");
 
-        String whereClauseWithMultiGroupId = " AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM " +
-                "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( SUB.USER_ID = ? ))";
-        String whereClauseWithMultiGroupIdCaseInsensitive = " AND  ( (APP.APPLICATION_ID IN  (SELECT APPLICATION_ID " +
-                "FROM AM_APPLICATION_GROUP_MAPPING  WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( LOWER(SUB.USER_ID) = LOWER" +
-                "(?) ))";
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            int tenantId = APIUtil.getTenantId(subscriber.getName());
-            if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
-                if (multiGroupAppSharingEnabled) {
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                    if (forceCaseInsensitiveComparisons) {
-                        sqlQuery += whereClauseWithMultiGroupIdCaseInsensitive;
-                    } else {
-                        sqlQuery += whereClauseWithMultiGroupId;
+                        if (APIConstants.API_IDENTIFIER_TYPE.equals(apiType)) {
+                            APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
+                                    ("API_PROVIDER")), result.getString("API_NAME"),
+                                    result.getString("API_VERSION"));
+
+                            SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
+                            initSubscribedAPI(subscribedAPI, subscriber, result);
+                            subscribedAPIs.add(subscribedAPI);
+
+                        } else if (APIConstants.API_PRODUCT_IDENTIFIER_TYPE.equals(apiType)) {
+                            APIProductIdentifier identifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(result.getString
+                                    ("API_PROVIDER")), result.getString("API_NAME"),
+                                    result.getString("API_VERSION"));
+
+                            SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
+                            initSubscribedAPI(subscribedAPI, subscriber, result);
+                            subscribedAPIs.add(subscribedAPI);
+                        }
+
+                        if (index == endSubIndex - 1) {
+                            break;
+                        }
                     }
-                    String groupIDArray[] = groupingId.split(",");
-
-                    ps = fillQueryParams(connection, sqlQuery, groupIDArray, 3);
-                    ps.setInt(1, tenantId);
-                    ps.setString(2, applicationName);
-                    // dynamically seeting the parameter index
-                    int paramIndex = groupIDArray.length + 2;
-                    ps.setString(++paramIndex, tenantDomain);
-                    ps.setString(++paramIndex, subscriber.getName());
-                } else {
-                    if (forceCaseInsensitiveComparisons) {
-                        sqlQuery += whereClauseWithGroupIdorceCaseInsensitiveComp;
-                    } else {
-                        sqlQuery += whereClauseWithGroupId;
-                    }
-                    ps = connection.prepareStatement(sqlQuery);
-                    ps.setInt(1, tenantId);
-                    ps.setString(2, applicationName);
-                    ps.setString(3, groupingId);
-                    ps.setString(4, subscriber.getName());
+                    index++;
                 }
-
-            } else {
-                if (forceCaseInsensitiveComparisons) {
-                    sqlQuery += whereClauseForceCaseInsensitiveComp;
-                } else {
-                    sqlQuery += whereClause;
-                }
-
-                ps = connection.prepareStatement(sqlQuery);
-                ps.setInt(1, tenantId);
-                ps.setString(2, applicationName);
-                ps.setString(3, subscriber.getName());
-            }
-            result = ps.executeQuery();
-
-            int index = 0;
-            while (result.next()) {
-                if (index >= startSubIndex && index < endSubIndex) {
-                    APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
-                            ("API_PROVIDER")), result.getString("API_NAME"), result.getString("API_VERSION"));
-
-                    SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
-                    subscribedAPI.setUUID(result.getString("SUB_UUID"));
-                    subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
-                    subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
-                    subscribedAPI.setTier(new Tier(result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
-
-                    Application application = new Application(result.getString("APP_NAME"), subscriber);
-                    application.setUUID(result.getString("APP_UUID"));
-                    subscribedAPI.setApplication(application);
-                    subscribedAPIs.add(subscribedAPI);
-                    if (index == endSubIndex - 1) {
-                        break;
-                    }
-                }
-                index++;
             }
         } catch (SQLException e) {
             handleException("Failed to get SubscribedAPI of :" + subscriber.getName(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, result);
         }
+
         return subscribedAPIs;
+    }
+
+    private String appendSubscriptionQueryWhereClause(final String groupingId, String sqlQuery) {
+        if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
+            if (multiGroupAppSharingEnabled) {
+                String[] groupIDArray = groupingId.split(",");
+                List<String> questionMarks = new ArrayList<>(Collections.nCopies(groupIDArray.length, "?"));
+                final String paramString = String.join(",", questionMarks);
+
+                if (forceCaseInsensitiveComparisons) {
+                    sqlQuery += " AND  ( (APP.APPLICATION_ID IN  (SELECT APPLICATION_ID " +
+                            " FROM AM_APPLICATION_GROUP_MAPPING  " +
+                            " WHERE GROUP_ID IN (" + paramString + ") AND TENANT = ?))" +
+                            "  OR  ( LOWER(SUB.USER_ID) = LOWER(?) ))";
+                } else {
+                    sqlQuery += " AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM " +
+                            "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN (" + paramString + ") AND TENANT = ?))  " +
+                            "OR  ( SUB.USER_ID = ? ))";
+                }
+            } else {
+                if (forceCaseInsensitiveComparisons) {
+                    sqlQuery += " AND (APP.GROUP_ID = ? OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL)" +
+                            " AND LOWER(SUB.USER_ID) = LOWER(?)))";
+                } else {
+                    sqlQuery += " AND (APP.GROUP_ID = ? OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL)" +
+                            " AND SUB.USER_ID = ?))";
+                }
+            }
+        } else {
+            if (forceCaseInsensitiveComparisons) {
+                sqlQuery += " AND LOWER(SUB.USER_ID) = LOWER(?)  ";
+            } else {
+                sqlQuery += " AND  SUB.USER_ID = ? ";
+            }
+        }
+
+        return sqlQuery;
+    }
+
+    private void setSubscriptionQueryParameters(String groupingId, Subscriber subscriber, String applicationName,
+                                                PreparedStatement statement) throws SQLException {
+        int tenantId = APIUtil.getTenantId(subscriber.getName());
+        int paramIndex = 0;
+
+        if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
+            if (multiGroupAppSharingEnabled) {
+                String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+
+                String[] groupIDArray = groupingId.split(",");
+
+                // Set the same parameters for each of the 2 SELECT statements of the UNION
+                for (int i = 0; i < 2; ++i) {
+                    statement.setInt(++paramIndex, tenantId);
+                    statement.setString(++paramIndex, applicationName);
+
+                    for (String groupId : groupIDArray) {
+                        statement.setString(++paramIndex, groupId);
+                    }
+                    statement.setString(++paramIndex, tenantDomain);
+                    statement.setString(++paramIndex, subscriber.getName());
+                }
+            } else {
+                // Set the same parameters for each of the 2 SELECT statements of the UNION
+                for (int i = 0; i < 2; ++i) {
+                    statement.setInt(++paramIndex, tenantId);
+                    statement.setString(++paramIndex, applicationName);
+                    statement.setString(++paramIndex, groupingId);
+                    statement.setString(++paramIndex, subscriber.getName());
+                }
+            }
+        } else {
+            // Set the same parameters for each of the 2 SELECT statements of the UNION
+            for (int i = 0; i < 2; ++i) {
+                statement.setInt(++paramIndex, tenantId);
+                statement.setString(++paramIndex, applicationName);
+                statement.setString(++paramIndex, subscriber.getName());
+            }
+        }
+    }
+
+    private void initSubscribedAPI(SubscribedAPI subscribedAPI, Subscriber subscriber, ResultSet resultSet)
+            throws SQLException {
+        subscribedAPI.setUUID(resultSet.getString("SUB_UUID"));
+        subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
+        subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
+        subscribedAPI.setTier(new Tier(resultSet.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
+
+        Application application = new Application(resultSet.getString("APP_NAME"), subscriber);
+        application.setUUID(resultSet.getString("APP_UUID"));
+        subscribedAPI.setApplication(application);
     }
 
     /**
