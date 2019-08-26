@@ -30,7 +30,7 @@ public class SubscriptionDTO   {
 @XmlEnum(String.class)
 public enum TypeEnum {
 
-    @XmlEnumValue("api") API(String.valueOf("api")), @XmlEnumValue("apiProduct") APIPRODUCT(String.valueOf("apiProduct"));
+    @XmlEnumValue("API") API(String.valueOf("API")), @XmlEnumValue("API_PRODUCT") API_PRODUCT(String.valueOf("API_PRODUCT"));
 
 
     private String value;

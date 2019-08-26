@@ -93,14 +93,22 @@ class SubscriptionTableData extends React.Component {
     render() {
         const {
             subscription: {
-                apiInfo, status, throttlingPolicy, subscriptionId, apiId,
+                apiInfo, apiProductInfo, status, throttlingPolicy, subscriptionId, apiId, apiProductId,
             },
         } = this.props;
         const { openMenu } = this.state;
+
+        let link;
+        if (apiId !== null) {
+            link = <Link to={'/apis/' + apiId}>{apiInfo.name}</Link>;
+        } else if (apiProductId !== null) {
+            link = <Link to={'/api-products/' + apiProductId}>{apiProductInfo.name}</Link>;
+        }
+
         return (
             <TableRow hover>
                 <TableCell style={{ paddingLeft: 0 }}>
-                    <Link to={'/apis/' + apiId}>{apiInfo.name}</Link>
+                    { link }
                 </TableCell>
                 <TableCell>{throttlingPolicy}</TableCell>
                 <TableCell>{status}</TableCell>

@@ -58,19 +58,21 @@ public class SubscriptionMappingUtil {
             subscriptionDTO.setApiId(api.getUUID());
             APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(api);
             subscriptionDTO.setApiInfo(apiInfo);
+            subscriptionDTO.setType(SubscriptionDTO.TypeEnum.API);
         }
         if (apiProdId != null) {
             APIProduct apiProduct = apiConsumer.getAPIProduct(apiProdId);
             APIProductInfoDTO apiProdInfo = APIMappingUtil.fromAPIProductToInfoDTO(apiProduct);
-            subscriptionDTO.setApiProductId(apiProdId.getUUID());
+            subscriptionDTO.setApiProductId(apiProduct.getUuid());
             subscriptionDTO.setApiProductInfo(apiProdInfo);
+            subscriptionDTO.setType(SubscriptionDTO.TypeEnum.API_PRODUCT);
         }
         Application application = subscription.getApplication();
         application = apiConsumer.getLightweightApplicationByUUID(application.getUUID());
         subscriptionDTO.setApplicationId(subscription.getApplication().getUUID());
         subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
         subscriptionDTO.setThrottlingPolicy(subscription.getTier().getName());
-        subscriptionDTO.setType(SubscriptionDTO.TypeEnum.API);
+
 
         ApplicationInfoDTO applicationInfoDTO = ApplicationMappingUtil.fromApplicationToInfoDTO(application);
         subscriptionDTO.setApplicationInfo(applicationInfoDTO);

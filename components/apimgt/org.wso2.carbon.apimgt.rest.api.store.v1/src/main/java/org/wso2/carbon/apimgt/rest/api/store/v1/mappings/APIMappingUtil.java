@@ -480,6 +480,12 @@ public class APIMappingUtil {
             productDto.setId(apiProduct.getUuid());
             productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                     .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
+            Set<Tier> availableTiers = apiProduct.getAvailableTiers();
+            List<String> tiers = new ArrayList<>();
+            for (Tier tier : availableTiers) {
+                tiers.add(tier.getName());
+            }
+            productDto.setThrottlingPolicies(tiers);
             list.add(productDto);
         }
 
@@ -526,6 +532,12 @@ public class APIMappingUtil {
         apiProductInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiProductInfoDTO.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                 .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
+        Set<Tier> availableTiers = apiProduct.getAvailableTiers();
+        List<String> tiers = new ArrayList<>();
+        for (Tier tier : availableTiers) {
+            tiers.add(tier.getName());
+        }
+        apiProductInfoDTO.setThrottlingPolicies(tiers);
 
         return apiProductInfoDTO;
     }
