@@ -131,18 +131,26 @@ public class JWTGenerator extends AbstractJWTGenerator {
                 }
             }
             // If claims are not found in AuthorizationGrantCache, they will be retrieved from the userstore.
-            String username = validationContext.getValidationInfoDTO().getEndUserName();
+            String tenantAwareUserName = validationContext.getValidationInfoDTO().getEndUserName();
 
             try {
-                int tenantId = APIUtil.getTenantId(username);
+                int tenantId = APIUtil.getTenantId(tenantAwareUserName);
 
                 if (tenantId != -1) {
                     UserStoreManager manager = ServiceReferenceHolder.getInstance().
                             getRealmService().getTenantUserRealm(tenantId).getUserStoreManager();
 
-                    String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
+                    String tenantDomain = MultitenantUtils.getTenantDomain(tenantAwareUserName);
+                    String[] split = tenantAwareUserName.split(tenantDomain);
 
-                    if (manager.isExistingUser(tenantAwareUserName)) {
+                    if (split.length != 1) {
+                        log.error("Could not extract username without tenant domain for: " + tenantAwareUserName);
+                        return null;
+                    }
+
+                    String username = split[0].substring(0, split[0].length() - 1);
+
+                    if (manager.isExistingUser(username)) {
                         customClaims.putAll(claimsRetriever.getClaims(username));
                         return customClaims;
                     } else {
@@ -153,7 +161,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
                         }
                     }
                 } else {
-                    log.error("Tenant cannot be found for username: " + username);
+                    log.error("Tenant cannot be found for username: " + tenantAwareUserName);
                 }
             } catch (APIManagementException e) {
                 log.error("Error while retrieving claims ", e);
