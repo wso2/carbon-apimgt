@@ -32,6 +32,7 @@ import API from 'AppData/api';
 import ApplicationCreateForm from 'AppComponents/Shared/AppsAndKeys/ApplicationCreateForm';
 import Alert from 'AppComponents/Shared/Alert';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
+import Settings from 'AppComponents/Shared/SettingsContext';
 
 /**
  *
@@ -71,6 +72,8 @@ function Transition(props) {
  * @param {any} value @inheritDoc
  */
 class NewApp extends React.Component {
+    static contextType = Settings;
+
     /**
      * @param {*} props properties
      */
@@ -280,15 +283,13 @@ class NewApp extends React.Component {
      * @param {*} appGroups already existing groups
      */
     handleAddChip = (chip, appGroups) => {
-        this.setState(() => {
-            const { applicationRequest } = this.state;
-            const newRequest = { ...applicationRequest };
-            let values = appGroups || [];
-            values = values.slice();
-            values.push(chip);
-            newRequest.groups = values;
-            return { applicationRequest: newRequest };
-        });
+        const { applicationRequest } = this.state;
+        const newRequest = { ...applicationRequest };
+        let values = appGroups || [];
+        values = values.slice();
+        values.push(chip);
+        newRequest.groups = values;
+        this.setState({ applicationRequest: newRequest });
     }
 
     /**
@@ -298,22 +299,21 @@ class NewApp extends React.Component {
      * @param {*} appGroups already existing groups
      */
     handleDeleteChip = (chip, index, appGroups) => {
-        this.setState(() => {
-            const { applicationRequest } = this.state;
-            const newRequest = { ...applicationRequest };
-            let values = appGroups || [];
-            values = values.filter(v => v !== chip);
-            newRequest.groups = values;
-            return { applicationRequest: newRequest };
-        });
+        const { applicationRequest } = this.state;
+        const newRequest = { ...applicationRequest };
+        let values = appGroups || [];
+        values = values.filter(v => v !== chip);
+        newRequest.groups = values;
+        this.setState({ applicationRequest: newRequest });
     }
 
     /**
-     * retrieve Settings from the local storage
+     * retrieve Settings from the context and check the application sharing enabled
+     * @param {*} settingsData required data
      */
     isApplicationGroupSharingEnabled = () => {
-        const settingsData = localStorage.getItem('settings');
-        const enabled = JSON.parse(settingsData).applicationSharingEnabled;
+        const settingsContext = this.context;
+        const enabled = settingsContext.settings.applicationSharingEnabled;
         this.setState({ isApplicationSharingEnabled: enabled });
     }
 

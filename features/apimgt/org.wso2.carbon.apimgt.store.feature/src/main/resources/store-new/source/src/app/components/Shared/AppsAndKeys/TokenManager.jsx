@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -30,6 +30,8 @@ import Loading from 'AppComponents/Base/Loading/Loading';
 import Alert from 'AppComponents/Shared/Alert';
 import ProvideOAuthKeys from 'AppComponents/Shared/AppsAndKeys/ProvideOAuthKeys';
 import Application from 'AppData/Application';
+import AuthManager from 'AppData/AuthManager';
+import Settings from 'AppComponents/Shared/SettingsContext';
 import KeyConfiguration from './KeyConfiguration';
 import ViewKeys from './ViewKeys';
 import WaitingForApproval from './WaitingForApproval';
@@ -71,6 +73,8 @@ const styles = theme => ({
  *  @param {String} value description
  */
 class TokenManager extends React.Component {
+    static contextType = Settings;
+
     /**
      *
      * @param {*} props props
@@ -88,6 +92,7 @@ class TokenManager extends React.Component {
             },
             providedConsumerKey: '',
             providedConsumerSecret: '',
+            isUserOwner: false,
         };
         this.keyStates = {
             COMPLETED: 'COMPLETED',
@@ -112,6 +117,7 @@ class TokenManager extends React.Component {
      * @memberof TokenManager
      */
     componentDidMount() {
+        this.checkOwner();
         if (this.appId) {
             this.application
                 .then(application => application.getKeys())
@@ -135,6 +141,16 @@ class TokenManager extends React.Component {
                     }
                 });
         }
+    }
+
+    /**
+     * Check if the current user is the owner of the application
+     * @param {*} owner required param
+     */
+    checkOwner() {
+        const { selectedApp } = this.props;
+        const username = AuthManager.getUser().name;
+        this.setState({ isUserOwner: username.includes(selectedApp.owner) });
     }
 
     /**
@@ -278,7 +294,7 @@ class TokenManager extends React.Component {
             classes, selectedApp, keyType,
         } = this.props;
         const {
-            keys, keyRequest, notFound, isKeyJWT, providedConsumerKey, providedConsumerSecret,
+            keys, keyRequest, notFound, isKeyJWT, providedConsumerKey, providedConsumerSecret, isUserOwner,
         } = this.state;
         if (!keys) {
             return <Loading />;
@@ -288,8 +304,11 @@ class TokenManager extends React.Component {
             return <WaitingForApproval keyState={key.keyState} states={this.keyStates} />;
         }
         // todo replace use of localStorage with useContext
-        const settingsData = localStorage.getItem('settings');
-        const { mapExistingAuthApps } = JSON.parse(settingsData);
+        // const settingsData = localStorage.getItem('settings');
+        // const { mapExistingAuthApps } = JSON.parse(settingsData);
+
+        const settingsContext = this.context;
+        const { mapExistingAuthApps } = settingsContext.settings;
 
         return (
             <div className={classes.root}>
@@ -311,15 +330,19 @@ class TokenManager extends React.Component {
                         <ExpansionPanelSummary expandIcon={<Icon>expand_more</Icon>}>
                             <Typography className={classes.heading} variant='subtitle1'>
                                 {
-                                    keys.size > 0 && keys.get(keyType) ?
-                                        <FormattedMessage
-                                            defaultMessage='Update Configuration'
-                                            id='Shared.AppsAndKeys.TokenManager.update.configuration'
-                                        /> :
-                                        <FormattedMessage
-                                            defaultMessage='Key Configuration'
-                                            id='Shared.AppsAndKeys.TokenManager.key.configuration'
-                                        />
+                                    keys.size > 0 && keys.get(keyType)
+                                        ? (
+                                            <FormattedMessage
+                                                defaultMessage='Update Configuration'
+                                                id='Shared.AppsAndKeys.TokenManager.update.configuration'
+                                            />
+                                        )
+                                        : (
+                                            <FormattedMessage
+                                                defaultMessage='Key Configuration'
+                                                id='Shared.AppsAndKeys.TokenManager.key.configuration'
+                                            />
+                                        )
                                 }
                             </Typography>
                         </ExpansionPanelSummary>
@@ -330,6 +353,7 @@ class TokenManager extends React.Component {
                                 keyType={keyType}
                                 updateKeyRequest={this.updateKeyRequest}
                                 keyRequest={keyRequest}
+                                isUserOwner={isUserOwner}
                             />
                         </ExpansionPanelDetails>
                     </ExpansionPanel>
@@ -338,15 +362,37 @@ class TokenManager extends React.Component {
                             resourcePath={resourcePaths.APPLICATION_GENERATE_KEYS}
                             resourceMethod={resourceMethods.POST}
                         >
-                            <Button
-                                variant='contained'
-                                color='primary'
-                                className={classes.button}
-                                onClick={keys.size > 0 && keys.get(keyType) ? this.updateKeys : this.generateKeys}
-                                noFound={notFound}
-                            >
-                                {keys.size > 0 && keys.get(keyType) ? 'Update' : 'Generate Keys'}
-                            </Button>
+                            {!isUserOwner ? (
+                                <Fragment>
+                                    <Button
+                                        variant='contained'
+                                        color='primary'
+                                        className={classes.button}
+                                        onClick={
+                                            keys.size > 0 && keys.get(keyType) ? this.updateKeys : this.generateKeys}
+                                        noFound={notFound}
+                                        disabled={!isUserOwner}
+                                    >
+                                        {keys.size > 0 && keys.get(keyType) ? 'Update keys' : 'Generate Keys'}
+                                    </Button>
+                                    <Typography variant='caption'>
+                                        <FormattedMessage
+                                            defaultMessage='Only owner can generate or update keys'
+                                            id='Shared.AppsAndKeys.TokenManager.key.and.user.owner'
+                                        />
+                                    </Typography>
+                                </Fragment>
+                            ) : (
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                    className={classes.button}
+                                    onClick={keys.size > 0 && keys.get(keyType) ? this.updateKeys : this.generateKeys}
+                                    noFound={notFound}
+                                >
+                                    {keys.size > 0 && keys.get(keyType) ? 'Update' : 'Generate Keys'}
+                                </Button>
+                            )}
                         </ScopeValidation>
                     </div>
                 </Paper>
@@ -367,6 +413,7 @@ class TokenManager extends React.Component {
                                         onChange={this.handleOnChangeProvidedOAuth}
                                         consumerKey={providedConsumerKey}
                                         consumerSecret={providedConsumerSecret}
+                                        isUserOwner={isUserOwner}
                                     />
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>
@@ -375,25 +422,68 @@ class TokenManager extends React.Component {
                                     resourcePath={resourcePaths.APPLICATION_GENERATE_KEYS}
                                     resourceMethod={resourceMethods.POST}
                                 >
-                                    <Button
-                                        variant='contained'
-                                        color='primary'
-                                        className={classes.button}
-                                        onClick={this.provideOAuthKeySecret}
-                                        noFound={notFound}
-                                    >
-                                        {
-                                            keys.size > 0 && keys.get(keyType) ?
+                                    {!isUserOwner ? (
+                                        <Fragment>
+                                            <Button
+                                                variant='contained'
+                                                color='primary'
+                                                className={classes.button}
+                                                onClick={this.provideOAuthKeySecret}
+                                                noFound={notFound}
+                                                disabled={!isUserOwner}
+                                            >
+                                                {
+                                                    keys.size > 0 && keys.get(keyType)
+                                                        ? (
+                                                            <FormattedMessage
+                                                                defaultMessage='Update'
+                                                                id='Shared.AppsAndKeys.TokenManager.provide.
+                                                                oauth.button.update'
+                                                            />
+                                                        )
+                                                        : (
+                                                            <FormattedMessage
+                                                                defaultMessage='Provide'
+                                                                id='Shared.AppsAndKeys.TokenManager.
+                                                                provide.oauth.button.provide'
+                                                            />
+                                                        )
+                                                }
+                                            </Button>
+                                            <Typography variant='caption'>
                                                 <FormattedMessage
-                                                    defaultMessage='Update'
-                                                    id='Shared.AppsAndKeys.TokenManager.provide.oauth.button.update'
-                                                /> :
-                                                <FormattedMessage
-                                                    defaultMessage='Provide'
-                                                    id='Shared.AppsAndKeys.TokenManager.provide.oauth.button.provide'
+                                                    defaultMessage='Only owner can provide keys'
+                                                    id='Shared.AppsAndKeys.TokenManager.key.provide.user.owner'
                                                 />
-                                        }
-                                    </Button>
+                                            </Typography>
+                                        </Fragment>
+                                    ) : (
+                                        <Button
+                                            variant='contained'
+                                            color='primary'
+                                            className={classes.button}
+                                            onClick={this.provideOAuthKeySecret}
+                                            noFound={notFound}
+                                        >
+                                            {
+                                                keys.size > 0 && keys.get(keyType)
+                                                    ? (
+                                                        <FormattedMessage
+                                                            defaultMessage='Update'
+                                                            id='Shared.AppsAndKeys.TokenManager.
+                                                            provide.oauth.button.update'
+                                                        />
+                                                    )
+                                                    : (
+                                                        <FormattedMessage
+                                                            defaultMessage='Provide'
+                                                            id='Shared.AppsAndKeys.
+                                                            TokenManager.provide.oauth.button.provide'
+                                                        />
+                                                    )
+                                            }
+                                        </Button>
+                                    )}
                                 </ScopeValidation>
                             </div>
                         </Paper>

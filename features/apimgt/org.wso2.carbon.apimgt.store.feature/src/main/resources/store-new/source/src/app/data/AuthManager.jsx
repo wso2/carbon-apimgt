@@ -158,13 +158,14 @@ class AuthManager {
 
     /**
      * retrieve Settings from settings rest api and store in the local storage
+     *  @returns {Object}: settings response object
      */
     static setSettings() {
         const promisedResponse = fetch('/api/am/store/v1.0/settings', {});
-        promisedResponse
+        return promisedResponse
             .then(response => response.json())
             .then((data) => {
-                localStorage.setItem('settings', JSON.stringify(data));
+                return data;
             });
     }
 

@@ -167,6 +167,7 @@ class Details extends Component {
                                             appId: application.applicationId,
                                             label: application.name,
                                             tokenType: application.tokenType,
+                                            owner: application.owner,
                                         }}
                                     />
                                 )}
