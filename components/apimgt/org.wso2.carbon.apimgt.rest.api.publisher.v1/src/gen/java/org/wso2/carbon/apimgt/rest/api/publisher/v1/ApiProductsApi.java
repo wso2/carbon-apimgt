@@ -9,6 +9,7 @@ import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiProductsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.ApiProductsApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -54,7 +55,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdDelete(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
+    public Response apiProductsApiProductIdDelete(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdDelete(apiProductId, ifMatch, securityContext);
     }
 
@@ -73,7 +74,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Document does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+    public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdDocumentsDocumentIdContentGet(apiProductId, documentId, accept, ifNoneMatch, securityContext);
     }
 
@@ -91,7 +92,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdDocumentsDocumentIdContentPost(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail, @Multipart(value = "inlineContent", required = false)  String inlineContent, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
+    public Response apiProductsApiProductIdDocumentsDocumentIdContentPost(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail, @Multipart(value = "inlineContent", required = false)  String inlineContent, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdDocumentsDocumentIdContentPost(apiProductId, documentId, fileInputStream, fileDetail, inlineContent, ifMatch, securityContext);
     }
 
@@ -108,7 +109,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdDocumentsDocumentIdDelete(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
+    public Response apiProductsApiProductIdDocumentsDocumentIdDelete(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdDocumentsDocumentIdDelete(apiProductId, documentId, ifMatch, securityContext);
     }
 
@@ -126,7 +127,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Document does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdDocumentsDocumentIdGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+    public Response apiProductsApiProductIdDocumentsDocumentIdGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdDocumentsDocumentIdGet(apiProductId, documentId, accept, ifNoneMatch, securityContext);
     }
 
@@ -144,7 +145,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdDocumentsDocumentIdPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId, @ApiParam(value = "Document object that needs to be added " ,required=true) DocumentDTO body, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
+    public Response apiProductsApiProductIdDocumentsDocumentIdPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId, @ApiParam(value = "Document object that needs to be added " ,required=true) DocumentDTO body, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdDocumentsDocumentIdPut(apiProductId, documentId, body, ifMatch, securityContext);
     }
 
@@ -162,7 +163,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API Product does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdDocumentsGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+    public Response apiProductsApiProductIdDocumentsGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdDocumentsGet(apiProductId, limit, offset, accept, ifNoneMatch, securityContext);
     }
 
@@ -179,7 +180,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created Document object as entity in the body. Location header contains URL of newly added document. ", response = DocumentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format.  ###################################################### ", response = Void.class) })
-    public Response apiProductsApiProductIdDocumentsPost(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document object that needs to be added " ,required=true) DocumentDTO body) {
+    public Response apiProductsApiProductIdDocumentsPost(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Document object that needs to be added " ,required=true) DocumentDTO body) throws APIManagementException{
         return delegate.apiProductsApiProductIdDocumentsPost(apiProductId, body, securityContext);
     }
 
@@ -197,7 +198,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+    public Response apiProductsApiProductIdGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdGet(apiProductId, accept, ifNoneMatch, securityContext);
     }
 
@@ -216,7 +217,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "API object that needs to be added " ,required=true) APIProductDTO body, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
+    public Response apiProductsApiProductIdPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "API object that needs to be added " ,required=true) APIProductDTO body, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdPut(apiProductId, body, ifMatch, securityContext);
     }
 
@@ -234,7 +235,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdSwaggerGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+    public Response apiProductsApiProductIdSwaggerGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdSwaggerGet(apiProductId, accept, ifNoneMatch, securityContext);
     }
 
@@ -253,7 +254,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdSwaggerPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @Multipart(value = "apiDefinition")  String apiDefinition, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
+    public Response apiProductsApiProductIdSwaggerPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @Multipart(value = "apiDefinition")  String apiDefinition, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdSwaggerPut(apiProductId, apiDefinition, ifMatch, securityContext);
     }
 
@@ -271,7 +272,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Document does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdThumbnailGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+    public Response apiProductsApiProductIdThumbnailGet(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdThumbnailGet(apiProductId, accept, ifNoneMatch, securityContext);
     }
 
@@ -289,7 +290,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdThumbnailPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
+    public Response apiProductsApiProductIdThumbnailPut(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdThumbnailPut(apiProductId, fileInputStream, fileDetail, ifMatch, securityContext);
     }
 
@@ -306,7 +307,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. List of qualifying API Products is returned. ", response = APIProductListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response apiProductsGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "")  @QueryParam("query") String query, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+    public Response apiProductsGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "")  @QueryParam("query") String query, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.apiProductsGet(limit, offset, query, accept, ifNoneMatch, securityContext);
     }
 
@@ -323,7 +324,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = APIProductDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was in a not supported format. ", response = ErrorDTO.class) })
-    public Response apiProductsPost(@ApiParam(value = "API object that needs to be added " ,required=true) APIProductDTO body) {
+    public Response apiProductsPost(@ApiParam(value = "API object that needs to be added " ,required=true) APIProductDTO body) throws APIManagementException{
         return delegate.apiProductsPost(body, securityContext);
     }
 }

@@ -45,6 +45,16 @@ public class ErrorItem implements ErrorHandler {
         this.statusCode = statusCode;
     }
 
+    public ErrorItem() {
+    }
+
+    public ErrorItem (String message, String description, long errorCode, int statusCode) {
+        this.message = message;
+        this.errorCode = errorCode;
+        this.statusCode = statusCode;
+        this.description = description;
+    }
+
     @Override
     public long getErrorCode() {
         return errorCode;

@@ -15,20 +15,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.carbon.apimgt.impl.wsdl.util;
 
-package org.wso2.carbon.apimgt.impl.soaptorest.exceptions;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
 
-/**
- * This is the custom exception class to be thrown when an issue encountered in WSDL related operations.
- */
-public class APIMgtWSDLException extends Exception {
-    public APIMgtWSDLException(String msg, Throwable e) {
-        super(msg, e);
+public class SwaggerFieldsExcludeStrategy implements ExclusionStrategy {
+    @Override
+    public boolean shouldSkipField(FieldAttributes fieldAttributes) {
+        return fieldAttributes.getName().equals("vendorExtensions");
     }
-    public APIMgtWSDLException(String msg) {
-        super(msg);
+
+    @Override
+    public boolean shouldSkipClass(Class<?> aClass) {
+        return false;
     }
-    public APIMgtWSDLException(Throwable throwable) {
-        super(throwable);
-    }
+
 }

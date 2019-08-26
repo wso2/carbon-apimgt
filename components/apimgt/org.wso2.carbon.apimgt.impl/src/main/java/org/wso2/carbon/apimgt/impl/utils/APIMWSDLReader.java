@@ -34,8 +34,16 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDL11ProcessorImpl;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDL20ProcessorImpl;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
+import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.xml.sax.SAXException;
 
 import javax.wsdl.Definition;
@@ -54,6 +62,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -64,9 +73,9 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-
-
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 /**
  * This class is used to read the WSDL file using WSDL4J library.
@@ -88,7 +97,10 @@ public class APIMWSDLReader {
 
 	private static final String WSDL20_NAMESPACE = "http://www.w3.org/ns/wsdl";
 	private static final String WSDL11_NAMESPACE = "http://schemas.xmlsoap.org/wsdl/";
-	
+
+    public APIMWSDLReader(){
+    }
+
 	public APIMWSDLReader(String baseURI) {
 		this.baseURI = baseURI;
 	}
@@ -100,7 +112,162 @@ public class APIMWSDLReader {
 		return wsdlFactoryInstance;
 	}
 
-	/**
+    /**
+     * Extract the WSDL archive zip and validates it
+     *
+     * @param inputStream zip input stream
+     * @return Validation information
+     * @throws APIManagementException Error occurred during validation
+     */
+    public static WSDLValidationResponse extractAndValidateWSDLArchive(InputStream inputStream) throws APIManagementException {
+        String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator
+                + APIConstants.WSDL_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
+        String archivePath = path + File.separator + APIConstants.WSDL_ARCHIVE_ZIP_FILE;
+        String extractedLocation = APIFileUtil
+                .extractUploadedArchive(inputStream, APIConstants.API_WSDL_EXTRACTED_DIRECTORY, archivePath, path);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully extracted WSDL archive. Location: " + extractedLocation);
+        }
+        WSDLProcessor processor;
+        try {
+            processor = getWSDLProcessor(extractedLocation);
+        } catch (APIManagementException e) {
+            return handleExceptionDuringValidation(e);
+        }
+
+        WSDLValidationResponse wsdlValidationResponse = new WSDLValidationResponse();
+        if (processor.hasError()) {
+            wsdlValidationResponse.setValid(false);
+            wsdlValidationResponse.setError(processor.getError());
+        } else {
+            wsdlValidationResponse.setValid(true);
+            WSDLArchiveInfo wsdlArchiveInfo = new WSDLArchiveInfo(path, APIConstants.WSDL_ARCHIVE_ZIP_FILE,
+                    processor.getWsdlInfo());
+            wsdlValidationResponse.setWsdlArchiveInfo(wsdlArchiveInfo);
+            wsdlValidationResponse.setWsdlInfo(processor.getWsdlInfo());
+        }
+        return wsdlValidationResponse;
+    }
+
+    /**
+     * Extract the WSDL file and validates it
+     *
+     * @param inputStream file input stream
+     * @return Validation information
+     * @throws APIManagementException Error occurred during validation
+     */
+    public static WSDLValidationResponse validateWSDLFile(InputStream inputStream) throws APIManagementException {
+        try {
+            byte[] wsdlContent = APIUtil.toByteArray(inputStream);
+            WSDLProcessor processor = getWSDLProcessor(wsdlContent);
+            return getWsdlValidationResponse(processor);
+        } catch (APIManagementException e) {
+            return handleExceptionDuringValidation(e);
+        } catch (IOException e) {
+            throw new APIMgtWSDLException("Error while validating WSDL", e);
+        }
+    }
+
+    /**
+     * Extract the WSDL url and validates it
+     *
+     * @param wsdlUrl WSDL url
+     * @return Validation information
+     * @throws APIManagementException Error occurred during validation
+     */
+    public static WSDLValidationResponse validateWSDLUrl(URL wsdlUrl) throws APIManagementException {
+        try {
+            WSDLProcessor processor = getWSDLProcessorForUrl(wsdlUrl);
+            return getWsdlValidationResponse(processor);
+        } catch (APIManagementException e) {
+            return handleExceptionDuringValidation(e);
+        }
+    }
+
+    /**
+     * Gets WSDL processor WSDL 1.1/WSDL 2.0 based on the content {@code content}.
+     *
+     * @param content WSDL content
+     * @return {@link WSDLProcessor}
+     * @throws APIManagementException
+     */
+    public static WSDLProcessor getWSDLProcessor(byte[] content)
+            throws APIManagementException {
+        WSDLProcessor wsdl11Processor = new WSDL11ProcessorImpl();
+        WSDLProcessor wsdl20Processor = new WSDL20ProcessorImpl();
+        try {
+            if (wsdl11Processor.canProcess(content)) {
+                wsdl11Processor.init(content);
+                return wsdl11Processor;
+            } else if (wsdl20Processor.canProcess(content)) {
+                wsdl20Processor.init(content);
+                return wsdl20Processor;
+            } else {
+                //no processors found if this line reaches
+                throw new APIManagementException("No WSDL processor found to process WSDL content.",
+                        ExceptionCodes.CONTENT_NOT_RECOGNIZED_AS_WSDL);
+            }
+        } catch (APIMgtWSDLException e) {
+            throw new APIManagementException("Error while instantiating wsdl processor class", e);
+        }
+    }
+
+    /**
+     * Returns the appropriate WSDL 1.1/WSDL 2.0 based on the file path {@code wsdlPath}.
+     *
+     * @param wsdlPath File path containing WSDL files and dependant files
+     * @return WSDL 1.1/2.0 processor for the provided content
+     * @throws APIManagementException If an error occurs while determining the processor
+     */
+    public static WSDLProcessor getWSDLProcessor(String wsdlPath) throws APIManagementException {
+        WSDLProcessor wsdl11Processor = new WSDL11ProcessorImpl();
+        WSDLProcessor wsdl20Processor = new WSDL20ProcessorImpl();
+        try {
+            if (wsdl11Processor.canProcess(wsdlPath)) {
+                wsdl11Processor.initPath(wsdlPath);
+                return wsdl11Processor;
+            } else if (wsdl20Processor.canProcess(wsdlPath)) {
+                wsdl20Processor.initPath(wsdlPath);
+                return wsdl20Processor;
+            } else {
+                //no processors found if this line reaches
+                throw new APIManagementException("No WSDL processor found to process WSDL content.",
+                        ExceptionCodes.CONTENT_NOT_RECOGNIZED_AS_WSDL);
+            }
+        } catch (APIMgtWSDLException e) {
+            throw new APIManagementException("Error while instantiating wsdl processor class", e);
+        }
+    }
+
+    /**
+     * Returns the appropriate WSDL 1.1/WSDL 2.0 based on the url {@code url}.
+     *
+     * @param url WSDL url
+     * @return WSDL 1.1/2.0 processor for the provided content
+     * @throws APIManagementException If an error occurs while determining the processor
+     */
+    public static WSDLProcessor getWSDLProcessorForUrl(URL url) throws APIManagementException {
+        WSDLProcessor wsdl11Processor = new WSDL11ProcessorImpl();
+        WSDLProcessor wsdl20Processor = new WSDL20ProcessorImpl();
+
+        try {
+            if (wsdl11Processor.canProcess(url)) {
+                wsdl11Processor.init(url);
+                return wsdl11Processor;
+            } else if (wsdl20Processor.canProcess(url)) {
+                wsdl20Processor.init(url);
+                return wsdl20Processor;
+            } else {
+                //no processors found if this line reaches
+                throw new APIManagementException("No WSDL processor found to process WSDL url: " + url,
+                        ExceptionCodes.URL_NOT_RECOGNIZED_AS_WSDL);
+            }
+        } catch (APIMgtWSDLException e) {
+            throw new APIManagementException("Error while instantiating wsdl processor class", e);
+        }
+    }
+
+    /**
 	 * Read the wsdl and clean the actual service endpoint instead of that set
 	 * the gateway endpoint.
 	 *
@@ -108,7 +275,6 @@ public class APIMWSDLReader {
 	 * @throws APIManagementException
 	 *
 	 */
-
 	public OMElement readAndCleanWsdl(API api) throws APIManagementException {
 
 		try {
@@ -221,6 +387,8 @@ public class APIMWSDLReader {
      *
      * @throws APIManagementException When error occurred while parsing the content from the URL
      */
+
+    @Deprecated
     public void validateBaseURI() throws APIManagementException {
         if (baseURI.startsWith(APIConstants.WSDL_REGISTRY_LOCATION_PREFIX)) {
             baseURI = APIUtil.getServerURL() + baseURI;
@@ -267,6 +435,7 @@ public class APIMWSDLReader {
      * @return true if the underlying document is a WSDL2
      * @throws APIManagementException if error occurred while checking whether baseURI is WSDL2.0
      */
+    @Deprecated
     public boolean isWSDL2BaseURI() throws APIManagementException {
         URL wsdl;
         boolean isWsdl2 = false;
@@ -377,6 +546,25 @@ public class APIMWSDLReader {
 		}
 	}
 
+    /**
+     * Handles the provided exception occurred during validation and return a validation response or the exception.
+     *
+     * @param e exception object
+     * @return a validation response if the exception contains an ErrorHandler
+     * @throws APIManagementException if the exception doesn't contains an ErrorHandler. Throws the same error as 'e'
+     */
+    private static WSDLValidationResponse handleExceptionDuringValidation(APIManagementException e) throws APIManagementException {
+        if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() < 500) {
+            log.debug("Validation error occurred due to invalid WSDL", e);
+            WSDLValidationResponse validationResponse = new WSDLValidationResponse();
+            validationResponse.setError(e.getErrorHandler());
+            return validationResponse;
+        } else {
+            throw e;
+        }
+    }
+
+    @Deprecated
     private static DocumentBuilderFactory getSecuredDocumentBuilder() {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setNamespaceAware(true);
@@ -398,6 +586,7 @@ public class APIMWSDLReader {
         return dbf;
     }
 
+    @Deprecated
     private org.apache.woden.wsdl20.Description readWSDL2File() throws APIManagementException, WSDLException {
         WSDLReader reader = getWsdlFactoryInstance().newWSDLReader();
         reader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
@@ -457,7 +646,7 @@ public class APIMWSDLReader {
 	 * @throws APIManagementException
 	 * @throws WSDLException
 	 */
-
+    @Deprecated
 	private Definition readWSDLFile() throws APIManagementException, WSDLException {
 		WSDLReader reader = getWsdlFactoryInstance().newWSDLReader();
 		// switch off the verbose mode
@@ -481,6 +670,7 @@ public class APIMWSDLReader {
      * @return an "XXE safe" built DOM XML object by reading the content from the provided URL
      * @throws APIManagementException When error occurred while reading from URL
      */
+    @Deprecated
     private Document getSecuredParsedDocumentFromURL(String url) throws APIManagementException {
         URL wsdl;
         String errorMsg = "Error while reading WSDL document";
@@ -509,6 +699,7 @@ public class APIMWSDLReader {
      * @return an "XXE safe" built DOM XML object by reading the content from the byte array
      * @throws APIManagementException When error occurred while reading from the byte array
      */
+    @Deprecated
     private Document getSecuredParsedDocumentFromContent(byte[] content) throws APIManagementException {
         String errorMsg = "Error while reading WSDL document";
         InputStream inputStream = null;
@@ -530,7 +721,7 @@ public class APIMWSDLReader {
 
     /**
      * Reads baseURI and validate if it is WSDL 2.0 resource.
-     * 
+     *
      * @throws org.apache.woden.WSDLException When error occurred while parsing/validating base URI
      * @throws APIManagementException When error occurred while parsing/validating base URI
      */
@@ -542,7 +733,7 @@ public class APIMWSDLReader {
         wsdlSource.setSource(domElement);
         wsdlReader20.readWSDL(wsdlSource);
     }
-    
+
     /**
      * Reads baseURI and validate if it is WSDL 1.1 resource.
      *
@@ -760,6 +951,26 @@ public class APIMWSDLReader {
             theChars[i] = (char)(bytes[i++]&0xff);
 
         return new String(theChars);
+    }
+
+    /**
+     * Gets WSDL validation response from the WSDL processor
+     *
+     * @param processor WSDL processor
+     * @return WSDL validation response
+     * @throws APIMgtWSDLException if error occurred while retrieving WSDL info
+     */
+    private static WSDLValidationResponse getWsdlValidationResponse(WSDLProcessor processor)
+            throws APIMgtWSDLException {
+        WSDLValidationResponse wsdlValidationResponse = new WSDLValidationResponse();
+        if (processor.hasError()) {
+            wsdlValidationResponse.setValid(false);
+            wsdlValidationResponse.setError(processor.getError());
+        } else {
+            wsdlValidationResponse.setValid(true);
+            wsdlValidationResponse.setWsdlInfo(processor.getWsdlInfo());
+        }
+        return wsdlValidationResponse;
     }
 
     private String determineURLTransport(String scheme, String transports) {

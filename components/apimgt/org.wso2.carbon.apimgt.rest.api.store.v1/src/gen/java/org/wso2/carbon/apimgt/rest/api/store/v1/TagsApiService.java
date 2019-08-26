@@ -7,6 +7,8 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
+
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TagListDTO;
 
@@ -19,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface TagsApiService {
-      public Response tagsGet(Integer limit, Integer offset, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
+      public Response tagsGet(Integer limit, Integer offset, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
 }

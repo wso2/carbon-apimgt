@@ -5,6 +5,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ImportApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.ImportApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -50,7 +51,7 @@ ImportApiService delegate = new ImportApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response importApplicationsPost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail) {
+    public Response importApplicationsPost( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail) throws APIManagementException{
         return delegate.importApplicationsPost(fileInputStream, fileDetail, securityContext);
     }
 
@@ -68,7 +69,7 @@ ImportApiService delegate = new ImportApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response importApplicationsPut( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail) {
+    public Response importApplicationsPut( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail) throws APIManagementException{
         return delegate.importApplicationsPut(fileInputStream, fileDetail, securityContext);
     }
 }
