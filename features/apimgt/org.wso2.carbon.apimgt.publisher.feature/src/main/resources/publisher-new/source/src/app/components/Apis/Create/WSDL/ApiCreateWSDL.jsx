@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useReducer, useState } from 'react';
+import React, { useReducer, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
@@ -71,6 +71,11 @@ APICreateBase.propTypes = {
  */
 export default function SOAPToREST() {
     const [wizardStep, setWizardStep] = useState(0);
+    useEffect(() => {
+        if (wizardStep === 1) {
+            // Do the API submission
+        }
+    }, [wizardStep]);
 
     /**
      *
@@ -86,6 +91,7 @@ export default function SOAPToREST() {
             case 'endpoint':
             case 'context':
             case 'policies':
+            case 'isFormValid':
                 return { ...currentState, [action]: value };
             case 'inputType':
                 return { ...currentState, [action]: value, inputValue: value === 'url' ? '' : [] };
@@ -98,6 +104,7 @@ export default function SOAPToREST() {
         type: 'SOAPtoREST',
         inputType: 'url',
         inputValue: '',
+        formValidity: true,
     });
 
     /**
@@ -108,6 +115,20 @@ export default function SOAPToREST() {
     function handleOnChange(event) {
         const { name: action, value } = event.target;
         inputsDispatcher({ action, value });
+    }
+
+    /**
+     *
+     * Set the validity of the API Inputs form
+     * @param {*} isValidForm
+     * @param {*} validationState
+     */
+    function handleOnValidate(isFormValid) {
+        // API Name , Version & Context is a must that's why `&&` chain
+        inputsDispatcher({
+            action: 'isFormValid',
+            value: isFormValid && Boolean(apiInputs.name) && Boolean(apiInputs.version) && Boolean(apiInputs.context),
+        });
     }
 
     return (
@@ -149,7 +170,9 @@ export default function SOAPToREST() {
                 <Grid item md={1} />
                 <Grid item md={11}>
                     {wizardStep === 0 && <ProvideWSDL apiInputs={apiInputs} inputsDispatcher={inputsDispatcher} />}
-                    {wizardStep === 1 && <DefaultAPIForm onChange={handleOnChange} api={apiInputs} />}
+                    {wizardStep === 1 && (
+                        <DefaultAPIForm onValidate={handleOnValidate} onChange={handleOnChange} api={apiInputs} />
+                    )}
                 </Grid>
                 <Grid item md={1} />
                 <Grid item md={9}>
@@ -168,9 +191,20 @@ export default function SOAPToREST() {
                             {wizardStep === 1 && <Button onClick={() => setWizardStep(step => step - 1)}>Back</Button>}
                         </Grid>
                         <Grid item>
-                            <Button onClick={() => setWizardStep(step => step + 1)} variant='contained' color='primary'>
-                                Next
-                            </Button>
+                            {wizardStep === 0 && (
+                                <Button
+                                    onClick={() => setWizardStep(step => step + 1)}
+                                    variant='contained'
+                                    color='primary'
+                                >
+                                    Next
+                                </Button>
+                            )}
+                            {wizardStep === 1 && (
+                                <Button variant='contained' color='primary' disabled={!apiInputs.isFormValid}>
+                                    Create
+                                </Button>
+                            )}
                         </Grid>
                     </Grid>
                 </Grid>

@@ -19,6 +19,7 @@
     "author": "WSO2 Org",
     "license": "Apache-2.0",
     "dependencies": {
+        "@hapi/hapi": "^18.3.2",
         "@material-ui/core": "^v4.3.1",
         "@material-ui/icons": "^v4.2.1",
         "antd": "^2.11.2",

@@ -156,13 +156,15 @@ export default function Configuration() {
                             newState[action].includes(API_SECURITY_BASIC_AUTH)
                         )
                     ) {
-                        const noMandatoryOAuthBasicAuth = newState[action].filter(schema => schema !== API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+                        const noMandatoryOAuthBasicAuth = newState[action]
+                            .filter(schema => schema !== API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
                         return {
                             ...newState,
                             [action]: noMandatoryOAuthBasicAuth,
                         };
                     } else if (!newState[action].includes(API_SECURITY_MUTUAL_SSL)) {
-                        const noMandatoryMutualSSL = newState[action].filter(schema => schema !== API_SECURITY_MUTUAL_SSL_MANDATORY);
+                        const noMandatoryMutualSSL = newState[action]
+                            .filter(schema => schema !== API_SECURITY_MUTUAL_SSL_MANDATORY);
                         return {
                             ...newState,
                             [action]: noMandatoryMutualSSL,

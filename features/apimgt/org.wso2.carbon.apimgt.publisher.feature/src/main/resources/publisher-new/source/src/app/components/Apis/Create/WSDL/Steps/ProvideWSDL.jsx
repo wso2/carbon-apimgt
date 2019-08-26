@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Radio from '@material-ui/core/Radio';
 import Grid from '@material-ui/core/Grid';
@@ -56,7 +56,7 @@ function isURL(str) {
 export default function ProvideWSDL(props) {
     const { apiInputs, inputsDispatcher } = props;
     const isFileInput = apiInputs.inputType === 'file';
-    const [validity, setValidity] = useState({ url: true, file: true });
+    // const [validity, setValidity] = useState({ url: true, file: true });
     /**
      *
      *
