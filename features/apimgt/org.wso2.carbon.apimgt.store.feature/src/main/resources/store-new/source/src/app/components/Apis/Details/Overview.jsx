@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
@@ -34,6 +34,8 @@ import Resources from './Resources';
 import Operations from './Operations';
 import Comments from './Comments/Comments';
 import Sdk from './Sdk';
+import API from '../../../data/api';
+import OverviewDocuments from './OverviewDocuments';
 /**
  *
  *
@@ -42,7 +44,6 @@ import Sdk from './Sdk';
 const styles = theme => ({
     root: {
         padding: theme.spacing.unit * 3,
-        width: theme.custom.contentAreaWidth,
     },
     iconClass: {
         marginRight: 10,
@@ -77,6 +78,9 @@ const styles = theme => ({
     actionPanel: {
         justifyContent: 'flex-start',
     },
+    linkToTest: {
+        textDecoration: 'none',
+    },
 });
 const ExpansionPanelSummary = withStyles({
     root: {
@@ -98,29 +102,17 @@ const ExpansionPanelSummary = withStyles({
 
 ExpansionPanelSummary.muiName = 'ExpansionPanelSummary';
 
-class Overview extends React.Component {
-    state = {
-        value: 0,
-    };
-
-    /**
-     *
-     *
-     * @memberof Overview
-     */
-    handleExpandClick = () => {
-        this.setState(state => ({ expanded: !state.expanded }));
-    };
-
+function Overview(props) {
+   
     /**
      *
      *
      * @returns
      * @memberof Overview
      */
-    render() {
-        const { classes, theme } = this.props;
-        function getResourcesForAPIs(apiType, api) {
+
+        const { classes, theme } = props;
+        const getResourcesForAPIs = (apiType, api) => {
             switch (apiType) {
                 case 'GRAPHQL':
                     return <Operations api={api} />;
@@ -129,7 +121,7 @@ class Overview extends React.Component {
             }
         }
 
-        function getTitleForAPIOperationType(apiType) {
+        const getTitleForAPIOperationType = (apiType)  => {
             switch (apiType) {
                 case 'GRAPHQL':
                     return <FormattedMessage id='Apis.Details.Overview.operations.title' defaultMessage='Operations' />;
@@ -141,7 +133,7 @@ class Overview extends React.Component {
             <ApiContext.Consumer>
                 {({ api, applicationsAvailable, subscribedApplications }) => (
                     <Grid container className={classes.root} spacing={16}>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} lg={6}>
                             <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary>
                                     <CustomIcon
@@ -163,8 +155,11 @@ class Overview extends React.Component {
                                     <Grid container className={classes.root} spacing={16}>
                                         <Grid item xs={12}>
                                             <div className={classes.subscriptionTop}>
-                                                <div className={classes.boxBadge}>2</div>
-                                                <Link to='/' className={classes.linkStyle}>
+                                                <div className={classes.boxBadge}>{subscribedApplications.length}</div>
+                                                <Link
+                                                    to={'/apis/' + api.id + '/credentials'}
+                                                    className={classes.linkStyle}
+                                                >
                                                     <FormattedMessage
                                                         id='Apis.Details.Overview.subscriptions'
                                                         defaultMessage='Subscriptions'
@@ -180,19 +175,37 @@ class Overview extends React.Component {
                                                 />
                                             </Typography>
                                             <div className={classes.subscriptionBox}>
-                                                <Link to='/' className={classes.linkStyle}>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Overview.with.an.existing'
-                                                        defaultMessage='With an Existing Application'
-                                                    />
-                                                </Link>
-                                                <Typography variant='caption'>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Overview.subscribe.to.an.application'
-                                                        defaultMessage='Subscribe to an Application'
-                                                    />
-                                                </Typography>
-                                                <Link to='/' className={classes.linkStyle}>
+                                                {applicationsAvailable.length > 0 && (
+                                                    <React.Fragment>
+                                                        <Link
+                                                            to={'/apis/' + api.id + '/credentials'}
+                                                            className={classes.linkStyle}
+                                                        >
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Overview.with.an.existing'
+                                                                defaultMessage='With an Existing Application'
+                                                            />
+                                                        </Link>
+                                                        <Typography variant='caption'>
+                                                            {applicationsAvailable.length}
+                                                            {' '}
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Overview.subscribe.to.an.application'
+                                                                defaultMessage='Applications Available'
+                                                            />
+                                                        </Typography>
+                                                    </React.Fragment>
+                                                )}
+
+                                                <Link
+                                                    to={{
+                                                        pathname: '/apis/' + api.id + '/credentials',
+                                                        state: {
+                                                            openWizard: true,
+                                                        },
+                                                    }}
+                                                    className={classes.linkStyle}
+                                                >
                                                     <FormattedMessage
                                                         id='Apis.Details.Overview.with.a.new.application'
                                                         defaultMessage='With a New Application'
@@ -212,7 +225,7 @@ class Overview extends React.Component {
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} lg={6}>
                             <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary>
                                     <CustomIcon
@@ -230,16 +243,18 @@ class Overview extends React.Component {
                                 </ExpansionPanelDetails>
                                 <Divider />
                                 <ExpansionPanelActions className={classes.actionPanel}>
-                                    <Button size='small' color='primary'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Overview.resources.show.more'
-                                            defaultMessage='Show More >>'
-                                        />
-                                    </Button>
+                                    <Link to={'/apis/' + api.id + '/test'} className={classes.linkToTest}>
+                                        <Button size='small' color='primary'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Overview.resources.show.more'
+                                                defaultMessage='Test >>'
+                                            />
+                                        </Button>
+                                    </Link>
                                 </ExpansionPanelActions>
                             </ExpansionPanel>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} lg={6}>
                             <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary>
                                     <CustomIcon
@@ -271,7 +286,7 @@ class Overview extends React.Component {
                                 </ExpansionPanelActions>
                             </ExpansionPanel>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} lg={6}>
                             <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary>
                                     <CustomIcon
@@ -304,16 +319,18 @@ class Overview extends React.Component {
                                 </ExpansionPanelDetails>
                                 <Divider />
                                 <ExpansionPanelActions className={classes.actionPanel}>
-                                    <Button size='small' color='primary'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Overview.sdk.generation.show.more'
-                                            defaultMessage='Show More >>'
-                                        />
-                                    </Button>
+                                    <Link to={'/apis/' + api.id + '/sdk'} className={classes.linkToTest}>
+                                        <Button size='small' color='primary'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Overview.sdk.generation.show.more'
+                                                defaultMessage='Show More >>'
+                                            />
+                                        </Button>
+                                    </Link>
                                 </ExpansionPanelActions>
                             </ExpansionPanel>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={12} lg={6}>
                             <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary>
                                     <CustomIcon
@@ -333,42 +350,12 @@ class Overview extends React.Component {
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
                                     <Grid container className={classes.root} spacing={16}>
-                                        <Grid item xs={12}>
-                                            <div className={classes.subscriptionTop}>
-                                                <div className={classes.boxBadge}>3</div>
-                                                <Link to='/' className={classes.linkStyle}>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Overview.documents.count.sufix'
-                                                        defaultMessage='Documents'
-                                                    />
-                                                </Link>
-                                            </div>
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <Typography variant='subtitle2'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Overview.documents.last.updated'
-                                                    defaultMessage='Last Updated'
-                                                />
-                                            </Typography>
-                                            <div className={classes.subscriptionBox}>
-                                                <Link to='/' className={classes.linkStyle}>
-                                                    AboutmyApi.pdf
-                                                </Link>
-                                                <Typography variant='caption'>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Overview.documents.last.updated'
-                                                        defaultMessage='Last Updated'
-                                                    />
-                                                    21 minutes ago
-                                                </Typography>
-                                            </div>
-                                        </Grid>
+                                                    <OverviewDocuments apiId={api.id} />
                                     </Grid>
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>
                         </Grid>
-                        <Grid item xs={6}>
+                        {/* <Grid item xs={12} lg={6}>
                             <ExpansionPanel defaultExpanded>
                                 <ExpansionPanelSummary>
                                     <CustomIcon
@@ -422,13 +409,13 @@ class Overview extends React.Component {
                                     </Grid>
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>
-                        </Grid>
+                        </Grid> */}
                     </Grid>
                 )}
             </ApiContext.Consumer>
         );
     }
-}
+
 
 Overview.propTypes = {
     classes: PropTypes.object.isRequired,

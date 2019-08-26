@@ -34,6 +34,9 @@ const styles = theme => ({
     listRoot: {
         padding: 0,
     },
+    listItemTextRoot: {
+        padding: 0,
+    },
     listText: {
         color: theme.palette.getContrastText(theme.palette.background.drawer),
     },
@@ -112,6 +115,7 @@ function GlobalNavBar(props) {
                             </ListItemIcon>
                             <ListItemText
                                 classes={{
+                                    root: classes.listItemTextRoot,
                                     primary: classNames({
                                         [classes.selectedText]: selected === 'home',
                                         [classes.listText]: selected !== 'home' && !smallView,
@@ -139,6 +143,7 @@ function GlobalNavBar(props) {
                     </ListItemIcon>
                     <ListItemText
                         classes={{
+                            root: classes.listItemTextRoot,
                             primary: classNames({
                                 [classes.selectedText]: selected === 'apis',
                                 [classes.listText]: selected !== 'apis' && !smallView,
@@ -165,6 +170,7 @@ function GlobalNavBar(props) {
                     </ListItemIcon>
                     <ListItemText
                         classes={{
+                            root: classes.listItemTextRoot,
                             primary: classNames({
                                 [classes.selectedText]: selected === 'api-products',
                                 [classes.listText]: selected !== 'api-products' && !smallView,
@@ -191,6 +197,7 @@ function GlobalNavBar(props) {
                     </ListItemIcon>
                     <ListItemText
                         classes={{
+                            root: classes.listItemTextRoot,
                             primary: classNames({
                                 [classes.selectedText]: selected === 'applications',
                                 [classes.listText]: selected !== 'applications' && !smallView,
