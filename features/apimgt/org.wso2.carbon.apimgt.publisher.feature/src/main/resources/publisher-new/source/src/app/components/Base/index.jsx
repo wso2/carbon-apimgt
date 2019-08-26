@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -43,7 +43,7 @@ const styles = theme => ({
     wrapper: {
         minHeight: '100%',
         marginBottom: -50,
-        background: theme.palette.background.default + ' url(' + theme.custom.backgroundImage + ') repeat left top',
+        background: '#d3d3d326',
     },
     contentWrapper: {
         display: 'flex',

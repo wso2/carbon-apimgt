@@ -27,6 +27,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import API from 'AppData/api.js';
+import APIProduct from 'AppData/APIProduct';
 import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
 
@@ -60,8 +61,8 @@ function Delete(props) {
     const [open, setOpen] = useState(false);
     const createEditForm = useRef(null);
 
-    const runAction = action => {
-        if(action === 'yes'){
+    const runAction = (action) => {
+        if (action === 'yes') {
             deleteDoc();
         } else {
             setOpen(!open);
@@ -71,12 +72,14 @@ function Delete(props) {
         setOpen(!open);
     };
     const deleteDoc = () => {
-        const restApi = new API();
-        const { apiId, docId, getDocumentsList} = props;
+        const {
+            apiId, docId, getDocumentsList, apiType,
+        } = props;
+        const restApi = apiType === API.CONSTS.APIProduct ? new APIProduct() : new API();
         const docPromise = restApi.deleteDocument(apiId, docId);
         docPromise
-            .then((doc) => {
-                Alert.info(`${doc.name} ${intl.formatMessage({
+            .then(() => {
+                Alert.info(`${intl.formatMessage({
                     id: 'Apis.Details.Documents.Delete.document.delete.successfully',
                     defaultMessage: 'deleted successfully.',
                 })}`);
@@ -148,6 +151,7 @@ function Delete(props) {
 Delete.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     apiId: PropTypes.shape({}).isRequired,
+    apiType: PropTypes.string.isRequired,
     docId: PropTypes.shape({}).isRequired,
     getDocumentsList: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,

@@ -17,8 +17,6 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApisApi"/>
 	    <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApiProductsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ExportApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ImportApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SdkGenApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SearchApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SelfSignupApi"/>
@@ -27,7 +25,8 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.TagsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ThrottlingPoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SwaggerYamlApi"/>
-            
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.TenantsApi"/>
+
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
@@ -37,7 +36,7 @@
 
     <bean id="PreAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PreAuthenticationInterceptor" />
     <bean id="AuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.OAuthAuthenticationInterceptor" />
-    <bean id="BasicAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthInterceptor" />
+    <bean id="BasicAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.auth.BasicAuthenticationInterceptor" />
     <bean id="PostAuthenticationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.PostAuthenticationInterceptor" />
     <bean id="SubscriberRegistrationInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.SubscriberRegistrationInterceptor" />
     <bean id="ValidationInInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.validation.ValidationInInterceptor"/>
@@ -51,7 +50,7 @@
             <ref bean="AuthenticationInterceptor"/>
             <ref bean="BasicAuthenticationInterceptor"/>
             <ref bean="PostAuthenticationInterceptor"/>
-            <ref bean="SubscriberRegistrationInterceptor"/>            
+            <ref bean="SubscriberRegistrationInterceptor"/>
             <ref bean="ValidationInInterceptor"/>
             <ref bean="ETagInInterceptor"/>
         </cxf:inInterceptors>

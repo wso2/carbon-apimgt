@@ -16,14 +16,8 @@
  * under the License.
  */
 
-import 'typeface-roboto';
-
 import ReactDOM from 'react-dom';
 import React from 'react';
 import Publisher from './src/Publisher';
-import './index.css';
 
-ReactDOM.render(
-    <Publisher />,
-    document.getElementById('react-root'),
-);
+ReactDOM.render(<Publisher />, document.getElementById('react-root'));

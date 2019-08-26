@@ -1,14 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
+import Tooltip from '@material-ui/core/Tooltip';
 import { FormattedMessage } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import { withStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
+import moment from 'moment';
+
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
-import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
 
@@ -46,69 +48,77 @@ const styles = theme => ({
     },
 });
 
-const DetailsTopMenu = ({ classes, theme }) => {
+const APIDetailsTopMenu = (props) => {
+    const {
+        classes, theme, api, isAPIProduct,
+    } = props;
     // todo: need to support rev proxy ~tmkb
     return (
-        <ApiContext.Consumer>
-            {({ api, isAPIProduct }) => (
-                <div className={classes.root}>
-                    <Link to={isAPIProduct ? '/api-products' : '/apis'} className={classes.backLink}>
-                        <KeyboardArrowLeft className={classes.backIcon} />
-                        <div className={classes.backText}>
-                            <FormattedMessage
-                                id='Apis.Details.components.APIDetailsTopMenu.back.to.listing'
-                                defaultMessage='BACK TO {break} LISTING'
-                                values={{ break: <br /> }}
-                            />
-                        </div>
-                    </Link>
-                    <VerticalDivider height={70} />
-                    <ThumbnailView api={api} width={70} height={50} />
-                    <div style={{ marginLeft: theme.spacing.unit }}>
-                        <Typography variant='display1'>
-                            {api.name} {isAPIProduct ? '' : ':' + api.version}
-                        </Typography>
-                        <Typography variant='caption' gutterBottom align='left'>
-                            Created by: {api.provider}
-                        </Typography>
-                    </div>
-                    <VerticalDivider height={70} />
-                    <div className={classes.infoItem}>
-                        <Typography variant='subheading' gutterBottom>
-                            {isAPIProduct ? api.state : api.lifeCycleStatus}
-                        </Typography>
-                        <Typography variant='caption' gutterBottom align='left'>
-                            State
-                        </Typography>
-                    </div>
-
-                    <VerticalDivider height={70} />
-
-                    <a
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        href={`${window.location.origin}/store-new/apis/${api.id}/overview`}
-                        className={classes.viewInStoreLauncher}
-                    >
-                        <div>
-                            <LaunchIcon />
-                        </div>
-                        <div className={classes.linkText}>View In store</div>
-                    </a>
-                    <VerticalDivider height={70} />
-                    {isAPIProduct ? null : (
-                        <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />
-                    )}
-                    <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />
+        <div className={classes.root}>
+            <Link to={isAPIProduct ? '/api-products' : '/apis'} className={classes.backLink}>
+                <KeyboardArrowLeft className={classes.backIcon} />
+                <div className={classes.backText}>
+                    <FormattedMessage
+                        id='Apis.Details.components.APIDetailsTopMenu.back.to.listing'
+                        defaultMessage='BACK TO {break} LISTING'
+                        values={{ break: <br /> }}
+                    />
                 </div>
-            )}
-        </ApiContext.Consumer>
+            </Link>
+            <VerticalDivider height={70} />
+            <ThumbnailView api={api} width={70} height={50} />
+            <div style={{ marginLeft: theme.spacing.unit }}>
+                <Typography variant='h4'>
+                    {api.name} {isAPIProduct ? '' : ':' + api.version}
+                </Typography>
+                <Typography variant='caption' gutterBottom align='left'>
+                    Created by: {api.provider}
+                </Typography>
+            </div>
+            <VerticalDivider height={70} />
+            <div className={classes.infoItem}>
+                <Typography variant='subtitle1' gutterBottom>
+                    {isAPIProduct ? api.state : api.lifeCycleStatus}
+                </Typography>
+                <Typography variant='caption' gutterBottom align='left'>
+                    State
+                </Typography>
+            </div>
+
+            <VerticalDivider height={70} />
+
+            <a
+                target='_blank'
+                rel='noopener noreferrer'
+                href={`${window.location.origin}/store-new/apis/${api.id}/overview`}
+                className={classes.viewInStoreLauncher}
+            >
+                <div>
+                    <LaunchIcon />
+                </div>
+                <div className={classes.linkText}>View In store</div>
+            </a>
+            <VerticalDivider height={70} />
+            <Tooltip title={moment(api.lastUpdatedTime).calendar()} aria-label='add'>
+                <Typography variant='caption' display='block'>
+                    <FormattedMessage
+                        id='Apis.Details.components.APIDetailsTopMenu.last.updated.time'
+                        defaultMessage='Last updated:'
+                    />{' '}
+                    {moment(api.lastUpdatedTime).fromNow()}
+                </Typography>
+            </Tooltip>
+            {isAPIProduct ? null : <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />}
+            <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />
+        </div>
     );
 };
 
-DetailsTopMenu.propTypes = {
+APIDetailsTopMenu.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({}).isRequired,
+    isAPIProduct: PropTypes.bool.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(DetailsTopMenu);
+export default withStyles(styles, { withTheme: true })(APIDetailsTopMenu);

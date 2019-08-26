@@ -31,7 +31,7 @@ import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeVali
 import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import LifeCycleImage from './LifeCycleImage';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 const styles = theme => ({
     buttonsWrapper: {
@@ -79,6 +79,7 @@ class LifeCycleUpdate extends Component {
                 this.props.handleUpdate(true);
                 let newState = response.body.lifecycleState.state;
                 this.setState({ newState });
+                const { intl } = this.props;
 
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success',
@@ -88,7 +89,7 @@ class LifeCycleUpdate extends Component {
             })
             .catch(error_response => {
                 console.log(error_response);
-                Alert.error(JSON.stringify(error_response));
+                Alert.error(JSON.stringify(error_response.message));
             });
     }
 
@@ -190,4 +191,4 @@ LifeCycleUpdate.propTypes = {
     }).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(LifeCycleUpdate);
+export default withStyles(styles, { withTheme: true })(injectIntl(LifeCycleUpdate));

@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -8,6 +25,7 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage } from 'react-intl';
+import Paper from '@material-ui/core/Paper';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import APIInputForm from 'AppComponents/Apis/Create/Components/APIInputForm';
@@ -15,6 +33,7 @@ import Progress from 'AppComponents/Shared/Progress';
 
 import ProvideWSDL from './Steps/ProvideWSDL';
 import BindingInfo from './BindingInfo';
+import APICreateTopMenu from '../Components/APICreateTopMenu';
 
 const styles = theme => ({
     instructions: {
@@ -44,6 +63,7 @@ const styles = theme => ({
     },
     subTitle: {
         color: theme.palette.grey[500],
+        marginBottom: theme.spacing.unit * 2,
     },
     stepper: {
         paddingLeft: 0,
@@ -336,91 +356,110 @@ class APICreateWSDL extends React.Component {
             return <Progress />;
         }
         return (
-            <Grid container spacing={24} className={classes.root}>
-                <Grid item xs={12} xl={6}>
-                    <div className={classes.titleWrapper}>
-                        <Typography variant='h4' align='left' className={classes.mainTitle}>
-                            <FormattedMessage
-                                id='design.a.new.rest.api.using.wsdl'
-                                defaultMessage='Design a new REST API using WSDL'
-                            />
-                        </Typography>
-                    </div>
-                    <Stepper activeStep={activeStep} className={classes.stepper}>
-                        {steps.map((label) => {
-                            const props = {};
-                            const labelProps = {};
-
-                            return (
-                                <Step key={label} {...props}>
-                                    <StepLabel {...labelProps}>{label}</StepLabel>
-                                </Step>
-                            );
-                        })}
-                    </Stepper>
-                    <div>
-                        {activeStep === 0 && (
-                            <ProvideWSDL
-                                {...provideWSDLProps}
-                                innerRef={(instance) => {
-                                    this.provideWSDL = instance;
-                                }}
-                            />
-                        )}
-                        {activeStep === 1 && (
-                            <React.Fragment>
-                                <APIInputForm api={api} handleInputChange={this.updateApiInputs} valid={valid} />
-                                <BindingInfo
-                                    updateApiInputs={this.updateApiInputs}
-                                    wsdlBean={wsdlBean}
-                                    classes={classes}
-                                    api={api}
+            <React.Fragment>
+                <APICreateTopMenu />
+                <Grid container spacing={7} className={classes.root}>
+                    <Grid item xs={12}>
+                        <div className={classes.titleWrapper}>
+                            <Typography variant='h4' align='left' className={classes.mainTitle}>
+                                <FormattedMessage
+                                    id='design.a.new.rest.api.using.wsdl'
+                                    defaultMessage='Design a new REST API using WSDL'
                                 />
-                            </React.Fragment>
-                        )}
-                    </div>
-                    <div>
-                        {activeStep === steps.length ? (
-                            <div>
-                                <Typography className={classes.instructions}>
-                                    All steps completed - you&quot;re finished
-                                </Typography>
-                                <Button onClick={this.handleReset} className={classes.button}>
-                                    Reset
-                                </Button>
-                            </div>
-                        ) : (
-                            <div>
+                            </Typography>
+                            <Typography variant='caption' align='left' className={classes.subTitle} component='div'>
+                                {uploadMethod === 'file' && (
+                                    <FormattedMessage
+                                        id='design.a.new.rest.api.using.wsdl.help.file'
+                                        defaultMessage='Provide an api definition file'
+                                    />
+                                )}
+                                {uploadMethod === 'url' && (
+                                    <FormattedMessage
+                                        id='design.a.new.rest.api.using.wsdl.help.url'
+                                        defaultMessage='Provide a url for the api deninition'
+                                    />
+                                )}
+                            </Typography>
+                        </div>
+                        <Paper>
+                            <Stepper activeStep={activeStep} className={classes.stepper}>
+                                {steps.map((label) => {
+                                    const props = {};
+                                    const labelProps = {};
+
+                                    return (
+                                        <Step key={label} {...props}>
+                                            <StepLabel {...labelProps}>{label}</StepLabel>
+                                        </Step>
+                                    );
+                                })}
+                            </Stepper>
+                        </Paper>
+                        <div>
+                            {activeStep === 0 && (
+                                <ProvideWSDL
+                                    {...provideWSDLProps}
+                                    innerRef={(instance) => {
+                                        this.provideWSDL = instance;
+                                    }}
+                                />
+                            )}
+                            {activeStep === 1 && (
+                                <React.Fragment>
+                                    <APIInputForm api={api} handleInputChange={this.updateApiInputs} valid={valid} />
+                                    <BindingInfo
+                                        updateApiInputs={this.updateApiInputs}
+                                        wsdlBean={wsdlBean}
+                                        classes={classes}
+                                        api={api}
+                                    />
+                                </React.Fragment>
+                            )}
+                        </div>
+                        <div>
+                            {activeStep === steps.length ? (
                                 <div>
-                                    <Button
-                                        disabled={activeStep === 0}
-                                        onClick={this.handleBack}
-                                        className={classes.button}
-                                    >
-                                        Back
-                                    </Button>
-                                    <Button
-                                        variant='contained'
-                                        color='primary'
-                                        onClick={this.handleNext}
-                                        className={classes.button}
-                                        disabled={
-                                            (valid.wsdlFile.invalidFile && uploadMethod === 'file') ||
-                                            (valid.wsdlUrl.invalidUrl && uploadMethod === 'url')
-                                        }
-                                    >
-                                        {activeStep === steps.length - 1 ? (
-                                            'Finish'
-                                        ) : (
-                                            <FormattedMessage id='next' defaultMessage='Next' />
-                                        )}
+                                    <Typography className={classes.instructions}>
+                                        All steps completed - you&quot;re finished
+                                    </Typography>
+                                    <Button onClick={this.handleReset} className={classes.button}>
+                                        Reset
                                     </Button>
                                 </div>
-                            </div>
-                        )}
-                    </div>
+                            ) : (
+                                <div>
+                                    <div>
+                                        <Button
+                                            disabled={activeStep === 0}
+                                            onClick={this.handleBack}
+                                            className={classes.button}
+                                        >
+                                            Back
+                                        </Button>
+                                        <Button
+                                            variant='contained'
+                                            color='primary'
+                                            onClick={this.handleNext}
+                                            className={classes.button}
+                                            disabled={
+                                                (valid.wsdlFile.invalidFile && uploadMethod === 'file') ||
+                                                (valid.wsdlUrl.invalidUrl && uploadMethod === 'url')
+                                            }
+                                        >
+                                            {activeStep === steps.length - 1 ? (
+                                                'Finish'
+                                            ) : (
+                                                <FormattedMessage id='next' defaultMessage='Next' />
+                                            )}
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </Grid>
                 </Grid>
-            </Grid>
+            </React.Fragment>
         );
     }
 }

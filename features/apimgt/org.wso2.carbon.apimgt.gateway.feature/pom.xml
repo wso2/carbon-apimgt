@@ -20,8 +20,8 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.5.53-SNAPSHOT</version>
-	    <relativePath>../pom.xml</relativePath>
+        <version>6.5.62-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -115,6 +115,18 @@
             <groupId>org.wso2.orbit.re2j</groupId>
             <artifactId>re2j</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.json.wso2</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.everit.json</groupId>
+            <artifactId>org.everit.json.schema</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.graphQL</groupId>
+            <artifactId>graphQL</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -178,20 +190,37 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub</bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub
+                                </bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                                 <bundleDef>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</bundleDef>
                                 <bundleDef>com.fasterxml.jackson.core:jackson-core</bundleDef>
                                 <bundleDef>com.fasterxml.jackson.core:jackson-annotations</bundleDef>
                                 <bundleDef>com.fasterxml.jackson.core:jackson-databind</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.publisher:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.mediation:org.wso2.carbon.sequences.stub:${carbon.mediation.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.mediation:org.wso2.carbon.endpoint.stub:${carbon.mediation.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.registry.cache.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.statsupdate.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tier.cache.stub:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.publisher:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.mediation:org.wso2.carbon.sequences.stub:${carbon.mediation.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.mediation:org.wso2.carbon.endpoint.stub:${carbon.mediation.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.registry.cache.stub:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.statsupdate.stub:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.stub:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tier.cache.stub:${carbon.apimgt.version}
+                                </bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                                 <bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
@@ -199,19 +228,35 @@
                                 <bundleDef>org.apache.commons:commons-pool2:${apache.commons.version}</bundleDef>
                                 <bundleDef>org.apache.commons:commons-lang3:${apache.commons.lang3.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.re2j:re2j:${re2j.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.localentry.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.orbit.com.jayway.jsonpath:json-path:${com.jayway.jsonpath.version}</bundleDef>
-                                <bundleDef>org.wso2.orbit.commons-text:commons-text:${org.wso2.orbit.commons-text.version}</bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.localentry.stub:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.org.everit.json:org.everit.json.schema:${everit.version}
+                                </bundleDef>
+                                <bundleDef>org.wso2.orbit.com.jayway.jsonpath:json-path:${com.jayway.jsonpath.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.orbit.commons-text:commons-text:${org.wso2.orbit.commons-text.version}
+                                </bundleDef>
+                                <bundleDef>org.wso2.orbit.graphQL:graphQL:${graphql.java.version}</bundleDef>
                             </bundles>
                             <importBundles>
-                                <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:${carbon.mediation.version}</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.ganalytics.publisher:${carbon.commons.version}</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:${carbon.mediation.version}</importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:${carbon.mediation.version}
+                                </importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon.commons:org.wso2.carbon.ganalytics.publisher:${carbon.commons.version}
+                                </importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:${carbon.mediation.version}
+                                </importBundleDef>
                                 <importBundleDef>org.wso2.orbit.re2j:re2j:${re2j.version}</importBundleDef>
                             </importBundles>
                             <importFeatures>
                                 <importFeatureDef>org.apache.synapse.wso2:${carbon.mediation.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.mediation.initializer:${carbon.mediation.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.mediation.initializer:${carbon.mediation.version}
+                                </importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

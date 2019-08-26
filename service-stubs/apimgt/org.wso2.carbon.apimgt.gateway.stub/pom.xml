@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-stubs</artifactId>
-        <version>6.5.53-SNAPSHOT</version>
+        <version>6.5.62-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -56,13 +56,8 @@
                                 </path>
                                 <java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
                                     <arg line="-uri src/main/resources/APIGatewayAdmin.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.apimgt.gateway.stub -ns2p http://dto.gateway.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.gateway.dto.stub" />
-                                    <!-- <classpath refid="wsdl2java.classpath" />
-				    
-                                    <classpath refid="maven.compile.classpath" />
-                                    <classpath refid="maven.runtime.classpath" /> -->
-                                    <classpath refid="maven.dependency.classpath" />
-                                    <classpath refid="maven.compile.classpath" />
-                                    <classpath refid="maven.runtime.classpath" />
+                                    <classpath refid="wsdl2java.classpath" />
+
                                 </java>
                             </tasks>
                         </configuration>

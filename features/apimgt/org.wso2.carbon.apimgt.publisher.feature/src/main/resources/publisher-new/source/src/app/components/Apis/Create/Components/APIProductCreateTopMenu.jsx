@@ -101,7 +101,7 @@ const APIProductDetailsTopMenu = ({ classes, theme }) => {
                     <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
                 </div>
                 <div className={classes.mainTitleWrapper}>
-                    <Typography variant='display1'>
+                    <Typography variant='h4'>
                         <FormattedMessage
                             id='apis.create.new.api.product'
                             defaultMessage='API Products - Create New API Product'

@@ -18,11 +18,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import ArrowDropDownCircleOutlined from '@material-ui/icons/ArrowDropDownCircleOutlined';
-import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
+import Icon from '@material-ui/core/Icon';
 import { Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid/Grid';
-import { FormattedMessage, injectIntl, } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import APIProduct from 'AppData/APIProduct';
+import CONSTS from 'AppData/Constants';
 import Alert from '../../../Shared/Alert';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
@@ -88,11 +89,19 @@ class Comments extends Component {
      * @memberof Comments
      */
     componentDidMount() {
+        const { apiType } = this.context;
         let {
             apiId, theme, match, intl,
         } = this.props;
         if (match) apiId = match.params.api_uuid;
-        const restApi = new API();
+
+        let restApi = null;
+        if (apiType === CONSTS.API_TYPE) {
+            restApi = new API();
+        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            restApi = new APIProduct();
+        }
+
         restApi
             .getAllComments(apiId)
             .then((result) => {
@@ -207,10 +216,12 @@ class Comments extends Component {
                     <div className={classes.contentWrapper}>
                         {!showLatest && (
                             <div className={classes.root}>
-                                <ArrowDropDownCircleOutlined
+                                <Icon
                                     onClick={this.handleExpandClick}
                                     aria-expanded={expanded}
-                                />
+                                >
+                                    arrow_drop_down_circle
+                                </Icon>
                                 <Typography
                                     onClick={this.handleExpandClick}
                                     variant='display1'
@@ -252,10 +263,12 @@ class Comments extends Component {
                                         </Typography>
                                     </Grid>
                                     <Grid>
-                                        <ArrowDropDown
+                                        <Icon
                                             onClick={this.handleLoadMoreComments}
                                             className={classes.link + ' ' + classes.verticalSpace}
-                                        />
+                                        >
+                                            arrow_drop_down
+                                        </Icon>
                                     </Grid>
                                     <Grid item>
                                         <Typography className={classes.verticalSpace} variant='body2'>
@@ -276,6 +289,7 @@ class Comments extends Component {
         );
     }
 }
+
 
 Comments.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,

@@ -22,11 +22,9 @@ import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardMedia from '@material-ui/core/CardMedia';
-
+import Icon from '@material-ui/core/Icon';
 import Divider from '@material-ui/core/Divider';
-import FileDownload from '@material-ui/icons/ArrowDownward';
 import Grid from '@material-ui/core/Grid';
-import InfoOutline from '@material-ui/icons/InfoOutlined';
 import JSFileDownload from 'js-file-download';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
@@ -222,7 +220,7 @@ class Sdk extends React.Component {
                                                     color='secondary'
                                                     onClick={event => this.handleClick(event, language)}
                                                 >
-                                                    <FileDownload />
+                                                    <Icon>arrow_downward</Icon>
                                                     {'Download'}
                                                 </Button>
                                             </Grid>
@@ -240,7 +238,7 @@ class Sdk extends React.Component {
                     <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
                         <Paper>
                             <Typography>
-                                <InfoOutline />
+                                <Icon>info</Icon>
                                 <FormattedMessage
                                     id='Apis.Details.Sdk.no.lanuages'
                                     defaultMessage='No languages are configured.'

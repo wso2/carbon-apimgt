@@ -268,7 +268,7 @@ class Resource extends React.Component {
      */
     render() {
         const {
-            classes, method, path, scopes, theme, intl, policyLevel
+            classes, method, path, scopes, theme, intl, policyLevel, isAPIProduct
         } = this.props;
         const resource = this.state.method;
         let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[method] : null;
@@ -282,7 +282,11 @@ class Resource extends React.Component {
         return (
             <div className={classes.resourceRoot}>
                 <div className={classes.listItem}>
-                    <FormControlLabel control={<Checkbox checked={this.state.deleteChecked} onChange={this.handleDeleteCheck(path, method)} value='' />} label='' className={classes.formControl} />
+                {isAPIProduct !== true && (
+                    <FormControlLabel control={<Checkbox checked={this.state.deleteChecked} 
+                    onChange={this.handleDeleteCheck(path, method)} value='' />} 
+                    label='' className={classes.formControl} />
+                )}
                     <a onClick={this.toggleMethodData} className={classes.link}>
                         <Chip label={method} style={{ backgroundColor: chipColor, color: chipTextColor }} className={classes.chipActive} />
                     </a>
@@ -291,7 +295,9 @@ class Resource extends React.Component {
                             {path}
                         </Typography>
                     </a>
-                    <InlineEditableField
+                   { isAPIProduct !== true && (
+                        <div> 
+                        <InlineEditableField
                         saveFieldCallback={this.saveFieldCallback}
                         initText={intl.formatMessage({
                             id: 'Apis.Details.Resources.Resource.click.here.to.add.summery',
@@ -304,12 +310,15 @@ class Resource extends React.Component {
                     <a onClick={this.deleteResource} className={classes.deleteButton}>
                         <Delete className={classes.rightIcon} />
                     </a>
+                    </div>
+                   )} 
                 </div>
                 {this.state.visible && (
                     <div>
-                        <Grid container spacing={24}>
+                        <Grid container spacing={7}>
                             <Grid item xs={12} className={classes.descriptionWrapperUp}>
                                 <Typography variant='caption' className={classes.descriptionWrapper}>
+                                  {isAPIProduct !== true &&
                                     <InlineEditableField
                                         saveFieldCallback={this.saveFieldCallback}
                                         initText={intl.formatMessage({
@@ -320,6 +329,7 @@ class Resource extends React.Component {
                                         type='textarea'
                                         fieldName='description'
                                     />
+                                    }
                                 </Typography>
                             </Grid>
                             <Grid item xs={12}>
@@ -477,6 +487,7 @@ class Resource extends React.Component {
                                 </Table>
                             </Grid>
 
+                            { isAPIProduct !== true && (
                             <Grid item xs={12} className={classes.addParamRow}>
                                 <Typography variant='subtitle2'>
                                     <FormattedMessage
@@ -507,6 +518,7 @@ class Resource extends React.Component {
                                 </form>
                                 {/* <WrappedPropertyAddForm propsSubmitHandler={this.propsSubmitHandler} /> */}
                             </Grid>
+                            )}
                             <Grid item xs={12}>
                                 {resource.parameters && resource.parameters.length > 0 && (
                                     <Table>

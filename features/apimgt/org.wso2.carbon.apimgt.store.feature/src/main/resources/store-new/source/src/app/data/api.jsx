@@ -67,6 +67,7 @@ export default class API extends Resource {
             return promiseGet;
         }
     }
+
     /*
      Get the inline content of a given document
      */
@@ -74,9 +75,9 @@ export default class API extends Resource {
         const promised_getDocContent = this.client.then((client) => {
             const payload = {
                 apiId: api_id,
-                documentId: docId
+                documentId: docId,
             };
-            return client.apis['Documents'].get_apis__apiId__documents__documentId__content(payload);
+            return client.apis['API Documents'].get_apis__apiId__documents__documentId__content(payload);
         });
         return promised_getDocContent;
     }
@@ -89,7 +90,7 @@ export default class API extends Resource {
      */
     getDocumentsByAPIId(id, callback = null) {
         const promiseGet = this.client.then((client) => {
-            return client.apis['Documents'].get_apis__apiId__documents({ apiId: id }, this._requestMetaData());
+            return client.apis['API Documents'].get_apis__apiId__documents({ apiId: id }, this._requestMetaData());
         });
         if (callback) {
             return promiseGet.then(callback);
@@ -110,17 +111,18 @@ export default class API extends Resource {
             const payload = {
                 apiId: api_id,
                 documentId: docId,
-                Accept: 'application/octet-stream'
+                Accept: 'application/octet-stream',
             };
-            return client.apis['Documents'].get_apis__apiId__documents__documentId__content(
+            return client.apis['API Documents'].get_apis__apiId__documents__documentId__content(
                 payload,
                 this._requestMetaData({
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
                 }),
             );
         });
         return promised_getDocContent;
     }
+
     /**
      * Get the swagger of an API
      * @param apiId {String} UUID of the API in which the swagger is needed
@@ -130,6 +132,23 @@ export default class API extends Resource {
     getSwaggerByAPIId(apiId, callback = null) {
         const promiseGet = this.client.then((client) => {
             return client.apis.APIs.get_apis__apiId__swagger({ apiId }, this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get the schema of an GraphQL API
+     * @param apiId {String} UUID of the API in which the swagger is needed
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getGraphQLSchemaByAPIId(apiId, callback = null) {
+        const promiseGet = this.client.then((client) => {
+            return client.apis.APIs.get_apis__apiId__graphql_schema({ apiId }, this._requestMetaData());
         });
         if (callback) {
             return promiseGet.then(callback);
@@ -238,7 +257,7 @@ export default class API extends Resource {
      */
     getAllApplicationAttributes() {
         return this.client.then((client) => {
-            return client.apis['Application Attributes'].get_settings_application_attributes(this._requestMetaData());
+            return client.apis['Settings'].get_settings_application_attributes(this._requestMetaData());
         });
     }
 
@@ -354,34 +373,50 @@ export default class API extends Resource {
         }
     }
 
-    getRatingFromUser(apiId, callback = null) {
+    /**
+     * Get Rating details for a partiuclar API
+     * @param {apiId} apiId of the api
+     * @returns {promise} promise
+     */
+    getRatingFromUser(apiId) {
         const promiseGet = this.client.then((client) => {
             return client.apis.Ratings.get_apis__apiId__ratings({ apiId }, this._requestMetaData());
         }).catch((error) => {
             console.error(error);
         });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
-        }
+        return promiseGet;
     }
 
+    /**
+     * Remove Rating details for a partiuclar API for the logged in user
+     * @param {apiId} apiId of the api
+     * @returns {promise} promise
+     */
+    removeRatingOfUser(apiId) {
+        const promiseDelete = this.client.then((client) => {
+            return client.apis.Ratings.delete_apis__apiId__user_rating({ apiId }, this._requestMetaData());
+        }).catch((error) => {
+            console.error(error);
+        });
+        return promiseDelete;
+    }
 
-    addRating(apiId, ratingInfo, callback = null) {
+    /**
+     * Add Rating for a partiuclar API by the logged in user
+     * @param {apiId} apiId of the api
+     * @param {ratingInfo} ratingInfo user rating for the api
+     * @returns {promise} promise
+     */
+    addRating(apiId, ratingInfo) {
         const promise = this.client.then((client) => {
-            return client.apis['API (Individual)'].put_apis__apiId__user_rating(
+            return client.apis.Ratings.put_apis__apiId__user_rating(
                 { apiId, body: ratingInfo },
                 this._requestMetaData(),
             );
         }).catch((error) => {
-            alert('error in adding ' + error);
+            console.error(error);
         });
-        if (callback) {
-            return promise.then(callback);
-        } else {
-            return promise;
-        }
+        return promise;
     }
 
     /**
@@ -478,10 +513,13 @@ export default class API extends Resource {
      * @param applicationId id of the application that needs to be subscribed
      * @param policy throttle policy applicable for the subscription
      * @param callback callback url
+     * @param apiType API type
      */
-    subscribe(apiId, applicationId, policy, callback = null) {
+    subscribe(apiId, applicationId, policy, callback = null, apiType = 'API') {
         const promiseCreateSubscription = this.client.then((client) => {
-            const subscriptionData = { apiId, applicationId, throttlingPolicy: policy };
+            const subscriptionData = {
+                apiId, applicationId, throttlingPolicy: policy, type: apiType,
+            };
             const payload = { body: subscriptionData };
             return client.apis.Subscriptions.post_subscriptions(payload, { 'Content-Type': 'application/json' });
         });
@@ -562,6 +600,7 @@ export default class API extends Resource {
         });
         return promise;
     }
+
     /**
      * Get the thumnail of an API
      *
@@ -570,13 +609,11 @@ export default class API extends Resource {
     getAPIThumbnail(id) {
         const promised_getAPIThumbnail = this.client.then((client) => {
             return client.apis.APIs.get_apis__apiId__thumbnail({
-                    apiId: id
-                },
-                this._requestMetaData(),
-            );
+                apiId: id,
+            },
+            this._requestMetaData());
         });
 
         return promised_getAPIThumbnail;
     }
-
 }

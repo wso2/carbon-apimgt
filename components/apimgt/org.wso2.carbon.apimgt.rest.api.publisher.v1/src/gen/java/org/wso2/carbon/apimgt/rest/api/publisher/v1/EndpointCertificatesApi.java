@@ -46,7 +46,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates")
         })
-    }, tags={ "Certificates (Individual)",  })
+    }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. * ", response = ErrorDTO.class),
@@ -64,7 +64,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:ep_certificates_update", description = "Update and delete backend endpoint certificates")
         })
-    }, tags={ "Certificates (Individual)",  })
+    }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The Certificate deleted successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request.  Invalid request or validation error. ", response = ErrorDTO.class),
@@ -82,7 +82,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates")
         })
-    }, tags={ "Certificates (Individual)",  })
+    }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. ", response = CertificateInfoDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
@@ -100,7 +100,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:ep_certificates_update", description = "Update and delete backend endpoint certificates")
         })
-    }, tags={ "Certificates (Individual)",  })
+    }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The Certificate updated successfully. ", response = CertMetadataDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
@@ -118,7 +118,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:ep_certificates_view", description = "View backend endpoint certificates")
         })
-    }, tags={ "Certificates (Collection)",  })
+    }, tags={ "Endpoint Certificates",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with the list of matching certificate information in the body. ", response = CertificatesDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
@@ -136,7 +136,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:ep_certificates_add", description = "Add backend endpoint certificates")
         })
-    }, tags={ "Certificates (Individual)" })
+    }, tags={ "Endpoint Certificates" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The Certificate added successfully. ", response = CertMetadataDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. * Failures due to existing alias or expired certificate. ", response = ErrorDTO.class),

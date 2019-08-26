@@ -21,9 +21,11 @@ public class APIInfoDTO   {
     private String description = null;
     private String context = null;
     private String version = null;
+    private String type = null;
     private String provider = null;
     private String lifeCycleStatus = null;
     private String thumbnailUri = null;
+    private String avgRating = null;
     private List<String> throttlingPolicies = new ArrayList<>();
 
   /**
@@ -112,6 +114,23 @@ public class APIInfoDTO   {
   }
 
   /**
+   **/
+  public APIInfoDTO type(String type) {
+    this.type = type;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "WS", value = "")
+  @JsonProperty("type")
+  public String getType() {
+    return type;
+  }
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  /**
    * If the provider value is not given, the user invoking the API will be used as the provider. 
    **/
   public APIInfoDTO provider(String provider) {
@@ -164,6 +183,24 @@ public class APIInfoDTO   {
   }
 
   /**
+   * Average rating of the API
+   **/
+  public APIInfoDTO avgRating(String avgRating) {
+    this.avgRating = avgRating;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "4.5", value = "Average rating of the API")
+  @JsonProperty("avgRating")
+  public String getAvgRating() {
+    return avgRating;
+  }
+  public void setAvgRating(String avgRating) {
+    this.avgRating = avgRating;
+  }
+
+  /**
    * List of throttling policies of the API
    **/
   public APIInfoDTO throttlingPolicies(List<String> throttlingPolicies) {
@@ -196,15 +233,17 @@ public class APIInfoDTO   {
         Objects.equals(description, apIInfo.description) &&
         Objects.equals(context, apIInfo.context) &&
         Objects.equals(version, apIInfo.version) &&
+        Objects.equals(type, apIInfo.type) &&
         Objects.equals(provider, apIInfo.provider) &&
         Objects.equals(lifeCycleStatus, apIInfo.lifeCycleStatus) &&
         Objects.equals(thumbnailUri, apIInfo.thumbnailUri) &&
+        Objects.equals(avgRating, apIInfo.avgRating) &&
         Objects.equals(throttlingPolicies, apIInfo.throttlingPolicies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, thumbnailUri, throttlingPolicies);
+    return Objects.hash(id, name, description, context, version, type, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies);
   }
 
   @Override
@@ -217,9 +256,11 @@ public class APIInfoDTO   {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
+    sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");
     sb.append("    throttlingPolicies: ").append(toIndentedString(throttlingPolicies)).append("\n");
     sb.append("}");
     return sb.toString();

@@ -43,7 +43,6 @@ const styles = theme => ({
     },
     dropZoneInside: {},
     dropZone: {
-        width: '100%',
         color: theme.palette.grey[500],
         border: 'dashed 1px ' + theme.palette.grey[500],
         background: theme.palette.grey[100],
@@ -145,7 +144,7 @@ class ProvideWSDL extends Component {
         } else {
             this.setState({ uploadMethod: event.target.value });
         }
-        this.validateWSDL();
+        // this.validateWSDL();
     };
 
     handleUploadFile = (acceptedFiles) => {
@@ -272,7 +271,6 @@ class ProvideWSDL extends Component {
                                     defaultMessage='File'
                                 />
                             }
-                            checked
                             className={classes.radioGroup}
                         />
                         <FormControlLabel
@@ -296,7 +294,7 @@ class ProvideWSDL extends Component {
                                     <FormattedMessage id='uploaded.file' defaultMessage='Uploaded file' /> :
                                 </Typography>
                                 <div className={classes.fileName}>
-                                    <Typography variant='body2' gutterBottom>
+                                    <Typography variant='body1' gutterBottom>
                                         {file.name} - {file.size} bytes
                                     </Typography>
                                 </div>
@@ -305,7 +303,7 @@ class ProvideWSDL extends Component {
                         {valid.wsdlFile.invalidFile && (
                             <div className={classes.errorMessageWrapper}>
                                 <ErrorOutline className={classes.errorIcon} />
-                                <Typography variant='body2' gutterBottom className={classes.errorMessage}>
+                                <Typography variant='body1' gutterBottom className={classes.errorMessage}>
                                     {errorMessage}
                                 </Typography>
                             </div>

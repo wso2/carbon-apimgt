@@ -15,8 +15,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState, } from 'react';
+import { Link, withRouter, } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
 import classNames from 'classnames';
@@ -31,94 +31,181 @@ import CustomIcon from '../../Shared/CustomIcon';
  * @param {*} theme
  */
 const styles = theme => ({
+    listRoot: {
+        padding: 0,
+    },
     listText: {
         color: theme.palette.getContrastText(theme.palette.background.drawer),
     },
-    small: {
-        padding: 0,
+    listTextSmall: {
+        color: theme.palette.getContrastText(theme.palette.background.appBar),
     },
     smallIcon: {
         marginRight: 5,
+        minWidth: 'auto',
+    },
+    links: {
+        display: 'flex',
+        height: 64,
+    },
+    selected: {
+        background: theme.palette.background.activeMenuItem,
+        alignItems: 'center',
+        textDecoration: 'none',
+        color: theme.palette.getContrastText(theme.palette.background.activeMenuItem),
+    },
+    selectedText: {
+        color: theme.palette.getContrastText(theme.palette.background.activeMenuItem),
     },
 });
 /**
+ * GlobalNavBar
  *
- *
- * @class GlobalNavBar
- * @extends {Component}
+ * @param {*} props Properties
+ * @returns {React.Component}
  */
-class GlobalNavBar extends Component {
-    render() {
-        const {
-            classes, theme, intl, smallView,
-        } = this.props;
-        let iconWidth = 32;
-        if (smallView) {
-            iconWidth = 16;
+function GlobalNavBar(props) {
+    const [selected, setSelected] = useState('home');
+    const {
+        classes, theme, intl, smallView, history,
+    } = props;
+    const ditectCurrentMenu = (location) => {
+        const { pathname } = location;
+        if (/\/apis$/g.test(pathname) || /\/apis\//g.test(pathname)) {
+            setSelected('apis');
+        } else if (/\/api-products$/g.test(pathname) || /\/api-products\//g.test(pathname)) {
+            setSelected('api-products');
+        } else if (/\/home$/g.test(pathname) || /\/home\//g.test(pathname)) {
+            setSelected('home');
+        } else if (/\/applications$/g.test(pathname) || /\/applications\//g.test(pathname)) {
+            setSelected('applications');
         }
-        const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
-        const linkTextClasses = classNames({ [classes.small]: smallView });
-        return (
-            <List>
-                {theme.custom.landingPage.active &&
-                <Link to='/home'>
-                    <ListItem button>
-                        <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
-                            <Icon style={{fontSize:iconWidth, color: strokeColor}}
-                                className={classes.listText}>home</Icon>
-                        </ListItemIcon>
-                        <ListItemText
-                            classes={{ primary: classes.listText, root: linkTextClasses }}
-                            primary={intl.formatMessage({
-                                id: 'Base.Generic.GlobalNavbar.menu.home',
-                                defaultMessage: 'Home',
-                            })}
-                        />
-                    </ListItem>
-                </Link> }
-                <Link to='/apis'>
-                    <ListItem button>
-                        <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
-                            <CustomIcon
-                                width={iconWidth}
-                                height={iconWidth}
-                                icon='api'
-                                className={classes.listText}
-                                strokeColor={strokeColor}
-                            />
-                        </ListItemIcon>
-                        <ListItemText
-                            classes={{ primary: classes.listText, root: linkTextClasses }}
-                            primary={intl.formatMessage({
-                                id: 'Base.Generic.GlobalNavbar.menu.apis',
-                                defaultMessage: 'APIs',
-                            })}
-                        />
-                    </ListItem>
-                </Link>
-                <Link to='/applications'>
-                    <ListItem button>
-                        <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
-                            <CustomIcon
-                                width={iconWidth}
-                                height={iconWidth}
-                                icon='applications'
-                                className={classes.listText}
-                                strokeColor={strokeColor}
-                            />
-                        </ListItemIcon>
-                        <ListItemText
-                            classes={{ primary: classes.listText, root: linkTextClasses }}
-                            primary={intl.formatMessage({
-                                id: 'Base.Generic.GlobalNavbar.menu.applications',
-                                defaultMessage: 'Applications',
-                            })}
-                        />
-                    </ListItem>
-                </Link>
-            </List>
-        );
+    };
+    useEffect(() => {
+        const { location } = history;
+        ditectCurrentMenu(location);
+    }, []);
+    history.listen((location) => {
+        ditectCurrentMenu(location);
+    });
+
+    let strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
+    let iconWidth = 32;
+    if (smallView) {
+        iconWidth = 16;
+        strokeColor = theme.palette.getContrastText(theme.palette.background.appBar);
     }
+    const linkTextClasses = classNames({ [classes.small]: smallView });
+    return (
+        <List className={classes.listRoot}>
+            {theme.custom.landingPage.active
+                && (
+                    <Link to='/home' className={classNames({ [classes.selected]: selected === 'home', [classes.links]: true })}>
+                        <ListItem button>
+                            <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
+                                <Icon
+                                    style={{ fontSize: iconWidth, color: strokeColor }}
+                                    className={classes.listText}
+                                >
+                                home
+                                </Icon>
+                            </ListItemIcon>
+                            <ListItemText
+                                classes={{
+                                    primary: classNames({
+                                        [classes.selectedText]: selected === 'home',
+                                        [classes.listText]: selected !== 'home' && !smallView,
+                                        [classes.listTextSmall]: selected !== 'home' && smallView,
+                                    }),
+                                }}
+                                primary={intl.formatMessage({
+                                    id: 'Base.Generic.GlobalNavbar.menu.home',
+                                    defaultMessage: 'Home',
+                                })}
+                            />
+                        </ListItem>
+                    </Link>
+                ) }
+            <Link to='/apis' className={classNames({ [classes.selected]: selected === 'apis', [classes.links]: true })}>
+                <ListItem button>
+                    <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
+                        <CustomIcon
+                            width={iconWidth}
+                            height={iconWidth}
+                            icon='api'
+                            className={classes.listText}
+                            strokeColor={strokeColor}
+                        />
+                    </ListItemIcon>
+                    <ListItemText
+                        classes={{
+                            primary: classNames({
+                                [classes.selectedText]: selected === 'apis',
+                                [classes.listText]: selected !== 'apis' && !smallView,
+                                [classes.listTextSmall]: selected !== 'apis' && smallView,
+                            }),
+                        }}
+                        primary={intl.formatMessage({
+                            id: 'Base.Generic.GlobalNavbar.menu.apis',
+                            defaultMessage: 'APIs',
+                        })}
+                    />
+                </ListItem>
+            </Link>
+            <Link to='/api-products' className={classNames({ [classes.selected]: selected === 'api-products', [classes.links]: true })}>
+                <ListItem button>
+                    <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
+                        <CustomIcon
+                            width={iconWidth}
+                            height={iconWidth}
+                            icon='api-product'
+                            className={classes.listText}
+                            strokeColor={strokeColor}
+                        />
+                    </ListItemIcon>
+                    <ListItemText
+                        classes={{
+                            primary: classNames({
+                                [classes.selectedText]: selected === 'api-products',
+                                [classes.listText]: selected !== 'api-products' && !smallView,
+                                [classes.listTextSmall]: selected !== 'api-products' && smallView,
+                            }),
+                        }}
+                        primary={intl.formatMessage({
+                            id: 'Base.Generic.GlobalNavbar.menu.apiproducts',
+                            defaultMessage: 'API Products',
+                        })}
+                    />
+                </ListItem>
+            </Link>
+            <Link to='/applications' className={classNames({ [classes.selected]: selected === 'applications', [classes.links]: true })}>
+                <ListItem button>
+                    <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
+                        <CustomIcon
+                            width={iconWidth}
+                            height={iconWidth}
+                            icon='applications'
+                            className={classes.listText}
+                            strokeColor={strokeColor}
+                        />
+                    </ListItemIcon>
+                    <ListItemText
+                        classes={{
+                            primary: classNames({
+                                [classes.selectedText]: selected === 'applications',
+                                [classes.listText]: selected !== 'applications' && !smallView,
+                                [classes.listTextSmall]: selected !== 'applications' && smallView,
+                            }),
+                        }}
+                        primary={intl.formatMessage({
+                            id: 'Base.Generic.GlobalNavbar.menu.applications',
+                            defaultMessage: 'Applications',
+                        })}
+                    />
+                </ListItem>
+            </Link>
+        </List>
+    );
 }
 
 GlobalNavBar.propTypes = {
@@ -126,4 +213,4 @@ GlobalNavBar.propTypes = {
     theme: PropTypes.shape({}).isRequired,
 };
 
-export default injectIntl(withStyles(styles, { withTheme: true })(GlobalNavBar));
+export default withRouter(injectIntl(withStyles(styles, { withTheme: true })(GlobalNavBar)));

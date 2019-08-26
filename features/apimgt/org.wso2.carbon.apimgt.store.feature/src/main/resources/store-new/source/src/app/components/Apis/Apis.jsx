@@ -16,25 +16,47 @@
  * under the License.
  */
 
-import React from 'react'
-import {Route, Switch} from 'react-router-dom'
+import React from 'react';
+import { Route, Switch } from 'react-router-dom';
 
-import Listing from './Listing/Listing'
-import Details from './Details/index'
-import {PageNotFound} from '../Base/Errors'
+import CONSTS from 'AppData/Constants';
+import CommonListing from './Listing/CommonListing';
+import Details from './Details/index';
+import { PageNotFound } from '../Base/Errors';
 
-
-class Apis extends React.Component {
-    render() {
-        return (
-            <Switch>
-                <Route exact path={"/apis"} component={Listing}/>
-                <Route path={"/apis/:api_uuid/"} render={ props => (
-                    <Details {...props} />)}/>
-                <Route component={PageNotFound}/>
-            </Switch>
-        );
-    }
+/**
+ * Default API Store overview page
+ *
+ * @returns {React.Component}
+ */
+function Apis() {
+    return (
+        <Switch>
+            <Route
+                exact
+                path='/apis'
+                render={props => (
+                    <CommonListing {...props} apiType={CONSTS.API_TYPE} />)}
+            />
+            <Route
+                exact
+                path='/api-products'
+                render={props => (
+                    <CommonListing {...props} apiType={CONSTS.API_PRODUCT_TYPE} />)}
+            />
+            <Route
+                path='/apis/:api_uuid/'
+                render={props => (
+                    <Details {...props} apiType={CONSTS.API_TYPE} />)}
+            />
+            <Route
+                path='/api-products/:api_uuid/'
+                render={props => (
+                    <Details {...props} apiType={CONSTS.API_PRODUCT_TYPE} />)}
+            />
+            <Route component={PageNotFound} />
+        </Switch>
+    );
 }
 
 export default Apis;

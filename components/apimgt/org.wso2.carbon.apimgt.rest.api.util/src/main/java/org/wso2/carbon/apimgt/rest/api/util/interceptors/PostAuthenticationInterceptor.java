@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 /**
  * This class will handle the post authentication steps in incoming requests.
- * This will check whether both OAuthAuthenticationInterceptor and BasicAuthInterceptor were skipped and 
+ * This will check whether both OAuthAuthenticationInterceptor and BasicAuthenticationInterceptor were skipped and 
  * throws a 401 unauthenticated error.
  */
 public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
@@ -55,7 +55,6 @@ public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
         if (RestApiUtil.checkIfAnonymousAPI(inMessage)) {
             return;
         }
-
         String authScheme = (String) inMessage.get(RestApiConstants.REQUEST_AUTHENTICATION_SCHEME);
         //check if the request does not have either the bearer or basic auth header. If so, throw 401 
         //unauthenticated error.

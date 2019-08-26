@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ApplicationNameWhiteSpaceValidationException;
 import org.wso2.carbon.apimgt.api.ApplicationNameWithInvalidCharactersException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
@@ -82,15 +83,18 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.validation.ConstraintViolation;
+import javax.ws.rs.core.Response;
 
 public class RestApiUtil {
 
@@ -141,7 +145,7 @@ public class RestApiUtil {
 
     /**
      * Returns a generic errorDTO
-     * 
+     *
      * @param message specifies the error message
      * @return A generic errorDTO with the specified details
      */
@@ -155,8 +159,49 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns a generic errorDTO from an Error Handler
+     *
+     * @param errorHandler ErrorHandler object containing the error information
+     * @return A generic errorDTO with the specified details
+     */
+    public static ErrorDTO getErrorDTO(ErrorHandler errorHandler){
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setCode(errorHandler.getErrorCode());
+        errorDTO.setMoreInfo("");
+        errorDTO.setMessage(errorHandler.getErrorMessage());
+        errorDTO.setDescription(errorHandler.getErrorDescription());
+        return errorDTO;
+    }
+
+    /**
+     * Returns a generic errorDTO from a list of Error Handlers
+     *
+     * @param errorHandlers A List of error handler objects containing the error information
+     * @return A generic errorDTO with the specified details
+     */
+    public static ErrorDTO getErrorDTO(List<ErrorHandler> errorHandlers) {
+        ErrorDTO errorDTO = new ErrorDTO();
+        for (int i = 0; i < errorHandlers.size(); i++) {
+            if (i == 0) {
+                ErrorHandler elementAt0 = errorHandlers.get(0);
+                errorDTO.setCode(elementAt0.getErrorCode());
+                errorDTO.setMoreInfo("");
+                errorDTO.setMessage(elementAt0.getErrorMessage());
+                errorDTO.setDescription(elementAt0.getErrorDescription());
+            } else {
+                ErrorListItemDTO errorListItemDTO = new ErrorListItemDTO();
+                errorListItemDTO.setCode(errorHandlers.get(i).getErrorCode() + "");
+                errorListItemDTO.setMessage(errorHandlers.get(i).getErrorMessage());
+                errorListItemDTO.setDescription(errorHandlers.get(i).getErrorDescription());
+                errorDTO.getError().add(errorListItemDTO);
+            }
+        }
+        return errorDTO;
+    }
+
+    /**
      * Check whether the specified apiId is of type UUID
-     * 
+     *
      * @param apiId api identifier
      * @return true if apiId is of type UUID, false otherwise
      */
@@ -194,7 +239,7 @@ public class RestApiUtil {
     }
 
     /** Returns an APIConsumer which is corresponding to the current logged in user taken from the carbon context
-     * 
+     *
      * @return an APIConsumer which is corresponding to the current logged in user
      * @throws APIManagementException
      */
@@ -254,9 +299,9 @@ public class RestApiUtil {
     }
 
     /**
-     * Check if the user's tenant and the API's tenant is equal. If it is not this will throw an 
+     * Check if the user's tenant and the API's tenant is equal. If it is not this will throw an
      * APIMgtAuthorizationFailedException
-     * 
+     *
      * @param apiIdentifier API Identifier
      * @throws APIMgtAuthorizationFailedException
      */
@@ -275,7 +320,7 @@ public class RestApiUtil {
 
     /**
      * Returns the requested tenant according to the input x-tenant-header
-     * 
+     *
      * @return requested tenant domain
      */
     public static String getRequestedTenantDomain(String xTenantHeader) {
@@ -317,7 +362,7 @@ public class RestApiUtil {
     /**
      * Returns date in RFC3339 format.
      * Example: 2008-11-13T12:23:30-08:00
-     * 
+     *
      * @param date Date object
      * @return date string in RFC3339 format.
      */
@@ -326,7 +371,7 @@ public class RestApiUtil {
         DateTime dateTime = new DateTime(date);
         return jodaDateTimeFormatter.print(dateTime);
     }
-            
+
     /**
      * Returns a new InternalServerErrorException
      *
@@ -352,7 +397,7 @@ public class RestApiUtil {
 
     /**
      * Returns a new NotFoundException
-     * 
+     *
      * @param resource Resource type
      * @param id identifier of the resource
      * @return a new NotFoundException with the specified details as a response DTO
@@ -400,7 +445,7 @@ public class RestApiUtil {
 
     /**
      * Returns a new ForbiddenException
-     * 
+     *
      * @param resource Resource type
      * @param id identifier of the resource
      * @return a new ForbiddenException with the specified details as a response DTO
@@ -429,7 +474,7 @@ public class RestApiUtil {
 
     /**
      * Returns a new BadRequestException
-     * 
+     *
      * @param description description of the exception
      * @return a new BadRequestException with the specified details as a response DTO
      */
@@ -439,8 +484,53 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns a new BadRequestException
+     *
+     * @param description description of the exception
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException buildBadRequestException(String description, Throwable e) {
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400l, description);
+        return new BadRequestException(description, e, errorDTO);
+    }
+
+    /**
+     * Returns a new BadRequestException
+     *
+     * @param errorDTO ErrorDTO object containing the error information
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException buildBadRequestException(ErrorDTO errorDTO) {
+        return new BadRequestException(errorDTO);
+    }
+
+
+    /**
+     * Returns a new BadRequestException
+     *
+     * @param errorHandler ErrorHandler object containing the error information
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException buildBadRequestException(ErrorHandler errorHandler) {
+        ErrorDTO errorDTO = getErrorDTO(errorHandler.getErrorMessage(), errorHandler.getErrorCode(),
+                errorHandler.getErrorDescription());
+        return new BadRequestException(errorDTO);
+    }
+
+    /**
+     * Returns a new BadRequestException from a list of Error Handlers
+     *
+     * @param errorHandlers A List of ErrorHandler object containing the error information
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException buildBadRequestException(List<ErrorHandler> errorHandlers) {
+        ErrorDTO errorDTO = getErrorDTO(errorHandlers);
+        return new BadRequestException(errorDTO);
+    }
+
+    /**
      * Returns a new MethodNotAllowedException
-     * 
+     *
      * @param method http method
      * @param resource resource which the method is not allowed
      * @return a new MethodNotAllowedException consists of the error message
@@ -453,7 +543,7 @@ public class RestApiUtil {
 
     /**
      * Returns a new ConflictException
-     * 
+     *
      * @param message summary of the error
      * @param description description of the exception
      * @return a new ConflictException with the specified details as a response DTO
@@ -489,7 +579,7 @@ public class RestApiUtil {
     /**
      * Check if the specified throwable e is happened as the updated/new resource conflicting with an already existing
      * resource
-     * 
+     *
      * @param e throwable to check
      * @return true if the specified throwable e is happened as the updated/new resource conflicting with an already
      *   existing resource, false otherwise
@@ -529,7 +619,7 @@ public class RestApiUtil {
 
     /**
      * Check if the message of the root cause message of 'e' matches with the specified message
-     * 
+     *
      * @param e throwable to check
      * @param message error message
      * @return true if the message of the root cause of 'e' matches with 'message'
@@ -542,7 +632,7 @@ public class RestApiUtil {
 
     /**
      * Attempts to find the actual cause of the throwable 'e'
-     * 
+     *
      * @param e throwable
      * @return the root cause of 'e' if the root cause exists, otherwise returns 'e' itself
      */
@@ -554,7 +644,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a BadRequestException with specified details and throws it
-     * 
+     *
      * @param msg error message
      * @param log Log instance
      * @throws BadRequestException
@@ -566,8 +656,62 @@ public class RestApiUtil {
     }
 
     /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     *
+     * @param msg error message
+     * @param e throwable to log
+     * @param log Log instance
+     * @throws BadRequestException
+     */
+    public static void handleBadRequest(String msg, Throwable e, Log log) throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(msg);
+        log.error(msg, e);
+        throw badRequestException;
+    }
+
+    /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     *
+     * @param errorHandler ErrorHandler object containing the error information
+     * @param log Log instance
+     * @throws BadRequestException
+     */
+    public static void handleBadRequest(ErrorHandler errorHandler, Log log) throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(errorHandler);
+        log.error(errorHandler.getErrorMessage());
+        throw badRequestException;
+    }
+
+    /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     *
+     * @param errorHandlers A List of error handler objects containing the error information
+     * @param log Log instance
+     * @throws BadRequestException
+     */
+    public static void handleBadRequest(List<ErrorHandler> errorHandlers, Log log) throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(errorHandlers);
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = 0; i < errorHandlers.size(); i++) {
+            ErrorHandler handler = errorHandlers.get(i);
+            builder.append(handler.getErrorMessage());
+            if (StringUtils.isNotBlank(handler.getErrorDescription())) {
+                builder.append(":");
+                builder.append(handler.getErrorDescription());
+            }
+
+            if (i < errorHandlers.size() - 1) {
+                builder.append(", ");
+            }
+        }
+        log.error(builder.toString());
+        throw badRequestException;
+    }
+
+    /**
      * Logs the error, builds a ForbiddenException with specified details and throws it
-     * 
+     *
      * @param resource Resource type
      * @param id id of resource
      * @param t Throwable
@@ -583,7 +727,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a ForbiddenException with specified details and throws it
-     * 
+     *
      * @param resource requested resource
      * @param id id of resource
      * @param log Log instance
@@ -598,7 +742,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a ForbiddenException with specified details and throws it
-     * 
+     *
      * @param description description of the error
      * @param t Throwable instance
      * @param log Log instance
@@ -629,7 +773,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a NotFoundException with specified details and throws it
-     * 
+     *
      * @param resource requested resource
      * @param id id of resource
      * @param t Throwable instance
@@ -645,7 +789,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a NotFoundException with specified details and throws it
-     * 
+     *
      * @param resource requested resource
      * @param id id of resource
      * @param log Log instance
@@ -689,7 +833,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a ConflictException with specified details and throws it
-     * 
+     *
      * @param description description of the error
      * @param log Log instance
      * @throws ConflictException
@@ -719,7 +863,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a ConflictException with specified details and throws it
-     * 
+     *
      * @param description description of the error
      * @param t Throwable instance
      * @param log Log instance
@@ -735,7 +879,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a MethodNotAllowedException with specified details and throws it
-     * 
+     *
      * @param method http method
      * @param resource requested resource
      * @param log Log instance
@@ -750,7 +894,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a internalServerErrorException with specified details and throws it
-     * 
+     *
      * @param msg error message
      * @param t Throwable instance
      * @param log Log instance
@@ -779,7 +923,7 @@ public class RestApiUtil {
 
     /**
      * Checks whether the specified tenant domain is available
-     * 
+     *
      * @param tenantDomain tenant domain
      * @return true if tenant domain available
      * @throws UserStoreException
@@ -888,7 +1032,7 @@ public class RestApiUtil {
     }
 
     /** Returns the paginated url for subscriptions for a particular API identifier
-     * 
+     *
      * @param offset starting index
      * @param limit max number of objects returned
      * @param apiId API Identifier
@@ -907,7 +1051,7 @@ public class RestApiUtil {
     }
 
     /** Returns the paginated url for subscriptions for a particular application
-     * 
+     *
      * @param offset starting index
      * @param limit max number of objects returned
      * @param applicationId application id
@@ -930,6 +1074,20 @@ public class RestApiUtil {
      */
     public static String getDocumentationPaginatedURL(Integer offset, Integer limit, String apiId) {
         String paginatedURL = RestApiConstants.DOCUMENTS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
+        return paginatedURL;
+    }
+
+    /** Returns the paginated url for API ratings
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getRatingPaginatedURL(Integer offset, Integer limit, String apiId) {
+        String paginatedURL = RestApiConstants.RATINGS_GET_PAGINATION_URL;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
@@ -1008,7 +1166,7 @@ public class RestApiUtil {
 
     /**
      * Checks whether the list of tiers are valid given the all valid tiers
-     * 
+     *
      * @param allTiers All defined tiers
      * @param currentTiers tiers to check if they are a subset of defined tiers
      * @return null if there are no invalid tiers or returns the set of invalid tiers if there are any
@@ -1169,7 +1327,7 @@ public class RestApiUtil {
     public static Set<URITemplate> getPublisherAppResourceMapping(String version) {
         API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER, RestApiConstants.REST_API_STORE_CONTEXT,
                 RestApiConstants.REST_API_STORE_VERSION_0));
-        
+
         if (publisherResourceMappings != null) {
             return publisherResourceMappings;
         } else {
@@ -1268,8 +1426,8 @@ public class RestApiUtil {
     }
 
     /**
-     * Returns the white-listed URIs and associated HTTP methods for REST API. If not already read before, reads 
-     * api-manager.xml configuration, store the results in a static reference and returns the results. 
+     * Returns the white-listed URIs and associated HTTP methods for REST API. If not already read before, reads
+     * api-manager.xml configuration, store the results in a static reference and returns the results.
      * Otherwise returns previously stored the static reference object.
      *
      * @return A Dictionary with the white-listed URIs and the associated HTTP methods
@@ -1438,5 +1596,28 @@ public class RestApiUtil {
     public static boolean checkIfAnonymousAPI(Message inMessage) {
         return (inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED) != null &&
                 !((Boolean) inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED)));
+    }
+
+    /**
+     * This method is used to get the URI template set for the relevant REST API using the given base path.
+     *
+     * @param basePath Base path of the REST API
+     * @return Set of URI templates for the REST API
+     */
+    public static Set<URITemplate> getURITemplatesForBasePath(String basePath) {
+        Set<URITemplate> uriTemplates = new HashSet<>();
+        //get URI templates using the base path in the request
+        if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_0)) {
+            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_0);
+        } else if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_1)) {
+            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_1);
+        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_0)) {
+            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_0);
+        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_1)) {
+            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_1);
+        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
+            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping();
+        }
+        return uriTemplates;
     }
 }

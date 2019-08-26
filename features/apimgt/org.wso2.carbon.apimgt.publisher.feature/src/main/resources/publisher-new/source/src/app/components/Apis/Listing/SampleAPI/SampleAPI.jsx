@@ -150,32 +150,32 @@ class SampleAPI extends Component {
             },
             operations: [
                 {
-                    uritemplate: '/order/{orderId}',
-                    httpVerb: 'GET',
+                    target: '/order/{orderId}',
+                    verb: 'GET',
                     throttlingPolicy: 'Unlimited',
                     authType: 'Application & Application User',
                 },
                 {
-                    uritemplate: '/order/{orderId}',
-                    httpVerb: 'DELETE',
+                    target: '/order/{orderId}',
+                    verb: 'DELETE',
                     throttlingPolicy: 'Unlimited',
                     authType: 'Application & Application User',
                 },
                 {
-                    uritemplate: '/order/{orderId}',
-                    httpVerb: 'PUT',
+                    target: '/order/{orderId}',
+                    verb: 'PUT',
                     throttlingPolicy: 'Unlimited',
                     authType: 'Application & Application User',
                 },
                 {
-                    uritemplate: '/menu',
-                    httpVerb: 'GET',
+                    target: '/menu',
+                    verb: 'GET',
                     throttlingPolicy: 'Unlimited',
                     authType: 'Application & Application User',
                 },
                 {
-                    uritemplate: '/order',
-                    httpVerb: 'POST',
+                    target: '/order',
+                    verb: 'POST',
                     throttlingPolicy: 'Unlimited',
                     authType: 'Application & Application User',
                 },
@@ -213,7 +213,7 @@ class SampleAPI extends Component {
         return (
             <InlineMessage type='info' height={140}>
                 <div className={classes.contentWrapper}>
-                    <Typography variant='headline' component='h3' className={classes.head}>
+                    <Typography variant='h5' component='h3' className={classes.head}>
                         <FormattedMessage
                             id='welcome.to.wso2.api.manager'
                             defaultMessage='Welcome to WSO2 API Manager'

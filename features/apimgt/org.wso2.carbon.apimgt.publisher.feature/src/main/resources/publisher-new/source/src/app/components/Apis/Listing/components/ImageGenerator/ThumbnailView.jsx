@@ -41,6 +41,7 @@ import PropTypes from 'prop-types';
 import Dropzone from 'react-dropzone';
 import { SketchPicker } from 'react-color';
 import Api from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
 import MaterialIcons from 'MaterialIcons';
 import Alert from 'AppComponents/Shared/Alert';
 import ImageGenerator from './ImageGenerator';
@@ -213,27 +214,31 @@ class ThumbnailView extends Component {
     }
 
     /**
-     * Load required data for showing the thubnail view
+     * Load required data for showing the thumbnail view
      */
     componentDidMount() {
-        const thumbApi = new Api();
-        const { api } = this.props;
-        thumbApi.getAPIThumbnail(api.id).then((response) => {
-            if (response && response.data) {
-                if (response.headers['content-type'] === 'application/json') {
-                    const iconJson = JSON.parse(response.data);
-                    this.setState({
-                        selectedIcon: iconJson.key,
-                        category: iconJson.category,
-                        color: iconJson.color,
-                        backgroundIndex: iconJson.backgroundIndex,
-                    });
-                } else if (response && response.data.size > 0) {
-                    const url = windowURL.createObjectURL(response.data);
-                    this.setState({ thumbnail: url });
+        const { api: { apiType, id, type } } = this.props;
+        if (type !== 'DOC') {
+            const promisedThumbnail = apiType === Api.CONSTS.APIProduct ? new APIProduct().getAPIProductThumbnail(id) :
+                new Api().getAPIThumbnail(id);
+
+            promisedThumbnail.then((response) => {
+                if (response && response.data) {
+                    if (response.headers['content-type'] === 'application/json') {
+                        const iconJson = JSON.parse(response.data);
+                        this.setState({
+                            selectedIcon: iconJson.key,
+                            category: iconJson.category,
+                            color: iconJson.color,
+                            backgroundIndex: iconJson.backgroundIndex,
+                        });
+                    } else if (response && response.data.size > 0) {
+                        const url = windowURL.createObjectURL(response.data);
+                        this.setState({ thumbnail: url });
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -305,10 +310,12 @@ class ThumbnailView extends Component {
      * @param {File} file new thumbnail image file
      */
     uploadThumbnail(apiId, file, intl) {
-        const api = new Api();
+        const { api: { apiType, id } } = this.props;
+        const promisedThumbnail = apiType === Api.CONSTS.APIProduct ?
+            new APIProduct().addAPIProductThumbnail(id, file) :
+            new Api().addAPIThumbnail(id, file);
 
-        const thumbnailPromise = api.addAPIThumbnail(apiId, file);
-        thumbnailPromise
+        promisedThumbnail
             .then(() => {
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Listing.components.ImageGenerator.ThumbnailView.thumbnail.upload.success',
@@ -366,7 +373,7 @@ class ThumbnailView extends Component {
      */
     render() {
         const {
-            api, classes, width, height, isEditable, theme, intl, isAPIProduct,
+            api, classes, width, height, isEditable, theme, intl,
         } = this.props;
         const colorPairs = theme.custom.thumbnail.backgrounds;
         const {
@@ -374,7 +381,13 @@ class ThumbnailView extends Component {
         } = this.state;
         let { category } = this.state;
         if (!category) category = MaterialIcons.categories[0].name;
-        const overviewPath = isAPIProduct ? `/api-products/${api.id}/overview` : `/apis/${api.id}/overview`;
+        let overviewPath = '';
+        if (api.apiType) {
+            overviewPath = (api.apiType === Api.CONSTS.APIProduct) ?
+                `/api-products/${api.id}/overview` : `/apis/${api.id}/overview`;
+        } else {
+            overviewPath = `/apis/${api.apiUUID}/documents/${api.id}/details`;
+        }
         let view;
 
         if (thumbnail) {
@@ -407,7 +420,7 @@ class ThumbnailView extends Component {
                         {view}
                         <span className={classes.thumbBackdrop} />
                         <span className={classes.thumbButton}>
-                            <Typography component='span' variant='subheading' color='inherit'>
+                            <Typography component='span' variant='subtitle1' color='inherit'>
                                 <EditIcon />
                             </Typography>
                         </span>
@@ -460,7 +473,7 @@ class ThumbnailView extends Component {
 
                     <DialogContent>
                         {selectedTab === 'upload' && (
-                            <Grid container spacing={16}>
+                            <Grid container spacing={4}>
                                 <Grid item xs={3}>
                                     <div className={classes.imageContainer}>
                                         <img
@@ -493,7 +506,7 @@ class ThumbnailView extends Component {
                             </Grid>
                         )}
                         {selectedTab === 'design' && (
-                            <Grid container spacing={16}>
+                            <Grid container spacing={4}>
                                 <Grid item xs={3} className={classes.imageGenWrapper}>
                                     <ImageGenerator
                                         width={width}
@@ -615,7 +628,6 @@ ThumbnailView.propTypes = {
     isEditable: PropTypes.bool,
     intl: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
-    isAPIProduct: PropTypes.bool.isRequired,
 };
 
 export default injectIntl(withStyles(styles, { withTheme: true })(ThumbnailView));

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import javax.validation.constraints.*;
@@ -32,7 +33,9 @@ public class APIDTO   {
     private String wsdlUri = null;
     private String lifeCycleStatus = null;
     private Boolean isDefaultVersion = null;
+    private String type = null;
     private List<String> transport = new ArrayList<>();
+    private List<APIOperationsDTO> operations = new ArrayList<>();
     private String authorizationHeader = null;
     private List<String> securityScheme = new ArrayList<>();
     private List<String> tags = new ArrayList<>();
@@ -44,6 +47,7 @@ public class APIDTO   {
     private List<LabelDTO> labels = new ArrayList<>();
     private List<String> environmentList = new ArrayList<>();
     private List<ScopeInfoDTO> scopes = new ArrayList<>();
+    private String avgRating = null;
 
   /**
    * UUID of the api 
@@ -230,6 +234,24 @@ public class APIDTO   {
   }
 
   /**
+   * This describes the transport type of the API
+   **/
+  public APIDTO type(String type) {
+    this.type = type;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "WS", value = "This describes the transport type of the API")
+  @JsonProperty("type")
+  public String getType() {
+    return type;
+  }
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  /**
    **/
   public APIDTO transport(List<String> transport) {
     this.transport = transport;
@@ -244,6 +266,23 @@ public class APIDTO   {
   }
   public void setTransport(List<String> transport) {
     this.transport = transport;
+  }
+
+  /**
+   **/
+  public APIDTO operations(List<APIOperationsDTO> operations) {
+    this.operations = operations;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("operations")
+  public List<APIOperationsDTO> getOperations() {
+    return operations;
+  }
+  public void setOperations(List<APIOperationsDTO> operations) {
+    this.operations = operations;
   }
 
   /**
@@ -440,6 +479,24 @@ public class APIDTO   {
     this.scopes = scopes;
   }
 
+  /**
+   * The average rating of the API
+   **/
+  public APIDTO avgRating(String avgRating) {
+    this.avgRating = avgRating;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "4.5", value = "The average rating of the API")
+  @JsonProperty("avgRating")
+  public String getAvgRating() {
+    return avgRating;
+  }
+  public void setAvgRating(String avgRating) {
+    this.avgRating = avgRating;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -460,7 +517,9 @@ public class APIDTO   {
         Objects.equals(wsdlUri, API.wsdlUri) &&
         Objects.equals(lifeCycleStatus, API.lifeCycleStatus) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
+        Objects.equals(type, API.type) &&
         Objects.equals(transport, API.transport) &&
+        Objects.equals(operations, API.operations) &&
         Objects.equals(authorizationHeader, API.authorizationHeader) &&
         Objects.equals(securityScheme, API.securityScheme) &&
         Objects.equals(tags, API.tags) &&
@@ -471,12 +530,13 @@ public class APIDTO   {
         Objects.equals(businessInformation, API.businessInformation) &&
         Objects.equals(labels, API.labels) &&
         Objects.equals(environmentList, API.environmentList) &&
-        Objects.equals(scopes, API.scopes);
+        Objects.equals(scopes, API.scopes) &&
+        Objects.equals(avgRating, API.avgRating);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, transport, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, endpointURLs, businessInformation, labels, environmentList, scopes);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating);
   }
 
   @Override
@@ -494,7 +554,9 @@ public class APIDTO   {
     sb.append("    wsdlUri: ").append(toIndentedString(wsdlUri)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
+    sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
@@ -506,6 +568,7 @@ public class APIDTO   {
     sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    environmentList: ").append(toIndentedString(environmentList)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");
     sb.append("}");
     return sb.toString();
   }

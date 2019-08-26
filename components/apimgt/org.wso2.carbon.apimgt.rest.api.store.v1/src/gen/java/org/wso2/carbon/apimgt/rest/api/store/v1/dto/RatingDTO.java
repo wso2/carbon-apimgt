@@ -27,9 +27,8 @@ public class RatingDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("ratingId")
-  @NotNull
   public String getRatingId() {
     return ratingId;
   }
@@ -45,9 +44,8 @@ public class RatingDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("apiId")
-  @NotNull
   public String getApiId() {
     return apiId;
   }
@@ -56,7 +54,6 @@ public class RatingDTO   {
   }
 
   /**
-   * If username is not given user invoking the API will be taken as the username. 
    **/
   public RatingDTO username(String username) {
     this.username = username;
@@ -64,9 +61,8 @@ public class RatingDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "If username is not given user invoking the API will be taken as the username. ")
+  @ApiModelProperty(value = "")
   @JsonProperty("username")
-  @NotNull
   public String getUsername() {
     return username;
   }

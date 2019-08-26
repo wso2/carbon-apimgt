@@ -1870,8 +1870,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public void rateAPI(APIIdentifier apiId, APIRating rating,
-                        String user) throws APIManagementException {
+    public void rateAPI(APIIdentifier apiId, APIRating rating, String user) throws APIManagementException {
         apiMgtDAO.addRating(apiId, rating.getRating(), user);
     }
 
@@ -1883,6 +1882,27 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public int getUserRating(APIIdentifier apiId, String user) throws APIManagementException {
         return apiMgtDAO.getUserRating(apiId, user);
+    }
+
+    @Override
+    public JSONObject getUserRatingInfo(APIIdentifier apiId, String user) throws APIManagementException {
+        JSONObject obj = apiMgtDAO.getUserRatingInfo(apiId, user);
+        if (obj == null || obj.isEmpty()) {
+            String msg = "Failed to get API ratings for API " + apiId + " for user " + user;
+            log.error(msg);
+            throw new APIMgtResourceNotFoundException(msg);
+        }
+        return obj;
+    }
+
+    @Override
+    public JSONArray getAPIRatings(APIIdentifier apiId) throws APIManagementException {
+        return apiMgtDAO.getAPIRatings(apiId);
+    }
+
+    @Override
+    public float getAverageAPIRating(APIIdentifier apiId) throws APIManagementException {
+        return apiMgtDAO.getAverageRating(apiId);
     }
 
     @Override
@@ -5021,7 +5041,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Need user name with tenant domain to get correct domain name from
             // MultitenantUtils.getTenantDomain(username)
             String userNameWithTenantDomain = (userNameWithoutChange != null) ? userNameWithoutChange : username;
-            String apiTenantDomain = getTenantDomain(identifier.getProviderName());
+            String apiTenantDomain = getTenantDomain(identifier);
             int apiTenantId = getTenantManager().getTenantId(apiTenantDomain);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
                 APIUtil.loadTenantRegistry(apiTenantId);

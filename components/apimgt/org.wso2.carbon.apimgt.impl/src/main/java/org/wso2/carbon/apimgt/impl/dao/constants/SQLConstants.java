@@ -1427,6 +1427,20 @@ public class SQLConstants {
     public static final String GET_RATING_SQL =
             "SELECT RATING FROM AM_API_RATINGS WHERE SUBSCRIBER_ID  = ? AND API_ID= ? ";
 
+    public static final String GET_RATING_INFO_SQL =
+            "SELECT RATING_ID, API_ID, RATING, SUBSCRIBER_ID FROM AM_API_RATINGS WHERE SUBSCRIBER_ID  = ? "
+                    + "AND API_ID= ? ";
+
+    public static final String GET_API_ALL_RATINGS_SQL =
+            "SELECT RATING_ID, API_ID, RATING, SUBSCRIBER_ID FROM AM_API_RATINGS WHERE API_ID= ? ";
+
+    public static final String GET_SUBSCRIBER_NAME_FROM_ID_SQL =
+            "SELECT USER_ID FROM AM_SUBSCRIBER WHERE SUBSCRIBER_ID = ? ";
+
+    public static final String GET_RATING_INFO_BY_ID_SQL =
+            "SELECT RATING_ID, API_ID, RATING, SUBSCRIBER_ID FROM AM_API_RATINGS WHERE RATING_ID = ? "
+                    + "AND API_ID= ? ";
+
     public static final String GET_AVERAGE_RATING_SQL =
             " SELECT " +
             "   CAST( SUM(RATING) AS DECIMAL)/COUNT(RATING) AS RATING " +
@@ -2803,6 +2817,17 @@ public class SQLConstants {
                     "   AM_POLICY_SUBSCRIPTION " +
                     " WHERE" +
                     "   TENANT_ID =?";
+
+    public static final String GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_PREFIX =
+            " SELECT " +
+                    "   * " +
+                    "FROM " +
+                    "   AM_POLICY_SUBSCRIPTION " +
+                    " WHERE" +
+                    "  NAME IN (";
+
+    public static final String GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_SUFFIX =
+            ") AND TENANT_ID =? ;";
 
     public static final String GET_GLOBAL_POLICIES =
             " SELECT " +

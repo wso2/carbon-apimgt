@@ -139,6 +139,9 @@ public final class APIConstants {
     //registry location for consumer
     public static final String API_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
 
+    //registry location for consumer
+    public static final String API_PRODUCT_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/products";
+
     //registry location for API documentation
     public static final String API_DOC_LOCATION = API_APPLICATION_DATA_LOCATION + "/api-docs";
 
@@ -298,6 +301,9 @@ public final class APIConstants {
     public static final String API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED = "overview_destinationStatsEnabled";
     public static final String API_OVERVIEW_WEBSOCKET = "overview_ws";
 
+    //This constant is used in Json schema validator
+    public static final String API_OVERVIEW_ENABLE_JSON_SCHEMA = "overview_enableSchemaValidation";
+    
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME = "overview_name";
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";
@@ -983,6 +989,26 @@ public final class APIConstants {
     public static final String API_RESOURCE_CACHE_KEY = "API_RESOURCE_CACHE_KEY";
     public static final String API_ELECTED_RESOURCE = "API_ELECTED_RESOURCE";
 
+    public static final String API_TYPE = "API_TYPE";
+    public static final String GRAPHQL_API = "GRAPHQL";
+    public static final String GRAPHQL_API_OPERATION_RESOURCE = "OPERATION_RESOURCE";
+    public static final String GRAPHQL_API_OPERATION_TYPE = "OPERATION_TYPE";
+    public static final String GRAPHQL_API_OPERATION_VERB_INFO_DTO = "OPERATION_VERB_INFO_DTO";
+    public static final String[] GRAPHQL_SUPPORTED_METHODS = {"QUERY", "MUTATION", "SUBSCRIPTION"};
+    public static final String API_GRAPHQL_SCHEMA_RESOURCE_LOCATION = API_APPLICATION_DATA_LOCATION + "/graphql/";
+    public static final String GRAPHQL_SCHEMA_FILE_EXTENSION = ".graphql";
+    public static final String GRAPHQL_SCHEMA_PROVIDER_SEPERATOR = "--";
+    public static final String GRAPHQL_SCHEMA_DEFINITION_SEPARATOR = "schemaDefinition=";
+    public static final String GRAPHQL_QUERY = "Query";
+    public static final String GRAPHQL_MUTATION = "Mutation";
+    public static final String GRAPHQL_SUBSCRIPTION = "Subscription";
+
+
+    //URI Authentication Schemes
+    public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
+            Collections.unmodifiableSet(new HashSet<String>(
+                    Arrays.asList(new String[]{ "QUERY", "MUTATION", "SUBSCRIPTION", "head", "options"})));
+
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
 
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
@@ -1328,6 +1354,8 @@ public final class APIConstants {
     public static final String BLOCKING_CONDITIONS_USER = "USER";
     public static final String BLOCKING_CONDITIONS_IP = "IP";
 
+    public static final String REVOKED_TOKEN_KEY = "revokedToken";
+
     public static final String SEARCH_AND_TAG = "&";
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
     public static final String LCSTATE_SEARCH_KEY = "lcState";
@@ -1373,7 +1401,6 @@ public final class APIConstants {
 
         public static final String GLOBAL_POLICY_ENGINE_WS_CONFIGURATION = "GlobalPolicyEngineWSConnectionDetails";
         public static final String SERVICE_URL = "ServiceURL";
-        public static final String JMS_CONNECTION_DESTINATION = "Destination";
         public static final String JMS_CONNECTION_DETAILS = "JMSConnectionDetails";
         public static final String JMS_CONNECTION_PARAMETERS = "JMSConnectionParameters";
         public static final String JMS_PUBLISHER_PARAMETERS = "JMSEventPublisherParameters";
@@ -1466,13 +1493,43 @@ public final class APIConstants {
 
     }
 
+    public static class JwtTokenConstants {
+        public static final String APPLICATION = "application";
+        public static final String APPLICATION_ID = "id";
+        public static final String APPLICATION_NAME = "name";
+        public static final String APPLICATION_TIER = "tier";
+        public static final String APPLICATION_OWNER = "owner";
+        public static final String KEY_TYPE = "keytype";
+        public static final String CONSUMER_KEY = "consumerKey";
+        public static final String SUBJECT = "sub";
+        public static final String SUBSCRIPTION_TIER = "subscriptionTier";
+        public static final String SUBSCRIBER_TENANT_DOMAIN = "subscriberTenantDomain";
+        public static final String TIER_INFO = "tierInfo";
+        public static final String STOP_ON_QUOTA_REACH = "stopOnQuotaReach";
+        public static final String SPIKE_ARREST_LIMIT = "spikeArrestLimit";
+        public static final String SPIKE_ARREST_UNIT = "spikeArrestUnit";
+        public static final String SCOPE = "scope";
+        public static final String SCOPE_DELIMITER = " ";
+        public static final String ISSUED_TIME = "iat";
+        public static final String EXPIRED_TIME = "exp";
+        public static final String SIGNATURE_ALGORITHM = "alg";
+        public static final String TOKEN_TYPE = "typ";
+        public static final String BACKEND_TOKEN = "backendJwt";
+        public static final String SUBSCRIBED_APIS = "subscribedAPIs";
+        public static final String API_CONTEXT = "context";
+        public static final String API_VERSION = "version";
+    }
+
+    public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
+    public static final String SIGNATURE_ALGORITHM_SHA256_WITH_RSA = "SHA256withRSA";
+
     public static class APIEndpointSecurityConstants {
         public static final String BASIC_AUTH = "BasicAuth";
         public static final String DIGEST_AUTH = "DigestAuth";
     }
 
     public enum APITransportType {
-        HTTP, WS,
+        HTTP, WS, GRAPHQL
     }
 
     public static final String JSON_GRANT_TYPES = "grant_types";
@@ -1613,4 +1670,15 @@ public final class APIConstants {
         API,
         PRODUCT_API
     }
+
+    public static final String TENANT_STATE_ACTIVE = "ACTIVE";
+    public static final String TENANT_STATE_INACTIVE = "INACTIVE";
+
+    public static final String GATEWAY_PUBLIC_CERTIFICATE_ALIAS = "gateway_certificate_alias";
+
+    //Constants for user API ratings
+    public static final String API_ID = "apiId";
+    public static final String RATING_ID = "ratingId";
+    public static final String RATING = "rating";
+    public static final String USER_NAME ="username";
 }
