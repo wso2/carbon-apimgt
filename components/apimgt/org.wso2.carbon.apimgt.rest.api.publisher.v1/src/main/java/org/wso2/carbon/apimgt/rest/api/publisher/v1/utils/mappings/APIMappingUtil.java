@@ -1971,6 +1971,12 @@ public class APIMappingUtil {
         return product.getId();
     }
 
+    /**
+     * Converts a WSDL validation response model to DTO
+     *
+     * @param validationResponse validation response model
+     * @return Converted WSDL validation response model to DTO
+     */
     public static WSDLValidationResponseDTO fromWSDLValidationResponseToDTO(WSDLValidationResponse validationResponse) {
         WSDLValidationResponseDTO wsdlValidationResponseDTO = new WSDLValidationResponseDTO();
         WSDLInfo wsdlInfo;
@@ -1990,7 +1996,13 @@ public class APIMappingUtil {
         return wsdlValidationResponseDTO;
     }
 
-    public static List<WSDLValidationResponseWsdlInfoEndpointsDTO>
+    /**
+     * Converts the provided WSDL endpoint map to REST API DTO
+     *
+     * @param endpoints endpoint map
+     * @return converted map to DTO
+     */
+    private static List<WSDLValidationResponseWsdlInfoEndpointsDTO>
             fromEndpointsMapToWSDLValidationResponseEndpointsDTO(Map<String, String> endpoints) {
         List<WSDLValidationResponseWsdlInfoEndpointsDTO> endpointsDTOList = new ArrayList<>();
         for (String endpointName: endpoints.keySet()) {

@@ -112,6 +112,13 @@ public class APIMWSDLReader {
 		return wsdlFactoryInstance;
 	}
 
+    /**
+     * Extract the WSDL archive zip and validates it
+     *
+     * @param inputStream zip input stream
+     * @return Validation information
+     * @throws APIManagementException Error occurred during validation
+     */
     public static WSDLValidationResponse extractAndValidateWSDLArchive(InputStream inputStream) throws APIManagementException {
         String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator
                 + APIConstants.WSDL_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
@@ -142,6 +149,13 @@ public class APIMWSDLReader {
         return wsdlValidationResponse;
     }
 
+    /**
+     * Extract the WSDL file and validates it
+     *
+     * @param inputStream file input stream
+     * @return Validation information
+     * @throws APIManagementException Error occurred during validation
+     */
     public static WSDLValidationResponse validateWSDLFile(InputStream inputStream) throws APIManagementException {
         try {
             byte[] wsdlContent = APIUtil.toByteArray(inputStream);
@@ -154,17 +168,13 @@ public class APIMWSDLReader {
         }
     }
 
-    private static WSDLValidationResponse handleExceptionDuringValidation(APIManagementException e) throws APIManagementException {
-        if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() < 500) {
-            log.debug("Validation error occurred due to invalid WSDL", e);
-            WSDLValidationResponse validationResponse = new WSDLValidationResponse();
-            validationResponse.setError(e.getErrorHandler());
-            return validationResponse;
-        } else {
-            throw e;
-        }
-    }
-
+    /**
+     * Extract the WSDL url and validates it
+     *
+     * @param wsdlUrl WSDL url
+     * @return Validation information
+     * @throws APIManagementException Error occurred during validation
+     */
     public static WSDLValidationResponse validateWSDLUrl(URL wsdlUrl) throws APIManagementException {
         try {
             WSDLProcessor processor = getWSDLProcessorForUrl(wsdlUrl);
@@ -177,7 +187,7 @@ public class APIMWSDLReader {
     /**
      * Gets WSDL processor WSDL 1.1/WSDL 2.0 based on the content {@code content}.
      *
-     * @param content    WSDL content
+     * @param content WSDL content
      * @return {@link WSDLProcessor}
      * @throws APIManagementException
      */
@@ -206,7 +216,7 @@ public class APIMWSDLReader {
      * Returns the appropriate WSDL 1.1/WSDL 2.0 based on the file path {@code wsdlPath}.
      *
      * @param wsdlPath File path containing WSDL files and dependant files
-     * @return WSDL 1.1 processor for the provided content
+     * @return WSDL 1.1/2.0 processor for the provided content
      * @throws APIManagementException If an error occurs while determining the processor
      */
     public static WSDLProcessor getWSDLProcessor(String wsdlPath) throws APIManagementException {
@@ -233,7 +243,7 @@ public class APIMWSDLReader {
      * Returns the appropriate WSDL 1.1/WSDL 2.0 based on the url {@code url}.
      *
      * @param url WSDL url
-     * @return WSDL 1.1 processor for the provided content
+     * @return WSDL 1.1/2.0 processor for the provided content
      * @throws APIManagementException If an error occurs while determining the processor
      */
     public static WSDLProcessor getWSDLProcessorForUrl(URL url) throws APIManagementException {
@@ -536,7 +546,25 @@ public class APIMWSDLReader {
 		}
 	}
 
-	@Deprecated
+    /**
+     * Handles the provided exception occurred during validation and return a validation response or the exception.
+     *
+     * @param e exception object
+     * @return a validation response if the exception contains an ErrorHandler
+     * @throws APIManagementException if the exception doesn't contains an ErrorHandler. Throws the same error as 'e'
+     */
+    private static WSDLValidationResponse handleExceptionDuringValidation(APIManagementException e) throws APIManagementException {
+        if (e.getErrorHandler() != null && e.getErrorHandler().getHttpStatusCode() < 500) {
+            log.debug("Validation error occurred due to invalid WSDL", e);
+            WSDLValidationResponse validationResponse = new WSDLValidationResponse();
+            validationResponse.setError(e.getErrorHandler());
+            return validationResponse;
+        } else {
+            throw e;
+        }
+    }
+
+    @Deprecated
     private static DocumentBuilderFactory getSecuredDocumentBuilder() {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setNamespaceAware(true);
@@ -925,7 +953,15 @@ public class APIMWSDLReader {
         return new String(theChars);
     }
 
-    private static WSDLValidationResponse getWsdlValidationResponse(WSDLProcessor processor) throws APIMgtWSDLException {
+    /**
+     * Gets WSDL validation response from the WSDL processor
+     *
+     * @param processor WSDL processor
+     * @return WSDL validation response
+     * @throws APIMgtWSDLException if error occurred while retrieving WSDL info
+     */
+    private static WSDLValidationResponse getWsdlValidationResponse(WSDLProcessor processor)
+            throws APIMgtWSDLException {
         WSDLValidationResponse wsdlValidationResponse = new WSDLValidationResponse();
         if (processor.hasError()) {
             wsdlValidationResponse.setValid(false);

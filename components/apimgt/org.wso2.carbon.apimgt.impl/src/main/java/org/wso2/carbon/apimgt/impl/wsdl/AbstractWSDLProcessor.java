@@ -108,6 +108,11 @@ abstract class AbstractWSDLProcessor implements WSDLProcessor {
         }
     }
 
+    /**
+     * Returns a secured document builder to avoid XXE attacks
+     *
+     * @return secured document builder to avoid XXE attacks
+     */
     private DocumentBuilderFactory getSecuredDocumentBuilder() {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setNamespaceAware(true);

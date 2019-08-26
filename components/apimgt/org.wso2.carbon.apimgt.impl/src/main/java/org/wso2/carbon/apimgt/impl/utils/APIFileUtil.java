@@ -229,6 +229,15 @@ public class APIFileUtil {
         }
     }
 
+    /**
+     * Iterates through the files in the given path with extension and search the provided string. If a file is found,
+     * then returns true
+     *
+     * @param path folder path
+     * @param extension file extension to filter
+     * @param stringTosearch string to search in files
+     * @return true when a file is found in the folder path whose content contains the provided string
+     */
     public static boolean hasFileContainsString(String path, String extension, String stringTosearch) {
         File folderToImport = new File(path);
         Collection<File> foundWSDLFiles = APIFileUtil.searchFilesWithMatchingExtension(folderToImport, extension);

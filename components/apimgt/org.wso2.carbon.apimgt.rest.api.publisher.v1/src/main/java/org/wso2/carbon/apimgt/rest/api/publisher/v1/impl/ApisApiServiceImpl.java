@@ -1778,8 +1778,19 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Validate a provided WSDL definition via a URL or a file/zip
+     *
+     * @param url WSDL URL
+     * @param fileInputStream file/zip input stream
+     * @param fileDetail file/zip details
+     * @param messageContext messageContext object
+     * @return WSDL validation response
+     * @throws APIManagementException when error occurred during validation
+     */
+    @Override
     public Response validateWSDLDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
-                         Boolean returnContent, MessageContext messageContext) throws APIManagementException {
+                                           MessageContext messageContext) throws APIManagementException {
         handleInvalidParams(fileInputStream, url);
         WSDLValidationResponseDTO responseDTO;
         WSDLValidationResponse validationResponse = new WSDLValidationResponse();

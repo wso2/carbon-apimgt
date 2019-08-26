@@ -5763,6 +5763,13 @@ public final class APIUtil {
         return false;
     }
 
+    /**
+     * Returns whether the provided URL content contains the string to match
+     *
+     * @param url URL
+     * @param match string to match
+     * @return whether the provided URL content contains the string to match
+     */
     public static boolean isURLContentContainsString(URL url, String match) {
         try (BufferedReader in =
                      new BufferedReader(new InputStreamReader(url.openStream(), Charset.defaultCharset()))) {

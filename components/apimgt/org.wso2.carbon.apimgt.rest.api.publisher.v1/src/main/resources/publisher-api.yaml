@@ -1730,7 +1730,7 @@ paths:
 # The "Validate WSDL Definition" utility API
 ######################################################
 
-  '/apis/validate-wsdl':
+  /apis/validate-wsdl:
     post:
       consumes:
         - multipart/form-data
@@ -1752,14 +1752,6 @@ paths:
           name: file
           description: Definition to upload as a file
           type: file
-          required: false
-        - in: query
-          name: returnContent
-          description: |
-            Specify whether to return the full content of the WSDL definition in the response. This is only applicable
-            when using url based validation
-          type: boolean
-          default: false
           required: false
       tags:
         - Validation
