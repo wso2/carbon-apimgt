@@ -15,11 +15,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useDropzone } from 'react-dropzone';
 
-function humanFileSize(bytes, si = false) {
+
+/**
+ *
+ * Convert raw byte values to human readable format
+ * @param {Number} bytes number of bytes
+ * @param {boolean} [si=false]
+ * @returns {String} Human readable string format
+ */
+function humanFileSize(bytesParam, si = false) {
+    let bytes = bytesParam; // To prevent `no-param-reassign` eslint rule violation
     const thresh = si ? 1000 : 1024;
     if (Math.abs(bytes) < thresh) {
         return bytes + ' B';
