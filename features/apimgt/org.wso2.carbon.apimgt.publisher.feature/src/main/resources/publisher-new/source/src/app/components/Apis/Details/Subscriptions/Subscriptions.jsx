@@ -24,7 +24,7 @@ import API from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import SubscriptionsTable from './SubscriptionsTable';
-import SubscriptionPoliciesManage from "./SubscriptionPoliciesManage";
+import SubscriptionPoliciesManage from './SubscriptionPoliciesManage';
 
 const styles = theme => ({
     button: {
@@ -95,7 +95,6 @@ Subscriptions.propTypes = {
         id: PropTypes.string,
     }).isRequired,
     resourceNotFoundMessage: PropTypes.string,
-    intl: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(Subscriptions);

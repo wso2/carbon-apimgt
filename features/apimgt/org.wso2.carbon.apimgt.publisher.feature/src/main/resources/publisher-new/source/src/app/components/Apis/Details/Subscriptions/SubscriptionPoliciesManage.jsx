@@ -143,6 +143,7 @@ class SubscriptionPoliciesManage extends Component {
                             <FormGroup>
                                 { subscriptionPolicies && Object.entries(subscriptionPolicies).map(([key, value]) => (
                                     <FormControlLabel
+                                        key={value.name}
                                         control={<Checkbox
                                             color='primary'
                                             checked={selectedSubscriptionPolicies.includes(value.name)}
