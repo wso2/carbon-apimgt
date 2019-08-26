@@ -429,7 +429,7 @@ class InfoBar extends React.Component {
                                                         </TableCell>
                                                     </TableRow>
                                                 )}
-                                                { api.type === 'GRAPHQL1' && (
+                                                { api.type === 'GRAPHQL' && (
                                                     <TableRow>
                                                         <TableCell component='th' scope='row'>
                                                             <div className={classes.iconAligner}>
