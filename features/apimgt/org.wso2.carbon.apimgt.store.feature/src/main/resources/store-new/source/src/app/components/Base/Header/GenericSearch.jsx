@@ -23,7 +23,7 @@ import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputAdornment from '@material-ui/core/InputAdornment';
-import SearchOutlined from '@material-ui/icons/SearchOutlined';
+import Icon from '@material-ui/core/Icon';
 import { injectIntl } from 'react-intl';
 
 const suggestions = [
@@ -45,7 +45,7 @@ function renderInput(inputProps) {
             InputProps={{
                 startAdornment: (
                     <InputAdornment position='start'>
-                        <SearchOutlined className={classes.searchIcon} />
+                        <Icon className={classes.searchIcon}>search</Icon>
                     </InputAdornment>
                 ),
                 inputRef: ref,

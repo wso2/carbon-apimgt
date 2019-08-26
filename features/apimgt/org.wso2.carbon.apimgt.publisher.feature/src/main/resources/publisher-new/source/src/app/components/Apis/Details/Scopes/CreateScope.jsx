@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,35 +15,67 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import React from 'react';
-import APIPropertyField from 'AppComponents/Apis/Details/Overview/APIPropertyField';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import TagsInput from 'react-tagsinput';
-import Api from 'AppData/api';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
+import Grid from '@material-ui/core/Grid';
+import classNames from 'classnames';
 import Alert from 'AppComponents/Shared/Alert';
+import Api from 'AppData/api';
 
 const styles = theme => ({
-    buttonSave: {
-        marginTop: theme.spacing.unit * 10,
+    root: {
+        flexGrow: 1,
+        marginTop: 10,
     },
-    buttonCancel: {
-        marginTop: theme.spacing.unit * 10,
-        marginLeft: theme.spacing.unit * 5,
+    titleWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
     },
-    topics: {
-        marginTop: theme.spacing.unit * 10,
+    contentWrapper: {
+        maxWidth: theme.custom.contentAreaWidth,
     },
-    headline: {
-        paddingTop: theme.spacing.unit * 1.5,
-        paddingLeft: theme.spacing.unit * 2.5,
+    mainTitle: {
+        paddingLeft: 0,
+    },
+    FormControl: {
+        padding: `0 0 0 ${theme.spacing.unit}px`,
+        width: '100%',
+        marginTop: 0,
+    },
+    FormControlOdd: {
+        padding: `0 0 0 ${theme.spacing.unit}px`,
+        backgroundColor: theme.palette.background.paper,
+        width: '100%',
+        marginTop: 0,
+    },
+    FormControlLabel: {
+        marginBottom: theme.spacing.unit,
+        marginTop: theme.spacing.unit,
+        fontSize: theme.typography.caption.fontSize,
+    },
+    buttonSection: {
+        paddingTop: theme.spacing.unit * 2,
+    },
+    saveButton: {
+        marginRight: theme.spacing.unit * 2,
+    },
+    helpText: {
+        color: theme.palette.text.hint,
+        marginTop: theme.spacing.unit,
+    },
+    extraPadding: {
+        paddingLeft: theme.spacing.unit * 2,
     },
 });
 
@@ -148,14 +180,18 @@ class CreateScope extends React.Component {
 
     validateScopeName(id, value) {
         const { valid, apiScope } = this.state;
-        const { api: { scopes } } = this.props;
+        const {
+            api: { scopes },
+        } = this.props;
 
         apiScope[id] = value;
         valid[id].invalid = !(value && value.length > 0);
         if (valid[id].invalid) {
             valid[id].error = 'Scope name cannot be empty';
         }
-        const exist = scopes.find((scope) => { return scope.name === value; });
+        const exist = scopes.find((scope) => {
+            return scope.name === value;
+        });
         if (!valid[id].invalid && exist) {
             valid[id].invalid = true;
             valid[id].error = 'Scope name already exist';
@@ -168,7 +204,8 @@ class CreateScope extends React.Component {
             valid[id].error = '';
         }
         this.setState({
-            valid, apiScope,
+            valid,
+            apiScope,
         });
         return valid[id].invalid;
     }
@@ -179,10 +216,10 @@ class CreateScope extends React.Component {
         valid[id].invalid = false;
         valid[id].error = '';
         this.setState({
-            valid, apiScope,
+            valid,
+            apiScope,
         });
     }
-
 
     /**
      *
@@ -194,82 +231,110 @@ class CreateScope extends React.Component {
         const { classes } = this.props;
         const url = `/apis/${this.props.api.id}/scopes`;
         return (
-            <Grid container>
-                <Typography
-                    className={classes.headline}
-                    gutterBottom
-                    variant='h5'
-                    component='h2'
-                >
-                    <FormattedMessage
-                        id='Apis.Details.Scopes.CreateScope.create.new.scope'
-                        defaultMessage='Create New Scope'
-                    />
-                </Typography>
-                <Grid item lg={5} className={classes.topics}>
-                    <APIPropertyField name='Name'>
+            <div className={classes.root}>
+                <div className={classes.titleWrapper}>
+                    <Typography variant='h4' align='left' className={classes.mainTitle}>
+                        <FormattedMessage
+                            id='Apis.Details.Scopes.CreateScope.create.new.scope'
+                            defaultMessage='Create New Scope'
+                        />
+                    </Typography>
+                </div>
+                <div className={classes.contentWrapper}>
+                    <FormControl margin='normal' className={classes.FormControl}>
                         <TextField
-                            fullWidth
-                            error={this.state.valid.name.invalid}
-                            helperText={this.state.valid.name.error}
                             id='name'
-                            type='text'
-                            name='name'
+                            label='Name'
+                            style={{ margin: 8 }}
+                            placeholder='Scope Name'
+                            error={this.state.valid.name.invalid}
+                            helperText={
+                                this.state.valid.name.invalid ? (
+                                    this.state.valid.name.error
+                                ) : (
+                                    <FormattedMessage
+                                        id='Apis.Details.Scopes.CreateScope.short.description.name'
+                                        defaultMessage='Enter Scope Name ( Ex: creator )'
+                                    />
+                                )
+                            }
+                            fullWidth
                             margin='normal'
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                             value={this.state.apiScope.name || ''}
                             onChange={this.handleScopeNameInput}
                         />
-                    </APIPropertyField>
-                    <APIPropertyField name='Description'>
+                    </FormControl>
+                    <FormControl margin='normal' className={classes.FormControlOdd}>
                         <TextField
-                            style={{
-                                width: '100%',
-                            }}
                             id='description'
-                            name='description'
-                            helperText={<FormattedMessage
-                                id='Apis.Details.Scopes.CreateScope.short.description.about.the.scope'
-                                defaultMessage='Short description about the scope'
-                            />}
+                            label='Description'
+                            style={{ margin: 8 }}
+                            placeholder='Short description about the scope'
+                            helperText={
+                                <FormattedMessage
+                                    id='Apis.Details.Scopes.CreateScope.short.description.about.the.scope'
+                                    defaultMessage='Short description about the scope'
+                                />
+                            }
                             margin='normal'
-                            type='text'
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                             onChange={this.validateScopeDescription}
                             value={this.state.apiScope.description || ''}
+                            multiline
                         />
-                    </APIPropertyField>
-                    <APIPropertyField name='Roles'>
-                        <TagsInput
-                            value={this.state.roles}
-                            onChange={this.handleInputs}
-                            onlyUnique
-                        />
-                    </APIPropertyField>
-                    <Button
-                        variant='contained'
-                        color='primary'
-                        onClick={this.addScope}
-                        className={classes.buttonSave}
-                        disabled={this.state.valid.name.invalid}
+                    </FormControl>
+                    <FormControl
+                        margin='normal'
+                        className={classNames({ [classes.FormControl]: true, [classes.extraPadding]: true })}
                     >
-                        <FormattedMessage
-                            id='Apis.Details.Scopes.CreateScope.save'
-                            defaultMessage='Save'
-                        />
-                    </Button>
-                    <Link to={url}>
-                        <Button
-                            variant='contained'
-                            color='primary'
-                            className={classes.buttonCancel}
-                        >
+                        <FormLabel component='legend' className={classes.FormControlLabel}>
+                            <FormattedMessage id='Apis.Details.Scopes.CreateScope.roles' defaultMessage='Roles' />
+                        </FormLabel>
+                        <TagsInput value={this.state.roles} onChange={this.handleInputs} onlyUnique />
+                        <Typography variant='caption' className={classes.helpText}>
                             <FormattedMessage
-                                id='Apis.Details.Scopes.CreateScope.cancel'
-                                defaultMessage='Cancel'
+                                id='Apis.Details.Scopes.CreateScope.roles.help'
+                                defaultMessage={
+                                    'Enter a valid role and press enter. ' +
+                                    'You can do this multiple times to add multiple roles.'
+                                }
                             />
-                        </Button>
-                    </Link>
-                </Grid>
-            </Grid>
+                        </Typography>
+                    </FormControl>
+                    <Grid
+                        container
+                        direction='row'
+                        alignItems='flex-start'
+                        spacing={4}
+                        className={classes.buttonSection}
+                    >
+                        <Grid item>
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                onClick={this.addScope}
+                                disabled={this.state.valid.name.invalid}
+                                className={classes.saveButton}
+                            >
+                                <FormattedMessage id='Apis.Details.Scopes.CreateScope.save' defaultMessage='Save' />
+                            </Button>
+                            <Link to={url}>
+                                <Button variant='contained'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Scopes.CreateScope.cancel'
+                                        defaultMessage='Cancel'
+                                    />
+                                </Button>
+                            </Link>
+                        </Grid>
+                    </Grid>
+                </div>
+            </div>
         );
     }
 }

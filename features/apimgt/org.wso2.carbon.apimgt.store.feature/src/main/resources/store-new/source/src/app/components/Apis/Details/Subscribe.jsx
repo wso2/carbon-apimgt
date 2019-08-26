@@ -33,11 +33,10 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Slide from '@material-ui/core/Slide';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
+import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
 import PropTypes from 'prop-types';
 import Collapse from '@material-ui/core/Collapse';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Api from '../../../data/api';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
@@ -444,7 +443,7 @@ class Subscribe extends Component {
                         id: 'Apis.Details.Subscribe.show.more',
                     })}
                 >
-                    <ExpandMoreIcon />
+                    <Icon>expand_more</Icon>
                 </IconButton>
                 <Collapse in={this.state.expanded} timeout='auto' unmountOnExit>
                     asdfsdf
@@ -623,7 +622,7 @@ class Subscribe extends Component {
                                     id: 'Apis.Details.Subscribe.close.label',
                                 })}
                             >
-                                <CloseIcon />
+                                <Icon>close</Icon>
                             </IconButton>
                         </Grid>
                         <Grid item xs={11} className={classes.applicationCreateRoot} />

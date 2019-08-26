@@ -1,6 +1,6 @@
 <div class="main-content">
 
-        <h2>ProductAPI_operations</h2>
+        <h2>TenantList</h2>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -21,7 +21,22 @@
                 <tbody>
                     <tr>
                         <td class="parameter">
-                            <p>uritemplate</p>
+                            <p>count</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Number of tenants returned. </p></td>
+                        <td class="parameter">
+                                <a href="#!/models#integer">integer</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">1</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>list</p>
                             <p class="param-required">
                                 
                                 optional
@@ -29,14 +44,14 @@
                         </td>
                         <td class="parameter"><p class="marked"></p></td>
                         <td class="parameter">
-                                <a href="#!/models#string">string</a>
+                                <a href="#!/models#array">array</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>httpVerb</p>
+                            <p>pagination</p>
                             <p class="param-required">
                                 
                                 optional
@@ -44,7 +59,7 @@
                         </td>
                         <td class="parameter"><p class="marked"></p></td>
                         <td class="parameter">
-                                <a href="#!/models#string">string</a>
+                                <a href="#!/models#Pagination">Pagination</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked"></p></td>

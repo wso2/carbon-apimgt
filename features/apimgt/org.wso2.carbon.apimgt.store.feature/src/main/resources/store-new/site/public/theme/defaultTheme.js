@@ -21,6 +21,7 @@ const Configurations = {
                     leftMenu: '#1a1f2f',
                     leftMenuActive: '#000000',
                     drawer: '#1a1f2f',
+                    activeMenuItem: '#000000',
                 },
             },
             typography: {

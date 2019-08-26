@@ -25,9 +25,12 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { FormattedMessage } from 'react-intl';
 import MaterialIcons from 'MaterialIcons';
+import CONSTS from 'AppData/Constants';
+import APIProduct from 'AppData/APIProduct';
+import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import ImageGenerator from './ImageGenerator';
-import StarRatingBar from './StarRating';
 import Api from '../../../data/api';
+import { ApiContext } from '../Details/ApiContext';
 
 /**
  *
@@ -112,7 +115,6 @@ class ApiThumb extends React.Component {
             overview_link: '',
             isRedirect: false,
             openMoreMenu: false,
-            rating: 0,
             category: MaterialIcons.categories[0].name,
             selectedIcon: null,
             color: null,
@@ -127,9 +129,19 @@ class ApiThumb extends React.Component {
      * @memberof ApiThumb
      */
     componentDidMount() {
-        const restApi = new Api();
+        const { apiType } = this.context;
         const { api } = this.props;
-        restApi.getAPIThumbnail(api.id).then((response) => {
+
+        let restApi = null;
+
+        if (apiType === CONSTS.API_TYPE) {
+            restApi = new Api();
+        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            restApi = new APIProduct();
+        }
+        const promisedThumbnail = restApi.getAPIThumbnail(api.id);
+
+        promisedThumbnail.then((response) => {
             if (response && response.data) {
                 if (response.headers['content-type'] === 'application/json') {
                     const iconJson = JSON.parse(response.data);
@@ -145,12 +157,6 @@ class ApiThumb extends React.Component {
                 }
             }
         });
-        const promised_rating = restApi.getRatingFromUser(api.id, null);
-        promised_rating.then((response) => {
-            if (response) {
-                this.setState({ rating: response.obj.userRating });
-            }
-        });
     }
 
     /**
@@ -163,6 +169,23 @@ class ApiThumb extends React.Component {
     }
 
     /**
+     * Get Path Prefix depedning on the respective API Type being rendered
+     *
+     * @returns {String} path
+     * @memberof ApiThumb
+     */
+    getPathPrefix() {
+        const { apiType } = this.context;
+
+        let path = '/apis/';
+        if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            path = '/api-products/';
+        }
+
+        return path;
+    }
+
+    /**
      *
      *
      * @returns
@@ -172,17 +195,14 @@ class ApiThumb extends React.Component {
         const {
             imageObj, selectedIcon, color, backgroundIndex, category,
         } = this.state;
-        const { api, classes, theme, isApiProduct, } = this.props;
-        let details_link = '/apis/' + this.props.api.id;
-        if(isApiProduct) {
-            details_link = '/api-products/' + this.props.api.id;    
-        }
+        const path = this.getPathPrefix();
+
+        const details_link = path + this.props.api.id;
+        const { api, classes, theme } = this.props;
         const { thumbnail } = theme.custom;
         const {
             name, version, context, provider,
         } = api;
-        const { rating } = this.state;
-        const starColor = theme.palette.getContrastText(thumbnail.contentBackgroundColor);
         const imageWidth = thumbnail.width;
         const defaultImage = thumbnail.defaultApiImage;
 
@@ -251,7 +271,7 @@ class ApiThumb extends React.Component {
                     <div className={classes.thumbInfo}>
                         <div className={classes.thumbLeft}>
                             <Typography variant='subheading' gutterBottom align='left'>
-                                <StarRatingBar rating={rating} starColor={starColor} />
+                                <StarRatingBar apiRating={api.avgRating} apiId={api.id} isEditable={false} showSummary={false} />
                             </Typography>
                         </div>
                         <div className={classes.thumbRight}>
@@ -271,7 +291,8 @@ class ApiThumb extends React.Component {
 ApiThumb.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
-    isApiProduct: PropTypes.bool.isRequired,
 };
+
+ApiThumb.contextType = ApiContext;
 
 export default withStyles(styles, { withTheme: true })(ApiThumb);

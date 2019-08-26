@@ -180,6 +180,7 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.tenant.TenantConstants;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -1622,6 +1623,11 @@ public final class APIUtil {
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
     }
 
+    public static String getAPIProductOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
+        return APIConstants.API_PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
+                apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
+    }
+
     public static String getWSDLDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
         return APIConstants.API_WSDL_RESOURCE_LOCATION + apiProvider + "--" + apiName + apiVersion + ".wsdl";
     }
@@ -1634,7 +1640,7 @@ public final class APIUtil {
     public static String getAPIProductOpenAPIDefinitionFilePath(APIProductIdentifier identifier) {
         return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
                 + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR
-                + identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + RegistryConstants.PATH_SEPARATOR
+                + identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR
                 + identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion()
                 + RegistryConstants.PATH_SEPARATOR;
     }
@@ -4567,6 +4573,26 @@ public final class APIUtil {
         return tenantDomains;
     }
 
+    /**
+     * Get tenants by state
+     * @param state state of the tenant
+     * @return set of tenants
+     * @throws UserStoreException
+     */
+    public static Set<String> getTenantDomainsByState(String state) throws UserStoreException {
+        boolean isActive = state.equalsIgnoreCase(APIConstants.TENANT_STATE_ACTIVE);
+        if (isActive) {
+            return getActiveTenantDomains();
+        }
+        Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
+        Set<String> tenantDomains = new HashSet<>();
+        for (Tenant tenant : tenants) {
+            if (!tenant.isActive()) {
+                tenantDomains.add(tenant.getDomain());
+            }
+        }
+        return tenantDomains;
+    }
 
     /**
      * Retrieves the role list of system

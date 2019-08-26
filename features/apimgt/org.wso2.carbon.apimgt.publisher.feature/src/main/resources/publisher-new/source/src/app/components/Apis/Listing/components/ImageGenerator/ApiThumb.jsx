@@ -28,7 +28,7 @@ import Chip from '@material-ui/core/Chip';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import green from '@material-ui/core/colors/green';
-import API from 'AppData/api.js';
+import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import DeleteApiButton from 'AppComponents/Apis/Details/components/DeleteApiButton';
 
@@ -127,6 +127,9 @@ class APIThumb extends Component {
         api.apiType = API.CONSTS.API;
         if (isAPIProduct) {
             api.apiType = API.CONSTS.APIProduct;
+        }
+        if (!api.lifeCycleStatus) {
+            api.lifeCycleStatus = api.status;
         }
 
         return (

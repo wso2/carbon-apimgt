@@ -24,7 +24,7 @@ import ErrorOutline from '@material-ui/icons/ErrorOutline';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import Progress from 'AppComponents/Shared/Progress';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Dropzone from 'react-dropzone';
 import classNames from 'classnames';
 import Backup from '@material-ui/icons/Backup';
@@ -38,7 +38,6 @@ const styles = theme => ({
     },
     dropZoneInside: {},
     dropZone: {
-        width: '100%',
         color: theme.palette.grey[500],
         border: 'dashed 1px ' + theme.palette.grey[500],
         background: theme.palette.grey[100],
@@ -147,7 +146,9 @@ class ProvideGraphQL extends Component {
     validateGraphQL() {
         // do not invoke callback in case of React SyntheticMouseEvent
         const { file } = this.state;
-        const { valid, updateFileErrors, updateGraphQLBean } = this.props;
+        const {
+            valid, updateFileErrors, updateGraphQLBean, intl,
+        } = this.props;
         this.setState({ loading: true });
         const newAPI = new API();
         let promisedValidation = {};
@@ -168,30 +169,36 @@ class ProvideGraphQL extends Component {
         promisedValidation
             .then((response) => {
                 const { isValid, graphQLInfo } = response.obj;
-                graphQLBean.info = graphQLInfo;
-                graphQLBean.file = file;
-                validNew.graphQLFile.invalidFile = false;
+                if (graphQLInfo === null) {
+                    validNew.graphQLFile.invalidFile = true;
+                    const message =
+                    intl.formatMessage({
+                        id: 'Apis.GraphQL.Steps.ProvideGraphQL.file.invalid.file',
+                        defaultMessage: 'Invalid file',
+                    });
+                    this.setState({
+                        isValid, errorMessage: message, loading: false, file,
+                    });
+                } else {
+                    graphQLBean.info = graphQLInfo;
+                    graphQLBean.file = file;
+                    validNew.graphQLFile.invalidFile = false;
+                }
                 updateFileErrors(validNew);
-                this.setState({ isValid, loading: false, file });
                 updateGraphQLBean(graphQLBean);
+                this.setState({ isValid, loading: false, file });
             })
-            .catch((error) => {
+            .catch(() => {
                 // Update the parent's state
                 validNew.graphQLFile.invalidFile = true;
                 updateFileErrors(validNew);
                 updateGraphQLBean(graphQLBean);
-                const response = error.response && error.response.obj;
-
                 const message =
-                    Intl.formatMessage({
-                        id: 'Apis.Details.APIDefinition.APIDefinition.file.validation.failed',
-                        defaultMessage: 'Error while validating GraphQL!! ' +
-                        response && '[' + response.message + '] '
-                        + response.description,
-                    });
-
+                intl.formatMessage({
+                    id: 'Apis.GraphQL.Steps.ProvideGraphQL.file.invalid.file',
+                    defaultMessage: 'Invalid file',
+                });
                 this.setState({ isValid: false, errorMessage: message, loading: false });
-                console.error(error);
             });
     }
 
@@ -259,12 +266,6 @@ class ProvideGraphQL extends Component {
                                 defaultMessage='This field can not be empty.'
                             />
                         )}
-                        {valid.graphQLFile.invalidFile && (
-                            <FormattedMessage
-                                id='Apis.GraphQL.Steps.ProvideGraphQL.error.invalid.graphql.file'
-                                defaultMessage='Invalid GraphQL File'
-                            />
-                        )}
                     </FormHelperText>
                 </React.Fragment>
             </React.Fragment>
@@ -284,6 +285,9 @@ ProvideGraphQL.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     updateFileErrors: PropTypes.func.isRequired,
     updateGraphQLValidity: PropTypes.func.isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
-export default withStyles(styles)(ProvideGraphQL);
+export default withStyles(styles)(injectIntl(ProvideGraphQL));

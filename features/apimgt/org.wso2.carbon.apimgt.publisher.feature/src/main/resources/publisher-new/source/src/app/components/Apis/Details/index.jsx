@@ -28,6 +28,7 @@ import BusinessIcon from '@material-ui/icons/Business';
 import CodeIcon from '@material-ui/icons/Code';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
+import MonetizationIcon from '@material-ui/icons/LocalAtm';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl, defineMessages } from 'react-intl';
 import { Redirect, Route, Switch, Link, matchPath } from 'react-router-dom';
@@ -47,6 +48,7 @@ import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
 import Operations from './Operations/Operations';
 import Resources from './Resources/Resources';
+import ProductResourcesView from './Resources/ProductResourcesView';
 import Endpoints from './Endpoints/Endpoints';
 import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
@@ -56,6 +58,7 @@ import APIDefinition from './APIDefinition/APIDefinition';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
+import Monetization from './Monetization';
 import { APIProvider } from './components/ApiContext';
 import CreateNewVersion from './NewVersion/NewVersion';
 
@@ -69,6 +72,7 @@ const styles = theme => ({
         bottom: 0,
         left: 0,
         top: 0,
+        overflowY: 'auto',
     },
     leftLInkMain: {
         borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
@@ -184,8 +188,9 @@ class Details extends Component {
     componentDidUpdate() {
         const { api } = this.state;
         const { apiUUID } = this.props.match.params;
+        const { apiProdUUID } = this.props.match.params;
         const { isAPIProduct } = this.props.isAPIProduct;
-        if (!api || api.id === apiUUID) {
+        if (!api || (api.id === apiUUID || api.id === apiProdUUID)) {
             return;
         }
         if (isAPIProduct) {
@@ -227,9 +232,11 @@ class Details extends Component {
      */
     setAPIProduct() {
         const { apiProdUUID } = this.props.match.params;
+        const { isAPIProduct } = this.props;
         const promisedApi = APIProduct.get(apiProdUUID);
         promisedApi
             .then((api) => {
+                this.setState({ isAPIProduct });
                 this.setState({ api });
             })
             .catch((error) => {
@@ -293,55 +300,33 @@ class Details extends Component {
     /**
      *
      *
-     * @param {*} newAPI
+     * @param {*} updatedProperties
      * @param {*} isAPIProduct
      * @memberof Details
      */
-    updateAPI(newAPI, isAPIProduct) {
-        const restAPI = (isAPIProduct || newAPI.apiType === Api.CONSTS.APIProduct) ? new APIProduct() : new Api();
-        /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
-        /* eslint no-param-reassign: ["error", { "props": false }] */
-        if (newAPI._data) delete newAPI._data;
-        if (newAPI.client) delete newAPI.client;
-
-        const modifiedNewAPI = JSON.parse(JSON.stringify(newAPI));
-        if (modifiedNewAPI.apiType) delete modifiedNewAPI.apiType;
-
+    updateAPI(updatedProperties, isAPIProduct) {
+        const { api } = this.state;
+        let promisedUpdate;
+        // TODO: Ideally, The state should hold the corresponding API object
+        // which we could call it's `update` method safely ~tmkb
         if (isAPIProduct) {
-            const promisedApi = restAPI.update(modifiedNewAPI);
-            promisedApi
-                .then((response) => {
-                    const { obj: api } = response;
-                    Alert.info(`${api.name} updated successfully.`);
-                    this.setState({ api });
-                })
-                .catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.log(error);
-                    }
-                    const { status } = error;
-                    if (status === 404) {
-                        this.setState({ apiNotFound: true });
-                    }
-                });
+            const restAPI = new Api();
+            promisedUpdate = restAPI.updateProduct(JSON.parse(JSON.stringify(updatedProperties)));
         } else {
-            const promisedApi = restAPI.update(modifiedNewAPI);
-            promisedApi
-                .then((response) => {
-                    const { obj: api } = response;
-                    Alert.info(`${api.name} updated successfully.`);
-                    this.setState({ api });
-                })
-                .catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.log(error);
-                    }
-                    const { status } = error;
-                    if (status === 404) {
-                        this.setState({ apiNotFound: true });
-                    }
-                });
+            promisedUpdate = api.update(updatedProperties);
         }
+        return promisedUpdate.then((updatedAPI) => {
+            Alert.info(`${updatedAPI.name} API updated successfully`);
+            this.setState({ api: updatedAPI });
+            return updatedAPI;
+        }).catch((error) => {
+            // TODO: Should log and handle the error case by the original callee ~tmkb
+            console.error(error);
+            Alert.error(`Something went wrong while updating the ${api.name} API!!`);
+            // Kinda force render,Resting API object to old one
+            this.setState({ api });
+            throw error;
+        });
     }
 
     /**
@@ -515,6 +500,16 @@ class Details extends Component {
                             active={active}
                             Icon={<PropertiesIcon />}
                         />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.monetization',
+                                defaultMessage: 'monetization',
+                            })}
+                            handleMenuSelect={this.handleMenuSelect}
+                            active={active}
+                            Icon={<MonetizationIcon />}
+                        />
+
                     </div>
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} />
@@ -549,6 +544,12 @@ class Details extends Component {
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
 
                                 <Route path={Details.subPaths.OPERATIONS} component={() => <Operations api={api} />} />
+                                <Route
+                                    path={Details.subPaths.RESOURCES_PRODUCT}
+                                    component={() =>
+                                        <ProductResourcesView api={api} />}
+                                />
+
                                 <Route path={Details.subPaths.RESOURCES} component={() => <Resources api={api} />} />
 
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
@@ -578,6 +579,10 @@ class Details extends Component {
                                     component={() => <Properties api={api} />}
                                 />
                                 <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
+                                <Route
+                                    path={Details.subPaths.MONETIZATION}
+                                    component={() => <Monetization api={api} />}
+                                />
                             </Switch>
                         </div>
                     </div>
@@ -604,7 +609,7 @@ Details.subPaths = {
     ENDPOINTS: '/apis/:api_uuid/endpoints',
     OPERATIONS: '/apis/:api_uuid/operations',
     RESOURCES: '/apis/:api_uuid/resources',
-    RESOURCES_PRODUCT: '/api_products/:apiprod_uuid/resources',
+    RESOURCES_PRODUCT: '/api-products/:apiprod_uuid/resources',
     SCOPES: '/apis/:api_uuid/scopes',
     SCOPES_PRODUCT: '/api-products/:apiprod_uuid/scopes',
     DOCUMENTS: '/apis/:api_uuid/documents',
@@ -617,6 +622,7 @@ Details.subPaths = {
     PROPERTIES: '/apis/:api_uuid/properties',
     PROPERTIES_PRODUCT: '/api-products/:apiprod_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
+    MONETIZATION: '/apis/:api_uuid/monetization',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum

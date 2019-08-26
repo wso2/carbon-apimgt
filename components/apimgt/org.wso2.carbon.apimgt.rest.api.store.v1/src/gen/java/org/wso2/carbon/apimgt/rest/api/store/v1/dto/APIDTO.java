@@ -47,6 +47,7 @@ public class APIDTO   {
     private List<LabelDTO> labels = new ArrayList<>();
     private List<String> environmentList = new ArrayList<>();
     private List<ScopeInfoDTO> scopes = new ArrayList<>();
+    private String avgRating = null;
 
   /**
    * UUID of the api 
@@ -478,6 +479,24 @@ public class APIDTO   {
     this.scopes = scopes;
   }
 
+  /**
+   * The average rating of the API
+   **/
+  public APIDTO avgRating(String avgRating) {
+    this.avgRating = avgRating;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "4.5", value = "The average rating of the API")
+  @JsonProperty("avgRating")
+  public String getAvgRating() {
+    return avgRating;
+  }
+  public void setAvgRating(String avgRating) {
+    this.avgRating = avgRating;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -511,12 +530,13 @@ public class APIDTO   {
         Objects.equals(businessInformation, API.businessInformation) &&
         Objects.equals(labels, API.labels) &&
         Objects.equals(environmentList, API.environmentList) &&
-        Objects.equals(scopes, API.scopes);
+        Objects.equals(scopes, API.scopes) &&
+        Objects.equals(avgRating, API.avgRating);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, endpointURLs, businessInformation, labels, environmentList, scopes);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating);
   }
 
   @Override
@@ -548,6 +568,7 @@ public class APIDTO   {
     sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    environmentList: ").append(toIndentedString(environmentList)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");
     sb.append("}");
     return sb.toString();
   }

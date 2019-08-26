@@ -39,7 +39,6 @@ const styles = theme => ({
         marginBottom: 0,
     },
     buttonRight: {
-        alignSelf: 'flex-end',
         display: 'flex',
     },
     ListingWrapper: {
@@ -57,10 +56,11 @@ const styles = theme => ({
         paddingLeft: 35,
         paddingRight: 20,
     },
-    mainTitle: {
-        paddingTop: 10,
+    mainTitleWrapper: {
+        display: 'flex',
+        justifyContent: 'center',
+        flexDirection: 'column',
     },
-    mainTitleWrapper: {},
     APICreateMenu: {
         flexGrow: 1,
         display: 'flex',
@@ -74,6 +74,33 @@ const styles = theme => ({
         background: '#15b8cf',
     },
 });
+
+/**
+ *
+ * @param props
+ * @returns {*}
+ */
+function getTitleForArtifactType(props) {
+    const {
+        isAPIProduct, query,
+    } = props;
+    if (query) {
+        return (
+            <FormattedMessage id='Apis.Listing.components.TopMenu.search.results' defaultMessage='Search Result(s)' />
+        );
+    } else if (isAPIProduct) {
+        return (
+            <FormattedMessage
+                id='Apis.Listing.components.TopMenu.apiproduct(s)'
+                defaultMessage='API Product(s)'
+            />
+        );
+    } else {
+        return (
+            <FormattedMessage id='Apis.Listing.components.TopMenu.api(s)' defaultMessage='API(s)' />
+        );
+    }
+}
 
 /**
  *
@@ -93,8 +120,8 @@ function TopMenu(props) {
             </div>
             <div className={classes.mainTitleWrapper}>
                 {data && (
-                    <div>
-                        <Typography variant='display1' className={classes.mainTitle}>
+                    <React.Fragment>
+                        <Typography variant='display1' className={classes.mainTitle} component='div'>
                             {isAPIProduct ? (
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.apiproducts'
@@ -104,22 +131,15 @@ function TopMenu(props) {
                                 <FormattedMessage id='Apis.Listing.components.TopMenu.apis' defaultMessage='APIs' />
                             )}
                         </Typography>
-                        <Typography variant='caption' gutterBottom align='left'>
+                        <Typography variant='caption' gutterBottom align='left' component='div'>
                             <FormattedMessage
                                 id='Apis.Listing.components.TopMenu.displaying'
                                 defaultMessage='Displaying'
                             />
-                            {count}
-                            {isAPIProduct ? (
-                                <FormattedMessage
-                                    id='Apis.Listing.components.TopMenu.apiproduct(s)'
-                                    defaultMessage='API Product(s)'
-                                />
-                            ) : (
-                                <FormattedMessage id='Apis.Listing.components.TopMenu.api(s)' defaultMessage='API(s)' />
-                            )}
+                            {' '} {count} {' '}
+                            {getTitleForArtifactType(props)}
                         </Typography>
-                    </div>
+                    </React.Fragment>
                 )}
             </div>
             <VerticalDivider height={70} />
@@ -140,12 +160,7 @@ function TopMenu(props) {
                 )}
             </div>
             <div className={classes.buttonRight}>
-                <IconButton
-                    className={classes.button}
-                    onClick={() => {
-                        setListType('list');
-                    }}
-                >
+                <IconButton className={classes.button} onClick={() => setListType('list')}>
                     <List color={listType === 'list' ? 'primary' : 'default'} />
                 </IconButton>
                 <IconButton className={classes.button} onClick={() => setListType('grid')}>

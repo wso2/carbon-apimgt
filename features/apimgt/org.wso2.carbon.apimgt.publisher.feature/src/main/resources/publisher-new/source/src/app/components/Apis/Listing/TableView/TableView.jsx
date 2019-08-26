@@ -21,12 +21,13 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
-import { injectIntl } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import queryString from 'query-string';
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
-import Configurations from 'Config';
 import ImageGenerator from 'AppComponents/Apis/Listing/components/ImageGenerator/ImageGenerator';
 import ApiThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/ApiThumb';
+import DocThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/DocThumb';
 import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import SampleAPI from 'AppComponents/Apis/Listing/SampleAPI/SampleAPI';
@@ -34,7 +35,7 @@ import TopMenu from 'AppComponents/Apis/Listing/components/TopMenu';
 
 const styles = theme => ({
     contentInside: {
-        paddingLeft: theme.spacing.unit * 3,
+        padding: theme.spacing.unit * 3,
         paddingTop: theme.spacing.unit * 2,
         '& > div[class^="MuiPaper-root-"]': {
             boxShadow: 'none',
@@ -43,6 +44,12 @@ const styles = theme => ({
     },
 });
 
+/**
+ *
+ *
+ * @class TableView
+ * @extends {React.Component}
+ */
 class TableView extends React.Component {
     constructor(props) {
         super(props);
@@ -65,8 +72,8 @@ class TableView extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
-        const { isAPIProduct } = this.props;
-        if (isAPIProduct !== prevProps.isAPIProduct) {
+        const { isAPIProduct, query } = this.props;
+        if (isAPIProduct !== prevProps.isAPIProduct || query !== prevProps.query) {
             this.getLocalStorage();
             this.getData();
         }
@@ -74,6 +81,8 @@ class TableView extends React.Component {
 
     getMuiTheme = () => {
         const { listType } = this.state;
+        const { theme } = this.props;
+        let themeAdditions = {};
         let muiTheme = {
             overrides: {
                 MUIDataTable: {
@@ -99,7 +108,7 @@ class TableView extends React.Component {
             },
         };
         if (listType === 'grid') {
-            const themeAdditions = {
+            themeAdditions = {
                 overrides: {
                     MUIDataTable: {
                         tableRoot: {
@@ -116,8 +125,8 @@ class TableView extends React.Component {
                     },
                 },
             };
-            muiTheme = Object.assign(Configurations.themes.light, muiTheme, themeAdditions);
         }
+        muiTheme = Object.assign(theme, muiTheme, themeAdditions);
         return createMuiTheme(muiTheme);
     };
 
@@ -189,7 +198,13 @@ class TableView extends React.Component {
     }
     xhrRequest = () => {
         const { page, rowsPerPage } = this;
-        const { isAPIProduct } = this.props;
+        const { isAPIProduct, query } = this.props;
+        if (query) {
+            const composeQuery = queryString.parse(query);
+            composeQuery.limit = this.rowsPerPage;
+            composeQuery.offset = page * rowsPerPage;
+            return API.search(composeQuery);
+        }
         if (isAPIProduct) {
             return APIProduct.all({ limit: this.rowsPerPage, offset: page * rowsPerPage });
         } else {
@@ -197,8 +212,17 @@ class TableView extends React.Component {
         }
     };
 
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof TableView
+     */
     render() {
-        const { intl, isAPIProduct, classes } = this.props;
+        const {
+            intl, isAPIProduct, classes, query,
+        } = this.props;
         const columns = [
             {
                 name: 'id',
@@ -214,10 +238,10 @@ class TableView extends React.Component {
                     defaultMessage: 'image',
                 }),
                 options: {
-                    customBodyRender: (value, tableMeta) => {
+                    customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
                         if (tableMeta.rowData) {
-                            const apiName = tableMeta.rowData[2];
-                            return <ImageGenerator api={apiName} width={30} height={30} />;
+                            const artifact = tableViewObj.state.apisAndApiProducts[tableMeta.rowIndex];
+                            return <ImageGenerator api={artifact} width={30} height={30} />;
                         }
                         return <span />;
                     },
@@ -235,12 +259,26 @@ class TableView extends React.Component {
                     customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
                         if (tableMeta.rowData) {
                             const { isAPIProduct } = tableViewObj.props; // eslint-disable-line no-shadow
+                            const artifact = tableViewObj.state.apisAndApiProducts[tableMeta.rowIndex];
                             const apiName = tableMeta.rowData[2];
                             const apiId = tableMeta.rowData[0];
                             if (isAPIProduct) {
                                 return <Link to={'/api-products/' + apiId + '/overview'}>{apiName}</Link>;
                             }
-                            return <Link to={'/apis/' + apiId + '/overview'}>{apiName}</Link>;
+                            if (artifact) {
+                                if (artifact.type === 'DOC') {
+                                    return (
+                                        <Link to={'/apis/' + artifact.apiUUID + '/documents/' + apiId + '/details'}>
+                                            <FormattedMessage
+                                                id='Apis.Listing.TableView.TableView.doc.flag'
+                                                defaultMessage=' [Doc]'
+                                            />
+                                            {apiName}
+                                        </Link>
+                                    );
+                                }
+                                return <Link to={'/apis/' + apiId + '/overview'}>{apiName}</Link>;
+                            }
                         }
                         return <span />;
                     },
@@ -308,15 +346,19 @@ class TableView extends React.Component {
         if (listType === 'grid') {
             options.customRowRender = (data, dataIndex, rowIndex, tableViewObj = this) => {
                 const { isAPIProduct } = tableViewObj.props; // eslint-disable-line no-shadow
-                const [id, name, , version, context, provider] = data;
-                const api = {
-                    id,
-                    name: name.props.api,
-                    version,
-                    context,
-                    provider,
-                };
-                return <ApiThumb api={api} isAPIProduct={isAPIProduct} updateData={tableViewObj.updateData} />;
+                const artifact = tableViewObj.state.apisAndApiProducts[dataIndex];
+                if (artifact) {
+                    if (artifact.type === 'DOC') {
+                        return (<DocThumb doc={artifact} />);
+                    } else {
+                        return (<ApiThumb
+                            api={artifact}
+                            isAPIProduct={isAPIProduct}
+                            updateData={tableViewObj.updateData}
+                        />);
+                    }
+                }
+                return <span />;
             };
             options.title = false;
             options.filter = false;
@@ -339,7 +381,7 @@ class TableView extends React.Component {
         if (notFound) {
             return <ResourceNotFound />;
         }
-        if (apisAndApiProducts.length === 0) {
+        if (apisAndApiProducts.length === 0 && !query) {
             return (
                 <React.Fragment>
                     <TopMenu
@@ -350,7 +392,7 @@ class TableView extends React.Component {
                         listType={listType}
                     />
                     <div className={classes.contentInside}>
-                        <SampleAPI isAPIProduct={isAPIProduct} />;
+                        <SampleAPI isAPIProduct={isAPIProduct} />
                     </div>
                 </React.Fragment>
             );
@@ -364,6 +406,7 @@ class TableView extends React.Component {
                     setListType={this.setListType}
                     isAPIProduct={isAPIProduct}
                     listType={listType}
+                    query={query}
                 />
                 <div className={classes.contentInside}>
                     <MuiThemeProvider theme={this.getMuiTheme()}>
@@ -375,7 +418,7 @@ class TableView extends React.Component {
     }
 }
 
-export default injectIntl(withStyles(styles)(TableView));
+export default injectIntl(withStyles(styles, { withTheme: true })(TableView));
 
 TableView.propTypes = {
     classes: PropTypes.shape({}).isRequired,
@@ -384,4 +427,9 @@ TableView.propTypes = {
     theme: PropTypes.shape({
         custom: PropTypes.string,
     }).isRequired,
+    query: PropTypes.string,
+};
+
+TableView.defaultProps = {
+    query: '',
 };

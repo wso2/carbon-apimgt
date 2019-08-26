@@ -25,7 +25,7 @@ import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { injectIntl } from 'react-intl';
 
-import { renderInput, renderSuggestion, getSuggestions, getSuggestionValue } from './SearchUtils';
+import { renderInput, renderSuggestion, getSuggestions, getSuggestionValue, buildSearchQuery } from './SearchUtils';
 
 const styles = theme => ({
     container: {
@@ -91,22 +91,50 @@ class HeaderSearch extends React.Component {
         this.handleSuggestionsFetchRequested = this.handleSuggestionsFetchRequested.bind(this);
         this.handleSuggestionsClearRequested = this.handleSuggestionsClearRequested.bind(this);
         this.handleChange = this.handleChange.bind(this);
+        this.onKeyDown = this.onKeyDown.bind(this);
         this.clearOnBlur = this.clearOnBlur.bind(this);
         this.renderSuggestionsContainer = this.renderSuggestionsContainer.bind(this);
         this.onSuggestionSelected = this.onSuggestionSelected.bind(this);
     }
-
     /**
      * To provide accessibility for Enter key upon suggestion selection
      * @param {React.SyntheticEvent} event event
      * @param {Object} suggestion This is either API object or document coming from search API call
      */
     onSuggestionSelected(event, { suggestion }) {
+        this.suggestionSelected = true;
         if (event.key === 'Enter') {
             const path = suggestion.type === 'API' ? `/apis/${suggestion.id}/overview` :
                 `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/details`;
             this.props.history.push(path);
         }
+    }
+
+    /**
+     * On enter pressed after giving a search text
+     * @param event
+     */
+    onKeyDown(event) {
+        if (event.key === 'Enter' && !this.suggestionSelected) {
+            const { history } = this.props;
+            history.push('/apis/search?query=' + buildSearchQuery(event.target.value));
+        }
+        this.suggestionSelected = false;
+    }
+
+    suggestionSelected = false;
+
+    /**
+     * On change search input element
+     *
+     * @param {React.SyntheticEvent} event ReactDOM event
+     * @param {String} { newValue } Changed value
+     * @memberof HeaderSearch
+     */
+    handleChange(event, { newValue }) {
+        this.setState({
+            searchText: newValue,
+        });
     }
 
     /**
@@ -122,7 +150,6 @@ class HeaderSearch extends React.Component {
         });
     }
 
-
     /**
      * Handle the suggestions clear Synthetic event
      *
@@ -133,20 +160,6 @@ class HeaderSearch extends React.Component {
             suggestions: [],
         });
     }
-
-    /**
-     * On change search input element
-     *
-     * @param {React.SyntheticEvent} event ReactDOM event
-     * @param {String} { newValue } Changed value
-     * @memberof HeaderSearch
-     */
-    handleChange(event, { newValue }) {
-        this.setState({
-            searchText: newValue,
-        });
-    }
-
     /**
      *
      * When search input is focus out (Blur), Clear the input text to accept brand new search
@@ -224,6 +237,7 @@ class HeaderSearch extends React.Component {
                     }),
                     value: searchText,
                     onChange: this.handleChange,
+                    onKeyDown: this.onKeyDown,
                     onBlur: this.clearOnBlur,
                     isLoading,
                 }}
@@ -249,3 +263,4 @@ HeaderSearch.propTypes = {
 };
 
 export default injectIntl(withRouter(withStyles(styles)(HeaderSearch)));
+

@@ -1593,7 +1593,7 @@ paths:
   # The "Import GraphQL API Schema from API Definition"  resource API
   ######################################################
 
-  /apis/import-graphQLSchema:
+  /apis/import-graphql-schema:
 
     #----------------------------------------------------------------------------
     # Import API from API Definition
@@ -6578,13 +6578,9 @@ definitions:
         type: string
         example: 01234567-0123-0123-0123-012345678901
       operations:
-       type: array
-       items:
-        properties:
-          uritemplate:
-            type: string
-          httpVerb:
-            type: string
+        type: array
+        items:
+          $ref: '#/definitions/APIOperations'
 
   #-----------------------------------------------------
   # The Resource Path resource

@@ -27,6 +27,7 @@ const Apis = () => {
         <Switch>
             <Route exact path='/apis' render={props => <Listing {...props} isAPIProduct={false} />} />
             <Route exact path='/api-products' render={props => <Listing {...props} isAPIProduct />} />
+            <Route path='/apis/search' render={props => <Listing {...props} isAPIProduct={false} />} />
             <Route path='/apis/create' component={ApiCreate} />
             <Route path='/api-products/create' component={ApiCreate} />
             <Route path='/apis/:apiUUID/' render={props => <Details {...props} isAPIProduct={false} />} />

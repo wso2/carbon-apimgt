@@ -31,7 +31,7 @@ module.exports = {
         jest: true,
         node: true
     },
-    extends: ['airbnb', 'plugin:jest/recommended'],
+    extends: ['airbnb', 'plugin:jest/recommended'], // http://airbnb.io/javascript/react/
     rules: {
         'max-len': ['error', { code: 120, tabWidth: 4 }],
         'require-jsdoc': [

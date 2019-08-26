@@ -88,10 +88,10 @@ Do the following as required
 -   For [React Intl](https://github.com/formatjs/react-intl/blob/master/docs/Testing-with-React-Intl.md) wrapper
 
 
-    Use the [IntlHelper.js](source/Tests/Utils/IntlHelper.js) If we could not survive with this Util we might need to add [this package](https://github.com/joetidee/enzyme-react-intl) to get the full support
+    Use the [IntlHelper.js](source/Tests/Utils/IntlHelper) If we could not survive with this Util we might need to add [this package](https://github.com/joetidee/enzyme-react-intl) to get the full support
     i:e
     ```javascript
-    import { mountWithIntl } from 'AppTests/Utils/IntlHelper.js';
+    import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
     .
     .
     .

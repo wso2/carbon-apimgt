@@ -23,8 +23,7 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import { FormattedMessage } from 'react-intl';
@@ -154,13 +153,15 @@ class AppsTableContent extends Component {
                                             <Tooltip title='Edit'>
                                                 <Link to={'application/edit/' + app.applicationId}>
                                                     <IconButton>
-                                                        <EditIcon aria-label={(
+                                                        <Icon aria-label={(
                                                             <FormattedMessage
                                                                 id='Applications.Listing.AppsTableContent.edit.btn'
                                                                 defaultMessage='Edit'
                                                             />
                                                         )}
-                                                        />
+                                                        >
+                                                            edit   
+                                                        </Icon>
                                                     </IconButton>
                                                 </Link>
                                             </Tooltip>
@@ -189,7 +190,7 @@ class AppsTableContent extends Component {
                                                     />
                                                 )}
                                             >
-                                                <DeleteIcon />
+                                                <Icon>delete</Icon>
                                             </IconButton>
                                         </Tooltip>
                                     </ScopeValidation>

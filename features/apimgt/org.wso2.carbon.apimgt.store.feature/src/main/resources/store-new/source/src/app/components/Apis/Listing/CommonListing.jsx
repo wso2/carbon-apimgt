@@ -20,14 +20,11 @@ import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
-import GridIcon from '@material-ui/icons/GridOn';
-import Grid from '@material-ui/core/Grid';
-import List from '@material-ui/icons/List';
+import Icon from '@material-ui/core/Icon';
 import { withStyles } from '@material-ui/core/styles';
 import CustomIcon from '../../Shared/CustomIcon';
-import Loading from '../../Base/Loading/Loading';
-import ApiThumb from './ApiThumb';
 import ApiTableView from './ApiTableView';
+import { ApiContext } from '../Details/ApiContext';
 
 const styles = theme => ({
     rightIcon: {
@@ -66,6 +63,9 @@ const styles = theme => ({
     content: {
         flexGrow: 1,
     },
+    listContentWrapper: {
+        padding: `0 ${theme.spacing.unit * 3}px`,
+    }
 });
 
 /**
@@ -104,7 +104,9 @@ class CommonListing extends React.Component {
      * @memberof CommonListing
      */
     render() {
-        const { apis, isApiProduct, theme, classes } = this.props;
+        const {
+            apis, apiType, theme, classes,
+        } = this.props;
         const { listType } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
 
@@ -128,16 +130,27 @@ class CommonListing extends React.Component {
                     </div>
                     <div className={classes.buttonRight}>
                         <IconButton className={classes.button} onClick={() => this.setListType('list')}>
-                            <List color={listType === 'list' ? 'primary' : 'default'} />
+                            <Icon color={listType === 'list' ? 'primary' : 'default'}>list</Icon>
                         </IconButton>
                         <IconButton className={classes.button} onClick={() => this.setListType('grid')}>
-                            <GridIcon color={listType === 'grid' ? 'primary' : 'default'} />
+                            <Icon color={listType === 'grid' ? 'primary' : 'default'}>grid_on</Icon>
                         </IconButton>
                     </div>
                 </div>
-
-                {listType === 'grid' && <ApiTableView gridView isApiProduct={isApiProduct} />}
-                {listType === 'list' && <ApiTableView gridView={false} isApiProduct={isApiProduct} />}
+                <div className={classes.listContentWrapper}>
+                    {listType === 'grid'
+                    && (
+                        <ApiContext.Provider value={{ apiType }}>
+                            <ApiTableView gridView />
+                        </ApiContext.Provider>
+                    )}
+                    {listType === 'list'
+                    && (
+                        <ApiContext.Provider value={{ apiType }}>
+                            <ApiTableView gridView={false} />
+                        </ApiContext.Provider>
+                    )}
+                </div>
             </main>
         );
     }
@@ -146,6 +159,8 @@ class CommonListing extends React.Component {
 CommonListing.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
+    apiType: PropTypes.string.isRequired,
+    apis: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(CommonListing);

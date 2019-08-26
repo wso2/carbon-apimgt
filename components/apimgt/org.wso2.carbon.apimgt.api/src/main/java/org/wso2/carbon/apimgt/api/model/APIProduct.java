@@ -47,6 +47,8 @@ public class APIProduct {
     private JSONObject additionalProperties = new JSONObject();
     private Set<String> environments;
 
+    private Set<Scope> scopes;
+
     /**
      * API security at the gateway level.
      */
@@ -325,6 +327,14 @@ public class APIProduct {
 
     public void setCorsConfiguration(CORSConfiguration corsConfiguration) {
         this.corsConfiguration = corsConfiguration;
+    }
+
+    public Set<Scope> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(Set<Scope> scopes) {
+        this.scopes = scopes;
     }
 
     public void setCreatedTime(Date createdTime) {

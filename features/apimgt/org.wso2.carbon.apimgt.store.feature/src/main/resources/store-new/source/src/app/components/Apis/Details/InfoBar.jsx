@@ -18,41 +18,24 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import {
-    KeyboardArrowLeft, StarRate, FileCopy, ArrowDropDownOutlined, ArrowDropUpOutlined,
-} from '@material-ui/icons';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
-import TextField from '@material-ui/core/TextField';
-import HighlightOff from '@material-ui/icons/HighlightOff';
+import Icon from '@material-ui/core/Icon';
 import { Link } from 'react-router-dom';
-import CopyToClipboard from 'react-copy-to-clipboard';
-import Tooltip from '@material-ui/core/Tooltip';
 import Collapse from '@material-ui/core/Collapse';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import CalendarViewDay from '@material-ui/icons/CalendarViewDay';
-import AccountBalanceWallet from '@material-ui/icons/AccountBalanceWallet';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import CheckCircle from '@material-ui/icons/CheckCircle';
-import Cloud from '@material-ui/icons/Cloud';
-import Build from '@material-ui/icons/Build';
-import Update from '@material-ui/icons/Update';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import Grid from '@material-ui/core/Grid';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Grade from '@material-ui/icons/Grade';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import VerticalDivider from '../../Shared/VerticalDivider';
 import ImageGenerator from '../Listing/ImageGenerator';
-import Api from '../../../data/api';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
+import AuthManager from '../../../data/AuthManager';
 import { ApiContext } from './ApiContext';
-
+import Environments from './Environments';
 /**
  *
  *
@@ -68,6 +51,7 @@ const styles = theme => ({
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         display: 'flex',
         alignItems: 'center',
+        paddingLeft: theme.spacing.unit * 2,
     },
     backIcon: {
         color: theme.palette.primary.main,
@@ -85,11 +69,11 @@ const styles = theme => ({
         marginRight: 10,
     },
     starRate: {
-        fontSize: 70,
+        fontSize: 40,
         color: theme.custom.starColor,
     },
     starRateMy: {
-        fontSize: 70,
+        fontSize: 40,
         color: theme.palette.primary.main,
     },
     rateLink: {
@@ -252,237 +236,11 @@ const styles = theme => ({
     downloadLink: {
         color: 'blue',
     },
+    contentToTop: {
+        verticlaAlign: 'top',
+    },
 });
 
-/**
- *
- *
- * @class StarRatingBar
- * @extends {React.Component}
- */
-class StarRatingBar extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            rating: null,
-            dummyRateValue: 1,
-            showRateNow: false,
-        };
-
-        this.handleMouseOver = this.handleMouseOver.bind(this);
-        this.handleRatingUpdate = this.handleRatingUpdate.bind(this);
-        this.handleMouseOut = this.handleMouseOut.bind(this);
-    }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    updateRating() {
-        const api = new Api();
-
-        // get user rating
-        const promised_rating = api.getRatingFromUser(this.props.apiIdProp, null);
-        promised_rating.then((response) => {
-            this.setState({
-                // rating: response.obj,
-                // dummyRateValue: response.obj.userRating,
-            });
-        });
-    }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    componentDidMount() {
-        this.updateRating();
-    }
-
-    /**
-     *
-     *
-     * @param {*} index
-     * @memberof StarRatingBar
-     */
-    handleMouseOver(index) {
-        this.setState({ rating: index });
-    }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    handleMouseOut() {
-        this.setState({ rating: this.state.previousRating });
-    }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    handleRatingUpdate() { }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    handleClickAway = () => {
-        this.setState({
-            showRateNow: false,
-        });
-    };
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    showRateBox = () => {
-        this.setState({
-            showRateNow: true,
-        });
-    };
-
-    /**
-     *
-     *
-     * @param {*} index
-     * @memberof StarRatingBar
-     */
-    highlightUs(index) {
-        this.setState({ dummyRateValue: index });
-    }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    unhighlightUs() {
-        this.setState({ dummyRateValue: 1 });
-    }
-
-    /**
-     *
-     *
-     * @param {*} rateIndex
-     * @memberof StarRatingBar
-     */
-    doRate(rateIndex) {
-        this.setState({ rateIndex, showRateNow: false });
-
-        const api = new Api();
-        const ratingInfo = { rating: rateIndex / 2 };
-        const promise = api.addRating(this.props.apiIdProp, ratingInfo);
-        promise
-            .then((response) => {
-                this.updateRating();
-                // message.success("Rating updated successfully");
-            })
-            .catch((error) => {
-                // message.error("Error occurred while adding ratings!");
-            });
-    }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof StarRatingBar
-     */
-    render() {
-        const { classes, theme } = this.props;
-        const { rating: rate, showRateNow, dummyRateValue } = this.state;
-        if (!rate) {
-            return <span />;
-        }
-        return (
-            <React.Fragment>
-                {rate.count > 0 ? (
-                    <React.Fragment>
-                        <StarRate className={classes.starRate} />
-                        <div className={classes.ratingSummery}>
-                            <div className={classes.userRating}>
-                                <Typography variant='display1'>{rate.avgRating * 2}</Typography>
-                                <Typography variant='caption'>/10</Typography>
-                            </div>
-                            <Typography variant='caption' gutterBottom align='left'>
-                                {rate.count}
-                                {' '}
-                                {rate.count === 1 ? 'user' : 'users'}
-                            </Typography>
-                        </div>
-                    </React.Fragment>
-                ) : (
-                    <StarRate
-                        onClick={this.showRateBox}
-                        className={classes.starRate}
-                        style={{ color: theme.palette.grey.A200 }}
-                    />
-                )}
-                <VerticalDivider height={32} />
-                <div className={classes.ratingBoxWrapper}>
-                    {showRateNow && (
-                        <div className={classes.ratingBox}>
-                            <HighlightOff />
-                            <VerticalDivider height={32} />
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
-                                <StarRate
-                                    color={
-                                        i <= rate.userRating * 2 || i <= dummyRateValue
-                                            ? 'primary'
-                                            : ''
-                                    }
-                                    onMouseOver={() => this.highlightUs(i)}
-                                    onMouseLeave={() => this.unhighlightUs()}
-                                    onClick={() => this.doRate(i)}
-                                />
-                            ))}
-                        </div>
-                    )}
-                    {rate.userRating ? (
-                        <React.Fragment>
-                            <StarRate className={classes.starRateMy} onClick={this.showRateBox} />
-                            <div className={classes.ratingSummery} onClick={this.showRateBox}>
-                                <Typography variant='display1'>{rate.userRating * 2}</Typography>
-                                <Typography variant='caption' gutterBottom align='left'>
-                                    <FormattedMessage id='Apis.Details.InfoBar.you' defaultMessage='YOU' />
-                                </Typography>
-                            </div>
-                        </React.Fragment>
-                    ) : (
-                        <React.Fragment>
-                            <StarRate
-                                onClick={this.showRateBox}
-                                className={classes.starRate}
-                                style={{ color: theme.palette.grey.A200 }}
-                            />
-                            <Typography onClick={this.showRateBox} className={classes.rateLink}>
-                                <FormattedMessage
-                                    id='Apis.Details.InfoBar.rate.this.api'
-                                    defaultMessage='Rate this API'
-                                />
-                            </Typography>
-                        </React.Fragment>
-                    )}
-                </div>
-            </React.Fragment>
-        );
-    }
-}
-
-StarRatingBar.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
-};
-
-StarRatingBar = withStyles(styles, { withTheme: true })(StarRatingBar);
 /**
  *
  *
@@ -502,12 +260,10 @@ class InfoBar extends React.Component {
             tabValue: 'Social Sites',
             comment: '',
             commentList: null,
-            prodUrlCopied: false,
-            sandboxUrlCopied: false,
             showOverview: false,
             checked: false,
-            epUrl: '',
         };
+        this.getSchema = this.getSchema.bind(this);
     }
 
     /**
@@ -515,19 +271,7 @@ class InfoBar extends React.Component {
      *
      * @memberof InfoBar
      */
-    onCopy = name => () => {
-        this.setState({
-            [name]: true,
-        });
-        const that = this;
-        const elementName = name;
-        const caller = function () {
-            that.setState({
-                [elementName]: false,
-            });
-        };
-        setTimeout(caller, 4000);
-    };
+
 
     /**
      *
@@ -542,6 +286,23 @@ class InfoBar extends React.Component {
         }
     };
 
+    getSchema() {
+        const newAPI = new Api();
+        const { api } = this.context;
+        const promisedGraphQL = newAPI.getGraphQLSchemaByAPIId(api.id);
+        promisedGraphQL.then((response) => {
+            const windowUrl = window.URL || window.webkitURL;
+            const binary = new Blob([response.data]);
+            const url = windowUrl.createObjectURL(binary);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = api.provider + '-' + api.name + '-' + api.version
+            + '.graphql';
+            anchor.click();
+            windowUrl.revokeObjectURL(url);
+        });
+    }
+
     /**
      *
      *
@@ -553,14 +314,8 @@ class InfoBar extends React.Component {
         const {
             notFound, showOverview, prodUrlCopied, sandboxUrlCopied, epUrl,
         } = this.state;
-        const format = 'txt';
-        const schema = 'text';
-        const fileName = 'schema.graphql';
-        // if (api.type === 'GRAPHQL' && graphQL === null) {
-        //     <Progress />;
-        // }
-        const downloadLink = 'data:text/' + format + ';charset=utf-8,' + encodeURIComponent(schema);
         const { resourceNotFountMessage } = this.props;
+        const user = AuthManager.getUser();
         if (notFound) {
             return <ResourceNotFound message={resourceNotFountMessage} />;
         }
@@ -571,7 +326,7 @@ class InfoBar extends React.Component {
                     <div className={classes.infoBarMain}>
                         <div className={classes.root}>
                             <Link to='/apis' className={classes.backLink}>
-                                <KeyboardArrowLeft className={classes.backIcon} />
+                                <Icon className={classes.backIcon}>keyboard_arrow_left</Icon>
                                 <div className={classes.backText}>
                                     <FormattedMessage id='Apis.Details.InfoBar.back.to' defaultMessage='BACK TO' />
                                     <br />
@@ -584,11 +339,10 @@ class InfoBar extends React.Component {
                                 <Typography variant='display1'>{api.name}</Typography>
                                 <Typography variant='caption' gutterBottom align='left'>
                                     {api.provider}
-                                    | 21-May 2018
                                 </Typography>
                             </div>
                             <VerticalDivider height={70} />
-                            <StarRatingBar apiIdProp={api.id} />
+                            {user && <StarRatingBar apiId={api.id} isEditable={false} showSummary />}
                         </div>
 
                         {showOverview && (
@@ -601,7 +355,7 @@ class InfoBar extends React.Component {
                                                 <TableRow>
                                                     <TableCell component='th' scope='row' className={classes.leftCol}>
                                                         <div className={classes.iconAligner}>
-                                                            <CalendarViewDay className={classes.iconOdd} />
+                                                        <Icon className={classes.iconOdd}>settings_input_component</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.list.version'
@@ -617,7 +371,7 @@ class InfoBar extends React.Component {
                                                 <TableRow>
                                                     <TableCell component='th' scope='row'>
                                                         <div className={classes.iconAligner}>
-                                                            <AccountBalanceWallet className={classes.iconEven} />
+                                                            <Icon className={classes.iconEven}>account_balance_wallet</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.list.context'
@@ -631,7 +385,7 @@ class InfoBar extends React.Component {
                                                 <TableRow>
                                                     <TableCell component='th' scope='row'>
                                                         <div className={classes.iconAligner}>
-                                                            <AccountCircle className={classes.iconOdd} />
+                                                            <Icon className={classes.iconOdd}>account_circle</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.provider'
@@ -642,10 +396,10 @@ class InfoBar extends React.Component {
                                                     </TableCell>
                                                     <TableCell>{api.provider}</TableCell>
                                                 </TableRow>
-                                                <TableRow>
+                                                {/* <TableRow>
                                                     <TableCell component='th' scope='row'>
                                                         <div className={classes.iconAligner}>
-                                                            <Update className={classes.iconEven} />
+                                                            <Icon className={classes.iconEven}>update</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.last.updated'
@@ -655,12 +409,30 @@ class InfoBar extends React.Component {
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>21 May 2018</TableCell>
-                                                </TableRow>
-                                                { api.type = 'GRAPHQL' ? (
+                                                </TableRow> */}
+                                                {user && (
                                                     <TableRow>
                                                         <TableCell component='th' scope='row'>
                                                             <div className={classes.iconAligner}>
-                                                                <CloudDownloadRounded className={classes.buttonIcon} />
+                                                                <Grade className={classes.iconOdd} />
+                                                                <span className={classes.iconTextWrapper}>
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.InfoBar.list.context.rating'
+                                                                        defaultMessage='Rating'
+                                                                    />
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <StarRatingBar apiId={api.id} isEditable showSummary={false} />
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
+                                                { api.type = 'GRAPHQL' && (
+                                                    <TableRow>
+                                                        <TableCell component='th' scope='row'>
+                                                            <div className={classes.iconAligner}>
+                                                                <Icon className={classes.iconEven}>cloud_download</Icon>
                                                                 <span className={classes.iconTextWrapper}>
                                                                     <FormattedMessage
                                                                         id='Apis.Details.InfoBar.download.Schema'
@@ -670,332 +442,35 @@ class InfoBar extends React.Component {
                                                             </div>
                                                         </TableCell>
                                                         <TableCell>
-                                                            <a className={classes.downloadLink} href={downloadLink} download={fileName}>
+                                                            <Button onClick={this.getSchema} size='small' fontSize='small' variant='outlined'>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.graphQL.schema'
                                                                     defaultMessage='GraphQL Schema'
                                                                 />
-                                                            </a>
+                                                            </Button>
+
                                                         </TableCell>
                                                     </TableRow>
-                                                ) : null}
+                                                )}
+                                                <TableRow>
+                                                    <TableCell component='th' scope='row' className={classes.contentToTop}>
+                                                        <div className={classes.iconAligner}>
+                                                            <Icon className={classes.iconOdd}>desktop_windows</Icon>
+                                                            <span className={classes.iconTextWrapper}>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.available.environments'
+                                                                    defaultMessage='Available Environments'
+                                                                />
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Environments />
+                                                    </TableCell>
+                                                </TableRow>
                                             </TableBody>
                                         </Table>
                                     </div>
-                                </div>
-                                <div className={classes.infoContent}>
-                                    <Typography variant='subtitle2'>
-                                        <FormattedMessage
-                                            id='Apis.Details.InfoBar.available.environments'
-                                            defaultMessage='Available Environments'
-                                        />
-                                    </Typography>
-                                    <Grid container spacing={16} item xs={8}>
-                                        {api.endpointURLs.map((endpoint) => {
-                                            return (
-                                                <Grid key={endpoint} item xs={6}>
-                                                    <ExpansionPanel>
-                                                        <ExpansionPanelSummary
-                                                            expandIcon={<ExpandMoreIcon />}
-                                                            aria-controls='panel1a-content'
-                                                            id='panel1a-header'
-                                                        >
-                                                            <div className={classes.iconAligner}>
-                                                                {endpoint.environmentType === 'hybrid' && (
-                                                                    <Cloud className={classes.iconEven} />
-                                                                )}
-                                                                {endpoint.environmentType === 'production' && (
-                                                                    <CheckCircle className={classes.iconEven} />
-                                                                )}
-                                                                {endpoint.environmentType === 'sandbox' && (
-                                                                    <Build className={classes.iconEven} />
-                                                                )}
-                                                                <span className={classes.iconTextWrapper}>
-                                                                    <Typography className={classes.heading}>
-                                                                        {endpoint.environmentName}
-                                                                    </Typography>
-                                                                </span>
-                                                            </div>
-                                                        </ExpansionPanelSummary>
-                                                        <ExpansionPanelDetails>
-                                                            <Grid container item xs={12} spacing={16}>
-                                                                {(endpoint.URLs.http !== null
-                                                                || endpoint.URLs.https !== null
-                                                                || endpoint.URLs.ws !== null
-                                                                || endpoint.URLs.wss !== null) && (
-                                                                    <Typography className={classes.heading}>
-                                                                        <FormattedMessage
-                                                                            id='Apis.Details.InfoBar.gateway.urls'
-                                                                            defaultMessage='Gateway URLs'
-                                                                        />
-                                                                    </Typography>
-                                                                )}
-                                                                {endpoint.URLs.http !== null && (
-                                                                    <Grid item xs={12}>
-                                                                        <TextField
-                                                                            defaultValue={endpoint.URLs.http}
-                                                                            id='bootstrap-input'
-                                                                            InputProps={{
-                                                                                disableUnderline: true,
-                                                                                classes: {
-                                                                                    root: classes.bootstrapRoot,
-                                                                                    input: classes.bootstrapInput,
-                                                                                },
-                                                                            }}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                                className: classes.bootstrapFormLabel,
-                                                                            }}
-                                                                        />
-                                                                        <Tooltip
-                                                                            title={prodUrlCopied
-                                                                                ? 'Copied' : 'Copy to clipboard'}
-                                                                            placement='right'
-                                                                        >
-                                                                            <CopyToClipboard
-                                                                                text={epUrl}
-                                                                                onCopy={() => this.onCopy('prodUrlCopied')}
-                                                                            >
-                                                                                <FileCopy color='secondary' />
-                                                                            </CopyToClipboard>
-                                                                        </Tooltip>
-                                                                    </Grid>
-                                                                )}
-                                                                {endpoint.URLs.https !== null && (
-                                                                    <Grid item xs={12}>
-                                                                        <TextField
-                                                                            defaultValue={endpoint.URLs.https}
-                                                                            id='bootstrap-input'
-                                                                            InputProps={{
-                                                                                disableUnderline: true,
-                                                                                classes: {
-                                                                                    root: classes.bootstrapRoot,
-                                                                                    input: classes.bootstrapInput,
-                                                                                },
-                                                                            }}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                                className: classes.bootstrapFormLabel,
-                                                                            }}
-                                                                        />
-                                                                        <Tooltip
-                                                                            title={prodUrlCopied
-                                                                                ? 'Copied' : 'Copy to clipboard'}
-                                                                            placement='right'
-                                                                        >
-                                                                            <CopyToClipboard
-                                                                                text={epUrl}
-                                                                                onCopy={() => this.onCopy('prodUrlCopied')}
-                                                                            >
-                                                                                <FileCopy color='secondary' />
-                                                                            </CopyToClipboard>
-                                                                        </Tooltip>
-                                                                    </Grid>
-                                                                )}
-                                                                {endpoint.URLs.ws !== null && (
-                                                                    <Grid item xs={12}>
-                                                                        <TextField
-                                                                            defaultValue={endpoint.URLs.ws}
-                                                                            id='bootstrap-input'
-                                                                            InputProps={{
-                                                                                disableUnderline: true,
-                                                                                classes: {
-                                                                                    root: classes.bootstrapRoot,
-                                                                                    input: classes.bootstrapInput,
-                                                                                },
-                                                                            }}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                                className: classes.bootstrapFormLabel,
-                                                                            }}
-                                                                        />
-                                                                        <Tooltip
-                                                                            title={prodUrlCopied
-                                                                                ? 'Copied' : 'Copy to clipboard'}
-                                                                            placement='right'
-                                                                        >
-                                                                            <CopyToClipboard
-                                                                                text={epUrl}
-                                                                                onCopy={() => this.onCopy('prodUrlCopied')}
-                                                                            >
-                                                                                <FileCopy color='secondary' />
-                                                                            </CopyToClipboard>
-                                                                        </Tooltip>
-                                                                    </Grid>
-                                                                )}
-                                                                {endpoint.URLs.wss !== null && (
-                                                                    <Grid item xs={12}>
-                                                                        <TextField
-                                                                            defaultValue={endpoint.URLs.wss}
-                                                                            id='bootstrap-input'
-                                                                            InputProps={{
-                                                                                disableUnderline: true,
-                                                                                classes: {
-                                                                                    root: classes.bootstrapRoot,
-                                                                                    input: classes.bootstrapInput,
-                                                                                },
-                                                                            }}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                                className: classes.bootstrapFormLabel,
-                                                                            }}
-                                                                        />
-                                                                        <Tooltip
-                                                                            title={prodUrlCopied
-                                                                                ? 'Copied' : 'Copy to clipboard'}
-                                                                            placement='right'
-                                                                        >
-                                                                            <CopyToClipboard
-                                                                                text={epUrl}
-                                                                                onCopy={() => this.onCopy('prodUrlCopied')}
-                                                                            >
-                                                                                <FileCopy color='secondary' />
-                                                                            </CopyToClipboard>
-                                                                        </Tooltip>
-                                                                    </Grid>
-                                                                )}
-                                                                {(endpoint.defaultVersionURLs.http !== null
-                                                                || endpoint.defaultVersionURLs.https !== null
-                                                                || endpoint.defaultVersionURLs.ws !== null
-                                                                || endpoint.defaultVersionURLs.wss !== null) && (
-                                                                    <Typography className={classes.heading}>
-                                                                        <FormattedMessage
-                                                                            id='Apis.Details.InfoBar.gateway.urls'
-                                                                            defaultMessage='Default Gateway URLs'
-                                                                        />
-                                                                    </Typography>
-                                                                )}
-                                                                {endpoint.defaultVersionURLs.http !== null && (
-                                                                    <Grid item xs={12}>
-                                                                        <TextField
-                                                                            defaultValue={endpoint.defaultVersionURLs.http}
-                                                                            id='bootstrap-input'
-                                                                            InputProps={{
-                                                                                disableUnderline: true,
-                                                                                classes: {
-                                                                                    root: classes.bootstrapRoot,
-                                                                                    input: classes.bootstrapInput,
-                                                                                },
-                                                                            }}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                                className: classes.bootstrapFormLabel,
-                                                                            }}
-                                                                        />
-                                                                        <Tooltip
-                                                                            title={prodUrlCopied
-                                                                                ? 'Copied' : 'Copy to clipboard'}
-                                                                            placement='right'
-                                                                        >
-                                                                            <CopyToClipboard
-                                                                                text={epUrl}
-                                                                                onCopy={() => this.onCopy('prodUrlCopied')}
-                                                                            >
-                                                                                <FileCopy color='secondary' />
-                                                                            </CopyToClipboard>
-                                                                        </Tooltip>
-                                                                    </Grid>
-                                                                )}
-                                                                {endpoint.defaultVersionURLs.https !== null && (
-                                                                    <Grid item xs={12}>
-                                                                        <TextField
-                                                                            defaultValue={endpoint.defaultVersionURLs.https}
-                                                                            id='bootstrap-input'
-                                                                            InputProps={{
-                                                                                disableUnderline: true,
-                                                                                classes: {
-                                                                                    root: classes.bootstrapRoot,
-                                                                                    input: classes.bootstrapInput,
-                                                                                },
-                                                                            }}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                                className: classes.bootstrapFormLabel,
-                                                                            }}
-                                                                        />
-                                                                        <Tooltip
-                                                                            title={prodUrlCopied
-                                                                                ? 'Copied' : 'Copy to clipboard'}
-                                                                            placement='right'
-                                                                        >
-                                                                            <CopyToClipboard
-                                                                                text={epUrl}
-                                                                                onCopy={() => this.onCopy('prodUrlCopied')}
-                                                                            >
-                                                                                <FileCopy color='secondary' />
-                                                                            </CopyToClipboard>
-                                                                        </Tooltip>
-                                                                    </Grid>
-                                                                )}
-                                                                {endpoint.defaultVersionURLs.ws !== null && (
-                                                                    <Grid item xs={12}>
-                                                                        <TextField
-                                                                            defaultValue={endpoint.defaultVersionURLs.ws}
-                                                                            id='bootstrap-input'
-                                                                            InputProps={{
-                                                                                disableUnderline: true,
-                                                                                classes: {
-                                                                                    root: classes.bootstrapRoot,
-                                                                                    input: classes.bootstrapInput,
-                                                                                },
-                                                                            }}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                                className: classes.bootstrapFormLabel,
-                                                                            }}
-                                                                        />
-                                                                        <Tooltip
-                                                                            title={prodUrlCopied
-                                                                                ? 'Copied' : 'Copy to clipboard'}
-                                                                            placement='right'
-                                                                        >
-                                                                            <CopyToClipboard
-                                                                                text={epUrl}
-                                                                                onCopy={() => this.onCopy('prodUrlCopied')}
-                                                                            >
-                                                                                <FileCopy color='secondary' />
-                                                                            </CopyToClipboard>
-                                                                        </Tooltip>
-                                                                    </Grid>
-                                                                )}
-                                                                {endpoint.defaultVersionURLs.wss !== null && (
-                                                                    <Grid item xs={12}>
-                                                                        <TextField
-                                                                            defaultValue={endpoint.defaultVersionURLs.wss}
-                                                                            id='bootstrap-input'
-                                                                            InputProps={{
-                                                                                disableUnderline: true,
-                                                                                classes: {
-                                                                                    root: classes.bootstrapRoot,
-                                                                                    input: classes.bootstrapInput,
-                                                                                },
-                                                                            }}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                                className: classes.bootstrapFormLabel,
-                                                                            }}
-                                                                        />
-                                                                        <Tooltip
-                                                                            title={prodUrlCopied
-                                                                                ? 'Copied' : 'Copy to clipboard'}
-                                                                            placement='right'
-                                                                        >
-                                                                            <CopyToClipboard
-                                                                                text={epUrl}
-                                                                                onCopy={() => this.onCopy('prodUrlCopied')}
-                                                                            >
-                                                                                <FileCopy color='secondary' />
-                                                                            </CopyToClipboard>
-                                                                        </Tooltip>
-                                                                    </Grid>
-                                                                )}
-                                                            </Grid>
-                                                        </ExpansionPanelDetails>
-                                                    </ExpansionPanel>
-                                                </Grid>
-                                            );
-                                        })}
-                                    </Grid>
                                 </div>
                             </Collapse>
                         )}
@@ -1014,7 +489,7 @@ class InfoBar extends React.Component {
                                             />
                                         </Typography>
                                     )}
-                                    {showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined />}
+                                    {showOverview ? <Icon>arrow_drop_up</Icon> : <Icon>arrow_drop_down</Icon>}
                                 </div>
                             </div>
                         </div>
@@ -1032,5 +507,7 @@ InfoBar.propTypes = {
         formatMessage: PropTypes.func,
     }).isRequired,
 };
+
+InfoBar.contextType = ApiContext;
 
 export default injectIntl(withStyles(styles, { withTheme: true })(InfoBar));

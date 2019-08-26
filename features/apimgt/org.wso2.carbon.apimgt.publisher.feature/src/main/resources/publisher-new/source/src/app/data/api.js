@@ -70,6 +70,33 @@ class API extends Resource {
         Resource._requestMetaData();
     }
 
+
+    /**
+     *
+     * Instance method of the API class to provide raw JSON object
+     * which is API body friendly to use with REST api requests
+     * Use this method instead of accessing the private _data object for
+     * converting to a JSON representation of an API object.
+     * Note: This is shallow coping
+     * Basically this is the revers operation in constructor.
+     * This method simply iterate through all the object properties
+     * and copy their values to new object excluding the properties in excludes list.
+     * So use this method sparingly!!
+     * @memberof API
+     * @param {Array} [userExcludes=[]] List of properties that are need to be excluded from the generated JSON object
+     * @returns {JSON} JSON representation of the API
+     */
+    toJSON(userExcludes = []) {
+        var copy = {},
+            excludes = ['_data', 'client', 'apiType', ...userExcludes];
+        for (var prop in this) {
+            if (!excludes.includes(prop)) {
+                copy[prop] = this[prop];
+            }
+        }
+        return copy;
+    }
+
     /**
      * Create an API with the given parameters in template and call the callback method given optional.
      * @param {Object} api_data - API data which need to fill the placeholder values in the @get_template
@@ -238,6 +265,9 @@ class API extends Resource {
     }
 
     getProductionEndpoint() {
+        if(!this.endpointConfig){
+            return null;
+        }
         if (!this.endpointConfig.production_endpoints) {
             return "";
         }
@@ -455,6 +485,61 @@ class API extends Resource {
         } else {
             return promise_get;
         }
+    }
+
+    /**
+     * Get settings of an API
+     */
+     getSettings(){
+         const promisedSettings = this.client.then((client) => {
+              return client.apis['Settings'].get_settings();
+         });
+         return promisedSettings.then(response => response.body);
+     }
+
+   /**
+    * Get Subscription Policies of an API
+    * @param id {String} UUID of the API in which the swagger is needed
+    * @param callback {function} Function which needs to be called upon success of the API deletion
+    * @returns {promise} With given callback attached to the success chain else API invoke promise.
+    */
+    getSubscriptionPolicies(id, callback = null){
+        const promisePolicies = this.client.then((client) => {
+            return client.apis['APIs'].get_apis__apiId__subscription_policies ({
+                    apiId: id
+                }, this._requestMetaData());
+        });
+        return promisePolicies.then(response => response.body);
+    }
+
+    /**
+     * Get monettization status of an API
+     * @param id {String} UUID of the API in which the swagger is needed
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+     getMonetization(id, callback = null) {
+        const promiseMonetization = this.client.then((client) => {
+            return client.apis['API Monetization'].get_apis__apiId__monetization({
+                apiId: id
+            }, this._requestMetaData());
+        });
+        return promiseMonetization.then(response => response.body);
+    }
+
+    /**
+     * configure monetization to an API
+     * @param apiId APIID
+     * @param body details of tiers
+     */
+    configureMonetizationToApi(apiId, body) {
+        const promised_status = this.client.then((client) => {
+            return client.apis['API (Individual)'].post_apis__apiId__monetize({
+                apiId,
+                body
+            });
+        });
+        return promised_status;
     }
 
     /**
@@ -722,11 +807,12 @@ class API extends Resource {
      * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
-    update(api) {
+    update(updatedProperties) {
+        const updatedAPI = { ...this.toJSON(), ...updatedProperties };
         const promisedUpdate = this.client.then((client) => {
             const payload = {
-                apiId: api.id,
-                body: api
+                apiId: this.id,
+                body: updatedAPI
             };
             return client.apis['APIs'].put_apis__apiId_(payload);
         });
@@ -1024,7 +1110,7 @@ class API extends Resource {
         };
        
         promise_create = this.client.then((client) => {
-            return client.apis['API (Collection)'].post_apis_import_graphQLSchema(
+            return client.apis['API (Collection)'].post_apis_import_graphql_schema(
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data'
