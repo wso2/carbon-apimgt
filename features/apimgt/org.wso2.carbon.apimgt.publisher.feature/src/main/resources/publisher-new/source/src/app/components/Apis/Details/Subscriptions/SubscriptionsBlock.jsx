@@ -38,8 +38,6 @@ class SubscriptionsBlock extends Component {
         this.handleChange = this.handleChange.bind(this);
     }
 
-    // enable allowShortCircuit as specified in https://eslint.org/docs/rules/no-unused-expressions
-    /* eslint no-unused-expressions: ["error", { "allowShortCircuit": true }] */
     /**
      * Handle onChange of subscription block
      * @param event onChange event
@@ -60,19 +58,25 @@ class SubscriptionsBlock extends Component {
                 if (blockProduction === true) {
                     newBlockProduction = false;
                 }
-                blockAllSubs && blockAllSubs(subscriptionId);
+                if (blockAllSubs) {
+                    blockAllSubs(subscriptionId);
+                }
             }
             if (value === blockType.BLOCK_PRODUCTION) {
                 newBlockProduction = checked;
                 if (blockAll === true) {
                     newBlockAll = false;
                 }
-                blockProductionSubs && blockProductionSubs(subscriptionId);
+                if (blockProductionSubs) {
+                    blockProductionSubs(subscriptionId);
+                }
             }
             this.setState({ [blockType.BLOCK_ALL]: newBlockAll, [blockType.BLOCK_PRODUCTION]: newBlockProduction });
         } else {
+            if (unblockSubs) {
+                unblockSubs(subscriptionId);
+            }
             this.setState({ [value]: checked });
-            unblockSubs && unblockSubs(subscriptionId);
         }
     }
 

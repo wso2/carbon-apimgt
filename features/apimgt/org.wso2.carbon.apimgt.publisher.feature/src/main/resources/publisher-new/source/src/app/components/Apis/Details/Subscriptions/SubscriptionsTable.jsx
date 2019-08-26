@@ -139,8 +139,6 @@ const subscriptionStatus = {
  * @returns {*}
  */
 function SubscriptionTablePagination(props) {
-    // enable allowShortCircuit as specified in https://eslint.org/docs/rules/no-unused-expressions
-    /* eslint no-unused-expressions: ["error", { "allowShortCircuit": true }] */
     const {
         count, page, rowsPerPage, onChangePage,
     } = props;
@@ -149,28 +147,36 @@ function SubscriptionTablePagination(props) {
      * handleFirstPageButtonClick loads data of the first page
      * */
     function handleFirstPageButtonClick() {
-        onChangePage && onChangePage(0);
+        if (onChangePage) {
+            onChangePage(0);
+        }
     }
 
     /**
      * handleBackButtonClick load data of the prev page
      * */
     function handleBackButtonClick() {
-        onChangePage && onChangePage(page - 1);
+        if (onChangePage) {
+            onChangePage(page - 1);
+        }
     }
 
     /**
      * handleNextButtonClick load data of the next page
      * */
     function handleNextButtonClick() {
-        onChangePage && onChangePage(page + 1);
+        if (onChangePage) {
+            onChangePage(page + 1);
+        }
     }
 
     /**
      * handleLastPageButtonClick load data of the last page
      * */
     function handleLastPageButtonClick() {
-        onChangePage && onChangePage(Math.max(0, Math.ceil(count / rowsPerPage) - 1));
+        if (onChangePage) {
+            onChangePage(Math.max(0, Math.ceil(count / rowsPerPage) - 1));
+        }
     }
 
     return (
