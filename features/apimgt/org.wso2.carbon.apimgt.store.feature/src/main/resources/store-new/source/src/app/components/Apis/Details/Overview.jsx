@@ -44,7 +44,6 @@ import OverviewDocuments from './OverviewDocuments';
 const styles = theme => ({
     root: {
         padding: theme.spacing.unit * 3,
-        width: theme.custom.contentAreaWidth,
     },
     iconClass: {
         marginRight: 10,
