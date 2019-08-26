@@ -457,20 +457,16 @@ function Configuration(props) {
                             </Typography>
                             <Typography component='p' variant='body1'>
                                 {api.corsConfiguration.corsConfigurationEnabled && (
-                                    <React.Fragment>
-                                        <FormattedMessage
-                                            id='Apis.Details.NewOverview.Configuration.cors.enabled'
-                                            defaultMessage='ENABLED'
-                                        />
-                                    </React.Fragment>
+                                    <FormattedMessage
+                                        id='Apis.Details.NewOverview.Configuration.cors.enabled'
+                                        defaultMessage='ENABLED'
+                                    />
                                 )}
                                 {!api.corsConfiguration.corsConfigurationEnabled && (
-                                    <React.Fragment>
-                                        <FormattedMessage
-                                            id='Apis.Details.NewOverview.Configuration.cors.disabled'
-                                            defaultMessage='DISABLED'
-                                        />
-                                    </React.Fragment>
+                                    <FormattedMessage
+                                        id='Apis.Details.NewOverview.Configuration.cors.disabled'
+                                        defaultMessage='DISABLED'
+                                    />
                                 )}
                             </Typography>
                         </div>
