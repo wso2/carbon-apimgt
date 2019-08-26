@@ -85,6 +85,12 @@ const styles = theme => ({
         justifyContent: 'center',
         color: '#888888',
     },
+    tableColumnSize: {
+        width: '15%',
+    },
+    tableColumnSize2: {
+        width: '40%',
+    },
 });
 
 const tableHeaders = (
@@ -476,11 +482,11 @@ class SubscriptionsTable extends Component {
                         <div>
                             <Table className={classes.table}>
                                 <colgroup>
-                                    <col style={{ width: '15%' }} />
-                                    <col style={{ width: '15%' }} />
-                                    <col style={{ width: '15%' }} />
-                                    <col style={{ width: '15%' }} />
-                                    <col style={{ width: '40%' }} />
+                                    <col className={classes.tableColumnSize} />
+                                    <col className={classes.tableColumnSize} />
+                                    <col className={classes.tableColumnSize} />
+                                    <col className={classes.tableColumnSize} />
+                                    <col className={classes.tableColumnSize2} />
                                 </colgroup>
                                 <TableHead>
                                     { tableHeaders }
