@@ -21,7 +21,6 @@ import { TagCloud } from 'react-tagcloud';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import { Link } from 'react-router-dom';
 import Paper from '@material-ui/core/Paper';
 import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
@@ -32,11 +31,12 @@ const styles = theme => ({
     root: {
         marginTop: theme.spacing.unit * 2,
         padding: theme.spacing.unit * 3,
+        paddingLeft: theme.spacing.unit * 3,
+        width: theme.spacing.unit * 30,
     },
     tagCloudWrapper: {
         display: 'flex',
         flexDirection: 'row',
-        flexWrap: 'wrap',
         paddingLeft: theme.spacing.unit * 3,
     },
     listContentWrapper: {
@@ -45,10 +45,6 @@ const styles = theme => ({
     mainTitle: {
         paddingTop: 10,
         paddingBottom: theme.spacing.unit * 3,
-    },
-    tags: {
-        paddingLeft: theme.spacing.unit * 3,
-        width: theme.spacing.unit * 30,
     },
     selectedTagSpacing: {
         paddingLeft: theme.spacing.unit * 3,
@@ -120,7 +116,7 @@ class ApiTagCloud extends React.Component {
             <div className={classes.tagCloudWrapper}>
                 {allTags && (
                     <Paper className={classes.root}>
-                        <div className={classes.tags}>
+                        <div>
                             <div>
                                 <Typography variant='display1' className={classes.mainTitle}>
                                     <FormattedMessage defaultMessage='Tags' id='Apis.Listing.ApiTagCloud.tags.heading' />
