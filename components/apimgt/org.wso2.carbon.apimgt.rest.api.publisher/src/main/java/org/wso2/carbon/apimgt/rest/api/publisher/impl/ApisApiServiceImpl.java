@@ -55,9 +55,9 @@ import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
+import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
@@ -1769,13 +1769,13 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     * 
+     *
      * @param apiId API Id
      * @param body WSDL DTO
      * @param contentType content type of the payload
      * @param ifMatch If-match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @return added wsdl 
+     * @return added wsdl
      */
     @Override
     public Response apisApiIdWsdlPost(String apiId, WsdlDTO body, String contentType, String ifMatch,

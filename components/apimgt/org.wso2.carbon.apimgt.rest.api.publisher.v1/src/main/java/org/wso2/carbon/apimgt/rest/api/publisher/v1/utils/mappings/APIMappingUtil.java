@@ -48,6 +48,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -79,6 +81,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoEndpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
@@ -1201,6 +1206,16 @@ public class APIMappingUtil {
         return errorListItemDTOs;
     }
 
+    public static List<ErrorListItemDTO> getErrorListItemsDTOsFromErrorHandler(ErrorHandler error) {
+        List<ErrorListItemDTO> errorListItemDTOs = new ArrayList<>();
+        ErrorListItemDTO dto = new ErrorListItemDTO();
+        dto.setCode(error.getErrorCode() + "");
+        dto.setMessage(error.getErrorMessage());
+        dto.setDescription(error.getErrorDescription());
+        errorListItemDTOs.add(dto);
+        return errorListItemDTOs;
+    }
+
     /**
      * Get the ErrorDTO from a list of ErrorListItemDTOs. The first item in the list is set as the main error.
      *
@@ -1900,7 +1915,38 @@ public class APIMappingUtil {
         return product.getId();
     }
 
-        /**
+    public static WSDLValidationResponseDTO fromWSDLValidationResponseToDTO(WSDLValidationResponse validationResponse) {
+        WSDLValidationResponseDTO wsdlValidationResponseDTO = new WSDLValidationResponseDTO();
+        WSDLInfo wsdlInfo;
+        if (validationResponse.isValid()) {
+            wsdlValidationResponseDTO.setIsValid(true);
+            wsdlInfo = validationResponse.getWsdlInfo();
+            WSDLValidationResponseWsdlInfoDTO wsdlInfoDTO = new WSDLValidationResponseWsdlInfoDTO();
+            wsdlInfoDTO.setVersion(wsdlInfo.getVersion());
+            List<WSDLValidationResponseWsdlInfoEndpointsDTO> endpointsDTOList =
+                    fromEndpointsMapToWSDLValidationResponseEndpointsDTO(wsdlInfo.getEndpoints());
+            wsdlInfoDTO.setEndpoints(endpointsDTOList);
+            wsdlValidationResponseDTO.setWsdlInfo(wsdlInfoDTO);
+        } else {
+            wsdlValidationResponseDTO.setIsValid(false);
+            wsdlValidationResponseDTO.setErrors(getErrorListItemsDTOsFromErrorHandler(validationResponse.getError()));
+        }
+        return wsdlValidationResponseDTO;
+    }
+
+    public static List<WSDLValidationResponseWsdlInfoEndpointsDTO>
+            fromEndpointsMapToWSDLValidationResponseEndpointsDTO(Map<String, String> endpoints) {
+        List<WSDLValidationResponseWsdlInfoEndpointsDTO> endpointsDTOList = new ArrayList<>();
+        for (String endpointName: endpoints.keySet()) {
+            WSDLValidationResponseWsdlInfoEndpointsDTO endpointDTO = new WSDLValidationResponseWsdlInfoEndpointsDTO();
+            endpointDTO.setName(endpointName);
+            endpointDTO.setLocation(endpoints.get(endpointName));
+            endpointsDTOList.add(endpointDTO);
+        }
+        return endpointsDTOList;
+    }
+
+    /**
      * Extract scopes from the swagger
      *
      * @param swagger swagger document

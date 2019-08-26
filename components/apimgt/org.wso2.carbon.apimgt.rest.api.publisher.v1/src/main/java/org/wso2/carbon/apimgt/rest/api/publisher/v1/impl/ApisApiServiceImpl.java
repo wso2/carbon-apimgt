@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -59,6 +60,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -67,8 +69,11 @@ import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
+import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
+import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 
@@ -76,8 +81,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -109,6 +116,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
@@ -1011,7 +1019,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Retrieves API Lifecycle state information
-     * 
+     *
      * @param apiId API Id
      * @param ifNoneMatch If-None-Match header value
      * @return API Lifecycle state information
@@ -1637,8 +1645,38 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     public Response validateWSDLDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
-          Boolean returnContent, MessageContext messageContext) {
-        return Response.ok().entity("magic!").build();
+                         Boolean returnContent, MessageContext messageContext) throws APIManagementException {
+        handleInvalidParams(fileInputStream, url);
+        WSDLValidationResponseDTO responseDTO;
+        WSDLValidationResponse validationResponse = new WSDLValidationResponse();
+
+        if (url != null) {
+            try {
+                URL wsdlUrl = new URL(url);
+                validationResponse = APIMWSDLReader.validateWSDLUrl(wsdlUrl);
+            } catch (MalformedURLException e) {
+                RestApiUtil.handleBadRequest("Invalid/Malformed URL : " + url, log);
+            }
+        } else if (fileInputStream != null) {
+            String filename = fileDetail.getContentDisposition().getFilename();
+            try {
+                if (filename.endsWith(".zip")) {
+                    validationResponse =
+                            APIMWSDLReader.extractAndValidateWSDLArchive(fileInputStream);
+                } else if (filename.endsWith(".wsdl")) {
+                    validationResponse = APIMWSDLReader.validateWSDLFile(fileInputStream);
+                } else {
+                    RestApiUtil.handleBadRequest("Unsupported extension type of file: " + filename, log);
+                }
+            } catch (APIManagementException e) {
+                String errorMessage = "Internal error while validating the WSDL from file:" + filename;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+
+        responseDTO =
+                APIMappingUtil.fromWSDLValidationResponseToDTO(validationResponse);
+        return Response.ok().entity(responseDTO).build();
     }
 
     @Override

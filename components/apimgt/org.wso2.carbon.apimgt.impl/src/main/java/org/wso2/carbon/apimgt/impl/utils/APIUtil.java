@@ -96,7 +96,6 @@ import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -110,7 +109,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.DefaultPasswordResolverImpl;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
@@ -125,8 +123,6 @@ import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.soaptorest.WSDLSOAPOperationExtractor;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
@@ -192,11 +188,13 @@ import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -232,7 +230,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1628,11 +1625,11 @@ public final class APIUtil {
     public static String getWSDLDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
         return APIConstants.API_WSDL_RESOURCE_LOCATION + apiProvider + "--" + apiName + apiVersion + ".wsdl";
     }
-    
+
     /**
      * Utility method to get OpenAPI registry path for API product
      * @param identifier product identifier
-     * @return path path to the 
+     * @return path path to the
      */
     public static String getAPIProductOpenAPIDefinitionFilePath(APIProductIdentifier identifier) {
         return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
@@ -1788,7 +1785,7 @@ public final class APIUtil {
                     throw new APIManagementException("Unknown sourceType " + sourceType + " provided for documentation");
             }
             //Documentation Source URL is a required field in the documentation.rxt for migrated setups
-            //Therefore setting a default value if it is not set. 
+            //Therefore setting a default value if it is not set.
             if (documentation.getSourceUrl() == null) {
                 documentation.setSourceUrl(" ");
             }
@@ -1860,7 +1857,7 @@ public final class APIUtil {
         log.error(msg);
         throw new APIMgtAuthorizationFailedException(msg);
     }
-    
+
     public static SubscriberKeyMgtClient getKeyManagementClient() throws APIManagementException {
 
         KeyManagerConfiguration configuration = KeyManagerHolder.getKeyManagerInstance().getKeyManagerConfiguration();
@@ -2060,22 +2057,6 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return wsdlArchiveResourcePath;
-    }
-
-    public static WSDLArchiveInfo extractAndValidateWSDLArchive(InputStream inputStream) throws APIManagementException {
-        String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator
-                + APIConstants.WSDL_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
-        String archivePath = path + File.separator + APIConstants.WSDL_ARCHIVE_ZIP_FILE;
-        String extractedLocation = APIFileUtil
-                .extractUploadedArchive(inputStream, APIConstants.API_WSDL_EXTRACTED_DIRECTORY, archivePath, path);
-        if (log.isDebugEnabled()) {
-            log.debug("Successfully extracted WSDL archive. Location: " + extractedLocation);
-        }
-        WSDLSOAPOperationExtractor processor = SOAPOperationBindingUtils.getWSDLProcessor(extractedLocation);
-        if (!processor.canProcess()) {
-            throw new APIManagementException(processor.getClass().getName() + " was unable to process the WSDL");
-        }
-        return new WSDLArchiveInfo(path, APIConstants.WSDL_ARCHIVE_ZIP_FILE);
     }
 
     /**
@@ -4671,7 +4652,7 @@ public final class APIUtil {
         }
         return true;
     }
-    
+
     /**
      * Check whether roles exist for the user.
      * @param userName
@@ -4697,7 +4678,7 @@ public final class APIUtil {
         }
         return foundUserRole;
     }
- 
+
 
     /**
      * Create API Definition in JSON
@@ -5752,6 +5733,24 @@ public final class APIUtil {
 
         if (log.isDebugEnabled()) {
             log.debug("WSDL url validation failed. Provided wsdl url is not valid url: " + wsdlURL);
+        }
+        return false;
+    }
+
+    public static boolean isURLContentContainsString(URL url, String match) {
+        try (BufferedReader in =
+                     new BufferedReader(new InputStreamReader(url.openStream(), Charset.defaultCharset()))) {
+            String inputLine;
+            StringBuilder urlContent = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                urlContent.append(inputLine);
+                if (urlContent.indexOf(match) > 0) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            log.error("Error Reading Input from Stream from " + url, e);
+
         }
         return false;
     }
@@ -7852,7 +7851,7 @@ public final class APIUtil {
     public static boolean hasUserAccessToTenant(String username, String targetTenantDomain)
             throws APIMgtInternalException {
         String superAdminRole = null;
-        
+
         //Accessing the same tenant as the user's tenant
         if (targetTenantDomain.equals(MultitenantUtils.getTenantDomain(username))) {
             return true;
@@ -7986,7 +7985,7 @@ public final class APIUtil {
     }
 
     /**
-     * This method is used to get the authorization configurations from the tenant registry or from api-manager.xml if 
+     * This method is used to get the authorization configurations from the tenant registry or from api-manager.xml if
      * config is not available in tenant registry
      *
      * @param tenantId The Tenant ID
@@ -8004,7 +8003,7 @@ public final class APIUtil {
         }
         return authConfigValue;
     }
-    
+
     /**
      * This method is used to get the authorization configurations from the tenant registry
      *
@@ -8255,7 +8254,7 @@ public final class APIUtil {
 
     /**
      * Convert special characters to encoded value.
-     * 
+     *
      * @param role
      * @return encorded value
      */
@@ -8268,10 +8267,10 @@ public final class APIUtil {
     }
 
     /**
-     * Util method to call SP rest api to invoke queries. 
-     * 
+     * Util method to call SP rest api to invoke queries.
+     *
      * @param appName SP app name that the query should run against
-     * @param query query 
+     * @param query query
      * @return jsonObj JSONObject of the response
      * @throws APIManagementException
      */
@@ -8293,7 +8292,7 @@ public final class APIUtil {
             JSONObject obj = new JSONObject();
             obj.put("appName", appName);
             obj.put("query", query);
-            
+
             if (log.isDebugEnabled()) {
                 log.debug("Request from SP: " + obj.toJSONString());
             }
@@ -8342,7 +8341,7 @@ public final class APIUtil {
         return rootCause instanceof AuthorizationFailedException
                 || rootCause instanceof APIMgtAuthorizationFailedException;
     }
-    
+
     /**
      * Attempts to find the actual cause of the throwable 'e'
      *
@@ -8485,7 +8484,7 @@ public final class APIUtil {
         return new QName(IdentityCoreConstants.IDENTITY_DEFAULT_NAMESPACE, localPart);
     }
 
-    
+
     /**
      * Return autogenerated product scope when product ID is given
      *

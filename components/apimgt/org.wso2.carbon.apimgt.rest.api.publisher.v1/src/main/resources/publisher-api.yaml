@@ -7733,16 +7733,6 @@ definitions:
                   type: string
                   description: "Endpoint URL"
                   example: "http://www.webservicex.net/stockquote.asmx"
-          bindingInfo:
-            description: |
-              WSDL binding related information
-            properties:
-              hasHttpBinding:
-                description: Indicates whether the WSDL contains HTTP Bindings
-                type: boolean
-              hasSoapBinding:
-                description: Indicates whether the WSDL contains SOAP Bindings
-                type: boolean
 
   GraphQLValidationResponse:
     title: GraphQL API definition validation Response
