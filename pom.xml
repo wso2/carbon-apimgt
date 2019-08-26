@@ -948,6 +948,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
+                <artifactId>org.wso2.carbon.identity.data.publisher.application.authentication</artifactId>
+                <version>${carbon.identity-data-publisher-application-authentication.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.wso2.carbon.identity.framework</groupId>
                 <artifactId>org.wso2.carbon.identity.user.registration.stub</artifactId>
                 <version>${carbon.identity.version}</version>
@@ -1582,6 +1588,7 @@
         <carbon.identity-inbound-auth-openid.version>5.4.0</carbon.identity-inbound-auth-openid.version>
         <carbon.identity-local-auth-basicauth.version>6.2.0</carbon.identity-local-auth-basicauth.version>
         <carbon.identity-outbound-auth-samlsso.version>5.2.3</carbon.identity-outbound-auth-samlsso.version>
+        <carbon.identity-data-publisher-application-authentication.version>5.1.8</carbon.identity-data-publisher-application-authentication.version>
         <graphql.java.version>13.0.wso2v1</graphql.java.version>
 
         <carbon.governance.version>4.8.5</carbon.governance.version>
