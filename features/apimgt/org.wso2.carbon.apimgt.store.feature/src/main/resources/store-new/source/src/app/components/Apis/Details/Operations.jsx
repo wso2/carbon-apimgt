@@ -113,12 +113,11 @@ class Operations extends React.Component {
         }
         const { classes } = this.props;
 
-
         return (
-            <div className={classes.root}>
-                <div className={classes.contentWrapper}>
-                    <Table>
-                        {operations
+            // <div className={classes.root}>
+            //     <div className={classes.contentWrapper}>
+            <Table>
+                {operations
                             && operations.length !== 0
                             && operations.map(item => (
                                 <TableRow style={{ borderStyle: 'hidden' }}>
@@ -132,9 +131,9 @@ class Operations extends React.Component {
                                     </TableCell>
                                 </TableRow>
                             ))}
-                    </Table>
-                </div>
-            </div>
+            </Table>
+            //     </div>
+            // </div>
         );
     }
 }

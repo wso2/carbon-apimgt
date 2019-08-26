@@ -116,7 +116,7 @@ class CreateScope extends React.Component {
      * @memberof Scopes
      */
     addScope() {
-        const { intl, api } = this.props;
+        const { intl, api, history } = this.props;
         if (this.validateScopeName('name', this.state.apiScope.name)) {
             // return status of the validation
             return;
@@ -139,6 +139,8 @@ class CreateScope extends React.Component {
                 defaultMessage: 'Scope added successfully',
             }));
             const { apiScopes } = this.state;
+            const redirectURL = '/apis/' + api.id + '/scopes/';
+            history.push(redirectURL);
             this.setState({
                 apiScopes,
                 apiScope: {},
@@ -339,6 +341,7 @@ CreateScope.propTypes = {
     api: PropTypes.shape({
         id: PropTypes.string,
     }).isRequired,
+    history: PropTypes.shape({ push: PropTypes.func }).isRequired,
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
