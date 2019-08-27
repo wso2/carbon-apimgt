@@ -110,6 +110,7 @@ export default function Configuration() {
             case 'isDefaultVersion':
             case 'authorizationHeader':
             case 'responseCaching':
+            case 'cacheTimeout':
             case 'enableSchemaValidation':
             case 'accessControl':
             case 'visibility':
