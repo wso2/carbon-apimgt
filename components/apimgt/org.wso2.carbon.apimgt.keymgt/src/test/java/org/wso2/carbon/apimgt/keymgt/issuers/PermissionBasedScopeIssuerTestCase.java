@@ -18,11 +18,18 @@
 
 package org.wso2.carbon.apimgt.keymgt.issuers;
 
+import org.json.simple.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.AuthorizationManager;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
@@ -34,11 +41,14 @@ import org.wso2.carbon.user.core.tenant.TenantManager;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
+import javax.cache.Caching;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Caching.class, APIUtil.class})
 public class PermissionBasedScopeIssuerTestCase {
 
     private CacheManager cacheManager = Mockito.mock(CacheManager.class);
@@ -58,7 +68,14 @@ public class PermissionBasedScopeIssuerTestCase {
 
     @Test
     public void testGetScopes() throws Exception {
-        
+
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.getTenantRESTAPIScopesConfig(Mockito.anyString())).thenReturn(new JSONObject());
+        Map<String, String> scopes = new HashMap<String, String>();
+        scopes.put("default", "default");
+        PowerMockito.when(APIUtil.getRESTAPIScopesFromConfig(Mockito.any())).thenReturn(scopes);
         Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
@@ -68,7 +85,7 @@ public class PermissionBasedScopeIssuerTestCase {
         OAuth2AccessTokenReqDTO tokenDTO = new OAuth2AccessTokenReqDTO();
         tokenDTO.setClientId("clientId");
         OAuthTokenReqMessageContext msgContext = new OAuthTokenReqMessageContext(tokenDTO);
-        msgContext.setScope(new String[]{"scope 1","scope 2"});
+        msgContext.setScope(new String[]{"scope 1", "scope 2"});
         AuthenticatedUser authenticatedUser = new AuthenticatedUser();
         authenticatedUser.setTenantDomain("carbon.super");
         authenticatedUser.setUserName("admin");
@@ -87,6 +104,8 @@ public class PermissionBasedScopeIssuerTestCase {
     @Test
     public void testGetScopesWhenAppScopesAreEmpty() throws Exception {
 
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
         Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
         Map<String, String> restAPIScopesOfCurrentTenant = new HashMap<String, String>();
         Mockito.when(cache.get(Mockito.anyString())).thenReturn(restAPIScopesOfCurrentTenant);
@@ -100,7 +119,7 @@ public class PermissionBasedScopeIssuerTestCase {
         OAuth2AccessTokenReqDTO tokenDTO = new OAuth2AccessTokenReqDTO();
         tokenDTO.setClientId("clientId");
         OAuthTokenReqMessageContext msgContext = new OAuthTokenReqMessageContext(tokenDTO);
-        msgContext.setScope(new String[]{"scope 1","scope 2"});
+        msgContext.setScope(new String[]{"scope 1", "scope 2"});
         AuthenticatedUser authenticatedUser = new AuthenticatedUser();
         authenticatedUser.setTenantDomain("carbon.super");
         authenticatedUser.setUserName("admin");
@@ -144,6 +163,8 @@ public class PermissionBasedScopeIssuerTestCase {
         Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(-1234);
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
 
         Map<String, String> restAPIScopes = new HashMap<String, String>();
         restAPIScopes.put("api_view", "api_view");
@@ -177,6 +198,8 @@ public class PermissionBasedScopeIssuerTestCase {
         Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(-1);
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
 
         Map<String, String> restAPIScopes = new HashMap<String, String>();
         restAPIScopes.put("api_view", "api_view");
@@ -210,6 +233,8 @@ public class PermissionBasedScopeIssuerTestCase {
         Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(0);
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
 
         Map<String, String> restAPIScopes = new HashMap<String, String>();
         restAPIScopes.put("api_view", "api_view");
@@ -245,6 +270,8 @@ public class PermissionBasedScopeIssuerTestCase {
         Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(0);
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
 
         Map<String, String> restAPIScopes = new HashMap<String, String>();
         restAPIScopes.put("api_view", "api_view");
@@ -280,6 +307,8 @@ public class PermissionBasedScopeIssuerTestCase {
         Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(0);
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
         Mockito.when(authorizationManager.isUserAuthorized(Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString())).thenReturn(true);
         Map<String, String> restAPIScopes = new HashMap<String, String>();
@@ -314,6 +343,8 @@ public class PermissionBasedScopeIssuerTestCase {
         Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(0);
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
 
         Map<String, String> restAPIScopes = new HashMap<String, String>();
         restAPIScopes.put("api_view", "api_view");
@@ -349,6 +380,8 @@ public class PermissionBasedScopeIssuerTestCase {
         Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(0);
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
 
         Map<String, String> restAPIScopes = new HashMap<String, String>();
         restAPIScopes.put("api_view", "api_view");
@@ -385,6 +418,8 @@ public class PermissionBasedScopeIssuerTestCase {
         Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(0);
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
 
         Map<String, String> restAPIScopes = new HashMap<String, String>();
         restAPIScopes.put("api_view", "api_view");
@@ -420,6 +455,8 @@ public class PermissionBasedScopeIssuerTestCase {
         Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(0);
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
 
         Map<String, String> restAPIScopes = new HashMap<String, String>();
         restAPIScopes.put("api_view", "api_view");
@@ -452,6 +489,8 @@ public class PermissionBasedScopeIssuerTestCase {
 
         Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
         Mockito.doThrow(UserStoreException.class).when(tenantManager).getTenantId(Mockito.anyString());
 
         Map<String, String> restAPIScopes = new HashMap<String, String>();
