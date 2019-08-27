@@ -2863,7 +2863,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SUBSCRIPTION, subsLogObject.toString(),
                         APIConstants.AuditLogConstants.CREATED, this.username);
 
-                workflowResponse = new GeneralWorkflowResponse();
+                if (workflowResponse == null) {
+                    workflowResponse = new GeneralWorkflowResponse();
+                }
             }
 
             if (log.isDebugEnabled()) {
