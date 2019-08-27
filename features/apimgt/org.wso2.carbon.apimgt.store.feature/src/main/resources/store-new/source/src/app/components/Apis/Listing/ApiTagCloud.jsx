@@ -124,8 +124,8 @@ class ApiTagCloud extends React.Component {
                             </div>
                             <div>
                                 <TagCloud
-                                    minSize={12}
-                                    maxSize={35}
+                                    minSize={18}
+                                    maxSize={40}
                                     colorOptions={options}
                                     tags={allTags}
                                     shuffle={false}
