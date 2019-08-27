@@ -96,7 +96,7 @@ class AppsTableContent extends Component {
                                 <TableCell>
                                     {app.status === this.APPLICATION_STATES.APPROVED ? (
                                         <Link to={'/applications/' + app.applicationId}>
-                                            { (isApplicationSharingEnabled && app.groups.length !== 0) ? (
+                                            {(isApplicationSharingEnabled && app.groups.length !== 0) ? (
                                                 app.owner + '/' + app.name
                                             ) : (
                                                 app.name
@@ -160,7 +160,7 @@ class AppsTableContent extends Component {
                                                             />
                                                         )}
                                                         >
-                                                            edit   
+                                                            edit
                                                         </Icon>
                                                     </IconButton>
                                                 </Link>
@@ -214,6 +214,7 @@ AppsTableContent.propTypes = {
     rowsPerPage: PropTypes.number.isRequired,
     order: PropTypes.string.isRequired,
     orderBy: PropTypes.string.isRequired,
+    isApplicationSharingEnabled: PropTypes.func.isRequired,
     apps: PropTypes.instanceOf(Map).isRequired,
 };
 export default AppsTableContent;
