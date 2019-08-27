@@ -93,7 +93,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @param ifNoneMatch If-None-Match header value
      * @return Response object containing resulted subscriptions
      */
-    public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
+    public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, String query,
             MessageContext messageContext) {
         // pre-processing
         // setting default limit and offset if they are null
@@ -109,13 +109,14 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             if (apiId != null) {
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
                 List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
-                subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(apiUsages, limit, offset);
+                subscriptionListDTO = SubscriptionMappingUtil
+                        .fromSubscriptionListToDTO(apiUsages, limit, offset, query);
                 SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, "", limit, offset,
                         apiUsages.size());
             } else {
                 UserApplicationAPIUsage[] allApiUsage = apiProvider.getAllAPIUsageByProvider(username);
                 subscriptionListDTO = SubscriptionMappingUtil.fromUserApplicationAPIUsageArrayToDTO(allApiUsage, limit,
-                        offset);
+                        offset, query);
                 SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, "", "", limit, offset,
                         allApiUsage.length);
             }

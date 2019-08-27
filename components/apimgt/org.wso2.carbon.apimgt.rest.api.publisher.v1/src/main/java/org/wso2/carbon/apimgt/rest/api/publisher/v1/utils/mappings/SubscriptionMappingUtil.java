@@ -19,11 +19,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionDTO;
@@ -68,7 +65,8 @@ public class SubscriptionMappingUtil {
      * @return SubscriptionListDTO object containing SubscriptionDTOs
      */
     public static SubscriptionListDTO fromSubscriptionListToDTO(List<SubscribedAPI> subscriptions, Integer limit,
-                                                                Integer offset) throws APIManagementException {
+                                                                Integer offset, String query)
+            throws APIManagementException {
         SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
         List<SubscriptionDTO> subscriptionDTOs = subscriptionListDTO.getList();
         if (subscriptionDTOs == null) {
@@ -76,15 +74,42 @@ public class SubscriptionMappingUtil {
             subscriptionListDTO.setList(subscriptionDTOs);
         }
 
-        //identifying the proper start and end indexes
-        int size = subscriptions.size();
-        int start = offset < size && offset >= 0 ? offset : Integer.MAX_VALUE;
-        int end = offset + limit - 1 <= size - 1 ? offset + limit - 1 : size - 1;
+        int size;
+        int start;
+        int end;
 
-        for (int i = start; i <= end; i++) {
-            SubscribedAPI subscription = subscriptions.get(i);
-            subscriptionDTOs.add(fromSubscriptionToDTO(subscription));
+        if (query != null) {
+            query = query.toLowerCase();
+            List<SubscriptionDTO> filteredSubscriptions = new ArrayList<>();
+
+            for (SubscribedAPI sub : subscriptions) {
+                SubscriptionDTO subscription = fromSubscriptionToDTO(sub);
+                if (subscription.getApplicationInfo().getName().toLowerCase().contains(query) ||
+                        subscription.getApplicationInfo().getSubscriber().toLowerCase().contains(query) ||
+                        subscription.getThrottlingPolicy().toLowerCase().contains(query)) {
+                    filteredSubscriptions.add(subscription);
+                }
+            }
+
+            //identifying the proper start and end indexes
+            size = filteredSubscriptions.size();
+            start = offset < size && offset >= 0 ? offset : Integer.MAX_VALUE;
+            end = offset + limit - 1 <= size - 1 ? offset + limit - 1 : size - 1;
+
+            for (int i = start; i <= end; i++) {
+                subscriptionDTOs.add(filteredSubscriptions.get(i));
+            }
+        } else {
+            //identifying the proper start and end indexes
+            size = subscriptions.size();
+            start = offset < size && offset >= 0 ? offset : Integer.MAX_VALUE;
+            end = offset + limit - 1 <= size - 1 ? offset + limit - 1 : size - 1;
+            for (int i = start; i <= end; i++) {
+                SubscribedAPI subscription = subscriptions.get(i);
+                subscriptionDTOs.add(fromSubscriptionToDTO(subscription));
+            }
         }
+
         subscriptionListDTO.setCount(subscriptionDTOs.size());
 
         return subscriptionListDTO;
@@ -122,8 +147,11 @@ public class SubscriptionMappingUtil {
         }
 
         PaginationDTO pagination = new PaginationDTO();
+        pagination.setOffset(offset);
+        pagination.setLimit(limit);
         pagination.setNext(paginatedNext);
         pagination.setPrevious(paginatedPrevious);
+        pagination.setTotal(size);
         subscriptionListDTO.setPagination(pagination);
     }
 
@@ -135,15 +163,16 @@ public class SubscriptionMappingUtil {
      * @param offset      starting index
      * @return a dto containing all subscriptions
      */
-    public static SubscriptionListDTO fromUserApplicationAPIUsageArrayToDTO(
-            UserApplicationAPIUsage[] allApiUsage,Integer limit, Integer offset) throws APIManagementException {
+    public static SubscriptionListDTO fromUserApplicationAPIUsageArrayToDTO(UserApplicationAPIUsage[] allApiUsage,
+                                                                            Integer limit, Integer offset, String query)
+            throws APIManagementException {
         List<SubscribedAPI> subscribedAPIs = new ArrayList<>();
 
         for (UserApplicationAPIUsage usage : allApiUsage) {
             Collections.addAll(subscribedAPIs, usage.getApiSubscriptions());
         }
 
-        return fromSubscriptionListToDTO(subscribedAPIs, limit, offset);
+        return fromSubscriptionListToDTO(subscribedAPIs, limit, offset, query);
     }
 
     /**
