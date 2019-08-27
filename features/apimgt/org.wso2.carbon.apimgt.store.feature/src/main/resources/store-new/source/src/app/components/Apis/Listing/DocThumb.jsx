@@ -41,6 +41,7 @@ const styles = theme => ({
         width: theme.custom.thumbnail.width - theme.spacing.unit,
         backgroundColor: theme.palette.background.paper,
         padding: theme.spacing.unit,
+        minHeight: 130,
     },
     thumbLeft: {
         alignSelf: 'flex-start',
