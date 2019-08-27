@@ -512,7 +512,7 @@ class Details extends Component {
 
                     </div>
                     <div className={classes.content}>
-                        <APIDetailsTopMenu api={api} />
+                        <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} />
                         <div className={classes.contentInside}>
                             <Switch>
                                 <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
