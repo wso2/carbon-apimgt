@@ -1735,7 +1735,7 @@
         <waffle-jna.version>1.6.wso2v6</waffle-jna.version>
         <version.snake.yaml>1.24</version.snake.yaml>
         <wsdl4j.version>1.6.3.wso2v3</wsdl4j.version>
-        <slf4j.test.version>1.7.26</slf4j.test.version>
+        <slf4j.test.version>1.7.28</slf4j.test.version>
         <reflection.version>0.9.11</reflection.version>
         <jacoco.version>0.7.9</jacoco.version>
         <xml-apis.version>1.4.01</xml-apis.version>
