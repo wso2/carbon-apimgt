@@ -285,7 +285,7 @@ class ApiTableView extends React.Component {
                     customBodyRender: (value, tableMeta, updateValue) => {
                         if (tableMeta.rowData) {
                             const apiId = tableMeta.rowData[0];
-                            const avgRating = tableMeta.rowData[7];
+                            const avgRating = tableMeta.rowData[8];
                             return <StarRatingBar apiRating={avgRating} apiId={apiId} isEditable={false} showSummary={false} />;
                         }
                     },
@@ -338,6 +338,7 @@ class ApiTableView extends React.Component {
                 api.context = data[4];
                 api.provider = data[5];
                 api.type = data[6];
+                api.avgRating = data[8];
                 return <ApiThumb api={api} />;
             };
             options.title = false;

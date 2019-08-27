@@ -415,7 +415,7 @@ class InfoBar extends React.Component {
                                                     <TableRow>
                                                         <TableCell component='th' scope='row'>
                                                             <div className={classes.iconAligner}>
-                                                                <Grade className={classes.iconOdd} />
+                                                                <Grade className={classes.iconEven} />
                                                                 <span className={classes.iconTextWrapper}>
                                                                     <FormattedMessage
                                                                         id='Apis.Details.InfoBar.list.context.rating'
@@ -433,7 +433,7 @@ class InfoBar extends React.Component {
                                                     <TableRow>
                                                         <TableCell component='th' scope='row'>
                                                             <div className={classes.iconAligner}>
-                                                                <Icon className={classes.iconEven}>cloud_download</Icon>
+                                                                <Icon className={classes.iconOdd}>cloud_download</Icon>
                                                                 <span className={classes.iconTextWrapper}>
                                                                     <FormattedMessage
                                                                         id='Apis.Details.InfoBar.download.Schema'
@@ -456,7 +456,7 @@ class InfoBar extends React.Component {
                                                 <TableRow>
                                                     <TableCell component='th' scope='row' className={classes.contentToTop}>
                                                         <div className={classes.iconAligner}>
-                                                            <Icon className={classes.iconOdd}>desktop_windows</Icon>
+                                                            <Icon className={classes.iconEven}>desktop_windows</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.available.environments'
