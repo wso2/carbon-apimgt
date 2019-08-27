@@ -3416,6 +3416,11 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/If-None-Match'
+        - name : query
+          in: query
+          description: |
+            Keywords to filter subscriptions
+          type: string
       tags:
         - Subscriptions
       responses:
