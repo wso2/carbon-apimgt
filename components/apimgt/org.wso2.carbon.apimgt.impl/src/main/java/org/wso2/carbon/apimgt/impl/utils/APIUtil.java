@@ -7810,6 +7810,21 @@ public final class APIUtil {
     }
 
     /**
+     * Used to check whether Provisioning Out-of-Band OAuth Clients feature is enabled
+     *
+     * @return true if feature is enabled
+     */
+    public static boolean isMapExistingAuthAppsEnabled() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String mappingEnabled = config.getFirstProperty(APIConstants.API_STORE_MAP_EXISTING_AUTH_APPS);
+        if (mappingEnabled == null) {
+            return false;
+        }
+        return Boolean.parseBoolean(mappingEnabled);
+    }
+
+    /**
      * Used to reconstruct the input search query as sub context and doc content doesn't support AND search
      *
      * @param query Input search query

@@ -5508,6 +5508,9 @@ definitions:
       applicationSharingEnabled:
         type: boolean
         default: false
+      mapExistingAuthApps:
+        type: boolean
+        default: false
 
 #-----------------------------------------------------
 # The Application Attribute resource
