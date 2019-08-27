@@ -25,6 +25,8 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.SettingsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.SubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ThrottlingPoliciesApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.RolesApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.MeApi"/>
 
             <!-- Manually Added -->
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.SwaggerYamlApi"/>
