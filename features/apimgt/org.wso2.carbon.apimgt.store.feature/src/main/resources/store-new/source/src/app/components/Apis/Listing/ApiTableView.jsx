@@ -184,11 +184,7 @@ class ApiTableView extends React.Component {
             }
         } else {
             const apiProduct = new APIProduct();
-            if (selectedTag) {
-                return apiProduct.getAllAPIProducts({ query: 'tag:' + selectedTag, limit: this.rowsPerPage, offset: page * rowsPerPage });
-            } else {
-                return apiProduct.getAllAPIProducts({ limit: this.rowsPerPage, offset: page * rowsPerPage });
-            }
+            return apiProduct.getAllAPIProducts({ limit: this.rowsPerPage, offset: page * rowsPerPage });
         }
     };
 

@@ -23,6 +23,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
 import { withStyles } from '@material-ui/core/styles';
 import API from 'AppData/api';
+import CONSTS from 'AppData/Constants';
 import ApiTagCloud from 'AppComponents/Apis/Listing/ApiTagCloud';
 import CustomIcon from '../../Shared/CustomIcon';
 import ApiTableView from './ApiTableView';
@@ -160,7 +161,8 @@ class CommonListing extends React.Component {
                         </IconButton>
                     </div>
                 </div>
-                {allTags ? <ApiTagCloud data={allTags} listType={listType} apiType={apiType} />
+                {(allTags && apiType === CONSTS.API_TYPE)
+                    ? <ApiTagCloud data={allTags} listType={listType} apiType={apiType} />
                     : (
                         <div className={classes.listContentWrapper}>
                             {listType === 'grid'
