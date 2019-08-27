@@ -20,12 +20,15 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+import Paper from '@material-ui/core/Paper';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Icon from '@material-ui/core/Icon';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Loading from 'AppComponents/Base/Loading/Loading';
+import Alert from 'AppComponents/Shared/Alert';
+import ProvideOAuthKeys from 'AppComponents/Shared/AppsAndKeys/ProvideOAuthKeys';
 import Application from 'AppData/Application';
 import KeyConfiguration from './KeyConfiguration';
 import ViewKeys from './ViewKeys';
@@ -55,6 +58,11 @@ const styles = theme => ({
     },
     generateWrapper: {
         padding: '10px 0px',
+        marginLeft: theme.spacing.unit * 1.25,
+    },
+    paper: {
+        background: 'none',
+        marginBottom: theme.spacing.unit * 2,
     },
 });
 
@@ -78,6 +86,8 @@ class TokenManager extends React.Component {
                 supportedGrantTypes: ['client_credentials'],
                 callbackUrl: 'https://wso2.am.com',
             },
+            providedConsumerKey: '',
+            providedConsumerSecret: '',
         };
         this.keyStates = {
             COMPLETED: 'COMPLETED',
@@ -92,6 +102,8 @@ class TokenManager extends React.Component {
         this.updateKeyRequest = this.updateKeyRequest.bind(this);
         this.generateKeys = this.generateKeys.bind(this);
         this.updateKeys = this.updateKeys.bind(this);
+        this.handleOnChangeProvidedOAuth = this.handleOnChangeProvidedOAuth.bind(this);
+        this.provideOAuthKeySecret = this.provideOAuthKeySecret.bind(this);
     }
 
     /**
@@ -140,13 +152,14 @@ class TokenManager extends React.Component {
      */
     generateKeys() {
         const { keyRequest, keys } = this.state;
-        const { keyType, updateSubscriptionData, selectedApp: { tokenType } } = this.props;
+        const {
+            keyType, updateSubscriptionData, selectedApp: { tokenType }, intl,
+        } = this.props;
         this.application
             .then((application) => {
                 return application.generateKeys(keyType, keyRequest.supportedGrantTypes, keyRequest.callbackUrl);
             })
             .then((response) => {
-                console.log('Keys generated successfully with ID :' + response);
                 if (updateSubscriptionData) {
                     updateSubscriptionData();
                 }
@@ -154,6 +167,10 @@ class TokenManager extends React.Component {
                 const isKeyJWT = tokenType === 'JWT';
                 newKeys.set(keyType, response);
                 this.setState({ keys: newKeys, isKeyJWT });
+                Alert.info(intl.formatMessage({
+                    id: 'Shared.AppsAndKeys.TokenManager.key.generate.success',
+                    defaultMessage: 'Application keys generated successfully',
+                }));
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -163,6 +180,10 @@ class TokenManager extends React.Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
+                Alert.error(intl.formatMessage({
+                    id: 'Shared.AppsAndKeys.TokenManager.key.generate.error',
+                    defaultMessage: 'Error occurred when generating application keys',
+                }));
             });
     }
 
@@ -185,13 +206,11 @@ class TokenManager extends React.Component {
                     applicationKey.consumerSecret,
                 );
             })
-            .then((response) => {
-                console.log(
-                    intl.formatMessage({
-                        defaultMessage: 'Keys updated successfully : ',
-                        id: 'Shared.AppsAndKeys.TokenManager.keys.generated.success',
-                    }) + response,
-                );
+            .then(() => {
+                Alert.info(intl.formatMessage({
+                    id: 'Shared.AppsAndKeys.TokenManager.key.update.success',
+                    defaultMessage: 'Application keys updated successfully',
+                }));
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -201,6 +220,52 @@ class TokenManager extends React.Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
+                Alert.error(intl.formatMessage({
+                    id: 'Shared.AppsAndKeys.TokenManager.key.update.error',
+                    defaultMessage: 'Error occurred when updating application keys',
+                }));
+            });
+    }
+
+    /**
+     * Handle on change of provided consumer key and consumer secret
+     *
+     * @param event onChange event
+     */
+    handleOnChangeProvidedOAuth(event) {
+        this.setState({ [event.target.name]: event.target.value });
+    }
+
+    /**
+     * Provide consumer key and secret of an existing OAuth app to an application
+     */
+    provideOAuthKeySecret() {
+        const { providedConsumerKey, providedConsumerSecret } = this.state;
+        const { keyType, intl } = this.props;
+
+        this.application
+            .then((application) => {
+                return application.provideKeys(keyType, providedConsumerKey, providedConsumerSecret);
+            })
+            .then(() => {
+                this.setState({ providedConsumerKey: '', providedConsumerSecret: '' });
+                Alert.info(intl.formatMessage({
+                    id: 'Shared.AppsAndKeys.TokenManager.key.provide.success',
+                    defaultMessage: 'Application keys provided successfully',
+                }));
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+                Alert.error(intl.formatMessage({
+                    id: 'Shared.AppsAndKeys.TokenManager.key.provide.error',
+                    defaultMessage: 'Error occurred when providing application keys',
+                }));
             });
     }
 
@@ -213,7 +278,7 @@ class TokenManager extends React.Component {
             classes, selectedApp, keyType,
         } = this.props;
         const {
-            keys, keyRequest, notFound, isKeyJWT,
+            keys, keyRequest, notFound, isKeyJWT, providedConsumerKey, providedConsumerSecret,
         } = this.state;
         if (!keys) {
             return <Loading />;
@@ -222,10 +287,14 @@ class TokenManager extends React.Component {
         if (key && (key.keyState === this.keyStates.CREATED || key.keyState === this.keyStates.REJECTED)) {
             return <WaitingForApproval keyState={key.keyState} states={this.keyStates} />;
         }
+        // todo replace use of localStorage with useContext
+        const settingsData = localStorage.getItem('settings');
+        const { mapExistingAuthApps } = JSON.parse(settingsData);
+
         return (
             <div className={classes.root}>
                 <Typography variant='headline' className={classes.keyTitle}>
-                    {keyType}
+                    {keyType + ' '}
                     <FormattedMessage
                         defaultMessage='Key and Secret'
                         id='Shared.AppsAndKeys.TokenManager.key.and.secret'
@@ -237,41 +306,99 @@ class TokenManager extends React.Component {
                     keys={keys}
                     isKeyJWT={isKeyJWT}
                 />
-                <ExpansionPanel>
-                    <ExpansionPanelSummary expandIcon={<Icon>expand_more</Icon>}>
-                        <Typography className={classes.heading} variant='subtitle1'>
-                            <FormattedMessage
-                                defaultMessage='Key Configuration'
-                                id='Shared.AppsAndKeys.TokenManager.key.configuration'
+                <Paper className={classes.paper}>
+                    <ExpansionPanel defaultExpanded>
+                        <ExpansionPanelSummary expandIcon={<Icon>expand_more</Icon>}>
+                            <Typography className={classes.heading} variant='subtitle1'>
+                                {
+                                    keys.size > 0 && keys.get(keyType) ?
+                                        <FormattedMessage
+                                            defaultMessage='Update Configuration'
+                                            id='Shared.AppsAndKeys.TokenManager.update.configuration'
+                                        /> :
+                                        <FormattedMessage
+                                            defaultMessage='Key Configuration'
+                                            id='Shared.AppsAndKeys.TokenManager.key.configuration'
+                                        />
+                                }
+                            </Typography>
+                        </ExpansionPanelSummary>
+                        <ExpansionPanelDetails className={classes.keyConfigWrapper}>
+                            <KeyConfiguration
+                                keys={keys}
+                                selectedApp={selectedApp}
+                                keyType={keyType}
+                                updateKeyRequest={this.updateKeyRequest}
+                                keyRequest={keyRequest}
                             />
-                        </Typography>
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails className={classes.keyConfigWrapper}>
-                        <KeyConfiguration
-                            keys={keys}
-                            selectedApp={selectedApp}
-                            keyType={keyType}
-                            updateKeyRequest={this.updateKeyRequest}
-                            keyRequest={keyRequest}
-                        />
-                    </ExpansionPanelDetails>
-                </ExpansionPanel>
-                <div className={classes.generateWrapper}>
-                    <ScopeValidation
-                        resourcePath={resourcePaths.APPLICATION_GENERATE_KEYS}
-                        resourceMethod={resourceMethods.POST}
-                    >
-                        <Button
-                            variant='contained'
-                            color='primary'
-                            className={classes.button}
-                            onClick={keys.size > 0 && keys.get(keyType) ? this.updateKeys : this.generateKeys}
-                            noFound={notFound}
+                        </ExpansionPanelDetails>
+                    </ExpansionPanel>
+                    <div className={classes.generateWrapper}>
+                        <ScopeValidation
+                            resourcePath={resourcePaths.APPLICATION_GENERATE_KEYS}
+                            resourceMethod={resourceMethods.POST}
                         >
-                            {keys.size > 0 && keys.get(keyType) ? 'Update keys' : 'Generate Keys'}
-                        </Button>
-                    </ScopeValidation>
-                </div>
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                className={classes.button}
+                                onClick={keys.size > 0 && keys.get(keyType) ? this.updateKeys : this.generateKeys}
+                                noFound={notFound}
+                            >
+                                {keys.size > 0 && keys.get(keyType) ? 'Update' : 'Generate Keys'}
+                            </Button>
+                        </ScopeValidation>
+                    </div>
+                </Paper>
+                {
+                    mapExistingAuthApps && !keys.get(keyType) && (
+                        <Paper className={classes.paper}>
+                            <ExpansionPanel defaultExpanded>
+                                <ExpansionPanelSummary expandIcon={<Icon>expand_more</Icon>}>
+                                    <Typography className={classes.heading} variant='subtitle1'>
+                                        <FormattedMessage
+                                            defaultMessage='Provide Existing OAuth Keys'
+                                            id='Shared.AppsAndKeys.TokenManager.provide.oauth'
+                                        />
+                                    </Typography>
+                                </ExpansionPanelSummary>
+                                <ExpansionPanelDetails className={classes.keyConfigWrapper}>
+                                    <ProvideOAuthKeys
+                                        onChange={this.handleOnChangeProvidedOAuth}
+                                        consumerKey={providedConsumerKey}
+                                        consumerSecret={providedConsumerSecret}
+                                    />
+                                </ExpansionPanelDetails>
+                            </ExpansionPanel>
+                            <div className={classes.generateWrapper}>
+                                <ScopeValidation
+                                    resourcePath={resourcePaths.APPLICATION_GENERATE_KEYS}
+                                    resourceMethod={resourceMethods.POST}
+                                >
+                                    <Button
+                                        variant='contained'
+                                        color='primary'
+                                        className={classes.button}
+                                        onClick={this.provideOAuthKeySecret}
+                                        noFound={notFound}
+                                    >
+                                        {
+                                            keys.size > 0 && keys.get(keyType) ?
+                                                <FormattedMessage
+                                                    defaultMessage='Update'
+                                                    id='Shared.AppsAndKeys.TokenManager.provide.oauth.button.update'
+                                                /> :
+                                                <FormattedMessage
+                                                    defaultMessage='Provide'
+                                                    id='Shared.AppsAndKeys.TokenManager.provide.oauth.button.provide'
+                                                />
+                                        }
+                                    </Button>
+                                </ScopeValidation>
+                            </div>
+                        </Paper>
+                    )
+                }
             </div>
         );
     }
@@ -283,6 +410,8 @@ TokenManager.propTypes = {
         tokenType: PropTypes.string.isRequired,
     }).isRequired,
     keyType: PropTypes.string.isRequired,
+    updateSubscriptionData: PropTypes.func.isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(TokenManager));

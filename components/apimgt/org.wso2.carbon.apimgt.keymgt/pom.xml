@@ -16,7 +16,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.5.62-SNAPSHOT</version>
+        <version>6.5.67-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -46,6 +46,10 @@
         <dependency>
             <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
             <artifactId>org.wso2.carbon.identity.oauth</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
+            <artifactId>org.wso2.carbon.identity.data.publisher.application.authentication</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>

@@ -61,7 +61,7 @@ import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
-import org.wso2.carbon.apimgt.api.model.WSDLArchiveInfo;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
@@ -226,7 +226,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     @Override
 	public Set<API> getAPIsWithTag(String tagName, String requestedTenantDomain) throws APIManagementException {
-    	
+
     	 /* We keep track of the lastUpdatedTime of the TagCache to determine its freshness.
          */
         long lastUpdatedTimeAtStart = lastUpdatedTimeForTagApi;
@@ -240,7 +240,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         		lastUpdatedTimeForTagApi = System.currentTimeMillis();
                 taggedAPIs = new ConcurrentHashMap<String, Set<API>>();
             }
-        	
+
         }
 
         boolean isTenantMode = requestedTenantDomain != null && !"null".equalsIgnoreCase(requestedTenantDomain);
@@ -280,7 +280,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 						taggedAPIs.get(tagName).add(api);
 					}
 				} else {
-					taggedAPIs.putIfAbsent(tagName, apisWithTag);					
+					taggedAPIs.putIfAbsent(tagName, apisWithTag);
 				}
 			}
 
@@ -1182,7 +1182,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
             if (artifactManager != null) {
-                
+
                 GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
                 totalLength=PaginationContext.getInstance().getLength();
                 if (genericArtifacts == null || genericArtifacts.length == 0) {
@@ -1789,7 +1789,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (UserStoreException e) {
             handleException("Failed to get all the tags", e);
         }
- 
+
         return tagSet;
     }
 
@@ -2504,7 +2504,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Map<String, Object> keyDetails = new HashMap<String, Object>();
 
         if (tokenInfo != null) {
-            keyDetails.put("validityTime", Long.toString(tokenInfo.getValidityPeriod()));
+            keyDetails.put("validityTime", tokenInfo.getValidityPeriod());
             keyDetails.put("accessToken", tokenInfo.getAccessToken());
             keyDetails.put("tokenDetails", tokenInfo.getJSONString());
         }
@@ -2738,7 +2738,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiIdentifier = (APIIdentifier) identifier;
             api = getAPI(apiIdentifier);
             state = api.getStatus();
-        } 
+        }
         if (identifier instanceof APIProductIdentifier) {
             apiProdIdentifier = (APIProductIdentifier) identifier;
             product = getAPIProductbyUUID(apiProdIdentifier.getUUID(), tenantDomain);
@@ -2939,7 +2939,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 isTenantFlowStarted = true;
             }
 
-            
+
             SubscriptionWorkflowDTO workflowDTO;
             WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             WorkflowExecutor removeSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
@@ -3019,7 +3019,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             } else if (apiProdIdentifier != null) {
                 subsLogObject.put(APIConstants.AuditLogConstants.API_PRODUCT_NAME, apiProdIdentifier.getName());
             }
-            
+
             subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
             subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
             subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, applicationName);
@@ -4915,8 +4915,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             + environmentType);
                 }
                 if (resourceUrl.endsWith(APIConstants.ZIP_FILE_EXTENSION)) {
-                    WSDLArchiveInfo archiveInfo = APIUtil
-                            .extractAndValidateWSDLArchive((InputStream) docResourceMap.get("Data"));
+                    WSDLArchiveInfo archiveInfo = APIMWSDLReader
+                            .extractAndValidateWSDLArchive((InputStream) docResourceMap.get("Data"))
+                            .getWsdlArchiveInfo();
                     File folderToImport = new File(
                             archiveInfo.getLocation() + File.separator + APIConstants.API_WSDL_EXTRACTED_DIRECTORY);
                     Collection<File> wsdlFiles = APIFileUtil
@@ -5471,7 +5472,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)) {
                 schemes.add(APIConstants.HTTP_PROTOCOL);
             }
-            
+
             JSONObject defaultImplicitSecurity = new JSONObject();
             defaultImplicitSecurity.put(APIConstants.SWAGGER_SECURITY_TYPE, APIConstants.SWAGGER_SECURITY_OAUTH2);
             defaultImplicitSecurity
@@ -5479,11 +5480,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             defaultImplicitSecurity
                     .put(APIConstants.SWAGGER_SECURITY_OAUTH2_FLOW, APIConstants.SWAGGER_SECURITY_OAUTH2_IMPLICIT);
             defaultImplicitSecurity.put(APIConstants.SWAGGER_SCOPES, new JSONArray());
-            
-            
+
+
             swaggerObj.put(APIConstants.SWAGGER_BASEPATH, basePath);
             swaggerObj.put(APIConstants.SWAGGER_SCHEMES, schemes);
-            
+
             JSONObject securityDefinitions = (JSONObject)swaggerObj.get(APIConstants.SWAGGER_SECURITY_DEFINITIONS);
             if (securityDefinitions == null) {
                 securityDefinitions = new JSONObject();

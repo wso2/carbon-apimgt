@@ -31,8 +31,8 @@ import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 import API from 'AppData/api';
 import SearchParser from './SearchParser';
 /* Utility methods defined here are described in
-* react-autosuggest documentation https://github.com/moroshko/react-autosuggest
-*/
+ * react-autosuggest documentation https://github.com/moroshko/react-autosuggest
+ */
 
 /**
  *
@@ -72,15 +72,17 @@ function renderInput(inputProps) {
 function renderSuggestion(suggestion, { query, isHighlighted }) {
     const matches = match(suggestion.name, query);
     const parts = parse(suggestion.name, matches);
-    const path = suggestion.type === 'API' ? `/apis/${suggestion.id}/overview` :
-        `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/details`;
+    const path =
+        suggestion.type === 'API'
+            ? `/apis/${suggestion.id}/overview`
+            : `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/details`;
     // TODO: Style the version ( and apiName if docs) apearing in the menu item
-    const suffix = suggestion.type === 'API' ? suggestion.version : (suggestion.apiName + ' ' + suggestion.apiVersion);
+    const suffix = suggestion.type === 'API' ? suggestion.version : suggestion.apiName + ' ' + suggestion.apiVersion;
     return (
         <React.Fragment>
             <Link to={path}>
                 <MenuItem selected={isHighlighted} component='div'>
-                    { suggestion.type === 'API' ? <APIsIcon /> : <DocumentsIcon /> }
+                    {suggestion.type === 'API' ? <APIsIcon /> : <DocumentsIcon />}
 
                     {parts.map((part, index) => {
                         return part.highlight ? (
@@ -93,7 +95,8 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
                             </strong>
                         );
                     })}
-                    <pre /><pre />
+                    <pre />
+                    <pre />
                     {suffix}
                 </MenuItem>
             </Link>
@@ -118,7 +121,7 @@ function getSuggestionValue(suggestion) {
  * @param searchText
  * @returns {string}
  */
-function buildSearchQuery(searchText){
+function buildSearchQuery(searchText) {
     const inputValue = searchText.trim().toLowerCase();
     return SearchParser.parse(inputValue);
 }

@@ -48,6 +48,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
@@ -722,6 +724,8 @@ public class APIMappingUtil {
             dto.setAdditionalProperties(additionalPropertiesMap);
         }
 
+        dto.setEndpointImplementationType(APIDTO.EndpointImplementationTypeEnum.valueOf(model.getImplementation()));
+
         dto.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY.equals(model.getAccessControl()) ?
                 APIDTO.AccessControlEnum.RESTRICTED :
                 APIDTO.AccessControlEnum.NONE);
@@ -1250,6 +1254,16 @@ public class APIMappingUtil {
             dto.setDescription(handler.getErrorDescription());
             errorListItemDTOs.add(dto);
         }
+        return errorListItemDTOs;
+    }
+
+    public static List<ErrorListItemDTO> getErrorListItemsDTOsFromErrorHandler(ErrorHandler error) {
+        List<ErrorListItemDTO> errorListItemDTOs = new ArrayList<>();
+        ErrorListItemDTO dto = new ErrorListItemDTO();
+        dto.setCode(error.getErrorCode() + "");
+        dto.setMessage(error.getErrorMessage());
+        dto.setDescription(error.getErrorDescription());
+        errorListItemDTOs.add(dto);
         return errorListItemDTOs;
     }
 
@@ -1959,7 +1973,50 @@ public class APIMappingUtil {
         return product.getId();
     }
 
-        /**
+    /**
+     * Converts a WSDL validation response model to DTO
+     *
+     * @param validationResponse validation response model
+     * @return Converted WSDL validation response model to DTO
+     */
+    public static WSDLValidationResponseDTO fromWSDLValidationResponseToDTO(WSDLValidationResponse validationResponse) {
+        WSDLValidationResponseDTO wsdlValidationResponseDTO = new WSDLValidationResponseDTO();
+        WSDLInfo wsdlInfo;
+        if (validationResponse.isValid()) {
+            wsdlValidationResponseDTO.setIsValid(true);
+            wsdlInfo = validationResponse.getWsdlInfo();
+            WSDLValidationResponseWsdlInfoDTO wsdlInfoDTO = new WSDLValidationResponseWsdlInfoDTO();
+            wsdlInfoDTO.setVersion(wsdlInfo.getVersion());
+            List<WSDLValidationResponseWsdlInfoEndpointsDTO> endpointsDTOList =
+                    fromEndpointsMapToWSDLValidationResponseEndpointsDTO(wsdlInfo.getEndpoints());
+            wsdlInfoDTO.setEndpoints(endpointsDTOList);
+            wsdlValidationResponseDTO.setWsdlInfo(wsdlInfoDTO);
+        } else {
+            wsdlValidationResponseDTO.setIsValid(false);
+            wsdlValidationResponseDTO.setErrors(getErrorListItemsDTOsFromErrorHandler(validationResponse.getError()));
+        }
+        return wsdlValidationResponseDTO;
+    }
+
+    /**
+     * Converts the provided WSDL endpoint map to REST API DTO
+     *
+     * @param endpoints endpoint map
+     * @return converted map to DTO
+     */
+    private static List<WSDLValidationResponseWsdlInfoEndpointsDTO>
+            fromEndpointsMapToWSDLValidationResponseEndpointsDTO(Map<String, String> endpoints) {
+        List<WSDLValidationResponseWsdlInfoEndpointsDTO> endpointsDTOList = new ArrayList<>();
+        for (String endpointName: endpoints.keySet()) {
+            WSDLValidationResponseWsdlInfoEndpointsDTO endpointDTO = new WSDLValidationResponseWsdlInfoEndpointsDTO();
+            endpointDTO.setName(endpointName);
+            endpointDTO.setLocation(endpoints.get(endpointName));
+            endpointsDTOList.add(endpointDTO);
+        }
+        return endpointsDTOList;
+    }
+
+    /**
      * Extract scopes from the swagger
      *
      * @param swagger swagger document

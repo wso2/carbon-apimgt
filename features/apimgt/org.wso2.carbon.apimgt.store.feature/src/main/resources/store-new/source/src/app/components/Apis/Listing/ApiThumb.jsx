@@ -131,7 +131,6 @@ class ApiThumb extends React.Component {
     componentDidMount() {
         const { apiType } = this.context;
         const { api } = this.props;
-
         let restApi = null;
 
         if (apiType === CONSTS.API_TYPE) {

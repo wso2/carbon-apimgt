@@ -5,6 +5,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.UserDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SelfSignupApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.SelfSignupApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -49,7 +50,7 @@ SelfSignupApiService delegate = new SelfSignupApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = UserDTO.class),
         @ApiResponse(code = 202, message = "Accepted. The request has been accepted. ", response = WorkflowResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class) })
-    public Response selfSignupPost(@ApiParam(value = "User object to represent the new user " ,required=true) UserDTO body) {
+    public Response selfSignupPost(@ApiParam(value = "User object to represent the new user " ,required=true) UserDTO body) throws APIManagementException{
         return delegate.selfSignupPost(body, securityContext);
     }
 }

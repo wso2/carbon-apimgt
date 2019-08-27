@@ -168,39 +168,57 @@ export default class Application extends Resource {
         });
     }
 
+    /**
+     * Provide Consumer Key and Secret of Existing OAuth Apps
+     *
+     * @param keyType           key type, either PRODUCTION or SANDBOX
+     * @param consumerKey       consumer key of the OAuth app
+     * @param consumerSecret    consumer secret of the OAuth app
+     * @returns {*}
+     */
+    provideKeys(keyType, consumerKey, consumerSecret) {
+        const promisedKeys = this.client.then((client) => {
+            const requestContent = { consumerKey, consumerSecret, keyType };
+            const payload = { applicationId: this.id, body: requestContent };
+            return client.apis['Application Keys'].post_applications__applicationId__map_keys(payload);
+        });
+        return promisedKeys.then((keysResponse) => {
+            this.keys.set(keyType, keysResponse.obj);
+            return this.keys.get(keyType);
+        });
+    }
+
     static get(id) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
-        const promised_get = apiClient.client.then(
-            (client) => {
-                return client.apis.Applications.get_applications__applicationId_({ applicationId: id },
-                    this._requestMetaData());
-            },
-        );
-        return promised_get.then((response) => {
-            const app_json = response.obj;
-            return new Application(app_json.name, app_json.description, app_json.throttlingTier, app_json);
+        const promisedGet = apiClient.client.then((client) => {
+            return client.apis.Applications.get_applications__applicationId_(
+                { applicationId: id },
+                this._requestMetaData(),
+            );
+        });
+        return promisedGet.then((response) => {
+            const appJson = response.obj;
+            return new Application(appJson.name, appJson.description, appJson.throttlingTier, appJson);
         });
     }
 
     static all() {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
-        const promised_all = apiClient.client.then(
-            (client) => {
-                return client.apis.Applications.get_applications({}, this._requestMetaData());
-            },
-        );
-        return promised_all.then(response => response.obj);
+        const promisedAll = apiClient.client.then((client) => {
+            return client.apis.Applications.get_applications({}, this._requestMetaData());
+        });
+        return promisedAll.then(response => response.obj);
     }
 
     static deleteApp(id) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
-        const promised_delete = apiClient.client.then(
-            (client) => {
-                return client.apis.Applications.delete_applications__applicationId_({ applicationId: id },
-                    this._requestMetaData());
-            },
-        );
-        return promised_delete.then(response => response.ok);
+        const promisedDelete = apiClient.client.then((client) => {
+            return client.apis.Applications.delete_applications__applicationId_(
+                { applicationId: id },
+                this._requestMetaData(),
+            );
+        });
+        return promisedDelete.then(response => response.ok);
     }
 }
 

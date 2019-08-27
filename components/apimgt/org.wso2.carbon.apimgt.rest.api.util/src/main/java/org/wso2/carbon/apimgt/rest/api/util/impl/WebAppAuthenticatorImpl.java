@@ -110,7 +110,9 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
      */
     private boolean validateScopes(Message message, AccessTokenInfo tokenInfo) {
         String basePath = (String) message.get(Message.BASE_PATH);
-        String path = (String) message.get(Message.PATH_INFO);
+        // path is obtained from Message.REQUEST_URI instead of Message.PATH_INFO, as Message.PATH_INFO contains
+        // decoded values of request parameters
+        String path = (String) message.get(Message.REQUEST_URI);
         String verb = (String) message.get(Message.HTTP_REQUEST_METHOD);
         String resource = path.substring(basePath.length() - 1);
         String[] scopes = tokenInfo.getScopes();

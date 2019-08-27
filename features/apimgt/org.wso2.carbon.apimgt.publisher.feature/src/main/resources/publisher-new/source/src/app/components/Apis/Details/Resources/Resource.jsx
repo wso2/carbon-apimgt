@@ -36,7 +36,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import { Typography } from '@material-ui/core';
+import {Icon, IconButton, Typography} from '@material-ui/core';
 import TextField from '@material-ui/core/TextField';
 import classNames from 'classnames';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -307,11 +307,13 @@ class Resource extends React.Component {
                         type='textarea'
                         fieldName='summery'
                     />
-                    <a onClick={this.deleteResource} className={classes.deleteButton}>
-                        <Delete className={classes.rightIcon} />
-                    </a>
+                        <IconButton onClick={this.deleteResource} className={classes.deleteButton}>
+                            <Icon>
+                                delete
+                            </Icon>
+                        </IconButton>
                     </div>
-                   )} 
+                   )}
                 </div>
                 {this.state.visible && (
                     <div>
