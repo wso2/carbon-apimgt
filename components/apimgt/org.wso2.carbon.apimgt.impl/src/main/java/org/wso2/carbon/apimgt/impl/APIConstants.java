@@ -177,6 +177,9 @@ public final class APIConstants {
     public static final String FILE_URI_PREFIX = "file://";
     public static final String API_DOC_RESOURCE_NAME = "api-doc.json";
 
+    public static final String WSDL_VERSION_11 = "1.1";
+    public static final String WSDL_VERSION_20 = "2.0";
+
     public static final String API_DOC_1_2_RESOURCE_NAME = "/api-doc";
     public static final String API_OAS_DEFINITION_RESOURCE_NAME = "swagger.json";
 
@@ -303,7 +306,7 @@ public final class APIConstants {
 
     //This constant is used in Json schema validator
     public static final String API_OVERVIEW_ENABLE_JSON_SCHEMA = "overview_enableSchemaValidation";
-    
+
     //Those constance are used in Provider artifact.
     public static final String PROVIDER_OVERVIEW_NAME = "overview_name";
     public static final String PROVIDER_OVERVIEW_EMAIL = "overview_email";

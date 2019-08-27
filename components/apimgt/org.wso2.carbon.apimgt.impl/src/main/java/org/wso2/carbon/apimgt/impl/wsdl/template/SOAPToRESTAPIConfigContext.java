@@ -15,11 +15,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.impl.soaptorest.template;
+package org.wso2.carbon.apimgt.impl.wsdl.template;
 
 import org.apache.velocity.VelocityContext;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.impl.template.ConfigContext;
 import org.wso2.carbon.apimgt.impl.template.ConfigContextDecorator;
 

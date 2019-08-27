@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.impl.soaptorest.model;
+package org.wso2.carbon.apimgt.impl.wsdl.model;
 
 import io.swagger.models.ModelImpl;
 

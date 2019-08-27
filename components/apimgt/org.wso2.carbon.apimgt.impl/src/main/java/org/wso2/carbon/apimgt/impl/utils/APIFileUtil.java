@@ -25,8 +25,10 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -225,5 +227,37 @@ public class APIFileUtil {
                         " Delete those files manually or it will be cleared after a server restart.");
             }
         }
+    }
+
+    /**
+     * Iterates through the files in the given path with extension and search the provided string. If a file is found,
+     * then returns true
+     *
+     * @param path folder path
+     * @param extension file extension to filter
+     * @param stringTosearch string to search in files
+     * @return true when a file is found in the folder path whose content contains the provided string
+     */
+    public static boolean hasFileContainsString(String path, String extension, String stringTosearch) {
+        File folderToImport = new File(path);
+        Collection<File> foundWSDLFiles = APIFileUtil.searchFilesWithMatchingExtension(folderToImport, extension);
+        for (File file : foundWSDLFiles) {
+            String absWSDLPath = file.getAbsolutePath();
+            if (log.isDebugEnabled()) {
+                log.debug("Processing WSDL file: " + absWSDLPath);
+            }
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String inputLine;
+                while ((inputLine = reader.readLine()) != null) {
+                    if (inputLine.indexOf(stringTosearch) > 0) {
+                        return true;
+                    }
+                }
+            } catch (IOException e) {
+                log.error("Error while validating WSDL files in path " + path, e);
+                return false;
+            }
+        }
+        return false;
     }
 }

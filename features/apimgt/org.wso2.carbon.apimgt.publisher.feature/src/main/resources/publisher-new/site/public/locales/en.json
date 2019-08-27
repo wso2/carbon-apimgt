@@ -419,6 +419,7 @@
   "Apis.Details.Resources.Resources.assign.policies": "Assign Advanced Throttling Policies",
   "Apis.Details.Resources.Resources.cancel": "Cancel",
   "Apis.Details.Resources.Resources.delete.selected": "Delete Selected",
+  "Apis.Details.Resources.Resources.edit.resources.button": "Edit Resources",
   "Apis.Details.Resources.Resources.resources": "Resources",
   "Apis.Details.Resources.Resources.save": "Save",
   "Apis.Details.Resources.Resources.something.went.wrong.while.getting.the.api": "Error occurred while retrieving API",

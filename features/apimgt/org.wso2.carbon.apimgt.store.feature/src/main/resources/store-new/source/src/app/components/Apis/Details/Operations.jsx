@@ -113,28 +113,21 @@ class Operations extends React.Component {
         }
         const { classes } = this.props;
 
-
         return (
-            <div className={classes.root}>
-                <div className={classes.contentWrapper}>
-                    <Table>
-                        {operations
-                            && operations.length !== 0
-                            && operations.map(item => (
-                                <TableRow style={{ borderStyle: 'hidden' }}>
-                                    <TableCell>
-                                        <Typography className={classes.heading} component='p' variant='body1'>
-                                            {item.target}
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell>
-                                        <RenderMethod method={item.verb.toLowerCase()} />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                    </Table>
-                </div>
-            </div>
+            <Table>
+                {operations && operations.length !== 0 && operations.map(item => (
+                    <TableRow style={{ borderStyle: 'hidden' }}>
+                        <TableCell>
+                            <Typography className={classes.heading} component='p' variant='body1'>
+                                {item.target}
+                            </Typography>
+                        </TableCell>
+                        <TableCell>
+                            <RenderMethod method={item.verb.toLowerCase()} />
+                        </TableCell>
+                    </TableRow>
+                ))}
+            </Table>
         );
     }
 }

@@ -15,17 +15,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.impl.soaptorest.model;
-
-import java.util.ArrayList;
-import java.util.List;
+package org.wso2.carbon.apimgt.impl.wsdl.model;
 
 /**
- * WSDL complex type representation.
+ * WSDL simple type representation.
  */
-public class WSDLComplexType {
+public class WSDLSimpleType {
     private String name;
-    private List<WSDLOperationParam> paramList = new ArrayList<>();
+    private String type;
 
     public String getName() {
         return name;
@@ -35,11 +32,11 @@ public class WSDLComplexType {
         this.name = name;
     }
 
-    public List<WSDLOperationParam> getParamList() {
-        return paramList;
+    public String getType() {
+        return type;
     }
 
-    public void setParamList(List<WSDLOperationParam> paramList) {
-        this.paramList = paramList;
+    public void setType(String type) {
+        this.type = type;
     }
 }

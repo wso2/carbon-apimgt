@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.api.model;
+package org.wso2.carbon.apimgt.impl.wsdl.model;
 
 import java.io.File;
 
@@ -27,12 +27,14 @@ public class WSDLArchiveInfo {
     private String fileName;
     private String location;
     private String fullAbsoluteFilePath;
+    private WSDLInfo wsdlInfo;
 
-    public WSDLArchiveInfo(String location, String fileName) {
+    public WSDLArchiveInfo(String location, String fileName, WSDLInfo wsdlInfo) {
 
         this.location = location;
         this.fileName = fileName;
         fullAbsoluteFilePath = location + File.separator + fileName;
+        this.wsdlInfo = wsdlInfo;
     }
 
     public String getFileName() {
@@ -45,5 +47,9 @@ public class WSDLArchiveInfo {
 
     public String getAbsoluteFilePath() {
         return fullAbsoluteFilePath;
+    }
+
+    public WSDLInfo getWsdlInfo() {
+        return wsdlInfo;
     }
 }

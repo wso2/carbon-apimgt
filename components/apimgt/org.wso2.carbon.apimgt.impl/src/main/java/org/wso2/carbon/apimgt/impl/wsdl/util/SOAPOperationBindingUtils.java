@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.impl.soaptorest.util;
+package org.wso2.carbon.apimgt.impl.wsdl.util;
 
 import io.swagger.models.Info;
 import io.swagger.models.ModelImpl;
@@ -40,12 +40,13 @@ import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.soaptorest.WSDL11SOAPOperationExtractor;
-import org.wso2.carbon.apimgt.impl.soaptorest.WSDL20SOAPOperationExtractor;
-import org.wso2.carbon.apimgt.impl.soaptorest.WSDLSOAPOperationExtractor;
-import org.wso2.carbon.apimgt.impl.soaptorest.exceptions.APIMgtWSDLException;
-import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLOperationParam;
-import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLSOAPOperation;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDL11ProcessorImpl;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDL11SOAPOperationExtractor;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDL20ProcessorImpl;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
+import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLOperationParam;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLSOAPOperation;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -58,7 +59,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -84,7 +84,9 @@ public class SOAPOperationBindingUtils {
     public static String getSoapOperationMapping(String url) throws APIManagementException {
         APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
         byte[] wsdlContent = wsdlReader.getWSDL();
-        WSDLSOAPOperationExtractor processor = getWSDLProcessor(wsdlContent, wsdlReader);
+        WSDL11SOAPOperationExtractor processor = new WSDL11SOAPOperationExtractor(wsdlReader);
+        processor.init(wsdlContent);
+
         Set<WSDLSOAPOperation> operations;
         Map<String, ModelImpl> paramModelMap;
         String swaggerStr = SOAPToRESTConstants.EMPTY_STRING;
@@ -334,48 +336,16 @@ public class SOAPOperationBindingUtils {
      *
      * @param content    WSDL content
      * @param wsdlReader WSDL reader used to parse the wsdl{@link APIMWSDLReader}
-     * @return {@link WSDLSOAPOperationExtractor}
+     * @return {@link WSDLProcessor}
      * @throws APIManagementException
      */
-    public static WSDLSOAPOperationExtractor getWSDLProcessor(byte[] content, APIMWSDLReader wsdlReader)
-            throws APIManagementException {
-        WSDLSOAPOperationExtractor processor = new WSDL11SOAPOperationExtractor(wsdlReader);
-        try {
-            boolean canProcess = processor.init(content);
-            if (canProcess) {
-                return processor;
-            } else {
-                throw new APIManagementException("No WSDL processor found to process WSDL content");
-            }
-        } catch (APIMgtWSDLException e) {
-            throw new APIManagementException("Error while instantiating wsdl processor class", e);
-        }
+    public static WSDL11SOAPOperationExtractor getWSDL11SOAPOperationExtractor(byte[] content,
+            APIMWSDLReader wsdlReader) throws APIManagementException {
+        WSDL11SOAPOperationExtractor wsdl11SOAPOperationExtractor = new WSDL11SOAPOperationExtractor(wsdlReader);
+        wsdl11SOAPOperationExtractor.init(content);
+        return wsdl11SOAPOperationExtractor;
     }
 
-    /**
-     * Returns the appropriate WSDL 1.1/WSDL 2.0 based on the file path {@code wsdlPath}.
-     *
-     * @param wsdlPath File path containing WSDL files and dependant files
-     * @return WSDL 1.1 processor for the provided content
-     * @throws APIManagementException If an error occurs while determining the processor
-     */
-    public static WSDLSOAPOperationExtractor getWSDLProcessor(String wsdlPath) throws APIManagementException {
-        WSDLSOAPOperationExtractor wsdl11Processor = new WSDL11SOAPOperationExtractor();
-        WSDLSOAPOperationExtractor wsdl20Processor = new WSDL20SOAPOperationExtractor();
-        boolean canProcess;
-        try {
-            canProcess = wsdl11Processor.initPath(wsdlPath);
-            if (canProcess) {
-                return wsdl11Processor;
-            } else if (wsdl20Processor.initPath(wsdlPath)){
-                return wsdl20Processor;
-            }
-        } catch (APIMgtWSDLException e) {
-            handleException("Error while instantiating wsdl processor class.", e);
-        }
-        //no processors found if this line reaches
-        throw new APIManagementException("No WSDL processor found to process WSDL content.");
-    }
 
     /**
      * converts a dom NodeList into a list of nodes

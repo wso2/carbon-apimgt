@@ -448,6 +448,27 @@ function Configuration(props) {
                                 {api.visibility === 'RESTRICTED' && api.visibleRoles.join()}
                                 {api.visibility === 'RESTRICTED' && ' ) '}
                             </Typography>
+                            {/* CORS Configuration */}
+                            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Configuration.cors.configuration'
+                                    defaultMessage='CORS Configuration'
+                                />
+                            </Typography>
+                            <Typography component='p' variant='body1'>
+                                {api.corsConfiguration.corsConfigurationEnabled && (
+                                    <FormattedMessage
+                                        id='Apis.Details.NewOverview.Configuration.cors.enabled'
+                                        defaultMessage='ENABLED'
+                                    />
+                                )}
+                                {!api.corsConfiguration.corsConfigurationEnabled && (
+                                    <FormattedMessage
+                                        id='Apis.Details.NewOverview.Configuration.cors.disabled'
+                                        defaultMessage='DISABLED'
+                                    />
+                                )}
+                            </Typography>
                         </div>
                     </div>
 

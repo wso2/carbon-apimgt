@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.soaptorest.model;
+package org.wso2.carbon.apimgt.impl.wsdl.model;
 
 /**
  * Basic WSDL operation parameter.

@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.impl.soaptorest;
+package org.wso2.carbon.apimgt.impl.wsdl;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.swagger.inflector.examples.ExampleBuilder;
@@ -45,9 +45,9 @@ import org.w3c.dom.Element;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.soaptorest.template.RESTToSOAPMsgTemplate;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
+import org.wso2.carbon.apimgt.impl.wsdl.template.RESTToSOAPMsgTemplate;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.RegistryConstants;

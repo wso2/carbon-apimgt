@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.impl.soaptorest.util;
+package org.wso2.carbon.apimgt.impl.wsdl.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -29,7 +29,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.soaptorest.template.SOAPToRESTAPIConfigContext;
+import org.wso2.carbon.apimgt.impl.wsdl.template.SOAPToRESTAPIConfigContext;
 import org.wso2.carbon.apimgt.impl.template.ConfigContext;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
