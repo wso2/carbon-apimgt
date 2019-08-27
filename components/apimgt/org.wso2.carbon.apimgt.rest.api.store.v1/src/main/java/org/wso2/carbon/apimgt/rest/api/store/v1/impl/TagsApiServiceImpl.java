@@ -58,8 +58,9 @@ public class TagsApiServiceImpl implements TagsApiService {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             tagSet = apiConsumer.getAllTags(requestedTenantDomain);
-            if (tagSet != null)
+            if (tagSet != null) {
                 tagList.addAll(tagSet);
+            }
             TagListDTO tagListDTO = TagMappingUtil.fromTagListToDTO(tagList, limit, offset);
             TagMappingUtil.setPaginationParams(tagListDTO, limit, offset, tagList.size());
             return Response.ok().entity(tagListDTO).build();
