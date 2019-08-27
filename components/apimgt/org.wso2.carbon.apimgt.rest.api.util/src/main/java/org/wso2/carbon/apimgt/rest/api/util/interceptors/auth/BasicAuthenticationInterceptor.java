@@ -38,6 +38,7 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 
@@ -117,7 +118,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
             tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
             userRealm = AnonymousSessionUtil.getRealmByTenantDomain(registryService, realmService, tenantDomain);
             if (userRealm == null) {
-                log.error("Authentication failed: domain or unactivated tenant login");
+                log.error("Authentication failed: invalid domain or unactivated tenant login");
                 return false;
             }
             //if authenticated
@@ -127,9 +128,9 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 carbonContext.setTenantDomain(tenantDomain);
                 carbonContext.setTenantId(tenantId);
                 carbonContext.setUsername(username);
-//                if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-//                    APIUtil.loadTenantConfigBlockingMode(tenantDomain);
-//                }
+                if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                    APIUtil.loadTenantConfigBlockingMode(tenantDomain);
+                }
                 return validateRoles(inMessage, userRealm, tenantDomain, username);
             } else {
                 log.error("Authentication failed: Invalid credentials");
