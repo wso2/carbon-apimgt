@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
@@ -42,18 +42,23 @@ const useStyles = makeStyles(theme => ({
 export default function DefaultAPIForm(props) {
     const { onChange, onValidate, api } = props;
     const classes = useStyles();
-    const [validation, setValidation] = useState({});
+    const [validity, setValidity] = useState({});
 
+    // Check the provided API validity on mount, TODO: Better to use Joi schema here ~tmkb
+    useEffect(() => {
+        onValidate(Boolean(api.name) && Boolean(api.version) && Boolean(api.context));
+    });
     /**
      * Trigger the provided onValidate call back on each input validation run
      * Do the validation state aggregation and call the onValidate method with aggregated value
      * @param {Object} state Validation state object
      */
     function validate(state) {
-        setValidation(state);
-        const isFormValid = Object.values(state)
+        setValidity(state);
+        let isFormValid = Object.values(state)
             .map(value => value === null || value === undefined) // Map the validation entries to booleans
             .reduce((acc, cVal) => acc && cVal); // Aggregate the individual validation states
+        isFormValid = isFormValid && Boolean(api.name) && Boolean(api.version) && Boolean(api.context);
         onValidate(isFormValid, state);
     }
     return (
@@ -63,7 +68,7 @@ export default function DefaultAPIForm(props) {
                     autoFocus
                     fullWidth
                     id='outlined-name'
-                    error={validation.name}
+                    error={validity.name}
                     label={
                         <React.Fragment>
                             <sup className={classes.mandatoryStar}>*</sup>{' '}
@@ -71,7 +76,7 @@ export default function DefaultAPIForm(props) {
                         </React.Fragment>
                     }
                     helperText={
-                        (validation.name && validation.name.message) ||
+                        (validity.name && validity.name.message) ||
                         'API name can not contain spaces or any special characters'
                     }
                     value={api.name}
@@ -80,7 +85,7 @@ export default function DefaultAPIForm(props) {
                     InputProps={{
                         onBlur: ({ target: { value } }) => {
                             validate({
-                                ...validation,
+                                ...validity,
                                 name: APIValidation.apiName.required().validate(value).error,
                             });
                         },
@@ -92,7 +97,7 @@ export default function DefaultAPIForm(props) {
                     <Grid item md={4}>
                         <TextField
                             fullWidth
-                            error={validation.version}
+                            error={validity.version}
                             id='outlined-name'
                             label={
                                 <React.Fragment>
@@ -109,12 +114,12 @@ export default function DefaultAPIForm(props) {
                             InputProps={{
                                 onBlur: ({ target: { value } }) => {
                                     validate({
-                                        ...validation,
+                                        ...validity,
                                         version: APIValidation.apiVersion.required().validate(value).error,
                                     });
                                 },
                             }}
-                            helperText={validation.version && validation.version.message}
+                            helperText={validity.version && validity.version.message}
                             margin='normal'
                             variant='outlined'
                         />
@@ -123,7 +128,7 @@ export default function DefaultAPIForm(props) {
                         <TextField
                             fullWidth
                             id='outlined-name'
-                            error={validation.context}
+                            error={validity.context}
                             label={
                                 <React.Fragment>
                                     <sup className={classes.mandatoryStar}>*</sup>{' '}
@@ -139,13 +144,13 @@ export default function DefaultAPIForm(props) {
                             InputProps={{
                                 onBlur: ({ target: { value } }) => {
                                     validate({
-                                        ...validation,
+                                        ...validity,
                                         context: APIValidation.apiContext.required().validate(value).error,
                                     });
                                 },
                             }}
                             helperText={
-                                (validation.context && validation.context.message) ||
+                                (validity.context && validity.context.message) ||
                                 'API will be exposed in this context at the gateway'
                             }
                             margin='normal'
@@ -163,13 +168,13 @@ export default function DefaultAPIForm(props) {
                     InputProps={{
                         onBlur: ({ target: { value } }) => {
                             validate({
-                                ...validation,
+                                ...validity,
                                 endpointURL: value ? APIValidation.url.validate(value).error : null,
                             });
                         },
                     }}
                     helperText={
-                        validation.endpointURL && (
+                        validity.endpointURL && (
                             <span>
                                 Enter a valid {''}
                                 <a rel='noopener noreferrer' target='_blank' href='http://tools.ietf.org/html/rfc3986'>
@@ -179,7 +184,7 @@ export default function DefaultAPIForm(props) {
                             </span>
                         )
                     }
-                    error={validation.endpointURL}
+                    error={validity.endpointURL}
                     margin='normal'
                     variant='outlined'
                 />

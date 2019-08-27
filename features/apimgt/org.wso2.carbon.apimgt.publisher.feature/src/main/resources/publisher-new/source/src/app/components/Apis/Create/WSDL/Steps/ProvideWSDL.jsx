@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Radio from '@material-ui/core/Radio';
 import Grid from '@material-ui/core/Grid';
@@ -25,27 +25,21 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
+import { makeStyles } from '@material-ui/core/styles';
+import { FormattedMessage } from 'react-intl';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import InputAdornment from '@material-ui/core/InputAdornment';
+
+import APIValidation from 'AppData/APIValidation';
+import Wsdl from 'AppData/Wsdl';
 import DropZoneLocal from './components/DropZoneLocal';
 
-/**
- * Source https://stackoverflow.com/questions/5717093/check-if-a-javascript-string-is-a-url
- * TODO: Needs to replace this kind of ad-hoc validation methods with proper library
- *
- * @param {*} str
- * @returns {Boolean} Whether the given string is a valid URL or not
- */
-function isURL(str) {
-    const pattern = new RegExp(
-        '^(https?:\\/\\/)?' + // protocol
-        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|' + // domain name
-        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-            '(\\#[-a-z\\d_]*)?$',
-        'i',
-    ); // fragment locator
-    return pattern.test(str);
-}
+const useStyles = makeStyles(theme => ({
+    mandatoryStar: {
+        color: theme.palette.error.main,
+    },
+}));
+
 /**
  * Sub component of API Create using WSDL UI, This is handling the taking input of WSDL file or URL from the user
  * In the create API using WSDL wizard first step out of 2 steps
@@ -54,9 +48,11 @@ function isURL(str) {
  * @returns {React.Component} @inheritdoc
  */
 export default function ProvideWSDL(props) {
-    const { apiInputs, inputsDispatcher } = props;
+    const { apiInputs, inputsDispatcher, onValidate } = props;
     const isFileInput = apiInputs.inputType === 'file';
-    // const [validity, setValidity] = useState({ url: true, file: true });
+    const classes = useStyles();
+    const [isError, setValidity] = useState(); // If valid value is `null` else an error object will be there
+    const [isValidating, setIsValidating] = useState(false);
     /**
      *
      *
@@ -67,12 +63,48 @@ export default function ProvideWSDL(props) {
         // accept the first file. This information is shown in the dropdown helper text
         inputsDispatcher({ action: 'inputValue', value: [files[0]] });
     }
+
+    /**
+     * Trigger the provided onValidate call back on each input validation run
+     * Do the validation state aggregation and call the onValidate method with aggregated value
+     * @param {Object} state Validation state object
+     */
+    function validate(state) {
+        if (state === null) {
+            setIsValidating(true);
+            Wsdl.validate(apiInputs.inputValue).then((response) => {
+                const {
+                    body: { isValid },
+                } = response;
+                if (isValid) {
+                    setValidity(null);
+                } else {
+                    setValidity({ message: 'WSDL content validation failed!' });
+                }
+                onValidate(isValid);
+                setIsValidating(false);
+            });
+            // Valid URL string
+            // Do API call
+        } else {
+            setValidity(state);
+            onValidate(false);
+        }
+    }
     return (
         <React.Fragment>
             <Grid container spacing={5}>
                 <Grid item md={12}>
                     <FormControl component='fieldset'>
-                        <FormLabel component='legend'>Input type</FormLabel>
+                        <FormLabel component='legend'>
+                            <React.Fragment>
+                                <sup className={classes.mandatoryStar}>*</sup>{' '}
+                                <FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.type'
+                                    defaultMessage='Input type'
+                                />
+                            </React.Fragment>
+                        </FormLabel>
                         <RadioGroup
                             aria-label='Input type'
                             value={apiInputs.inputType}
@@ -89,12 +121,10 @@ export default function ProvideWSDL(props) {
                         <DropZoneLocal onDrop={onDrop} files={apiInputs.inputValue} />
                     ) : (
                         <TextField
+                            autoFocus
                             id='outlined-full-width'
                             label='WSDL URL'
-                            inputProps={{ onBlur: event => console.log(event.target.value) }}
                             placeholder='Enter WSDL URL'
-                            error={isURL(apiInputs.inputValue)}
-                            helperText='Give the URL of WSDL endpoint'
                             fullWidth
                             margin='normal'
                             variant='outlined'
@@ -103,12 +133,34 @@ export default function ProvideWSDL(props) {
                             InputLabelProps={{
                                 shrink: true,
                             }}
+                            InputProps={{
+                                onBlur: ({ target: { value } }) => {
+                                    validate(APIValidation.url.required().validate(value).error);
+                                },
+                                endAdornment: isValidating && (
+                                    <InputAdornment position='end'>
+                                        <CircularProgress />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            // 'Give the URL of WSDL endpoint'
+                            helperText={isError && isError.message}
+                            error={Boolean(isError)}
+                            disabled={isValidating}
                         />
                     )}
                 </Grid>
                 <Grid item md={12}>
                     <FormControl component='fieldset'>
-                        <FormLabel component='legend'>Implementation type</FormLabel>
+                        <FormLabel component='legend'>
+                            <React.Fragment>
+                                <sup className={classes.mandatoryStar}>*</sup>{' '}
+                                <FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.implementation.type'
+                                    defaultMessage='Implementation type'
+                                />
+                            </React.Fragment>
+                        </FormLabel>
                         <RadioGroup
                             aria-label='Implementation type'
                             value={isFileInput ? 'PASS' : apiInputs.type}
@@ -133,10 +185,14 @@ export default function ProvideWSDL(props) {
     );
 }
 
+ProvideWSDL.defaultProps = {
+    onValidate: () => {},
+};
 ProvideWSDL.propTypes = {
     apiInputs: PropTypes.shape({
         type: PropTypes.string,
         inputType: PropTypes.string,
     }).isRequired,
     inputsDispatcher: PropTypes.func.isRequired,
+    onValidate: PropTypes.func,
 };

@@ -26,6 +26,8 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
+import Wsdl from 'AppData/Wsdl';
+
 import ProvideWSDL from './Steps/ProvideWSDL';
 import DefaultAPIForm from './Steps/DefaultAPIForm';
 
@@ -71,11 +73,6 @@ APICreateBase.propTypes = {
  */
 export default function SOAPToREST() {
     const [wizardStep, setWizardStep] = useState(0);
-    useEffect(() => {
-        if (wizardStep === 1) {
-            // Do the API submission
-        }
-    }, [wizardStep]);
 
     /**
      *
@@ -104,7 +101,7 @@ export default function SOAPToREST() {
         type: 'SOAPtoREST',
         inputType: 'url',
         inputValue: '',
-        formValidity: true,
+        formValidity: false,
     });
 
     /**
@@ -127,8 +124,43 @@ export default function SOAPToREST() {
         // API Name , Version & Context is a must that's why `&&` chain
         inputsDispatcher({
             action: 'isFormValid',
-            value: isFormValid && Boolean(apiInputs.name) && Boolean(apiInputs.version) && Boolean(apiInputs.context),
+            value: isFormValid,
         });
+    }
+
+    /**
+     *
+     *
+     * @param {*} params
+     */
+    function createAPI() {
+        const {
+            name, version, context, endpoint, policies,
+        } = apiInputs;
+        const endpointConfig = {
+            endpoint_type: 'http',
+            sandbox_endpoints: {
+                url: endpoint,
+            },
+            production_endpoints: {
+                url: endpoint,
+            },
+        };
+        const promisedWSDLImport = Wsdl.import(
+            apiInputs.inputValue,
+            {
+                name,
+                version,
+                context,
+                endpointConfig,
+                policies,
+            },
+            'SOAPTOREST',
+        );
+        promisedWSDLImport.then((response) => {
+            console.log(response);
+        });
+        // TODO: catch error ~tmkb
     }
 
     return (
@@ -169,7 +201,13 @@ export default function SOAPToREST() {
                 <Grid item md={12} />
                 <Grid item md={1} />
                 <Grid item md={11}>
-                    {wizardStep === 0 && <ProvideWSDL apiInputs={apiInputs} inputsDispatcher={inputsDispatcher} />}
+                    {wizardStep === 0 && (
+                        <ProvideWSDL
+                            onValidate={handleOnValidate}
+                            apiInputs={apiInputs}
+                            inputsDispatcher={inputsDispatcher}
+                        />
+                    )}
                     {wizardStep === 1 && (
                         <DefaultAPIForm onValidate={handleOnValidate} onChange={handleOnChange} api={apiInputs} />
                     )}
@@ -196,12 +234,18 @@ export default function SOAPToREST() {
                                     onClick={() => setWizardStep(step => step + 1)}
                                     variant='contained'
                                     color='primary'
+                                    disabled={!apiInputs.isFormValid}
                                 >
                                     Next
                                 </Button>
                             )}
                             {wizardStep === 1 && (
-                                <Button variant='contained' color='primary' disabled={!apiInputs.isFormValid}>
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                    disabled={!apiInputs.isFormValid}
+                                    onClick={createAPI}
+                                >
                                     Create
                                 </Button>
                             )}
