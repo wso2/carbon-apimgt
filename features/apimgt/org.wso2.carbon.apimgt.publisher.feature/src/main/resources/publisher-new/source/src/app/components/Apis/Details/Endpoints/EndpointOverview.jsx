@@ -279,7 +279,7 @@ function EndpointOverview(props) {
             endpointTemplate = {
                 endpoint_type: 'address',
                 template_not_supported: false,
-                url: 'http://myservice/resource',
+                url: '',
             };
         } else if (selectedKey === 'default') {
             endpointTemplate = {
@@ -287,7 +287,7 @@ function EndpointOverview(props) {
             };
         } else {
             endpointTemplate = {
-                url: 'http://myservice/resource',
+                url: '',
             };
         }
 
@@ -405,18 +405,18 @@ function EndpointOverview(props) {
     const saveAdvanceConfig = (advanceConfig) => {
         const endpointConfigProperty =
             getEndpointTypeProperty(advanceConfigOptions.type, advanceConfigOptions.category);
-        const endpoints = epConfig[endpointConfigProperty];
-        if (Array.isArray(endpoints)) {
+        const selectedEndpoints = JSON.parse(JSON.stringify(epConfig[endpointConfigProperty]));
+        if (Array.isArray(selectedEndpoints)) {
             if (advanceConfigOptions.type === 'failover') {
-                endpoints[advanceConfigOptions.index - 1].config = advanceConfig;
+                selectedEndpoints[advanceConfigOptions.index - 1].config = advanceConfig;
             } else {
-                endpoints[advanceConfigOptions.index].config = advanceConfig;
+                selectedEndpoints[advanceConfigOptions.index].config = advanceConfig;
             }
         } else {
-            endpoints.config = advanceConfig;
+            selectedEndpoints.config = advanceConfig;
         }
         setAdvancedConfigOptions({ open: false });
-        setEpConfig({ ...epConfig, [endpointConfigProperty]: endpoints });
+        setEpConfig({ ...epConfig, [endpointConfigProperty]: selectedEndpoints });
     };
 
     /**
