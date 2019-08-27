@@ -41,7 +41,7 @@ import AuthManager from '../../data/AuthManager';
 import ConfigManager from '../../data/ConfigManager';
 import EnvironmentMenu from './Header/EnvironmentMenu';
 import GlobalNavBar from './Header/GlobalNavbar';
-import GenericSearch from './Header/GenericSearch';
+import HeaderSearch from 'AppComponents/Base/Header/Search/HeaderSearch';
 import Utils from '../../data/Utils';
 import VerticalDivider from '../Shared/VerticalDivider';
 
@@ -264,8 +264,8 @@ class Layout extends React.Component {
                                 </Drawer>
                             </Hidden>
                             <VerticalDivider height={32} />
-                            <GenericSearch />
-                            <VerticalDivider height={64} />
+                            <HeaderSearch />
+                            <VerticalDivider height={72} />
                             {/* Environment menu */}
                             <EnvironmentMenu
                                 environments={this.state.environments}
