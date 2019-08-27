@@ -7547,6 +7547,9 @@ public final class APIUtil {
 
                 if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey) &&
                         !APIConstants.TAG_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey)) {
+                    if (APIConstants.API_STATUS.equalsIgnoreCase(searchKey)) {
+                        searchValue = searchValue.toLowerCase();
+                    }
                     if (!(searchValue.endsWith("\"") && searchValue.startsWith("\""))) {
                         if (!searchValue.endsWith("*")) {
                             searchValue = searchValue + "*";
@@ -7816,8 +7819,7 @@ public final class APIUtil {
 
         // sub context and doc content doesn't support AND search
         if (inputSearchQuery != null && inputSearchQuery.contains(" ") && !inputSearchQuery
-                .contains(APIConstants.TAG_SEARCH_TYPE_PREFIX4) && !inputSearchQuery
-                .contains(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                .contains(APIConstants.TAG_SEARCH_TYPE_PREFIX4)) {
             if (inputSearchQuery.split(" ").length > 1) {
                 String[] searchCriterias = inputSearchQuery.split(" ");
                 for (int i = 0; i < searchCriterias.length; i++) {

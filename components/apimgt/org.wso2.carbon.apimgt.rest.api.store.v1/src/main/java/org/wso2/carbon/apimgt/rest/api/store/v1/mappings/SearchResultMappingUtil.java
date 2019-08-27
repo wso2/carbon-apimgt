@@ -76,6 +76,7 @@ public class SearchResultMappingUtil {
         docResultDTO.setApiName(apiId.getApiName());
         docResultDTO.setApiVersion(apiId.getVersion());
         docResultDTO.setApiProvider(apiId.getProviderName());
+        docResultDTO.setApiUUID(api.getUUID());
         return docResultDTO;
     }
 
