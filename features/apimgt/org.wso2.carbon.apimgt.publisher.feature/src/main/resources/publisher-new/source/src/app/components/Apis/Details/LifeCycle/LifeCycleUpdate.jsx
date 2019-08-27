@@ -25,6 +25,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 import API from 'AppData/api';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
@@ -78,6 +79,7 @@ class LifeCycleUpdate extends Component {
                 /* TODO: Handle IO erros ~tmkb */
                 this.props.handleUpdate(true);
                 let newState = response.body.lifecycleState.state;
+                this.context.updateAPI({updateproperties: response.body});
                 this.setState({ newState });
                 const { intl } = this.props;
 
@@ -190,5 +192,7 @@ LifeCycleUpdate.propTypes = {
         formatMessage: PropTypes.func,
     }).isRequired,
 };
+
+LifeCycleUpdate.contextType = ApiContext;
 
 export default withStyles(styles, { withTheme: true })(injectIntl(LifeCycleUpdate));

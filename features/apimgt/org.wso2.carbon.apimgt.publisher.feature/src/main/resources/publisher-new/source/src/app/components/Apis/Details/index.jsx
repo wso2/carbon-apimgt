@@ -205,24 +205,28 @@ class Details extends Component {
      *
      * @memberof Details
      */
-    setAPI() {
-        const { apiUUID } = this.props.match.params;
-        const promisedApi = Api.get(apiUUID);
-        promisedApi
-            .then((api) => {
-                this.setState({ api });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ apiNotFound: true });
-                } else if (status === 401) {
-                    doRedirectToLogin();
-                }
-            });
+    setAPI(newAPI) {
+        if (newAPI) {
+            this.setState({ api: newAPI });
+        } else {
+            const { apiUUID } = this.props.match.params;
+            const promisedApi = Api.get(apiUUID);
+            promisedApi
+                .then((api) => {
+                    this.setState({ api });
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                    const { status } = error;
+                    if (status === 404) {
+                        this.setState({ apiNotFound: true });
+                    } else if (status === 401) {
+                        doRedirectToLogin();
+                    }
+                });
+        }
     }
 
     /**
@@ -312,6 +316,9 @@ class Details extends Component {
         if (isAPIProduct) {
             const restAPI = new Api();
             promisedUpdate = restAPI.updateProduct(JSON.parse(JSON.stringify(updatedProperties)));
+        } else if (updatedProperties) {
+        // this is to get the updated api when api properties are updated.
+            promisedUpdate = Api.get(api.id);
         } else {
             promisedUpdate = api.update(updatedProperties);
         }
@@ -400,7 +407,10 @@ class Details extends Component {
 
         return (
             <React.Fragment>
-                <APIProvider value={{ api, updateAPI: this.updateAPI, isAPIProduct }}>
+                <APIProvider value={{
+                    api, updateAPI: this.updateAPI, isAPIProduct, setAPI: this.setAPI,
+                }}
+                >
                     <div className={classes.LeftMenu}>
                         <Link to={'/' + (isAPIProduct ? 'api-products' : 'apis') + '/'}>
                             <div className={classes.leftLInkMain}>
