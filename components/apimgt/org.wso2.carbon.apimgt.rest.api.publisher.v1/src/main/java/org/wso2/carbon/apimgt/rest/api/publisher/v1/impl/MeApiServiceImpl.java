@@ -28,10 +28,19 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import javax.ws.rs.core.Response;
 
+/**
+ * This is the service implementation class for operations related to the logged-in user (/me endpoint)
+ */
 public class MeApiServiceImpl implements MeApiService {
 
     private static final Log log = LogFactory.getLog(MeApiServiceImpl.class);
 
+    /**
+     * Check whether the logged-in user has given role
+     *
+     * @param roleId Base64 URL encoded form of role name -Base64URLEncode{user-store-name/role-name}
+     * @return 200 if logged-in user has given role
+     */
     public Response meRolesRoleIdHead(String roleId, MessageContext messageContext) {
 
         String userName = RestApiUtil.getLoggedInUsername();

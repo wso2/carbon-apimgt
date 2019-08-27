@@ -6001,8 +6001,9 @@ parameters:
     name: roleId
     in: path
     description: |
-      The Base 64 URL encoded role name. If the role existed in secondary user-store, role name should be specified as
-      {user-store-name}/{role-name}.
+      The Base 64 URL encoded role name with domain. If the given role is in secondary user-store, role ID should be
+      derived as Base64URLEncode({user-store-name}/{role-name}). If the given role is in PRIMARY user-store, role ID
+      can be derived as Base64URLEncode(role-name)
     required: true
     type: string
 

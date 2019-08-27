@@ -28,10 +28,19 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import javax.ws.rs.core.Response;
 
+/**
+ * This is the service implementation class for operations related to roles
+ */
 public class RolesApiServiceImpl implements RolesApiService {
 
     private static final Log log = LogFactory.getLog(RolesApiServiceImpl.class);
 
+    /**
+     * Check whether the given role exists in the system
+     *
+     * @param roleId Base64 URL encoded form of role name -Base64URLEncode{user-store-name/role-name}
+     * @return 200 if the given role exists
+     */
     public Response rolesRoleIdHead(String roleId, MessageContext messageContext) {
         Boolean isRoleExist = false;
         String username = RestApiUtil.getLoggedInUsername();
