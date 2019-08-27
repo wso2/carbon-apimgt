@@ -755,6 +755,12 @@ APIDesigner.prototype.transform = function(api_doc){
         delete path.parameters;
         for(var verbkey in path){
             var verb = path[verbkey];
+            verb.displayPath = pathkey;
+            if (pathkey.indexOf(".") != -1){
+                var str1 = "['";
+                var str2 = "']";
+                pathkey = str1.concat(pathkey).concat(str2);
+            }
             verb.path = pathkey;
         }
     }
