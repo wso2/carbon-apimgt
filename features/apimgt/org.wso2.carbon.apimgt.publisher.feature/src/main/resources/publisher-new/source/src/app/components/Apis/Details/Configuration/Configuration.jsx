@@ -68,7 +68,7 @@ function copyAPIConfig(api) {
         description: api.description,
         accessControl: api.accessControl,
         authorizationHeader: api.authorizationHeader,
-        responseCaching: api.responseCaching,
+        responseCachingEnabled: api.responseCachingEnabled,
         cacheTimeout: api.cacheTimeout,
         visibility: api.visibility,
         isDefaultVersion: api.isDefaultVersion,
@@ -109,7 +109,7 @@ export default function Configuration() {
             case 'description':
             case 'isDefaultVersion':
             case 'authorizationHeader':
-            case 'responseCaching':
+            case 'responseCachingEnabled':
             case 'cacheTimeout':
             case 'enableSchemaValidation':
             case 'accessControl':

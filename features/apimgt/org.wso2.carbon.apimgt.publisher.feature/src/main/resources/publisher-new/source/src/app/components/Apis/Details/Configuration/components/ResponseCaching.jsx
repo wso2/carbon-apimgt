@@ -37,7 +37,7 @@ import TextField from '@material-ui/core/TextField';
  */
 export default function ResponseCaching(props) {
     const { api, configDispatcher } = props;
-    const isResponseCachingEnabled = api.responseCaching;
+    const isResponseCachingEnabled = api.responseCachingEnabled;
     return (
         <Grid container spacing={1} alignItems='flex-start'>
             <Grid item>
@@ -51,10 +51,10 @@ export default function ResponseCaching(props) {
                     <FormControlLabel
                         control={
                             <Switch
-                                checked={api.responseCaching}
+                                checked={api.responseCachingEnabled}
                                 onChange={({ target: { checked } }) =>
                                     configDispatcher({
-                                        action: 'responseCaching',
+                                        action: 'responseCachingEnabled',
                                         value: checked,
                                     })
                                 }

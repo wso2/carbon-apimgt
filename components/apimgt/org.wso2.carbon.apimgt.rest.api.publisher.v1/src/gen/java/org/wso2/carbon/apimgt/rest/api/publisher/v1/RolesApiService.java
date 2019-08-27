@@ -7,6 +7,8 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
+
 
 import java.util.List;
 
@@ -17,5 +19,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface RolesApiService {
-      public Response rolesRoleIdHead(String roleId, MessageContext messageContext);
+      public Response rolesRoleIdHead(String roleId, MessageContext messageContext) throws APIManagementException;
 }

@@ -321,8 +321,18 @@ function Configuration(props) {
                                 </Tooltip>
                             </Typography>
                             <Typography component='p' variant='body1'>
-                                {api.responseCaching && <React.Fragment>{api.responseCaching}</React.Fragment>}
-                                {!api.responseCaching && <React.Fragment>?</React.Fragment>}
+                                {api.responseCachingEnabled && (
+                                    <FormattedMessage
+                                        id='Apis.Details.NewOverview.Configuration.response.caching.enabled'
+                                        defaultMessage='ENABLED'
+                                    />
+                                )}
+                                {!api.responseCachingEnabled && (
+                                    <FormattedMessage
+                                        id='Apis.Details.NewOverview.Configuration.response.caching.disabled'
+                                        defaultMessage='DISABLED'
+                                    />
+                                )}
                             </Typography>
                             {/* Authorization Header */}
                             <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
