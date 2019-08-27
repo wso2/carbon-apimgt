@@ -79,7 +79,7 @@ class LifeCycleUpdate extends Component {
                 /* TODO: Handle IO erros ~tmkb */
                 this.props.handleUpdate(true);
                 let newState = response.body.lifecycleState.state;
-                this.context.updateAPI({updateproperties: response.body});
+                this.context.updateAPI();
                 this.setState({ newState });
                 const { intl } = this.props;
 

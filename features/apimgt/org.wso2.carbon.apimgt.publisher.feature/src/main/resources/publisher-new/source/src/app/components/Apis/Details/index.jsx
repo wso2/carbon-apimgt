@@ -32,6 +32,7 @@ import MonetizationIcon from '@material-ui/icons/LocalAtm';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl, defineMessages } from 'react-intl';
 import { Redirect, Route, Switch, Link, matchPath } from 'react-router-dom';
+import isEmpty from 'lodash.isEmpty';
 import Utils from 'AppData/Utils';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
@@ -308,7 +309,7 @@ class Details extends Component {
      * @param {*} isAPIProduct
      * @memberof Details
      */
-    updateAPI(updatedProperties, isAPIProduct) {
+    updateAPI(updatedProperties = {}, isAPIProduct) {
         const { api } = this.state;
         let promisedUpdate;
         // TODO: Ideally, The state should hold the corresponding API object
@@ -316,11 +317,12 @@ class Details extends Component {
         if (isAPIProduct) {
             const restAPI = new Api();
             promisedUpdate = restAPI.updateProduct(JSON.parse(JSON.stringify(updatedProperties)));
-        } else if (updatedProperties) {
-        // this is to get the updated api when api properties are updated.
-            promisedUpdate = Api.get(api.id);
-        } else {
+        } else if (!isEmpty(updatedProperties)) {
+            // newApi object has to be provided as the updatedProperties. Then api will be updated.
             promisedUpdate = api.update(updatedProperties);
+        } else {
+            // this is to get the updated api when api properties are updated, but we do not have the newApi object
+            promisedUpdate = Api.get(api.id);
         }
         return promisedUpdate.then((updatedAPI) => {
             Alert.info(`${updatedAPI.name} API updated successfully`);
