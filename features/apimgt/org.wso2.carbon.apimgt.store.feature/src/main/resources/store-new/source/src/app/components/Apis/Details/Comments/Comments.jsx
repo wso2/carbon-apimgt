@@ -126,16 +126,8 @@ class Comments extends Component {
                 }
             })
             .catch((error) => {
-                console.error(error);
-                if (error.response) {
-                    Alert.error(error.response.body.message);
-                } else {
-                    Alert.error(
-                        intl.formatMessage({
-                            defaultMessage: 'Something went wrong while retrieving comments',
-                            id: 'AnonymousView.SignUp.something.went.wrong',
-                        }),
-                    );
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
                 }
             });
     }
