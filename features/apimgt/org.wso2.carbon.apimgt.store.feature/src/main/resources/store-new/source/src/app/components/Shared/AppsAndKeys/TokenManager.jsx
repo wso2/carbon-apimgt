@@ -160,7 +160,6 @@ class TokenManager extends React.Component {
                 return application.generateKeys(keyType, keyRequest.supportedGrantTypes, keyRequest.callbackUrl);
             })
             .then((response) => {
-                console.log('Keys generated successfully with ID :' + response);
                 if (updateSubscriptionData) {
                     updateSubscriptionData();
                 }
@@ -207,8 +206,7 @@ class TokenManager extends React.Component {
                     applicationKey.consumerSecret,
                 );
             })
-            .then((response) => {
-                console.log('Keys updated successfully : ' + response);
+            .then(() => {
                 Alert.info(intl.formatMessage({
                     id: 'Shared.AppsAndKeys.TokenManager.key.update.success',
                     defaultMessage: 'Application keys updated successfully',
@@ -249,8 +247,7 @@ class TokenManager extends React.Component {
             .then((application) => {
                 return application.provideKeys(keyType, providedConsumerKey, providedConsumerSecret);
             })
-            .then((response) => {
-                console.log('Keys provided successfully : ' + response);
+            .then(() => {
                 this.setState({ providedConsumerKey: '', providedConsumerSecret: '' });
                 Alert.info(intl.formatMessage({
                     id: 'Shared.AppsAndKeys.TokenManager.key.provide.success',
