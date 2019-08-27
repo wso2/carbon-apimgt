@@ -105,7 +105,7 @@ class CommonListing extends React.Component {
      */
     render() {
         const {
-            apis, apiType, theme, classes,
+            apis, apiType, theme, classes, location: { search }
         } = this.props;
         const { listType } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
@@ -141,13 +141,13 @@ class CommonListing extends React.Component {
                     {listType === 'grid'
                     && (
                         <ApiContext.Provider value={{ apiType }}>
-                            <ApiTableView gridView />
+                            <ApiTableView gridView query={search}/>
                         </ApiContext.Provider>
                     )}
                     {listType === 'list'
                     && (
                         <ApiContext.Provider value={{ apiType }}>
-                            <ApiTableView gridView={false} />
+                            <ApiTableView gridView={false} query={search} />
                         </ApiContext.Provider>
                     )}
                 </div>
@@ -161,6 +161,15 @@ CommonListing.propTypes = {
     theme: PropTypes.shape({}).isRequired,
     apiType: PropTypes.string.isRequired,
     apis: PropTypes.shape({}).isRequired,
+    location: PropTypes.shape({
+        search: PropTypes.string,
+    }),
 };
 
-export default withStyles(styles, { withTheme: true })(CommonListing);
+CommonListing.defaultProps = {
+    location: PropTypes.shape({
+        search: '',
+    }),
+}
+
+export default  withStyles(styles, { withTheme: true })(CommonListing);

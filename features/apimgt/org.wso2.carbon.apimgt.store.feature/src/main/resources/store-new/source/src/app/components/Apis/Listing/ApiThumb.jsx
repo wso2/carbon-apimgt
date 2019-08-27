@@ -203,6 +203,10 @@ class ApiThumb extends React.Component {
         const {
             name, version, context, provider,
         } = api;
+
+        if (!api.lifeCycleStatus) {
+            api.lifeCycleStatus = api.status;
+        }
         const imageWidth = thumbnail.width;
         const defaultImage = thumbnail.defaultApiImage;
 
