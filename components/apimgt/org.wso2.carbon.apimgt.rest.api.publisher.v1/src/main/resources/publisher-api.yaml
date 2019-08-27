@@ -5611,7 +5611,7 @@ paths:
       summary: Retreive publisher settings
       security:
         - OAuth2Security:
-          - apim:publisher_setting
+          - apim:publisher_settings
       description: |
         Retreive publisher settings
       tags:
