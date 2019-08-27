@@ -101,7 +101,7 @@ const styles = theme => ({
 });
 
 const endpointTypes = [{ key: 'http', value: 'HTTP/REST Endpoint' },
-    { key: 'address', value: 'HTTP/SOAP Endpoint' }];
+    { key: 'address', value: 'HTTP/SOAP Endpoint' }, { key: 'default', value: 'Dynamic Endpoints' }];
 
 /**
  * The endpoint overview component. This component holds the views of endpoint creation and configuration.
@@ -136,6 +136,8 @@ function EndpointOverview(props) {
             return endpointTypes[0];
         } else if (type === 'address') {
             return endpointTypes[1];
+        } else if (type === 'default') {
+            return endpointTypes[2];
         } else {
             const prodEndpoints = endpointConfig.production_endpoints;
             if (Array.isArray(prodEndpoints)) {
@@ -279,6 +281,10 @@ function EndpointOverview(props) {
                 template_not_supported: false,
                 url: 'http://myservice/resource',
             };
+        } else if (selectedKey === 'default') {
+            endpointTemplate = {
+                url: 'default',
+            };
         } else {
             endpointTemplate = {
                 url: 'http://myservice/resource',
@@ -420,7 +426,6 @@ function EndpointOverview(props) {
         setAdvancedConfigOptions({ open: false });
     };
 
-    console.log(api.type);
     return (
         <React.Fragment className={classes.overviewWrapper}>
             <Grid container xs={12}>
@@ -436,7 +441,7 @@ function EndpointOverview(props) {
                         apiType={api.type}
                     />
                 </Grid>
-                <Paper className={classes.endpointContainer}>
+                <Paper className={classes.endpointContainer} hidden={endpointType.key === 'default'}>
                     <Grid container item xs={12}>
                         <Grid item container xs spacing={2}>
                             <Grid xs className={classes.endpointsWrapperLeft}>
@@ -448,8 +453,9 @@ function EndpointOverview(props) {
                                 </Typography>
                                 <GenericEndpoint
                                     className={classes.defaultEndpointWrapper}
-                                    endpointURL={epConfig.production_endpoints.length > 0 ?
-                                        epConfig.production_endpoints[0].url : epConfig.production_endpoints.url}
+                                    endpointURL={
+                                        epConfig.production_endpoints && epConfig.production_endpoints.length > 0 ?
+                                            epConfig.production_endpoints[0].url : epConfig.production_endpoints.url}
                                     type=''
                                     index={0}
                                     category='production_endpoints'
@@ -468,7 +474,7 @@ function EndpointOverview(props) {
                                 </div>
                                 <GenericEndpoint
                                     className={classes.defaultEndpointWrapper}
-                                    endpointURL={epConfig.sandbox_endpoints.length > 0 ?
+                                    endpointURL={epConfig.sandbox_endpoints && epConfig.sandbox_endpoints.length > 0 ?
                                         epConfig.sandbox_endpoints[0].url : epConfig.sandbox_endpoints.url}
                                     type=''
                                     index={0}
@@ -552,8 +558,8 @@ function EndpointOverview(props) {
                                     />
                                 </Grid>
                             </Grid>
-                        </Grid>
-                        : <div /> }
+                            {/* TODO : Integrate the mediation sequence upload component here. */}
+                        </Grid> : <div /> }
                 </Paper>
             </Grid>
             <Dialog open={isLBConfigOpen}>
