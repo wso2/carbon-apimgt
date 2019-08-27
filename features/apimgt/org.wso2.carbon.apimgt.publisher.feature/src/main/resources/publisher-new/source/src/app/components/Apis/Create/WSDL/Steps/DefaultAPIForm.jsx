@@ -47,7 +47,7 @@ export default function DefaultAPIForm(props) {
     // Check the provided API validity on mount, TODO: Better to use Joi schema here ~tmkb
     useEffect(() => {
         onValidate(Boolean(api.name) && Boolean(api.version) && Boolean(api.context));
-    });
+    }, []);
     /**
      * Trigger the provided onValidate call back on each input validation run
      * Do the validation state aggregation and call the onValidate method with aggregated value
@@ -58,6 +58,7 @@ export default function DefaultAPIForm(props) {
         let isFormValid = Object.values(state)
             .map(value => value === null || value === undefined) // Map the validation entries to booleans
             .reduce((acc, cVal) => acc && cVal); // Aggregate the individual validation states
+        // API Name , Version & Context is a must that's why `&&` chain
         isFormValid = isFormValid && Boolean(api.name) && Boolean(api.version) && Boolean(api.context);
         onValidate(isFormValid, state);
     }

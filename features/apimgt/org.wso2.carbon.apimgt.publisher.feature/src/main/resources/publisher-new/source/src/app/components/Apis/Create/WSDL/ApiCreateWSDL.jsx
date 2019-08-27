@@ -27,6 +27,8 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import Wsdl from 'AppData/Wsdl';
+import Alert from 'AppComponents/Shared/Alert';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import ProvideWSDL from './Steps/ProvideWSDL';
 import DefaultAPIForm from './Steps/DefaultAPIForm';
@@ -121,46 +123,55 @@ export default function SOAPToREST() {
      * @param {*} validationState
      */
     function handleOnValidate(isFormValid) {
-        // API Name , Version & Context is a must that's why `&&` chain
         inputsDispatcher({
             action: 'isFormValid',
             value: isFormValid,
         });
     }
 
+    const [isCreating, setCreating] = useState();
     /**
      *
      *
      * @param {*} params
      */
     function createAPI() {
+        setCreating(true);
         const {
             name, version, context, endpoint, policies,
         } = apiInputs;
-        const endpointConfig = {
-            endpoint_type: 'http',
-            sandbox_endpoints: {
-                url: endpoint,
-            },
-            production_endpoints: {
-                url: endpoint,
-            },
+        const additionalProperties = {
+            name,
+            version,
+            context,
+            policies,
         };
-        const promisedWSDLImport = Wsdl.import(
-            apiInputs.inputValue,
-            {
-                name,
-                version,
-                context,
-                endpointConfig,
-                policies,
-            },
-            'SOAPTOREST',
-        );
-        promisedWSDLImport.then((response) => {
-            console.log(response);
-        });
-        // TODO: catch error ~tmkb
+        if (endpoint) {
+            additionalProperties.endpointConfig = {
+                endpoint_type: 'http',
+                sandbox_endpoints: {
+                    url: endpoint,
+                },
+                production_endpoints: {
+                    url: endpoint,
+                },
+            };
+        }
+
+        const promisedWSDLImport = Wsdl.import(apiInputs.inputValue, additionalProperties, 'SOAPTOREST');
+        promisedWSDLImport
+            .then(() => {
+                Alert.info('API created successfully');
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while adding the API');
+                }
+                console.error(error);
+            })
+            .finally(() => setCreating(false));
     }
 
     return (
@@ -243,10 +254,10 @@ export default function SOAPToREST() {
                                 <Button
                                     variant='contained'
                                     color='primary'
-                                    disabled={!apiInputs.isFormValid}
+                                    disabled={!apiInputs.isFormValid || isCreating}
                                     onClick={createAPI}
                                 >
-                                    Create
+                                    Create {isCreating && <CircularProgress size={24} />}
                                 </Button>
                             )}
                         </Grid>
