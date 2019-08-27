@@ -27,6 +27,7 @@ import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Icon from '@material-ui/core/Icon';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Loading from 'AppComponents/Base/Loading/Loading';
+import Alert from 'AppComponents/Shared/Alert';
 import ProvideOAuthKeys from 'AppComponents/Shared/AppsAndKeys/ProvideOAuthKeys';
 import Application from 'AppData/Application';
 import KeyConfiguration from './KeyConfiguration';
@@ -151,7 +152,9 @@ class TokenManager extends React.Component {
      */
     generateKeys() {
         const { keyRequest, keys } = this.state;
-        const { keyType, updateSubscriptionData, selectedApp: { tokenType } } = this.props;
+        const {
+            keyType, updateSubscriptionData, selectedApp: { tokenType }, intl,
+        } = this.props;
         this.application
             .then((application) => {
                 return application.generateKeys(keyType, keyRequest.supportedGrantTypes, keyRequest.callbackUrl);
@@ -165,6 +168,10 @@ class TokenManager extends React.Component {
                 const isKeyJWT = tokenType === 'JWT';
                 newKeys.set(keyType, response);
                 this.setState({ keys: newKeys, isKeyJWT });
+                Alert.info(intl.formatMessage({
+                    id: 'Shared.AppsAndKeys.TokenManager.key.generate.success',
+                    defaultMessage: 'Application keys generated successfully',
+                }));
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -174,6 +181,10 @@ class TokenManager extends React.Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
+                Alert.error(intl.formatMessage({
+                    id: 'Shared.AppsAndKeys.TokenManager.key.generate.error',
+                    defaultMessage: 'Error occurred when generating application keys',
+                }));
             });
     }
 
@@ -183,7 +194,7 @@ class TokenManager extends React.Component {
      */
     updateKeys() {
         const { keys, keyRequest } = this.state;
-        const { keyType } = this.props;
+        const { keyType, intl } = this.props;
         const applicationKey = keys.get(keyType);
         this.application
             .then((application) => {
@@ -198,6 +209,10 @@ class TokenManager extends React.Component {
             })
             .then((response) => {
                 console.log('Keys updated successfully : ' + response);
+                Alert.info(intl.formatMessage({
+                    id: 'Shared.AppsAndKeys.TokenManager.key.update.success',
+                    defaultMessage: 'Application keys updated successfully',
+                }));
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -207,6 +222,10 @@ class TokenManager extends React.Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
+                Alert.error(intl.formatMessage({
+                    id: 'Shared.AppsAndKeys.TokenManager.key.update.error',
+                    defaultMessage: 'Error occurred when updating application keys',
+                }));
             });
     }
 
@@ -224,7 +243,7 @@ class TokenManager extends React.Component {
      */
     provideOAuthKeySecret() {
         const { providedConsumerKey, providedConsumerSecret } = this.state;
-        const { keyType } = this.props;
+        const { keyType, intl } = this.props;
 
         this.application
             .then((application) => {
@@ -233,6 +252,10 @@ class TokenManager extends React.Component {
             .then((response) => {
                 console.log('Keys provided successfully : ' + response);
                 this.setState({ providedConsumerKey: '', providedConsumerSecret: '' });
+                Alert.info(intl.formatMessage({
+                    id: 'Shared.AppsAndKeys.TokenManager.key.provide.success',
+                    defaultMessage: 'Application keys provided successfully',
+                }));
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -242,6 +265,10 @@ class TokenManager extends React.Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
+                Alert.error(intl.formatMessage({
+                    id: 'Shared.AppsAndKeys.TokenManager.key.provide.error',
+                    defaultMessage: 'Error occurred when providing application keys',
+                }));
             });
     }
 
@@ -387,6 +414,7 @@ TokenManager.propTypes = {
     }).isRequired,
     keyType: PropTypes.string.isRequired,
     updateSubscriptionData: PropTypes.func.isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
 export default injectIntl(withStyles(styles)(TokenManager));

@@ -43,15 +43,15 @@ function ProvideOAuthKeys(props) {
         classes, consumerKey, consumerSecret, intl, onChange,
     } = props;
 
-    // enable allowShortCircuit as specified in https://eslint.org/docs/rules/no-unused-expressions
-    /* eslint no-unused-expressions: ["error", { "allowShortCircuit": true }] */
     /**
      * Handle onChange of provided consumer key and secret
      *
      * @param event
      */
     function handleChange(event) {
-        onChange && onChange(event);
+        if (onChange) {
+            onChange(event);
+        }
     }
 
     return (
