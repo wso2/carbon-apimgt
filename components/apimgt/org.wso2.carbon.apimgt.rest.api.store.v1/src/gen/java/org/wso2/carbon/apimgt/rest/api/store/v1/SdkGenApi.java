@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SdkGenApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.SdkGenApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -47,7 +48,7 @@ SdkGenApiService delegate = new SdkGenApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. List of supported languages for generating SDKs. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The list of languages is not found. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error. Error while retrieving the list. ", response = ErrorDTO.class) })
-    public Response sdkGenLanguagesGet() {
+    public Response sdkGenLanguagesGet() throws APIManagementException{
         return delegate.sdkGenLanguagesGet(securityContext);
     }
 }

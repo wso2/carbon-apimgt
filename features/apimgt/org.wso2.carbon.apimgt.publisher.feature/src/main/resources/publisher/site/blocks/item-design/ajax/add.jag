@@ -255,7 +255,7 @@ if(jagg.isCSRFTokenValid())
                 var resp;
                 try {
                     if(rest) {
-                        var soapToRestUtil = Packages.org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
+                        var soapToRestUtil = Packages.org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
                         resp = new Packages.java.lang.String(soapToRestUtil.getSoapOperationMapping(url));
                         if(resp) {
                             mappingJson = JSON.parse(resp);
@@ -407,7 +407,7 @@ if(jagg.isCSRFTokenValid())
                     isSoapToRestApi = false;
                 }
                 if (isSoapToRestApi) {
-                    var sequenceGenerator = Packages.org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
+                    var sequenceGenerator = Packages.org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
                     sequenceGenerator.generateSequencesFromSwagger(apiData.swagger, stringify(apiData));
                 }
             }
@@ -523,7 +523,7 @@ if(jagg.isCSRFTokenValid())
             var soapToRestOutsequences = request.getParameter("sequenceOutMapping");
 
             if(soapToRestInsequences && soapToRestOutsequences) {
-                var sequenceUtils = Packages.org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
+                var sequenceUtils = Packages.org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
                 sequenceUtils.updateRestToSoapConvertedSequences(apiData.apiName, apiData.version, apiData.provider, "in", soapToRestInsequences);
                 sequenceUtils.updateRestToSoapConvertedSequences(apiData.apiName, apiData.version, apiData.provider, "out", soapToRestOutsequences);
             }

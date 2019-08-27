@@ -7,6 +7,8 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
+
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
@@ -20,6 +22,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SettingsApiService {
-      public Response settingsGatewayEnvironmentsGet(String apiId, MessageContext messageContext);
-      public Response settingsGet(MessageContext messageContext);
+      public Response settingsGatewayEnvironmentsGet(String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response settingsGet(MessageContext messageContext) throws APIManagementException;
 }

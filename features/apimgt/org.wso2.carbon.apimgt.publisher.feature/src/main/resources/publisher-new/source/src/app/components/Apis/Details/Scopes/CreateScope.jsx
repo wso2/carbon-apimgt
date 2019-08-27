@@ -31,6 +31,7 @@ import Grid from '@material-ui/core/Grid';
 import classNames from 'classnames';
 import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = theme => ({
     root: {
@@ -116,12 +117,13 @@ class CreateScope extends React.Component {
      * @memberof Scopes
      */
     addScope() {
-        const { intl, api } = this.props;
+        const {
+            intl, api, history, updateAPI,
+        } = this.props;
         if (this.validateScopeName('name', this.state.apiScope.name)) {
             // return status of the validation
             return;
         }
-        const restApi = new Api();
         const scope = this.state.apiScope;
 
         scope.bindings = {
@@ -132,13 +134,15 @@ class CreateScope extends React.Component {
         // eslint-disable-next-line no-underscore-dangle
         const newApi = JSON.parse(JSON.stringify(api._data));
         newApi.scopes.push(scope);
-        const promisedApiUpdate = restApi.update(newApi);
+        const promisedApiUpdate = updateAPI(newApi);
         promisedApiUpdate.then(() => {
             Alert.info(intl.formatMessage({
                 id: 'Apis.Details.Scopes.CreateScope.scope.added.successfully',
                 defaultMessage: 'Scope added successfully',
             }));
             const { apiScopes } = this.state;
+            const redirectURL = '/apis/' + api.id + '/scopes/';
+            history.push(redirectURL);
             this.setState({
                 apiScopes,
                 apiScope: {},
@@ -339,12 +343,14 @@ CreateScope.propTypes = {
     api: PropTypes.shape({
         id: PropTypes.string,
     }).isRequired,
+    history: PropTypes.shape({ push: PropTypes.func }).isRequired,
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
+    updateAPI: PropTypes.func.isRequired,
 };
 
 CreateScope.defaultProps = {
     match: { params: {} },
 };
 
-export default injectIntl(withRouter(withStyles(styles)(CreateScope)));
+export default withAPI(injectIntl(withRouter(withStyles(styles)(CreateScope))));

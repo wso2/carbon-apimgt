@@ -40,13 +40,15 @@ import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
-import Resource from './Resource';
+import cloneDeep from 'lodash.clonedeep';
+import isEmpty from 'lodash.isEmpty';
 import Api from 'AppData/api';
 import CONSTS from 'AppData/Constants';
 import { Progress } from 'AppComponents/Shared';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
-import { Radio, RadioGroup} from "@material-ui/core";
+import { Radio, RadioGroup } from '@material-ui/core';
+import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
+import Resource from './Resource';
 
 const styles = theme => ({
     root: {
@@ -135,7 +137,14 @@ const styles = theme => ({
     },
 });
 
+/**
+ *  Classed used for resoruces
+ */
 class Resources extends React.Component {
+    /**
+     * @inheritdoc
+     * @param {*} props properties
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -401,8 +410,16 @@ class Resources extends React.Component {
         tmpPaths[this.state.tmpResourceName] = pathValue;
         this.setState({ paths: tmpPaths });
     }
+
+    /**
+     * Update the resource paths in the state
+     * @param {*} path resource path
+     * @param {*} method resource method
+     * @param {*} value value
+     */
     updatePath(path, method, value) {
-        const tmpPaths = this.state.paths;
+        const { paths } = this.state;
+        const tmpPaths = cloneDeep(paths);
         if (value === null) {
             delete tmpPaths[path][method];
         } else {
@@ -410,13 +427,22 @@ class Resources extends React.Component {
         }
         this.setState({ paths: tmpPaths });
     }
+
+    /**
+     *  update the resources in swagger
+     */
     updateResources() {
-        const tmpSwagger = this.state.swagger;
-        tmpSwagger.paths = this.state.paths;
-        const api = this.state.api;
+        const { swagger, paths, api } = this.state;
         const { intl } = this.props;
-        const promised_api = api.updateSwagger(this.state.swagger);
-        promised_api
+        const tmpSwagger = { ...swagger, paths: cloneDeep(paths) };
+        const newPaths = Object.keys(paths).filter(path => !isEmpty(paths[path]))
+            .reduce((acc, path) => {
+                acc[path] = paths[path];
+                return acc;
+            }, {});
+        tmpSwagger.paths = newPaths;
+        const promisedApi = api.updateSwagger(tmpSwagger);
+        promisedApi
             .then(() => {
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Details.Resources.Resources.api.path.updated.successfully',
@@ -426,7 +452,7 @@ class Resources extends React.Component {
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') console.log(error);
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 } else if (status === 401) {
@@ -435,6 +461,9 @@ class Resources extends React.Component {
             });
     }
 
+    /**
+     * Updates the api
+     */
     updateAPI() {
         const api = new Api();
         const { intl, api: { id } } = this.props;
@@ -443,7 +472,7 @@ class Resources extends React.Component {
         promisedApi
             .then((getResponse) => {
                 const apiData = getResponse.body;
-                if ('perAPI' === policyLevel) {
+                if (policyLevel === 'perAPI') {
                     apiData.apiThrottlingPolicy = selectedPolicy;
                 } else {
                     apiData.apiThrottlingPolicy = null;
@@ -455,6 +484,12 @@ class Resources extends React.Component {
                             id: 'Apis.Details.Resources.Resources.api.updated.successfully',
                             defaultMessage: 'API updated successfully!',
                         }));
+                        return this.api.getSwagger(id);
+                    })
+                    .then((response) => {
+                        if (response.obj.paths !== undefined) {
+                            this.setState({ paths: response.obj.paths });
+                        }
                     })
                     .catch((errorResponse) => {
                         console.error(errorResponse);
@@ -563,17 +598,21 @@ class Resources extends React.Component {
     }
     advancedPolicyTypeChange = (event) => {
         const { apiThrottlingPolicy } = this.props.api;
-        if ('perAPI' === event.target.value) {
+        if (event.target.value === 'perAPI') {
             this.setState({ selectedPolicy: apiThrottlingPolicy });
         }
         this.setState({ policyLevel: event.target.value });
     }
-    handlePolicyChange = (event) =>  {
+    handlePolicyChange = (event) => {
         this.setState({ selectedPolicy: event.target.value });
     }
+
+    /**
+     * @inheritdoc
+     */
     render() {
         const {
-            api, showAddResource, showPolicy, policyLevel, apiPolicies, selectedPolicy
+            api, showAddResource, showPolicy, policyLevel, apiPolicies, selectedPolicy,
         } = this.state;
 
         if (this.state.notFound) {
@@ -593,11 +632,17 @@ class Resources extends React.Component {
                     </Typography>
                     <Button size='small' className={classes.button} onClick={this.toggleAddResource}>
                         <AddCircle className={classes.buttonIcon} />
-                        <FormattedMessage id='Apis.Details.Resources.Resources.add.new.resource.button' defaultMessage='Add New Resource' />
+                        <FormattedMessage
+                            id='Apis.Details.Resources.Resources.add.new.resource.button'
+                            defaultMessage='Add New Resource'
+                        />
                     </Button>
                     <Button size='small' className={classes.button} onClick={this.toggleAssignPolicy}>
                         <ScopesIcon className={classes.buttonIcon} />
-                        <FormattedMessage id='Apis.Details.Resources.Resources.assign.policies' defaultMessage='Assign Advanced Throttling Policies' />
+                        <FormattedMessage
+                            id='Apis.Details.Resources.Resources.assign.policies'
+                            defaultMessage='Assign Advanced Throttling Policies'
+                        />
                     </Button>
                 </div>
                 <div className={classes.contentWrapper}>
@@ -629,10 +674,15 @@ class Resources extends React.Component {
                                     <div className={classes.radioGroup}>
                                         {plainOptions.map((option, index) => (
                                             <FormGroup key={index} row>
-                                                <FormControlLabel control={<Checkbox
-                                                    checked={this.state.tmpMethods.indexOf(option) > -1}
-                                                    onChange={this.handleChange(option)} value={option} />
-                                                } label={option.toUpperCase()} />
+                                                <FormControlLabel
+                                                    control={<Checkbox
+                                                        checked={this.state.tmpMethods.indexOf(option) > -1}
+                                                        onChange={this.handleChange(option)}
+                                                        value={option}
+                                                    />
+                                                    }
+                                                    label={option.toUpperCase()}
+                                                />
                                             </FormGroup>
                                         ))}
                                     </div>
@@ -656,62 +706,82 @@ class Resources extends React.Component {
                         </React.Fragment>}
 
                     {showPolicy &&
-                    <React.Fragment>
-                        <div className={classes.addNewWrapper}>
-                            <Typography className={classes.addNewHeader}>
-                                <FormattedMessage
-                                    id='Apis.Details.Resources.Resources.assign.advanced.throttling.policies'
-                                    defaultMessage='Assign advanced throttling policies'
-                                />
-                            </Typography>
-                            <Divider className={classes.divider} />
-                            <div className={classes.addNewOther}>
-                                <FormControl component="fieldset" className={classes.formControl}>
-                                    <RadioGroup
-                                        aria-label="advancedPolicyType"
-                                        name="advancedPolicyType"
-                                        className={classes.group}
-                                        value={policyLevel}
-                                        onChange={this.advancedPolicyTypeChange}
-                                    >
-                                        <FormControlLabel value="perAPI" control={<Radio />} label={intl.formatMessage({
-                                            id: 'Apis.Details.Resources.Resources.assign.advanced.throttling.perApi',
-                                            defaultMessage: 'Apply per API',
-                                        })} />
-                                        <FormControlLabel value="perResource" control={<Radio />} label={intl.formatMessage({
-                                            id: 'Apis.Details.Resources.Resources.assign.advanced.throttling.Resource',
-                                            defaultMessage: 'Apply per Resource',
-                                        })} />
-                                    </RadioGroup>
-                                </FormControl>
-                                <div className={classes.rightDataColum}>
-                                    {policyLevel==='perAPI' &&
-                                    <Select className={classes.selectWidth}
-                                        value={selectedPolicy}
-                                        onChange={this.handlePolicyChange}
-                                        fieldName='Throttling Policy'
-                                    >
-                                        {apiPolicies.map((policy) => (
-                                            <MenuItem
-                                                key={policy.name}
-                                                value={policy.name}
+                        <React.Fragment>
+                            <div className={classes.addNewWrapper}>
+                                <Typography className={classes.addNewHeader}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Resources.Resources.assign.advanced.throttling.policies'
+                                        defaultMessage='Assign advanced throttling policies'
+                                    />
+                                </Typography>
+                                <Divider className={classes.divider} />
+                                <div className={classes.addNewOther}>
+                                    <FormControl component='fieldset' className={classes.formControl}>
+                                        <RadioGroup
+                                            aria-label='advancedPolicyType'
+                                            name='advancedPolicyType'
+                                            className={classes.group}
+                                            value={policyLevel}
+                                            onChange={this.advancedPolicyTypeChange}
+                                        >
+                                            <FormControlLabel
+                                                value='perAPI'
+                                                control={<Radio />}
+                                                label={intl.formatMessage({
+                                                    id: 'Apis.Details.Resources.Resources.assign.advanced.throttling.perApi',
+                                                    defaultMessage: 'Apply per API',
+                                                })}
+                                            />
+                                            <FormControlLabel
+                                                value='perResource'
+                                                control={<Radio />}
+                                                label={intl.formatMessage({
+                                                    id: 'Apis.Details.Resources.Resources.assign.advanced.throttling.Resource',
+                                                    defaultMessage: 'Apply per Resource',
+                                                })}
+                                            />
+                                        </RadioGroup>
+                                    </FormControl>
+                                    <div className={classes.rightDataColum}>
+                                        {policyLevel === 'perAPI' &&
+                                            <Select
+                                                className={classes.selectWidth}
+                                                value={selectedPolicy}
+                                                onChange={this.handlePolicyChange}
+                                                fieldName='Throttling Policy'
                                             >
-                                                {policy.displayName}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>}
+                                                {apiPolicies.map(policy => (
+                                                    <MenuItem
+                                                        key={policy.name}
+                                                        value={policy.name}
+                                                    >
+                                                        {policy.displayName}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </React.Fragment>}
+                        </React.Fragment>}
 
                     <List>
                         {this.state.paths && (
                             <ListItem>
-                                <FormControlLabel control={<Checkbox checked={this.state.allChecked} onChange={this.handleCheckAll} value='' />} label='Check All' />
+                                <FormControlLabel
+                                    control={<Checkbox
+                                        checked={this.state.allChecked}
+                                        onChange={this.handleCheckAll}
+                                        value=''
+                                    />}
+                                    label='Check All'
+                                />
                                 {Object.keys(this.state.pathDeleteList).length !== 0 && (
                                     <ListItemSecondaryAction>
-                                        <Button className={classes.button} color='secondary' onClick={this.deleteSelected}>
+                                        <Button
+                                            className={classes.button}
+                                            color='secondary'
+                                            onClick={this.deleteSelected}
+                                        >
                                             <FormattedMessage
                                                 id='Apis.Details.Resources.Resources.delete.selected'
                                                 defaultMessage='Delete Selected'
@@ -724,28 +794,40 @@ class Resources extends React.Component {
                         {Object.keys(paths).map((key) => {
                             const path = paths[key];
                             const that = this;
-                            return (<div>
-                                <ExpansionPanel defaultExpanded className={classes.expansionPanel}>
-                                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                                        <Typography className={classes.heading} variant='h6'>{key}</Typography>
-                                    </ExpansionPanelSummary>
-                                    <ExpansionPanelDetails className={classes.expansionPanelDetails}>
-                                        {Object.keys(path).map((innerKey) => {
-                                            return CONSTS.HTTP_METHODS.includes(innerKey) ?
-                                                <Resource path={key} method={innerKey} methodData={path[innerKey]}
-                                                             updatePath={that.updatePath} scopes={api.scopes}
-                                                             apiPolicies={apiPolicies}
-                                                             isAPIProduct={false}
-                                                             addRemoveToDeleteList={that.addRemoveToDeleteList}
-                                                             onRef={ref => this.childResources.push(ref)}
-                                                             policyLevel={policyLevel}/> : null;            
-                                        })}
-                                    </ExpansionPanelDetails>
-                                </ExpansionPanel>
-                            </div>);
+                            return (
+                                <div>
+                                    <ExpansionPanel defaultExpanded className={classes.expansionPanel}>
+                                        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                                            <Typography className={classes.heading} variant='h6'>{key}</Typography>
+                                        </ExpansionPanelSummary>
+                                        <ExpansionPanelDetails className={classes.expansionPanelDetails}>
+                                            {Object.keys(path).map((innerKey) => {
+                                                return CONSTS.HTTP_METHODS.includes(innerKey) ?
+                                                    <Resource
+                                                        path={key}
+                                                        method={innerKey}
+                                                        methodData={path[innerKey]}
+                                                        updatePath={that.updatePath}
+                                                        scopes={api.scopes}
+                                                        apiPolicies={apiPolicies}
+                                                        isAPIProduct={false}
+                                                        addRemoveToDeleteList={that.addRemoveToDeleteList}
+                                                        onRef={ref => this.childResources.push(ref)}
+                                                        policyLevel={policyLevel}
+                                                    /> : null;
+                                            })}
+                                        </ExpansionPanelDetails>
+                                    </ExpansionPanel>
+                                </div>
+                            );
                         })}
                     </List>
-                    <Button variant='contained' color='primary' className={classes.buttonMain} onClick={this.updateResources} >
+                    <Button
+                        variant='contained'
+                        color='primary'
+                        className={classes.buttonMain}
+                        onClick={this.updateResources}
+                    >
                         <FormattedMessage id='Apis.Details.Resources.Resources.save' defaultMessage='Save' />
                     </Button>
                 </div>

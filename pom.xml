@@ -1569,14 +1569,14 @@
         <carbon.apimgt.version>6.5.67-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <carbon.analytics.common.version>5.2.2</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.2.6</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.5.0-m4</carbon.kernel.version>
         <carbon.kernel.feature.version>4.5.0</carbon.kernel.feature.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
-        <carbon.commons.version>4.7.2</carbon.commons.version>
-        <carbon.registry.version>4.7.4</carbon.registry.version>
+        <carbon.commons.version>4.7.7</carbon.commons.version>
+        <carbon.registry.version>4.7.9</carbon.registry.version>
         <carbon.mediation.version>4.7.5</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
@@ -1729,13 +1729,13 @@
         <commons.scxml.version>0.9.0.wso2v1</commons.scxml.version>
         <velocity.version>1.7</velocity.version>
         <fasterxml.jackson.version>2.9.9</fasterxml.jackson.version>
-        <fasterxml.jackson.databind.version>2.9.9.1</fasterxml.jackson.databind.version>
+        <fasterxml.jackson.databind.version>2.9.9.3</fasterxml.jackson.databind.version>
         <javax.validation-api>1.1.0.Final</javax.validation-api>
         <carbon.broker.version>3.3.3</carbon.broker.version>
         <waffle-jna.version>1.6.wso2v6</waffle-jna.version>
         <version.snake.yaml>1.24</version.snake.yaml>
         <wsdl4j.version>1.6.3.wso2v3</wsdl4j.version>
-        <slf4j.test.version>1.7.26</slf4j.test.version>
+        <slf4j.test.version>1.7.28</slf4j.test.version>
         <reflection.version>0.9.11</reflection.version>
         <jacoco.version>0.7.9</jacoco.version>
         <xml-apis.version>1.4.01</xml-apis.version>
