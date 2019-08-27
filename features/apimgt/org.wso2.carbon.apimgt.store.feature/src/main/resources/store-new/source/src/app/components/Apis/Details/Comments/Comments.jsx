@@ -24,7 +24,7 @@ import Grid from '@material-ui/core/Grid/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import APIProduct from 'AppData/APIProduct';
 import CONSTS from 'AppData/Constants';
-import Alert from '../../../Shared/Alert';
+import AuthManager from 'AppData/AuthManager';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
 import API from '../../../../data/api';
@@ -102,34 +102,37 @@ class Comments extends Component {
             restApi = new APIProduct();
         }
 
-        restApi
-            .getAllComments(apiId)
-            .then((result) => {
-                let commentList = result.body.list;
-                if (isOverview) {
-                    setCount(commentList.length);
-                    if(commentList.length > 2) {
-                        commentList = commentList.slice(commentList.length - 3, commentList.length)
+        const user = AuthManager.getUser();
+        if (user != null) {
+            restApi
+                .getAllComments(apiId)
+                .then((result) => {
+                    let commentList = result.body.list;
+                    if (isOverview) {
+                        setCount(commentList.length);
+                        if (commentList.length > 2) {
+                            commentList = commentList.slice(commentList.length - 3, commentList.length);
+                        }
                     }
-                }  
-                this.setState({ allComments: commentList, totalComments: commentList.length });
-                if (commentList.length < theme.custom.commentsLimit) {
-                    this.setState({ startCommentsToDisplay: 0, comments: commentList.slice(0, commentList.length) });
-                } else {
-                    this.setState({
-                        startCommentsToDisplay: commentList.length - theme.custom.commentsLimit,
-                        comments: commentList.slice(
-                            commentList.length - theme.custom.commentsLimit,
-                            commentList.length,
-                        ),
-                    });
-                }
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-            });
+                    this.setState({ allComments: commentList, totalComments: commentList.length });
+                    if (commentList.length < theme.custom.commentsLimit) {
+                        this.setState({ startCommentsToDisplay: 0, comments: commentList.slice(0, commentList.length) });
+                    } else {
+                        this.setState({
+                            startCommentsToDisplay: commentList.length - theme.custom.commentsLimit,
+                            comments: commentList.slice(
+                                commentList.length - theme.custom.commentsLimit,
+                                commentList.length,
+                            ),
+                        });
+                    }
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                });
+        }
     }
 
     /**
