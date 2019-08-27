@@ -101,6 +101,7 @@ class ApiConsole extends React.Component {
     componentDidMount() {
         const { match } = this.props;
         const apiID = match.params.api_uuid;
+        const user = AuthManager.getUser();
         let api;
         let environments;
         let labels;
@@ -134,41 +135,60 @@ class ApiConsole extends React.Component {
             })
             .then((swaggerResponse) => {
                 swagger = swaggerResponse.obj;
-                return this.apiClient.getSubscriptions(apiID);
+                if (user != null) {
+                    return this.apiClient.getSubscriptions(apiID);
+                } else {
+                    return null;
+                }
             })
             .then((subscriptionsResponse) => {
-                subscriptions = subscriptionsResponse.obj.list.filter(item => item.status === 'UNBLOCKED');
+                if (subscriptionsResponse != null) {
+                    subscriptions = subscriptionsResponse.obj.list.filter(item => item.status === 'UNBLOCKED');
 
-                if (subscriptions && subscriptions.length > 0) {
-                    selectedApplication = subscriptions[0].applicationId;
-                    const promiseApp = Application.get(selectedApplication);
+                    if (subscriptions && subscriptions.length > 0) {
+                        selectedApplication = subscriptions[0].applicationId;
+                        const promiseApp = Application.get(selectedApplication);
 
-                    promiseApp
-                        .then((application) => {
-                            return application.getKeys();
-                        })
-                        .then((appKeys) => {
-                            if (appKeys.get('SANDBOX')) {
-                                selectedKeyType = 'SANDBOX';
-                                ({ accessToken } = appKeys.get('SANDBOX').token);
-                            } else if (appKeys.get('PRODUCTION')) {
-                                selectedKeyType = 'PRODUCTION';
-                                ({ accessToken } = appKeys.get('PRODUCTION').token);
-                            }
+                        promiseApp
+                            .then((application) => {
+                                return application.getKeys();
+                            })
+                            .then((appKeys) => {
+                                if (appKeys.get('SANDBOX')) {
+                                    selectedKeyType = 'SANDBOX';
+                                    ({ accessToken } = appKeys.get('SANDBOX').token);
+                                } else if (appKeys.get('PRODUCTION')) {
+                                    selectedKeyType = 'PRODUCTION';
+                                    ({ accessToken } = appKeys.get('PRODUCTION').token);
+                                }
 
-                            this.setState({
-                                api,
-                                swagger,
-                                subscriptions,
-                                environments,
-                                labels,
-                                selectedEnvironment,
-                                selectedApplication,
-                                keys: appKeys,
-                                selectedKeyType,
-                                accessToken,
+                                this.setState({
+                                    api,
+                                    swagger,
+                                    subscriptions,
+                                    environments,
+                                    labels,
+                                    selectedEnvironment,
+                                    selectedApplication,
+                                    keys: appKeys,
+                                    selectedKeyType,
+                                    accessToken,
+                                });
                             });
+                    } else {
+                        this.setState({
+                            api,
+                            swagger,
+                            subscriptions,
+                            environments,
+                            labels,
+                            selectedEnvironment,
+                            selectedApplication,
+                            keys,
+                            selectedKeyType,
+                            accessToken,
                         });
+                    }
                 } else {
                     this.setState({
                         api,
@@ -339,7 +359,7 @@ class ApiConsole extends React.Component {
                             </Paper>
                         </Grid>
                     )}
-                    {subscriptions && (
+                    {user != null && subscriptions && (
                         <Grid container>
                             <Grid item md={4} xs={4} className={classes.gridWrapper}>
                                 <FormControl className={classes.formControl} disabled={subscriptions.length === 0}>
