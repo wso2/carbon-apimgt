@@ -120,7 +120,6 @@ class APICreateWrapper extends Component {
         const { type } = this.props;
         return (
             <React.Fragment>
-                <APICreateTopMenu />
                 <APICreateDefault
                     api={this.state.api}
                     handleSubmit={this.handleSubmit}

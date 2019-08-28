@@ -16,7 +16,6 @@
  * under the License.
  */
 import React, { useReducer, useState } from 'react';
-import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -29,43 +28,11 @@ import { Link } from 'react-router-dom';
 import Wsdl from 'AppData/Wsdl';
 import Alert from 'AppComponents/Shared/Alert';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm';
+import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
 
 import ProvideWSDL from './Steps/ProvideWSDL';
-import DefaultAPIForm from './Steps/DefaultAPIForm';
 
-/**
- * Base component for all API create forms
- *
- * @param {Object} props title and children components are expected
- * @returns {React.Component} Base element
- */
-function APICreateBase(props) {
-    const { title, children } = props;
-    return (
-        <Grid container spacing={3}>
-            <Grid item sm={12} md={12} />
-            {/*
-            Following two grids control the placement of whole create page
-            For centering the content better use `container` props, but instead used an empty grid item for flexibility
-             */}
-            <Grid item sm={0} md={3} />
-            <Grid item sm={12} md={6}>
-                <Grid container spacing={5}>
-                    <Grid item md={12}>
-                        {title}
-                    </Grid>
-                    <Grid item md={12}>
-                        <Paper elevation={0}>{children}</Paper>
-                    </Grid>
-                </Grid>
-            </Grid>
-        </Grid>
-    );
-}
-APICreateBase.propTypes = {
-    title: PropTypes.element.isRequired,
-    children: PropTypes.element.isRequired,
-};
 /**
  * Handle API creation from WSDL.
  *
@@ -229,7 +196,7 @@ export default function SOAPToREST() {
                         <Grid item>
                             {wizardStep === 0 && (
                                 <Link to='/apis/'>
-                                    <Button>
+                                    <Button variant='outlined'>
                                         <FormattedMessage
                                             id='Apis.Details.Configuration.Configuration.cancel'
                                             defaultMessage='Cancel'

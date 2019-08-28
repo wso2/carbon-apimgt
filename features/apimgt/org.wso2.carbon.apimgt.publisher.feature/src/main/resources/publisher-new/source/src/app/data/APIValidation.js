@@ -21,9 +21,9 @@ const definition = {
     apiName: Joi.string()
         .regex(/^[a-zA-Z0-9]{1,30}$/),
     apiVersion: Joi.string()
-        .regex(/^[a-zA-Z0-9]{1,30}$/),
+        .regex(/^[a-zA-Z0-9.]{1,30}$/),
     apiContext: Joi.string()
-        .regex(/^[a-zA-Z0-9]{1,30}$/),
+        .regex(/^[a-zA-Z0-9/]{1,30}$/),
     url: Joi.string()
         .uri(),
 };

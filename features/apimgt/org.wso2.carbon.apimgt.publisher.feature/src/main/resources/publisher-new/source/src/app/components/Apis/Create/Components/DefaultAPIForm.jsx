@@ -24,7 +24,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import APIValidation from 'AppData/APIValidation';
 
-import SelectPolicies from './components/SelectPolicies';
+import SelectPolicies from './SelectPolicies';
 
 const useStyles = makeStyles(theme => ({
     mandatoryStar: {

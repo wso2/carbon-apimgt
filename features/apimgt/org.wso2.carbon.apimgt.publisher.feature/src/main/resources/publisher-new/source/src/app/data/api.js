@@ -99,16 +99,16 @@ class API extends Resource {
 
     /**
      * Create an API with the given parameters in template and call the callback method given optional.
-     * @param {Object} api_data - API data which need to fill the placeholder values in the @get_template
+     * @param {Object} apiData - API data which need to fill the placeholder values in the @get_template
      * @param {function} callback - An optional callback method
      * @returns {Promise} Promise after creating and optionally calling the callback method.
      */
-    create(api_data, callback = null) {
+    create(apiData, callback = null) {
         let payload;
         let promise_create;
-        if (api_data.constructor.name === 'Blob' || api_data.constructor.name === 'File') {
+        if (apiData.constructor.name === 'Blob' || apiData.constructor.name === 'File') {
             payload = {
-                file: api_data,
+                file: apiData,
                 'Content-Type': 'multipart/form-data'
             };
             promise_create = this.client.then((client) => {
@@ -119,9 +119,9 @@ class API extends Resource {
                     }),
                 );
             });
-        } else if (api_data.type === 'swagger-url') {
+        } else if (apiData.type === 'swagger-url') {
             payload = {
-                url: api_data.url,
+                url: apiData.url,
                 'Content-Type': 'multipart/form-data'
             };
             promise_create = this.client.then((client) => {
@@ -134,7 +134,7 @@ class API extends Resource {
             });
         } else {
             payload = {
-                body: api_data,
+                body: apiData,
                 'Content-Type': 'application/json'
             };
             promise_create = this.client.then((client) => {
@@ -1108,7 +1108,7 @@ class API extends Resource {
             file: api_data.file,
             'Content-Type': 'multipart/form-data',
         };
-       
+
         promise_create = this.client.then((client) => {
             return client.apis['API (Collection)'].post_apis_import_graphql_schema(
                 payload,
