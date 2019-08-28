@@ -109,9 +109,15 @@ class AuthManager {
             .then(response => response.json())
             .then((data) => {
                 let user = null;
+                let username;
                 if (data.active) {
                     const currentEnv = Utils.getCurrentEnvironment();
-                    user = new User(currentEnv.label, data.username);
+                    if (data.username.includes("@carbon.super")) {
+                        username = data.username.replace('@carbon.super', '');
+                    } else {
+                        username = data.username;
+                    }
+                    user = new User(currentEnv.label, username);
                     user.scopes = data.scope.split(' ');
                     AuthManager.setUser(user, currentEnv.label);
                 } else {

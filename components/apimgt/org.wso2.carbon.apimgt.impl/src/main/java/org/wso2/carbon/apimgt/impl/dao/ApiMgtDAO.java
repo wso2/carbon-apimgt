@@ -7578,7 +7578,7 @@ public class ApiMgtDAO {
                 comment.setId(resultSet.getString("COMMENT_ID"));
                 comment.setText(resultSet.getString("COMMENT_TEXT"));
                 comment.setUser(resultSet.getString("COMMENTED_USER"));
-                comment.setCreatedTime(new java.util.Date(resultSet.getTimestamp("DATE_COMMENTED").getTime()));
+                comment.setCreatedTime(resultSet.getTimestamp("DATE_COMMENTED"));
                 commentList.add(comment);
             }
         } catch (SQLException e) {
@@ -7607,7 +7607,6 @@ public class ApiMgtDAO {
      */
     public Comment getComment(APIIdentifier identifier, int commentId) throws APIManagementException {
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Comment comment = new Comment();
         Connection connection = null;
         ResultSet resultSet = null;
@@ -7628,7 +7627,7 @@ public class ApiMgtDAO {
                 comment.setId(resultSet.getString("COMMENT_ID"));
                 comment.setText(resultSet.getString("COMMENT_TEXT"));
                 comment.setUser(resultSet.getString("COMMENTED_USER"));
-                comment.setCreatedTime(formatter.parse(resultSet.getString("DATE_COMMENTED")));
+                comment.setCreatedTime(resultSet.getTimestamp("DATE_COMMENTED"));
                 return comment;
             }
         } catch (SQLException e) {
@@ -7640,9 +7639,6 @@ public class ApiMgtDAO {
                 log.error("Failed to retrieve comment ", e1);
             }
             handleException("Failed to retrieve comment for API " + identifier.getApiName() + "with comment ID " + commentId, e);
-
-        } catch (ParseException e) {
-            log.error("Failed to retrieve the created time of the comment ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
         }
