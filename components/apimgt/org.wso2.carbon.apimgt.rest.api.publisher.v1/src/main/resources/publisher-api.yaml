@@ -3420,6 +3420,8 @@ paths:
           description: |
             OK.
             UUID returned
+          schema:
+            $ref: '#/definitions/AuditReport'
         404:
           description: |
             Not Created.
@@ -3486,6 +3488,8 @@ paths:
                 The content of the body.
               default: application/json
               type: string
+          schema:
+            $ref: '#/definitions/AuditReport'
         404:
           description: |
             Not Found.
@@ -6482,6 +6486,28 @@ definitions:
         description: |
           The name of the API.
         example: Swagger-Petstore
+
+  #-----------------------------------------------------
+  # The API Security Audit Info resource
+  #-----------------------------------------------------
+  AuditReport:
+    title: Resource for Audit Report
+    properties:
+      report:
+        type: string
+        description: |
+          The API Security Audit Report
+        example: grade = 32.95
+      grade:
+        type: string
+        description: |
+          The overall grade of the Security Audit
+        example: 27.95
+      numErrors:
+        type: integer
+        description: |
+          The number of errors in the API Definition
+        example: 20
 
   #-----------------------------------------------------
   # The API Product List resource
