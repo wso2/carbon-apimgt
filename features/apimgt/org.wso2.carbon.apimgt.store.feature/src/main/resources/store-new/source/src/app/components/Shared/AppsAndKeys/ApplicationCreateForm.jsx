@@ -237,7 +237,7 @@ const ApplicationCreate = (props) => {
                                     />
                                 </FormControl>
                             ) : (null)))
-                     )}
+                    )}
                     {isApplicationSharingEnabled && (
                         <FormControl margin='normal' className={classes.FormControl}>
                             <FormLabel component='legend'>
@@ -251,8 +251,8 @@ const ApplicationCreate = (props) => {
                             <ChipInput
                                 {...applicationRequest}
                                 value={applicationRequest.groups || []}
-                                onAdd={chip => props.handleAddChip(chip, applicationRequest.groups)}
-                                onDelete={(chip, index) => props.handleDeleteChip(chip,
+                                onAdd={chip => handleAddChip(chip, applicationRequest.groups)}
+                                onDelete={(chip, index) => handleDeleteChip(chip,
                                     index, applicationRequest.groups)}
                             />
                         </FormControl>
@@ -274,6 +274,9 @@ ApplicationCreate.propTypes = {
     validateName: PropTypes.func.isRequired,
     updateApplicationRequest: PropTypes.func.isRequired,
     isRequiredAttribute: PropTypes.bool.isRequired,
+    isApplicationSharingEnabled: PropTypes.func.isRequired,
+    handleAddChip: PropTypes.func.isRequired,
+    handleDeleteChip: PropTypes.func.isRequired,
     throttlingPolicyList: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 

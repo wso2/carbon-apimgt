@@ -27,8 +27,8 @@ import { FormattedMessage } from 'react-intl';
 import MaterialIcons from 'MaterialIcons';
 import CONSTS from 'AppData/Constants';
 import APIProduct from 'AppData/APIProduct';
+import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import ImageGenerator from './ImageGenerator';
-import StarRatingBar from './StarRating';
 import Api from '../../../data/api';
 import { ApiContext } from '../Details/ApiContext';
 
@@ -115,7 +115,6 @@ class ApiThumb extends React.Component {
             overview_link: '',
             isRedirect: false,
             openMoreMenu: false,
-            rating: 0,
             category: MaterialIcons.categories[0].name,
             selectedIcon: null,
             color: null,
@@ -132,7 +131,6 @@ class ApiThumb extends React.Component {
     componentDidMount() {
         const { apiType } = this.context;
         const { api } = this.props;
-
         let restApi = null;
 
         if (apiType === CONSTS.API_TYPE) {
@@ -156,12 +154,6 @@ class ApiThumb extends React.Component {
                     const url = windowURL.createObjectURL(response.data);
                     this.setState({ imageObj: url });
                 }
-            }
-        });
-        const promised_rating = restApi.getRatingFromUser(api.id, null);
-        promised_rating.then((response) => {
-            if (response) {
-                this.setState({ rating: response.obj.userRating });
             }
         });
     }
@@ -210,8 +202,6 @@ class ApiThumb extends React.Component {
         const {
             name, version, context, provider,
         } = api;
-        const { rating } = this.state;
-        const starColor = theme.palette.getContrastText(thumbnail.contentBackgroundColor);
         const imageWidth = thumbnail.width;
         const defaultImage = thumbnail.defaultApiImage;
 
@@ -280,7 +270,7 @@ class ApiThumb extends React.Component {
                     <div className={classes.thumbInfo}>
                         <div className={classes.thumbLeft}>
                             <Typography variant='subheading' gutterBottom align='left'>
-                                <StarRatingBar rating={rating} starColor={starColor} />
+                                <StarRatingBar apiRating={api.avgRating} apiId={api.id} isEditable={false} showSummary={false} />
                             </Typography>
                         </div>
                         <div className={classes.thumbRight}>

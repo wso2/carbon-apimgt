@@ -18,7 +18,6 @@ package org.wso2.carbon.apimgt.impl.template;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
-import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,6 +25,8 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.log.CommonsLogLogChute;
+import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -36,8 +37,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -52,7 +53,6 @@ import java.io.File;
 import java.io.StringWriter;
 import java.lang.String;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -106,9 +106,10 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             /*  first, initialize velocity engine  */
             VelocityEngine velocityengine = new VelocityEngine();
             if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty( RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                                            "org.apache.velocity.runtime.log.Log4JLogChute" );
-                velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
+                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                        CommonsLogLogChute.class.getName());
+                velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
+                velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
             }
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
@@ -161,9 +162,10 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             /*  first, initialize velocity engine  */
             VelocityEngine velocityengine = new VelocityEngine();
             if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty( RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                                            "org.apache.velocity.runtime.log.Log4JLogChute" );
-                velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
+                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                        CommonsLogLogChute.class.getName());
+                velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
+                velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
             }
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
@@ -187,9 +189,10 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         try {
             VelocityEngine velocityengine = new VelocityEngine();
             if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty( RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                                            "org.apache.velocity.runtime.log.Log4JLogChute" );
-                velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
+                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                        CommonsLogLogChute.class.getName());
+                velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
+                velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
             }
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
@@ -252,9 +255,10 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             VelocityEngine velocityengine = new VelocityEngine();
             if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty( RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        "org.apache.velocity.runtime.log.Log4JLogChute" );
-                velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
+                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                        CommonsLogLogChute.class.getName());
+                velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
+                velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
             }
 
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());

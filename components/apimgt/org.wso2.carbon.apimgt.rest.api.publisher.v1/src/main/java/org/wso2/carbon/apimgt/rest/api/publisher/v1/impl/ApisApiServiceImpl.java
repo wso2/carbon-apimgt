@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import graphql.language.FieldDefinition;
@@ -33,7 +31,6 @@ import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
 import org.apache.axiom.util.base64.Base64Utils;
-import org.apache.axis2.util.URL;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -73,7 +70,6 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -85,15 +81,18 @@ import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
+import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -603,7 +602,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
                 // Logic for HTTP Request
                 String putUrl = "https://platform.42crunch.com/api/v1/apis/" + uuid;
-                URL updateApiUrl = new URL(putUrl);
+                org.apache.axis2.util.URL updateApiUrl = new org.apache.axis2.util.URL(putUrl);
                 try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil.getHttpClient(updateApiUrl.getPort(), updateApiUrl.getProtocol())) {
                     HttpPut httpPut = new HttpPut(putUrl);
 
@@ -640,7 +639,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // Logic for the HTTP request
             String getUrl = "https://platform.42crunch.com/api/v1/apis/" + uuid + "/assessmentreport";
-            URL getReportUrl = new URL(getUrl);
+            org.apache.axis2.util.URL getReportUrl = new org.apache.axis2.util.URL(getUrl);
             try (CloseableHttpClient getHttpClient = (CloseableHttpClient) APIUtil.getHttpClient(getReportUrl.getPort(), getReportUrl.getProtocol())) {
                 HttpGet httpGet = new HttpGet(getUrl);
 
@@ -1299,7 +1298,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Retrieves API Lifecycle state information
-     * 
+     *
      * @param apiId API Id
      * @param ifNoneMatch If-None-Match header value
      * @return API Lifecycle state information
@@ -2057,9 +2056,50 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    /**
+     * Validate a provided WSDL definition via a URL or a file/zip
+     *
+     * @param url WSDL URL
+     * @param fileInputStream file/zip input stream
+     * @param fileDetail file/zip details
+     * @param messageContext messageContext object
+     * @return WSDL validation response
+     * @throws APIManagementException when error occurred during validation
+     */
+    @Override
     public Response validateWSDLDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
-          Boolean returnContent, MessageContext messageContext) {
-        return Response.ok().entity("magic!").build();
+                                           MessageContext messageContext) throws APIManagementException {
+        handleInvalidParams(fileInputStream, url);
+        WSDLValidationResponseDTO responseDTO;
+        WSDLValidationResponse validationResponse = new WSDLValidationResponse();
+
+        if (url != null) {
+            try {
+                URL wsdlUrl = new URL(url);
+                validationResponse = APIMWSDLReader.validateWSDLUrl(wsdlUrl);
+            } catch (MalformedURLException e) {
+                RestApiUtil.handleBadRequest("Invalid/Malformed URL : " + url, log);
+            }
+        } else if (fileInputStream != null) {
+            String filename = fileDetail.getContentDisposition().getFilename();
+            try {
+                if (filename.endsWith(".zip")) {
+                    validationResponse =
+                            APIMWSDLReader.extractAndValidateWSDLArchive(fileInputStream);
+                } else if (filename.endsWith(".wsdl")) {
+                    validationResponse = APIMWSDLReader.validateWSDLFile(fileInputStream);
+                } else {
+                    RestApiUtil.handleBadRequest("Unsupported extension type of file: " + filename, log);
+                }
+            } catch (APIManagementException e) {
+                String errorMessage = "Internal error while validating the WSDL from file:" + filename;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+
+        responseDTO =
+                APIMappingUtil.fromWSDLValidationResponseToDTO(validationResponse);
+        return Response.ok().entity(responseDTO).build();
     }
 
     @Override

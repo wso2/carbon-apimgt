@@ -508,7 +508,7 @@ class API extends Resource {
      */
      getSettings(){
          const promisedSettings = this.client.then((client) => {
-              return client.apis['default'].get_settings();
+              return client.apis['Settings'].get_settings();
          });
          return promisedSettings.then(response => response.body);
      }
@@ -520,12 +520,12 @@ class API extends Resource {
     * @returns {promise} With given callback attached to the success chain else API invoke promise.
     */
     getSubscriptionPolicies(id, callback = null){
-        const promise_policies = this.client.then((client) => {
-            return client.apis['API (Individual)'].get_apis__apiId__subscription_policies ({
+        const promisePolicies = this.client.then((client) => {
+            return client.apis['APIs'].get_apis__apiId__subscription_policies ({
                     apiId: id
                 }, this._requestMetaData());
         });
-        return promise_policies.then(response => response.body);
+        return promisePolicies.then(response => response.body);
     }
 
     /**
@@ -535,12 +535,12 @@ class API extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
      getMonetization(id, callback = null) {
-        const promise_monetization = this.client.then((client) => {
-            return client.apis['API (Individual)'].get_apis__apiId__monetization({
+        const promiseMonetization = this.client.then((client) => {
+            return client.apis['API Monetization'].get_apis__apiId__monetization({
                 apiId: id
             }, this._requestMetaData());
         });
-        return promise_monetization.then(response => response.body);
+        return promiseMonetization.then(response => response.body);
     }
 
     /**
@@ -550,7 +550,7 @@ class API extends Resource {
      */
     configureMonetizationToApi(apiId, body) {
         const promised_status = this.client.then((client) => {
-            return client.apis['API (Individual)'].post_apis__apiId__monetize({
+            return client.apis['API Monetization'].post_apis__apiId__monetize({
                 apiId,
                 body
             });
@@ -827,7 +827,7 @@ class API extends Resource {
         const updatedAPI = { ...this.toJSON(), ...updatedProperties };
         const promisedUpdate = this.client.then((client) => {
             const payload = {
-                apiId: this.id,
+                apiId: updatedAPI.id,
                 body: updatedAPI
             };
             return client.apis['APIs'].put_apis__apiId_(payload);

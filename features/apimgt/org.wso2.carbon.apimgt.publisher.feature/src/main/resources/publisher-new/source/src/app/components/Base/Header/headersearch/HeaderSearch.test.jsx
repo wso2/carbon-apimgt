@@ -77,7 +77,7 @@ describe('Publisher <HeaderSearch> component tests', () => {
         await wrapper.find('#searchQuery input').simulate('change', { target: { value: 'test' } });
         expect(wrapper.find('#searchQuery input').props().value).toEqual('test');
         await wrapper.update();
-        expect(mockedSearch).toHaveBeenCalledWith({ limit: 8, query: 'test' });
+        expect(mockedSearch).toHaveBeenCalledWith({ limit: 8, query: 'content:test' });
     });
     test('search results should be displayed for the user provided search query', async () => {
         const wrapper = await mountHeaderSearchComponent();

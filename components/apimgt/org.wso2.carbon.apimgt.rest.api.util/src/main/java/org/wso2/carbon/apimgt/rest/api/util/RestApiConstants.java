@@ -36,8 +36,7 @@ public final class RestApiConstants {
     public static final String REQUEST_AUTHENTICATION_SCHEME = "request_authentication_scheme";
     public static final String OAUTH2_AUTHENTICATION = "oauth2";
     public static final String BASIC_AUTHENTICATION = "basic_auth";
-    public static final String REST_API_SCOPE_CACHE = "REST_API_SCOPE_CACHE";
-    
+
     public static final String USER_REST_API_SCOPES = "user_rest_api_scopes";
 
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
@@ -46,6 +45,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_API = "API";
     public static final String RESOURCE_API_PRODUCT = "API Product";
     public static final String RESOURCE_PRODUCT_DOCUMENTATION = "product documentation";
+    public static final String RESOURCE_RATING = "Rating";
     public static final String RESOURCE_APPLICATION = "application";
     public static final String RESOURCE_SUBSCRIPTION = "subscription";
     public static final String RESOURCE_DOCUMENTATION = "documentation";
@@ -105,6 +105,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_TIERS_APPLICATION = RESOURCE_PATH_TIERS + "/application";
     public static final String RESOURCE_PATH_TIERS_RESOURCE = RESOURCE_PATH_TIERS + "/resource";
     public static final String RESOURCE_PATH_TAGS = "/tags";
+    public static final String RESOURCE_PATH_RATINGS = "/ratings";
     public static final String RESOURCE_PATH_THUMBNAIL = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/thumbnail";
     public static final String RESOURCE_PATH_DOCUMENTS = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/documents";
     public static final String RESOURCE_PATH_PRODUCT_DOCUMENTS = RESOURCE_PATH_API_PRODUCTS + "/" + APIPRODUCTID_PARAM + "/documents";
@@ -163,6 +164,9 @@ public final class RestApiConstants {
 
     public static final String DOCUMENTS_GET_PAGINATION_URL =
             RESOURCE_PATH_DOCUMENTS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+
+    public static final String RATINGS_GET_PAGINATION_URL =
+            RESOURCE_PATH_RATINGS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
     public static final String TIERS_GET_PAGINATION_URL =
             RESOURCE_PATH_TIERS + "/" + TIER_LEVEL_PARAM + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;

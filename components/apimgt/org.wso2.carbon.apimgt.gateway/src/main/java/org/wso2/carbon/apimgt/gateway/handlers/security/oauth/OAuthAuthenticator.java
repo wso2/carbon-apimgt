@@ -180,7 +180,7 @@ public class OAuthAuthenticator implements Authenticator {
         String authenticationScheme;
         try {
             //Initial guess of a JWT token using the presence of a DOT.
-            if (apiKey.contains(APIConstants.DOT)) {
+            if (StringUtils.isNotEmpty(apiKey) && apiKey.contains(APIConstants.DOT)) {
                 try {
                     JSONObject decodedHeader = new JSONObject(new String(Base64.getUrlDecoder()
                             .decode(apiKey.split("\\.")[0])));

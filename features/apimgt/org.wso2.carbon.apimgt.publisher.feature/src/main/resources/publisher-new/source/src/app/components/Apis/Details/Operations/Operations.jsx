@@ -19,15 +19,9 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormControl from '@material-ui/core/FormControl';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
-import ScopesIcon from '@material-ui/icons/VpnKey';
 import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import Table from '@material-ui/core/Table';
@@ -126,20 +120,14 @@ class Operations extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            swagger: {},
-            scopes: [],
             notFound: false,
-            showScopes: false,
             apiPolicies: [],
             operationList: null,
         };
 
         this.newApi = new Api();
         this.handleUpdateList = this.handleUpdateList.bind(this);
-        this.toggleAssignScopes = this.toggleAssignScopes.bind(this);
-        this.handleScopeChange = this.handleScopeChange.bind(this);
         this.updateOperations = this.updateOperations.bind(this);
-        this.handleScopeChangeInSwaggerRoot = this.handleScopeChangeInSwaggerRoot.bind(this);
     }
 
     /**
@@ -148,24 +136,7 @@ class Operations extends React.Component {
     componentDidMount() {
         this.setState({
             operationList: this.props.api.operations,
-            scopes: this.props.api.scopes,
         });
-        const promisedApi = this.newApi.getSwagger(this.props.api.id);
-        promisedApi
-            .then((response) => {
-                let tempScopes = [];
-                if (response.obj.security && response.obj.security.length !== 0) {
-                    tempScopes = response.obj.security.filter(object => object.OAuth2Security);
-                }
-                this.setState({ swagger: response.obj, scopes: tempScopes });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') console.log(error);
-                const { status } = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
         const promisedResPolicies = Api.policies('api');
         promisedResPolicies
             .then((policies) => {
@@ -186,34 +157,6 @@ class Operations extends React.Component {
 
     /**
      *
-     * @param {*} event triggered for scope change
-     */
-    handleScopeChange(event) {
-        this.setState({ scopes: event.target.value });
-        this.handleScopeChangeInSwaggerRoot(event.target.value);
-    }
-
-    /**
-     *
-     * @param {*} scopes
-     */
-    handleScopeChangeInSwaggerRoot(scopes) {
-        const { swagger } = this.state;
-        if (swagger.security) {
-            swagger.security.map((object) => {
-                if (object.OAuth2Security) {
-                    object.OAuth2Security = scopes;
-                }
-                return object.OAuth2Security;
-            });
-        } else {
-            swagger.security = [{ OAuth2Security: scopes }];
-        }
-        this.setState({ swagger });
-    }
-
-    /**
-     *
      * @param {*} newOperation
      */
     handleUpdateList(newOperation) {
@@ -230,11 +173,6 @@ class Operations extends React.Component {
         const { api, intl } = this.props;
         const { operationList } = this.state;
         api.operations = operationList;
-        /* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
-        /* eslint no-param-reassign: ["error", { "props": false }] */
-        if (api._data) delete api._data;
-        if (api.client) delete api.client;
-        if (api.apiType) delete api.apiType;
         const promisedApi = this.newApi.update(JSON.parse(JSON.stringify(api)));
         promisedApi
             .then(() => {
@@ -250,20 +188,16 @@ class Operations extends React.Component {
                 }));
             });
     }
-    toggleAssignScopes = () => {
-        // this.setState({ showScopes: !this.state.showScopes });
-        this.setState(prevState => ({ showScopes: !prevState.showScopes }));
-    }
 
     /**
      * @inheritdoc
      */
     render() {
         const {
-            operationList, scopes, showScopes, apiPolicies,
+            operationList, apiPolicies,
         } = this.state;
         if (this.state.notFound) {
-            return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
+            return <ResourceNotFound message={this.props.resourceNotFoundMessage} />;
         }
         if (!operationList) {
             return <Progress />;
@@ -278,72 +212,8 @@ class Operations extends React.Component {
                             defaultMessage='Operations'
                         />
                     </Typography>
-                    <Button size='small' className={classes.button} onClick={this.toggleAssignScopes}>
-                        <ScopesIcon className={classes.buttonIcon} />
-                        <FormattedMessage
-                            id='Apis.Details.Resources.Resources.assign.global.scope.for.api'
-                            defaultMessage='Assign Global Scope for API'
-                        />
-                    </Button>
                 </div>
                 <div className={classes.contentWrapper}>
-                    {(this.state.scopes && showScopes) &&
-                        <React.Fragment>
-                            <div className={classes.addNewWrapper}>
-                                <Typography className={classes.addNewHeader}>
-                                    <FormattedMessage
-                                        id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.title'
-                                        defaultMessage='Assign Global Scopes for API'
-                                    />
-                                </Typography>
-                                <Divider className={classes.divider} />
-                                <div className={classes.addNewOther}>
-                                    <FormControl className={classes.formControl}>
-                                        <InputLabel htmlFor='select-multiple'><FormattedMessage
-                                            id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.input'
-                                            defaultMessage='Assign Global Scopes for API'
-                                        />
-                                        </InputLabel>
-                                        <Select
-                                            multiple
-                                            value={this.state.scopes}
-                                            onChange={this.handleScopeChange}
-                                            className={classes.scopes}
-                                        >
-                                            {scopes.list.map(tempScope => (
-                                                <MenuItem
-                                                    key={tempScope.name}
-                                                    value={tempScope.name}
-                                                    style={{
-                                                        fontWeight: this.state.scopes.indexOf(tempScope.name) !== -1
-                                                            ? '500' : '400',
-                                                        width: 400,
-                                                    }}
-                                                >
-                                                    {tempScope.name}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                </div>
-                                <Divider className={classes.divider} />
-                                <div className={classes.addNewOther}>
-                                    <Button variant='contained' color='primary' onClick={this.handleScopeChange}>
-                                        <FormattedMessage
-                                            id='Apis.Details.Resources.Resources.assign.global.scopes.for.api.button'
-                                            defaultMessage='Assign global scopes for API'
-                                        />
-                                    </Button>
-                                    <Button className={classes.button} onClick={this.toggleAssignScopes}>
-                                        <FormattedMessage
-                                            id='Apis.Details.Resources.Resources.cancel'
-                                            defaultMessage='Cancel'
-                                        />
-                                    </Button>
-                                </div>
-                            </div>
-                        </React.Fragment>
-                    }
                     <List>
                         <Grid>
                             <Table>
@@ -425,11 +295,10 @@ Operations.propTypes = {
         operations: PropTypes.array,
         scopes: PropTypes.array,
         updateOperations: PropTypes.func,
-        getSwagger: PropTypes.func,
         policies: PropTypes.func,
         id: PropTypes.string,
     }).isRequired,
-    resourceNotFountMessage: PropTypes.shape({}).isRequired,
+    resourceNotFoundMessage: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,

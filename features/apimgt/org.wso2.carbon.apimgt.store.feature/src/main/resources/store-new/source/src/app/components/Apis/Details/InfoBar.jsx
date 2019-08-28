@@ -27,11 +27,14 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
+import Grade from '@material-ui/icons/Grade';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import API from 'AppData/api';
+import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import VerticalDivider from '../../Shared/VerticalDivider';
 import ImageGenerator from '../Listing/ImageGenerator';
-import Api from '../../../data/api';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
+import AuthManager from '../../../data/AuthManager';
 import { ApiContext } from './ApiContext';
 import Environments from './Environments';
 /**
@@ -67,11 +70,11 @@ const styles = theme => ({
         marginRight: 10,
     },
     starRate: {
-        fontSize: 70,
+        fontSize: 40,
         color: theme.custom.starColor,
     },
     starRateMy: {
-        fontSize: 70,
+        fontSize: 40,
         color: theme.palette.primary.main,
     },
     rateLink: {
@@ -242,235 +245,6 @@ const styles = theme => ({
 /**
  *
  *
- * @class StarRatingBar
- * @extends {React.Component}
- */
-class StarRatingBar extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            rating: null,
-            dummyRateValue: 1,
-            showRateNow: false,
-        };
-
-        this.handleMouseOver = this.handleMouseOver.bind(this);
-        this.handleRatingUpdate = this.handleRatingUpdate.bind(this);
-        this.handleMouseOut = this.handleMouseOut.bind(this);
-    }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    updateRating() {
-        const api = new Api();
-
-        // get user rating
-        const promised_rating = api.getRatingFromUser(this.props.apiIdProp, null);
-        promised_rating.then((response) => {
-            this.setState({
-                // rating: response.obj,
-                // dummyRateValue: response.obj.userRating,
-            });
-        });
-    }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    componentDidMount() {
-        this.updateRating();
-    }
-
-    /**
-     *
-     *
-     * @param {*} index
-     * @memberof StarRatingBar
-     */
-    handleMouseOver(index) {
-        this.setState({ rating: index });
-    }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    handleMouseOut() {
-        this.setState({ rating: this.state.previousRating });
-    }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    handleRatingUpdate() { }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    handleClickAway = () => {
-        this.setState({
-            showRateNow: false,
-        });
-    };
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    showRateBox = () => {
-        this.setState({
-            showRateNow: true,
-        });
-    };
-
-    /**
-     *
-     *
-     * @param {*} index
-     * @memberof StarRatingBar
-     */
-    highlightUs(index) {
-        this.setState({ dummyRateValue: index });
-    }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    unhighlightUs() {
-        this.setState({ dummyRateValue: 1 });
-    }
-
-    /**
-     *
-     *
-     * @param {*} rateIndex
-     * @memberof StarRatingBar
-     */
-    doRate(rateIndex) {
-        this.setState({ rateIndex, showRateNow: false });
-
-        const api = new Api();
-        const ratingInfo = { rating: rateIndex / 2 };
-        const promise = api.addRating(this.props.apiIdProp, ratingInfo);
-        promise
-            .then((response) => {
-                this.updateRating();
-                // message.success("Rating updated successfully");
-            })
-            .catch((error) => {
-                // message.error("Error occurred while adding ratings!");
-            });
-    }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof StarRatingBar
-     */
-    render() {
-        const { classes, theme } = this.props;
-        const { rating: rate, showRateNow, dummyRateValue } = this.state;
-        if (!rate) {
-            return <span />;
-        }
-        return (
-            <React.Fragment>
-                {rate.count > 0 ? (
-                    <React.Fragment>
-                        <Icon className={classes.starRate}>star_rate</Icon>
-                        <div className={classes.ratingSummery}>
-                            <div className={classes.userRating}>
-                                <Typography variant='display1'>{rate.avgRating * 2}</Typography>
-                                <Typography variant='caption'>/10</Typography>
-                            </div>
-                            <Typography variant='caption' gutterBottom align='left'>
-                                {rate.count}
-                                {' '}
-                                {rate.count === 1 ? 'user' : 'users'}
-                            </Typography>
-                        </div>
-                    </React.Fragment>
-                ) : (
-                    <Icon
-                        onClick={this.showRateBox}
-                        className={classes.starRate}
-                        style={{ color: theme.palette.grey.A200 }}
-                    >star_rate</Icon>
-                )}
-                <VerticalDivider height={32} />
-                <div className={classes.ratingBoxWrapper}>
-                    {showRateNow && (
-                        <div className={classes.ratingBox}>
-                            <Icon>highlight_off</Icon>
-                            <VerticalDivider height={32} />
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
-                                <Icon
-                                    color={
-                                        i <= rate.userRating * 2 || i <= dummyRateValue
-                                            ? 'primary'
-                                            : ''
-                                    }
-                                    onMouseOver={() => this.highlightUs(i)}
-                                    onMouseLeave={() => this.unhighlightUs()}
-                                    onClick={() => this.doRate(i)}
-                                >star_rate</Icon>
-                            ))}
-                        </div>
-                    )}
-                    {rate.userRating ? (
-                        <React.Fragment>
-                            <Icon className={classes.starRateMy} onClick={this.showRateBox}>star_rate</Icon>
-                            <div className={classes.ratingSummery} onClick={this.showRateBox}>
-                                <Typography variant='display1'>{rate.userRating * 2}</Typography>
-                                <Typography variant='caption' gutterBottom align='left'>
-                                    <FormattedMessage id='Apis.Details.InfoBar.you' defaultMessage='YOU' />
-                                </Typography>
-                            </div>
-                        </React.Fragment>
-                    ) : (
-                        <React.Fragment>
-                            <Icon
-                                onClick={this.showRateBox}
-                                className={classes.starRate}
-                                style={{ color: theme.palette.grey.A200 }}
-                            >star_rate</Icon>
-                            <Typography onClick={this.showRateBox} className={classes.rateLink}>
-                                <FormattedMessage
-                                    id='Apis.Details.InfoBar.rate.this.api'
-                                    defaultMessage='Rate this API'
-                                />
-                            </Typography>
-                        </React.Fragment>
-                    )}
-                </div>
-            </React.Fragment>
-        );
-    }
-}
-
-StarRatingBar.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
-};
-
-StarRatingBar = withStyles(styles, { withTheme: true })(StarRatingBar);
-/**
- *
- *
  * @class InfoBar
  * @extends {React.Component}
  */
@@ -514,7 +288,7 @@ class InfoBar extends React.Component {
     };
 
     getSchema() {
-        const newAPI = new Api();
+        const newAPI = new API();
         const { api } = this.context;
         const promisedGraphQL = newAPI.getGraphQLSchemaByAPIId(api.id);
         promisedGraphQL.then((response) => {
@@ -542,6 +316,7 @@ class InfoBar extends React.Component {
             notFound, showOverview, prodUrlCopied, sandboxUrlCopied, epUrl,
         } = this.state;
         const { resourceNotFountMessage } = this.props;
+        const user = AuthManager.getUser();
         if (notFound) {
             return <ResourceNotFound message={resourceNotFountMessage} />;
         }
@@ -568,7 +343,7 @@ class InfoBar extends React.Component {
                                 </Typography>
                             </div>
                             <VerticalDivider height={70} />
-                            <StarRatingBar apiIdProp={api.id} />
+                            {user && <StarRatingBar apiId={api.id} isEditable={false} showSummary />}
                         </div>
 
                         {showOverview && (
@@ -581,7 +356,7 @@ class InfoBar extends React.Component {
                                                 <TableRow>
                                                     <TableCell component='th' scope='row' className={classes.leftCol}>
                                                         <div className={classes.iconAligner}>
-                                                        <Icon className={classes.iconOdd}>settings_input_component</Icon>
+                                                            <Icon className={classes.iconOdd}>settings_input_component</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.list.version'
@@ -636,11 +411,29 @@ class InfoBar extends React.Component {
                                                     </TableCell>
                                                     <TableCell>21 May 2018</TableCell>
                                                 </TableRow> */}
-                                                { api.type = 'GRAPHQL' && (
+                                                {user && (
                                                     <TableRow>
                                                         <TableCell component='th' scope='row'>
                                                             <div className={classes.iconAligner}>
-                                                                <Icon className={classes.iconEven}>cloud_download</Icon>
+                                                                <Grade className={classes.iconEven} />
+                                                                <span className={classes.iconTextWrapper}>
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.InfoBar.list.context.rating'
+                                                                        defaultMessage='Rating'
+                                                                    />
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <StarRatingBar apiId={api.id} isEditable showSummary={false} />
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
+                                                { api.type === 'GRAPHQL' && (
+                                                    <TableRow>
+                                                        <TableCell component='th' scope='row'>
+                                                            <div className={classes.iconAligner}>
+                                                                <Icon className={classes.iconOdd}>cloud_download</Icon>
                                                                 <span className={classes.iconTextWrapper}>
                                                                     <FormattedMessage
                                                                         id='Apis.Details.InfoBar.download.Schema'
@@ -663,7 +456,7 @@ class InfoBar extends React.Component {
                                                 <TableRow>
                                                     <TableCell component='th' scope='row' className={classes.contentToTop}>
                                                         <div className={classes.iconAligner}>
-                                                            <Icon className={classes.iconOdd}>desktop_windows</Icon>
+                                                            <Icon className={classes.iconEven}>desktop_windows</Icon>
                                                             <span className={classes.iconTextWrapper}>
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.available.environments'

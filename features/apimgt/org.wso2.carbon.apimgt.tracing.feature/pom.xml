@@ -21,7 +21,7 @@
     <parent>
         <artifactId>apimgt-feature</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.5.56-SNAPSHOT</version>
+        <version>6.5.67-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -63,7 +63,9 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tracing:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tracing:${carbon.apimgt.version}
+                                </bundleDef>
                                 <bundleDef>org.json.wso2:json:${orbit.version.json}</bundleDef>
                             </bundles>
                         </configuration>

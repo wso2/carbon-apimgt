@@ -17,58 +17,62 @@
  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<parent>
-		<groupId>org.wso2.carbon.apimgt</groupId>
-		<artifactId>oidc-authenticator-feature</artifactId>
-		<version>6.5.56-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
-	</parent>
+    <parent>
+        <groupId>org.wso2.carbon.apimgt</groupId>
+        <artifactId>oidc-authenticator-feature</artifactId>
+        <version>6.5.67-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>org.wso2.carbon.apimgt.authenticator.oidc.feature</artifactId>
-	<packaging>pom</packaging>
-	<name>OIDC based Single Sign-On authenticator Feature</name>
-	<url>http://wso2.org</url>
-	<description>This feature contains the bundles required for OIDC based authentication functionality</description>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>org.wso2.carbon.apimgt.authenticator.oidc.feature</artifactId>
+    <packaging>pom</packaging>
+    <name>OIDC based Single Sign-On authenticator Feature</name>
+    <url>http://wso2.org</url>
+    <description>This feature contains the bundles required for OIDC based authentication functionality</description>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.wso2.carbon.apimgt</groupId>
-			<artifactId>org.wso2.carbon.apimgt.authenticator.oidc.server.feature</artifactId>
-			<version>${project.version}</version>
-			<type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>org.wso2.carbon.apimgt</groupId>
-			<artifactId>org.wso2.carbon.apimgt.authenticator.oidc.ui.feature</artifactId>
-			<version>${project.version}</version>
-			<type>zip</type>
-		</dependency>
-	</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.authenticator.oidc.server.feature</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.authenticator.oidc.ui.feature</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.wso2.maven</groupId>
-				<artifactId>carbon-p2-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>4-p2-feature-generation</id>
-						<phase>package</phase>
-						<goals>
-							<goal>p2-feature-gen</goal>
-						</goals>
-						<configuration>
-							<id>org.wso2.carbon.apimgt.authenticator.oidc</id>
-							<propertiesFile>../../../../etc/feature.properties</propertiesFile>
-							<includedFeatures>
-								<includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.authenticator.oidc.server.feature</includedFeatureDef>
-								<includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.authenticator.oidc.ui.feature</includedFeatureDef>
-							</includedFeatures>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.wso2.maven</groupId>
+                <artifactId>carbon-p2-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>4-p2-feature-generation</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>p2-feature-gen</goal>
+                        </goals>
+                        <configuration>
+                            <id>org.wso2.carbon.apimgt.authenticator.oidc</id>
+                            <propertiesFile>../../../../etc/feature.properties</propertiesFile>
+                            <includedFeatures>
+                                <includedFeatureDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.authenticator.oidc.server.feature
+                                </includedFeatureDef>
+                                <includedFeatureDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.authenticator.oidc.ui.feature
+                                </includedFeatureDef>
+                            </includedFeatures>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

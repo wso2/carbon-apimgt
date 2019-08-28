@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.5.56-SNAPSHOT</version>
+        <version>6.5.67-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -158,7 +158,9 @@
                                     </includes>
                                 </resource>
                                 <resource>
-                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/resources</directory>
+                                    <directory>
+                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/resources
+                                    </directory>
                                     <includes>
                                         <include>tenant/tenant-conf.json</include>
                                     </includes>

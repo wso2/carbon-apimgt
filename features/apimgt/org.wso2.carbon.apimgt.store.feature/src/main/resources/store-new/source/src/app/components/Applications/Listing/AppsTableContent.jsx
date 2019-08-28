@@ -95,21 +95,13 @@ class AppsTableContent extends Component {
                             <TableRow key={app.applicationId}>
                                 <TableCell>
                                     {app.status === this.APPLICATION_STATES.APPROVED ? (
-                                        <Link to={'/applications/' + app.applicationId}>
-                                            { (isApplicationSharingEnabled && app.groups.length !== 0) ? (
-                                                app.owner + '/' + app.name
-                                            ) : (
-                                                app.name
-                                            )}
-                                        </Link>
-                                    ) : [((isApplicationSharingEnabled && app.groups.length !== 0)
-                                        ? (app.owner + '/' + app.name)
-                                        : (
-                                            app.name
-                                        )
-                                    ),
-                                    ]}
+                                        <Link to={'/applications/' + app.applicationId}>{app.name}</Link>
+                                    ) : (
+                                        app.name
+                                    )
+                                    }
                                 </TableCell>
+                                <TableCell>{app.owner}</TableCell>
                                 <TableCell>{app.throttlingPolicy}</TableCell>
                                 <TableCell>
                                     {app.status === this.APPLICATION_STATES.APPROVED && (
@@ -160,7 +152,7 @@ class AppsTableContent extends Component {
                                                             />
                                                         )}
                                                         >
-                                                            edit   
+                                                            edit
                                                         </Icon>
                                                     </IconButton>
                                                 </Link>
@@ -214,6 +206,7 @@ AppsTableContent.propTypes = {
     rowsPerPage: PropTypes.number.isRequired,
     order: PropTypes.string.isRequired,
     orderBy: PropTypes.string.isRequired,
+    isApplicationSharingEnabled: PropTypes.func.isRequired,
     apps: PropTypes.instanceOf(Map).isRequired,
 };
 export default AppsTableContent;

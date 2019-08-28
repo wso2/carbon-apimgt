@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>org.wso2.carbon.apimgt.hybrid.gateway</artifactId>
-        <version>6.5.56-SNAPSHOT</version>
+        <version>6.5.67-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -36,8 +36,8 @@
             <artifactId>org.wso2.carbon.utils</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -106,7 +106,7 @@
             <version>${slf4j.wso2.version}</version>
             <scope>test</scope>
         </dependency>
-    <dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
             <scope>provided</scope>
@@ -126,18 +126,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
+
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -150,10 +139,11 @@
                         </Private-Package>
                         <Import-Package>
                             org.wso2.carbon.utils.*; version="${carbon.kernel.package.import.version.range}",
-                            org.apache.commons.logging; version="${commons.logging.imp.pkg.version}",
+                            org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
                             org.wso2.carbon.tenant.mgt.services.*; version="${carbon.multitenancy.version}",
                             org.wso2.carbon.context.*; version="${carbon.kernel.package.import.version.range}",
-                            org.wso2.carbon.core.multitenancy.*; version="${carbon.kernel.package.import.version.range}",
+                            org.wso2.carbon.core.multitenancy.*;
+                            version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.core.*; version="${carbon.kernel.package.import.version.range}",
                             org.osgi.framework.*,
                             org.osgi.service.component.*,
@@ -162,7 +152,8 @@
                             org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.hybrid.gateway.common.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.apache.axis2.*,
-                            org.wso2.carbon.authenticator.stub.*; version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.authenticator.stub.*;
+                            version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.user.api.*; version="${imp.pkg.version.org.wso2.carbon.user.api}",
                             org.wso2.carbon.user.core.*; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.base.*; version="${imp.pkg.version.org.wso2.carbon.base}",

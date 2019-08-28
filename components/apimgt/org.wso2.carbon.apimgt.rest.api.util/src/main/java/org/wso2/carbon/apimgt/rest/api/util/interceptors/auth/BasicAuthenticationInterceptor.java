@@ -27,10 +27,8 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.CarbonException;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -40,17 +38,16 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.cache.Caching;
 
 /**
  * This class will validate incoming requests with Basic authenticator headers. This will also validate the roles of
@@ -121,7 +118,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
             tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
             userRealm = AnonymousSessionUtil.getRealmByTenantDomain(registryService, realmService, tenantDomain);
             if (userRealm == null) {
-                log.error("Authentication failed: domain or unactivated tenant login");
+                log.error("Authentication failed: invalid domain or unactivated tenant login");
                 return false;
             }
             //if authenticated
@@ -131,6 +128,9 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 carbonContext.setTenantDomain(tenantDomain);
                 carbonContext.setTenantId(tenantId);
                 carbonContext.setUsername(username);
+                if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                    APIUtil.loadTenantConfigBlockingMode(tenantDomain);
+                }
                 return validateRoles(inMessage, userRealm, tenantDomain, username);
             } else {
                 log.error("Authentication failed: Invalid credentials");
@@ -186,7 +186,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                     //Continue the role check only if the invoking resource URI template has roles
                     if (!resourceScopeList.isEmpty()) {
                         //get the configured RESTAPIScopes map for the tenant from cache or registry
-                        restAPIScopes = getRESTAPIScopesForTenant(tenantDomain);
+                        restAPIScopes = APIUtil.getRESTAPIScopesForTenant(tenantDomain);
                         if (restAPIScopes != null) {
                             //get the current role list of the user from local user store manager 
                             userRoles = userRealm.getUserStoreManager()
@@ -226,35 +226,6 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
     }
 
     /**
-     * This method gets the RESTAPIScopes configuration from REST_API_SCOPE_CACHE if available, if not from
-     * tenant-conf.json in registry.
-     *
-     * @param tenantDomain tenant domain name
-     * @return Map of scopes which contains scope names and associated role list
-     */
-    @SuppressWarnings("unchecked")
-    private Map<String, String> getRESTAPIScopesForTenant(String tenantDomain) {
-        Map<String, String> restAPIScopes;
-        restAPIScopes = (Map) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                .getCache(RestApiConstants.REST_API_SCOPE_CACHE)
-                .get(tenantDomain);
-        if (restAPIScopes == null) {
-            try {
-                restAPIScopes =
-                        APIUtil.getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain));
-                //call load tenant config for rest API.
-                //then put cache
-                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                        .getCache(RestApiConstants.REST_API_SCOPE_CACHE)
-                        .put(tenantDomain, restAPIScopes);
-            } catch (APIManagementException e) {
-                log.error("Error while getting REST API scopes for tenant: " + tenantDomain, e);
-            }
-        }
-        return restAPIScopes;
-    }
-
-    /**
      * This method validates the user roles against the roles of the REST API scopes defined for the current resource.
      *
      * @param resourceScopeList Scope list of the current resource
@@ -290,6 +261,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                             log.debug("Basic Authentication: role validation successful for user: "
                                     + username + " with scope: " + scope.getKey()
                                     + " for resource path: " + path + " and verb " + verb);
+                            log.debug("Added scope: " + scope.getKey() + " to validated user scope list");
                         }
                         break;
                     }
@@ -305,9 +277,9 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
         }
         if (!validatedUserScopes.isEmpty()) {
             //Add the successfully validated user scope list to the cxf message
-            inMessage.put(RestApiConstants.USER_REST_API_SCOPES, validatedUserScopes);
+            inMessage.put(RestApiConstants.USER_REST_API_SCOPES, validatedUserScopes.toArray(new Scope[0]));
             if (log.isDebugEnabled()) {
-                log.debug("Successfully validated REST API Scopes for the user " + username + " :  " + validatedUserScopes);
+                log.debug("Successfully validated REST API Scopes for the user " + username);
             }
             return true;
         }

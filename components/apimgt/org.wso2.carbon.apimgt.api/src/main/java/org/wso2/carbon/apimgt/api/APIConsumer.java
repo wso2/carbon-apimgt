@@ -613,6 +613,12 @@ public interface APIConsumer extends APIManager {
     
     int getUserRating(APIIdentifier apiId, String user) throws APIManagementException;
 
+    JSONObject getUserRatingInfo(APIIdentifier apiId, String user) throws APIManagementException;
+    
+    float getAverageAPIRating(APIIdentifier apiId) throws APIManagementException;
+
+    JSONArray getAPIRatings(APIIdentifier apiId) throws APIManagementException;
+
     /**
      * Get a list of published APIs by the given provider.
      *

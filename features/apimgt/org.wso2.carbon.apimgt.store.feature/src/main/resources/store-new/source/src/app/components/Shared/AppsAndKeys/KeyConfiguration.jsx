@@ -98,7 +98,7 @@ class KeyConfiguration extends React.Component {
      */
     render() {
         const {
-            classes, keyRequest, notFound, intl,
+            classes, keyRequest, notFound, intl, isUserOwner,
         } = this.props;
         const { supportedGrantTypes, callbackUrl } = keyRequest;
         if (notFound) {
@@ -131,6 +131,7 @@ class KeyConfiguration extends React.Component {
                                         checked={isRefreshChecked}
                                         onChange={e => this.handleChange('grantType', e)}
                                         value='refresh_token'
+                                        disabled={!isUserOwner}
                                     />
                                 )}
                                 label={intl.formatMessage({
@@ -145,6 +146,7 @@ class KeyConfiguration extends React.Component {
                                         checked={isPasswordChecked}
                                         value='password'
                                         onChange={e => this.handleChange('grantType', e)}
+                                        disabled={!isUserOwner}
                                     />
                                 )}
                                 label='Password'
@@ -156,6 +158,7 @@ class KeyConfiguration extends React.Component {
                                         checked={isImplicitChecked}
                                         value='implicit'
                                         onChange={e => this.handleChange('grantType', e)}
+                                        disabled={!isUserOwner}
                                     />
                                 )}
                                 label={intl.formatMessage({
@@ -172,6 +175,7 @@ class KeyConfiguration extends React.Component {
                                         checked={isCodeChecked}
                                         value='authorization_code'
                                         onChange={e => this.handleChange('grantType', e)}
+                                        disabled={!isUserOwner}
                                     />
                                 )}
                                 label={intl.formatMessage({
@@ -211,6 +215,7 @@ class KeyConfiguration extends React.Component {
                             className={classes.textField}
                             margin='normal'
                             value={callbackUrl}
+                            disabled={!isUserOwner}
                         />
                         <FormHelperText>
                             <FormattedMessage

@@ -21,7 +21,6 @@ public class ApplicationDTO   {
   
     private String applicationId = null;
     private String name = null;
-    private String subscriber = null;
     private String throttlingPolicy = null;
     private String description = null;
 
@@ -99,24 +98,6 @@ public enum TokenTypeEnum {
   }
   public void setName(String name) {
     this.name = name;
-  }
-
-  /**
-   * If subscriber is not given user invoking the API will be taken as the subscriber. 
-   **/
-  public ApplicationDTO subscriber(String subscriber) {
-    this.subscriber = subscriber;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "admin", value = "If subscriber is not given user invoking the API will be taken as the subscriber. ")
-  @JsonProperty("subscriber")
-  public String getSubscriber() {
-    return subscriber;
-  }
-  public void setSubscriber(String subscriber) {
-    this.subscriber = subscriber;
   }
 
   /**
@@ -304,7 +285,6 @@ public enum TokenTypeEnum {
     ApplicationDTO application = (ApplicationDTO) o;
     return Objects.equals(applicationId, application.applicationId) &&
         Objects.equals(name, application.name) &&
-        Objects.equals(subscriber, application.subscriber) &&
         Objects.equals(throttlingPolicy, application.throttlingPolicy) &&
         Objects.equals(description, application.description) &&
         Objects.equals(tokenType, application.tokenType) &&
@@ -319,7 +299,7 @@ public enum TokenTypeEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner);
+    return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner);
   }
 
   @Override
@@ -329,7 +309,6 @@ public enum TokenTypeEnum {
     
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    subscriber: ").append(toIndentedString(subscriber)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
