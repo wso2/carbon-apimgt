@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ClientCertificatesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.ClientCertificatesApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -52,7 +53,7 @@ ClientCertificatesApiService delegate = new ClientCertificatesApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Alias not provided or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Certificate for the Alias not found. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
-    public Response clientCertificatesAliasContentGet(@ApiParam(value = "",required=true) @PathParam("alias") String alias) {
+    public Response clientCertificatesAliasContentGet(@ApiParam(value = "",required=true) @PathParam("alias") String alias) throws APIManagementException{
         return delegate.clientCertificatesAliasContentGet(alias, securityContext);
     }
 
@@ -70,7 +71,7 @@ ClientCertificatesApiService delegate = new ClientCertificatesApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Alias not found or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. | Failed to delete the certificate. Certificate could not found for the given alias ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
-    public Response clientCertificatesAliasDelete(@ApiParam(value = "The alias of the certificate that should be deleted. ",required=true) @PathParam("alias") String alias) {
+    public Response clientCertificatesAliasDelete(@ApiParam(value = "The alias of the certificate that should be deleted. ",required=true) @PathParam("alias") String alias) throws APIManagementException{
         return delegate.clientCertificatesAliasDelete(alias, securityContext);
     }
 
@@ -88,7 +89,7 @@ ClientCertificatesApiService delegate = new ClientCertificatesApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Alias not found or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Alias not found ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
-    public Response clientCertificatesAliasGet(@ApiParam(value = "",required=true) @PathParam("alias") String alias) {
+    public Response clientCertificatesAliasGet(@ApiParam(value = "",required=true) @PathParam("alias") String alias) throws APIManagementException{
         return delegate.clientCertificatesAliasGet(alias, securityContext);
     }
 
@@ -106,7 +107,7 @@ ClientCertificatesApiService delegate = new ClientCertificatesApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Failure due to not providing alias. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Updating certificate failed. Alias not found or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
-    public Response clientCertificatesAliasPut(@ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias,  @Multipart(value = "certificate", required = false) InputStream certificateInputStream, @Multipart(value = "certificate" , required = false) Attachment certificateDetail, @Multipart(value = "tier", required = false)  String tier) {
+    public Response clientCertificatesAliasPut(@ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias,  @Multipart(value = "certificate", required = false) InputStream certificateInputStream, @Multipart(value = "certificate" , required = false) Attachment certificateDetail, @Multipart(value = "tier", required = false)  String tier) throws APIManagementException{
         return delegate.clientCertificatesAliasPut(alias, certificateInputStream, certificateDetail, tier, securityContext);
     }
 
@@ -123,7 +124,7 @@ ClientCertificatesApiService delegate = new ClientCertificatesApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Successful response with the list of matching certificate information in the body. ", response = ClientCertificatesDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Failure due to not providing alias or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
-    public Response clientCertificatesGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Alias for the client certificate")  @QueryParam("alias") String alias,  @ApiParam(value = "UUID of the API")  @QueryParam("apiId") String apiId) {
+    public Response clientCertificatesGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Alias for the client certificate")  @QueryParam("alias") String alias,  @ApiParam(value = "UUID of the API")  @QueryParam("apiId") String apiId) throws APIManagementException{
         return delegate.clientCertificatesGet(limit, offset, alias, apiId, securityContext);
     }
 
@@ -140,7 +141,7 @@ ClientCertificatesApiService delegate = new ClientCertificatesApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. The Certificate added successfully. ", response = ClientCertMetadataDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Failures due to existing alias or expired certificate. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error Failed to add the Certificate due to an Internal Server Error ", response = ErrorDTO.class) })
-    public Response clientCertificatesPost( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @Multipart(value = "alias")  String alias, @Multipart(value = "apiId")  String apiId, @Multipart(value = "tier")  String tier) {
+    public Response clientCertificatesPost( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @Multipart(value = "alias")  String alias, @Multipart(value = "apiId")  String apiId, @Multipart(value = "tier")  String tier) throws APIManagementException{
         return delegate.clientCertificatesPost(certificateInputStream, certificateDetail, alias, apiId, tier, securityContext);
     }
 }

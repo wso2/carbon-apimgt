@@ -4877,10 +4877,10 @@ definitions:
       - name
       - weight
     properties:
-      name:
+      value:
         type: string
         example: tag1
-      weight:
+      count:
         type: integer
         example: 5
 
@@ -5506,6 +5506,9 @@ definitions:
         items:
           type: string
       applicationSharingEnabled:
+        type: boolean
+        default: false
+      mapExistingAuthApps:
         type: boolean
         default: false
 

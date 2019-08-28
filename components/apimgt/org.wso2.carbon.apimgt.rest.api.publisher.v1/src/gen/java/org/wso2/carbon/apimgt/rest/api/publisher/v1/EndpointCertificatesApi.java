@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.EndpointCertificatesApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -52,7 +53,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. * ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Certificate for the Alias not found. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
-    public Response endpointCertificatesAliasContentGet(@ApiParam(value = "",required=true) @PathParam("alias") String alias) {
+    public Response endpointCertificatesAliasContentGet(@ApiParam(value = "",required=true) @PathParam("alias") String alias) throws APIManagementException{
         return delegate.endpointCertificatesAliasContentGet(alias, securityContext);
     }
 
@@ -70,7 +71,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @ApiResponse(code = 400, message = "Bad Request.  Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. | Failed to delete the certificate. Certificate could not found for the given alias ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
-    public Response endpointCertificatesAliasDelete(@ApiParam(value = "The alias of the certificate that should be deleted. ",required=true) @PathParam("alias") String alias) {
+    public Response endpointCertificatesAliasDelete(@ApiParam(value = "The alias of the certificate that should be deleted. ",required=true) @PathParam("alias") String alias) throws APIManagementException{
         return delegate.endpointCertificatesAliasDelete(alias, securityContext);
     }
 
@@ -88,7 +89,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Alias not found ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
-    public Response endpointCertificatesAliasGet(@ApiParam(value = "",required=true) @PathParam("alias") String alias) {
+    public Response endpointCertificatesAliasGet(@ApiParam(value = "",required=true) @PathParam("alias") String alias) throws APIManagementException{
         return delegate.endpointCertificatesAliasGet(alias, securityContext);
     }
 
@@ -106,7 +107,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Updating certificate failed. Alias not found ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
-    public Response endpointCertificatesAliasPut( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias) {
+    public Response endpointCertificatesAliasPut( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias) throws APIManagementException{
         return delegate.endpointCertificatesAliasPut(certificateInputStream, certificateDetail, alias, securityContext);
     }
 
@@ -124,7 +125,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
-    public Response endpointCertificatesGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Alias for the certificate")  @QueryParam("alias") String alias,  @ApiParam(value = "Endpoint of which the certificate is uploaded")  @QueryParam("endpoint") String endpoint) {
+    public Response endpointCertificatesGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Alias for the certificate")  @QueryParam("alias") String alias,  @ApiParam(value = "Endpoint of which the certificate is uploaded")  @QueryParam("endpoint") String endpoint) throws APIManagementException{
         return delegate.endpointCertificatesGet(limit, offset, alias, endpoint, securityContext);
     }
 
@@ -141,7 +142,7 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
         @ApiResponse(code = 200, message = "OK. The Certificate added successfully. ", response = CertMetadataDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. * Failures due to existing alias or expired certificate. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error * Failed to add the Certificate due to an Internal Server Error ", response = ErrorDTO.class) })
-    public Response endpointCertificatesPost( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @Multipart(value = "alias")  String alias, @Multipart(value = "endpoint")  String endpoint) {
+    public Response endpointCertificatesPost( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @Multipart(value = "alias")  String alias, @Multipart(value = "endpoint")  String endpoint) throws APIManagementException{
         return delegate.endpointCertificatesPost(certificateInputStream, certificateDetail, alias, endpoint, securityContext);
     }
 }

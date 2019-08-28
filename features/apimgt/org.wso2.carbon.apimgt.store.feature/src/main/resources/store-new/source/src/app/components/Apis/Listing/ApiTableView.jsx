@@ -112,7 +112,7 @@ class ApiTableView extends React.Component {
                         '& tr:nth-child(even)': {
                             backgroundColor: '#fff',
                         },
-                    }
+                    },
                 },
                 MUIDataTableBodyCell: {
                     root: {
@@ -153,8 +153,8 @@ class ApiTableView extends React.Component {
         this.getData();
     }
 
-    componentDidUpdate() {
-        if (this.apiType !== this.context.apiType) {
+    componentDidUpdate(prevProps) {
+        if ((this.apiType !== this.context.apiType) || (prevProps.selectedTag !== this.props.selectedTag)) {
             this.apiType = this.context.apiType;
             this.getData();
         }
@@ -172,11 +172,16 @@ class ApiTableView extends React.Component {
     };
 
     xhrRequest = () => {
+        const { selectedTag } = this.props;
         const { page, rowsPerPage } = this;
         const { apiType } = this.context;
         if (apiType === CONSTS.API_TYPE) {
             const api = new API();
-            return api.getAllAPIs({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+            if (selectedTag) {
+                return api.getAllAPIs({ query: 'tag:' + selectedTag, limit: this.rowsPerPage, offset: page * rowsPerPage });
+            } else {
+                return api.getAllAPIs({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+            }
         } else {
             const apiProduct = new APIProduct();
             return apiProduct.getAllAPIProducts({ limit: this.rowsPerPage, offset: page * rowsPerPage });
@@ -285,7 +290,7 @@ class ApiTableView extends React.Component {
                     customBodyRender: (value, tableMeta, updateValue) => {
                         if (tableMeta.rowData) {
                             const apiId = tableMeta.rowData[0];
-                            const avgRating = tableMeta.rowData[7];
+                            const avgRating = tableMeta.rowData[8];
                             return <StarRatingBar apiRating={avgRating} apiId={apiId} isEditable={false} showSummary={false} />;
                         }
                     },
@@ -338,6 +343,7 @@ class ApiTableView extends React.Component {
                 api.context = data[4];
                 api.provider = data[5];
                 api.type = data[6];
+                api.avgRating = data[8];
                 return <ApiThumb api={api} />;
             };
             options.title = false;

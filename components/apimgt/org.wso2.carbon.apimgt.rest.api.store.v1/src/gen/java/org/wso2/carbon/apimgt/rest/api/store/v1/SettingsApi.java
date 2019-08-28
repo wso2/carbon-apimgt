@@ -5,6 +5,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SettingsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.SettingsApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -49,7 +50,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Application attributes returned. ", response = ApplicationAttributeListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested application does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response settingsApplicationAttributesGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+    public Response settingsApplicationAttributesGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.settingsApplicationAttributesGet(ifNoneMatch, securityContext);
     }
 
@@ -65,7 +66,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Settings returned ", response = SettingsDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Settings does not exist. ", response = ErrorDTO.class) })
-    public Response settingsGet() {
+    public Response settingsGet() throws APIManagementException{
         return delegate.settingsGet(securityContext);
     }
 }

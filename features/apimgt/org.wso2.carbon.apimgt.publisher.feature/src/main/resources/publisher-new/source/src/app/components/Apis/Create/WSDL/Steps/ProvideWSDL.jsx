@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -11,398 +11,188 @@
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { Component } from 'react';
-import {
-    withStyles,
-    RadioGroup,
-    Radio,
-    Button,
-    FormControl,
-    FormHelperText,
-    FormControlLabel,
-} from '@material-ui/core';
-import ErrorOutline from '@material-ui/icons/ErrorOutline';
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import Progress from 'AppComponents/Shared/Progress';
+import Radio from '@material-ui/core/Radio';
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
+import { makeStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
-import Dropzone from 'react-dropzone';
-import classNames from 'classnames';
-import Backup from '@material-ui/icons/Backup';
-import API from 'AppData/api';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
-const styles = theme => ({
-    radioWrapper: {
-        display: 'flex',
-        flexDirection: 'row',
-    },
-    dropZoneInside: {},
-    dropZone: {
-        color: theme.palette.grey[500],
-        border: 'dashed 1px ' + theme.palette.grey[500],
-        background: theme.palette.grey[100],
-        padding: theme.spacing.unit * 4,
-        textAlign: 'center',
-        cursor: 'pointer',
-    },
-    dropZoneIcon: {
-        color: theme.palette.grey[500],
-        width: 100,
-        height: 100,
-    },
-    dropZoneError: {
+import APIValidation from 'AppData/APIValidation';
+import Wsdl from 'AppData/Wsdl';
+import DropZoneLocal from './components/DropZoneLocal';
+
+const useStyles = makeStyles(theme => ({
+    mandatoryStar: {
         color: theme.palette.error.main,
     },
-    dropZoneErrorBox: {
-        border: 'dashed 1px ' + theme.palette.error.main,
-    },
-    errorMessage: {
-        color: theme.palette.error.main,
-    },
-    errorIcon: {
-        color: theme.palette.error.main,
-        marginRight: theme.spacing.unit * 2,
-    },
-    fileNameWrapper: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        '& div': {
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-        },
-    },
-    FormControl: {
-        padding: 0,
-        width: '100%',
-        marginTop: 0,
-    },
-    errorMessageWrapper: {
-        display: 'flex',
-        alignItems: 'center',
-    },
-    urlWrapper: {
-        display: 'flex',
-        alignItems: 'center',
-    },
-    button: {
-        whiteSpace: 'nowrap',
-    },
-});
+}));
 
 /**
- *
- * @class ProvideWSDL
- * @extends {Component}
+ * Sub component of API Create using WSDL UI, This is handling the taking input of WSDL file or URL from the user
+ * In the create API using WSDL wizard first step out of 2 steps
+ * @export
+ * @param {*} props
+ * @returns {React.Component} @inheritdoc
  */
-class ProvideWSDL extends Component {
-    /**
-     * Creates an instance of ProvideWSDL.
-     * @param {any} props @inheritDoc
-     * @memberof ProvideWSDL
-     */
-    constructor(props) {
-        super(props);
-        const { uploadMethod, file, url } = props;
-        this.state = {
-            uploadMethod,
-            file,
-            url,
-            isValid: null,
-            errorMessage: '',
-            loading: false,
-        };
-        this.validateWSDL = this.validateWSDL.bind(this);
-        this.updateURL = this.updateURL.bind(this);
-    }
-
-    /**
-     * @inheritDoc
-     * @param {any} nextProps New props received
-     * @memberof ProvideWSDL
-     */
-    componentWillReceiveProps(nextProps) {
-        const { validate, updateWSDLValidity } = nextProps;
-        if (validate) {
-            this.validateWSDL(updateWSDLValidity);
-        }
-    }
-
-    getUploadMethod() {
-        return this.state.uploadMethod;
-    }
-
-    toggleType = (event) => {
-        if (event.target.value === 'file') {
-            this.setState({ uploadMethod: event.target.value, file: null });
-        } else {
-            this.setState({ uploadMethod: event.target.value });
-        }
-        // this.validateWSDL();
-    };
-
-    handleUploadFile = (acceptedFiles) => {
-        this.validateWSDL((isValid, wsdlBean) => {
-            console.info('(isValid, wsdlBean) = ', isValid, wsdlBean);
-        });
-        this.setState({ file: acceptedFiles[0] });
-    };
-
+export default function ProvideWSDL(props) {
+    const { apiInputs, inputsDispatcher, onValidate } = props;
+    const isFileInput = apiInputs.inputType === 'file';
+    const classes = useStyles();
+    const [isError, setValidity] = useState(); // If valid value is `null` else an error object will be there
+    const [isValidating, setIsValidating] = useState(false);
     /**
      *
-     * @param {React.SyntheticEvent} event Event handler for URL input field
-     * @memberof ProvideWSDL
-     */
-    updateURL(event) {
-        const { value } = event.target;
-        this.setState({ url: value });
-    }
-    /**
      *
-     * @param validity {Function} Call back function to trigger after pass/fail the validation
+     * @param {*} files
      */
-    validateWSDL() {
-        // do not invoke callback in case of React SyntheticMouseEvent
-        const { uploadMethod, url, file } = this.state;
-        const { valid, updateFileErrors, updateWSDLBean } = this.props;
-        this.setState({ loading: true });
-        const newAPI = new API();
-        let promisedValidation;
-        const wsdlBean = {};
-        const validNew = JSON.parse(JSON.stringify(valid));
-        if (uploadMethod === 'file') {
-            if (!file) {
-                // Update the parent's state
-                validNew.wsdlFile.empty = true;
-                updateFileErrors(validNew);
-                return;
-            }
-            // Update the parent's state
-            validNew.wsdlFile.empty = false;
-            updateFileErrors(validNew);
+    function onDrop(files) {
+        // Why `files[0]` below is , We only handle one wsdl file at a time, So if use provide multiple, We would only
+        // accept the first file. This information is shown in the dropdown helper text
+        inputsDispatcher({ action: 'inputValue', value: [files[0]] });
+    }
 
-            wsdlBean.file = file;
-            promisedValidation = newAPI.validateWSDLFile(file);
-        } else {
-            if (!url) {
-                // Update the parent's state
-                validNew.wsdlUrl.empty = true;
-                updateFileErrors(validNew);
-                return;
-            }
-
-            // Update the parent's state
-            validNew.wsdlUrl.empty = false;
-            updateFileErrors(validNew);
-
-            wsdlBean.url = url;
-            promisedValidation = newAPI.validateWSDLUrl(url);
-        }
-        promisedValidation
-            .then((response) => {
-                const { isValid, wsdlInfo } = response.obj;
-                wsdlBean.info = wsdlInfo;
-
-                // Update the parent's state
-                if (uploadMethod === 'file') {
-                    validNew.wsdlFile.invalidFile = false;
-                    updateFileErrors(validNew);
+    /**
+     * Trigger the provided onValidate call back on each input validation run
+     * Do the validation state aggregation and call the onValidate method with aggregated value
+     * @param {Object} state Validation state object
+     */
+    function validate(state) {
+        if (state === null) {
+            setIsValidating(true);
+            Wsdl.validate(apiInputs.inputValue).then((response) => {
+                const {
+                    body: { isValid },
+                } = response;
+                if (isValid) {
+                    setValidity(null);
                 } else {
-                    validNew.wsdlUrl.invalidUrl = false;
-                    updateFileErrors(validNew);
+                    setValidity({ message: 'WSDL content validation failed!' });
                 }
-                this.setState({ isValid, loading: false, file });
-                updateWSDLBean(wsdlBean);
-            })
-            .catch((error) => {
-                // Update the parent's state
-                if (uploadMethod === 'file') {
-                    validNew.wsdlFile.invalidFile = true;
-                    updateFileErrors(validNew);
-                } else {
-                    validNew.wsdlUrl.invalidUrl = true;
-                    updateFileErrors(validNew);
-                }
-                updateWSDLBean(wsdlBean);
-                const response = error.response && error.response.obj;
-                const message =
-                    'Error while validating WSDL!! ' + response && '[' + response.message + '] ' + response.description;
-                this.setState({ isValid: false, errorMessage: message, loading: false });
-                console.error(error);
+                onValidate(isValid);
+                setIsValidating(false);
             });
-    }
-
-    /**
-     * @inheritDoc
-     * @returns {React.Component}
-     * @memberof ProvideWSDL
-     */
-    render() {
-        const {
-            isValid, errorMessage, uploadMethod, file, url, loading,
-        } = this.state;
-        const { classes, valid } = this.props;
-        const error = isValid === false; // Because of null case, which means validation haven't done yet
-        if (loading) {
-            return <Progress error={error} />;
+            // Valid URL string
+            // Do API call
+        } else {
+            setValidity(state);
+            onValidate(false);
         }
-        return (
-            <React.Fragment>
-                <FormControl className={classes.FormControl}>
-                    <RadioGroup
-                        aria-label='swagger-upload-method'
-                        name='swagger-upload-method'
-                        value={uploadMethod}
-                        onChange={this.toggleType}
-                        className={classes.radioWrapper}
-                    >
-                        <FormControlLabel
-                            value='file'
-                            control={<Radio />}
-                            label={
-                                <FormattedMessage
-                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.uploaded.file'
-                                    defaultMessage='File'
-                                />
-                            }
-                            className={classes.radioGroup}
-                        />
-                        <FormControlLabel
-                            value='url'
-                            control={<Radio />}
-                            label={
-                                <FormattedMessage
-                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.uploaded.url'
-                                    defaultMessage='URL'
-                                />
-                            }
-                            className={classes.radioGroup}
-                        />
-                    </RadioGroup>
-                </FormControl>
-                {uploadMethod === 'file' ? (
-                    <React.Fragment>
-                        {file && (
-                            <div className={classes.fileNameWrapper}>
-                                <Typography variant='subtitle2' gutterBottom>
-                                    <FormattedMessage id='uploaded.file' defaultMessage='Uploaded file' /> :
-                                </Typography>
-                                <div className={classes.fileName}>
-                                    <Typography variant='body1' gutterBottom>
-                                        {file.name} - {file.size} bytes
-                                    </Typography>
-                                </div>
-                            </div>
-                        )}
-                        {valid.wsdlFile.invalidFile && (
-                            <div className={classes.errorMessageWrapper}>
-                                <ErrorOutline className={classes.errorIcon} />
-                                <Typography variant='body1' gutterBottom className={classes.errorMessage}>
-                                    {errorMessage}
-                                </Typography>
-                            </div>
-                        )}
-                        <Dropzone
-                            onDrop={this.handleUploadFile}
-                            multiple={false}
-                            className={classNames(classes.dropZone, {
-                                [classes.dropZoneErrorBox]: valid.wsdlFile.empty,
-                            })}
-                        >
-                            <Backup className={classes.dropZoneIcon} />
-                            <div>
-                                <FormattedMessage
-                                    id='try.dropping.some.files.here.or.click.to.select.files.to.upload'
-                                    defaultMessage='Try dropping some files here, or click to select files to upload.'
-                                />
-                            </div>
-                        </Dropzone>
-                        <FormHelperText className={classes.errorMessage}>
-                            {valid.wsdlFile.empty && (
-                                <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
-                            )}
-                            {valid.wsdlFile.invalidFile && (
-                                <FormattedMessage id='error.invalid.wsdl.file' defaultMessage='Invalid WSDL File' />
-                            )}
-                        </FormHelperText>
-                    </React.Fragment>
-                ) : (
-                    <form>
-                        <FormControl fullWidth aria-describedby='url-text'>
-                            <div className={classes.urlWrapper}>
-                                <TextField
-                                    error={valid.wsdlUrl.empty}
-                                    fullWidth
-                                    id='url'
-                                    label='WSDL Url'
-                                    placeholder={
-                                        'eg: ' +
-                                        'https://graphical.weather.gov/xml/SOAP_server/ndfdXMLserver.php?wsdl'
-                                    }
-                                    helperText={
-                                        <FormattedMessage
-                                            id='create.new.wsdl.help'
-                                            defaultMessage={
-                                                'Give a WSDL url such as' +
-                                                ' https://graphical.weather.gov/xml/SOAP_server/ndfdXMLserver.php?wsdl'
-                                            }
-                                        />
-                                    }
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    type='text'
-                                    name='url'
-                                    margin='normal'
-                                    value={url}
-                                    onChange={this.updateURL}
-                                />
-                                <Button
-                                    variant='outlined'
-                                    color='primary'
-                                    className={classes.button}
-                                    onClick={this.validateWSDL}
-                                >
-                                    LOAD WSDL
-                                </Button>
-                            </div>
-
-                            <FormHelperText className={classes.errorMessage}>
-                                {valid.wsdlUrl.empty && (
-                                    <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
-                                )}
-                                {valid.wsdlUrl.invalidUrl && 'Invalid WSDL Url'}
-                            </FormHelperText>
-                        </FormControl>
-                    </form>
-                )}
-            </React.Fragment>
-        );
     }
+    return (
+        <React.Fragment>
+            <Grid container spacing={5}>
+                <Grid item md={12}>
+                    <FormControl component='fieldset'>
+                        <FormLabel component='legend'>
+                            <React.Fragment>
+                                <sup className={classes.mandatoryStar}>*</sup>{' '}
+                                <FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.type'
+                                    defaultMessage='Input type'
+                                />
+                            </React.Fragment>
+                        </FormLabel>
+                        <RadioGroup
+                            aria-label='Input type'
+                            value={apiInputs.inputType}
+                            onChange={event => inputsDispatcher({ action: 'inputType', value: event.target.value })}
+                        >
+                            <FormControlLabel value='url' control={<Radio />} label='WSDL URL' />
+                            <FormControlLabel value='file' control={<Radio />} label='WSDL Archive/File' />
+                        </RadioGroup>
+                    </FormControl>
+                </Grid>
+                <Grid item md={7}>
+                    {isFileInput ? (
+                        // TODO: Pass message saying accepting only one file ~tmkb
+                        <DropZoneLocal onDrop={onDrop} files={apiInputs.inputValue} />
+                    ) : (
+                        <TextField
+                            autoFocus
+                            id='outlined-full-width'
+                            label='WSDL URL'
+                            placeholder='Enter WSDL URL'
+                            fullWidth
+                            margin='normal'
+                            variant='outlined'
+                            onChange={({ target: { value } }) => inputsDispatcher({ action: 'inputValue', value })}
+                            value={apiInputs.inputValue}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            InputProps={{
+                                onBlur: ({ target: { value } }) => {
+                                    validate(APIValidation.url.required().validate(value).error);
+                                },
+                                endAdornment: isValidating && (
+                                    <InputAdornment position='end'>
+                                        <CircularProgress />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            // 'Give the URL of WSDL endpoint'
+                            helperText={isError && isError.message}
+                            error={Boolean(isError)}
+                            disabled={isValidating}
+                        />
+                    )}
+                </Grid>
+                <Grid item md={12}>
+                    <FormControl component='fieldset'>
+                        <FormLabel component='legend'>
+                            <React.Fragment>
+                                <sup className={classes.mandatoryStar}>*</sup>{' '}
+                                <FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.implementation.type'
+                                    defaultMessage='Implementation type'
+                                />
+                            </React.Fragment>
+                        </FormLabel>
+                        <RadioGroup
+                            aria-label='Implementation type'
+                            value={isFileInput ? 'PASS' : apiInputs.type}
+                            onChange={event => inputsDispatcher({ action: 'type', value: event.target.value })}
+                        >
+                            <FormControlLabel value='PASS' control={<Radio />} label='Pass Through' />
+                            <FormControlLabel
+                                disabled={isFileInput}
+                                value='SOAPtoREST'
+                                control={<Radio />}
+                                label='Generate REST APIs'
+                            />
+                        </RadioGroup>
+                        <FormHelperText>
+                            <sup>*</sup>
+                            <b>Generate REST APIs</b> option is only available for WSDL URL input type
+                        </FormHelperText>
+                    </FormControl>
+                </Grid>
+            </Grid>
+        </React.Fragment>
+    );
 }
 
 ProvideWSDL.defaultProps = {
-    uploadMethod: 'file',
-    url: '',
-    file: {},
+    onValidate: () => {},
 };
-
 ProvideWSDL.propTypes = {
-    url: PropTypes.string,
-    updateWSDLBean: PropTypes.func.isRequired,
-    uploadMethod: PropTypes.string,
-    validate: PropTypes.bool.isRequired,
-    valid: PropTypes.shape({}).isRequired,
-    file: PropTypes.shape({}),
-    classes: PropTypes.shape({}).isRequired,
-    updateFileErrors: PropTypes.func.isRequired,
-    updateWSDLValidity: PropTypes.func.isRequired,
+    apiInputs: PropTypes.shape({
+        type: PropTypes.string,
+        inputType: PropTypes.string,
+    }).isRequired,
+    inputsDispatcher: PropTypes.func.isRequired,
+    onValidate: PropTypes.func,
 };
-
-export default withStyles(styles)(ProvideWSDL);

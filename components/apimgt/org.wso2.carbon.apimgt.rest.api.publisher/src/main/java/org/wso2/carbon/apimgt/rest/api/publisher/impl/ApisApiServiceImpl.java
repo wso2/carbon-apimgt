@@ -55,9 +55,9 @@ import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
+import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
@@ -251,32 +251,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                         + " already exists.", log);
             }
 
-            //Get all existing versions of  api been adding
-            List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
-            if (apiVersions.size() > 0) {
-                //If any previous version exists
-                for (String version : apiVersions) {
-                    if (version.equalsIgnoreCase(body.getVersion())) {
-                        //If version already exists
-                        if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
-                            RestApiUtil.handleResourceAlreadyExistsError("Error occurred while " +
-                                    "adding the API. A duplicate API already exists for "
-                                    + body.getName() + "-" + body.getVersion(), log);
-                        } else {
-                            RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " +
-                                    body.getName() + " already exists with different " +
-                                    "context", log);
-                        }
-                    }
-                }
-            } else {
-                //If no any previous version exists
-                if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
-                    RestApiUtil.handleBadRequest("Error occurred while adding the API. A duplicate API context " +
-                                    "already exists for " + body.getContext(), log);
-                }
-            }
-
             //Check if the user has admin permission before applying a different provider than the current user
             String provider = body.getProvider();
             if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
@@ -305,6 +279,32 @@ public class ApisApiServiceImpl extends ApisApiService {
             } else {
                 //Set username in case provider is null or empty
                 provider = username;
+            }
+
+            //Get all existing versions of  api been adding
+            List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), provider);
+            if (apiVersions.size() > 0) {
+                //If any previous version exists
+                for (String version : apiVersions) {
+                    if (version.equalsIgnoreCase(body.getVersion())) {
+                        //If version already exists
+                        if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
+                            RestApiUtil.handleResourceAlreadyExistsError("Error occurred while " +
+                                    "adding the API. A duplicate API already exists for "
+                                    + body.getName() + "-" + body.getVersion(), log);
+                        } else {
+                            RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " +
+                                    body.getName() + " already exists with different " +
+                                    "context", log);
+                        }
+                    }
+                }
+            } else {
+                //If no any previous version exists
+                if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
+                    RestApiUtil.handleBadRequest("Error occurred while adding the API. A duplicate API context " +
+                                    "already exists for " + body.getContext(), log);
+                }
             }
 
             List<String> tiersFromDTO = body.getTiers();
@@ -1769,13 +1769,13 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     * 
+     *
      * @param apiId API Id
      * @param body WSDL DTO
      * @param contentType content type of the payload
      * @param ifMatch If-match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @return added wsdl 
+     * @return added wsdl
      */
     @Override
     public Response apisApiIdWsdlPost(String apiId, WsdlDTO body, String contentType, String ifMatch,

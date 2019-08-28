@@ -534,7 +534,7 @@ class API extends Resource {
      */
     configureMonetizationToApi(apiId, body) {
         const promised_status = this.client.then((client) => {
-            return client.apis['API (Individual)'].post_apis__apiId__monetize({
+            return client.apis['API Monetization'].post_apis__apiId__monetize({
                 apiId,
                 body
             });
@@ -811,7 +811,7 @@ class API extends Resource {
         const updatedAPI = { ...this.toJSON(), ...updatedProperties };
         const promisedUpdate = this.client.then((client) => {
             const payload = {
-                apiId: this.id,
+                apiId: updatedAPI.id,
                 body: updatedAPI
             };
             return client.apis['APIs'].put_apis__apiId_(payload);

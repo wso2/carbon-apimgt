@@ -44,7 +44,7 @@ class BusinessPlans extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            policies: null,
+            policies: [],
             monetizedPolices: null,
         };
         this.monetizationQuery = this.monetizationQuery.bind(this);
