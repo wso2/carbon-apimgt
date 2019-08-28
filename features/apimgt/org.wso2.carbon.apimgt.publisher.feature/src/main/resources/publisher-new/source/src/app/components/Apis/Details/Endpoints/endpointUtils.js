@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import cloneDeep from 'lodash.clonedeep';
+
 /**
  * Utility method to get the endpoint property name based on the given endpoint type and category.
  *
@@ -102,7 +104,7 @@ function getEndpointTemplateByType(endpointType, isAddressEndpoint, currentEndpo
  * @return {array} The list of endpoints.
  * */
 function endpointsToList(endpointConfig) {
-    const config = JSON.parse(JSON.stringify(endpointConfig));
+    const config = cloneDeep(endpointConfig);
     const endpoints = [];
 
     if (Array.isArray(config.production_endpoints)) {
