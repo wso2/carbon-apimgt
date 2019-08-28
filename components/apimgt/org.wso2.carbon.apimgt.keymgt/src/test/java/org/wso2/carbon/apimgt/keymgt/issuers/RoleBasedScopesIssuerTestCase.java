@@ -18,11 +18,18 @@
 
 package org.wso2.carbon.apimgt.keymgt.issuers;
 
+import org.json.simple.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.handlers.ResourceConstants;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.oauth.common.GrantType;
@@ -36,11 +43,14 @@ import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
+import javax.cache.Caching;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Caching.class, APIUtil.class})
 public class RoleBasedScopesIssuerTestCase {
 
     private ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
@@ -94,6 +104,13 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopes() throws Exception {
 
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.getTenantRESTAPIScopesConfig(Mockito.anyString())).thenReturn(new JSONObject());
+        Map<String, String> scopes = new HashMap<String, String>();
+        scopes.put("default", "default");
+        PowerMockito.when(APIUtil.getRESTAPIScopesFromConfig(Mockito.any())).thenReturn(scopes);
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
@@ -125,6 +142,8 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesWhenRestAPIScopesOfCurrentTenantIsNotNull() throws Exception {
 
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
@@ -159,6 +178,8 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesWhenAppScopesIsEmpty() throws Exception {
 
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
@@ -192,6 +213,8 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesWhenTenantISZero() throws Exception {
 
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(0);
@@ -226,6 +249,8 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesWhenTenantISMinusOne() throws Exception {
 
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1);
@@ -260,6 +285,8 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesForGrantType() throws Exception {
 
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
@@ -296,6 +323,8 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesForGrantTypeWhenSAML2NotEnabled() throws Exception {
 
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
@@ -333,6 +362,8 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesForUserStoreException() throws Exception {
 
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.doThrow(UserStoreException.class).when(tenantManager).getTenantId(Mockito.anyString());
@@ -362,6 +393,8 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesForRoles() throws Exception {
 
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
@@ -398,6 +431,8 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesForRolesWhenRestAPIScopesNotNull() throws Exception {
 
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
@@ -434,6 +469,8 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesForAppScopes() throws Exception {
 
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
@@ -491,6 +528,13 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesOfRolesWithSpacesAndCases() throws Exception {
         AbstractUserStoreManager abstractUserStoreManager = Mockito.mock(AbstractUserStoreManager.class);
+        PowerMockito.mockStatic(Caching.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.getTenantRESTAPIScopesConfig(Mockito.anyString())).thenReturn(new JSONObject());
+        Map<String, String> scopes = new HashMap<String, String>();
+        scopes.put("default", "default");
+        PowerMockito.when(APIUtil.getRESTAPIScopesFromConfig(Mockito.any())).thenReturn(scopes);
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);

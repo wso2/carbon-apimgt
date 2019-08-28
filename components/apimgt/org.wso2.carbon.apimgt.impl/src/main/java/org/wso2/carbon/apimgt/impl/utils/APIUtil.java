@@ -6663,6 +6663,35 @@ public final class APIUtil {
     }
 
     /**
+     * This method gets the RESTAPIScopes configuration from REST_API_SCOPE_CACHE if available, if not from
+     * tenant-conf.json in registry.
+     *
+     * @param tenantDomain tenant domain name
+     * @return Map of scopes which contains scope names and associated role list
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, String> getRESTAPIScopesForTenant(String tenantDomain) {
+        Map<String, String> restAPIScopes;
+        restAPIScopes = (Map) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                .getCache(APIConstants.REST_API_SCOPE_CACHE)
+                .get(tenantDomain);
+        if (restAPIScopes == null) {
+            try {
+                restAPIScopes =
+                        APIUtil.getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain));
+                //call load tenant config for rest API.
+                //then put cache
+                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                        .getCache(APIConstants.REST_API_SCOPE_CACHE)
+                        .put(tenantDomain, restAPIScopes);
+            } catch (APIManagementException e) {
+                log.error("Error while getting REST API scopes for tenant: " + tenantDomain, e);
+            }
+        }
+        return restAPIScopes;
+    }
+
+    /**
      * @param tenantDomain Tenant domain to be used to get default role configurations
      * @return JSON object which contains configuration for default roles
      * @throws APIManagementException

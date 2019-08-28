@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.RolesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.RolesApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -45,7 +46,7 @@ RolesApiService delegate = new RolesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested role name exists.", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested role name does not exist.", response = Void.class) })
-    public Response rolesRoleIdHead(@ApiParam(value = "The Base 64 URL encoded role name. If the role existed in secondary user-store, role name should be specified as {user-store-name}/{role-name}. ",required=true) @PathParam("roleId") String roleId) {
+    public Response rolesRoleIdHead(@ApiParam(value = "The Base 64 URL encoded role name with domain. If the given role is in secondary user-store, role ID should be derived as Base64URLEncode({user-store-name}/{role-name}). If the given role is in PRIMARY user-store, role ID can be derived as Base64URLEncode(role-name) ",required=true) @PathParam("roleId") String roleId) throws APIManagementException{
         return delegate.rolesRoleIdHead(roleId, securityContext);
     }
 }

@@ -132,7 +132,11 @@ public class APIMappingUtil {
         if (dto.isEnableSchemaValidation() != null) {
             model.setEnableSchemaValidation(dto.isEnableSchemaValidation());
         }
-        model.setResponseCache(dto.getResponseCaching());
+        if (dto.isResponseCachingEnabled()) {
+            model.setResponseCache(APIConstants.ENABLED);
+        } else {
+            model.setResponseCache(APIConstants.DISABLED);
+        }
         if (dto.getCacheTimeout() != null) {
             model.setCacheTimeout(dto.getCacheTimeout());
         } else {
@@ -595,7 +599,12 @@ public class APIMappingUtil {
 
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
-        dto.setResponseCaching(model.getResponseCache());
+        if (APIConstants.ENABLED.equals(model.getResponseCache())) {
+            dto.setResponseCachingEnabled(Boolean.TRUE);
+        } else {
+            dto.setResponseCachingEnabled(Boolean.FALSE);
+        }
+
         dto.setCacheTimeout(model.getCacheTimeout());
         try {
             JSONParser parser = new JSONParser();
