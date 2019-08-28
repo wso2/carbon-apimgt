@@ -3413,6 +3413,8 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/APISecurityAuditInfo'
+      tags:
+        API Audit
       responses:
         200:
           description: |
@@ -3438,6 +3440,8 @@ paths:
       parameters:
         - $ref: "#/parameters/Accept"
         - $ref: "#/parameters/apiId"
+      tags:
+        API Audit
       responses:
         200:
           description: |
@@ -3469,6 +3473,8 @@ paths:
       parameters:
         - $ref: "#/parameters/Accept"
         - $ref: "#/parameters/apiId"
+      tags:
+        API Audit
       responses:
         200:
           description: |
