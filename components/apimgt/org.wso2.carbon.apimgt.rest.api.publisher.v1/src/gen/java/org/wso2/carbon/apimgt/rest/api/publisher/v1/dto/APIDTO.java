@@ -36,7 +36,7 @@ public class APIDTO   {
     private String provider = null;
     private String lifeCycleStatus = null;
     private String wsdlUri = null;
-    private String responseCaching = null;
+    private Boolean responseCachingEnabled = null;
     private Integer cacheTimeout = null;
     private String destinationStatsEnabled = null;
     private Boolean hasThumbnail = null;
@@ -383,19 +383,19 @@ public enum EndpointImplementationTypeEnum {
 
   /**
    **/
-  public APIDTO responseCaching(String responseCaching) {
-    this.responseCaching = responseCaching;
+  public APIDTO responseCachingEnabled(Boolean responseCachingEnabled) {
+    this.responseCachingEnabled = responseCachingEnabled;
     return this;
   }
 
   
-  @ApiModelProperty(example = "Disabled", value = "")
-  @JsonProperty("responseCaching")
-  public String getResponseCaching() {
-    return responseCaching;
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("responseCachingEnabled")
+  public Boolean isResponseCachingEnabled() {
+    return responseCachingEnabled;
   }
-  public void setResponseCaching(String responseCaching) {
-    this.responseCaching = responseCaching;
+  public void setResponseCachingEnabled(Boolean responseCachingEnabled) {
+    this.responseCachingEnabled = responseCachingEnabled;
   }
 
   /**
@@ -1042,7 +1042,7 @@ public enum EndpointImplementationTypeEnum {
         Objects.equals(provider, API.provider) &&
         Objects.equals(lifeCycleStatus, API.lifeCycleStatus) &&
         Objects.equals(wsdlUri, API.wsdlUri) &&
-        Objects.equals(responseCaching, API.responseCaching) &&
+        Objects.equals(responseCachingEnabled, API.responseCachingEnabled) &&
         Objects.equals(cacheTimeout, API.cacheTimeout) &&
         Objects.equals(destinationStatsEnabled, API.destinationStatsEnabled) &&
         Objects.equals(hasThumbnail, API.hasThumbnail) &&
@@ -1083,7 +1083,7 @@ public enum EndpointImplementationTypeEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlUri, responseCaching, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlUri, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies);
   }
 
   @Override
@@ -1099,7 +1099,7 @@ public enum EndpointImplementationTypeEnum {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    wsdlUri: ").append(toIndentedString(wsdlUri)).append("\n");
-    sb.append("    responseCaching: ").append(toIndentedString(responseCaching)).append("\n");
+    sb.append("    responseCachingEnabled: ").append(toIndentedString(responseCachingEnabled)).append("\n");
     sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");
     sb.append("    destinationStatsEnabled: ").append(toIndentedString(destinationStatsEnabled)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
