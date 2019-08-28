@@ -9,7 +9,7 @@
 
 	//Since we always redirect to root in Publisher
 	var requestURI = jagg.getAbsoluteUrl("/");
-	
+
 	var checkSSO = true;
 
 	if(requestURI.indexOf("register.jag") != -1) {
@@ -104,5 +104,3 @@
 
 <%  }  %>
 <% }); %>
-
-

@@ -1,0 +1,45 @@
+<%
+
+    var log = new Log("Jaggery service for token introspection");
+
+    var userInfoEndpoint = "https://localhost:8243/userinfo";
+    var introspectEndpoint = "https://localhost:9443/oauth2/introspect"
+    var tokenP1 = request.getCookie("WSO2_AM_TOKEN_1_Default").value;
+    var tokenP2 = request.getCookie("AM_ACC_TOKEN_DEFAULT_P2").value;
+    var token = tokenP1 + tokenP2;
+    var userData = {};
+    var userResult = get(userInfoEndpoint, userData , {
+        "Authorization": "Bearer " + token
+    });
+
+    var data = {token: token }
+    var introspectResult = post(introspectEndpoint, data , {
+        "Authorization": "Basic YWRtaW46YWRtaW4=", // TODO: get super admin username password from configs and do encoding ~tmkb
+        "Content-Type": "application/x-www-form-urlencoded"
+    });
+
+    log.debug("Intropspection result json: " + introspectResult);
+    response.contentType = "application/json";
+
+    var scopes = "apim:subscribe apim:self-signup apim:dedicated_gateway openid"; // TODO: fetch from introspect request
+
+    if (introspectResult.data.active) {
+        print(introspectResult.data);
+    } else {
+        log.warn("Something went wrong while introspecting the token " + tokenP1 + tokenP2 + ". response :" + introspectResult.data);
+        log.info("Sending mock response.");
+
+        // TODO: remove mock once the introspect API issue get resolved ~tmkb
+        var mock = {
+            "exp": 1464161608,
+            "username": JSON.parse(userResult.data).sub,
+            "active": true,
+            "token_type": "Bearer",
+            "client_id": "rgfKVdnMQnJSSr_pKFTxj3apiwYa",
+            "iat": 1464158008,
+            "scope": scopes
+          };
+          print(mock);
+    }
+
+%>

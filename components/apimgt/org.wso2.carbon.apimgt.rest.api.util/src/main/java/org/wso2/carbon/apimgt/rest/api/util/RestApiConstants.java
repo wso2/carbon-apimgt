@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.rest.api.util;
 
 import java.io.File;
+import java.util.regex.Pattern;
 
 public final class RestApiConstants {
 
@@ -41,11 +42,13 @@ public final class RestApiConstants {
     public static final String RESOURCE_DOCUMENTATION = "documentation";
     public static final String RESOURCE_POLICY = "policy";
     public static final String RESOURCE_APP_POLICY = "application policy";
+    public static final String RESOURCE_APP_CONSUMER_KEY = "application consumer key";
     public static final String RESOURCE_ADVANCED_POLICY = "advanced policy";
     public static final String RESOURCE_SUBSCRIPTION_POLICY = "subcription policy";
     public static final String RESOURCE_CUSTOM_RULE = "custom rule";
     public static final String RESOURCE_BLOCK_CONDITION = "block condition";
     public static final String RESOURCE_TIER = "tier";
+    public static final String RESOURCE_THROTTLING_POLICY = "throttling policy";
     public static final String RESOURCE_TIER_UPDATE_PERMISSION = RESOURCE_TIER + "/update-permission";
     public static final String RESOURCE_TAG = "tag";
     public static final String RESOURCE_WORKFLOW = "workflow";
@@ -95,15 +98,26 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_DOCUMENTS = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/documents";
     public static final String RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID = RESOURCE_PATH_DOCUMENTS + "/" + DOCUMENTID_PARAM;
     public static final String RESOURCE_PATH_DOCUMENT_CONTENT = RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID + "/content";
+    public static final String REST_API_STORE_VERSION_0 ="v0.14";
+    public static final String REST_API_STORE_VERSION_1 ="v1";
     public static final String REST_API_STORE_CONTEXT="/api/am/store/";
-    public static final String REST_API_STORE_VERSION="v0.14";
-    public static final String REST_API_PUBLISHER_VERSION="v0.14";
-    public static final String REST_API_PUBLISHER_CONTEXT="/api/am/publisher/";
-    public static final String REST_API_ADMIN_CONTEXT="/api/am/admin";
-    public static final String REST_API_ADMIN_VERSION="v0.14";
+    public static final String REST_API_STORE_CONTEXT_FULL_0 = REST_API_STORE_CONTEXT + REST_API_STORE_VERSION_0;
+    public static final String REST_API_STORE_CONTEXT_FULL_1 = REST_API_STORE_CONTEXT + REST_API_STORE_VERSION_1;
+    public static final String REST_API_PUBLISHER_VERSION_0 ="v0.14";
+    public static final String REST_API_PUBLISHER_VERSION_1 = "v1";
+    public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
+    public static final String REST_API_PUBLISHER_CONTEXT_FULL_0 =
+            REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_0;
+    public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
+            REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_1;
+    public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin";
+    public static final String REST_API_ADMIN_VERSION = "v0.14";
     public static final String REST_API_PROVIDER = "admin";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
+    public static final Pattern REGEX_BEARER_PATTERN = Pattern.compile("Bearer\\s");
+    public static final String COOKIE_HEADER_NAME = "cookie";
+    public static final String AUTH_COOKIE_NAME = "AM_ACC_TOKEN_DEFAULT_P2"; // This cookie name should be used when setting the cookie for SPA app in SPA app user authentication response to REST API context as path directive
 
     public static final int PAGINATION_LIMIT_DEFAULT = 25;
     public static final int PAGINATION_OFFSET_DEFAULT = 0;
@@ -111,6 +125,7 @@ public final class RestApiConstants {
     public static final String PAGINATION_NEXT_LIMIT = "next_limit";
     public static final String PAGINATION_PREVIOUS_OFFSET = "previous_offset";
     public static final String PAGINATION_PREVIOUS_LIMIT = "previous_limit";
+    public static final String DEFAULT_SORT_ORDER = "asc";
 
     public static final String APIS_GET_PAGINATION_URL =
             RESOURCE_PATH_APIS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM;
@@ -140,6 +155,11 @@ public final class RestApiConstants {
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_NAME = "name";
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_VALUE = "value";
 
+    //Constants for application sortBy
+    public static final String SORT_BY_NAME = "name";
+    public static final String SORT_BY_THROTTLING_TIER = "throttlingTier";
+    public static final String SORT_BY_STATUS = "status";
+    
     //default error messages
     public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "Forbidden";
     public static final String STATUS_NOT_FOUND_MESSAGE_DEFAULT = "Not Found";
@@ -178,4 +198,6 @@ public final class RestApiConstants {
     public static final String SEQUENCE_CONTENT = "content";
     public static final String SEQUENCE_ARTIFACT_ID = "id";
     public static final String HTTP_METHOD = "method";
+    
+    public static final String[] SUPPORTED_METHODS = {"get", "put", "post", "delete", "patch"};
 }

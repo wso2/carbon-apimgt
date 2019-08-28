@@ -1156,7 +1156,7 @@
                 <td class="resource-method-td resource_expand" data-path="$.paths.{{ path}}.{{ @key }}">
                     <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
                 </td>
-                <td class="resource_expand"><a class="resource-path" title="{{ path }}">{{ path }}</a></td>
+                <td class="resource_expand"><a class="resource-path" title="{{ path }}">{{ displayPath }}</a></td>
                 <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
             </tr>
             <tr><td colspan="3" class="resource_body " data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
@@ -1372,10 +1372,9 @@
                 <div class="col-sm-6">
                     <select class="form-control selectpicker" id="actionSelect" name="actionSelect">
                         <option {{#contains actionSelect "fault"}}selected{{/contains}} value="fault"><%=i18n.localize("Execute fault sequence")%></option>
-                        <option {{#contains actionSelect "neverTimeout"}}selected{{/contains}} value="neverTimeout"><%=i18n.localize("Never timeout")%></option>
                         <option {{#contains actionSelect "discard"}}selected{{/contains}} value="discard"><%=i18n.localize("Discard message")%></option>
                     </select>
-                    <p class="help-block hide"><%=i18n.localize("The action to be made at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence")%></p>
+                    <p class="help-block hide"><%=i18n.localize("The action to be made at a timeout situation. You can select from: 1) Discard Message 2) Execute Fault Sequence")%></p>
 					<span class="help-block jsonform-errortext" style="display:none;"></span>
                 </div>
             </div>

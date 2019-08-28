@@ -10,15 +10,12 @@
     var authorizationCode = request.getParameter("code");
     var state = request.getParameter("state");
 
-
     // check for state, if it doesn't match we bail early
     if (session.get("STATE") != state) {
         log.error("STATE does not match. Hence redirecting to error page. Sign-in fails.");
         response.sendRedirect("../site/pages/error-pages/401.html");
         return;
     }
-
-
 
     // create a sso relying party js object
     var security = require("oidc");
@@ -36,8 +33,9 @@
         requestedURI = "/store";
     }
 
+    var oidcTokenReponse = oidcRelyingParty.getIdTokenResponse(authorizationCode);
     // Check OIDC signature valid and set session as a authenticated if success
-    var isSignatureValid = oidcRelyingParty.validateOIDCSignature(authorizationCode, session.get("NONCE"), sessionId);
+    var isSignatureValid = oidcRelyingParty.validateOIDCSignature(oidcTokenReponse, session.get("NONCE"), sessionId);
 
     if (!Boolean(isSignatureValid)) {
         log.error("OIDC signature is verification failed.");
@@ -75,5 +73,3 @@
 %>
 </body>
 </html>
-
-

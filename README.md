@@ -1,3 +1,5 @@
+#### Please note that, This branch (6.x) has been moved to master , Hence don't send PRs or continue development in this branch. Please send all new PRs to master branch instead.
+
 # carbon-apimgt
 
 

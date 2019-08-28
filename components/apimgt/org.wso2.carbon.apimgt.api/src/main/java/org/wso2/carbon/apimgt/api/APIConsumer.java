@@ -759,6 +759,29 @@ public interface APIConsumer extends APIManager {
      */
     Map<String,Object> getAllPaginatedLightWeightAPIsByStatus(String tenantDomain,int start,int end, String[] Status,
                                                    boolean returnAPITags) throws APIManagementException;
+
+    /**
+     * Returns the swagger definition of the API for the given gateway environment as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @param environmentName API Gateway environment name
+     * @return swagger string
+     * @throws APIManagementException if error occurred while obtaining the swagger definition
+     */
+    String getOpenAPIDefinitionForEnvironment(APIIdentifier apiId, String environmentName)
+            throws APIManagementException;
+
+    /**
+     * Returns the swagger definition of the API for the given microgateway gateway label as a string
+     * 
+     * @param apiId id of the APIIdentifier
+     * @param labelName name of the microgateway label
+     * @return swagger string
+     * @throws APIManagementException if error occurred while obtaining the swagger definition
+     */
+    String getOpenAPIDefinitionForLabel(APIIdentifier apiId, String labelName)
+            throws APIManagementException;
+
     /**
      * Revokes the oldAccessToken generating a new one.
      *
@@ -792,7 +815,18 @@ public interface APIConsumer extends APIManager {
 	 */
 	Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers) throws APIManagementException;
 
-	/**
+    /**
+     * Returns a set of scopes associated with an application subscription.
+     *
+     * @param username    subscriber of the application
+     * @param applicationId applicationId of the application
+     * @return set of scopes.
+     * @throws APIManagementException
+     */
+    JSONArray getScopesForApplicationSubscription(String username, int applicationId)
+            throws APIManagementException;
+
+    /**
 	 * Returns the scopes of an access token as a string
 	 *
 	 * @param accessToken access token you want to receive scopes for
@@ -852,4 +886,5 @@ public interface APIConsumer extends APIManager {
     Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(Subscriber subscriber, APIIdentifier apiIdentifier, String groupingId) throws APIManagementException;
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException;
+
 }

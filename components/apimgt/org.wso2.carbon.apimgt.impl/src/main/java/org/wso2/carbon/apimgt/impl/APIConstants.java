@@ -331,6 +331,7 @@ public final class APIConstants {
     public static final String APPLICATION_NAME = "NAME";
     public static final String APPLICATION_SUBSCRIBER_ID = "SUBSCRIBER_ID";
     public static final String APPLICATION_TIER = "APPLICATION_TIER";
+    public static final String APPLICATION_STATUS = "APPLICATION_STATUS";
 
     //IDENTITY OAUTH2 table
     public static final String IDENTITY_OAUTH2_FIELD_TOKEN_STATE = "TOKEN_STATE";
@@ -594,6 +595,7 @@ public final class APIConstants {
     public static final String API_STORE_FORUM_ENABLED = API_STORE + "isStoreForumEnabled";
     public static final String MULTI_TENANT_USER_ADMIN_SERVICE = "MultiTenantUserAdminService";
     public static final String API_STORE_GROUP_EXTRACTOR_CLAIM_URI = API_STORE + "DefaultGroupExtractorClaimUri";
+    public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";
@@ -649,6 +651,10 @@ public final class APIConstants {
             + "Access-Control-Allow-Headers";
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS = CORS_CONFIGURATION
             + "Access-Control-Allow-Methods";
+
+    public static final String CORS_CONFIGURATION_ACCESS_CTL_EXPOSE_HEADERS = CORS_CONFIGURATION
+            + "Access-Control-Expose-Headers";
+
     public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS = CORS_CONFIGURATION
             + "Access-Control-Allow-Credentials";
 
@@ -894,6 +900,7 @@ public final class APIConstants {
     public static class CORSHeaders {
         public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
         public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+        public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
         public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
         public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
         public static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
@@ -1081,6 +1088,7 @@ public final class APIConstants {
     public static final String SWAGGER_X_WSO2_SCOPES = "x-wso2-scopes";
     public static final String SWAGGER_SCOPE_KEY = "key";
     public static final String SWAGGER_NAME = "name";
+    public static final String SWAGGER_SCHEMES = "schemes";
     public static final String SWAGGER_DESCRIPTION = "description";
     public static final String SWAGGER_SERVERS = "servers";
     public static final String SWAGGER_SUMMARY = "summary";
@@ -1088,14 +1096,24 @@ public final class APIConstants {
     public static final String SWAGGER_TITLE = "title";
     public static final String SWAGGER_EMAIL = "email";
     public static final String SWAGGER_CONTACT = "contact";
+    public static final String SWAGGER_SECURITY_TYPE = "type";
+    public static final String SWAGGER_SECURITY_OAUTH2 = "oauth2";
+    public static final String SWAGGER_SECURITY_OAUTH2_IMPLICIT = "implicit";
+    public static final String SWAGGER_SECURITY_OAUTH2_PASSWORD = "password";
+    public static final String SWAGGER_SECURITY_OAUTH2_AUTHORIZATION_URL = "authorizationUrl";
+    public static final String SWAGGER_SECURITY_OAUTH2_TOKEN_URL = "tokenUrl";
+    public static final String SWAGGER_SECURITY_OAUTH2_FLOW = "flow";
     public static final String SWAGGER_VER = "version";
     public static final String SWAGGER_OBJECT_NAME_APIM = "apim";
     public static final String SWAGGER_PATHS = "paths";
     public static final String SWAGGER_RESPONSES = "responses";
     public static final String SWAGGER = "swagger";
+    public static final String SWAGGER_HOST = "host";
     public static final String SWAGGER_V2 = "2.0";
     public static final String SWAGGER_INFO = "info";
     public static final String SWAGGER_RESPONSE_200 = "200";
+    public static final String SWAGGER_SECURITY_DEFINITIONS = "securityDefinitions";
+    public static final String SWAGGER_APIM_DEFAULT_SECURITY = "default";
     public static final String OPEN_API_V3 = "3.0.0";
     public static final String OPEN_API = "openapi";
 
@@ -1105,6 +1123,7 @@ public final class APIConstants {
     public static final String SWAGGER_BASEPATH = "basePath";
     public static final String SWAGGER_OPERATIONS = "operations";
     public static final String SWAGGER_SCOPE = "scope";
+    public static final String SWAGGER_SCOPES = "scopes";
     public static final String SWAGGER_AUTH_TYPE = "auth_type";
     public static final String API_THROTTLING_TIER = "throttling_tier";
     public static final String API_MEDIATION_SCRIPT = "mediation_script";
@@ -1143,6 +1162,9 @@ public final class APIConstants {
     public static final String API_DATA_SANDBOX_ENDPOINTS = "sandbox_endpoints";
     public static final String API_DATA_URL = "url";
 
+    public static final String API_ENDPOINT_CONFIG_TIMEOUT = "timeout";
+    public static final String API_ENDPOINT_CONFIG_PROTOCOL_TYPE = "endpoint_type";
+
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";
 
@@ -1151,7 +1173,9 @@ public final class APIConstants {
     public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
 
     public static final String HTTPS_PROTOCOL = "https";
+    public static final String HTTPS_PROTOCOL_URL_PREFIX = "https://";
     public static final String HTTP_PROTOCOL = "http";
+    public static final String HTTP_PROTOCOL_URL_PREFIX = "http://";
     public static final int HTTPS_PROTOCOL_PORT = 443;
     public static final int HTTP_PROTOCOL_PORT = 80;
 
@@ -1498,4 +1522,11 @@ public final class APIConstants {
     public static final String DOCUMENT_INDEXER_INDICATOR = "document_indexed";
 
     public static final String KEY_SUFFIX = "_KEY";
+
+    public static class OASResourceAuthTypes {
+        public static final String APPLICATION_OR_APPLICATION_USER = "Application & Application User";
+        public static final String APPLICATION_USER = "Application User";
+        public static final String APPLICATION = "Application";
+        public static final String NONE = "None";
+    }
 }

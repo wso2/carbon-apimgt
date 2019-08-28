@@ -1,0 +1,44 @@
+<%
+    var log = new Log("Services login DCR request");
+    var dcrUrl = 'https://localhost:9443/client-registration/v0.14/register'; // TODO: fetch from config
+    var authorizeEndpoint = "https://localhost:8243/authorize"; // TODO: fetch from config
+    var callbackUrl = "https://localhost:9443/publisher-new/services/auth/callback"; // TODO: fetch from config
+    var scopes = "apim:api_delete apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:mediation_policy_view apim:api_workflow openid"; // TODO: fetch from config
+
+    var SystemApplicationDAO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
+    var systemApplicationDAO = new SystemApplicationDAO();
+
+    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_publisher");
+    if(systemApplicationDTO  !== null) {
+        var clientId = systemApplicationDTO.getConsumerKey();
+    } else {
+        var dcrRequestData = {
+            "callbackUrl": callbackUrl,
+            "clientName": "publisher",
+            "owner": "admin",
+            "grantType": "authorization_code refresh_token",
+            "saasApp": true
+        };
+
+        var result = post(dcrUrl, JSON.stringify(dcrRequestData) , {
+            "Authorization": "Basic YWRtaW46YWRtaW4=",
+            "Content-Type": "application/json"
+        }, "json");
+        var clientId = result.data.clientId;
+        var clientSecret = result.data.clientSecret;
+
+
+        var addApplicationKey = systemApplicationDAO.addApplicationKey("admin_publisher", clientId, clientSecret);
+        if (!addApplicationKey) {
+            log.error("Error while persisting application information in system application DB table!!");
+            log.error("Client ID = " + clientId);
+        }
+    }
+    log.info("clientId = " + clientId);
+    var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&redirect_uri=" + callbackUrl;
+    log.debug("Redirecting to = " + authorizeEndpoint + authRequestParams);
+    var cookie = {'name': 'CLIENT_ID', 'value': clientId, 'path': "/publisher-new/", "HttpOnly": false, "secure": true, "maxAge": -1};
+    response.addCookie(cookie);
+    response.sendRedirect(authorizeEndpoint + authRequestParams);
+
+%>

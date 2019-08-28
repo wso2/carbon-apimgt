@@ -126,6 +126,9 @@
         render_advance: function(selectedEndpointType, selectedEndpointIndex){
             var context = jQuery.extend({}, this.config[selectedEndpointType][selectedEndpointIndex].config);
             context[this.config.endpoint_type] = true;
+            if(this.config[selectedEndpointType][selectedEndpointIndex].endpoint_type == "address"){
+                context["address"] = true;
+            }
             var model = this.element.find("#advance_form").html(template2(context));
             this.element.find("#advance_endpoint_config").find('.selectpicker').selectpicker();
             this.element.find("#advance_endpoint_config").modal('show');

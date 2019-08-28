@@ -3,3 +3,4 @@ org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../depl
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/);\
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/server/webapps/);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.rest.api.store_${feature.version}/api#am#store#v0.14.war,target:${installFolder}/../../deployment/server/webapps/api#am#store#v0.14.war,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.rest.api.store_${feature.version}/api#am#store#v1.0.war,target:${installFolder}/../../deployment/server/webapps/api#am#store#v1.0.war,overwrite:true);\

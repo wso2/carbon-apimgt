@@ -57,6 +57,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     private static final Log log = LogFactory.getLog(CORSRequestHandler.class);
     private String apiImplementationType;
     private String allowHeaders;
+    private String exposeHeaders;
     private String allowCredentials;
     private Set<String> allowedOrigins;
     private boolean initializeHeaderValues;
@@ -104,6 +105,9 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             if (allowedMethods != null) {
                 allowedMethodList = Arrays.asList(allowedMethods.split(","));
             }
+        }
+        if (exposeHeaders == null) {
+            exposeHeaders = APIUtil.getExposedHeaders();
         }
 
         initializeHeaderValues = true;
@@ -337,12 +341,12 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         messageContext.setProperty(APIConstants.CORS_CONFIGURATION_ENABLED, isCorsEnabled());
         messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, allowedMethods);
         messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, allowHeaders);
+        messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, exposeHeaders);
     }
 
     protected boolean isCorsEnabled() {
         return APIUtil.isCORSEnabled();
     }
-
 
     public String getAllowHeaders() {
         return allowHeaders;

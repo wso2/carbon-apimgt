@@ -69,6 +69,7 @@ import org.w3c.dom.Document;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
@@ -113,6 +114,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -141,6 +143,8 @@ import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.lcm.util.CommonUtil;
+import org.wso2.carbon.identity.core.util.IdentityConfigParser;
+import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceStub;
 import org.wso2.carbon.identity.user.profile.stub.UserProfileMgtServiceUserProfileExceptionException;
@@ -170,6 +174,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
@@ -222,6 +227,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
@@ -265,6 +272,11 @@ public final class APIUtil {
     public static final String DEFAULT_AND_LOCALHOST = "DefaultAndLocalhost";
     public static final String HOST_NAME_VERIFIER = "httpclient.hostnameVerifier";
     public static String multiGrpAppSharing = null;
+
+    private static final String CONFIG_ELEM_OAUTH = "OAuth";
+    private static final String REVOKE = "revoke";
+    private static final String TOKEN = "token";
+    private static final String GRANT_TYPE_NAME = "<GrantTypeName>";
 
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
@@ -725,7 +737,7 @@ public final class APIUtil {
      *                              "template_not_supported":false},"endpoint_type":"http"})
      * @return Set<String>
      */
-    private static Set<String> extractEnvironmentListForAPI(String endpointConfigs)
+    public static Set<String> extractEnvironmentListForAPI(String endpointConfigs)
             throws ParseException, ClassCastException {
         Set<String> environmentList = new HashSet<String>();
         if (endpointConfigs != null) {
@@ -749,7 +761,7 @@ public final class APIUtil {
      * @param endpoints (Eg: {"url":"http://www.test.com/v1/xxx","config":null,"template_not_supported":false})
      * @return boolean
      */
-    private static boolean isEndpointURLNonEmpty(Object endpoints) {
+    public static boolean isEndpointURLNonEmpty(Object endpoints) {
         if (endpoints instanceof JSONObject) {
             JSONObject endpointJson = (JSONObject) endpoints;
             if (endpointJson.containsKey(APIConstants.API_DATA_URL) &&
@@ -1680,6 +1692,16 @@ public final class APIUtil {
         throw new APIManagementException(msg, t);
     }
 
+    public static void handleInternalException(String msg, Throwable t) throws APIMgtInternalException {
+        log.error(msg, t);
+        throw new APIMgtInternalException(msg, t);
+    }
+
+    public static void handleAuthFailureException(String msg) throws APIMgtAuthorizationFailedException {
+        log.error(msg);
+        throw new APIMgtAuthorizationFailedException(msg);
+    }
+    
     public static SubscriberKeyMgtClient getKeyManagementClient() throws APIManagementException {
 
         KeyManagerConfiguration configuration = KeyManagerHolder.getKeyManagerInstance().getKeyManagerConfiguration();
@@ -4433,6 +4455,26 @@ public final class APIUtil {
     }
 
     /**
+     * Check whether the user has the given role
+     *
+     * @throws UserStoreException
+     * @throws APIManagementException
+     */
+    public static boolean isUserInRole(String user, String role) throws UserStoreException, APIManagementException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(user));
+        UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
+        user = SelfSignUpUtil.getDomainSpecificUserName(user, signupConfig);
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(user);
+        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .getTenantId(tenantDomain);
+        UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
+        org.wso2.carbon.user.core.UserStoreManager manager = realm.getUserStoreManager();
+        AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
+        return abstractManager.isUserInRole(tenantAwareUserName, role);
+    }
+
+    /**
      * check whether given role is exist
      *
      * @param userName logged user
@@ -6584,6 +6626,16 @@ public final class APIUtil {
     }
 
     /**
+     * Used to get access control expose headers define in api-manager.xml
+     *
+     * @return access control expose headers string
+     */
+    public static String getExposedHeaders() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_EXPOSE_HEADERS);
+    }
+
+    /**
      * Used to get access control allowed credential define in api-manager.xml
      *
      * @return true if access control allow credential enabled
@@ -7548,6 +7600,77 @@ public final class APIUtil {
     }
 
     /**
+     * Removes x-mediation-scripts from swagger as they should not be provided to store consumers
+     *
+     * @param apiSwagger swagger definition of API
+     * @return swagger which exclude x-mediation-script elements
+     */
+    public static String removeXMediationScriptsFromSwagger(String apiSwagger) {
+        //removes x-mediation-script key:values
+        String mediationScriptRegex = "\"x-mediation-script\":\".*?(?<!\\\\)\"";
+        Pattern pattern = Pattern.compile("," + mediationScriptRegex);
+        Matcher matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        pattern = Pattern.compile(mediationScriptRegex + ",");
+        matcher = pattern.matcher(apiSwagger);
+        while (matcher.find()) {
+            apiSwagger = apiSwagger.replace(matcher.group(), "");
+        }
+        return apiSwagger;
+    }
+
+    /**
+     * Handle if any cross tenant access permission violations detected. Cross tenant resources (apis/apps) can be
+     * retrieved only by super tenant admin user, only while a migration process(2.6.0 to 3.0.0). APIM server has to be
+     * started with the system property 'migrationMode=true' if a migration related exports are to be done.
+     *
+     * @param targetTenantDomain Tenant domain of which resources are requested
+     * @param username           Logged in user name
+     * @throws APIMgtInternalException  When internal error occurred
+     */
+    public static boolean hasUserAccessToTenant(String username, String targetTenantDomain)
+            throws APIMgtInternalException {
+        String superAdminRole = null;
+        
+        //Accessing the same tenant as the user's tenant
+        if (targetTenantDomain.equals(MultitenantUtils.getTenantDomain(username))) {
+            return true;
+        }
+
+        try {
+            superAdminRole = ServiceReferenceHolder.getInstance().getRealmService().
+                    getTenantUserRealm(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID).getRealmConfiguration().getAdminRoleName();
+        } catch (UserStoreException e) {
+            handleInternalException("Error in getting super admin role name", e);
+        }
+
+        //check whether logged in user is a super tenant user
+        String superTenantDomain = null;
+        try {
+            superTenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                    getSuperTenantDomain();
+        } catch (UserStoreException e) {
+            handleInternalException("Error in getting the super tenant domain", e);
+        }
+        boolean isSuperTenantUser = MultitenantUtils.getTenantDomain(username).equals(superTenantDomain);
+        if (!isSuperTenantUser) {
+            return false;
+        }
+
+        //check whether the user has super tenant admin role
+        boolean isSuperAdminRoleNameExistInUser = false;
+        try {
+            isSuperAdminRoleNameExistInUser = isUserInRole(username, superAdminRole);
+        } catch (UserStoreException | APIManagementException e) {
+            handleInternalException("Error in checking whether the user has admin role", e);
+        }
+
+        return isSuperAdminRoleNameExistInUser;
+    }
+
+    /**
      * To set the resource properties to the API.
      *
      * @param api          API that need to set the resource properties.
@@ -8032,5 +8155,62 @@ public final class APIUtil {
             }
         }
         return null;
+    }
+
+    /**
+     * This method is used to set environments values to api object.
+     *
+     * @param environments environments values in json format
+     * @return set of environments that need to Publish
+     */
+    public static Set<String> extractEnvironmentsForAPI(List<String> environments) {
+
+        Set<String> environmentStringSet = null;
+        if (environments == null) {
+            environmentStringSet = new HashSet<String>(
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+        } else {
+            //handle not to publish to any of the gateways
+            if (environments.size() == 1 && APIConstants.API_GATEWAY_NONE.equals(environments.get(0))) {
+                environmentStringSet = new HashSet<String>();
+            }
+            //handle to set published gateways into api object
+            else if (environments.size() > 0) {
+                environmentStringSet = new HashSet<String>(environments);
+                environmentStringSet.remove(APIConstants.API_GATEWAY_NONE);
+            }
+            //handle to publish to any of the gateways when api creating stage
+            else if (environments.size() == 0) {
+                environmentStringSet = new HashSet<String>(
+                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+            }
+        }
+        return environmentStringSet;
+    }
+
+    public static List<String> getGrantTypes() throws APIManagementException {
+        IdentityConfigParser configParser;
+        List<String> grantTypes = new ArrayList<>();
+        configParser = IdentityConfigParser.getInstance();
+        OMElement oauthElem = configParser.getConfigElement(CONFIG_ELEM_OAUTH);
+        Iterator supportedGrantTypes = oauthElem.getFirstChildWithName(getQNameWithIdentityNS(
+                "SupportedGrantTypes")).getChildElements();
+        while (supportedGrantTypes.hasNext()) {
+            grantTypes.add(StringUtils.substringBetween(supportedGrantTypes.next().toString(),
+                    GRANT_TYPE_NAME, GRANT_TYPE_NAME));
+        }
+        return grantTypes;
+    }
+
+    public static String getTokenUrl() throws APIManagementException {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.REVOKE_API_URL).
+                replace(REVOKE, TOKEN);
+    }
+
+    private static QName getQNameWithIdentityNS(String localPart) {
+        return new QName(IdentityCoreConstants.IDENTITY_DEFAULT_NAMESPACE, localPart);
     }
 }

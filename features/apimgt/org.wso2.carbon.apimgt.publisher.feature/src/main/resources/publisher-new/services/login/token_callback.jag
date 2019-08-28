@@ -1,0 +1,118 @@
+<%
+    var log = new Log("Token Request Function");
+    var state = request.getParameter("state","UTF-8");
+    log.debug("state: " + state);
+    if ( state !== null ) {
+        var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
+        var systemApplicationDAO = new SystemApplicationDTO();
+        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_publisher");
+
+        var clientId = systemApplicationDTO.getConsumerKey();
+        var clientSecret = systemApplicationDTO.getConsumerSecret();
+        var Base64 = org.apache.axiom.om.util.Base64;
+        var String = Packages.java.lang.String;
+        var base64encoded = Base64.encode ( new String (clientId + ":" + clientSecret).getBytes());
+        var tokenRevokeEndpoint = "https://localhost:9443/oauth2/revoke";
+
+        var tokenP1 = request.getCookie("WSO2_AM_TOKEN_1_Default").value;
+        var tokenP2 = request.getCookie("AM_ACC_TOKEN_DEFAULT_P2").value;
+        var token = tokenP1 + tokenP2;
+        var tokenRevokeRequestData = {
+            "token": token
+        };
+        var result = post(tokenRevokeEndpoint, tokenRevokeRequestData,{"Authorization": "Basic " + base64encoded});
+        log.debug("revoke token response:"+response);
+
+        var cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': '', 'path': "/publisher-new/", "HttpOnly": true, "secure": true, "maxAge": 2};
+        response.addCookie(cookie);
+
+        cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': '', 'path': "/api/am/publisher/", "HttpOnly": true, "secure": true, "maxAge": 2};
+        response.addCookie(cookie);
+
+        cookie = {'name': 'AM_REF_TOKEN_DEFAULT_P2', 'value': '', 'path': "/publisher-new/", "HttpOnly": true, "secure": true, "maxAge": 2};
+        response.addCookie(cookie);
+
+        cookie = {'name': 'WSO2_AM_TOKEN_1_Default', 'value': '', 'path': "/publisher-new/", "secure": true, "maxAge": 2}; 
+        response.addCookie(cookie);
+
+        cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P2', 'value':'', 'path': "/publisher-new/services/logout", "secure": true, "maxAge": 2}; 
+        response.addCookie(cookie);
+
+        cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P1', 'value':'', 'path': "/publisher-new/services/logout", "secure": true, "maxAge": 2}; 
+        response.addCookie(cookie);
+
+        log.debug("redirecting to login");
+        response.sendRedirect("/publisher-new/login");
+    } else {
+        var tokenRequestData = {
+            "grant_type": "authorization_code",
+            "code": request.getParameter("code","UTF-8"),
+            "redirect_uri": "https://localhost:9443/publisher-new/services/auth/callback",
+        };
+
+        var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
+        var systemApplicationDAO = new SystemApplicationDTO();
+        var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_publisher");
+
+        var clientId = systemApplicationDTO.getConsumerKey();
+        var clientSecret = systemApplicationDTO.getConsumerSecret();
+        var Base64 = org.apache.axiom.om.util.Base64;
+        var String = Packages.java.lang.String;
+        var Integer = Packages.java.lang.Integer;
+        var base64encoded = Base64.encode ( new String (clientId + ":" + clientSecret).getBytes());
+        var tokenEndpoint = "https://localhost:8243/token";
+        var result = post(tokenEndpoint, tokenRequestData,{"Authorization": "Basic " + base64encoded});
+
+        log.debug("Token response: " + result.data);
+        response.contentType = "application/json";
+        var token_response = JSON.parse(result.data);
+
+        var token_length = token_response.access_token.length;
+        var access_token = String(token_response.access_token);
+
+        var id_token_length = token_response.id_token.length;
+        var id_token = String(token_response.id_token);
+
+        var id_token_part_1 = id_token.substring(0,id_token_length/2);
+        var id_token_part_2 = id_token.substring(id_token_length/2,id_token_length);
+
+        var access_token_token_part_1 = access_token.substring(0, token_length/2);
+        var access_token_token_part_2 = access_token.substring(token_length/2, token_length);
+
+        var refresh_token = String(token_response.refresh_token);
+        token_length = token_response.refresh_token.length;
+        var refresh_token_token_part_1 = refresh_token.substring(0, token_length/2);
+        var refresh_token_token_part_2 = refresh_token.substring(token_length/2, token_length);
+
+        var response_data = {
+            AM_ACC_TOKEN_DEFAULT_P1: String(access_token_token_part_1),
+            AM_REF_TOKEN_DEFAULT_P1: String(refresh_token_token_part_1),
+            id_token: String(token_response.id_token),
+            scope: String(token_response.scope),
+            expires_in: String(token_response.expires_in)
+        } // TODO: not in use ~tmkb
+
+        // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/publisher
+        // because partial HTTP only cookie is required for get the user information from access token,
+        // hence setting the HTTP only access token path to /publisher-new/
+        var cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': access_token_token_part_2, 'path': "/publisher-new/", "HttpOnly": true, "secure": true, "maxAge": Integer(token_response.expires_in)};
+        response.addCookie(cookie);
+
+        cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': access_token_token_part_2, 'path': "/api/am/publisher/", "HttpOnly": true, "secure": true, "maxAge": Integer(token_response.expires_in)};
+        response.addCookie(cookie);
+
+        cookie = {'name': 'AM_REF_TOKEN_DEFAULT_P2', 'value': refresh_token_token_part_2, 'path': "/publisher-new/", "HttpOnly": true, "secure": true, "maxAge": -1};
+        response.addCookie(cookie);
+
+        cookie = {'name': 'WSO2_AM_TOKEN_1_Default', 'value': access_token_token_part_1, 'path': "/publisher-new/", "secure": true, "maxAge": Integer(token_response.expires_in)}; 
+        response.addCookie(cookie);
+
+        cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P2', 'value':id_token_part_2, 'path': "/publisher-new/services/logout", "secure": true, "maxAge": Integer(token_response.expires_in)}; 
+        response.addCookie(cookie);
+
+        cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P1', 'value':id_token_part_1, 'path': "/publisher-new/services/logout", "secure": true, "maxAge": Integer(token_response.expires_in)}; 
+        response.addCookie(cookie);
+
+        response.sendRedirect("/publisher-new/apis");
+    }
+%>

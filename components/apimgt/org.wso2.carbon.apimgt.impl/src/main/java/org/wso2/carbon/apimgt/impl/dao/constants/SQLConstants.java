@@ -110,6 +110,22 @@ public class SQLConstants {
                     "   AND API.API_ID = SP.API_ID" +
                     "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
+    public static final String GET_SUBSCRIBED_API_IDs_BY_APP_ID_SQL =
+            " SELECT " +
+                    "   API.API_ID " +
+                    " FROM " +
+                    "   AM_SUBSCRIBER SUB," +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIPTION SUBS, " +
+                    "   AM_API API " +
+                    " WHERE " +
+                    "   SUB.TENANT_ID = ? " +
+                    "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
+                    "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+                    "   AND API.API_ID=SUBS.API_ID" +
+                    "   AND APP.APPLICATION_ID= ? " +
+                    "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
     public static final String GET_SUBSCRIBED_APIS_OF_USER_BY_APP_SQL =
             " SELECT " +
                     "   API.API_PROVIDER AS API_PROVIDER," +
@@ -644,12 +660,14 @@ public class SQLConstants {
 
     public static final String GET_PAGINATED_SUBSCRIBED_APIS_SQL =
             " SELECT " +
+                    "   SUBS.UUID AS SUB_UUID, " +
                     "   SUBS.SUBSCRIPTION_ID, " +
                     "   API.API_PROVIDER AS API_PROVIDER, " +
                     "   API.API_NAME AS API_NAME, " +
                     "   API.API_VERSION AS API_VERSION, " +
                     "   SUBS.TIER_ID AS TIER_ID, " +
                     "   APP.APPLICATION_ID AS APP_ID, " +
+                    "   APP.UUID AS APP_UUID, " +
                     "   SUBS.SUB_STATUS AS SUB_STATUS, " +
                     "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
                     "   APP.NAME AS APP_NAME, " +
@@ -666,6 +684,7 @@ public class SQLConstants {
                     "   AND API.API_ID=SUBS.API_ID" +
                     "   AND APP.NAME= ? " +
                     "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
 
     public static final String GET_PAGINATED_SUBSCRIBED_APIS_BY_APP_ID_SQL =
             " SELECT " +
@@ -3097,14 +3116,31 @@ public class SQLConstants {
     public static class BotDataConstants {
 
         public static final String ADD_NOTIFICATION = "INSERT INTO AM_NOTIFICATION_SUBSCRIBER (UUID, CATEGORY," +
-        "NOTIFICATION_METHOD, SUBSCRIBER_ADDRESS)" +
-                            " VALUES(?,?,?,?)";
+                "NOTIFICATION_METHOD, SUBSCRIBER_ADDRESS)" +
+                " VALUES(?,?,?,?)";
 
         public static final String GET_SAVED_ALERT_EMAILS =
                 " SELECT UUID, SUBSCRIBER_ADDRESS FROM AM_NOTIFICATION_SUBSCRIBER";
 
         public static final String DELETE_EMAIL_BY_UUID =
                 "DELETE FROM AM_NOTIFICATION_SUBSCRIBER WHERE UUID= ?";
+    }
+
+    /**
+     * Static class to hold database queries related to AM_SYSTEM_APPS table
+     */
+    public static class SystemApplicationConstants {
+
+        public static final String INSERT_SYSTEM_APPLICATION =
+                "INSERT INTO AM_SYSTEM_APPS " + "(NAME,CONSUMER_KEY,CONSUMER_SECRET,CREATED_TIME) VALUES (?,?,?,?)";
+
+        public static final String GET_CLIENT_CREDENTIALS_FOR_APPLICATION =
+                "SELECT CONSUMER_KEY,CONSUMER_SECRET FROM " + "AM_SYSTEM_APPS WHERE NAME = ?";
+
+        public static final String DELETE_SYSTEM_APPLICATION = "DELETE FROM AM_SYSTEM_APPS WHERE NAME = ?";
+
+        public static final String CHECK_CLIENT_CREDENTIALS_EXISTS = "SELECT CONSUMER_KEY,CONSUMER_SECRET " +
+                "FROM AM_SYSTEM_APPS WHERE NAME = ?";
 
     }
 }

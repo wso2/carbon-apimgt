@@ -1358,6 +1358,48 @@ public class ApiMgtDAO {
         return subscribedAPIs;
     }
 
+    public Set<Scope> getScopesForApplicationSubscription(Subscriber subscriber, int applicationId)
+            throws APIManagementException {
+        HashMap<String, Scope> scopeHashMap = new HashMap<>();
+        int tenantId = APIUtil.getTenantId(subscriber.getName());
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            String sqlQueryforGetSubscribedApis = SQLConstants.GET_SUBSCRIBED_API_IDs_BY_APP_ID_SQL;
+            String sqlQuery = SQLConstants.GET_SCOPE_BY_SUBSCRIBED_API_PREFIX + sqlQueryforGetSubscribedApis +
+                    SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX;
+
+            if (conn.getMetaData().getDriverName().contains("Oracle")) {
+                sqlQuery = SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_ORACLE_SQL + sqlQueryforGetSubscribedApis +
+                        SQLConstants.GET_SCOPE_BY_SUBSCRIBED_ID_SUFFIX;
+            }
+            try (PreparedStatement statement = conn.prepareStatement(sqlQuery)) {
+                statement.setInt(1, tenantId);
+                statement.setInt(2, applicationId);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    while (resultSet.next()) {
+                        Scope scope;
+                        String scopeKey = resultSet.getString(1);
+                        if (scopeHashMap.containsKey(scopeKey)) {
+                            // scope already exists append roles.
+                            scope = scopeHashMap.get(scopeKey);
+                            scope.setRoles(scope.getRoles().concat("," + resultSet.getString(4)).trim());
+                        } else {
+                            scope = new Scope();
+                            scope.setKey(scopeKey);
+                            scope.setName(resultSet.getString(2));
+                            scope.setDescription(resultSet.getString(3));
+                            scope.setRoles(resultSet.getString(4).trim());
+                        }
+                        scopeHashMap.put(scopeKey, scope);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve scopes ", e);
+        }
+        return populateScopeSet(scopeHashMap);
+    }
+
     private Set<APIKey> getAPIKeysBySubscription(int subscriptionId) throws APIManagementException {
         Connection connection = null;
         PreparedStatement ps = null;
@@ -1606,11 +1648,13 @@ public class ApiMgtDAO {
                             ("API_PROVIDER")), result.getString("API_NAME"), result.getString("API_VERSION"));
 
                     SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
+                    subscribedAPI.setUUID(result.getString("SUB_UUID"));
                     subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
                     subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
                     subscribedAPI.setTier(new Tier(result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
 
                     Application application = new Application(result.getString("APP_NAME"), subscriber);
+                    application.setUUID(result.getString("APP_UUID"));
                     subscribedAPI.setApplication(application);
                     subscribedAPIs.add(subscribedAPI);
                     if (index == endSubIndex - 1) {
@@ -4221,7 +4265,8 @@ public class ApiMgtDAO {
             Application application;
             while (rs.next()) {
                 application = new Application(rs.getString("NAME"), subscriber);
-                application.setId(rs.getInt("APPLICATION_ID"));
+                int applicationId = rs.getInt("APPLICATION_ID");
+                application.setId(applicationId);
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setDescription(rs.getString("DESCRIPTION"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
@@ -4233,6 +4278,10 @@ public class ApiMgtDAO {
                 if (multiGroupAppSharingEnabled) {
                     setGroupIdInApplication(application);
                 }
+
+                //setting subscription count
+                int subscriptionCount = getSubscriptionCountByApplicationId(subscriber, applicationId, groupingId);
+                application.setSubscriptionCount(subscriptionCount);
 
                 applicationsList.add(application);
             }
@@ -6203,6 +6252,10 @@ public class ApiMgtDAO {
                         application.setGroupId(getGroupId(application.getId()));
                     }
                 }
+
+                int subscriptionCount = getSubscriptionCountByApplicationId(subscriber, applicationId,
+                        application.getGroupId());
+                application.setSubscriptionCount(subscriptionCount);
 
                 Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
                 application.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
@@ -8292,9 +8345,9 @@ public class ApiMgtDAO {
                 if (scopeHashMap.containsKey(scopeKey)) {
                     // scope already exists append roles.
                     scope = scopeHashMap.get(scopeKey);
-                    String roles = scope.getRoles();
+                    String roles = resultSet.getString(4);
                     if (StringUtils.isNotEmpty(roles)) {
-                        scope.setRoles(scope.getRoles().concat("," + resultSet.getString(4)).trim());
+                        scope.setRoles(scope.getRoles().concat("," + roles.trim()));
                     }
                 } else {
                     scope = new Scope();
@@ -8335,14 +8388,20 @@ public class ApiMgtDAO {
                 if (scopeHashMap.containsKey(scopeId)) {
                     // scope already exists append roles.
                     scope = scopeHashMap.get(scopeId);
-                    scope.setRoles(scope.getRoles().concat("," + resultSet.getString(5)).trim());
+                    String roles = resultSet.getString(5);
+                    if (StringUtils.isNotEmpty(roles)) {
+                        scope.setRoles(scope.getRoles().concat("," + roles.trim()));
+                    }
                 } else {
                     scope = new Scope();
                     scope.setId(scopeId);
                     scope.setKey(resultSet.getString(2));
                     scope.setName(resultSet.getString(3));
                     scope.setDescription(resultSet.getString(4));
-                    scope.setRoles(resultSet.getString(5).trim());
+                    String roles = resultSet.getString(5);
+                    if (StringUtils.isNotEmpty(roles)) {
+                        scope.setRoles(roles.trim());
+                    }
                 }
                 scopeHashMap.put(scopeId, scope);
             }
@@ -8389,14 +8448,20 @@ public class ApiMgtDAO {
                 if (scopeHashMap.containsKey(scopeId)) {
                     // scope already exists append roles.
                     scope = scopeHashMap.get(scopeId);
-                    scope.setRoles(scope.getRoles().concat("," + resultSet.getString(6)).trim());
+                    String roles = resultSet.getString(6);
+                    if (StringUtils.isNotEmpty(roles)) {
+                        scope.setRoles(scope.getRoles().concat("," + roles.trim()));
+                    }
                 } else {
                     scope = new Scope();
                     scope.setId(scopeId);
                     scope.setKey(resultSet.getString(2));
                     scope.setName(resultSet.getString(3));
                     scope.setDescription(resultSet.getString(4));
-                    scope.setRoles(resultSet.getString(6).trim());
+                    String roles = resultSet.getString(6);
+                    if (StringUtils.isNotEmpty(roles)) {
+                        scope.setRoles(roles.trim());
+                    }
                 }
                 scopeHashMap.put(scopeId, scope);
             }
@@ -12694,7 +12759,7 @@ public class ApiMgtDAO {
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
                 if (multiGroupAppSharingEnabled) {
-                    if (application.getGroupId().isEmpty()) {
+                    if (StringUtils.isEmpty(application.getGroupId())) {
                         application.setGroupId(getGroupId(application.getId()));
                     }
                 }

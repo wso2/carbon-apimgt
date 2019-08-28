@@ -31,7 +31,6 @@
     session.put("STATE", state);
     session.put("PUBLISHER_REDIRECT_URI", requestURI)
 
-
     var checkSSO = true;
 
     if (requestURI.indexOf("register.jag") != -1) {

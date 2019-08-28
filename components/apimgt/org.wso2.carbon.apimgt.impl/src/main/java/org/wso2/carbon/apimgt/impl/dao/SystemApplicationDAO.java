@@ -1,0 +1,253 @@
+/*
+ *  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package org.wso2.carbon.apimgt.impl.dao;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.dto.SystemApplicationDTO;
+import org.wso2.carbon.apimgt.impl.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.TimeZone;
+
+/**
+ * Implementation for SystemApplicationDAO
+ */
+public class SystemApplicationDAO {
+
+    private static final Logger log = LoggerFactory.getLogger(SystemApplicationDAO.class);
+    private static final String SYSTEM_APP_TABLE_NAME = "AM_SYSTEM_APPS";
+    private static boolean initialAutoCommit = false;
+
+    /**
+     * Checks whether the system application table exists in the database.
+     *
+     * @return : True if exists, false otherwise.
+     */
+    public boolean isTableExists() throws APIMgtDAOException {
+
+        boolean isExists = false;
+        Connection connection = null;
+        ResultSet resultSet = null;
+        DatabaseMetaData databaseMetaData;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            databaseMetaData = connection.getMetaData();
+
+            resultSet = databaseMetaData.getTables(null, null, SYSTEM_APP_TABLE_NAME, null);
+            if (resultSet.next()) {
+                isExists = true;
+            }
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving database information. ", e);
+            }
+            handleException("Error retrieving Database information", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, connection, resultSet);
+        }
+        return isExists;
+    }
+
+    /**
+     * Method to add application key to the AM_SYSTEM_APPS table
+     *
+     * @param appName required parameter
+     * @param consumerKey required parameter
+     * @param consumerSecret required parameter
+     * @return boolean
+     * @throws APIMgtDAOException
+     */
+    public boolean addApplicationKey(String appName, String consumerKey, String consumerSecret)
+            throws APIMgtDAOException {
+        boolean result = false;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String addCertQuery = SQLConstants.SystemApplicationConstants.INSERT_SYSTEM_APPLICATION;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+
+            preparedStatement = connection.prepareStatement(addCertQuery);
+            preparedStatement.setString(1, appName);
+            preparedStatement.setString(2, consumerKey);
+            preparedStatement.setString(3, consumerSecret);
+            preparedStatement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()),
+                    Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+            result = preparedStatement.executeUpdate() >= 1;
+            connection.commit();
+
+        } catch (SQLException e) {
+            handleConnectionRollBack(connection);
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while adding client credentials to SYSTEM_APPS table ", e);
+            }
+            handleException("Error while persisting client credentials to SYSTEM_APPS table ", e);
+        } finally {
+            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+        return result;
+    }
+
+    /**
+     * Method to retrieve client credentials for a given application name
+     *
+     * @param appName required parameter
+     * @return SystemApplicationDTO which hold the retrieved client credentials
+     * @throws APIMgtDAOException
+     */
+    public SystemApplicationDTO getClientCredentialsForApplication(String appName) throws APIMgtDAOException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        SystemApplicationDTO systemApplicationDTO = null;
+        String getCredentialsQuery = SQLConstants.SystemApplicationConstants.GET_CLIENT_CREDENTIALS_FOR_APPLICATION;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            connection.commit();
+            preparedStatement = connection.prepareStatement(getCredentialsQuery);
+            preparedStatement.setString(1, appName);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                systemApplicationDTO = new SystemApplicationDTO();
+                systemApplicationDTO.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
+                systemApplicationDTO.setConsumerSecret(resultSet.getString("CONSUMER_SECRET"));
+            }
+        } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving client credentials for application: " + appName);
+            }
+            handleException("Error while retrieving client credentials for application: " + appName, e);
+        } finally {
+            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
+        }
+        return systemApplicationDTO;
+    }
+
+    /**
+     * Method to remove client credentials for given application
+     *
+     * @param appName required parameter
+     * @return boolean
+     * @throws APIMgtDAOException
+     */
+    public boolean removeConsumerKeyForApplication(String appName) throws APIMgtDAOException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        boolean result = false;
+        String deleteApplicationKeyQuery = SQLConstants.SystemApplicationConstants.DELETE_SYSTEM_APPLICATION;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(deleteApplicationKeyQuery);
+            preparedStatement.setString(1, appName);
+            result = preparedStatement.executeUpdate() == 1;
+            connection.commit();
+        } catch (SQLException e) {
+            handleConnectionRollBack(connection);
+            handleException("Error while deleting System Application. ", e);
+        } finally {
+            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            APIMgtDBUtil.closeStatement(preparedStatement);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+        return result;
+    }
+
+    /**
+     * Method to check whether client credentials exists for a given application
+     *
+     * @param appName required parameter
+     * @return boolean
+     * @throws APIMgtDAOException
+     */
+    public boolean isClientCredentialsExistForApplication(String appName) throws APIMgtDAOException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        boolean result = false;
+        String checkClientCredentialsExistsQuery = SQLConstants.SystemApplicationConstants.CHECK_CLIENT_CREDENTIALS_EXISTS;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            initialAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+            preparedStatement = connection.prepareStatement(checkClientCredentialsExistsQuery);
+            preparedStatement.setString(1, appName);
+            result = preparedStatement.executeUpdate() == 1;
+            connection.commit();
+        } catch (SQLException e) {
+            handleConnectionRollBack(connection);
+            handleException("Error while checking for System Application. ", e);
+        } finally {
+            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
+            APIMgtDBUtil.closeStatement(preparedStatement);
+            APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
+        }
+        return result;
+    }
+
+    /**
+     * Method to handle the SQL Exception.
+     *
+     * @param message : Error message.
+     * @param e       : Throwable cause.
+     * @throws APIMgtDAOException :
+     */
+    private void handleException(String message, Throwable e) throws APIMgtDAOException {
+
+        throw new APIMgtDAOException(message, e);
+    }
+
+    /**
+     * This method handles the connection roll back.
+     *
+     * @param connection Relevant database connection that need to be rolled back.
+     */
+    private void handleConnectionRollBack(Connection connection) {
+        try {
+            if (connection != null) {
+                connection.rollback();
+            } else {
+                log.warn("Could not perform rollback since the connection is null.");
+            }
+        } catch (SQLException e1) {
+            log.error("Error while rolling back the transaction.", e1);
+        }
+    }
+}

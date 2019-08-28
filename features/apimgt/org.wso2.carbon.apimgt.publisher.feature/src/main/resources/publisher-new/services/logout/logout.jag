@@ -1,0 +1,13 @@
+<%
+    var log = new Log("Logout Request Function");
+    var idTokenP1 = request.getCookie("AM_ID_TOKEN_DEFAULT_P1").value;
+    var idTokenP2 = request.getCookie("AM_ID_TOKEN_DEFAULT_P2").value;
+    var idToken = idTokenP1 + idTokenP2;
+    // var idToken = session.get('idToken');
+    var postLogoutRedirectURI = "https://localhost:9443/publisher-new/services/auth/callback";
+    var logoutState = "state_1";
+    var url = 'https://localhost:9443/oidc/logout?id_token_hint=' + idToken
+        + '&post_logout_redirect_uri=' + postLogoutRedirectURI + '&state=' + logoutState;
+    log.debug("Redirecting to = " + url);
+    response.sendRedirect(url);
+%>

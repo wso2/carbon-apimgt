@@ -7,6 +7,8 @@ target
 .idea
 features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/repository/database/WSO2AM_DB.h2.db
 *.DS_Store
+WSO2AM_DB.trace.db
+node_modules
 features/apimgt/org.wso2.carbon.apimgt.gateway.feature/src/main/resources/am#sample#calculator#*.war
 features/apimgt/org.wso2.carbon.apimgt.gateway.feature/src/main/resources/am#sample#pizzashack#*.war
 features/apimgt/org.wso2.carbon.apimgt.rest.api.dcr.feature/src/main/resources/client-registration#*.war
@@ -22,3 +24,7 @@ features/apimgt/org.wso2.carbon.apimgt.rest.api.store.feature/src/main/resources
 features/apimgt/org.wso2.carbon.apimgt.rest.api.admin.feature/src/main/resources/api-docs/main.js
 features/apimgt/org.wso2.carbon.apimgt.rest.api.admin.feature/src/main/resources/api-docs/package.json
 components/apimgt/org.wso2.carbon.apimgt.hybrid.gateway/org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher/src/test/resources/carbon-home/api-usage-data/api-usage-data.dat
+components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/publisher-api.yaml
+components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/store-api.yaml
+components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/swagger.json
+components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/swagger.json

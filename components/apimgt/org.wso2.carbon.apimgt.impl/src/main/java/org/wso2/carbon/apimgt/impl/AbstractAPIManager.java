@@ -1625,6 +1625,11 @@ public abstract class AbstractAPIManager implements APIManager {
         return application;
     }
 
+    @Override
+    public Application getLightweightApplicationByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getApplicationByUUID(uuid);
+    }
+
     /**
      * returns the SubscribedAPI object which is related to the UUID
      *

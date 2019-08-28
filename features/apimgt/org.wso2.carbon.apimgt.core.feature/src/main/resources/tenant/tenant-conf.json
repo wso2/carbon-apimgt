@@ -17,6 +17,10 @@
         "Roles": "admin,Internal/publisher,Internal/creator"
       },
       {
+        "Name": "apim:api_delete",
+        "Roles": "admin,Internal/creator"
+      },
+      {
         "Name": "apim:subscribe",
         "Roles": "admin,Internal/subscriber"
       },

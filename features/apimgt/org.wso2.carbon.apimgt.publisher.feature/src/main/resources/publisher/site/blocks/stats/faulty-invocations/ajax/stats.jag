@@ -25,6 +25,15 @@ include("/jagg/jagg.jag");
             var apiFilter = request.getParameter("apiFilter");
             
             if (currentLocation.indexOf("all-statistics") >= 0  && (!apiFilter || (apiFilter != "myAPIs"))) {
+                var splitValues = provider.split("@");
+                var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+                if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0 && (!apiFilter || (apiFilter != "myAPIs"))) {
+                    if (MultitenantUtils.isEmailUserName() && 3 <= splitValues.length) { //email-username
+                        allProviders = allProviders + "@" + splitValues[1] + "@" +  MultitenantUtils.getTenantDomain(provider);
+                    } else {
+                        allProviders = allProviders + '@' + MultitenantUtils.getTenantDomain(provider);
+                    }
+                }
                 result = mod.getAPIResponseFaultCount(allProviders, from, to);
             } else {
                 result = mod.getAPIResponseFaultCount(provider, from, to);

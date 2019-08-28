@@ -208,7 +208,7 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             stream.setApplicationName(applicationName);
             stream.setApplicationOwner(applicationOwner);
             stream.setBackendTime(backendTime);
-            stream.setDestination((String) mc.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS));
+            stream.setDestination(GatewayUtils.extractAddressBasePath(mc));
             stream.setExecutionTime(GatewayUtils.getExecutionTime(mc));
             stream.setMetaClientType(keyType); // check meta type
             stream.setProtocol(protocol);
