@@ -610,10 +610,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                         String grade = (String) ((JSONObject) ((JSONObject) responseJson.get("attr")).get("data")).get("grade");
                         Integer numErrors = Integer.valueOf((String) ((JSONObject) ((JSONObject) responseJson.get("attr")).get("data")).get("numErrors"));
                         String decodedReport = new String(Base64Utils.decode(report));
-//                        AuditReportDTO auditReportDTO = new AuditReportDTO();
-//                        auditReportDTO.setReport(decodedReport);
-//                        auditReportDTO.setGrade(grade);
-//                        auditReportDTO.setNumErrors(numErrors);
+                        AuditReportDTO auditReportDTO = new AuditReportDTO();
+                        auditReportDTO.setReport(decodedReport);
+                        auditReportDTO.setGrade(grade);
+                        auditReportDTO.setNumErrors(numErrors);
                         return Response.ok().entity("auditReportDto").build();
                     }
                 }

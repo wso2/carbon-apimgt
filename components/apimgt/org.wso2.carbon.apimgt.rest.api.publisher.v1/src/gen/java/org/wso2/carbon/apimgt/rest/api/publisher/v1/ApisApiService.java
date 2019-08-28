@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APISecurityAuditInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
