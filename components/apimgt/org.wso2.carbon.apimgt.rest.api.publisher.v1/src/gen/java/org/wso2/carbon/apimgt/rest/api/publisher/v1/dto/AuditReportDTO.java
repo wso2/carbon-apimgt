@@ -27,7 +27,7 @@ public class AuditReportDTO   {
   }
 
   
-  @ApiModelProperty(example = "grade = 32.95", value = "The API Security Audit Report ")
+  @ApiModelProperty(value = "The API Security Audit Report ")
   @JsonProperty("report")
   public String getReport() {
     return report;

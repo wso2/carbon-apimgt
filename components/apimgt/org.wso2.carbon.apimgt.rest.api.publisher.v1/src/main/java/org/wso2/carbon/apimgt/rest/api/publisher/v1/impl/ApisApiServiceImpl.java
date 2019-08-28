@@ -572,6 +572,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = api.getId();
+            String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
 
             // Get configuration file and retrieve API token
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
@@ -580,6 +581,65 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // Retrieve the uuid from the database
             String uuid = ApiMgtDAO.getInstance().getAuditApiId(apiIdentifier);
+
+            // Initiate JSON Parser
+            JSONParser parser = new JSONParser();
+
+            // TODO - Remove if not needed
+//            JSONObject jsonObject;
+//
+//            // Parse JSON String of API Definition
+//            jsonObject = (JSONObject) parser.parse(apiDefinition);
+
+            if (uuid != null) {
+                // PUT Request
+
+                // Set the property to be attached in the body of the request
+                // Attach API Definition to property called specfile to be sent in the request
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("{\n");
+                stringBuilder.append("  \"specfile\":   ").append(Base64Utils.encode(apiDefinition.getBytes("UTF-8"))).append("\n");
+                stringBuilder.append("}");
+
+                // Logic for HTTP Request
+                URL auditURL = new URL("https://platform.42crunch.com/api/v1/apis/" + uuid);
+                try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil.getHttpClient(auditURL.getPort(), auditURL.getProtocol())) {
+                    HttpPut httpPut = new HttpPut(String.valueOf(auditURL));
+
+                    // Set the header properties of the request
+                    httpPut.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                    httpPut.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                    httpPut.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
+                    httpPut.setEntity(new StringEntity(stringBuilder.toString()));
+
+                    // Code block for processing the response
+                    try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
+                        if (isDebugEnabled) {
+                            log.debug("HTTP status " + response.getStatusLine().getStatusCode());
+                        }
+                        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                            BufferedReader reader = new BufferedReader(
+                                    new InputStreamReader(response.getEntity().getContent()));
+                            String inputLine;
+                            StringBuilder responseString = new StringBuilder();
+
+                            while ((inputLine = reader.readLine()) != null) {
+                                responseString.append(inputLine);
+                            }
+
+                            return Response.ok().entity(responseString.toString()).build();
+                        } else {
+                            throw new APIManagementException("Error while sending data to " + auditURL +
+                                    ". Found http status " + response.getStatusLine());
+                        }
+                    } finally {
+                        httpPut.releaseConnection();
+                    }
+                }
+            } else {
+                // Insert POST Request here
+
+            }
 
             // Logic for the HTTP request
             String getUrl = "https://platform.42crunch.com/api/v1/apis/" + uuid + "/assessmentreport";
@@ -614,7 +674,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         auditReportDTO.setReport(decodedReport);
                         auditReportDTO.setGrade(grade);
                         auditReportDTO.setNumErrors(numErrors);
-                        return Response.ok().entity("auditReportDto").build();
+                        return Response.ok().entity(auditReportDTO).build();
                     }
                 }
             }

@@ -6488,7 +6488,7 @@ definitions:
         example: Swagger-Petstore
 
   #-----------------------------------------------------
-  # The API Security Audit Info resource
+  # The Audit Report resource
   #-----------------------------------------------------
   AuditReport:
     title: Resource for Audit Report
@@ -6497,12 +6497,11 @@ definitions:
         type: string
         description: |
           The API Security Audit Report
-        example: grade = 32.95
       grade:
         type: string
         description: |
           The overall grade of the Security Audit
-        example: 27.95
+        example: "27.95"
       numErrors:
         type: integer
         description: |
