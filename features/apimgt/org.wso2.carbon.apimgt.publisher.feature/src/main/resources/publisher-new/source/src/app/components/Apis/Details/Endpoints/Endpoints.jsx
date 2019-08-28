@@ -22,6 +22,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
+import cloneDeep from 'lodash.clonedeep';
 
 import EndpointOverview from './EndpointOverview';
 import ApiContext from '../components/ApiContext';
@@ -87,7 +88,7 @@ function Endpoints(props) {
     useEffect(() => {
         const { lifeCycleStatus } = api;
         const implType = api.endpointConfig.implementation_status;
-        setModifiedAPI(JSON.parse(JSON.stringify(api)));
+        setModifiedAPI(cloneDeep(api));
         setEndpointImplementation(() => {
             return lifeCycleStatus === 'PROTOTYPED' && implType === 'prototyped' ?
                 endpointImplType[1] : endpointImplType[0];
