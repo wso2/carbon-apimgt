@@ -32,6 +32,7 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
+import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.util.URL;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
@@ -581,17 +582,17 @@ public class ApisApiServiceImpl implements ApisApiService {
             String uuid = ApiMgtDAO.getInstance().getAuditApiId(apiIdentifier);
 
             // Logic for the HTTP request
-            URL auditURL = new URL("https://platform.42crunch.com/api/v1/apis/" + uuid + "/assessmentreport");
-            try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil.getHttpClient(auditURL.getPort(), auditURL.getProtocol())) {
-                HttpGet httpGet = new HttpGet(String.valueOf(auditURL));
+            String getUrl = "https://platform.42crunch.com/api/v1/apis/" + uuid + "/assessmentreport";
+            URL getReportUrl = new URL(getUrl);
+            try (CloseableHttpClient getHttpClient = (CloseableHttpClient) APIUtil.getHttpClient(getReportUrl.getPort(), getReportUrl.getProtocol())) {
+                HttpGet httpGet = new HttpGet(getUrl);
 
                 // Set the header properties of the request
                 httpGet.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-                httpGet.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                 httpGet.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
 
                 // Code block for the processing of the response
-                try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+                try (CloseableHttpResponse response = getHttpClient.execute(httpGet)) {
                     if (isDebugEnabled) {
                         log.debug("HTTP status " + response.getStatusLine().getStatusCode());
                     }
@@ -604,20 +605,31 @@ public class ApisApiServiceImpl implements ApisApiService {
                         while ((inputLine = reader.readLine()) != null) {
                             responseString.append(inputLine);
                         }
-                        return Response.ok().entity(responseString.toString()).build();
+                        JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
+                        String report = responseJson.get("data").toString();
+                        String grade = (String) ((JSONObject) ((JSONObject) responseJson.get("attr")).get("data")).get("grade");
+                        Integer numErrors = Integer.valueOf((String) ((JSONObject) ((JSONObject) responseJson.get("attr")).get("data")).get("numErrors"));
+                        String decodedReport = new String(Base64Utils.decode(report));
+//                        AuditReportDTO auditReportDTO = new AuditReportDTO();
+//                        auditReportDTO.setReport(decodedReport);
+//                        auditReportDTO.setGrade(grade);
+//                        auditReportDTO.setNumErrors(numErrors);
+                        return Response.ok().entity("auditReportDto").build();
                     }
                 }
-            } catch (IOException e) {
-                log.error("Error occurred while getting HttpClient instance");
             }
+        } catch (IOException e) {
+            log.error("Error occurred while getting HttpClient instance");
+        } catch (ParseException e) {
+            log.error("API Definition String could not be parsed into JSONObject.");
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving Security Audit Report for API : " + apiId;
+            String errorMessage = "Error while Auditing API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
 
-    @Override
+        @Override
     public Response apisApiIdAuditapiPost(String apiId, APISecurityAuditInfoDTO body, String accept, MessageContext messageContext) {
         boolean isDebugEnabled = log.isDebugEnabled();
         try {
