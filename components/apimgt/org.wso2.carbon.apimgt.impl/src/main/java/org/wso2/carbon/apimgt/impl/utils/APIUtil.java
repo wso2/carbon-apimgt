@@ -180,7 +180,6 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.core.tenant.TenantConstants;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -692,8 +691,8 @@ public final class APIUtil {
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
             //set data and status related to monetization
             api.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute
-                    (APIConstants.API_MONETIZATION_STATUS)));
-            String monetizationInfo = artifact.getAttribute(APIConstants.API_MONETIZATION_PROPERTIES);
+                    (APIConstants.Monetization.API_MONETIZATION_STATUS)));
+            String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
             if (StringUtils.isNotBlank(monetizationInfo)) {
                 JSONParser parser = new JSONParser();
                 JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
@@ -1264,10 +1263,10 @@ public final class APIUtil {
             attachLabelsToAPIArtifact(artifact, api, tenantDomain);
 
             //set monetization status (i.e - enabled or disabled)
-            artifact.setAttribute(APIConstants.API_MONETIZATION_STATUS, Boolean.toString(api.getMonetizationStatus()));
+            artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS, Boolean.toString(api.getMonetizationStatus()));
             //set additional monetization data
             if (api.getMonetizationProperties() != null) {
-                artifact.setAttribute(APIConstants.API_MONETIZATION_PROPERTIES,
+                artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES,
                         api.getMonetizationProperties().toJSONString());
             }
 
@@ -8779,5 +8778,16 @@ public final class APIUtil {
         org.wso2.carbon.user.core.UserStoreManager manager = realm.getUserStoreManager();
         AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
         return abstractManager.isUserInRole(tenantAwareUserName, roleName);
+    }
+
+    public static JSONArray getMonetizationAttributes() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getMonetizationAttributes();
+    }
+
+    public static boolean isMonetizationEnabled() {
+        return (StringUtils.isEmpty(
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                        .getFirstProperty(APIConstants.Monetization.MONETIZATION_IMPL)));
     }
 }

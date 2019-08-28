@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
+import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -30,6 +32,7 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -60,7 +63,7 @@ public class SettingsMappingUtil {
                 environmentListDTO = EnvironmentMappingUtil.fromEnvironmentCollectionToDTO(environments.values());
             }
             settingsDTO.setEnvironment(environmentListDTO.getList());
-            settingsDTO.setMonetizationProperties(getMonetizationProperties());
+            settingsDTO.setMonetizationAttributes(getMonetizationAttributes());
         }
         settingsDTO.setScopes(GetScopeList());
         return settingsDTO;
@@ -94,12 +97,23 @@ public class SettingsMappingUtil {
      * @return List<String> monetization properties
      * @throws APIManagementException
      */
-    private List<String> getMonetizationProperties() throws APIManagementException {
+    private List<MonetizationAttributeDTO> getMonetizationAttributes() {
 
-        List<String> properties = new ArrayList<>();
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        properties = configuration.getProperty(APIConstants.MonetizationUsagePublisher.ADDITIONAL_PROPERTY_LOCATION);
-        return properties;
+        List<MonetizationAttributeDTO> monetizationAttributeDTOSList = new ArrayList<MonetizationAttributeDTO>();
+        JSONArray monetizationAttributes = APIUtil.getMonetizationAttributes();
+
+        for (int i = 0; i < monetizationAttributes.size(); i++) {
+            JSONObject monetizationAttribute = (JSONObject) monetizationAttributes.get(i);
+            MonetizationAttributeDTO monetizationAttributeDTO = new MonetizationAttributeDTO();
+            monetizationAttributeDTO.setName((String) monetizationAttribute.get(APIConstants.Monetization.ATTRIBUTE));
+            monetizationAttributeDTO.setDescription(
+                    (String) monetizationAttribute.get(APIConstants.Monetization.ATTRIBUTE_DESCRIPTION));
+            monetizationAttributeDTO
+                    .setRequired((Boolean) monetizationAttribute.get(APIConstants.ApplicationAttributes.REQUIRED));
+            monetizationAttributeDTO
+                    .setHidden((Boolean) monetizationAttribute.get(APIConstants.Monetization.IS_ATTRIBUTE_HIDDEN));
+            monetizationAttributeDTOSList.add(monetizationAttributeDTO);
+        }
+        return monetizationAttributeDTOSList;
     }
 }

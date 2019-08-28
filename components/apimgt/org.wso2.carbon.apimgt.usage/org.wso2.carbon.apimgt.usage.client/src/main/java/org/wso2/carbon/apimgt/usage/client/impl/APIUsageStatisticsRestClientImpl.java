@@ -2693,10 +2693,10 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         granularity = configuration.getFirstProperty(
-                APIConstants.MonetizationUsagePublisher.GRANULARITY_PROERTY_LOCATION);
+                APIConstants.Monetization.USAGE_PUBLISHER_GRANULARITY);
         if (StringUtils.isEmpty(granularity)) {
             //set the default granularity to days, if it is not set in configuration
-            granularity = APIConstants.MonetizationUsagePublisher.DEFAULT_GRANULARITY;
+            granularity = APIConstants.Monetization.USAGE_PUBLISH_DEFAULT_GRANULARITY;
         }
         StringBuilder query = new StringBuilder(
                 "from " + APIUsageStatisticsClientConstants.MONETIZATION_USAGE_RECORD_AGG

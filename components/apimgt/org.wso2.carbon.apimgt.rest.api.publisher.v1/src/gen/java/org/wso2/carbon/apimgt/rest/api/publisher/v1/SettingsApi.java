@@ -46,7 +46,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "Settings",  })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK. Environment list is returned. ", response = EnvironmentListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class) })
@@ -55,15 +55,15 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
     }
 
     @GET
-    
+
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Retreive publisher settings", notes = "Retreive publisher settings ", response = SettingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            
+
         })
     }, tags={ "Settings" })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK. Settings returned ", response = SettingsDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Settings does not exist. ", response = ErrorDTO.class) })
     public Response settingsGet() throws APIManagementException{
