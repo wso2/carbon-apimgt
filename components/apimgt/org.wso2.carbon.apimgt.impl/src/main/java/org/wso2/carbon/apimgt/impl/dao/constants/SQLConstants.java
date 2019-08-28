@@ -1807,7 +1807,7 @@ public class SQLConstants {
                     + "AND API_PRODUCT_VERSION = ?";
 
     public static final String GET_AUDIT_UUID_SQL = "SELECT MAP.AUDIT_UUID FROM AM_SECURITY_AUDIT_UUID_MAPPING MAP WHERE " +
-            "API_ID = ?";
+            "MAP.API_ID = ?";
     public static final String ADD_SECURITY_AUDIT_MAP_SQL = "INSERT INTO AM_SECURITY_AUDIT_UUID_MAPPING (API_ID, AUDIT_UUID) " +
             "VALUES (?,?)";
 
