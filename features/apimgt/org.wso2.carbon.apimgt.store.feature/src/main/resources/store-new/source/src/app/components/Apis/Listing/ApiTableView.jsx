@@ -115,7 +115,7 @@ class ApiTableView extends React.Component {
                         '& tr:nth-child(even)': {
                             backgroundColor: '#fff',
                         },
-                    }
+                    },
                 },
                 MUIDataTableBodyCell: {
                     root: {
@@ -157,8 +157,9 @@ class ApiTableView extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
-        const { query } = this.props;
-        if (this.apiType !== this.context.apiType || query !== prevProps.query ) {
+        const { query, selectedTag } = this.props;
+        if ((this.apiType !== this.context.apiType) || query !== prevProps.query ||
+            (prevProps.selectedTag !== selectedTag)) {
             this.apiType = this.context.apiType;
             this.getData();
         }
@@ -176,9 +177,9 @@ class ApiTableView extends React.Component {
     };
 
     xhrRequest = () => {
+        const { query, selectedTag } = this.props;
         const { page, rowsPerPage } = this;
         const { apiType } = this.context;
-        const { query } = this.props;
         const api = new API();
         if (query) {
             const composeQuery = queryString.parse(query);
@@ -187,7 +188,11 @@ class ApiTableView extends React.Component {
             return api.search(composeQuery);
         }
         if (apiType === CONSTS.API_TYPE) {
-            return api.getAllAPIs({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+            if (selectedTag) {
+                return api.getAllAPIs({ query: 'tag:' + selectedTag, limit: this.rowsPerPage, offset: page * rowsPerPage });
+            } else {
+                return api.getAllAPIs({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+            }
         } else {
             const apiProduct = new APIProduct();
             return apiProduct.getAllAPIProducts({ limit: this.rowsPerPage, offset: page * rowsPerPage });

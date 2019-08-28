@@ -602,6 +602,19 @@ export default class API extends Resource {
     }
 
     /**
+     * Get all tags
+     * @returns {promise} promise all tags of APIs
+     */
+    getAllTags() {
+        const promiseGet = this.client.then((client) => {
+            return client.apis.Tags.get_tags(this._requestMetaData());
+        }).catch((error) => {
+            console.error(error);
+        });
+        return promiseGet;
+    }
+
+    /**
      * Get the thumnail of an API
      *
      * @param id {string} UUID of the api
