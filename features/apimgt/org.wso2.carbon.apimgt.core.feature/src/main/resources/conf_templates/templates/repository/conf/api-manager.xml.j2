@@ -850,6 +850,9 @@
                <Attribute required="{{attribute.required}}">
                    <Name>{{attribute.name}}</Name>
                    <Description>{{attribute.description}}</Description>
+                   {% if {{attribute.default is defined}}
+                   <Default>{{attribute.default}}</Default>
+                   {% endif %}
                </Attribute>
                {% endfor %}
             </AdditionalAttributes>

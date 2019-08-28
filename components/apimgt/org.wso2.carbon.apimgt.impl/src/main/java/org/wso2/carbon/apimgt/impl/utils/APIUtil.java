@@ -8784,10 +8784,4 @@ public final class APIUtil {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getMonetizationAttributes();
     }
-
-    public static boolean isMonetizationEnabled() {
-        return (StringUtils.isEmpty(
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                        .getFirstProperty(APIConstants.Monetization.MONETIZATION_IMPL)));
-    }
 }
