@@ -26,7 +26,7 @@ import Table from '@material-ui/core/Table';
 import TablePagination from '@material-ui/core/TablePagination';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import Alert from 'AppComponents/Base/Alert';
+import Alert from 'AppComponents/Shared/Alert';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import Application from 'AppData/Application';
 import NewApp from 'AppComponents/Applications/Create/NewApp';
@@ -118,7 +118,6 @@ class Listing extends Component {
             order: 'asc',
             orderBy: 'name',
             data: null,
-            alertMessage: null,
             page: 0,
             rowsPerPage: 10,
             open: false,
@@ -236,7 +235,8 @@ class Listing extends Component {
         promisedDelete.then((ok) => {
             if (ok) {
                 newData.delete(id);
-                this.setState({ data: newData, alertMessage: message });
+                Alert.info(message);
+                this.setState({ data: newData });
             }
         });
     }
@@ -246,7 +246,7 @@ class Listing extends Component {
      */
     render() {
         const {
-            data, order, orderBy, alertMessage, rowsPerPage, page, open, isApplicationSharingEnabled,
+            data, order, orderBy, rowsPerPage, page, open, isApplicationSharingEnabled,
         } = this.state;
         if (!data) {
             return <Loading />;
@@ -314,7 +314,6 @@ class Listing extends Component {
                         </div>
                     )}
                 </div>
-                {alertMessage && <Alert message={alertMessage} />}
                 <Grid container spacing={0} justify='center'>
                     <Grid item xs={12}>
                         {data.size > 0 ? (

@@ -41,7 +41,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import cloneDeep from 'lodash.clonedeep';
-import isEmpty from 'lodash.isEmpty';
+import isEmpty from 'lodash/isEmpty';
 import Api from 'AppData/api';
 import CONSTS from 'AppData/Constants';
 import { Progress } from 'AppComponents/Shared';

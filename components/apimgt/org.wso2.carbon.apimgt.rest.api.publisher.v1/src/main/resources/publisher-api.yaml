@@ -94,7 +94,7 @@ securityDefinitions:
       apim:ep_certificates_view: View backend endpoint certificates
       apim:ep_certificates_add: Add backend endpoint certificates
       apim:ep_certificates_update: Update and delete backend endpoint certificates
-      apim:publisher_setting: Retrieve store settings
+      apim:publisher_settings: Retrieve store settings
 
 security:
   - OAuth2Security:

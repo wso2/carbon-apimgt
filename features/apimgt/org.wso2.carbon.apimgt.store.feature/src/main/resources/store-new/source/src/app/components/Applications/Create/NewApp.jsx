@@ -100,7 +100,17 @@ class NewApp extends React.Component {
      * @memberof NewApp
      */
     componentDidMount() {
-        // Get all the tires to populate the drop down.
+        this.initApplicationState();
+        this.isApplicationGroupSharingEnabled();
+    }
+
+    /**
+     * Used to initialize the component state
+     * @param {boolean} reset should it be reset to initial state or not
+     * @memberof NewApp
+     */
+    initApplicationState = (reset = false) => {
+        // Get all the tiers to populate the drop down.
         const api = new API();
         const promiseTiers = api.getAllTiers('application');
         const promisedAttributes = api.getAllApplicationAttributes();
@@ -118,6 +128,12 @@ class NewApp extends React.Component {
                 if (allAttributes.length > 0) {
                     newRequest.attributes = allAppAttributes.filter(item => !item.hidden);
                 }
+                if (reset) {
+                    newRequest.name = '';
+                    newRequest.description = '';
+                    newRequest.tokenType = 'OAUTH';
+                    newRequest.groups = null;
+                }
                 this.setState({ applicationRequest: newRequest, throttlingPolicyList, allAppAttributes });
             })
             .catch((error) => {
@@ -130,7 +146,6 @@ class NewApp extends React.Component {
                     this.setState({ notFound: true });
                 }
             });
-        this.isApplicationGroupSharingEnabled();
     }
 
     /**
@@ -228,6 +243,7 @@ class NewApp extends React.Component {
                 console.log('Application created successfully.');
                 handleClose();
                 updateApps();
+                this.initApplicationState(true);
             })
             .catch((error) => {
                 const { response } = error;
@@ -308,7 +324,6 @@ class NewApp extends React.Component {
     render() {
         const {
             throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled,
-            handleAddChip, handleDeleteChip,
         } = this.state;
         const {
             classes, open, handleClickOpen, handleClose,
