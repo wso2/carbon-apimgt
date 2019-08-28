@@ -6663,6 +6663,35 @@ public final class APIUtil {
     }
 
     /**
+     * This method gets the RESTAPIScopes configuration from REST_API_SCOPE_CACHE if available, if not from
+     * tenant-conf.json in registry.
+     *
+     * @param tenantDomain tenant domain name
+     * @return Map of scopes which contains scope names and associated role list
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, String> getRESTAPIScopesForTenant(String tenantDomain) {
+        Map<String, String> restAPIScopes;
+        restAPIScopes = (Map) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                .getCache(APIConstants.REST_API_SCOPE_CACHE)
+                .get(tenantDomain);
+        if (restAPIScopes == null) {
+            try {
+                restAPIScopes =
+                        APIUtil.getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain));
+                //call load tenant config for rest API.
+                //then put cache
+                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                        .getCache(APIConstants.REST_API_SCOPE_CACHE)
+                        .put(tenantDomain, restAPIScopes);
+            } catch (APIManagementException e) {
+                log.error("Error while getting REST API scopes for tenant: " + tenantDomain, e);
+            }
+        }
+        return restAPIScopes;
+    }
+
+    /**
      * @param tenantDomain Tenant domain to be used to get default role configurations
      * @return JSON object which contains configuration for default roles
      * @throws APIManagementException
@@ -7810,6 +7839,21 @@ public final class APIUtil {
     }
 
     /**
+     * Used to check whether Provisioning Out-of-Band OAuth Clients feature is enabled
+     *
+     * @return true if feature is enabled
+     */
+    public static boolean isMapExistingAuthAppsEnabled() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String mappingEnabled = config.getFirstProperty(APIConstants.API_STORE_MAP_EXISTING_AUTH_APPS);
+        if (mappingEnabled == null) {
+            return false;
+        }
+        return Boolean.parseBoolean(mappingEnabled);
+    }
+
+    /**
      * Used to reconstruct the input search query as sub context and doc content doesn't support AND search
      *
      * @param query Input search query
@@ -8715,4 +8759,23 @@ public final class APIUtil {
                 APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR;
     }
 
+    /**
+     * Check whether the user has the given role
+     *
+     * @param username Logged-in username
+     * @param roleName role that needs to be checked
+     * @throws UserStoreException
+     */
+    public static boolean checkIfUserInRole(String username, String roleName) throws UserStoreException {
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
+        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .getTenantId(tenantDomain);
+
+        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+        UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
+        org.wso2.carbon.user.core.UserStoreManager manager = realm.getUserStoreManager();
+        AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
+        return abstractManager.isUserInRole(tenantAwareUserName, roleName);
+    }
 }

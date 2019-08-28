@@ -43,9 +43,11 @@ public class SettingsMappingUtil {
             settingsDTO.setGrantTypes(APIUtil.getGrantTypes());
             settingsDTO.setScopes(GetScopeList());
             settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
+            settingsDTO.setMapExistingAuthApps(APIUtil.isMapExistingAuthAppsEnabled());
         } else {
             settingsDTO.setScopes(GetScopeList());
             settingsDTO.setApplicationSharingEnabled(APIUtil.isMultiGroupAppSharingEnabled());
+            settingsDTO.setMapExistingAuthApps(APIUtil.isMapExistingAuthAppsEnabled());
         }
         return settingsDTO;
     }

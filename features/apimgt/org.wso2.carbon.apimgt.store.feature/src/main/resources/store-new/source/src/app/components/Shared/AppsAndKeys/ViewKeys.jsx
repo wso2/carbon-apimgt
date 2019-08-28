@@ -392,7 +392,7 @@ class ViewKeys extends React.Component {
                                 </div>
                                 <FormControl>
                                     <FormHelperText id='access-token-helper-text'>
-                                        {`Above token has a validity period of ${validityPeriod}seconds.
+                                        {`Above token has a validity period of ${validityPeriod} seconds.
                                             And the token has (${accessTokenScopes.join(', ')}) scopes.`}
                                     </FormHelperText>
                                 </FormControl>
@@ -482,7 +482,7 @@ class ViewKeys extends React.Component {
         ) : (
             <React.Fragment>
                 <Typography variant='caption' gutterBottom className={classes.noKeyMessageBox}>
-                    {keyType}
+                    {keyType + ' '}
                     <FormattedMessage
                         id='Shared.AppsAndKeys.ViewKeys.key.secret.title'
                         defaultMessage='Key and Secret is not generated for this application'

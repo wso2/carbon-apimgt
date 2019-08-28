@@ -554,6 +554,7 @@ public final class APIConstants {
     public static final String SCOPE_CACHE_ENABLED = CACHE_CONFIGS + "EnableScopeCache";
     public static final String PUBLISHER_ROLE_CACHE_ENABLED = CACHE_CONFIGS + "EnablePublisherRoleCache";
     public static final String DEFAULT_CACHE_TIMEOUT = "Cache.DefaultCacheTimeout";
+    public static final String REST_API_SCOPE_CACHE = "REST_API_SCOPE_CACHE";
 
     public static final String API_KEY_VALIDATOR = "APIKeyValidator.";
     public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
@@ -625,6 +626,7 @@ public final class APIConstants {
     public static final String API_STORE_FORUM_ENABLED = API_STORE + "isStoreForumEnabled";
     public static final String MULTI_TENANT_USER_ADMIN_SERVICE = "MultiTenantUserAdminService";
     public static final String API_STORE_GROUP_EXTRACTOR_CLAIM_URI = API_STORE + "DefaultGroupExtractorClaimUri";
+    public static final String API_STORE_MAP_EXISTING_AUTH_APPS = API_STORE + "MapExistingAuthApps";
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
 
     public static final String API_PUBLISHER = "APIPublisher.";
