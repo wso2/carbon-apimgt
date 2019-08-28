@@ -13775,7 +13775,8 @@ public class ApiMgtDAO {
             }
             return uuid;
         } catch (SQLException e) {
-            handleException("Failed to retrieve Security Audit UUID : ", e);
+//            handleException("Failed to retrieve Security Audit UUID : ", e);
+            log.error("Failed to retrieve Security Audit UUID");
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
