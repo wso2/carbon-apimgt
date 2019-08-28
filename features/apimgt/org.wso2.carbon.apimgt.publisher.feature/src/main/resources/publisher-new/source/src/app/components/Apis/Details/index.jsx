@@ -142,10 +142,17 @@ class Details extends Component {
      */
     constructor(props) {
         super(props);
+        const { location } = this.props;
+        const currentLink = location.pathname.match(/[^/]+(?=\/$|$)/g);
+        let active = null;
         const isAPIProduct = null;
+        if (currentLink && currentLink.length > 0) {
+            [active] = currentLink;
+        }
         this.state = {
             api: null,
             apiNotFound: false,
+            active: active || 'overview',
             // updateAPI: this.updateAPI,
             isAPIProduct,
         };
@@ -491,7 +498,7 @@ class Details extends Component {
 
                                 <Route path={Details.subPaths.OPERATIONS} component={() => <Operations api={api} />} />
                                 <Route
-                                    exact
+                                exact
                                     path={Details.subPaths.RESOURCES_PRODUCT}
                                     component={() => <ProductResourcesView api={api} />}
                                 />

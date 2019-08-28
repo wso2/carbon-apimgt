@@ -15,8 +15,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/* eslint-disable array-callback-return */
-
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
@@ -36,6 +34,7 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 
+import APIProduct from 'AppData/APIProduct';
 import API from 'AppData/api';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
@@ -123,32 +122,33 @@ function ProductResourcesEdit() {
     const classes = useStyles();
 
     // Get the current api product object from the context
-    const { api, updateAPI } = useContext(APIContext);
+    const { api, updateAPI, } = useContext(APIContext);
     const apiCopy = JSON.parse(JSON.stringify(api));
     const { apis } = apiCopy;
 
     // Define states
     const [allApis, setAllApis] = useState([]);
     const [notFound, setNotFound] = useState(false);
-    const [checked] = useState([0]);
+    const [checked, setChecked] = useState([0]);
     const [searchText, setSearchText] = useState('');
     const [selectedApiPaths, setSelectedApiPaths] = useState([]);
     const [selectedApi, setSelectedApi] = useState(null);
     const [apiResources, setApiResources] = useState(apis);
 
     // Initialize the rest api libraries
+    const apiProductRestClient = new APIProduct();
     const apiRestClient = new API();
 
     /**
      * This method is filtering apis base on the searchText entered. In no searchText provided it will give all apis.
      *
-     * @param {*} [text=null]
+     * @param {*} [searchText=null]
      * @returns a promise
      */
-    const filterAPIs = (text = null) => {
-        if (text) {
+    const filterAPIs = (searchText = null) => {
+        if (searchText) {
             // Build the search query and update
-            const inputValue = text.trim().toLowerCase();
+            const inputValue = searchText.trim().toLowerCase();
             let composeQuery = SearchParser.parse(inputValue);
             composeQuery = '?query=' + composeQuery;
             const composeQueryJSON = queryString.parse(composeQuery);
@@ -162,14 +162,14 @@ function ProductResourcesEdit() {
     };
 
     // Get the api swagger after an api is selected
-    const getApiSwagger = (apiSelected) => {
-        const { id } = apiSelected;
+    const getApiSwagger = (api) => {
+        const { id } = api;
         const promisedAPI = apiRestClient.getSwagger(id);
         promisedAPI
             .then((response) => {
                 if (response.obj.paths !== undefined) {
                     setSelectedApiPaths(response.obj.paths);
-                    setSelectedApi(apiSelected);
+                    setSelectedApi(api);
                 }
             })
             .catch((error) => {
@@ -196,7 +196,7 @@ function ProductResourcesEdit() {
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') console.log(error);
-                const { status } = error;
+                const status = error.status;
                 if (status === 404) {
                     setNotFound(true);
                 } else if (status === 401) {
@@ -267,19 +267,18 @@ function ProductResourcesEdit() {
         }
     };
     const save = () => {
-        const updatePromise = updateAPI(apiCopy, true);
-        updatePromise
-            .then((response) => {
-                console.info(response);
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') console.log(error);
-                const { status } = error;
-                if (status === 401) {
-                    doRedirectToLogin();
-                }
-            });
-    };
+        const updatePromise = updateAPI(apiCopy,true);
+        updatePromise.then((response) => {
+            console.info(response);     
+        })
+        .catch((error) => {
+            if (process.env.NODE_ENV !== 'production') console.log(error);
+            const status = error.status;
+            if (status === 401) {
+                doRedirectToLogin();
+            }
+        });
+    }
     useEffect(() => {
         // Get all apis
         const apiPromise = filterAPIs();
@@ -296,7 +295,7 @@ function ProductResourcesEdit() {
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') console.log(error);
-                const { status } = error;
+                const status = error.status;
                 if (status === 404) {
                     setNotFound(true);
                 } else if (status === 401) {
@@ -346,24 +345,24 @@ function ProductResourcesEdit() {
                             </ListItem>
                             <div className={classes.apiWrapper}>
                                 <List dense>
-                                    {allApis.map((apiObj) => {
-                                        const labelId = `checkbox-list-label-${apiObj.id}`;
+                                    {allApis.map((api) => {
+                                        const labelId = `checkbox-list-label-${api.id}`;
 
                                         return (
                                             <ListItem
-                                                key={apiObj.id}
+                                                key={api.id}
                                                 role={undefined}
                                                 dense
                                                 button
                                                 className={
-                                                    selectedApi && apiObj.id === selectedApi.id && classes.selectedApi
+                                                    selectedApi && selectedApi.id === api.id && classes.selectedApi
                                                 }
                                             >
                                                 <ListItemText
                                                     id={labelId}
-                                                    primary={apiObj.name}
-                                                    secondary={`${apiObj.version} - ${apiObj.context}`}
-                                                    onClick={() => getApiSwagger(apiObj)}
+                                                    primary={api.name}
+                                                    secondary={`${api.version} - ${api.context}`}
+                                                    onClick={() => getApiSwagger(api)}
                                                 />
                                             </ListItem>
                                         );
@@ -485,17 +484,17 @@ function ProductResourcesEdit() {
                                 />
                             </div>
                             <div className={classes.treeViewRoot}>
-                                {Object.keys(apiResources).map((key) => {
+                                {Object.keys(apiResources).map((key, indexA) => {
                                     const apiResource = apiResources[key];
                                     return (
-                                        <div key={apiResource.name}>
+                                        <div key={indexA}>
                                             <div className={classes.treeItemMain}>{apiResource.name}</div>
                                             <div className={classes.treeItemMainWrapper}>
-                                                {Object.keys(apiResource.operations).map((innerKey) => {
+                                                {Object.keys(apiResource.operations).map((innerKey, indexB) => {
                                                     const operation = apiResource.operations[innerKey];
                                                     const { target, verb } = operation;
                                                     return (
-                                                        <div key={verb} className={classes.treeItem}>
+                                                        <div key={`${indexA}_${indexB}`} className={classes.treeItem}>
                                                             <Typography variant='body2'>{target}</Typography>
                                                             <MethodView method={verb} className={classes.methodView} />
                                                             <hr className={classes.hr} />
