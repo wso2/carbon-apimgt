@@ -69,7 +69,7 @@ const APIDetailsTopMenu = (props) => {
             <ThumbnailView api={api} width={70} height={50} />
             <div style={{ marginLeft: theme.spacing.unit }}>
                 <Typography variant='h4'>
-                    {api.name} {isAPIProduct ? '' : ':' + api.version}
+                    {api.name} {api.version && <span> : {api.version}</span>}
                 </Typography>
                 <Typography variant='caption' gutterBottom align='left'>
                     Created by: {api.provider}
