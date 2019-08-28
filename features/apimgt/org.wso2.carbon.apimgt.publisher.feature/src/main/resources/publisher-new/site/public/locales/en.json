@@ -523,7 +523,7 @@
   "Apis.Details.Subscriptions.SubscriptionsTable.error.subscription.block.prod.only": "Error: Unable to block subscription. (Reason: {message})",
   "Apis.Details.Subscriptions.SubscriptionsTable.error.subscription.unblock": "Error: Unable to unblock subscription. (Reason: {message})",
   "Apis.Details.Subscriptions.SubscriptionsTable.manage.subscriptions": "Manage Subscriptions",
-  "Apis.Details.Subscriptions.SubscriptionsTable.no.subscriptions": "No subscriptions available",
+  "Apis.Details.Subscriptions.SubscriptionsTable.no.subscriptions": "No subscriptions data available",
   "Apis.Details.Subscriptions.SubscriptionsTable.search": "Search",
   "Apis.Details.Subscriptions.SubscriptionsTable.search.tooltip": "Search subscriptions by Subscriber, Application and Tier",
   "Apis.Details.Subscriptions.SubscriptionsTable.status": "Status",
