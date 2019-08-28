@@ -51,7 +51,7 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
     public void handleMessage(Message message) {
         String username = RestApiUtil.getLoggedInUsername();
         //by-passes the interceptor if user is an annonymous user
-        if (username.equalsIgnoreCase("wso2.anonymous.user")) {
+        if (username.equalsIgnoreCase(APIConstants.WSO2_ANONYMOUS_USER)) {
             return;
         }
 

@@ -18,7 +18,6 @@ public class ApplicationInfoDTO   {
   
     private String applicationId = null;
     private String name = null;
-    private String subscriber = null;
     private String throttlingPolicy = null;
     private String description = null;
     private String status = "";
@@ -59,23 +58,6 @@ public class ApplicationInfoDTO   {
   }
   public void setName(String name) {
     this.name = name;
-  }
-
-  /**
-   **/
-  public ApplicationInfoDTO subscriber(String subscriber) {
-    this.subscriber = subscriber;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "admin", value = "")
-  @JsonProperty("subscriber")
-  public String getSubscriber() {
-    return subscriber;
-  }
-  public void setSubscriber(String subscriber) {
-    this.subscriber = subscriber;
   }
 
   /**
@@ -209,7 +191,6 @@ public class ApplicationInfoDTO   {
     ApplicationInfoDTO applicationInfo = (ApplicationInfoDTO) o;
     return Objects.equals(applicationId, applicationInfo.applicationId) &&
         Objects.equals(name, applicationInfo.name) &&
-        Objects.equals(subscriber, applicationInfo.subscriber) &&
         Objects.equals(throttlingPolicy, applicationInfo.throttlingPolicy) &&
         Objects.equals(description, applicationInfo.description) &&
         Objects.equals(status, applicationInfo.status) &&
@@ -221,7 +202,7 @@ public class ApplicationInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingPolicy, description, status, groups, subscriptionCount, attributes, owner);
+    return Objects.hash(applicationId, name, throttlingPolicy, description, status, groups, subscriptionCount, attributes, owner);
   }
 
   @Override
@@ -231,7 +212,6 @@ public class ApplicationInfoDTO   {
     
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    subscriber: ").append(toIndentedString(subscriber)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");

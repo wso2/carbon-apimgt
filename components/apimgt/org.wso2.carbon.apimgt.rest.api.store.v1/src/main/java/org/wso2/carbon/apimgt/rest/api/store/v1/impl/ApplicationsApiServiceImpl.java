@@ -631,16 +631,21 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
-                String clientId = body.getConsumerKey();
-                String keyType = body.getKeyType().toString();
-                String tokenType = APIConstants.DEFAULT_TOKEN_TYPE;
-                jsonParamObj.put(APIConstants.SUBSCRIPTION_KEY_TYPE, body.getKeyType().toString());
-                jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getConsumerSecret());
-                Map<String, Object> keyDetails = apiConsumer.mapExistingOAuthClient(jsonParamObj.toJSONString(),
-                        username, clientId, application.getName(), keyType, tokenType);
-                ApplicationKeyDTO applicationKeyDTO =
-                        ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
-                return Response.ok().entity(applicationKeyDTO).build();
+                if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                    String clientId = body.getConsumerKey();
+                    String keyType = body.getKeyType().toString();
+                    String tokenType = APIConstants.DEFAULT_TOKEN_TYPE;
+                    jsonParamObj.put(APIConstants.SUBSCRIPTION_KEY_TYPE, body.getKeyType().toString());
+                    jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getConsumerSecret());
+                    Map<String, Object> keyDetails = apiConsumer
+                            .mapExistingOAuthClient(jsonParamObj.toJSONString(), username, clientId,
+                                    application.getName(), keyType, tokenType);
+                    ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil
+                            .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
+                    return Response.ok().entity(applicationKeyDTO).build();
+                } else {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
