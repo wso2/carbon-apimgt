@@ -264,37 +264,37 @@ function Overview(props) {
                                     icon='comments'
                                 />
 
-                                <Typography className={classes.heading} variant='h6'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Overview.comments.title'
-                                        defaultMessage='Comments'
+                                    <Typography className={classes.heading} variant='h6'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.comments.title'
+                                            defaultMessage='Comments'
+                                        />
+                                    </Typography>
+                                </ExpansionPanelSummary>
+                                <ExpansionPanelDetails className={classes.resourceWrapper}>
+                                    {api && <Comments apiId={api.id} showLatest isOverview={true} />}
+                                </ExpansionPanelDetails>
+                                <Divider />
+                                <ExpansionPanelActions className={classes.actionPanel}>
+                                    <Button size='small' color='primary' href={'/store-new/apis/' + api.id + '/comments'}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.comments.show.more'
+                                            defaultMessage='Show More >>'
+                                        />
+                                    </Button>
+                                </ExpansionPanelActions>
+                            </ExpansionPanel>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <ExpansionPanel defaultExpanded>
+                                <ExpansionPanelSummary>
+                                    <CustomIcon
+                                        strokeColor={theme.palette.secondary.main}
+                                        className={classes.iconClass}
+                                        width={24}
+                                        height={24}
+                                        icon='sdk'
                                     />
-                                </Typography>
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails className={classes.resourceWrapper}>
-                                {api && <Comments apiId={api.id} showLatest />}
-                            </ExpansionPanelDetails>
-                            <Divider />
-                            <ExpansionPanelActions className={classes.actionPanel}>
-                                <Button size='small' color='primary'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Overview.comments.show.more'
-                                        defaultMessage='Show More >>'
-                                    />
-                                </Button>
-                            </ExpansionPanelActions>
-                        </ExpansionPanel>
-                    </Grid>
-                    <Grid item xs={12} lg={6}>
-                        <ExpansionPanel defaultExpanded>
-                            <ExpansionPanelSummary>
-                                <CustomIcon
-                                    strokeColor={theme.palette.secondary.main}
-                                    className={classes.iconClass}
-                                    width={24}
-                                    height={24}
-                                    icon='sdk'
-                                />
 
                                 <Typography className={classes.heading} variant='h6'>
                                     <FormattedMessage
