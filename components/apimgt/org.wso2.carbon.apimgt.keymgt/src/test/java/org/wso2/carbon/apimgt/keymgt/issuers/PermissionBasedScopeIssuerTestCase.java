@@ -76,7 +76,7 @@ public class PermissionBasedScopeIssuerTestCase {
         Map<String, String> scopes = new HashMap<String, String>();
         scopes.put("default", "default");
         PowerMockito.when(APIUtil.getRESTAPIScopesFromConfig(Mockito.any())).thenReturn(scopes);
-        Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
+        Mockito.when(cacheManager.getCache(APIConstants.REST_API_SCOPE_CACHE)).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         PermissionBasedScopeIssuer permissionBasedScopeIssuer =
@@ -106,7 +106,7 @@ public class PermissionBasedScopeIssuerTestCase {
 
         PowerMockito.mockStatic(Caching.class);
         PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
-        Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
+        Mockito.when(cacheManager.getCache(APIConstants.REST_API_SCOPE_CACHE)).thenReturn(cache);
         Map<String, String> restAPIScopesOfCurrentTenant = new HashMap<String, String>();
         Mockito.when(cache.get(Mockito.anyString())).thenReturn(restAPIScopesOfCurrentTenant);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
@@ -138,7 +138,7 @@ public class PermissionBasedScopeIssuerTestCase {
     @Test
     public void testGetScopesHandleException() throws Exception {
 
-        Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
+        Mockito.when(cacheManager.getCache(APIConstants.REST_API_SCOPE_CACHE)).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         PermissionBasedScopeIssuer permissionBasedScopeIssuer =
@@ -160,7 +160,7 @@ public class PermissionBasedScopeIssuerTestCase {
     @Test
     public void testGetAuthorizedScopes() throws Exception {
 
-        Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
+        Mockito.when(cacheManager.getCache(APIConstants.REST_API_SCOPE_CACHE)).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(-1234);
         PowerMockito.mockStatic(Caching.class);
@@ -195,7 +195,7 @@ public class PermissionBasedScopeIssuerTestCase {
     @Test
     public void testGetAuthorizedScopesWhenTenantISMinusOne() throws Exception {
 
-        Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
+        Mockito.when(cacheManager.getCache(APIConstants.REST_API_SCOPE_CACHE)).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(-1);
         PowerMockito.mockStatic(Caching.class);
@@ -230,7 +230,7 @@ public class PermissionBasedScopeIssuerTestCase {
     @Test
     public void testGetAuthorizedScopesWhenTenantISZero() throws Exception {
 
-        Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
+        Mockito.when(cacheManager.getCache(APIConstants.REST_API_SCOPE_CACHE)).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(0);
         PowerMockito.mockStatic(Caching.class);
@@ -267,7 +267,7 @@ public class PermissionBasedScopeIssuerTestCase {
 
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(authorizationManager);
         Mockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userRealm);
-        Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
+        Mockito.when(cacheManager.getCache(APIConstants.REST_API_SCOPE_CACHE)).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(0);
         PowerMockito.mockStatic(Caching.class);
@@ -304,7 +304,7 @@ public class PermissionBasedScopeIssuerTestCase {
 
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(authorizationManager);
         Mockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userRealm);
-        Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
+        Mockito.when(cacheManager.getCache(APIConstants.REST_API_SCOPE_CACHE)).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(0);
         PowerMockito.mockStatic(Caching.class);
@@ -340,7 +340,7 @@ public class PermissionBasedScopeIssuerTestCase {
 
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(null);
         Mockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userRealm);
-        Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
+        Mockito.when(cacheManager.getCache(APIConstants.REST_API_SCOPE_CACHE)).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(0);
         PowerMockito.mockStatic(Caching.class);
@@ -377,7 +377,7 @@ public class PermissionBasedScopeIssuerTestCase {
 
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(null);
         Mockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userRealm);
-        Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
+        Mockito.when(cacheManager.getCache(APIConstants.REST_API_SCOPE_CACHE)).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(0);
         PowerMockito.mockStatic(Caching.class);
@@ -415,7 +415,7 @@ public class PermissionBasedScopeIssuerTestCase {
 
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(null);
         Mockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userRealm);
-        Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
+        Mockito.when(cacheManager.getCache(APIConstants.REST_API_SCOPE_CACHE)).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(0);
         PowerMockito.mockStatic(Caching.class);
@@ -452,7 +452,7 @@ public class PermissionBasedScopeIssuerTestCase {
 
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(null);
         Mockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userRealm);
-        Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
+        Mockito.when(cacheManager.getCache(APIConstants.REST_API_SCOPE_CACHE)).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(0);
         PowerMockito.mockStatic(Caching.class);
@@ -487,7 +487,7 @@ public class PermissionBasedScopeIssuerTestCase {
     @Test
     public void testGetAuthorizedScopesForUserStoreException() throws Exception {
 
-        Mockito.when(cacheManager.getCache("REST_API_SCOPE_CACHE")).thenReturn(cache);
+        Mockito.when(cacheManager.getCache(APIConstants.REST_API_SCOPE_CACHE)).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         PowerMockito.mockStatic(Caching.class);
         PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);

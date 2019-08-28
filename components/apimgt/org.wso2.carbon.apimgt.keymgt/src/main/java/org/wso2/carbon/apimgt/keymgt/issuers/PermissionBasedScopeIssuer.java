@@ -47,7 +47,6 @@ public class PermissionBasedScopeIssuer extends AbstractScopesIssuer {
     private static final String DEFAULT_SCOPE_NAME = "default";
     private static final String ISSUER_PREFIX = "perm";
     private static final String UI_EXECUTE = "ui.execute";
-    private static final String REST_API_SCOPE_CACHE = "REST_API_SCOPE_CACHE";
 
     @Override
     public String getPrefix(){
