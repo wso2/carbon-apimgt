@@ -18,6 +18,7 @@
 
 import SwaggerClient from 'swagger-client';
 import { Mutex } from 'async-mutex';
+import Configurations from 'Config';
 import AuthManager from './AuthManager';
 import Utils from './Utils';
 
@@ -122,6 +123,21 @@ class APIClient {
             if (data.headers.etag) {
                 APIClient.addETag(data.url, data.headers.etag);
             }
+
+            // If an unauthenticated response is received, we check whether the token is valid by introspecting it.
+            // If it is not valid, we need to clear the stored tokens (in cookies etc) in the browser by redirecting the
+            //   user to logout.
+            if (data.status === 401 && data.obj != null && data.obj.description === 'Unauthenticated request') {
+                const userData = AuthManager.getUserFromToken();
+                userData.then((user) => {
+                    if (user == null) {
+                        window.location = Configurations.app.context + Utils.CONST.LOGOUT_CALLBACK;
+                    }
+                }).catch((error) => {
+                    console.error('Error occurred while checking token status. Hence redirecting to login', error);
+                    window.location = Configurations.app.context + Utils.CONST.LOGOUT_CALLBACK;
+                });
+            }
             return data;
         };
     }
@@ -173,10 +189,8 @@ class APIClient {
                 });
             });
 
-            if (
-                APIClient.getETag(request.url) &&
-                (request.method === 'PUT' || request.method === 'DELETE' || request.method === 'POST')
-            ) {
+            if (APIClient.getETag(request.url) &&
+                (request.method === 'PUT' || request.method === 'DELETE' || request.method === 'POST')) {
                 request.headers['If-Match'] = APIClient.getETag(request.url);
             }
             return promise;

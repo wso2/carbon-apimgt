@@ -1,3 +1,4 @@
+const APP_CONTEXT = '/store-new';
 const Configurations = {
     themes: {
         light: {
@@ -142,5 +143,8 @@ const Configurations = {
                 },
             },
         },
+    },
+    app: {
+        context: APP_CONTEXT,
     },
 };

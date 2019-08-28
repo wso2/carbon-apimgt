@@ -69,6 +69,14 @@ export default class User {
     }
 
     /**
+     * Get the JS accessible refresh token fragment from cookie storage.
+     * @returns {String|null}
+     */
+    getRefreshPartialToken() {
+        return Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1);
+    }
+
+    /**
      * Store the JavaScript accessible access token segment in cookie storage
      * @param {String} newToken : Part of the access token which needs when accessing REST API
      * @param {Number} validityPeriod : Validity period of the cookie in seconds
@@ -120,6 +128,7 @@ export default class User {
 User.CONST = {
     WSO2_AM_TOKEN_MSF4J: "WSO2_AM_TOKEN_MSF4J",
     WSO2_AM_TOKEN_1: "WSO2_AM_TOKEN_1",
+    WSO2_AM_REFRESH_TOKEN_1: 'WSO2_AM_REFRESH_TOKEN_1',
     LOCALSTORAGE_USER: "wso2_user_store"
 };
 /**
