@@ -27,6 +27,7 @@ import {
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import cloneDeep from 'lodash.clonedeep';
 
 import EndpointListing from './EndpointListing';
 import { getEndpointTemplateByType, getEndpointTypeProperty } from './endpointUtils';
@@ -173,7 +174,7 @@ function EndpointOverview(props) {
     const editEndpoint = (index, category, url) => {
         let modifiedEndpoint = null;
         // Make a copy of the endpoint config.
-        const endpointConfigCopy = JSON.parse(JSON.stringify(epConfig));
+        const endpointConfigCopy = cloneDeep(epConfig);
 
         /*
         * If the index > 0, it means that the endpoint is load balance or fail over.
@@ -220,7 +221,7 @@ function EndpointOverview(props) {
      * @param {string} newURL The url of the new endpoint.
      * */
     const addEndpoint = (category, type, newURL) => {
-        const endpointConfigCopy = JSON.parse(JSON.stringify(epConfig));
+        const endpointConfigCopy = cloneDeep(epConfig);
         let endpointTemplate = {};
         if (endpointType.key === 'address' || type === 'failover') {
             endpointTemplate = {
@@ -405,7 +406,7 @@ function EndpointOverview(props) {
     const saveAdvanceConfig = (advanceConfig) => {
         const endpointConfigProperty =
             getEndpointTypeProperty(advanceConfigOptions.type, advanceConfigOptions.category);
-        const selectedEndpoints = JSON.parse(JSON.stringify(epConfig[endpointConfigProperty]));
+        const selectedEndpoints = cloneDeep(epConfig[endpointConfigProperty]);
         if (Array.isArray(selectedEndpoints)) {
             if (advanceConfigOptions.type === 'failover') {
                 selectedEndpoints[advanceConfigOptions.index - 1].config = advanceConfig;
@@ -431,7 +432,7 @@ function EndpointOverview(props) {
             <Grid container xs={12}>
                 <Grid container item xs={12}>
                     <GeneralConfiguration
-                        epConfig={(JSON.parse(JSON.stringify(epConfig)))}
+                        epConfig={(cloneDeep(epConfig))}
                         endpointSecurityInfo={endpointSecurityInfo}
                         onChangeEndpointCategory={onChangeEndpointCategory}
                         handleToggleEndpointSecurity={handleToggleEndpointSecurity}
