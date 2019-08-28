@@ -598,13 +598,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                 // Attach API Definition to property called specfile to be sent in the request
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append("{\n");
-                stringBuilder.append("  \"specfile\":   ").append(Base64Utils.encode(apiDefinition.getBytes("UTF-8"))).append("\n");
+                stringBuilder.append("  \"specfile\":   \"").append(Base64Utils.encode(apiDefinition.getBytes("UTF-8"))).append("\" \n");
                 stringBuilder.append("}");
 
                 // Logic for HTTP Request
-                URL auditURL = new URL("https://platform.42crunch.com/api/v1/apis/" + uuid);
-                try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil.getHttpClient(auditURL.getPort(), auditURL.getProtocol())) {
-                    HttpPut httpPut = new HttpPut(String.valueOf(auditURL));
+                String putUrl = "https://platform.42crunch.com/api/v1/apis/" + uuid;
+                URL updateApiUrl = new URL(putUrl);
+                try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil.getHttpClient(updateApiUrl.getPort(), updateApiUrl.getProtocol())) {
+                    HttpPut httpPut = new HttpPut(putUrl);
 
                     // Set the header properties of the request
                     httpPut.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
@@ -618,27 +619,23 @@ public class ApisApiServiceImpl implements ApisApiService {
                             log.debug("HTTP status " + response.getStatusLine().getStatusCode());
                         }
                         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                            BufferedReader reader = new BufferedReader(
-                                    new InputStreamReader(response.getEntity().getContent()));
-                            String inputLine;
-                            StringBuilder responseString = new StringBuilder();
-
-                            while ((inputLine = reader.readLine()) != null) {
-                                responseString.append(inputLine);
-                            }
-
-                            return Response.ok().entity(responseString.toString()).build();
+//                            BufferedReader reader = new BufferedReader(
+//                                    new InputStreamReader(response.getEntity().getContent()));
+//                            String inputLine;
+//                            StringBuilder responseString = new StringBuilder();
+//
+//                            while ((inputLine = reader.readLine()) != null) {
+//                                responseString.append(inputLine);
+//                            }
+                            log.info("API Definition successfully updated");
                         } else {
-                            throw new APIManagementException("Error while sending data to " + auditURL +
+                            throw new APIManagementException("Error while sending data to " + putUrl +
                                     ". Found http status " + response.getStatusLine());
                         }
                     } finally {
                         httpPut.releaseConnection();
                     }
                 }
-            } else {
-                // Insert POST Request here
-
             }
 
             // Logic for the HTTP request
