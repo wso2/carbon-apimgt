@@ -18,10 +18,11 @@
 import React from 'react';
 import { useTheme } from '@material-ui/styles';
 import Chip from '@material-ui/core/Chip';
+import PropTypes from 'prop-types';
 
 function MethodView(props) {
     const theme = useTheme();
-    const { method, className, } = props;
+    const { method, className } = props;
     let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[method.toLowerCase()] : null;
     let chipTextColor = '#000000';
     if (!chipColor) {
@@ -30,7 +31,17 @@ function MethodView(props) {
     } else {
         chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[method.toLowerCase()]);
     }
-    return <Chip label={method} className={className ? className : ''} style={{ backgroundColor: chipColor, color: chipTextColor, height: 20 }} />;
+    return (
+        <Chip
+            label={method}
+            className={className || ''}
+            style={{ backgroundColor: chipColor, color: chipTextColor, height: 20 }}
+        />
+    );
 }
+MethodView.propTypes = {
+    className: PropTypes.string.isRequired,
+    method: PropTypes.string.isRequired,
+};
 
 export default MethodView;

@@ -179,5 +179,8 @@ LeftMenuItem.propTypes = {
     Icon: PropTypes.element.isRequired,
     text: PropTypes.string.isRequired,
     to: PropTypes.string.isRequired,
+    history: PropTypes.shape({
+        location: PropTypes.string.isRequired,
+    }).isRequired,
 };
 export default withRouter(withStyles(styles, { withTheme: true })(LeftMenuItem));
