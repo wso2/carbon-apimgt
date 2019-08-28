@@ -835,10 +835,10 @@ class API extends Resource {
      * @param {String} apiId API UUID
      * @returns {Promise} With given callback attached to the success chain else API invoke promise.
      */
-    subscriptions(id, callback = null) {
+    subscriptions(apiId, offset = null, limit = null, query = null, callback = null) {
         const promise_subscription = this.client.then((client) => {
             return client.apis['Subscriptions'].get_subscriptions({
-                apiId: id
+                apiId, limit, offset, query
             }, this._requestMetaData());
         });
         if (callback) {

@@ -105,20 +105,27 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             SubscriptionListDTO subscriptionListDTO;
+            List<SubscribedAPI> apiUsages;
 
             if (apiId != null) {
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-                List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
-                subscriptionListDTO = SubscriptionMappingUtil
-                        .fromSubscriptionListToDTO(apiUsages, limit, offset, query);
-                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, "", limit, offset,
-                        apiUsages.size());
+                apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
             } else {
                 UserApplicationAPIUsage[] allApiUsage = apiProvider.getAllAPIUsageByProvider(username);
-                subscriptionListDTO = SubscriptionMappingUtil.fromUserApplicationAPIUsageArrayToDTO(allApiUsage, limit,
-                        offset, query);
-                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, "", "", limit, offset,
-                        allApiUsage.length);
+                apiUsages = SubscriptionMappingUtil.fromUserApplicationAPIUsageArrayToSubscribedAPIList(allApiUsage);
+            }
+
+            if (query != null && !query.isEmpty()) {
+                SubscriptionListDTO filteredSubscriptionList = SubscriptionMappingUtil
+                        .fromSubscriptionListToDTO(apiUsages, query);
+                subscriptionListDTO =
+                        SubscriptionMappingUtil.getPaginatedSubscriptions(filteredSubscriptionList, limit, offset);
+                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, "", limit,
+                        offset, filteredSubscriptionList.getCount());
+            } else {
+                subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(apiUsages, limit, offset);
+                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, "", limit, offset,
+                        apiUsages.size());
             }
 
             return Response.ok().entity(subscriptionListDTO).build();
