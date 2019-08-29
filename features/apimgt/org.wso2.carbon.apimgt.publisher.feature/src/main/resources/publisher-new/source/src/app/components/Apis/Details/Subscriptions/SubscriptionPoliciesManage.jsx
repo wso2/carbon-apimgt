@@ -96,6 +96,8 @@ class SubscriptionPoliciesManage extends Component {
         updatedAPI.policies = updatedSelectedPolicies;
         apiClient.update(updatedAPI)
             .then((res) => {
+                // todo remove the following es-lint disable when update API method call return is changed
+                // eslint-disable-next-line no-underscore-dangle
                 this.api = res._data;
                 this.setState({ selectedSubscriptionPolicies: updatedSelectedPolicies, updateInProgress: false });
                 Alert.info(intl.formatMessage({
