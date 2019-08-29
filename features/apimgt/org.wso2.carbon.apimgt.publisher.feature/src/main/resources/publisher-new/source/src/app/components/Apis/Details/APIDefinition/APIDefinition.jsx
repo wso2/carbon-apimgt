@@ -41,13 +41,13 @@ import yaml from 'js-yaml';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api.js';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
+import APISecurityAudit from 'source/src/app/components/Apis/Details/APIDefinition/APISecurityAudit';
 
 import Dropzone from 'react-dropzone';
 import json2yaml from 'json2yaml';
 import SwaggerParser from 'swagger-parser';
 
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
-// import APISecurityAudit from './APISecurityAudit';
 
 const EditorDialog = React.lazy(() => import('./SwaggerEditorDrawer'));
 
@@ -104,6 +104,7 @@ class APIDefinition extends React.Component {
             graphQL: null,
             format: null,
             convertTo: null,
+            isAuditApiClicked: false,
         };
         this.onDrop = this.onDrop.bind(this);
         this.handleNo = this.handleNo.bind(this);
@@ -190,16 +191,10 @@ class APIDefinition extends React.Component {
     }
 
     /**
-         * Audit the API Definition
-         * @returns {string} the swagger definition
+         * Set isAuditApiClicked to true when Audit API is clicked
          */
     onAuditApiClick() {
-        const { swagger } = this.state;
-        if (this.hasJsonStructure(swagger) === false) {
-            // Add logic to open up Report UI
-            this.onChangeFormatClick();
-        }
-        return swagger;
+        this.setState({ isAuditApiClicked: true });
     }
 
     /**
@@ -418,7 +413,7 @@ class APIDefinition extends React.Component {
      */
     render() {
         const {
-            swagger, graphQL, openEditor, openDialog, format, convertTo, notFound,
+            swagger, graphQL, openEditor, openDialog, format, convertTo, notFound, isAuditApiClicked,
         } = this.state;
         const { classes, resourceNotFountMessage, api } = this.props;
         let downloadLink;
@@ -497,7 +492,6 @@ class APIDefinition extends React.Component {
                         </a>
                         {/**
                            * Code for the Audit API button
-                           * TODO - Add onClick for the button
                         */}
                         <Button size='small' className={classes.button} onClick={this.onAuditApiClick}>
                             <LockRounded className={classes.buttonIcon} />
@@ -520,13 +514,18 @@ class APIDefinition extends React.Component {
                     }
                 </div>
                 <div>
-                    <MonacoEditor
-                        width='100%'
-                        height='calc(100vh - 51px)'
-                        theme='vs-dark'
-                        value={swagger !== null ? swagger : graphQL}
-                        options={editorOptions}
-                    />
+                    {isAuditApiClicked ? (
+                        // API Security Audit
+                        <APISecurityAudit />
+                    ) : (
+                        <MonacoEditor
+                            width='100%'
+                            height='calc(100vh - 51px)'
+                            theme='vs-dark'
+                            value={swagger !== null ? swagger : graphQL}
+                            options={editorOptions}
+                        />
+                    )}
                 </div>
                 <Dialog fullScreen open={openEditor} onClose={this.closeEditor} TransitionComponent={this.transition}>
                     <Paper square className={classes.popupHeader}>
