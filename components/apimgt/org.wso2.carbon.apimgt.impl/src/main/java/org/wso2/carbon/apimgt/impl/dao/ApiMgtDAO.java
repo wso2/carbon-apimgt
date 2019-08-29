@@ -829,6 +829,9 @@ public class ApiMgtDAO {
                             applicationName + " was blocked");
                     throw new SubscriptionBlockedException("Subscription to API/API Product " + identifier.getName() + " through " +
                             "application " + applicationName + " was blocked");
+                } else if (APIConstants.SubscriptionStatus.REJECTED.equals(subStatus)) {
+                    throw new SubscriptionBlockedException("Subscription to API " + identifier.getName()
+                            + " through application " + applicationName + " was rejected");
                 }
             }
 
