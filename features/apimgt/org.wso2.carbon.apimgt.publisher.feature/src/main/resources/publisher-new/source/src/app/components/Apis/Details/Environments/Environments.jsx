@@ -51,6 +51,7 @@ export default function Environments() {
         updateAPI({ gatewayEnvironments }).then(() => Alert.info('API Update Successfully'));
     }
 
+    // TODO: Get environments from setting API
     const environments =
         {
             environment: [
