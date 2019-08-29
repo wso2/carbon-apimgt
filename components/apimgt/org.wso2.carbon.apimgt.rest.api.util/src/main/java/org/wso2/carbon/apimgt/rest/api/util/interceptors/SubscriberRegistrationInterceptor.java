@@ -30,19 +30,24 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.cache.Cache;
+import javax.cache.Caching;
+
 public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor {
 
     private static final Log logger = LogFactory.getLog(SubscriberRegistrationInterceptor.class);
-    
+
     public SubscriberRegistrationInterceptor() {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
         super(Phase.PRE_INVOKE);
     }
 
     /**
-     * Handles the incoming message after post authentication. Only used in Store REST API, to register a newly 
-     * signed up store user who hasn't logged in to Store for the first time either via REST API or Store UI. 
-     * This method will register the user as a subscriber 
+     * Handles the incoming message after post authentication. Only used in Store REST API, to register a newly
+     * signed up store user who hasn't logged in to Store for the first time either via REST API or Store UI.
+     * This method will register the user as a subscriber
      * (register in AM_SUBSCRIBER table, add the default application for subscriber etc.).
      *
      * @param message cxf message
@@ -51,10 +56,18 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
     public void handleMessage(Message message) {
         String username = RestApiUtil.getLoggedInUsername();
         //by-passes the interceptor if user is an annonymous user
-        if (username.equalsIgnoreCase("wso2.anonymous.user")) {
+        if (username.equalsIgnoreCase(APIConstants.WSO2_ANONYMOUS_USER)) {
             return;
         }
 
+        // checking if the subscriber exists in the subscriber cache
+        Cache<String, Subscriber> subscriberCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                        .getCache(APIConstants.API_SUBSCRIBER_CACHE);
+        if (subscriberCache.get(username) != null) {
+            return;
+        }
+
+        // check the existence in the database
         String groupId = RestApiUtil.getLoggedInUserGroupId();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         try {
@@ -62,24 +75,35 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             Subscriber subscriber = apiConsumer.getSubscriber(username);
             if (subscriber == null) {
-                try {
-                    APIUtil.checkPermission(username, APIConstants.Permissions.API_SUBSCRIBE);
-                } catch (APIManagementException e) {
-                    // When user does not have subscribe permission we will log it and continue flow.
-                    // This happens when user tries to access anonymous apis although he does not have subscribe 
-                    // permission. It should be allowed.
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("User " + username + " does not have subscribe permission", e);
+                synchronized (this) {
+                    subscriber = apiConsumer.getSubscriber(username);
+                    if (subscriber == null) {
+                        try {
+                            APIUtil.checkPermission(username, APIConstants.Permissions.API_SUBSCRIBE);
+                        } catch (APIManagementException e) {
+                            // When user does not have subscribe permission we will log it and continue flow.
+                            // This happens when user tries to access anonymous apis although he does not have subscribe
+                            // permission. It should be allowed.
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("User " + username + " does not have subscribe permission", e);
+                            }
+                            return;
+                        }
+                        if (!APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain)) {
+                            loadTenantRegistry();
+                        }
+                        apiConsumer.addSubscriber(username, groupId);
+
+                        // The subscriber object added here is not a complete subscriber object. It will only contain
+                        //  username
+                        subscriberCache.put(username, new Subscriber(username));
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Subscriber " + username + " added to AM_SUBSCRIBER database");
+                        }
                     }
-                    return;
                 }
-                if (!APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain)) {
-                    loadTenantRegistry();
-                }
-                apiConsumer.addSubscriber(username, groupId);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Subscriber " + username + " added to AM_SUBSCRIBER database");
-                }
+            } else {
+                subscriberCache.put(username, subscriber);
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Unable to add the subscriber " + username, e, logger);
