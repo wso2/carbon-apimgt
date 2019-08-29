@@ -81,6 +81,9 @@ const styles = theme => ({
     linkToTest: {
         textDecoration: 'none',
     },
+    button: {
+        textDecoration: 'none',
+    },
 });
 const ExpansionPanelSummary = withStyles({
     root: {
@@ -275,13 +278,15 @@ function Overview(props) {
                                     {api && <Comments apiId={api.id} showLatest isOverview={true} />}
                                 </ExpansionPanelDetails>
                                 <Divider />
-                                <ExpansionPanelActions className={classes.actionPanel}>
-                                    <Button size='small' color='primary' href={'/store-new/apis/' + api.id + '/comments'}>
-                                        <FormattedMessage
-                                            id='Apis.Details.Overview.comments.show.more'
-                                            defaultMessage='Show More >>'
-                                        />
-                                    </Button>
+                                <ExpansionPanelActions className={classes.actionPanel} >
+                                    <Link to={'/apis/' + api.id + '/comments'} className={classes.button}>
+                                        <Button size='small' color='primary'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Overview.comments.show.more'
+                                                defaultMessage='Show More >>'
+                                            />
+                                        </Button>
+                                    </Link>
                                 </ExpansionPanelActions>
                             </ExpansionPanel>
                         </Grid>

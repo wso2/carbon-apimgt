@@ -106,8 +106,8 @@ class Comments extends Component {
             .getAllComments(apiId)
             .then((result) => {
                 let commentList = result.body.list;
-                if(isOverview) {
-                    commentList = commentList.slice(0,3)
+                if (isOverview) {
+                    commentList = commentList.slice(commentList.length - 3, commentList.length)
                 }
                 this.setState({ allComments: commentList, totalComments: commentList.length });
                 if (commentList.length < theme.custom.commentsLimit) {
@@ -250,7 +250,7 @@ class Comments extends Component {
                                 cancelButton={true}
                             />
                         )}
-                        
+
                         {startCommentsToDisplay !== 0 && (
                             <div className={classes.contentWrapper}>
                                 <Grid container spacing={32} className={classes.root}>
