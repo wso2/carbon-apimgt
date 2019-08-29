@@ -241,19 +241,15 @@ class API extends Resource {
     }
 
     /**
-     * Create a new API in the 42Crunch Platform
+     * Get API Security Audit Report
      */
-    createNew42CrunchAPI(id, callback = null) {
-        const promise_create_42crunch_api = this.client.then((client) => {
-            return client.apis['Scope (Individual)'].post_apis_42crunch_api_({
+    getSecurityAuditReport(id) {
+        const promiseGetAuditReport = this.client.then((client) => {
+            return client.apis['API Audit'].get_apis_apiId_auditapi({
                 id: id
             }, this._requestMetaData());
         });
-        if (callback) {
-            return promise_create_42crunch_api.then(callback);
-        } else {
-            return promise_create_42crunch_api_id;
-        }
+        return promiseGetAuditReport;
     }
 
     /**

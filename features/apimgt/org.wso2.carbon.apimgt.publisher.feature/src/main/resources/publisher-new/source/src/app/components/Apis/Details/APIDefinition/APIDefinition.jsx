@@ -41,13 +41,13 @@ import yaml from 'js-yaml';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api.js';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
-import APISecurityAudit from 'source/src/app/components/Apis/Details/APIDefinition/APISecurityAudit';
 
 import Dropzone from 'react-dropzone';
 import json2yaml from 'json2yaml';
 import SwaggerParser from 'swagger-parser';
 
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
+import APISecurityAudit from './APISecurityAudit';
 
 const EditorDialog = React.lazy(() => import('./SwaggerEditorDrawer'));
 
@@ -191,8 +191,8 @@ class APIDefinition extends React.Component {
     }
 
     /**
-         * Set isAuditApiClicked to true when Audit API is clicked
-         */
+      * Set isAuditApiClicked to true when Audit API is clicked
+      */
     onAuditApiClick() {
         this.setState({ isAuditApiClicked: true });
     }
@@ -515,8 +515,7 @@ class APIDefinition extends React.Component {
                 </div>
                 <div>
                     {isAuditApiClicked ? (
-                        // API Security Audit
-                        <APISecurityAudit />
+                        <APISecurityAudit apiId={api.id} />
                     ) : (
                         <MonacoEditor
                             width='100%'

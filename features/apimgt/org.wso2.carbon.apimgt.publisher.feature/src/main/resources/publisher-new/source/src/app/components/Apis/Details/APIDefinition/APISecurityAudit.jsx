@@ -16,6 +16,9 @@
 
 import React, { Component } from 'react';
 import Typography from '@material-ui/core/Typography';
+import API from 'AppData/api';
+import PropTypes from 'prop-types';
+import Alert from 'AppComponents/Shared/Alert';
 
 /**
  * This Component hosts the API Security Audit Component
@@ -38,24 +41,20 @@ class APISecurityAudit extends Component {
      */
     componentDidMount() {
         // Include code to pass in the data from the backend
-        // const { api } = this.props;
-        // const promisedReport = api.getSecurityAuditReport(api.id);
+        const { apiId } = this.props;
+        const Api = new API();
 
-        // promisedReport
-        //     .then(response => response.json())
-        //     .then(results => this.setState({ items: results }))
-        //     .catch((error) => {
-        //         if (process.env.NODE_ENV !== 'production') {
-        //             console.log(error);
-        //         }
-        //         const { status } = error;
-        //         if (status === 404) {
-        //             // this.setState({ error: true });
-        //         } else if (status === 401) {
-        //             // doRedirectToLogin();
-        //         }
-        //         // TODO - Re-check the catch code
-        //     });
+        Api.getSecurityAuditReport(apiId.id)
+            .then(response => response.json())
+            .then(response => this.setState({ items: response }))
+            .catch((error) => {
+                console.error(error);
+                if (error.response) {
+                    Alert.error(error.response.body.message);
+                } else {
+                    Alert.error('Something went wrong while retrieving the API Security Report');
+                }
+            });
     }
 
     /**
@@ -81,5 +80,9 @@ class APISecurityAudit extends Component {
         );
     }
 }
+
+APISecurityAudit.propTypes = {
+    apiId: PropTypes.string.isRequired,
+};
 
 export default APISecurityAudit;
