@@ -17,6 +17,7 @@
  */
 
 import React, { Component } from 'react';
+import { FormattedMessage, injectIntl, defineMessages } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
 import InputBase from '@material-ui/core/InputBase';
 import FirstPageIcon from '@material-ui/icons/FirstPage';
@@ -34,7 +35,6 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
-import { FormattedMessage, injectIntl, defineMessages } from 'react-intl';
 import withStyles from '@material-ui/core/styles/withStyles';
 import PropTypes from 'prop-types';
 
@@ -79,11 +79,11 @@ const styles = theme => ({
         padding: theme.spacing.unit * 1.25,
     },
     noDataMessage: {
-        height: theme.spacing.unit * 50,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         color: '#888888',
+        width: '100%',
     },
     tableColumnSize: {
         width: '15%',
@@ -190,25 +190,25 @@ function SubscriptionTablePagination(props) {
             style={{ display: 'flex' }}
         >
             <IconButton
-                onClick={() => handleFirstPageButtonClick()}
+                onClick={handleFirstPageButtonClick}
                 disabled={page === 0}
             >
                 <FirstPageIcon />
             </IconButton>
             <IconButton
-                onClick={() => handleBackButtonClick()}
+                onClick={handleBackButtonClick}
                 disabled={page === 0}
             >
                 <KeyboardArrowLeft />
             </IconButton>
             <IconButton
-                onClick={() => handleNextButtonClick()}
+                onClick={handleNextButtonClick}
                 disabled={page >= Math.ceil(count / rowsPerPage) - 1}
             >
                 <KeyboardArrowRight />
             </IconButton>
             <IconButton
-                onClick={() => handleLastPageButtonClick()}
+                onClick={handleLastPageButtonClick}
                 disabled={page >= Math.ceil(count / rowsPerPage) - 1}
             >
                 <LastPageIcon />
@@ -236,9 +236,12 @@ class SubscriptionsTable extends Component {
         this.api = props.api;
         this.state = {
             subscriptions: [],
-            selectedSubscriptions: [],
+            totalSubscription: 0,
             page: 0,
             rowsPerPage: 5,
+            searchQuery: null,
+            rowsPerPageOptions: [5, 10, 25, 50, 100],
+            emptyColumnHeight: 60,
         };
         this.formatSubscriptionStateString = this.formatSubscriptionStateString.bind(this);
         this.blockSubscription = this.blockSubscription.bind(this);
@@ -379,22 +382,14 @@ class SubscriptionsTable extends Component {
      */
     fetchSubscriptionData() {
         const api = new API();
-        const promisedSubscriptions = api.subscriptions(this.api.id);
+        const { page, rowsPerPage, searchQuery } = this.state;
+        const promisedSubscriptions = api.subscriptions(this.api.id, page * rowsPerPage, rowsPerPage, searchQuery);
         promisedSubscriptions
-            .then((response) => {
-                const subscriptions = response.obj.list.sort((a, b) => {
-                    const x = a.subscriptionId;
-                    const y = b.subscriptionId;
-                    if (x < y) {
-                        return -1;
-                    }
-                    if (x > y) {
-                        return 1;
-                    }
-                    return 0;
-                });
-                this.setState({ subscriptions, selectedSubscriptions: subscriptions });
-            })
+            .then(response =>
+                this.setState({
+                    subscriptions: response.obj.list,
+                    totalSubscription: response.obj.pagination.total,
+                }))
             .catch((errorMessage) => {
                 console.log(errorMessage);
                 Alert.error(JSON.stringify(errorMessage));
@@ -407,7 +402,7 @@ class SubscriptionsTable extends Component {
      * @param page selected page
      * */
     handleChangePage(page) {
-        this.setState({ page });
+        this.setState({ page }, this.fetchSubscriptionData);
     }
 
     /**
@@ -416,7 +411,7 @@ class SubscriptionsTable extends Component {
      * @param event rows per page change event
      * */
     handleChangeRowsPerPage(event) {
-        this.setState({ rowsPerPage: event.target.value });
+        this.setState({ rowsPerPage: event.target.value, page: 0 }, this.fetchSubscriptionData);
     }
 
     /**
@@ -425,60 +420,51 @@ class SubscriptionsTable extends Component {
      * @param event onChange event of user search
      */
     filterSubscriptions(event) {
-        const { subscriptions } = this.state;
-        let { value } = event.target;
-        if (value) {
-            value = value.toLowerCase();
-            const selectedSubscriptions = subscriptions.filter(sub => (
-                (sub.applicationInfo.subscriber).toLowerCase()).includes(value)
-                || ((sub.applicationInfo.name).toLowerCase()).includes(value)
-                || ((sub.throttlingPolicy).toLowerCase()).includes(value));
-            this.setState({ selectedSubscriptions });
-        } else {
-            this.setState({ selectedSubscriptions: subscriptions });
-        }
+        this.setState({ searchQuery: event.target.value }, this.fetchSubscriptionData);
     }
 
     render() {
         const {
-            subscriptions, selectedSubscriptions, page, rowsPerPage,
+            subscriptions, page, rowsPerPage, totalSubscription, rowsPerPageOptions, emptyColumnHeight,
         } = this.state;
         const { classes, intl } = this.props;
+        const emptyRows = totalSubscription > 0 ?
+            (rowsPerPage - Math.min(rowsPerPage, totalSubscription.length - (page * rowsPerPage))) : null;
 
-        if (subscriptions.length > 0) {
-            return (
-                <div>
-                    <Typography className={classes.headline} gutterBottom variant='headline' component='h2'>
-                        <FormattedMessage
-                            id='Apis.Details.Subscriptions.SubscriptionsTable.manage.subscriptions'
-                            defaultMessage='Manage Subscriptions'
-                        />
-                    </Typography>
-                    <Paper>
-                        <Tooltip
-                            title={intl.formatMessage({
-                                id: 'Apis.Details.Subscriptions.SubscriptionsTable.search.tooltip',
-                                defaultMessage: 'Search subscriptions by Subscriber, Application and Tier',
-                            })}
-                            aria-label='Search tooltip'
-                        >
-                            <div className={classes.searchDiv}>
-                                <div className={classes.searchRoot}>
-                                    <InputBase
-                                        className={classes.searchInput}
-                                        placeholder={intl.formatMessage({
-                                            id: 'Apis.Details.Subscriptions.SubscriptionsTable.search',
-                                            defaultMessage: 'Search',
-                                        })}
-                                        inputProps={{ 'aria-label': 'Search' }}
-                                        onChange={e => this.filterSubscriptions(e)}
-                                    />
-                                    <IconButton className={classes.searchIconButton} aria-label='Search' disabled>
-                                        <Search />
-                                    </IconButton>
-                                </div>
+        return (
+            <div>
+                <Typography className={classes.headline} gutterBottom variant='headline' component='h2'>
+                    <FormattedMessage
+                        id='Apis.Details.Subscriptions.SubscriptionsTable.manage.subscriptions'
+                        defaultMessage='Manage Subscriptions'
+                    />
+                </Typography>
+                <Paper>
+                    <Tooltip
+                        title={intl.formatMessage({
+                            id: 'Apis.Details.Subscriptions.SubscriptionsTable.search.tooltip',
+                            defaultMessage: 'Search subscriptions by Subscriber, Application and Tier',
+                        })}
+                        aria-label='Search tooltip'
+                    >
+                        <div className={classes.searchDiv}>
+                            <div className={classes.searchRoot}>
+                                <InputBase
+                                    className={classes.searchInput}
+                                    placeholder={intl.formatMessage({
+                                        id: 'Apis.Details.Subscriptions.SubscriptionsTable.search',
+                                        defaultMessage: 'Search',
+                                    })}
+                                    inputProps={{ 'aria-label': 'Search' }}
+                                    onChange={e => this.filterSubscriptions(e)}
+                                />
+                                <IconButton className={classes.searchIconButton} aria-label='Search' disabled>
+                                    <Search />
+                                </IconButton>
                             </div>
-                        </Tooltip>
+                        </div>
+                    </Tooltip>
+                    {subscriptions.length > 0 ? (
                         <div>
                             <Table className={classes.table}>
                                 <colgroup>
@@ -489,44 +475,52 @@ class SubscriptionsTable extends Component {
                                     <col className={classes.tableColumnSize2} />
                                 </colgroup>
                                 <TableHead>
-                                    { tableHeaders }
+                                    {tableHeaders}
                                 </TableHead>
-                                <TableBody className={classes.body}>
+                                <TableBody>
+                                    {subscriptions
+                                        .map(sub => (
+                                            <TableRow key={sub.subscriptionId}>
+                                                <TableCell>{sub.applicationInfo.subscriber}</TableCell>
+                                                <TableCell>{sub.applicationInfo.name}</TableCell>
+                                                <TableCell>{sub.throttlingPolicy}</TableCell>
+                                                <TableCell>
+                                                    {this.formatSubscriptionStateString(sub.subscriptionStatus)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <ScopeValidation
+                                                        resourceMethod={resourceMethod.POST}
+                                                        resourcePath={resourcePath.BLOCK_SUBSCRIPTION}
+                                                    >
+                                                        <SubscriptionsBlock
+                                                            subscriptionId={sub.subscriptionId}
+                                                            subscriptionStatus={sub.subscriptionStatus}
+                                                            blockProductionSubs={this.blockProductionOnly}
+                                                            blockAllSubs={this.blockSubscription}
+                                                            unblockSubs={this.unblockSubscription}
+                                                        />
+                                                    </ScopeValidation>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    }
                                     {
-                                        selectedSubscriptions
-                                            .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
-                                            .map(sub => (
-                                                <TableRow key={sub.subscriptionId}>
-                                                    <TableCell>{sub.applicationInfo.subscriber}</TableCell>
-                                                    <TableCell>{sub.applicationInfo.name}</TableCell>
-                                                    <TableCell>{sub.throttlingPolicy}</TableCell>
-                                                    <TableCell>
-                                                        {this.formatSubscriptionStateString(sub.subscriptionStatus)}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <ScopeValidation
-                                                            resourceMethod={resourceMethod.POST}
-                                                            resourcePath={resourcePath.BLOCK_SUBSCRIPTION}
-                                                        >
-                                                            <SubscriptionsBlock
-                                                                subscriptionId={sub.subscriptionId}
-                                                                subscriptionStatus={sub.subscriptionStatus}
-                                                                blockProductionSubs={this.blockProductionOnly}
-                                                                blockAllSubs={this.blockSubscription}
-                                                                unblockSubs={this.unblockSubscription}
-                                                            />
-                                                        </ScopeValidation>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))
+                                        emptyRows && (
+                                            <TableRow>
+                                                <TableCell
+                                                    colSpan={5}
+                                                    style={{ height: emptyRows * emptyColumnHeight }}
+                                                />
+                                            </TableRow>
+                                        )
                                     }
                                 </TableBody>
                                 <TableFooter>
                                     <TableRow>
                                         <TablePagination
-                                            rowsPerPageOptions={[5, 10, 25, 50, 100]}
+                                            rowsPerPageOptions={rowsPerPageOptions}
                                             colSpan={5}
-                                            count={selectedSubscriptions.length}
+                                            count={totalSubscription}
                                             rowsPerPage={rowsPerPage}
                                             page={page}
                                             onChangePage={this.handleChangePage}
@@ -536,22 +530,19 @@ class SubscriptionsTable extends Component {
                                     </TableRow>
                                 </TableFooter>
                             </Table>
-                        </div>
-                    </Paper>
-                </div>
-            );
-        } else {
-            return (
-                <div>
-                    <Paper className={classes.noDataMessage}>
-                        <FormattedMessage
-                            id='Apis.Details.Subscriptions.SubscriptionsTable.no.subscriptions'
-                            defaultMessage='No subscriptions available'
-                        />
-                    </Paper>
-                </div>
-            );
-        }
+                        </div>) :
+                        (
+                            <div className={classes.noDataMessage} style={{ height: rowsPerPage * emptyColumnHeight }}>
+                                <FormattedMessage
+                                    id='Apis.Details.Subscriptions.SubscriptionsTable.no.subscriptions'
+                                    defaultMessage='No subscriptions data available'
+                                />
+                            </div>
+                        )
+                    }
+                </Paper>
+            </div>
+        );
     }
 }
 
