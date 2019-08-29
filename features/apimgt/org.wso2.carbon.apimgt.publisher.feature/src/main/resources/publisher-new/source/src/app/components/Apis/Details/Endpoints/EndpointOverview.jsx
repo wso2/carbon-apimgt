@@ -68,7 +68,7 @@ const styles = theme => ({
     radioGroup: {
         display: 'flex',
         flexDirection: 'row',
-        paddingTop: '8px',
+        paddingTop: theme.spacing.unit,
     },
     endpointsWrapperLeft: {
         padding: theme.spacing.unit,
