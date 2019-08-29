@@ -49,6 +49,7 @@ const styles = theme => ({
     radioGroup: {
         display: 'flex',
         flexDirection: 'row',
+        marginLeft: theme.spacing.unit * 2,
     },
 });
 
