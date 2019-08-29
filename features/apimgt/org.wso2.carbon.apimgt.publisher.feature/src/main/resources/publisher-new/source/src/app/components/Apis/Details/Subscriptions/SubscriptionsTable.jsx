@@ -429,7 +429,7 @@ class SubscriptionsTable extends Component {
         } = this.state;
         const { classes, intl } = this.props;
         const emptyRows = totalSubscription > 0 ?
-            (rowsPerPage - Math.min(rowsPerPage, totalSubscription.length - (page * rowsPerPage))) : null;
+            (rowsPerPage - Math.min(rowsPerPage, totalSubscription.length - (page * rowsPerPage))) : 0;
 
         return (
             <div>
@@ -505,7 +505,7 @@ class SubscriptionsTable extends Component {
                                         ))
                                     }
                                     {
-                                        emptyRows && (
+                                        emptyRows > 0 && (
                                             <TableRow>
                                                 <TableCell
                                                     colSpan={5}

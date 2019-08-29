@@ -94,7 +94,7 @@ class SubscriptionPoliciesManage extends Component {
             updatedSelectedPolicies = updatedSelectedPolicies.filter(policy => policy !== name);
         }
         updatedAPI.policies = updatedSelectedPolicies;
-        apiClient.update(updatedAPI.id, updatedAPI)
+        apiClient.update(updatedAPI)
             .then((res) => {
                 this.api = res._data;
                 this.setState({ selectedSubscriptionPolicies: updatedSelectedPolicies, updateInProgress: false });
@@ -119,7 +119,6 @@ class SubscriptionPoliciesManage extends Component {
         const { classes } = this.props;
         const { subscriptionPolicies, selectedSubscriptionPolicies, updateInProgress } = this.state;
 
-
         return (
             <Paper className={classes.subscriptionPoliciesPaper}>
                 { updateInProgress && <Progress /> }
@@ -141,16 +140,16 @@ class SubscriptionPoliciesManage extends Component {
                         </Grid>
                         <Grid item xs={8}>
                             <FormGroup>
-                                { subscriptionPolicies && Object.entries(subscriptionPolicies).map(([key, value]) => (
+                                { subscriptionPolicies && Object.entries(subscriptionPolicies).map(value => (
                                     <FormControlLabel
-                                        key={value.name}
+                                        key={value[1].name}
                                         control={<Checkbox
                                             color='primary'
-                                            checked={selectedSubscriptionPolicies.includes(value.name)}
+                                            checked={selectedSubscriptionPolicies.includes(value[1].name)}
                                             onChange={e => this.handleChange(e)}
-                                            name={value.name}
+                                            name={value[1].name}
                                         />}
-                                        label={value.name + ' : ' + value.description}
+                                        label={value[1].name + ' : ' + value[1].description}
                                     />
                                 ))}
                             </FormGroup>
