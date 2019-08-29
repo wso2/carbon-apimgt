@@ -23,6 +23,7 @@ import Resource from './Resource';
  * An abstract representation of an API
  */
 class API extends Resource {
+
     constructor(name, version, context, kwargs) {
         super();
         let properties = kwargs;
@@ -34,17 +35,20 @@ class API extends Resource {
             this.version = version;
             this.context = context;
             this.isDefaultVersion = false;
-            this.gatewayEnvironments = ['Production and Sandbox']; //todo: load the environments from settings API
-            this.transport = ['http', 'https'];
-            this.visibility = 'PUBLIC';
+            this.gatewayEnvironments = ["Production and Sandbox"]; //todo: load the environments from settings API
+            this.transport = [
+                "http",
+                "https"
+            ];
+            this.visibility = "PUBLIC";
             this.endpointConfig = {
                 endpoint_type: 'http',
                 sandbox_endpoints: {
                     url: '',
                 },
-                production_endpoints: {
-                    url: '',
-                },
+                production_endpoints : {
+                    url: ''
+                }
             };
         }
         this.apiType = API.CONSTS.API;
@@ -95,45 +99,45 @@ class API extends Resource {
 
     /**
      * Create an API with the given parameters in template and call the callback method given optional.
-     * @param {Object} apiData - API data which need to fill the placeholder values in the @get_template
+     * @param {Object} api_data - API data which need to fill the placeholder values in the @get_template
      * @param {function} callback - An optional callback method
      * @returns {Promise} Promise after creating and optionally calling the callback method.
      */
-    create(apiData, callback = null) {
+    create(api_data, callback = null) {
         let payload;
         let promise_create;
-        if (apiData.constructor.name === 'Blob' || apiData.constructor.name === 'File') {
+        if (api_data.constructor.name === 'Blob' || api_data.constructor.name === 'File') {
             payload = {
-                file: apiData,
-                'Content-Type': 'multipart/form-data',
+                file: api_data,
+                'Content-Type': 'multipart/form-data'
             };
-            promise_create = this.client.then(client => {
+            promise_create = this.client.then((client) => {
                 return client.apis['APIs'].post_apis_import_definition(
                     payload,
                     this._requestMetaData({
-                        'Content-Type': 'multipart/form-data',
+                        'Content-Type': 'multipart/form-data'
                     }),
                 );
             });
-        } else if (apiData.type === 'swagger-url') {
+        } else if (api_data.type === 'swagger-url') {
             payload = {
-                url: apiData.url,
-                'Content-Type': 'multipart/form-data',
+                url: api_data.url,
+                'Content-Type': 'multipart/form-data'
             };
-            promise_create = this.client.then(client => {
+            promise_create = this.client.then((client) => {
                 return client.apis['APIs'].post_apis_import_definition(
                     payload,
                     this._requestMetaData({
-                        'Content-Type': 'multipart/form-data',
+                        'Content-Type': 'multipart/form-data'
                     }),
                 );
             });
         } else {
             payload = {
-                body: apiData,
-                'Content-Type': 'application/json',
+                body: api_data,
+                'Content-Type': 'application/json'
             };
-            promise_create = this.client.then(client => {
+            promise_create = this.client.then((client) => {
                 return client.apis['APIs'].post_apis(payload, this._requestMetaData());
             });
         }
@@ -145,8 +149,9 @@ class API extends Resource {
     }
 
     importOpenAPIByFile(openAPIData, callback = null) {
-        let payload, promisedCreate;
-        promisedCreate = this.client.then(client => {
+        let payload, promise_create;
+
+        promise_create = this.client.then((client) => {
             const apiData = this.getDataFromSpecFields(client);
 
             payload = {
@@ -802,7 +807,7 @@ class API extends Resource {
      * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
-    update(updatedProperties) {
+    update(apiId, updatedProperties) {
         const updatedAPI = { ...this.toJSON(), ...updatedProperties };
         const promisedUpdate = this.client.then((client) => {
             const payload = {

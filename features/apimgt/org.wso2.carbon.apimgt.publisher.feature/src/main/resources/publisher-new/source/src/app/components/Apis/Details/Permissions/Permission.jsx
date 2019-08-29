@@ -130,7 +130,7 @@ class Permission extends Component {
                 api_data.permission = permissionString;
                 const securitySchemes = this.createSecuritySchemeArray(this);
                 api_data.securityScheme = securitySchemes;
-                const promised_update = api.update(api_data.id, api_data);
+                const promised_update = api.update(api_data);
                 const { intl } = this.props;
                 promised_update
                     .then((response) => {
