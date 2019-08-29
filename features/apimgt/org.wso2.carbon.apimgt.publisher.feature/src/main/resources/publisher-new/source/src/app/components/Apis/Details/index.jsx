@@ -32,7 +32,7 @@ import MonetizationIcon from '@material-ui/icons/LocalAtm';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl, defineMessages } from 'react-intl';
 import { Redirect, Route, Switch, Link, matchPath } from 'react-router-dom';
-import isEmpty from 'lodash.isEmpty';
+import isEmpty from 'lodash/isEmpty';
 import Utils from 'AppData/Utils';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
