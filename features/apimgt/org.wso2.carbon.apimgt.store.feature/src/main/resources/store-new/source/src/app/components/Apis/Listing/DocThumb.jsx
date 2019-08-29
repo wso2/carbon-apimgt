@@ -26,7 +26,6 @@ import classNames from 'classnames';
 import { FormattedMessage } from 'react-intl';
 import MaterialIcons from 'MaterialIcons';
 import CONSTS from 'AppData/Constants';
-import APIProduct from 'AppData/APIProduct';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import ImageGenerator from './ImageGenerator';
 import Api from '../../../data/api';
@@ -42,6 +41,7 @@ const styles = theme => ({
         width: theme.custom.thumbnail.width - theme.spacing.unit,
         backgroundColor: theme.palette.background.paper,
         padding: theme.spacing.unit,
+        minHeight: 130,
     },
     thumbLeft: {
         alignSelf: 'flex-start',
@@ -100,12 +100,12 @@ const styles = theme => ({
 /**
  *
  *
- * @class ApiThumb
+ * @class DocThumb
  * @extends {React.Component}
  */
 const windowURL = window.URL || window.webkitURL;
 
-class ApiThumb extends React.Component {
+class DocThumb extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -124,41 +124,6 @@ class ApiThumb extends React.Component {
     }
 
     /**
-     *
-     *
-     * @memberof ApiThumb
-     */
-    componentDidMount() {
-        const { apiType } = this.context;
-        const { api } = this.props;
-        let restApi = null;
-
-        if (apiType === CONSTS.API_TYPE) {
-            restApi = new Api();
-        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
-            restApi = new APIProduct();
-        }
-        const promisedThumbnail = restApi.getAPIThumbnail(api.id);
-
-        promisedThumbnail.then((response) => {
-            if (response && response.data) {
-                if (response.headers['content-type'] === 'application/json') {
-                    const iconJson = JSON.parse(response.data);
-                    this.setState({
-                        selectedIcon: iconJson.key,
-                        category: iconJson.category,
-                        color: iconJson.color,
-                        backgroundIndex: iconJson.backgroundIndex,
-                    });
-                } else if (response && response.data.size > 0) {
-                    const url = windowURL.createObjectURL(response.data);
-                    this.setState({ imageObj: url });
-                }
-            }
-        });
-    }
-
-    /**
      * Clean up resource
      */
     componentWillUnmount() {
@@ -168,66 +133,37 @@ class ApiThumb extends React.Component {
     }
 
     /**
-     * Get Path Prefix depedning on the respective API Type being rendered
-     *
-     * @returns {String} path
-     * @memberof ApiThumb
-     */
-    getPathPrefix() {
-        const { apiType } = this.context;
-
-        let path = '/apis/';
-        if (apiType === CONSTS.API_PRODUCT_TYPE) {
-            path = '/api-products/';
-        }
-
-        return path;
-    }
-
-    /**
      *
      *
      * @returns
-     * @memberof ApiThumb
+     * @memberof DocThumb
      */
     render() {
         const {
-            imageObj, selectedIcon, color, backgroundIndex, category,
+            selectedIcon, color, backgroundIndex, category,
         } = this.state;
-        const path = this.getPathPrefix();
-
-        const details_link = path + this.props.api.id;
-        const { api, classes, theme } = this.props;
+        const { doc, classes, theme } = this.props;
+        const { doc : { name, sourceType, apiName, apiVersion, id, apiUUID } } = this.props;
+        const details_link = '/apis/' + apiUUID + '/docs';
         const { thumbnail } = theme.custom;
-        const {
-            name, version, context, provider,
-        } = api;
-
-        if (!api.lifeCycleStatus) {
-            api.lifeCycleStatus = api.status;
-        }
         const imageWidth = thumbnail.width;
         const defaultImage = thumbnail.defaultApiImage;
 
-        let ImageView;
-        if (imageObj) {
-            ImageView = <img height={140} src={imageObj} alt='API Product Thumbnail' className={classes.media} />;
-        } else {
-            ImageView = (
+        let ImageView = (
                 <ImageGenerator
                     width={imageWidth}
                     height={140}
-                    api={api}
+                    api={doc}
                     fixedIcon={{
                         key: selectedIcon,
                         color,
                         backgroundIndex,
                         category,
-                        api,
+                        doc,
                     }}
                 />
             );
-        }
+
         return (
             <div className={classes.thumbWrapper}>
                 <Link to={details_link} className={classes.imageWrapper}>
@@ -252,36 +188,22 @@ class ApiThumb extends React.Component {
                         </Typography>
                     </Link>
                     <Typography variant='caption' gutterBottom align='left'>
-                        <FormattedMessage defaultMessage='By:' id='Apis.Listing.ApiThumb.by' />
-                        {provider}
+                        <FormattedMessage defaultMessage='Source Type:' id='Apis.Listing.DocThumb.sourceType' />
+                        {sourceType}
                     </Typography>
                     <div className={classes.thumbInfo}>
                         <div className={classes.thumbLeft}>
-                            <Typography variant='subheading'>{version}</Typography>
+                            <Typography variant='subheading'>{apiName}</Typography>
                             <Typography variant='caption' gutterBottom align='left'>
-                                <FormattedMessage defaultMessage='Version' id='Apis.Listing.ApiThumb.version' />
+                                <FormattedMessage defaultMessage='Api Name' id='Apis.Listing.DocThumb.apiName' />
                             </Typography>
                         </div>
                         <div className={classes.thumbRight}>
                             <Typography variant='subheading' align='right' className={classes.contextBox}>
-                                {context}
+                                {apiVersion}
                             </Typography>
                             <Typography variant='caption' gutterBottom align='right'>
-                                <FormattedMessage defaultMessage='Context' id='Apis.Listing.ApiThumb.context' />
-                            </Typography>
-                        </div>
-                    </div>
-                    <div className={classes.thumbInfo}>
-                        <div className={classes.thumbLeft}>
-                            <Typography variant='subheading' gutterBottom align='left'>
-                                <StarRatingBar apiRating={api.avgRating} apiId={api.id} isEditable={false} showSummary={false} />
-                            </Typography>
-                        </div>
-                        <div className={classes.thumbRight}>
-                            <Typography variant='subheading' gutterBottom align='right'>
-                                {api.type === 'GRAPHQL' && (
-                                    <Chip label={api.type} color='primary' />
-                                )}
+                                <FormattedMessage defaultMessage='Api Version' id='Apis.Listing.DocThumb.apiVersion' />
                             </Typography>
                         </div>
                     </div>
@@ -291,11 +213,11 @@ class ApiThumb extends React.Component {
     }
 }
 
-ApiThumb.propTypes = {
+DocThumb.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
 };
 
-ApiThumb.contextType = ApiContext;
+DocThumb.contextType = ApiContext;
 
-export default withStyles(styles, { withTheme: true })(ApiThumb);
+export default withStyles(styles, { withTheme: true })(DocThumb);

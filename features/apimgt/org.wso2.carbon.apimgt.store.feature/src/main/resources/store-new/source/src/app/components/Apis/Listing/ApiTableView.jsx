@@ -20,7 +20,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createMuiTheme, MuiThemeProvider, withStyles } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
-import { injectIntl } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import queryString from 'query-string';
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import CONSTS from 'AppData/Constants';
@@ -28,6 +29,7 @@ import Configurations from 'Config';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import ImageGenerator from './ImageGenerator';
 import ApiThumb from './ApiThumb';
+import DocThumb from './DocThumb';
 import { ApiContext } from '../Details/ApiContext';
 
 class StarRatingColumn extends React.Component {
@@ -88,6 +90,7 @@ class ApiTableView extends React.Component {
 
     getMuiTheme = () => {
         const { gridView } = this.props;
+        let themeAdditions = {};
         let muiTheme = {
             overrides: {
                 MUIDataTable: {
@@ -122,7 +125,7 @@ class ApiTableView extends React.Component {
             },
         };
         if (gridView) {
-            const themeAdditions = {
+            themeAdditions = {
                 overrides: {
                     MUIDataTable: {
                         tableRoot: {
@@ -143,8 +146,8 @@ class ApiTableView extends React.Component {
                     },
                 },
             };
-            muiTheme = Object.assign(muiTheme, themeAdditions, Configurations.themes.light);
         }
+        muiTheme = Object.assign(muiTheme, themeAdditions, Configurations.themes.light);
         return createMuiTheme(muiTheme);
     };
 
@@ -154,7 +157,9 @@ class ApiTableView extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
-        if ((this.apiType !== this.context.apiType) || (prevProps.selectedTag !== this.props.selectedTag)) {
+        const { query, selectedTag } = this.props;
+        if ((this.apiType !== this.context.apiType) || query !== prevProps.query ||
+            (prevProps.selectedTag !== selectedTag)) {
             this.apiType = this.context.apiType;
             this.getData();
         }
@@ -172,11 +177,17 @@ class ApiTableView extends React.Component {
     };
 
     xhrRequest = () => {
-        const { selectedTag } = this.props;
+        const { query, selectedTag } = this.props;
         const { page, rowsPerPage } = this;
         const { apiType } = this.context;
+        const api = new API();
+        if (query) {
+            const composeQuery = queryString.parse(query);
+            composeQuery.limit = this.rowsPerPage;
+            composeQuery.offset = page * rowsPerPage;
+            return api.search(composeQuery);
+        }
         if (apiType === CONSTS.API_TYPE) {
-            const api = new API();
             if (selectedTag) {
                 return api.getAllAPIs({ query: 'tag:' + selectedTag, limit: this.rowsPerPage, offset: page * rowsPerPage });
             } else {
@@ -214,6 +225,12 @@ class ApiTableView extends React.Component {
             {
                 name: 'name',
                 options: {
+                    customBodyRender: (value, tableMeta, updateValue,tableViewObj = this) => {
+                        if (tableMeta.rowData) {
+                            const artifact = tableViewObj.state.data[tableMeta.rowIndex];
+                            return <ImageGenerator api={artifact} width={30} height={30} />;
+                        }
+                    },
                     sort: false,
                     filter: false,
                     display: 'excluded',
@@ -229,13 +246,33 @@ class ApiTableView extends React.Component {
                     customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
                         if (tableMeta.rowData) {
                             const { apiType } = this.context;
+                            const artifact = tableViewObj.state.data[tableMeta.rowIndex];
                             const apiName = tableMeta.rowData[2];
                             const apiId = tableMeta.rowData[0];
                             const { classes } = this.props;
                             if (apiType === CONSTS.API_TYPE) {
-                                return <Link to={'/apis/' + apiId + '/overview'} className={classes.rowImageOverride}><ImageGenerator api={apiName} width={30} height={30} />{apiName}</Link>;
+                                if (artifact) {
+                                    if (artifact.type === 'DOC') {
+                                        return (
+                                            <Link to={'/apis/' + artifact.apiUUID + '/docs'}>
+                                            <ImageGenerator api={artifact} width={30} height={30} />
+                                                <FormattedMessage
+                                                    id='Apis.Listing.TableView.TableView.doc.flag'
+                                                    defaultMessage='[Doc] '
+                                                />
+                                                {apiName}
+                                            </Link>
+                                        );
+                                    }
+                                    return (
+                                        <Link to={'/apis/' + apiId + '/overview'} className={classes.rowImageOverride}>
+                                            <ImageGenerator api={artifact} width={30} height={30}/>{apiName}</Link>);
+                                }
                             } else {
-                                return <Link to={'/api-products/' + apiId + '/overview'} className={classes.rowImageOverride}><ImageGenerator api={apiName} width={30} height={30} />{apiName}</Link>;
+                                return (<Link
+                                    to={'/api-products/' + apiId + '/overview'}
+                                    className={classes.rowImageOverride}>
+                                    <ImageGenerator api={artifact} width={30} height={30}/>{apiName}</Link>);
                             }
                         }
                     },
@@ -287,11 +324,21 @@ class ApiTableView extends React.Component {
                     defaultMessage: 'rating',
                 }),
                 options: {
-                    customBodyRender: (value, tableMeta, updateValue) => {
+                    customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
                         if (tableMeta.rowData) {
-                            const apiId = tableMeta.rowData[0];
-                            const avgRating = tableMeta.rowData[8];
-                            return <StarRatingBar apiRating={avgRating} apiId={apiId} isEditable={false} showSummary={false} />;
+                            const artifact = tableViewObj.state.data[tableMeta.rowIndex];
+                            if (artifact) {
+                                if (artifact.type !== 'DOC') {
+                                    const apiId = tableMeta.rowData[0];
+                                    const avgRating = tableMeta.rowData[7];
+                                    return <StarRatingBar
+                                        apiRating={avgRating}
+                                        apiId={apiId}
+                                        isEditable={false}
+                                        showSummary={false}
+                                    />;
+                                }
+                            }
                         }
                     },
                     options: {
@@ -335,16 +382,16 @@ class ApiTableView extends React.Component {
             },
         };
         if (gridView) {
-            options.customRowRender = (data, dataIndex, rowIndex ) => {
-                const api = {};
-                api.id = data[0];
-                api.name = data[1];
-                api.version = data[3];
-                api.context = data[4];
-                api.provider = data[5];
-                api.type = data[6];
-                api.avgRating = data[8];
-                return <ApiThumb api={api} />;
+            options.customRowRender = (data, dataIndex, rowIndex, tableViewObj = this) => {
+                const artifact = tableViewObj.state.data[dataIndex];
+                if (artifact) {
+                    if (artifact.type === 'DOC') {
+                        return (<DocThumb doc={artifact} />);
+                    } else {
+                        return (<ApiThumb api={artifact} />);
+                    }
+                }
+                return <span />;
             };
             options.title = false;
             options.filter = false;

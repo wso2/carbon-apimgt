@@ -39,6 +39,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
@@ -89,13 +90,17 @@ public class SearchApiServiceImpl implements SearchApiService {
             Map<String, Object> result = apiConsumer
                     .searchPaginatedAPIs(query, requestedTenantDomain, offset, limit, false);
             ArrayList<Object> apis;
-            /* Above searchPaginatedAPIs method underneath calls searchPaginatedAPIsByContent method and searchPaginatedAPIs
-            method in AbstractApiManager. And those methods respectively returns ArrayList and a TreeSet.
+            /* Above searchPaginatedAPIs method underneath calls searchPaginatedAPIsByContent method,searchPaginatedAPIs
+            method and searchAPIDoc method in AbstractApiManager. And those methods respectively returns ArrayList,
+            TreeSet and a HashMap.
             Hence the below logic.
             */
             Object apiSearchResults = result.get("apis");
             if (apiSearchResults instanceof List<?>) {
                 apis = (ArrayList<Object>) apiSearchResults;
+            } else if (apiSearchResults instanceof HashMap) {
+                Collection<String> values = ((HashMap) apiSearchResults).values();
+                apis = new ArrayList<Object>(values);
             } else {
                 apis = new ArrayList<Object>();
                 apis.addAll((Collection<?>) apiSearchResults);
@@ -115,9 +120,15 @@ public class SearchApiServiceImpl implements SearchApiService {
                 }
             }
 
+            Object totalLength = result.get("length");
+            Integer length = 0;
+            if (totalLength != null) {
+                length = (Integer) totalLength;
+            }
+
             resultListDTO.setList(allmatchedResults);
             resultListDTO.setCount(allmatchedResults.size());
-            SearchResultMappingUtil.setPaginationParams(resultListDTO, query, offset, limit, resultListDTO.getCount());
+            SearchResultMappingUtil.setPaginationParams(resultListDTO, query, offset, limit, length);
 
         } catch (APIManagementException | UserStoreException e) {
             String errorMessage = "Error while retrieving search results";

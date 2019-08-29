@@ -38,6 +38,7 @@
         "mui-datatables": "^2.8.1",
         "prop-types": "^15.6.0",
         "qs": "^6.5.1",
+        "query-string": "^6.8.2",
         "random-material-color": "^1.0.3",
         "rc-notification": "^3.1.1",
         "react": "^16.8.6",

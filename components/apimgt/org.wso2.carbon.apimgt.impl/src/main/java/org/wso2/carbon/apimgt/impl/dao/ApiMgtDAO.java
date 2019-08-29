@@ -829,6 +829,9 @@ public class ApiMgtDAO {
                             applicationName + " was blocked");
                     throw new SubscriptionBlockedException("Subscription to API/API Product " + identifier.getName() + " through " +
                             "application " + applicationName + " was blocked");
+                } else if (APIConstants.SubscriptionStatus.REJECTED.equals(subStatus)) {
+                    throw new SubscriptionBlockedException("Subscription to API " + identifier.getName()
+                            + " through application " + applicationName + " was rejected");
                 }
             }
 
@@ -6555,6 +6558,7 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 application.setTokenType(rs.getString("TOKEN_TYPE"));
+                application.setOwner(rs.getString("CREATED_BY"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
 
                 if (multiGroupAppSharingEnabled) {

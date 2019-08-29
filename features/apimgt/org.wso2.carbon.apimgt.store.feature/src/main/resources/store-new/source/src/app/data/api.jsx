@@ -319,7 +319,7 @@ export default class API extends Resource {
      */
     getAllComments(apiId, callback = null) {
         const promiseGet = this.client.then((client) => {
-            return client.apis['Comment (Collection)'].get_apis__apiId__comments({ apiId }, this._requestMetaData());
+            return client.apis['Comments'].get_apis__apiId__comments({ apiId }, this._requestMetaData());
         }).catch((error) => {
             console.error(error);
         });
@@ -628,5 +628,17 @@ export default class API extends Resource {
         });
 
         return promised_getAPIThumbnail;
+    }
+
+    /**
+     * method to search apis and documents based on content
+     * @param {Object} params APIs, Documents filtering parameters i:e { "name": "MyBank API"}
+     * @returns {Promise} promise object return from SwaggerClient-js
+     * @memberof API
+     */
+    search(params) {
+        return this.client.then((client) => {
+            return client.apis['Unified Search'].get_search(params, Resource._requestMetaData());
+        });
     }
 }

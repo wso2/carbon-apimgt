@@ -40,7 +40,7 @@ const styles = theme => ({
  */
 function ProvideOAuthKeys(props) {
     const {
-        classes, consumerKey, consumerSecret, intl, onChange,
+        classes, consumerKey, consumerSecret, intl, onChange, isUserOwner,
     } = props;
 
     /**
@@ -70,6 +70,7 @@ function ProvideOAuthKeys(props) {
                         onChange={e => handleChange(e)}
                         margin='normal'
                         fullWidth
+                        disabled={!isUserOwner}
                     />
                     <FormControl>
                         <FormHelperText id='consumer-key-helper-text'>
@@ -93,6 +94,7 @@ function ProvideOAuthKeys(props) {
                         onChange={e => handleChange(e)}
                         margin='normal'
                         fullWidth
+                        disabled={!isUserOwner}
                     />
                     <FormControl>
                         <FormHelperText id='consumer-secret-helper-text'>
@@ -114,11 +116,13 @@ ProvideOAuthKeys.propTypes = {
     onChange: PropTypes.func.isRequired,
     consumerKey: PropTypes.string,
     consumerSecret: PropTypes.string,
+    isUserOwner: PropTypes.string,
 };
 
 ProvideOAuthKeys.defaultProps = {
     consumerKey: '',
     consumerSecret: '',
+    isUserOwner: false,
 };
 
 export default injectIntl(withStyles(styles)(ProvideOAuthKeys));

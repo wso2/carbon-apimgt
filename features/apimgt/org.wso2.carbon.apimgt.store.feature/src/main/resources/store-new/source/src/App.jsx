@@ -24,6 +24,8 @@ import Login from './app/components/Login/Login';
 import Logout from './app/components/Logout';
 import SignUp from './app/components/AnonymousView/SignUp';
 import Progress from './app/components/Shared/Progress';
+import { SettingsProvider } from './app/components/Shared/SettingsContext';
+import AuthManager from './app/data/AuthManager';
 
 const LoadableProtectedApp = Loadable({
     loader: () => import(// eslint-disable-line function-paren-newline
@@ -50,6 +52,23 @@ class Store extends React.Component {
     constructor(props) {
         super(props);
         LoadableProtectedApp.preload();
+        this.state = {
+            settings: null,
+        };
+    }
+
+    /**
+     *  Mounting the components
+     */
+    componentDidMount() {
+        AuthManager.setSettings().then((response) => {
+            this.setState({ settings: response });
+        }).catch((error) => {
+            console.error(
+                'Error while receiving settings : ',
+                error,
+            );
+        });
     }
 
     /**
@@ -59,15 +78,20 @@ class Store extends React.Component {
      * @memberof Store
      */
     render() {
+        const { settings } = this.state;
         return (
-            <Router basename='/store-new'>
-                <Switch>
-                    <Route path='/login' render={() => <Login appName='store-new' appLabel='STORE' />} />
-                    <Route path='/logout' component={Logout} />
-                    <Route path='/sign-up' component={SignUp} />
-                    <Route component={LoadableProtectedApp} />
-                </Switch>
-            </Router>
+            settings && (
+                <SettingsProvider value={{ settings }}>
+                    <Router basename='/store-new'>
+                        <Switch>
+                            <Route path='/login' render={() => <Login appName='store-new' appLabel='STORE' />} />
+                            <Route path='/logout' component={Logout} />
+                            <Route path='/sign-up' component={SignUp} />
+                            <Route component={LoadableProtectedApp} />
+                        </Switch>
+                    </Router>
+                </SettingsProvider>
+            )
         );
     }
 }

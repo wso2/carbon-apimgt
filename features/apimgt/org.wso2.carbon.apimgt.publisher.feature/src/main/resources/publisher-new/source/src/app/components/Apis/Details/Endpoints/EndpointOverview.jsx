@@ -27,6 +27,7 @@ import {
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import cloneDeep from 'lodash.clonedeep';
 
 import EndpointListing from './EndpointListing';
 import { getEndpointTemplateByType, getEndpointTypeProperty } from './endpointUtils';
@@ -173,7 +174,7 @@ function EndpointOverview(props) {
     const editEndpoint = (index, category, url) => {
         let modifiedEndpoint = null;
         // Make a copy of the endpoint config.
-        const endpointConfigCopy = JSON.parse(JSON.stringify(epConfig));
+        const endpointConfigCopy = cloneDeep(epConfig);
 
         /*
         * If the index > 0, it means that the endpoint is load balance or fail over.
@@ -220,7 +221,7 @@ function EndpointOverview(props) {
      * @param {string} newURL The url of the new endpoint.
      * */
     const addEndpoint = (category, type, newURL) => {
-        const endpointConfigCopy = JSON.parse(JSON.stringify(epConfig));
+        const endpointConfigCopy = cloneDeep(epConfig);
         let endpointTemplate = {};
         if (endpointType.key === 'address' || type === 'failover') {
             endpointTemplate = {
@@ -279,7 +280,7 @@ function EndpointOverview(props) {
             endpointTemplate = {
                 endpoint_type: 'address',
                 template_not_supported: false,
-                url: 'http://myservice/resource',
+                url: '',
             };
         } else if (selectedKey === 'default') {
             endpointTemplate = {
@@ -287,7 +288,7 @@ function EndpointOverview(props) {
             };
         } else {
             endpointTemplate = {
-                url: 'http://myservice/resource',
+                url: '',
             };
         }
 
@@ -405,18 +406,18 @@ function EndpointOverview(props) {
     const saveAdvanceConfig = (advanceConfig) => {
         const endpointConfigProperty =
             getEndpointTypeProperty(advanceConfigOptions.type, advanceConfigOptions.category);
-        const endpoints = epConfig[endpointConfigProperty];
-        if (Array.isArray(endpoints)) {
+        const selectedEndpoints = cloneDeep(epConfig[endpointConfigProperty]);
+        if (Array.isArray(selectedEndpoints)) {
             if (advanceConfigOptions.type === 'failover') {
-                endpoints[advanceConfigOptions.index - 1].config = advanceConfig;
+                selectedEndpoints[advanceConfigOptions.index - 1].config = advanceConfig;
             } else {
-                endpoints[advanceConfigOptions.index].config = advanceConfig;
+                selectedEndpoints[advanceConfigOptions.index].config = advanceConfig;
             }
         } else {
-            endpoints.config = advanceConfig;
+            selectedEndpoints.config = advanceConfig;
         }
         setAdvancedConfigOptions({ open: false });
-        setEpConfig({ ...epConfig, [endpointConfigProperty]: endpoints });
+        setEpConfig({ ...epConfig, [endpointConfigProperty]: selectedEndpoints });
     };
 
     /**
@@ -431,7 +432,7 @@ function EndpointOverview(props) {
             <Grid container xs={12}>
                 <Grid container item xs={12}>
                     <GeneralConfiguration
-                        epConfig={(JSON.parse(JSON.stringify(epConfig)))}
+                        epConfig={(cloneDeep(epConfig))}
                         endpointSecurityInfo={endpointSecurityInfo}
                         onChangeEndpointCategory={onChangeEndpointCategory}
                         handleToggleEndpointSecurity={handleToggleEndpointSecurity}

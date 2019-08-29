@@ -4558,11 +4558,6 @@ definitions:
       name:
         type: string
         example: CalculatorApp
-      subscriber:
-        description: |
-          If subscriber is not given user invoking the API will be taken as the subscriber.
-        type: string
-        example: admin
       throttlingPolicy:
         type: string
         example: Unlimited
@@ -4625,9 +4620,6 @@ definitions:
       name:
         type: string
         example: CalculatorApp
-      subscriber:
-        type: string
-        example: admin
       throttlingPolicy:
         type: string
         example: Unlimited

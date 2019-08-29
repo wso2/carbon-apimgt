@@ -16,8 +16,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
-
+import React, { Component, useContext } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
@@ -31,6 +30,7 @@ import Loading from 'AppComponents/Base/Loading/Loading';
 import Application from 'AppData/Application';
 import NewApp from 'AppComponents/Applications/Create/NewApp';
 import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
+import Settings from 'AppComponents/Shared/SettingsContext';
 import AppsTableContent from './AppsTableContent';
 import ApplicationTableHead from './ApplicationTableHead';
 
@@ -108,6 +108,7 @@ const styles = theme => ({
  * @extends {Component}
  */
 class Listing extends Component {
+    static contextType = Settings;
     /**
      *
      * @param {any} props properties
@@ -135,11 +136,12 @@ class Listing extends Component {
     }
 
     /**
-     * retrieve Settings from the local storage
+     * retrieve Settings from the context and check the application sharing enabled
+     * @param {*} settingsData required data
      */
     isApplicationGroupSharingEnabled = () => {
-        const settingsData = localStorage.getItem('settings');
-        const enabled = JSON.parse(settingsData).applicationSharingEnabled;
+        const settingsContext = this.context;
+        const enabled = settingsContext.settings.applicationSharingEnabled;
         this.setState({ isApplicationSharingEnabled: enabled });
     }
 

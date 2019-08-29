@@ -78,6 +78,13 @@ const Configurations = {
                         { prime: 0xff9700ff, sub: 0xffeb3cff },
                         { prime: 0xff9700ff, sub: 0xfe5722ff },
                     ],
+                    document: {
+                        icon: 'library_books',
+                        backgrounds: {
+                            prime: 0xcff7ffff,
+                            sub: 0xe2fff7ff,
+                        },
+                    },
                 },
                 landingPage: {
                     active: true,

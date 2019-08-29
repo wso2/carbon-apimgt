@@ -68,6 +68,7 @@ const styles = theme => ({
     },
     certificatesHeader: {
         fontWeight: 600,
+        marginTop: 20,
     },
     addCertificateBtn: {
         borderColor: '#c4c4c4',

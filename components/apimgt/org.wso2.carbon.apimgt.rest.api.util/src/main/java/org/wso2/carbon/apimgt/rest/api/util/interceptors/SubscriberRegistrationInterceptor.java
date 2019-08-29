@@ -30,8 +30,6 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
-import java.util.HashMap;
-import java.util.Map;
 import javax.cache.Cache;
 import javax.cache.Caching;
 
@@ -62,7 +60,7 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
 
         // checking if the subscriber exists in the subscriber cache
         Cache<String, Subscriber> subscriberCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                        .getCache(APIConstants.API_SUBSCRIBER_CACHE);
+                .getCache(APIConstants.API_SUBSCRIBER_CACHE);
         if (subscriberCache.get(username) != null) {
             return;
         }
@@ -125,5 +123,4 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
             throw new APIManagementException("Error occured while loading registry for tenant '" + tenantDomain + "'");
         }
     }
-
 }
