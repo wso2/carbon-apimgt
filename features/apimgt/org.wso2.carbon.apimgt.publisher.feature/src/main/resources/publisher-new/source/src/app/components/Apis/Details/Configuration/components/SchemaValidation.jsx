@@ -95,7 +95,7 @@ export default class SchemaValidation extends React.Component {
         return (
             <Grid container spacing={1} alignItems='flex-start'>
                 <Grid item>
-                    <FormControl component='fieldset'>
+                    <FormControl component='fieldset' style={{ marginTop: 20 }}>
                         <FormLabel component='legend'>
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.schema.validation'
@@ -132,6 +132,7 @@ export default class SchemaValidation extends React.Component {
                         aria-label='Schema Validation'
                         placement='right-end'
                         interactive
+                        style={{ marginTop: 20 }}
                     >
                         <HelpOutline />
                     </Tooltip>

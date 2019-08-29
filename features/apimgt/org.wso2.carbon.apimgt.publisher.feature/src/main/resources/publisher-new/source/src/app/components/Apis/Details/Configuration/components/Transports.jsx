@@ -56,73 +56,72 @@ export default function Transports(props) {
         return null; // No errors :-)
     };
     return (
-        <Grid container spacing={1} alignItems='flex-start'>
-            <Grid item>
-                <FormControl component='fieldset'>
-                    <FormLabel component='legend'>
-                        <FormattedMessage
-                            id='Apis.Details.Configuration.Configuration.transports'
-                            defaultMessage='Transports'
-                        />
-                    </FormLabel>
-                    <FormGroup>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={api.transport.includes('http')}
-                                    onChange={({ target: { checked } }) =>
-                                        configDispatcher({
-                                            action: 'transport',
-                                            event: { checked, value: 'http' },
-                                        })
-                                    }
-                                    value='http'
-                                />
-                            }
-                            label='HTTP'
-                        />
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={api.transport.includes('https')}
-                                    onChange={({ target: { checked } }) =>
-                                        configDispatcher({
-                                            action: 'transport',
-                                            event: { checked, value: 'https' },
-                                        })
-                                    }
-                                    value='https'
-                                />
-                            }
-                            label='HTTPS'
-                        />
-                    </FormGroup>
-                </FormControl>
+        <React.Fragment>
+            <Grid container spacing={1} alignItems='flex-start'>
+                <Grid item>
+                    <FormControl component='fieldset'>
+                        <FormLabel component='legend'>
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.Configuration.transports'
+                                defaultMessage='Transports'
+                            />
+                        </FormLabel>
+                        <FormGroup style={{ display: 'flow-root' }}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={api.transport.includes('http')}
+                                        onChange={({ target: { checked } }) =>
+                                            configDispatcher({
+                                                action: 'transport',
+                                                event: { checked, value: 'http' },
+                                            })
+                                        }
+                                        value='http'
+                                    />
+                                }
+                                label='HTTP'
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={api.transport.includes('https')}
+                                        onChange={({ target: { checked } }) =>
+                                            configDispatcher({
+                                                action: 'transport',
+                                                event: { checked, value: 'https' },
+                                            })
+                                        }
+                                        value='https'
+                                    />
+                                }
+                                label='HTTPS'
+                            />
+                        </FormGroup>
+                    </FormControl>
+                </Grid>
+                <Grid item>
+                    <Tooltip
+                        title={
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.components.Transports.tooltip'
+                                defaultMessage='API will be exposed in selected transport(s) in the gateway(s)'
+                            />
+                        }
+                        aria-label='Transports'
+                        placement='right-end'
+                        interactive
+                    >
+                        <HelpOutline />
+                    </Tooltip>
+                </Grid>
             </Grid>
-            <Grid item>
-                <Tooltip
-                    title={
-                        <FormattedMessage
-                            id='Apis.Details.Configuration.components.Transports.tooltip'
-                            defaultMessage='API will be exposed in selected transport(s) in the gateway(s)'
-                        />
-                    }
-                    aria-label='Transports'
-                    placement='right-end'
-                    interactive
-                >
-                    <HelpOutline />
-                </Tooltip>
-            </Grid>
-            <Grid item>
-                <span className={classes.error}>
-                    <Validate />
-                </span>
-            </Grid>
-        </Grid>
+            <div className={classes.error}>
+                <Validate />
+            </div>
+        </React.Fragment>
     );
 }
-
 
 Transports.propTypes = {
     api: PropTypes.shape({}).isRequired,

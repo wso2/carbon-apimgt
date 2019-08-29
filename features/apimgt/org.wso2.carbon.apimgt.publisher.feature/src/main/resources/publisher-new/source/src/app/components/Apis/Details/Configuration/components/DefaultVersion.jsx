@@ -38,9 +38,9 @@ import { FormattedMessage } from 'react-intl';
 export default function DefaultVersion(props) {
     const { api, configDispatcher } = props;
     return (
-        <Grid container spacing={1} alignItems='flex-start'>
+        <Grid container spacing={1} alignItems='flex-start' xs={11}>
             <Grid item>
-                <FormControl component='fieldset'>
+                <FormControl component='fieldset' style={{ display: 'flex', marginTop: 20 }}>
                     <FormLabel component='legend'>
                         <FormattedMessage
                             id='Apis.Details.Configuration.Configuration.isdefault.label'
@@ -53,6 +53,7 @@ export default function DefaultVersion(props) {
                         onChange={({ target: { value } }) =>
                             configDispatcher({ action: 'isDefaultVersion', value: value === 'true' })
                         }
+                        style={{ display: 'flow-root' }}
                     >
                         <FormControlLabel
                             value
@@ -77,7 +78,7 @@ export default function DefaultVersion(props) {
                     </RadioGroup>
                 </FormControl>
             </Grid>
-            <Grid item>
+            <Grid item xs={1}>
                 <Tooltip
                     title={
                         <FormattedMessage
@@ -93,6 +94,7 @@ export default function DefaultVersion(props) {
                     aria-label='add'
                     placement='right-end'
                     interactive
+                    style={{ marginTop: 20 }}
                 >
                     <HelpOutline />
                 </Tooltip>
