@@ -52,6 +52,7 @@ import Resources from './Resources/Resources';
 import ProductResourcesView from './Resources/ProductResourcesView';
 import ProductResourcesEdit from './ProductResources/ProductResourcesEdit';
 import Endpoints from './Endpoints/Endpoints';
+import Environments from './Environments/Environments';
 import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
 import Scope from './Scopes';
@@ -421,7 +422,18 @@ class Details extends Component {
                                 to={pathPrefix + 'endpoints'}
                                 Icon={<EndpointIcon />}
                             />
-                        )}
+                        }
+                        {!isAPIProduct &&
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.environments',
+                                    defaultMessage: 'environments',
+                                })}
+                                handleMenuSelect={this.handleMenuSelect}
+                                active={active}
+                                Icon={<EndpointIcon />}
+                            />
+                        }
                         {this.getLeftMenuItemForAPIType(api.type)}
                         <LeftMenuItem
                             text={intl.formatMessage({
@@ -500,7 +512,7 @@ class Details extends Component {
                                     component={() => <Configuration api={api} />}
                                 />
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
-
+                                <Route path={Details.subPaths.ENVIRONMENTS} component={() => <Environments api={api} />} />
                                 <Route path={Details.subPaths.OPERATIONS} component={() => <Operations api={api} />} />
                                 <Route
                                     exact
@@ -569,6 +581,7 @@ Details.subPaths = {
     CONFIGURATION: '/apis/:api_uuid/configuration',
     CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/configuration',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
+    ENVIRONMENTS: '/apis/:api_uuid/environments',
     OPERATIONS: '/apis/:api_uuid/operations',
     RESOURCES: '/apis/:api_uuid/resources',
     RESOURCES_PRODUCT: '/api-products/:apiprod_uuid/resources',
