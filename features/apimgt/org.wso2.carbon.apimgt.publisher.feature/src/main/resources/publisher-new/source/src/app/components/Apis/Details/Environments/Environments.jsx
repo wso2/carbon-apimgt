@@ -53,60 +53,19 @@ export default function Environments() {
 
     const environments =
         {
-            'data': {
-                'environment': [
-                    {
-                        'name': 'Production and Sandbox',
-                        'type': 'hybrid',
-                        'serverUrl': 'https://localhost:9443/services/',
-                        'showInApiConsole': true,
-                        'endpoints': {
-                            'http': 'http://localhost:8280',
-                            'https': 'https://localhost:8243'
-                        }
+            environment: [
+                {
+                    name: 'Production and Sandbox',
+                    type: 'hybrid',
+                    serverUrl: 'https://localhost:9443/services/',
+                    showInApiConsole: true,
+                    endpoints: {
+                        http: 'http://localhost:8280',
+                        https: 'https://localhost:8243',
                     },
-                    {
-                        'name': 'Production',
-                        'type': 'production',
-                        'serverUrl': 'https://localhost:9443/services/',
-                        'showInApiConsole': true,
-                        'endpoints': {
-                            'http': 'http://localhost:8280',
-                            'https': 'https://localhost:8243'
-                        }
-                    }
-                ],
-                'scopes': [
-                    'apim:document_create',
-                    'apim:subscription_block',
-                    'apim:mediation_policy_create',
-                    'apim:ep_certificates_update',
-                    'apim:api_create',
-                    'apim:api_delete',
-                    'apim:client_certificates_update',
-                    'apim:threat_protection_policy_manage',
-                    'apim:document_manage',
-                    'apim:client_certificates_add',
-                    'apim:publisher_setting',
-                    'openid',
-                    'apim:client_certificates_view',
-                    'apim:subscription_view',
-                    'apim:mediation_policy_manage',
-                    'apim:api_publish',
-                    'apim:api_view',
-                    'apim:external_services_discover',
-                    'apim:threat_protection_policy_create',
-                    'apim:ep_certificates_add',
-                    'apim:ep_certificates_view',
-                    'apim:mediation_policy_view'
-                ],
-                'MonetizationProperties': null
-            },
-            'xhr': {
-
-            }
+                },
+            ],
         };
-
 
     return (
         <div>
@@ -130,7 +89,7 @@ export default function Environments() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {environments.data.environment.map(row => (
+                        {environments.environment.map(row => (
                             <TableRow key={row.name}>
                                 <TableCell padding='checkbox'>
                                     <Checkbox
