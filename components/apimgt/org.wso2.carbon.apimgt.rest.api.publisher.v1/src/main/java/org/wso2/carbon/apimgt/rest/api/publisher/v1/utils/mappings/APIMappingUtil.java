@@ -132,7 +132,7 @@ public class APIMappingUtil {
         if (dto.isEnableSchemaValidation() != null) {
             model.setEnableSchemaValidation(dto.isEnableSchemaValidation());
         }
-        if (dto.isResponseCachingEnabled()) {
+        if (dto.isResponseCachingEnabled() != null && dto.isResponseCachingEnabled()) {
             model.setResponseCache(APIConstants.ENABLED);
         } else {
             model.setResponseCache(APIConstants.DISABLED);

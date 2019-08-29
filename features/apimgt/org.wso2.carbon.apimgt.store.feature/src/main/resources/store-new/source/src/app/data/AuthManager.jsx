@@ -36,42 +36,6 @@ class AuthManager {
         this.username = null;
     }
 
-    static refreshTokenOnExpire() {
-        const timestampSkew = 100;
-        const currentTimestamp = Math.floor(Date.now() / 1000);
-        const tokenTimestamp = localStorage.getItem('expiresIn');
-        const rememberMe = localStorage.getItem('rememberMe') === 'true';
-        if (rememberMe && tokenTimestamp - currentTimestamp < timestampSkew) {
-            const bearerToken = 'Bearer ' + Utils.getCookie('WSO2_AM_REFRESH_TOKEN_1');
-            const loginPromise = authManager.refresh(bearerToken);
-            loginPromise.then((data, status, xhr) => {
-                authManager.setUser(true);
-                const expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
-                window.localStorage.setItem('expiresIn', expiresIn);
-            });
-            loginPromise.error((error) => {
-                const error_data = JSON.parse(error.responseText);
-                const message = 'Error while refreshing token' + '<br/> You will be redirect to the login page ...';
-                noty({
-                    text: message,
-                    type: 'error',
-                    dismissQueue: true,
-                    modal: true,
-                    progressBar: true,
-                    timeout: 5000,
-                    layout: 'top',
-                    theme: 'relax',
-                    maxVisible: 10,
-                    callback: {
-                        afterClose() {
-                            window.location = loginPageUri;
-                        },
-                    },
-                });
-            });
-        }
-    }
-
     /**
      * Static method to handle unauthorized user action error catch, It will look for response status code and skip !401 errors
      * @param {object} error_response
@@ -274,22 +238,29 @@ class AuthManager {
         });
     }
 
-    refresh(authzHeader) {
+    /**
+     * Call Token API with refresh token grant type
+     * @param {Object} environment - Name of the environment
+     * @return {AxiosPromise}
+     */
+    static refresh(environment) {
         const params = {
-            grant_type: 'refresh_token',
-            validity_period: '3600',
-            scopes: 'apim:subscribe apim:signup apim:workflow_approve',
+            refresh_token: AuthManager.getUser(environment.label).getRefreshPartialToken(),
+            validity_period: -1,
+            scopes: AuthManager.CONST.USER_SCOPES,
         };
         const referrer = document.referrer.indexOf('https') !== -1 ? document.referrer : null;
-        const url = Utils.CONST.CONTEXT_PATH + '/auth/apis/login/token';
-        /* TODO: Fetch this from configs ~tmkb */
+        const url = Utils.CONST.CONTEXT_PATH + environment.refreshTokenPath;
         const headers = {
-            Authorization: authzHeader,
             Accept: 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Alt-Referer': referrer,
         };
-        return axios.post(url, qs.stringify(params), { headers });
+        return fetch(url, {
+            method: 'POST',
+            body: qs.stringify(params),
+            headers,
+        });
     }
 
     /**
