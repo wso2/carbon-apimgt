@@ -44,7 +44,7 @@ const styles = theme => ({
         textTransform: 'capitalize',
     },
     apiDetails: { padding: theme.spacing.unit },
-    apiActions: { justifyContent: 'space-between', padding: `0px 0px ${theme.spacing.unit}px 0px` },
+    apiActions: { justifyContent: 'space-between', padding: `0px 0px ${theme.spacing.unit}px 8px` },
     deleteProgress: {
         color: green[200],
         position: 'absolute',
