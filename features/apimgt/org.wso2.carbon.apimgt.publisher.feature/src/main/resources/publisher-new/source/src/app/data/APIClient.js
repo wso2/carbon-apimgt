@@ -130,7 +130,7 @@ class APIClient {
             if (data.status === 401 && data.obj != null && data.obj.description === 'Unauthenticated request') {
                 const userData = AuthManager.getUserFromToken();
                 userData.then((user) => {
-                    if (user == null) {
+                    if (user) {
                         window.location = Configurations.app.context + Utils.CONST.LOGOUT_CALLBACK;
                     }
                 }).catch((error) => {

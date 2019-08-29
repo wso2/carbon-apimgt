@@ -133,19 +133,19 @@ class APIClient {
                 const existingUser = AuthManager.getUser(this.environment.label);
                 if (existingUser) {
                     userData.then((user) => {
-                        if (user == null) {
+                        if (user) {
                             window.location = Configurations.app.context + Utils.CONST.LOGOUT_CALLBACK;
                         }
                     }).catch((error) => {
                         console.error('Error occurred while checking token status. Hence redirecting to login', error);
                         window.location = Configurations.app.context + Utils.CONST.LOGOUT_CALLBACK;
-                    })
+                    });
                 } else {
-                    console.error("Attempted a call to a protected API without a proper access token")
+                    console.error('Attempted a call to a protected API without a proper access token');
                 }
             }
             return data;
-        }
+        };
     }
 
     _getRequestInterceptor() {
