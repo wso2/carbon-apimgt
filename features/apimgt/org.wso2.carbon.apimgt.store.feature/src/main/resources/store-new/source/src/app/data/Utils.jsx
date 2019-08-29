@@ -100,7 +100,7 @@ class Utils {
 
         let environmentData = localStorage.getItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT);
         if (!environmentData) {
-            return Utils._getDefaultEnvironment();
+            return Utils.getDefaultEnvironment();
         }
 
         return JSON.parse(environmentData);
@@ -133,9 +133,10 @@ class Utils {
             label: 'Default',
             host: window.location.host,
             loginTokenPath: '/login/token',
+            refreshTokenPath: '/services/refresh/refresh.jag',
         };
     }
-    
+
     /**
      * Get current environment's index from the given environment array
      * @param {Array} environments
@@ -161,7 +162,7 @@ class Utils {
      */
     static setEnvironment(environment) {
         if (!environment) {
-            environment = Utils._getDefaultEnvironment();
+            environment = Utils.getDefaultEnvironment();
         }
 
         if (!environment.host) {
@@ -195,25 +196,20 @@ class Utils {
     static getSwaggerURL() {
         return "https://" + Utils.getEnvironment().host + Utils.CONST.SWAGGER_YAML;
     }
-
-    /**
-     * Get an environment object with default values.
-     * @returns {Object} environment: {label: string, host: string, loginTokenPath: string}
-     * @private
-     */
-    static _getDefaultEnvironment() {
-        return {label: 'Default', host: window.location.host, loginTokenPath: '/login/token'};
-    }
 }
 
 Utils.CONST = {
     LOCALSTORAGE_ENVIRONMENT: 'environment_store',
+    //TODO: fix/remove below wrong paths
     DCR_APP_INFO: '/login/login',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
     LOGIN_SIGN_UP_PATH: '/login/signup',
+
+    LOGOUT_CALLBACK: '/services/auth/callback/logout',
     SWAGGER_YAML: '/api/am/store/v1.0/swagger.yaml',
     PROTOCOL: 'https://',
+    // TODO: remove this and use the one from the configuration
     CONTEXT_PATH: '/store-new',
 };
 

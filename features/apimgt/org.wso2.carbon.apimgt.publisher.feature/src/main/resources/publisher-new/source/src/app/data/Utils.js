@@ -268,12 +268,16 @@ class Utils {
 
 Utils.CONST = {
     LOCAL_STORAGE_ENVIRONMENT: 'environment_publisher',
+    // TODO: fix/remove below wrong paths
     DCR_APP_INFO: '/publisher-new/site/public/theme/temporary_login_config.json',
     MULTI_ENVIRONMENT_OVERVIEW_ENABLED: 'multi_env_overview',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
+
+    LOGOUT_CALLBACK: '/services/auth/callback/logout',
     SWAGGER_YAML: '/api/am/publisher/v1.0/swagger.yaml',
     PROTOCOL: 'https://',
+    // TODO: remove this and use the one from the configuration
     CONTEXT_PATH: '/publisher-new',
 };
 

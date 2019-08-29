@@ -48,32 +48,42 @@
     var SystemApplicationDAO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
     var systemApplicationDAO = new SystemApplicationDAO();
     var clientId ;
-    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_store");
+    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME);
+
+    var lock = SystemApplicationDAO.getLock();
     if (systemApplicationDTO  !== null) {
         clientId = systemApplicationDTO.getConsumerKey();
     } else {
-        var dcrRequestData = {
-            "callbackUrl": callbackUrl,
-            "clientName": "store",
-            "owner": "admin",
-            "grantType": "authorization_code refresh_token",
-            "saasApp": true
-        };
+        try {
+            lock.acquire();
+            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(STORE_CLIENT_APP_NAME);
+            if (systemApplicationDTO == null) {
+                var dcrRequestData = {
+                    "callbackUrl": callbackUrl,
+                    "clientName": STORE_CLIENT_APP_NAME,
+                    "owner": String(utils.getAdminUsername()),
+                    "grantType": "authorization_code refresh_token",
+                    "saasApp": true
+                };
 
-        var result = post(dcrUrl, JSON.stringify(dcrRequestData) , {
-            "Authorization": authorizationHeader,
-            "Content-Type": "application/json"
-        }, "json");
+                var result = post(dcrUrl, JSON.stringify(dcrRequestData) , {
+                    "Authorization": authorizationHeader,
+                    "Content-Type": "application/json"
+                }, "json");
 
-        clientId = result.data.clientId;
-        var clientSecret = result.data.clientSecret;
+                clientId = result.data.clientId;
+                var clientSecret = result.data.clientSecret;
 
-        log.debug("Client ID = " + clientId);
+                log.debug("Client ID = " + clientId);
 
-        var addApplicationKey = systemApplicationDAO.addApplicationKey("admin_store", clientId, clientSecret);
-        if (!addApplicationKey) {
-            log.error("Error while persisting application information in system application DB table!!");
-            log.error("Client ID = " + clientId);
+                var addApplicationKey = systemApplicationDAO.addApplicationKey(STORE_CLIENT_APP_NAME, clientId, clientSecret);
+                if (!addApplicationKey) {
+                    log.error("Error while persisting application information in system application DB table!!");
+                    log.error("Client ID = " + clientId);
+                }
+            }
+        } finally {
+            lock.release();
         }
     }
     var authRequestParams = "?response_type=code&client_id=" + clientId + "&scope=" + scopes + "&state=" + state + "&redirect_uri=" + loginCallbackUrl;
