@@ -2229,6 +2229,7 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/applicationId-Q'
+        - $ref: '#/parameters/apiType-Q'
         - $ref: '#/parameters/groupId'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/limit'
@@ -3941,6 +3942,15 @@ parameters:
     in: query
     description: |
       **API ID** consisting of the **UUID** of the API.
+    type: string
+
+# API Type
+# Specified as part of the query string
+  apiType-Q:
+    name: apiType
+    in: query
+    description: |
+      **API TYPE** Identifies the type API(API or API_PRODUCT).
     type: string
 
 # SDK language

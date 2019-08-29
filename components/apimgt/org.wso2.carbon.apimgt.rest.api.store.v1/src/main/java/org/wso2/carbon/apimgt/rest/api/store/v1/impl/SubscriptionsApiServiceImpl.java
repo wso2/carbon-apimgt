@@ -35,6 +35,8 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO.TypeEnum;
@@ -75,8 +77,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return matched subscriptions as a list of SubscriptionDTOs
      */
     @Override
-    public Response subscriptionsGet(String apiId, String applicationId, String apiType, Integer offset, Integer limit,
-            String ifNoneMatch, MessageContext messageContext) {
+    public Response subscriptionsGet(String apiId, String applicationId, String apiType, String groupId, Integer offset,
+                                     Integer limit, String ifNoneMatch, MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         Subscriber subscriber = new Subscriber(username);
@@ -89,7 +91,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
         // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
         // As a improvement, we can check admin privileges of the user and honor groupId.
-        String groupId = RestApiUtil.getLoggedInUserGroupId();
+        groupId = RestApiUtil.getLoggedInUserGroupId();
 
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
@@ -97,12 +99,19 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             if (!StringUtils.isEmpty(apiId)) {
                 // todo : FIX properly, need to done properly with backend side pagination. 
                 // todo : getSubscribedIdentifiers() method should NOT be used. Appears to be too slow. 
-                
-                // This will fail with an authorization failed exception if user does not have permission to access the API
-                API api = apiConsumer.getLightweightAPIByUUID(apiId, tenantDomain);
-                subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, api.getId(), groupId);
-                //sort by application name
-                subscribedAPIList.addAll(subscriptions);
+
+                if (StringUtils.isEmpty(apiType) || APIType.API.toString().equals(apiType)) {
+                    // This will fail with an authorization failed exception if user does not have permission to access the API
+                    API api = apiConsumer.getLightweightAPIByUUID(apiId, tenantDomain);
+                    subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, api.getId(), groupId);
+                    //sort by application name
+                    subscribedAPIList.addAll(subscriptions);
+                } else if (APIType.API_PRODUCT.toString().equals(apiType)) {
+                    APIProduct apiProduct = apiConsumer.getAPIProductbyUUID(apiId, tenantDomain);
+                    subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, apiProduct.getId(), groupId);
+                    //sort by application name
+                    subscribedAPIList.addAll(subscriptions);
+                }
                 subscribedAPIList.sort(Comparator.comparing(o -> o.getApplication().getName()));
 
                 subscriptionListDTO = SubscriptionMappingUtil
