@@ -32,6 +32,7 @@ import MonetizationIcon from '@material-ui/icons/LocalAtm';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl, defineMessages } from 'react-intl';
 import { Redirect, Route, Switch, Link, matchPath } from 'react-router-dom';
+import isEmpty from 'lodash.isEmpty';
 import Utils from 'AppData/Utils';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
@@ -205,24 +206,28 @@ class Details extends Component {
      *
      * @memberof Details
      */
-    setAPI() {
-        const { apiUUID } = this.props.match.params;
-        const promisedApi = Api.get(apiUUID);
-        promisedApi
-            .then((api) => {
-                this.setState({ api });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    this.setState({ apiNotFound: true });
-                } else if (status === 401) {
-                    doRedirectToLogin();
-                }
-            });
+    setAPI(newAPI) {
+        if (newAPI) {
+            this.setState({ api: newAPI });
+        } else {
+            const { apiUUID } = this.props.match.params;
+            const promisedApi = Api.get(apiUUID);
+            promisedApi
+                .then((api) => {
+                    this.setState({ api });
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                    const { status } = error;
+                    if (status === 404) {
+                        this.setState({ apiNotFound: true });
+                    } else if (status === 401) {
+                        doRedirectToLogin();
+                    }
+                });
+        }
     }
 
     /**
@@ -304,7 +309,7 @@ class Details extends Component {
      * @param {*} isAPIProduct
      * @memberof Details
      */
-    updateAPI(updatedProperties, isAPIProduct) {
+    updateAPI(updatedProperties = {}, isAPIProduct) {
         const { api } = this.state;
         let promisedUpdate;
         // TODO: Ideally, The state should hold the corresponding API object
@@ -312,8 +317,12 @@ class Details extends Component {
         if (isAPIProduct) {
             const restAPI = new Api();
             promisedUpdate = restAPI.updateProduct(JSON.parse(JSON.stringify(updatedProperties)));
-        } else {
+        } else if (!isEmpty(updatedProperties)) {
+            // newApi object has to be provided as the updatedProperties. Then api will be updated.
             promisedUpdate = api.update(updatedProperties);
+        } else {
+            // this is to get the updated api when api properties are updated, but we do not have the newApi object
+            promisedUpdate = Api.get(api.id);
         }
         return promisedUpdate.then((updatedAPI) => {
             Alert.info(`${updatedAPI.name} API updated successfully`);
@@ -400,7 +409,10 @@ class Details extends Component {
 
         return (
             <React.Fragment>
-                <APIProvider value={{ api, updateAPI: this.updateAPI, isAPIProduct }}>
+                <APIProvider value={{
+                    api, updateAPI: this.updateAPI, isAPIProduct, setAPI: this.setAPI,
+                }}
+                >
                     <div className={classes.LeftMenu}>
                         <Link to={'/' + (isAPIProduct ? 'api-products' : 'apis') + '/'}>
                             <div className={classes.leftLInkMain}>

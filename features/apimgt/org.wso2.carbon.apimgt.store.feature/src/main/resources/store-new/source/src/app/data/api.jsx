@@ -319,7 +319,7 @@ export default class API extends Resource {
      */
     getAllComments(apiId, callback = null) {
         const promiseGet = this.client.then((client) => {
-            return client.apis['Comment (Collection)'].get_apis__apiId__comments({ apiId }, this._requestMetaData());
+            return client.apis['Comments'].get_apis__apiId__comments({ apiId }, this._requestMetaData());
         }).catch((error) => {
             console.error(error);
         });
