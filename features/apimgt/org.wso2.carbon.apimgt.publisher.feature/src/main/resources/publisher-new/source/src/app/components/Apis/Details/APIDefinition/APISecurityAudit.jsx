@@ -38,24 +38,24 @@ class APISecurityAudit extends Component {
      */
     componentDidMount() {
         // Include code to pass in the data from the backend
-        const { api } = this.props;
-        const promisedReport = api.getSecurityAuditReport(api.id);
+        // const { api } = this.props;
+        // const promisedReport = api.getSecurityAuditReport(api.id);
 
-        promisedReport
-            .then(response => response.json())
-            .then(results => this.setState({ items: results }))
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    // this.setState({ error: true });
-                } else if (status === 401) {
-                    // doRedirectToLogin();
-                }
-                // TODO - Re-check the catch code
-            });
+        // promisedReport
+        //     .then(response => response.json())
+        //     .then(results => this.setState({ items: results }))
+        //     .catch((error) => {
+        //         if (process.env.NODE_ENV !== 'production') {
+        //             console.log(error);
+        //         }
+        //         const { status } = error;
+        //         if (status === 404) {
+        //             // this.setState({ error: true });
+        //         } else if (status === 401) {
+        //             // doRedirectToLogin();
+        //         }
+        //         // TODO - Re-check the catch code
+        //     });
     }
 
     /**
