@@ -65,7 +65,7 @@ export default function ApplicationLevel(props) {
                             defaultMessage='Application Level (HTTP)'
                         />
                     </FormLabel>
-                    <FormGroup>
+                    <FormGroup style={{ display: 'flow-root' }}>
                         <FormControlLabel
                             control={
                                 <Checkbox

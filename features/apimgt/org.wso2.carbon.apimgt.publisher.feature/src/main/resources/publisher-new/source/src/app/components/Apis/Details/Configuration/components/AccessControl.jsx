@@ -42,8 +42,8 @@ export default function AccessControl(props) {
     const isRestricted = api.accessControl === 'RESTRICTED';
     return (
         <Grid container spacing={0} alignItems='flex-start'>
-            <Grid item>
-                <FormControl>
+            <Grid item xs={11}>
+                <FormControl style={{ display: 'flex' }} >
                     <InputLabel htmlFor='accessControl-selector'>
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.AccessControl.head.topic'
@@ -76,7 +76,7 @@ export default function AccessControl(props) {
                     </FormHelperText>
                 </FormControl>
             </Grid>
-            <Grid item>
+            <Grid item xs={1}>
                 <Tooltip
                     title={
                         <React.Fragment>
@@ -127,6 +127,7 @@ export default function AccessControl(props) {
                         onChange={({ target: { value } }) => configDispatcher({ action: 'accessControlRoles', value })}
                         helperText={'Enter role name(s). If there are multiple roles, ' +
                         'separate them using comma (i:e role1,role2,...)'}
+                        style={{ marginTop: 20 }}
                     />
                 </Grid>
             )}

@@ -34,16 +34,16 @@ export default function Tags(props) {
     const { api, configDispatcher } = props;
     return (
         <React.Fragment>
-            <Grid item>
-                <Typography variant='subtitle1'><FormattedMessage
-                    id='Apis.Details.Configuration.components.Tags.title'
-                    defaultMessage='Tags'
-                />
-                </Typography>
-            </Grid>
-            <Grid container spacing={1} alignItems='flex-start'>
-
-                <Grid item xs={4}>
+            <Grid container>
+                <Grid item xs={12}>
+                    <Typography variant='subtitle1'>
+                        <FormattedMessage
+                            id='Apis.Details.Configuration.components.Tags.title'
+                            defaultMessage='Tags'
+                        />
+                    </Typography>
+                </Grid>
+                <Grid item xs={12}>
                     <ChipInput
                         value={api.tags}
                         helperText={
@@ -58,6 +58,7 @@ export default function Tags(props) {
                         onDelete={(tag) => {
                             configDispatcher({ action: 'tags', value: api.tags.filter(oldTag => oldTag !== tag) });
                         }}
+                        style={{ display: 'flex' }}
                     />
                 </Grid>
             </Grid>
