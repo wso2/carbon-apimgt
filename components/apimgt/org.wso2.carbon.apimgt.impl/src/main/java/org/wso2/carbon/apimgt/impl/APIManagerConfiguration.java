@@ -1074,8 +1074,10 @@ public class APIManagerConfiguration {
             monetizationAttribute.put(APIConstants.Monetization.IS_ATTRIBUTE_HIDDEN, isHidden);
             while (attributes.hasNext()) {
                 OMElement attribute = (OMElement) attributes.next();
-                if (attribute.getLocalName().equals(APIConstants.Monetization.NAME)) {
+                if (attribute.getLocalName().equals(APIConstants.Monetization.ATTRIBUTE_NAME)) {
                     monetizationAttribute.put(APIConstants.Monetization.ATTRIBUTE, attribute.getText());
+                } else if(attribute.getLocalName().equals(APIConstants.Monetization.ATTRIBUTE_DISPLAY_NAME)){
+                    monetizationAttribute.put(APIConstants.Monetization.ATTRIBUTE_DISPLAY_NAME, attribute.getText());
                 } else if (attribute.getLocalName().equals(APIConstants.Monetization.ATTRIBUTE_DESCRIPTION)) {
                     monetizationAttribute.put(APIConstants.Monetization.ATTRIBUTE_DESCRIPTION, attribute.getText());
                 } else if (attribute.getLocalName().equals(APIConstants.Monetization.ATTRIBUTE_DEFAULT) && isRequired) {

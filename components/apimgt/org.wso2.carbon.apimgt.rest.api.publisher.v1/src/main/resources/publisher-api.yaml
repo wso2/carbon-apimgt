@@ -8085,6 +8085,10 @@ definitions:
         type: string
         description: |
           Name of the attribute
+      displayName:
+        type: string
+        description: |
+          Display name of the attribute
       description:
         type: string
         description: |

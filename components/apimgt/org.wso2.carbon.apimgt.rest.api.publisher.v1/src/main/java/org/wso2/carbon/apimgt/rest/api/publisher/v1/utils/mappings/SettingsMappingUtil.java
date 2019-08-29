@@ -104,10 +104,12 @@ public class SettingsMappingUtil {
             JSONObject monetizationAttribute = (JSONObject) monetizationAttributes.get(i);
             MonetizationAttributeDTO monetizationAttributeDTO = new MonetizationAttributeDTO();
             monetizationAttributeDTO.setName((String) monetizationAttribute.get(APIConstants.Monetization.ATTRIBUTE));
+            monetizationAttributeDTO.setDisplayName(
+                    (String) monetizationAttribute.get(APIConstants.Monetization.ATTRIBUTE_DISPLAY_NAME));
             monetizationAttributeDTO.setDescription(
                     (String) monetizationAttribute.get(APIConstants.Monetization.ATTRIBUTE_DESCRIPTION));
             monetizationAttributeDTO
-                    .setRequired((Boolean) monetizationAttribute.get(APIConstants.ApplicationAttributes.REQUIRED));
+                    .setRequired((Boolean) monetizationAttribute.get(APIConstants.Monetization.IS_ATTRIBITE_REQUIRED));
             monetizationAttributeDTO
                     .setHidden((Boolean) monetizationAttribute.get(APIConstants.Monetization.IS_ATTRIBUTE_HIDDEN));
             monetizationAttributeDTOSList.add(monetizationAttributeDTO);

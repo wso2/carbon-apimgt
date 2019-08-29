@@ -1655,7 +1655,8 @@ public final class APIConstants {
         public static final String IS_ATTRIBUTE_HIDDEN = "Hidden";
         public static final String ATTRIBUTE_DESCRIPTION = "Description";
         public static final String ATTRIBUTE_DEFAULT = "Default";
-        public static final String NAME = "Name";
+        public static final String ATTRIBUTE_DISPLAY_NAME = "DisplayName";
+        public static final String ATTRIBUTE_NAME = "Name";
 
         public static final String CURRENCY = "currencyType";
         public static final String BILLING_CYCLE = "billingCycle";

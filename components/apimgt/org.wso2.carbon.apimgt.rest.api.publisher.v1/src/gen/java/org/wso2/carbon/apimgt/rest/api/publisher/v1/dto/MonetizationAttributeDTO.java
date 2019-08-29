@@ -16,6 +16,7 @@ public class MonetizationAttributeDTO   {
   
     private Boolean required = null;
     private String name = null;
+    private String displayName = null;
     private String description = null;
     private Boolean hidden = null;
     private String _default = null;
@@ -54,6 +55,24 @@ public class MonetizationAttributeDTO   {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   * Display name of the attribute 
+   **/
+  public MonetizationAttributeDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Display name of the attribute ")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -122,6 +141,7 @@ public class MonetizationAttributeDTO   {
     MonetizationAttributeDTO monetizationAttribute = (MonetizationAttributeDTO) o;
     return Objects.equals(required, monetizationAttribute.required) &&
         Objects.equals(name, monetizationAttribute.name) &&
+        Objects.equals(displayName, monetizationAttribute.displayName) &&
         Objects.equals(description, monetizationAttribute.description) &&
         Objects.equals(hidden, monetizationAttribute.hidden) &&
         Objects.equals(_default, monetizationAttribute._default);
@@ -129,7 +149,7 @@ public class MonetizationAttributeDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(required, name, description, hidden, _default);
+    return Objects.hash(required, name, displayName, description, hidden, _default);
   }
 
   @Override
@@ -139,6 +159,7 @@ public class MonetizationAttributeDTO   {
     
     sb.append("    required: ").append(toIndentedString(required)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    hidden: ").append(toIndentedString(hidden)).append("\n");
     sb.append("    _default: ").append(toIndentedString(_default)).append("\n");

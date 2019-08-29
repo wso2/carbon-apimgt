@@ -849,6 +849,7 @@
                {% for attribute in apim.monetization.additional_attributes %}
                <Attribute required="{{attribute.required}}">
                    <Name>{{attribute.name}}</Name>
+                   <DisplayName>{{attribute.display_name}}</DisplayName>
                    <Description>{{attribute.description}}</Description>
                    <Default>{{attribute.default}}</Default>
                </Attribute>
