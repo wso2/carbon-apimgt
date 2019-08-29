@@ -1766,7 +1766,7 @@
         <opentracing.api.version>0.31.0</opentracing.api.version>
         <span.reporter.version>0.1.0</span.reporter.version>
         <opentracing.mock.version>0.31.0</opentracing.mock.version>
-        <aspectj.version>1.9.3</aspectj.version>
+        <aspectj.version>1.9.4</aspectj.version>
         <everit.version>1.5.0.wso2.v1</everit.version>
         <json.orbit.version>3.0.0.wso2v1</json.orbit.version>
         <aspectj.version>1.9.4</aspectj.version>
