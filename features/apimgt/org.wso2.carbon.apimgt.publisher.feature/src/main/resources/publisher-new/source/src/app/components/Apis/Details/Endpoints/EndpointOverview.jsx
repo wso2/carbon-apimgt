@@ -68,6 +68,7 @@ const styles = theme => ({
     radioGroup: {
         display: 'flex',
         flexDirection: 'row',
+        paddingTop: '8px',
     },
     endpointsWrapperLeft: {
         padding: theme.spacing.unit,
@@ -444,46 +445,46 @@ function EndpointOverview(props) {
                 </Grid>
                 <Paper className={classes.endpointContainer} hidden={endpointType.key === 'default'}>
                     <Grid container item xs={12}>
-                        <Grid item container xs spacing={2}>
-                            <Grid xs className={classes.endpointsWrapperLeft}>
+                        <Grid xs className={classes.endpointsWrapperLeft}>
+                            <div className={classes.sandboxHeading}>
                                 <Typography className={classes.endpointName}>
                                     <FormattedMessage
                                         id='Apis.Details.Endpoints.EndpointOverview.production'
                                         defaultMessage='Production'
                                     />
                                 </Typography>
-                                <GenericEndpoint
-                                    className={classes.defaultEndpointWrapper}
-                                    endpointURL={
-                                        epConfig.production_endpoints && epConfig.production_endpoints.length > 0 ?
-                                            epConfig.production_endpoints[0].url : epConfig.production_endpoints.url}
-                                    type=''
-                                    index={0}
-                                    category='production_endpoints'
-                                    editEndpoint={editEndpoint}
-                                    setAdvancedConfigOpen={toggleAdvanceConfig}
-                                />
-                            </Grid>
-                            <Grid xs className={classes.endpointsWrapperRight}>
-                                <div className={classes.sandboxHeading}>
-                                    <Typography className={classes.endpointName}>
-                                        <FormattedMessage
-                                            id='Apis.Details.Endpoints.EndpointOverview.sandbox'
-                                            defaultMessage='Sandbox'
-                                        />
-                                    </Typography>
-                                </div>
-                                <GenericEndpoint
-                                    className={classes.defaultEndpointWrapper}
-                                    endpointURL={epConfig.sandbox_endpoints && epConfig.sandbox_endpoints.length > 0 ?
-                                        epConfig.sandbox_endpoints[0].url : epConfig.sandbox_endpoints.url}
-                                    type=''
-                                    index={0}
-                                    category='sandbox_endpoints'
-                                    editEndpoint={editEndpoint}
-                                    setAdvancedConfigOpen={toggleAdvanceConfig}
-                                />
-                            </Grid>
+                            </div>
+                            <GenericEndpoint
+                                className={classes.defaultEndpointWrapper}
+                                endpointURL={
+                                    epConfig.production_endpoints && epConfig.production_endpoints.length > 0 ?
+                                        epConfig.production_endpoints[0].url : epConfig.production_endpoints.url}
+                                type=''
+                                index={0}
+                                category='production_endpoints'
+                                editEndpoint={editEndpoint}
+                                setAdvancedConfigOpen={toggleAdvanceConfig}
+                            />
+                        </Grid>
+                        <Grid xs className={classes.endpointsWrapperRight}>
+                            <div className={classes.sandboxHeading}>
+                                <Typography className={classes.endpointName}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Endpoints.EndpointOverview.sandbox'
+                                        defaultMessage='Sandbox'
+                                    />
+                                </Typography>
+                            </div>
+                            <GenericEndpoint
+                                className={classes.defaultEndpointWrapper}
+                                endpointURL={epConfig.sandbox_endpoints && epConfig.sandbox_endpoints.length > 0 ?
+                                    epConfig.sandbox_endpoints[0].url : epConfig.sandbox_endpoints.url}
+                                type=''
+                                index={0}
+                                category='sandbox_endpoints'
+                                editEndpoint={editEndpoint}
+                                setAdvancedConfigOpen={toggleAdvanceConfig}
+                            />
                         </Grid>
                     </Grid>
                     {api.type === 'HTTP' ?
