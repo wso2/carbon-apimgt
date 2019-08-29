@@ -112,6 +112,7 @@ function APICreateDefault(props) {
                 },
             };
         }
+        apiData.gatewayEnvironments = ['Production and Sandbox'];
         const newAPI = new API(apiData);
         newAPI
             .save()
@@ -175,7 +176,7 @@ function APICreateDefault(props) {
                             <Link to='/apis/'>
                                 <Button variant='outlined'>
                                     <FormattedMessage
-                                        id='Apis.Details.Configuration.Configuration.cancel'
+                                        id='Apis.Create.Default.APICreateDefault.cancel'
                                         defaultMessage='Cancel'
                                     />
                                 </Button>

@@ -11,285 +11,159 @@
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { Component } from 'react';
-import { withStyles, RadioGroup, Radio, FormControl, FormControlLabel } from '@material-ui/core';
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import Radio from '@material-ui/core/Radio';
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
+import { makeStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
-import Dropzone from 'react-dropzone';
-import classNames from 'classnames';
-import Backup from '@material-ui/icons/Backup';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
-const styles = theme => ({
-    radioWrapper: {
-        display: 'flex',
-        flexDirection: 'row',
-    },
-    dropZoneInside: {},
-    dropZone: {
-        color: theme.palette.grey[500],
-        border: 'dashed 1px ' + theme.palette.grey[500],
-        background: theme.palette.grey[100],
-        padding: theme.spacing.unit * 4,
-        textAlign: 'center',
-        cursor: 'pointer',
-    },
-    dropZoneIcon: {
-        color: theme.palette.grey[500],
-        width: 100,
-        height: 100,
-    },
-    dropZoneError: {
+import APIValidation from 'AppData/APIValidation';
+import API from 'AppData/api';
+import DropZoneLocal from 'AppComponents/Shared/DropZoneLocal';
+
+const useStyles = makeStyles(theme => ({
+    mandatoryStar: {
         color: theme.palette.error.main,
     },
-    dropZoneErrorBox: {
-        border: 'dashed 1px ' + theme.palette.error.main,
-    },
-    errorMessage: {
-        color: theme.palette.error.main,
-    },
-    errorIcon: {
-        color: theme.palette.error.main,
-        marginRight: theme.spacing.unit * 2,
-    },
-    fileNameWrapper: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        '& div': {
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-        },
-    },
-    FormControl: {
-        padding: 0,
-        width: '100%',
-        marginTop: 0,
-    },
-    errorMessageWrapper: {
-        display: 'flex',
-        alignItems: 'center',
-    },
-    urlWrapper: {
-        display: 'flex',
-        alignItems: 'center',
-    },
-    button: {
-        whiteSpace: 'nowrap',
-    },
-});
+}));
 
 /**
- *
- * @class ProvideOpenAPI
- * @extends {Component}
+ * Sub component of API Create using OpenAPI UI, This is handling the taking input of WSDL file or URL from the user
+ * In the create API using OpenAPI wizard first step out of 2 steps
+ * @export
+ * @param {*} props
+ * @returns {React.Component} @inheritdoc
  */
-class ProvideOpenAPI extends Component {
+export default function ProvideOpenAPI(props) {
+    const { apiInputs, inputsDispatcher, onValidate } = props;
+    const isFileInput = apiInputs.inputType === 'file';
+    const classes = useStyles();
+    const [isError, setValidity] = useState(); // If valid value is `null` else an error object will be there
+    const [isValidating, setIsValidating] = useState(false);
     /**
-     * Creates an instance of ProvideWSDL.
-     * @param {any} props @inheritDoc
-     * @memberof ProvideWSDL
+     *
+     *
+     * @param {*} files
      */
-    constructor(props) {
-        super(props);
-        this.onDrop = this.onDrop.bind(this);
-        this.openAPIUrlChange = this.openAPIUrlChange.bind(this);
-        this.handleUploadMethodChange = this.handleUploadMethodChange.bind(this);
+    function onDrop(files) {
+        // Why `files[0]` below is , We only handle one OpenAPI file at a time,
+        // So if use provide multiple, We would only
+        // accept the first file. This information is shown in the dropdown helper text
+        inputsDispatcher({ action: 'inputValue', value: [files[0]] });
     }
 
     /**
-     * Handle OpenAPI file ondrop action when user drag and drop file to dopzone, This is passed through props
-     * to child component
-     * @param {Object} newFiles File object passed from DropZone library
-     * @memberof ApiCreateOpenAPI
+     * Trigger the provided onValidate call back on each input validation run
+     * Do the validation state aggregation and call the onValidate method with aggregated value
+     * @param {Object} state Validation state object
      */
-    onDrop(newFiles) {
-        const { setOpenAPIFiles, valid, setValid } = this.props;
-        const validUpdated = { ...valid };
-        validUpdated.openAPIFile.empty = newFiles.length === 0;
-        setOpenAPIFiles(newFiles);
-        setValid(validUpdated);
+    function validate(state) {
+        if (state === null) {
+            setIsValidating(true);
+            API.validateOpenAPIByUrl(apiInputs.inputValue).then((response) => {
+                const {
+                    body: { isValid, info },
+                } = response;
+                if (isValid) {
+                    inputsDispatcher({ action: 'preSetAPI', value: info });
+                    setValidity(null);
+                } else {
+                    setValidity({ message: 'OpenAPI content validation failed!' });
+                }
+                onValidate(isValid);
+                setIsValidating(false);
+            });
+            // Valid URL string
+            // TODO: Handle catch network or api call failures ~tmkb
+        } else {
+            setValidity(state);
+            onValidate(false);
+        }
     }
-
-    /**
-     * Update openAPIUrl when input get changed
-     * @param {React.SyntheticEvent} event Event triggered when URL input field changed
-     * @memberof ApiCreateOpenAPI
-     */
-    openAPIUrlChange(event) {
-        const { setOpenAPIUrl, valid, setValid } = this.props;
-        const openAPIUrl = event.target.value;
-        const validUpdated = { ...valid };
-        validUpdated.openAPIUrl.empty = !openAPIUrl;
-        setOpenAPIUrl(openAPIUrl);
-        setValid(validUpdated);
-    }
-
-    handleUploadMethodChange(e, value) {
-        const { setUploadMethod } = this.props;
-        setUploadMethod(value);
-    }
-
-    /**
-     * @inheritDoc
-     * @returns {React.Component}
-     * @memberof ProvideWSDL
-     */
-    render() {
-        const {
-            uploadMethod, openAPIUrl, files, valid,
-        } = this.props;
-        const { classes } = this.props;
-        return (
-            <React.Fragment>
-                <form>
-                    <FormControl margin='normal' className={classes.FormControl}>
+    return (
+        <React.Fragment>
+            <Grid container spacing={5}>
+                <Grid item md={12}>
+                    <FormControl component='fieldset'>
+                        <FormLabel component='legend'>
+                            <React.Fragment>
+                                <sup className={classes.mandatoryStar}>*</sup>{' '}
+                                <FormattedMessage
+                                    id='Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.type'
+                                    defaultMessage='Input type'
+                                />
+                            </React.Fragment>
+                        </FormLabel>
                         <RadioGroup
-                            aria-label='inputType'
-                            name='inputType'
-                            value={uploadMethod}
-                            onChange={this.handleUploadMethodChange}
-                            className={classes.radioWrapper}
+                            aria-label='Input type'
+                            value={apiInputs.inputType}
+                            onChange={event => inputsDispatcher({ action: 'inputType', value: event.target.value })}
                         >
-                            <FormControlLabel
-                                value='file'
-                                control={<Radio />}
-                                label={<FormattedMessage id='file' defaultMessage='File' />}
-                            />
-                            <FormControlLabel
-                                value='url'
-                                control={<Radio />}
-                                label={<FormattedMessage id='url' defaultMessage='URL' />}
-                            />
+                            <FormControlLabel value='url' control={<Radio />} label='OpenAPI URL' />
+                            <FormControlLabel value='file' control={<Radio />} label='OpenAPI File' />
                         </RadioGroup>
                     </FormControl>
-                    {uploadMethod === 'file' && (
-                        <FormControl className={classes.FormControl}>
-                            {files && files.length > 0 && (
-                                <div className={classes.fileNameWrapper}>
-                                    <Typography variant='subtitle2' gutterBottom>
-                                        <FormattedMessage id='uploaded.file' defaultMessage='Uploaded file' /> :
-                                    </Typography>
-                                    {files.map(f => (
-                                        <div key={f.name} className={classes.fileName}>
-                                            <Typography variant='body1' gutterBottom>
-                                                {f.name} - {f.size} bytes
-                                            </Typography>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                            <Dropzone
-                                onDrop={this.onDrop}
-                                multiple={false}
-                                className={classNames(classes.dropZone, {
-                                    [classes.dropZoneErrorBox]: valid.openAPIFile.empty,
-                                })}
-                            >
-                                <Backup className={classes.dropZoneIcon} />
-                                <div>
-                                    <FormattedMessage
-                                        id='try.dropping.some.files.here.or.click.to.select.files.to.upload'
-                                        defaultMessage={
-                                            'Try dropping some files ' +
-                                            'here, or click to select files to upload.'
-                                        }
-                                    />
-                                </div>
-                            </Dropzone>
-                            {valid.openAPIFile.empty && (
-                                <Typography variant='caption' gutterBottom className={classes.dropZoneError}>
-                                    <FormattedMessage id='error.empty' defaultMessage='This field can not be empty.' />
-                                </Typography>
-                            )}
-                        </FormControl>
+                </Grid>
+                <Grid item md={7}>
+                    {isFileInput ? (
+                        // TODO: Pass message saying accepting only one file ~tmkb
+                        <DropZoneLocal onDrop={onDrop} files={apiInputs.inputValue} />
+                    ) : (
+                        <TextField
+                            autoFocus
+                            id='outlined-full-width'
+                            label='OpenAPI URL'
+                            placeholder='Enter OpenAPI URL'
+                            fullWidth
+                            margin='normal'
+                            variant='outlined'
+                            onChange={({ target: { value } }) => inputsDispatcher({ action: 'inputValue', value })}
+                            value={apiInputs.inputValue}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            InputProps={{
+                                onBlur: ({ target: { value } }) => {
+                                    validate(APIValidation.url.required().validate(value).error);
+                                },
+                                endAdornment: isValidating && (
+                                    <InputAdornment position='end'>
+                                        <CircularProgress />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            // 'Give the URL of OpenAPI endpoint'
+                            helperText={isError && isError.message}
+                            error={Boolean(isError)}
+                            disabled={isValidating}
+                        />
                     )}
-                    {uploadMethod === 'url' && (
-                        <FormControl className={classes.FormControl}>
-                            <TextField
-                                error={valid.openAPIUrl.empty}
-                                id='openAPIUrl'
-                                label={
-                                    <FormattedMessage
-                                        id='Apis.Create.OpenAPI.ApiCreateOpenAPI.error.empty'
-                                        defaultMessage='OpenAPI URL'
-                                    />
-                                }
-                                placeholder='eg: http://petstore.swagger.io/v2/swagger.json'
-                                helperText={
-                                    valid.openAPIUrl.empty ? (
-                                        <FormattedMessage
-                                            id='error.empty'
-                                            defaultMessage='This field can not be empty.'
-                                        />
-                                    ) : (
-                                        <FormattedMessage
-                                            id='create.new.openAPI.help'
-                                            defaultMessage={
-                                                'Give an OpenAPI definition such' +
-                                                ' as http://petstore.swagger.io/v2/swagger.json'
-                                            }
-                                        />
-                                    )
-                                }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                type='text'
-                                name='openAPIUrl'
-                                margin='normal'
-                                value={openAPIUrl}
-                                onChange={this.openAPIUrlChange}
-                            />
-                        </FormControl>
-                    )}
-                </form>
-            </React.Fragment>
-        );
-    }
+                </Grid>
+            </Grid>
+        </React.Fragment>
+    );
 }
 
-ProvideOpenAPI.propTypes = {
-    intl: PropTypes.shape({
-        formatMessage: PropTypes.func,
-    }).isRequired,
-    history: PropTypes.shape({
-        push: PropTypes.func.isRequired,
-    }).isRequired,
-    classes: PropTypes.shape({
-        FormControl: PropTypes.shape({}).isRequired,
-        radioWrapper: PropTypes.shape({}).isRequired,
-        fileNameWrapper: PropTypes.shape({}).isRequired,
-        dropZone: PropTypes.shape({}).isRequired,
-        fileName: PropTypes.shape({}).isRequired,
-        dropZoneErrorBox: PropTypes.shape({}).isRequired,
-        dropZoneIcon: PropTypes.shape({}).isRequired,
-        dropZoneError: PropTypes.shape({}).isRequired,
-    }).isRequired,
-    valid: PropTypes.shape({
-        openAPIFile: PropTypes.shape({
-            empty: PropTypes.bool.isRequired,
-        }).isRequired,
-        openAPIUrl: PropTypes.shape({
-            empty: PropTypes.bool.isRequired,
-        }).isRequired,
-    }).isRequired,
-    setOpenAPIFiles: PropTypes.func.isRequired,
-    setOpenAPIUrl: PropTypes.func.isRequired,
-    setValid: PropTypes.func.isRequired,
-    setUploadMethod: PropTypes.func.isRequired,
-    uploadMethod: PropTypes.string.isRequired,
-    openAPIUrl: PropTypes.string.isRequired,
-    files: PropTypes.arrayOf(PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        size: PropTypes.number.isRequired,
-    }).isRequired).isRequired,
+ProvideOpenAPI.defaultProps = {
+    onValidate: () => {},
 };
-
-export default withStyles(styles)(ProvideOpenAPI);
+ProvideOpenAPI.propTypes = {
+    apiInputs: PropTypes.shape({
+        type: PropTypes.string,
+        inputType: PropTypes.string,
+    }).isRequired,
+    inputsDispatcher: PropTypes.func.isRequired,
+    onValidate: PropTypes.func,
+};

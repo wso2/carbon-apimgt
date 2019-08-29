@@ -198,7 +198,7 @@ export default function SOAPToREST() {
                                 <Link to='/apis/'>
                                     <Button variant='outlined'>
                                         <FormattedMessage
-                                            id='Apis.Details.Configuration.Configuration.cancel'
+                                            id='Apis.Create.WSDL.ApiCreateWSDL.cancel'
                                             defaultMessage='Cancel'
                                         />
                                     </Button>

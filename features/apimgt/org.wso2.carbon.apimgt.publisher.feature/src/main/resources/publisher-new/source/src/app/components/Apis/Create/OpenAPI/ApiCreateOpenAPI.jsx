@@ -15,467 +15,250 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-
-import Grid from '@material-ui/core/Grid';
+import React, { useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage, injectIntl, defineMessages } from 'react-intl';
-import { withStyles } from '@material-ui/core/styles';
-
-import API from 'AppData/api.js';
+import Typography from '@material-ui/core/Typography';
+import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
+import { FormattedMessage } from 'react-intl';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import green from '@material-ui/core/colors/green';
-import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
-import APIInputForm from 'AppComponents/Apis/Create/Components/APIInputForm';
+import { Link } from 'react-router-dom';
+import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
-import ProvideOpenAPI from './Steps/ProvideOpenAPI';
-import APICreateTopMenu from '../Components/APICreateTopMenu';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm';
+import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
 
-const styles = theme => ({
-    root: {
-        width: theme.custom.contentAreaWidth,
-        flexGrow: 1,
-        marginLeft: 0,
-        marginTop: 0,
-        paddingLeft: theme.spacing.unit * 4,
-        paddingTop: theme.spacing.unit * 2,
-    },
-    paper: {
-        padding: theme.spacing.unit * 2,
-    },
-    buttonProgress: {
-        color: green[500],
-        position: 'relative',
-    },
-    button: {
-        marginTop: theme.spacing.unit * 2,
-        marginRight: theme.spacing.unit,
-    },
-    subTitle: {
-        color: theme.palette.grey[500],
-        marginBottom: theme.spacing.unit * 2,
-    },
-    stepper: {
-        paddingLeft: 0,
-        marginLeft: 0,
-        width: 400,
-    },
-});
+import ProvideOpenAPI from './Steps/ProvideOpenAPI';
 
 /**
- * @inheritDoc
- * @class ApiCreateOpenAPI
- * @extends {React.Component}
+ * Handle API creation from OpenAPI Definition.
+ *
+ * @export
+ * @param {*} props
+ * @returns
  */
-class ApiCreateOpenAPI extends React.Component {
-    /**
-     * Creates an instance of ApiCreateOpenAPI.
-     * @param {any} props @inheritDoc
-     * @memberof ApiCreateOpenAPI
-     */
-    constructor(props) {
-        super(props);
-        this.state = {
-            api: new API(),
-            activeStep: 0,
-            valid: {
-                openAPIUrl: { empty: false, invalidUrl: false },
-                openAPIFile: { empty: false, invalidFile: false },
-                name: { empty: false, alreadyExists: false },
-                context: { empty: false, alreadyExists: false },
-                version: { empty: false },
-            },
-            loading: false,
-            uploadMethod: 'file',
-            openAPIFile: null,
-            files: [],
-            openAPIUrl: '',
-        };
-        this.inputChange = this.inputChange.bind(this);
-        this.handleNext = this.handleNext.bind(this);
-        this.handleBack = this.handleBack.bind(this);
-        this.handleFinish = this.handleFinish.bind(this);
-        this.handleOpenAPIValidationResponse = this.handleOpenAPIValidationResponse.bind(this);
-        this.setOpenAPIFiles = this.setOpenAPIFiles.bind(this);
-        this.setValid = this.setValid.bind(this);
-        this.setOpenAPIUrl = this.setOpenAPIUrl.bind(this);
-        this.setUploadMethod = this.setUploadMethod.bind(this);
-        this.handleOpenAPIImportSuccess = this.handleOpenAPIImportSuccess.bind(this);
-        this.handleOpenAPIImportError = this.handleOpenAPIImportError.bind(this);
-    }
-
-    static getSteps() {
-        return [
-            <FormattedMessage
-                id='Apis.Create.OpenAPI.ApiCreateOpenAPI.select.openapi'
-                defaultMessage='Select OpenAPI Definition'
-            />,
-            <FormattedMessage id='Apis.Create.OpenAPI.ApiCreateOpenAPI.create.api' defaultMessage='Create API' />,
-        ];
-    }
-
-    static getSubstitutedContext(api) {
-        let substitutedContext = '{context}/{version}';
-        if (api.context) {
-            substitutedContext = api.context;
-            if (api.context.indexOf('{version}') < 0) {
-                substitutedContext = api.context + '/{version}';
-            }
-        }
-        if (api.version) {
-            substitutedContext = substitutedContext.replace('{version}', api.version);
-        }
-        return substitutedContext;
-    }
-
-    setOpenAPIFiles(openAPIFiles) {
-        this.setState({ openAPIFile: openAPIFiles[0], files: openAPIFiles });
-    }
-
-    setOpenAPIUrl(openAPIUrl) {
-        this.setState({ openAPIUrl });
-    }
-
-    setUploadMethod(uploadMethod) {
-        this.setState({ uploadMethod });
-    }
-
-    setValid(valid) {
-        this.setState({ valid });
-    }
-
-    handleNext() {
-        const {
-            api, openAPIFile, openAPIUrl, uploadMethod, files,
-        } = this.state;
-        if ((uploadMethod === 'file' && files.length === 0) || (uploadMethod === 'url' && !openAPIUrl)) {
-            this.setState(({ valid, files: currentFiles, openAPIUrl: currentOpenAPIUrl }) => {
-                const validUpdated = { ...valid };
-                validUpdated.openAPIFile.empty = currentFiles.length === 0;
-                validUpdated.openAPIUrl.empty = !currentOpenAPIUrl;
-                return { valid: validUpdated };
-            });
-            return;
-        }
-        this.setState({ loading: true });
-        if (uploadMethod === 'file') {
-            api.validateOpenAPIByFile(openAPIFile).then((response) => {
-                this.handleOpenAPIValidationResponse(response);
-            });
-        } else if (uploadMethod === 'url') {
-            api.validateOpenAPIByUrl(openAPIUrl).then((response) => {
-                this.handleOpenAPIValidationResponse(response);
-            });
-        } else {
-            this.handleInvalidInputMethod();
-        }
-    }
-
-    handleInvalidInputMethod() {
-        const { intl } = this.props;
-        const messages = defineMessages({
-            openAPIInvalidInputMethod: {
-                id: 'Apis.Create.OpenAPI.ApiCreateOpenAPI.openapi.invalid.input.method',
-                defaultMessage: 'Invalid Input Method. Either URL or File should be present.',
-            },
-        });
-        Alert.error(intl.formatMessage(messages.openAPIValidationFailed));
-        this.setState({ loading: false });
-    }
-
-    handleBack() {
-        this.setState({ activeStep: 0 });
-    }
-
-    handleOpenAPIValidationResponse(response) {
-        const { intl } = this.props;
-        const { isValid, errors, info } = response.obj;
-        if (isValid) {
-            const name = info.name.replace(/[&/\\#,+()$~%.'":*?<>{}\s]/g, '');
-            const newAPI = new API(name, info.version, info.context);
-            this.setState({ loading: false, activeStep: 1, api: newAPI });
-        } else {
-            const messages = defineMessages({
-                openAPIValidationFailed: {
-                    id: 'Apis.Create.OpenAPI.ApiCreateOpenAPI.openapi.validation.failed',
-                    defaultMessage: 'OpenAPI definition validation failed. Reason(s): [{failedReasons}]',
-                },
-            });
-            let failedReasons = '';
-            errors.forEach((err, index) => {
-                failedReasons += err.description + (index < errors.length - 1 ? ', ' : '');
-            });
-            Alert.error(intl.formatMessage(messages.openAPIValidationFailed, { failedReasons }));
-            this.setState({ loading: false });
-        }
-    }
-
-    handleFinish() {
-        const {
-            api, openAPIFile, openAPIUrl, uploadMethod,
-        } = this.state;
-
-        // Checking the api name,version,context undefined or empty states
-        if (!api.name || !api.context || !api.version) {
-            this.setState(({ valid, api: currentAPI }) => {
-                const validUpdated = { ...valid };
-                validUpdated.name.empty = !currentAPI.name;
-                validUpdated.context.empty = !currentAPI.context;
-                validUpdated.version.empty = !currentAPI.version;
-                return { valid: validUpdated };
-            });
-            return;
-        }
-
-        // Create the API
-        this.setState({ loading: true });
-        if (uploadMethod === 'file') {
-            api.importOpenAPIByFile(openAPIFile)
-                .then((response) => {
-                    this.handleOpenAPIImportSuccess(response);
-                })
-                .catch((error) => {
-                    this.handleOpenAPIImportError(error);
-                });
-        } else if (uploadMethod === 'url') {
-            api.importOpenAPIByUrl(openAPIUrl)
-                .then((response) => {
-                    this.handleOpenAPIImportSuccess(response);
-                })
-                .catch((error) => {
-                    this.handleOpenAPIImportError(error);
-                });
-        } else {
-            this.handleInvalidInputMethod();
-        }
-    }
-
-    handleOpenAPIImportError(error) {
-        const { intl } = this.props;
-        const messages = defineMessages({
-            apiCreateFailed: {
-                id: 'Apis.Create.OpenAPI.ApiCreateOpenAPI.create.failed',
-                defaultMessage: 'API creation failed. Code: {errCode}, Reason(s): "{errMessage}"',
-            },
-        });
-        const errResponse = error.response;
-        const errMessage = errResponse.body.description;
-        const errCode = errResponse.status;
-        Alert.error(intl.formatMessage(messages.apiCreateFailed, {
-            errCode,
-            errMessage,
-        }));
-        this.setState({ loading: false });
-    }
-
-    handleOpenAPIImportSuccess(response) {
-        const { intl, history } = this.props;
-        const newAPI = response.body;
-        const redirectURL = '/apis/' + newAPI.id + '/overview';
-        const apiAndVersion = newAPI.name + ':' + newAPI.version;
-        const messages = defineMessages({
-            apiCreated: {
-                id: 'Apis.Create.OpenAPI.ApiCreateOpenAPI.create.success',
-                defaultMessage: '{apiAndVersion} created successfully.',
-            },
-        });
-        this.setState({ loading: false });
-        Alert.info(intl.formatMessage(messages.apiCreated, { apiAndVersion }));
-        history.push(redirectURL);
-    }
+export default function ApiCreateOpenAPI(props) {
+    const [wizardStep, setWizardStep] = useState(0);
+    const { history } = props;
 
     /**
-     * Change input
-     * @param {any} e Synthetic React Event
-     * @memberof APICreateForm
+     *
+     * Reduce the events triggered from API input fields to current state
+     * @param {*} currentState
+     * @param {*} inputAction
+     * @returns
      */
-    inputChange({ target }) {
-        const { name, value } = target;
-        this.setState(({ api, valid }) => {
-            const changes = api;
-            if (name === 'endpoint') {
-                changes.endpointConfig = {
-                    endpoint_type: 'http',
-                    sandbox_endpoints: {
-                        url: value,
-                    },
-                    production_endpoints: {
-                        url: value,
-                    },
+    function apiInputsReducer(currentState, inputAction) {
+        const { action, value } = inputAction;
+        switch (action) {
+            case 'type':
+            case 'inputValue':
+            case 'name':
+            case 'version':
+            case 'endpoint':
+            case 'context':
+            case 'policies':
+            case 'isFormValid':
+                return { ...currentState, [action]: value };
+            case 'inputType':
+                return { ...currentState, [action]: value, inputValue: value === 'url' ? '' : [] };
+            case 'preSetAPI':
+                return {
+                    ...currentState,
+                    name: value.name.replace(/[&/\\#,+()$~%.'":*?<>{}\s]/g, ''),
+                    version: value.version,
+                    context: value.context,
                 };
-            } else {
-                changes[name] = value;
-            }
-            // Checking validity.
-            const validUpdated = { ...valid };
-            validUpdated.name.empty = !api.name;
-            validUpdated.context.empty = !api.context;
-            validUpdated.version.empty = !api.version;
-            return { api: changes, valid: validUpdated };
-        });
+            default:
+                return currentState;
+        }
+    }
+
+    const [apiInputs, inputsDispatcher] = useReducer(apiInputsReducer, {
+        type: 'ApiCreateOpenAPI',
+        inputType: 'url',
+        inputValue: '',
+        formValidity: false,
+    });
+
+    /**
+     *
+     *
+     * @param {*} event
+     */
+    function handleOnChange(event) {
+        const { name: action, value } = event.target;
+        inputsDispatcher({ action, value });
     }
 
     /**
      *
-     * @returns {React.Component} @inheritDoc
-     * @memberof ApiCreateOpenAPI
+     * Set the validity of the API Inputs form
+     * @param {*} isValidForm
+     * @param {*} validationState
      */
-    render() {
+    function handleOnValidate(isFormValid) {
+        inputsDispatcher({
+            action: 'isFormValid',
+            value: isFormValid,
+        });
+    }
+
+    const [isCreating, setCreating] = useState();
+    /**
+     *
+     *
+     * @param {*} params
+     */
+    function createAPI() {
+        setCreating(true);
         const {
-            uploadMethod, valid, activeStep, api, openAPIUrl, files, loading,
-        } = this.state;
-        const steps = ApiCreateOpenAPI.getSteps();
-        const { classes } = this.props;
-        const substitutedContext = ApiCreateOpenAPI.getSubstitutedContext(api);
-        return (
-            <React.Fragment>
-                <APICreateTopMenu />
-                <Grid container spacing={7} className={classes.root}>
-                    <Grid item xs={12}>
-                        <div className={classes.titleWrapper}>
-                            <Typography variant='h4' align='left' className={classes.mainTitle}>
-                                <FormattedMessage
-                                    id='Apis.Create.OpenAPI.ApiCreateOpenAPI.import.api'
-                                    defaultMessage='Import an OpenAPI Definition'
-                                />
-                            </Typography>
-                            <Typography variant='caption' align='left' className={classes.subTitle} component='div'>
-                                {activeStep === 1 ? (
-                                    <React.Fragment>
+            name, version, context, endpoint, policies, inputValue,
+        } = apiInputs;
+        const additionalProperties = {
+            name,
+            version,
+            context,
+            policies,
+        };
+        if (endpoint) {
+            additionalProperties.endpointConfig = {
+                endpoint_type: 'http',
+                sandbox_endpoints: {
+                    url: endpoint,
+                },
+                production_endpoints: {
+                    url: endpoint,
+                },
+            };
+        }
+        additionalProperties.gatewayEnvironments = ['Production and Sandbox'];
+        const newAPI = new API(additionalProperties);
+        newAPI
+            .importOpenAPIByUrl(inputValue)
+            .then((api) => {
+                Alert.info('API created successfully');
+                history.push(`/apis/${api.id}/overview`);
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while adding the API');
+                }
+                console.error(error);
+            })
+            .finally(() => setCreating(false));
+    }
+
+    return (
+        <APICreateBase
+            title={
+                <React.Fragment>
+                    <Typography variant='h5'>
+                        <FormattedMessage
+                            id='Apis.Create.OpenAPI.ApiCreateOpenAPI.heading'
+                            defaultMessage='Create an API using OpenAPI definition'
+                        />
+                    </Typography>
+                    <Typography variant='caption'>
+                        <FormattedMessage
+                            id='Apis.Create.OpenAPI.ApiCreateOpenAPI.sub.heading'
+                            defaultMessage={
+                                'Use an existing OpenAPI definition file or URL' +
+                                ' to create an API in WSO2 API Manager.'
+                            }
+                        />
+                    </Typography>
+                </React.Fragment>
+            }
+        >
+            <Paper elevation={1}>
+                <Stepper activeStep={0}>
+                    <Step>
+                        <StepLabel>
+                            <FormattedMessage
+                                id='Apis.Create.OpenAPI.ApiCreateOpenAPI.wizard.one'
+                                defaultMessage='Provide OpenAPI'
+                            />
+                        </StepLabel>
+                    </Step>
+
+                    <Step>
+                        <StepLabel>
+                            <FormattedMessage
+                                id='Apis.Create.OpenAPI.ApiCreateOpenAPI.wizard.two'
+                                defaultMessage='Create API'
+                            />
+                        </StepLabel>
+                    </Step>
+                </Stepper>
+            </Paper>
+
+            <Grid container spacing={3}>
+                <Grid item md={12} />
+                <Grid item md={1} />
+                <Grid item md={11}>
+                    {wizardStep === 0 && (
+                        <ProvideOpenAPI
+                            onValidate={handleOnValidate}
+                            apiInputs={apiInputs}
+                            inputsDispatcher={inputsDispatcher}
+                        />
+                    )}
+                    {wizardStep === 1 && (
+                        <DefaultAPIForm onValidate={handleOnValidate} onChange={handleOnChange} api={apiInputs} />
+                    )}
+                </Grid>
+                <Grid item md={1} />
+                <Grid item md={9}>
+                    <Grid container direction='row' justify='space-between'>
+                        <Grid item>
+                            {wizardStep === 0 && (
+                                <Link to='/apis/'>
+                                    <Button variant='outlined'>
                                         <FormattedMessage
-                                            id='Apis.Create.Default.APICreateDefault.gateway.url'
-                                            defaultMessage='Gateway_URL/'
+                                            id='Apis.Create.OpenAPI.ApiCreateOpenAPI.cancel'
+                                            defaultMessage='Cancel'
                                         />
-                                        {substitutedContext}
-                                    </React.Fragment>
-                                ) : (
-                                    <React.Fragment>
-                                        {uploadMethod === 'file' && (
-                                            <FormattedMessage
-                                                id='Apis.Create.OpenAPI.ApiCreateOpenAPI.import.api.help.file'
-                                                defaultMessage='Provide an api definition file'
-                                            />
-                                        )}
-                                        {uploadMethod === 'url' && (
-                                            <FormattedMessage
-                                                id='Apis.Create.OpenAPI.ApiCreateOpenAPI.import.api.help.url'
-                                                defaultMessage='Provide a url for the api deninition'
-                                            />
-                                        )}
-                                    </React.Fragment>
-                                )}
-                            </Typography>
-                        </div>
-
-                        <Paper>
-                            <Stepper activeStep={activeStep} className={classes.stepper}>
-                                {steps.map((label) => {
-                                    const props = {};
-                                    const labelProps = {};
-
-                                    return (
-                                        <Step key={label} {...props}>
-                                            <StepLabel {...labelProps}>{label}</StepLabel>
-                                        </Step>
-                                    );
-                                })}
-                            </Stepper>
-                        </Paper>
-                        <div>
-                            {activeStep === 0 && (
-                                <ProvideOpenAPI
-                                    valid={valid}
-                                    setOpenAPIFiles={this.setOpenAPIFiles}
-                                    setOpenAPIUrl={this.setOpenAPIUrl}
-                                    setUploadMethod={this.setUploadMethod}
-                                    setValid={this.setValid}
-                                    uploadMethod={uploadMethod}
-                                    openAPIUrl={openAPIUrl}
-                                    files={files}
-                                />
+                                    </Button>
+                                </Link>
                             )}
-                            {activeStep === 1 && (
-                                <APIInputForm api={api} handleInputChange={this.inputChange} valid={valid} />
+                            {wizardStep === 1 && <Button onClick={() => setWizardStep(step => step - 1)}>Back</Button>}
+                        </Grid>
+                        <Grid item>
+                            {wizardStep === 0 && (
+                                <Button
+                                    onClick={() => setWizardStep(step => step + 1)}
+                                    variant='contained'
+                                    color='primary'
+                                    disabled={!apiInputs.isFormValid}
+                                >
+                                    Next
+                                </Button>
                             )}
-                        </div>
-                        <div>
-                            <Button disabled={activeStep === 0} onClick={this.handleBack} className={classes.button}>
-                                Back
-                            </Button>
-                            {activeStep !== steps.length - 1 ? (
+                            {wizardStep === 1 && (
                                 <Button
                                     variant='contained'
                                     color='primary'
-                                    onClick={this.handleNext}
-                                    className={classes.button}
-                                    disabled={
-                                        (valid.openAPIFile.invalidFile && uploadMethod === 'file') ||
-                                        (valid.openAPIUrl.invalidUrl && uploadMethod === 'url')
-                                    }
+                                    disabled={!apiInputs.isFormValid || isCreating}
+                                    onClick={createAPI}
                                 >
-                                    <FormattedMessage
-                                        id='Apis.Create.OpenAPI.ApiCreateOpenAPI.next'
-                                        defaultMessage='Next'
-                                    />
-                                </Button>
-                            ) : (
-                                <Button
-                                    variant='contained'
-                                    color='primary'
-                                    onClick={this.handleFinish}
-                                    className={classes.button}
-                                    disabled={valid.name.empty || valid.version.empty || valid.context.empty}
-                                >
-                                    <FormattedMessage
-                                        id='Apis.Create.OpenAPI.ApiCreateOpenAPI.finish'
-                                        defaultMessage='Finish'
-                                    />
+                                    Create {isCreating && <CircularProgress size={24} />}
                                 </Button>
                             )}
-                            {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
-                        </div>
+                        </Grid>
                     </Grid>
                 </Grid>
-            </React.Fragment>
-        );
-    }
+            </Grid>
+        </APICreateBase>
+    );
 }
 
 ApiCreateOpenAPI.propTypes = {
-    intl: PropTypes.shape({
-        formatMessage: PropTypes.func.isRequired,
-    }).isRequired,
-    history: PropTypes.shape({
-        push: PropTypes.func.isRequired,
-    }).isRequired,
-    valid: PropTypes.shape({
-        openAPIFile: PropTypes.shape({
-            invalidFile: PropTypes.bool.isRequired,
-        }).isRequired,
-        openAPIUrl: PropTypes.shape({
-            invalidUrl: PropTypes.bool.isRequired,
-        }).isRequired,
-        name: PropTypes.shape({
-            empty: PropTypes.bool.isRequired,
-        }).isRequired,
-        version: PropTypes.shape({
-            empty: PropTypes.bool.isRequired,
-        }).isRequired,
-        context: PropTypes.shape({
-            empty: PropTypes.bool.isRequired,
-        }).isRequired,
-    }).isRequired,
-    classes: PropTypes.shape({
-        root: PropTypes.shape({}).isRequired,
-        stepper: PropTypes.shape({}).isRequired,
-        button: PropTypes.shape({}).isRequired,
-        buttonProgress: PropTypes.shape({}).isRequired,
-    }).isRequired,
+    history: PropTypes.shape({ push: PropTypes.func }).isRequired,
 };
-
-export default injectIntl(withStyles(styles)(ApiCreateOpenAPI));

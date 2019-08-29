@@ -70,7 +70,6 @@ class API extends Resource {
         Resource._requestMetaData();
     }
 
-
     /**
      *
      * Instance method of the API class to provide raw JSON object
@@ -184,18 +183,15 @@ class API extends Resource {
                 additionalProperties: JSON.stringify(apiData),
             };
 
-            return client.apis['APIs'].importOpenAPIDefinition(
+            const promisedResponse =  client.apis['APIs'].importOpenAPIDefinition(
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data'
                 }),
             );
+            return promisedResponse.then(response=> new API(response.body))
         });
-        if (callback) {
-            return promise_create.then(callback);
-        } else {
-            return promise_create;
-        }
+        return promise_create;
     }
 
     validateOpenAPIByFile(openAPIData, callback = null) {
@@ -219,13 +215,14 @@ class API extends Resource {
         }
     }
 
-    validateOpenAPIByUrl(url, callback = null) {
+    static validateOpenAPIByUrl(url, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         let payload, promise_validate;
         payload = {
             url: url,
             'Content-Type': 'multipart/form-data'
         };
-        promise_validate = this.client.then((client) => {
+        promise_validate = apiClient.then((client) => {
             return client.apis['Validation'].validateOpenAPIDefinition(
                 payload,
                 this._requestMetaData({

@@ -33,6 +33,31 @@ const useStyles = makeStyles(theme => ({
 }));
 
 /**
+ *
+ * Return the actual API context that will be exposed in the gateway.
+ * If the context value contains `{version}` placeholder text it will be replaced with the actual version value.
+ * If there is no such placeholder text in the context, The version will be appended to the context
+ * i:e /context/version
+ * Parameter expect an object containing `context` and `version` properties.
+ * @param {String} context API Context
+ * @param {String} version API Version string
+ * @returns {String} Derived actual context string
+ */
+function actualContext({ context, version }) {
+    let initialContext = '{context}/{version}';
+    if (context) {
+        initialContext = context;
+        if (context.indexOf('{version}') < 0) {
+            initialContext = context + '/{version}';
+        }
+    }
+    if (version) {
+        initialContext = initialContext.replace('{version}', version);
+    }
+    return initialContext;
+}
+
+/**
  * Improved API create default form
  *
  * @export
@@ -62,6 +87,7 @@ export default function DefaultAPIForm(props) {
         isFormValid = isFormValid && Boolean(api.name) && Boolean(api.version) && Boolean(api.context);
         onValidate(isFormValid, state);
     }
+
     return (
         <Grid item md={9}>
             <form noValidate autoComplete='off'>
@@ -152,7 +178,7 @@ export default function DefaultAPIForm(props) {
                             }}
                             helperText={
                                 (validity.context && validity.context.message) ||
-                                'API will be exposed in this context at the gateway'
+                                `API will be exposed in ${actualContext(api)} context at the gateway`
                             }
                             margin='normal'
                             variant='outlined'

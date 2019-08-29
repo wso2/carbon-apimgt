@@ -19,7 +19,6 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useDropzone } from 'react-dropzone';
 
-
 /**
  *
  * Convert raw byte values to human readable format
@@ -71,14 +70,17 @@ const acceptStyle = {
 const rejectStyle = {
     borderColor: '#ff1744',
 };
+
 /**
  *
- *
+ * Provide a class friendly Dropzone wrapper using hooks.
  * @export
  * @returns
  */
 export default function DropZoneLocal(props) {
-    const { message, onDrop, files } = props;
+    const {
+        message, onDrop, files, showFilesList,
+    } = props;
     const dropZoneObject = useDropzone({ onDrop });
     const {
         getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject,
@@ -105,20 +107,26 @@ export default function DropZoneLocal(props) {
                 <input {...getInputProps()} />
                 <p>{message}</p>
             </div>
-            <aside>
-                <h4>Files</h4>
-                <ul>{filesList}</ul>
-            </aside>
+            {showFilesList && (
+                <aside>
+                    <h4>Files</h4>
+                    <ul>{filesList}</ul>
+                </aside>
+            )}
         </section>
     );
 }
 DropZoneLocal.defaultProps = {
     message: "Drag 'n' drop some files here, or click to select files",
     onDrop: () => {},
+    showFilesList: true,
     files: null,
+    children: null,
 };
 DropZoneLocal.propTypes = {
     message: PropTypes.string,
     onDrop: PropTypes.func,
+    showFilesList: PropTypes.bool,
     files: PropTypes.arrayOf(PropTypes.object),
+    children: PropTypes.element,
 };
