@@ -203,7 +203,6 @@ class CommentOptions extends React.Component {
                 <Grid item className={classes.time}>
                     <Typography component='a' variant='caption'>
                         {this.displayDate(comment.createdTime)}
-                        {/* {comment.createdTime} */}
                     </Typography>
                 </Grid>
 

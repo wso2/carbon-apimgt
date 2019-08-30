@@ -3121,7 +3121,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return apiMgtDAO.addComment(identifier, comment, user);
     }
 
-
     @Override
     public org.wso2.carbon.apimgt.api.model.Comment[] getComments(APIIdentifier identifier)
             throws APIManagementException {
@@ -3137,7 +3136,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public void deleteComment(APIIdentifier identifier, int commentId) throws APIManagementException {
         apiMgtDAO.deleteComment(identifier, commentId);
     }
-
 
     /**
      * Add a new Application from the store.

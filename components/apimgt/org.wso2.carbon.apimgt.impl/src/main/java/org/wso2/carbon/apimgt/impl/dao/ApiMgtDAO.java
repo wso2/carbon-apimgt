@@ -7598,7 +7598,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Returns a specific comment of on an API
+     * Returns a specific comment of an API
      *
      * @param commentId  Comment ID
      * @param identifier API identifier

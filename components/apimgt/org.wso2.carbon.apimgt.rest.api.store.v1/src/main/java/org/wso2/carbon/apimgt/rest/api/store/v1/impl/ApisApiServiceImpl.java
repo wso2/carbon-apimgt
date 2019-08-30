@@ -200,7 +200,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response apisApiIdCommentsCommentIdPut(Integer commentId, String apiId, CommentDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException {
-        return null;
+        return Response.ok().entity("magic!").build();
     }
 
     @Override
