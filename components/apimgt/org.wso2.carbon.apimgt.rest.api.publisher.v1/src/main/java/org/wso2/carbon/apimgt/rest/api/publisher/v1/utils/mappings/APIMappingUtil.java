@@ -1806,7 +1806,8 @@ public class APIMappingUtil {
                 URITemplate template = new URITemplate();
                 template.setHTTPVerb(resourceItem.getVerb());
                 template.setResourceURI(resourceItem.getTarget());
-                template.setUriTemplate(resourceItem.getAuthType());
+                template.setUriTemplate(resourceItem.getTarget());
+                template.setAuthType(resourceItem.getAuthType());
                 template.setThrottlingTier(resourceItem.getThrottlingPolicy());
 
                 APIProductResource resource = new APIProductResource();

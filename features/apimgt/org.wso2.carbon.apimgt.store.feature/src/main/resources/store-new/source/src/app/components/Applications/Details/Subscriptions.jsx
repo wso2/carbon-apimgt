@@ -36,6 +36,13 @@ import APIList from 'AppComponents/Apis/Listing/APICardView';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Subscription from 'AppData/Subscription';
 import Api from 'AppData/api';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
+import APIProduct from 'AppData/APIProduct';
+import CONSTS from 'AppData/Constants';
 import SubscriptionTableData from './SubscriptionTableData';
 
 /**
@@ -81,11 +88,14 @@ class Subscriptions extends React.Component {
             apisNotFound: false,
             subscriptionsNotFound: false,
             isAuthorize: true,
+            apiType: CONSTS.API_TYPE,
         };
         this.handleSubscriptionDelete = this.handleSubscriptionDelete.bind(this);
         this.updateSubscriptions = this.updateSubscriptions.bind(this);
         this.updateUnsubscribedAPIsList = this.updateUnsubscribedAPIsList.bind(this);
         this.handleSubscribe = this.handleSubscribe.bind(this);
+        this.getIdsOfSubscribedEntities = this.getIdsOfSubscribedEntities.bind(this);
+        this.handleChange = this.handleChange.bind(this);
     }
 
     /**
@@ -95,9 +105,36 @@ class Subscriptions extends React.Component {
      */
     componentDidMount() {
         const { match: { params: { applicationId } } } = this.props;
+        const { apiType } = this.state;
         this.updateSubscriptions(applicationId);
-        this.updateUnsubscribedAPIsList();
+        this.updateUnsubscribedAPIsList(apiType);
     }
+
+    /**
+     *
+     * Get List of the Ids of all APIs and API Products that have been already subscribed
+     *
+     * @returns {*} Ids of respective APIs and API Products
+     * @memberof Subscriptions
+     */
+    getIdsOfSubscribedEntities() {
+        const { subscriptions } = this.state;
+
+        // Get arrays of the API and API Product Ids and remove all null/empty references by executing 'fliter(Boolean)'
+        const subscribedAPIIds = subscriptions.map(sub => sub.apiId).filter(Boolean);
+        const subscribedAPIProductIds = subscriptions.map(sub => sub.apiProductId).filter(Boolean);
+
+        // We want to treat both API and API Product Ids as a single array of Ids
+        const subscribedIds = subscribedAPIIds.concat(subscribedAPIProductIds);
+
+        return subscribedIds;
+    }
+
+    handleChange = (event) => {
+        const { value } = event.target;
+        this.setState({ apiType: value });
+        this.updateUnsubscribedAPIsList(value);
+    };
 
     /**
      *
@@ -108,9 +145,10 @@ class Subscriptions extends React.Component {
     updateSubscriptions(applicationId) {
         const client = new Subscription();
         const promisedSubscriptions = client.getSubscriptions(null, applicationId);
+        const { apiType } = this.state;
         promisedSubscriptions
             .then((response) => {
-                this.setState({ subscriptions: response.body.list }, this.updateUnsubscribedAPIsList);
+                this.setState({ subscriptions: response.body.list }, this.updateUnsubscribedAPIsList(apiType));
             })
             .catch((error) => {
                 const { status } = error;
@@ -140,7 +178,7 @@ class Subscriptions extends React.Component {
                     return;
                 }
                 Alert.info('Subscription deleted successfully!');
-                const { subscriptions } = this.state;
+                const { subscriptions, apiType } = this.state;
                 for (const endpointIndex in subscriptions) {
                     if (Object.prototype.hasOwnProperty.call(subscriptions, endpointIndex)
                         && subscriptions[endpointIndex].subscriptionId === subscriptionId) {
@@ -148,7 +186,7 @@ class Subscriptions extends React.Component {
                         break;
                     }
                 }
-                this.setState({ subscriptions }, this.updateUnsubscribedAPIsList);
+                this.setState({ subscriptions }, this.updateUnsubscribedAPIsList(apiType));
             })
             .catch((error) => {
                 const { status } = error;
@@ -159,21 +197,30 @@ class Subscriptions extends React.Component {
             });
     }
 
+
     /**
      *
      * Update list of unsubscribed APIs
+     * @param {string} apiType The type of API being dealt with(API or API Product)
      * @memberof Subscriptions
      */
-    updateUnsubscribedAPIsList() {
-        const apiClient = new Api();
-        const promisedGetApis = apiClient.getAllAPIs();
-        const { subscriptions } = this.state;
+    updateUnsubscribedAPIsList(apiType) {
+        let promisedGetApis = null;
+
+        if (apiType === CONSTS.API_TYPE) {
+            const apiClient = new Api();
+            promisedGetApis = apiClient.getAllAPIs();
+        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            const apiClient = new APIProduct();
+            promisedGetApis = apiClient.getAllAPIProducts();
+        }
+
         promisedGetApis
             .then((response) => {
                 const { list } = response.obj;
-                const subscribedAPIIds = subscriptions.map(sub => sub.apiId);
+                const subscribedIds = this.getIdsOfSubscribedEntities();
                 const unsubscribedAPIList = list
-                    .filter(api => !subscribedAPIIds.includes(api.id))
+                    .filter(api => !subscribedIds.includes(api.id))
                     .map((filteredApi) => {
                         return {
                             Id: filteredApi.id,
@@ -211,7 +258,9 @@ class Subscriptions extends React.Component {
             return;
         }
 
-        const promisedSubscribe = api.subscribe(apiId, applicationId, policy);
+        const { apiType } = this.state;
+
+        const promisedSubscribe = api.subscribe(apiId, applicationId, policy, apiType);
         promisedSubscribe
             .then((response) => {
                 if (response.status !== 201) {
@@ -251,7 +300,7 @@ class Subscriptions extends React.Component {
         }
 
         const {
-            subscriptions, unsubscribedAPIList, apisNotFound, subscriptionsNotFound,
+            subscriptions, unsubscribedAPIList, apisNotFound, subscriptionsNotFound, apiType,
         } = this.state;
         const { match: { params: { applicationId } } } = this.props;
         const { classes } = this.props;
@@ -265,6 +314,23 @@ class Subscriptions extends React.Component {
                             defaultMessage='Subscription Management'
                         />
                     </Typography>
+
+                    <div className='apiTypeSelection' align='center'>
+                        <FormControl component='fieldset' className={classes.formControl}>
+                            <FormLabel component='legend'>API Type</FormLabel>
+                            <RadioGroup
+                                aria-label='API Type'
+                                name='apiType1'
+                                className={classes.group}
+                                value={apiType}
+                                onChange={this.handleChange}
+                                row
+                            >
+                                <FormControlLabel value={CONSTS.API_TYPE} control={<Radio />} label='API' />
+                                <FormControlLabel value={CONSTS.API_PRODUCT_TYPE} control={<Radio />} label='API Product' />
+                            </RadioGroup>
+                        </FormControl>
+                    </div>
 
                     <Grid container className='tab-grid' spacing={16}>
                         <Grid item xs={6}>

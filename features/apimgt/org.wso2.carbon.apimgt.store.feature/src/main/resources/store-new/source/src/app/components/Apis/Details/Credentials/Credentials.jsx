@@ -172,12 +172,12 @@ class Credentials extends React.Component {
      * @memberof Credentials
      */
     handleSubscribe = () => {
-        const { updateSubscriptionData } = this.context;
+        const { updateSubscriptionData, apiType } = this.context;
         const { subscriptionRequest } = this.state;
         const { intl } = this.props;
         const api = new Api();
         api.subscribe(subscriptionRequest.apiId, subscriptionRequest.applicationId,
-            subscriptionRequest.throttlingPolicy)
+            subscriptionRequest.throttlingPolicy, apiType)
             .then((response) => {
                 console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
                 Alert.info(intl.formatMessage({
