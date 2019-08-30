@@ -141,7 +141,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-
     @Override
     public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
         return Response.ok().entity(getAPIByAPIId(apiId, xWSO2Tenant)).build();
@@ -200,7 +199,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdCommentsCommentIdPut(Object commentId, String apiId, CommentDTO body, String ifMatch, MessageContext messageContext) {
+    public Response apisApiIdCommentsCommentIdPut(Integer commentId, String apiId, CommentDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException {
         return null;
     }
 
@@ -432,6 +431,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    @Override
     public Response apisApiIdRatingsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant,
             MessageContext messageContext) {
         //pre-processing

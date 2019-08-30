@@ -84,8 +84,9 @@ class CommentAdd extends React.Component {
      * @memberof CommentAdd
      */
     handleClickCancel() {
-        const { toggleShowReply } = this.props;
-        toggleShowReply();
+        this.setState({content:""})
+        // const { toggleShowReply } = this.props;
+        // toggleShowReply();
     }
 
     // /**

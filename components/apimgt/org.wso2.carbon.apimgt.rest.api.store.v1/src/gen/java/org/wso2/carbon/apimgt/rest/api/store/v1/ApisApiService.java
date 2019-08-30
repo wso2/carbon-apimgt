@@ -29,8 +29,8 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApisApiService {
-      public Response addCommentToAPI(String apiId, CommentDTO body, MessageContext messageContext);
-      public Response apisApiIdCommentsCommentIdPut(Object commentId, String apiId, CommentDTO body, String ifMatch, MessageContext messageContext);
+      public Response addCommentToAPI(String apiId, CommentDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdCommentsCommentIdPut(Integer commentId, String apiId, CommentDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
@@ -46,7 +46,7 @@ public interface ApisApiService {
       public Response apisApiIdUserRatingPut(String apiId, RatingDTO body, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response deleteComment(Integer commentId, String apiId, String ifMatch, MessageContext messageContext);
-      public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset, MessageContext messageContext);
-      public Response getCommentOfAPI(Integer commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext);
+      public Response deleteComment(Integer commentId, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
+      public Response getCommentOfAPI(Integer commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
 }

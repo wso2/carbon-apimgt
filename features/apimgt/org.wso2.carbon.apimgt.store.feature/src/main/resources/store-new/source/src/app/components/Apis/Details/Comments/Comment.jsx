@@ -210,18 +210,18 @@ class Comment extends React.Component {
             })
             .catch((error) => {
                 console.error(error);
-                if (error.response) {
-                    Alert.error(error.response.body.message);
-                } else {
-                    Alert.error(
-                        intl.formatMessage({
-                            defaultMessage: 'Something went wrong while deleting comment',
-                            id: 'Apis.Details.Comments.Comment.something.went.wrong',
-                        })
-                        + ' - '
-                        + commentIdOfCommentToDelete,
-                    );
-                }
+                // if (error.response) {
+                //     Alert.error(error.response.body.message);
+                // } else {
+                //     Alert.error(
+                //         intl.formatMessage({
+                //             defaultMessage: 'Something went wrong while deleting comment',
+                //             id: 'Apis.Details.Comments.Comment.something.went.wrong',
+                //         })
+                //         + ' - '
+                //         + commentIdOfCommentToDelete,
+                //     );
+                // }
             });
     }
 

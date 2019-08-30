@@ -91,7 +91,7 @@ class Comments extends Component {
     componentDidMount() {
         const { apiType } = this.context;
         let {
-            apiId, theme, match, intl, isOverview
+            apiId, theme, match, intl, isOverview, setCount
         } = this.props;
         if (match) apiId = match.params.api_uuid;
 
@@ -107,8 +107,11 @@ class Comments extends Component {
             .then((result) => {
                 let commentList = result.body.list;
                 if (isOverview) {
-                    commentList = commentList.slice(commentList.length - 3, commentList.length)
-                }
+                    setCount(commentList.length);
+                    if(commentList.length > 2) {
+                        commentList = commentList.slice(commentList.length - 3, commentList.length)
+                    }
+                }  
                 this.setState({ allComments: commentList, totalComments: commentList.length });
                 if (commentList.length < theme.custom.commentsLimit) {
                     this.setState({ startCommentsToDisplay: 0, comments: commentList.slice(0, commentList.length) });
@@ -213,7 +216,6 @@ class Comments extends Component {
         const {
             comments, expanded, allComments, startCommentsToDisplay, totalComments, commentsUpdate,
         } = this.state;
-
         return (
             <ApiContext.Consumer>
                 {({ api }) => (
@@ -279,7 +281,7 @@ class Comments extends Component {
                                         <Typography className={classes.verticalSpace} variant='body2'>
                                             <FormattedMessage
                                                 id='Apis.Details.Comments.showing.comments'
-                                                defaultMessage='Showing comments'
+                                                defaultMessage='Showing comments '
                                             />
 
                                             {totalComments - startCommentsToDisplay + ' of ' + totalComments}
