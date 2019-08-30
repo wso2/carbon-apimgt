@@ -117,6 +117,14 @@ public class SubscriptionMappingUtil {
         return subscriptionListDTO;
     }
 
+    /**
+     * Get the subscriptions within the specified pagination range
+     *
+     * @param subscriptionListDTO   list of all subscription DTOs
+     * @param limit                 max number of objects returned
+     * @param offset                starting index
+     * @return SubscriptionListDTO object containing SubscriptionDTOs within the pagination range
+     */
     public static SubscriptionListDTO getPaginatedSubscriptions(SubscriptionListDTO subscriptionListDTO, Integer limit,
                                                                 Integer offset) {
         SubscriptionListDTO paginatedSubscriptionListDTO = new SubscriptionListDTO();
