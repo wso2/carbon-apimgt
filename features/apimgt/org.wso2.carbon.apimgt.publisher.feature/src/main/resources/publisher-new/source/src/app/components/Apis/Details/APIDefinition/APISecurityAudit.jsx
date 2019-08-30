@@ -95,8 +95,8 @@ class APISecurityAudit extends Component {
                             <p>Score: {item.validation.grade} / 25</p>
                             <p>Number of issues: {item.validation.issueCounter}</p>
                             <p>Criticality: {item.validation.criticality}</p>
-                            { item.validation.issueCounter !== 0
-                                ? item.validation.issues.map((issue) => {
+                            { (item.validation.issueCounter !== 0)
+                                ? (item.validation.issues.map((issue) => {
                                     return (
                                         <ul>
                                             <li key={this.getKey()}>Description: {issue.message}</li>
@@ -104,18 +104,17 @@ class APISecurityAudit extends Component {
                                             <li key={this.getKey()}>Criticality: {issue.criticality}</li>
                                         </ul>
                                     );
-                                })
+                                }))
                                 : (null)
                             }
-                            
 
                             <h4>Security</h4>
                             {/** Show score out of 25 and progress bar here */}
                             <p>Score: {item.security.grade} / 25 </p>
                             <p>Number of issues: {item.security.issueCounter}</p>
                             <p>Criticality: {item.security.criticality}</p>
-                            { item.security.issueCounter !== 0
-                                ? item.security.issues.map((issue) => {
+                            { (item.security.issueCounter !== 0)
+                                ? (item.security.issues.map((issue) => {
                                     return (
                                         <ul>
                                             <li key={this.getKey()}>Description: {issue.message}</li>
@@ -123,7 +122,7 @@ class APISecurityAudit extends Component {
                                             <li key={this.getKey()}>Criticality: {issue.criticality}</li>
                                         </ul>
                                     );
-                                })
+                                }))
                                 : (null)
                             }
 
@@ -132,8 +131,8 @@ class APISecurityAudit extends Component {
                             <p>Score: {item.data.grade} / 50 </p>
                             <p>Number of issues: {item.data.issueCounter}</p>
                             <p>Criticality: {item.data.criticality}</p>
-                            { item.data.issueCounter !== 0
-                                ? item.data.issues.map((issue) => {
+                            { (item.data.issueCounter !== 0)
+                                ? (item.data.issues.map((issue) => {
                                     return (
                                         <ul>
                                             <li key={this.getKey()}>Description: {issue.message}</li>
@@ -141,7 +140,7 @@ class APISecurityAudit extends Component {
                                             <li key={this.getKey()}>Criticality: {issue.criticality}</li>
                                         </ul>
                                     );
-                                })
+                                }))
                                 : (null)
                             }
                         </div>
