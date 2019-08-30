@@ -41,7 +41,7 @@ const styles = theme => ({
         paddingRight: '10px',
     },
     buttonSection: {
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
     },
     titleWrapper: {
         paddingTop: '10px',

@@ -36,11 +36,11 @@ const styles = theme => ({
         width: '100%',
     },
     input: {
-        marginLeft: theme.spacing.unit,
+        marginLeft: theme.spacing(),
         flex: 1,
     },
     iconButton: {
-        padding: theme.spacing.unit,
+        padding: theme.spacing(),
     },
     divider: {
         width: 1,

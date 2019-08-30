@@ -41,10 +41,10 @@ const styles = theme => ({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: theme.spacing.unit * 2,
+        marginBottom: theme.spacing(2),
     },
     buttonSection: {
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
     },
 });
 
