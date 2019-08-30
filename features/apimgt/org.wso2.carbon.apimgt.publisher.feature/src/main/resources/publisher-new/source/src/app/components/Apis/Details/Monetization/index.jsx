@@ -53,6 +53,10 @@ class Monetization extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
+    componentDidMount() {
+        this.getMonetizationData();
+    }
+
     getMonetizationData() {
         const { api } = this.props;
         api.getSettings().then((settings) => {
@@ -63,10 +67,6 @@ class Monetization extends Component {
         api.getMonetization(this.props.api.id).then((status) => {
             this.setState({ monStatus: status.enabled });
         });
-    }
-
-    componentDidMount() {
-        this.getMonetizationData();
     }
 
     /**
@@ -93,7 +93,7 @@ class Monetization extends Component {
                 id: 'Apis.Details.Monetization.Index.monetization.configured.successfully',
                 defaultMessage: 'Monetization Configured Successfully',
             }));
-            this.setState({monStatus: !this.state.monStatus});
+            this.setState({ monStatus: !this.state.monStatus });
         }).catch((error) => {
             console.error(error);
             if (error.response) {
