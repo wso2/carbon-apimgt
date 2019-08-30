@@ -7869,7 +7869,8 @@ public final class APIUtil {
 
         // sub context and doc content doesn't support AND search
         if (inputSearchQuery != null && inputSearchQuery.contains(" ") && !inputSearchQuery
-                .contains(APIConstants.TAG_SEARCH_TYPE_PREFIX4)) {
+                .contains(APIConstants.TAG_SEARCH_TYPE_PREFIX4) && (!inputSearchQuery
+                .contains(APIConstants.CONTENT_SEARCH_TYPE_PREFIX) || inputSearchQuery.split(":").length > 2)) {
             if (inputSearchQuery.split(" ").length > 1) {
                 String[] searchCriterias = inputSearchQuery.split(" ");
                 for (int i = 0; i < searchCriterias.length; i++) {
