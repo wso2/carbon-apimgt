@@ -52,10 +52,8 @@ const styles = theme => ({
 class SubscriptionPoliciesManage extends Component {
     constructor(props) {
         super(props);
-        this.api = props.api;
         this.state = {
             subscriptionPolicies: {},
-            selectedSubscriptionPolicies: props.api.policies,
             updateInProgress: false,
         };
         this.handleChange = this.handleChange.bind(this);
@@ -64,7 +62,7 @@ class SubscriptionPoliciesManage extends Component {
     componentDidMount() {
         API.policies('subscription')
             .then((res) => {
-                this.setState({ subscriptionPolicies: res.obj.list });
+                this.setState({ subscriptionPolicies: res.body.list });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -81,45 +79,42 @@ class SubscriptionPoliciesManage extends Component {
     handleChange(event) {
         this.setState({ updateInProgress: true });
 
-        const apiClient = new API();
         const { name, checked } = event.target;
-        const { selectedSubscriptionPolicies } = this.state;
-        const { intl } = this.props;
-        let updatedSelectedPolicies = [...selectedSubscriptionPolicies];
-        const updatedAPI = { ...this.api };
+        const { intl, api, updateAPI } = this.props;
+        let updatedSelectedPolicies = [...api.policies];
 
         if (checked) {
-            updatedSelectedPolicies[updatedSelectedPolicies.length] = name;
+            updatedSelectedPolicies.push(name);
         } else {
             updatedSelectedPolicies = updatedSelectedPolicies.filter(policy => policy !== name);
         }
-        updatedAPI.policies = updatedSelectedPolicies;
-        apiClient.update(updatedAPI)
-            .then((res) => {
-                // todo remove the following es-lint disable when update API method call return is changed
-                // eslint-disable-next-line no-underscore-dangle
-                this.api = res._data;
-                this.setState({ selectedSubscriptionPolicies: updatedSelectedPolicies, updateInProgress: false });
-                Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.Subscriptions.SubscriptionPoliciesManage.policy.update.success',
-                    defaultMessage: 'API subscription policies updated successfully',
-                }));
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.error(error);
-                }
-                this.setState({ updateInProgress: false });
-                Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.Subscriptions.SubscriptionPoliciesManage.policy.update.error',
-                    defaultMessage: 'Error occurred while updating subscription policies',
-                }));
-            });
+
+        if (updateAPI) {
+            updateAPI({ policies: updatedSelectedPolicies })
+                .then(() => {
+                    Alert.info(intl.formatMessage({
+                        id: 'Apis.Details.Subscriptions.SubscriptionPoliciesManage.policy.update.success',
+                        defaultMessage: 'API subscription policies updated successfully',
+                    }));
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.error(error);
+                    }
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Subscriptions.SubscriptionPoliciesManage.policy.update.error',
+                        defaultMessage: 'Error occurred while updating subscription policies',
+                    }));
+                })
+                .finally(() => {
+                    this.setState({ updateInProgress: false });
+                });
+        }
     }
 
     render() {
-        const { classes } = this.props;
-        const { subscriptionPolicies, selectedSubscriptionPolicies, updateInProgress } = this.state;
+        const { classes, api } = this.props;
+        const { subscriptionPolicies, updateInProgress } = this.state;
 
         return (
             <Paper className={classes.subscriptionPoliciesPaper}>
@@ -147,7 +142,7 @@ class SubscriptionPoliciesManage extends Component {
                                         key={value[1].name}
                                         control={<Checkbox
                                             color='primary'
-                                            checked={selectedSubscriptionPolicies.includes(value[1].name)}
+                                            checked={api.policies.includes(value[1].name)}
                                             onChange={e => this.handleChange(e)}
                                             name={value[1].name}
                                         />}
@@ -168,6 +163,7 @@ SubscriptionPoliciesManage.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
     api: PropTypes.shape({ policies: PropTypes.array }).isRequired,
+    updateAPI: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(SubscriptionPoliciesManage));

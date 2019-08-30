@@ -533,7 +533,7 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.SUBSCRIPTIONS}
-                                    component={() => <Subscriptions api={api} />}
+                                    component={() => <Subscriptions api={api} updateAPI={this.updateAPI}/>}
                                 />
                                 <Route path={Details.subPaths.SECURITY} component={() => <Security api={api} />} />
                                 <Route path={Details.subPaths.COMMENTS} component={() => <Comments api={api} />} />
