@@ -34,6 +34,7 @@ class APISecurityAudit extends Component {
         this.state = {
             items: [],
         };
+        this.keyCount = 0;
     }
 
     /**
@@ -58,9 +59,19 @@ class APISecurityAudit extends Component {
     }
 
     /**
+     * Method to return the index number
+     * @returns {int} this.keyCount
+     */
+    getKey() {
+        return this.keyCount++;
+    }
+
+    /**
      * @inheritdoc
      */
     render() {
+        // TODO - Change header elements to Typography
+        // TODO - Make a criticality map where 1 is lowest and 4 is highest and color code if possible
         return (
             <div
                 width='100%'
@@ -68,11 +79,71 @@ class APISecurityAudit extends Component {
             >
                 <Typography variant='h6'>API Security Audit Report</Typography>
                 <p>API Security Audit works!</p>
+                {/** Test the json data after finishing the structure */}
                 {this.state.items.map((item) => {
                     return (
                         <div>
-                            <p>{item.grade}</p>
-                            <p>{item.criticality}</p>
+                            <h1>Audit Score and Summary</h1>
+                            {/** Show total score and possibly a Progress Ring */}
+                            <p>Overall Grade: {item.grade}</p>
+                            <p>Number of issues: {item.issueCounter}</p>
+                            <p>Overall Criticality: {item.criticality}</p>
+
+                            {/** Properties to be used are: issueCounter, grade, issues[], criticality */}
+                            <h4>OpenAPI format requirements</h4>
+                            {/** Show score out of 25 and progress bar here */}
+                            <p>Score: {item.validation.grade} / 25</p>
+                            <p>Number of issues: {item.validation.issueCounter}</p>
+                            <p>Criticality: {item.validation.criticality}</p>
+                            { item.validation.issueCounter !== 0
+                                ? item.validation.issues.map((issue) => {
+                                    return (
+                                        <ul>
+                                            <li key={this.getKey()}>Description: {issue.message}</li>
+                                            <li key={this.getKey()}>Score Impact: {issue.configScore}</li>
+                                            <li key={this.getKey()}>Criticality: {issue.criticality}</li>
+                                        </ul>
+                                    );
+                                })
+                                : (null)
+                            }
+                            
+
+                            <h4>Security</h4>
+                            {/** Show score out of 25 and progress bar here */}
+                            <p>Score: {item.security.grade} / 25 </p>
+                            <p>Number of issues: {item.security.issueCounter}</p>
+                            <p>Criticality: {item.security.criticality}</p>
+                            { item.security.issueCounter !== 0
+                                ? item.security.issues.map((issue) => {
+                                    return (
+                                        <ul>
+                                            <li key={this.getKey()}>Description: {issue.message}</li>
+                                            <li key={this.getKey()}>Score Impact: {issue.configScore}</li>
+                                            <li key={this.getKey()}>Criticality: {issue.criticality}</li>
+                                        </ul>
+                                    );
+                                })
+                                : (null)
+                            }
+
+                            <h4>Data Validation</h4>
+                            {/** Show score out of 50 and progress bar here */}
+                            <p>Score: {item.data.grade} / 50 </p>
+                            <p>Number of issues: {item.data.issueCounter}</p>
+                            <p>Criticality: {item.data.criticality}</p>
+                            { item.data.issueCounter !== 0
+                                ? item.data.issues.map((issue) => {
+                                    return (
+                                        <ul>
+                                            <li key={this.getKey()}>Description: {issue.message}</li>
+                                            <li key={this.getKey()}>Score Impact: {issue.configScore}</li>
+                                            <li key={this.getKey()}>Criticality: {issue.criticality}</li>
+                                        </ul>
+                                    );
+                                })
+                                : (null)
+                            }
                         </div>
                     );
                 })}
