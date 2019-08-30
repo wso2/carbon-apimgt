@@ -159,8 +159,8 @@
                             org.wso2.carbon.apimgt.hybrid.gateway.common.*;version="${project.version}"
                         </Export-Package>
                         <Import-Package>
-                            org.osgi.framework.*,
-                            org.osgi.service.component.*,
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",					
                             org.apache.commons.codec.binary.*,
                             org.apache.commons.io.*; version="${commons-io.version}",
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
