@@ -50,7 +50,8 @@ export default function ProvideOpenAPI(props) {
     const { apiInputs, inputsDispatcher, onValidate } = props;
     const isFileInput = apiInputs.inputType === 'file';
     const classes = useStyles();
-    const [isError, setValidity] = useState(); // If valid value is `null` else an error object will be there
+    // If valid value is `null`,that means valid, else an error object will be there
+    const [isValid, setValidity] = useState({ url: null, file: null });
     const [isValidating, setIsValidating] = useState(false);
     /**
      *
@@ -58,37 +59,64 @@ export default function ProvideOpenAPI(props) {
      * @param {*} files
      */
     function onDrop(files) {
-        // Why `files[0]` below is , We only handle one OpenAPI file at a time,
+        setIsValidating(true);
+
+        // Why `files.pop()` below is , We only handle one OpenAPI file at a time,
         // So if use provide multiple, We would only
         // accept the first file. This information is shown in the dropdown helper text
-        inputsDispatcher({ action: 'inputValue', value: [files[0]] });
+        const file = files.pop();
+        let validFile = null;
+        API.validateOpenAPIByFile(file)
+            .then((response) => {
+                const {
+                    body: { isValid: isValidFile, info },
+                } = response;
+                if (isValidFile) {
+                    validFile = file;
+                    inputsDispatcher({ action: 'preSetAPI', value: info });
+                    setValidity({ ...isValid, file: null });
+                } else {
+                    setValidity({ ...isValid, file: { message: 'OpenAPI content validation failed!' } });
+                }
+            })
+            .catch((error) => {
+                setValidity({ ...isValid, file: { message: 'OpenAPI content validation failed!' } });
+                console.error(error);
+            })
+            .finally(() => {
+                setIsValidating(false); // Stop the loading animation
+                onValidate(validFile !== null); // If there is a valid file then validation has passed
+                // If the given file is valid , we set it as the inputValue else set `null`
+                inputsDispatcher({ action: 'inputValue', value: validFile });
+            });
     }
 
     /**
      * Trigger the provided onValidate call back on each input validation run
      * Do the validation state aggregation and call the onValidate method with aggregated value
-     * @param {Object} state Validation state object
+     * @param {Object} state Validation state object returned from Joi `.validate()` method
      */
-    function validate(state) {
+    function validateURL(state) {
+        // State `null` means URL is valid, We do backend validation only in valid URLs
         if (state === null) {
             setIsValidating(true);
             API.validateOpenAPIByUrl(apiInputs.inputValue).then((response) => {
                 const {
-                    body: { isValid, info },
+                    body: { isValid: isValidURL, info },
                 } = response;
-                if (isValid) {
+                if (isValidURL) {
                     inputsDispatcher({ action: 'preSetAPI', value: info });
-                    setValidity(null);
+                    setValidity({ ...isValid, url: null });
                 } else {
-                    setValidity({ message: 'OpenAPI content validation failed!' });
+                    setValidity({ ...isValid, url: { message: 'OpenAPI content validation failed!' } });
                 }
-                onValidate(isValid);
+                onValidate(isValidURL);
                 setIsValidating(false);
             });
             // Valid URL string
             // TODO: Handle catch network or api call failures ~tmkb
         } else {
-            setValidity(state);
+            setValidity({ ...isValid, url: state });
             onValidate(false);
         }
     }
@@ -118,8 +146,19 @@ export default function ProvideOpenAPI(props) {
                 </Grid>
                 <Grid item md={7}>
                     {isFileInput ? (
-                        // TODO: Pass message saying accepting only one file ~tmkb
-                        <DropZoneLocal onDrop={onDrop} files={apiInputs.inputValue} />
+                        <React.Fragment>
+                            <DropZoneLocal error={isValid.file} onDrop={onDrop} files={apiInputs.inputValue}>
+                                {isValidating && <CircularProgress />}
+                                {isValid.file ? (
+                                    isValid.file.message
+                                ) : (
+                                    <FormattedMessage
+                                        id='Apis.Create.OpenAPI.Steps.ProvideOpenAPI.Input.file.dropzone'
+                                        defaultMessage='Select an OpenAPI definition file'
+                                    />
+                                )}
+                            </DropZoneLocal>
+                        </React.Fragment>
                     ) : (
                         <TextField
                             autoFocus
@@ -136,7 +175,7 @@ export default function ProvideOpenAPI(props) {
                             }}
                             InputProps={{
                                 onBlur: ({ target: { value } }) => {
-                                    validate(APIValidation.url.required().validate(value).error);
+                                    validateURL(APIValidation.url.required().validate(value).error);
                                 },
                                 endAdornment: isValidating && (
                                     <InputAdornment position='end'>
@@ -145,8 +184,8 @@ export default function ProvideOpenAPI(props) {
                                 ),
                             }}
                             // 'Give the URL of OpenAPI endpoint'
-                            helperText={isError && isError.message}
-                            error={Boolean(isError)}
+                            helperText={isValid.url && isValid.url.message}
+                            error={Boolean(isValid.url)}
                             disabled={isValidating}
                         />
                     )}

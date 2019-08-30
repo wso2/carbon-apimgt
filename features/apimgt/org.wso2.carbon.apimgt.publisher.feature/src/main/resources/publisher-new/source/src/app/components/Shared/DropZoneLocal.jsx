@@ -78,9 +78,11 @@ const rejectStyle = {
  * @returns
  */
 export default function DropZoneLocal(props) {
+    let { files } = props;
     const {
-        message, onDrop, files, showFilesList,
+        message, onDrop, error, showFilesList, children,
     } = props;
+    files = files instanceof File ? [files] : files;
     const dropZoneObject = useDropzone({ onDrop });
     const {
         getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject,
@@ -92,6 +94,7 @@ export default function DropZoneLocal(props) {
             {file.path} - {humanFileSize(file.size)}
         </li>
     ));
+    baseStyle.borderColor = error ? rejectStyle.borderColor : '#eeeeee';
     const style = useMemo(
         () => ({
             ...baseStyle,
@@ -99,13 +102,13 @@ export default function DropZoneLocal(props) {
             ...(isDragAccept ? acceptStyle : {}),
             ...(isDragReject ? rejectStyle : {}),
         }),
-        [isDragActive, isDragReject],
+        [isDragActive, isDragReject, error],
     );
     return (
         <section className='container'>
             <div {...getRootProps({ style })}>
                 <input {...getInputProps()} />
-                <p>{message}</p>
+                {children || <p>{message}</p>}
             </div>
             {showFilesList && (
                 <aside>
@@ -122,11 +125,13 @@ DropZoneLocal.defaultProps = {
     showFilesList: true,
     files: null,
     children: null,
+    error: false,
 };
 DropZoneLocal.propTypes = {
     message: PropTypes.string,
     onDrop: PropTypes.func,
     showFilesList: PropTypes.bool,
-    files: PropTypes.arrayOf(PropTypes.object),
-    children: PropTypes.element,
+    files: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.object), PropTypes.instanceOf(File)]),
+    children: PropTypes.oneOfType([PropTypes.element, PropTypes.array]),
+    error: PropTypes.oneOfType([PropTypes.bool, PropTypes.shape({})]),
 };

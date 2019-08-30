@@ -65,7 +65,7 @@ export default function ApiCreateOpenAPI(props) {
             case 'isFormValid':
                 return { ...currentState, [action]: value };
             case 'inputType':
-                return { ...currentState, [action]: value, inputValue: value === 'url' ? '' : [] };
+                return { ...currentState, [action]: value, inputValue: value === 'url' ? '' : null };
             case 'preSetAPI':
                 return {
                     ...currentState,
@@ -117,7 +117,7 @@ export default function ApiCreateOpenAPI(props) {
     function createAPI() {
         setCreating(true);
         const {
-            name, version, context, endpoint, policies, inputValue,
+            name, version, context, endpoint, policies, inputValue, inputType,
         } = apiInputs;
         const additionalProperties = {
             name,
@@ -138,8 +138,9 @@ export default function ApiCreateOpenAPI(props) {
         }
         additionalProperties.gatewayEnvironments = ['Production and Sandbox'];
         const newAPI = new API(additionalProperties);
-        newAPI
-            .importOpenAPIByUrl(inputValue)
+        const promisedResponse =
+            inputType === 'file' ? newAPI.importOpenAPIByFile(inputValue) : newAPI.importOpenAPIByUrl(inputValue);
+        promisedResponse
             .then((api) => {
                 Alert.info('API created successfully');
                 history.push(`/apis/${api.id}/overview`);
