@@ -36,18 +36,19 @@ const styles = theme => ({
  * @extends {Component}
  */
 function Subscriptions(props) {
-    const { api } = props;
+    const { api, updateAPI } = props;
 
     return (
         <div>
             <SubscriptionsTable api={api} />
-            <SubscriptionPoliciesManage api={api} />
+            <SubscriptionPoliciesManage api={api} updateAPI={updateAPI} />
         </div>
     );
 }
 
 Subscriptions.propTypes = {
     api: PropTypes.shape({}).isRequired,
+    updateAPI: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(Subscriptions);
