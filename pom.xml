@@ -1647,6 +1647,11 @@
         <!-- Jaggery Version -->
         <jaggery.version>0.14.10</jaggery.version>
 
+	<!-- OSGi -->
+        <imp.package.version.osgi.service>[1.2.0,1.3.0)</imp.package.version.osgi.service>
+        <imp.package.version.osgi.util>[1.2.0,2.0.0)</imp.package.version.osgi.util>
+        <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
+
         <!-- Misc Versions -->
         <synapse.version>2.1.7-wso2v115</synapse.version>
 
