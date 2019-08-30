@@ -50,7 +50,7 @@ class Wsdl extends Resource {
         return apiClient.then((client) => {
             return client.apis.APIs.importWSDLDefinition({
                 url: input,
-                additionalProperties,
+                additionalProperties: JSON.stringify(additionalProperties),
                 implementationType,
             });
         });
