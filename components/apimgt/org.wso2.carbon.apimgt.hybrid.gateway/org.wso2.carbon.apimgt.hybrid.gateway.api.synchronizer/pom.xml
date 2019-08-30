@@ -176,7 +176,6 @@
                         </Private-Package>
                         <Import-Package>
                             org.wso2.carbon.utils.*; version="${carbon.kernel.package.import.version.range}",
-                            org.osgi.service.component.*,
                             org.apache.commons.logging; version="${commons.logging.imp.pkg.version}",
                             org.wso2.carbon.tenant.mgt.services.*; version="${carbon.multitenancy.version}",
                             org.wso2.carbon.context.*; version="${carbon.kernel.package.import.version.range}",
@@ -184,7 +183,8 @@
                             version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.stratos.common.*; version="${carbon.commons.imp.pkg.version}",
                             org.wso2.carbon.core.*; version="${carbon.kernel.package.import.version.range}",
-                            org.osgi.framework.*,
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.json.*,
                             org.wso2.carbon.registry.*; version="${carbon.registry.imp.pkg.version}",
                             org.wso2.carbon.user.core.*; version="${carbon.platform.package.import.version.range}",

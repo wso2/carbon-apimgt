@@ -24,7 +24,7 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SubscriptionsApiService {
-      public Response subscriptionsGet(String apiId, String applicationId, String groupId, Integer offset, Integer limit, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsGet(String apiId, String applicationId, String apiType, String groupId, Integer offset, Integer limit, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response subscriptionsMultiplePost(List<SubscriptionDTO> body, MessageContext messageContext) throws APIManagementException;
       public Response subscriptionsPost(SubscriptionDTO body, MessageContext messageContext) throws APIManagementException;
       public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch, MessageContext messageContext) throws APIManagementException;

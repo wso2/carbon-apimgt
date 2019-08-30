@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -19,6 +21,7 @@ public class APIProductInfoDTO   {
     private String description = null;
     private String provider = null;
     private String thumbnailUri = null;
+    private List<String> throttlingPolicies = new ArrayList<>();
 
   /**
    **/
@@ -106,6 +109,24 @@ public class APIProductInfoDTO   {
     this.thumbnailUri = thumbnailUri;
   }
 
+  /**
+   * The subscription tiers selected for the particular API product
+   **/
+  public APIProductInfoDTO throttlingPolicies(List<String> throttlingPolicies) {
+    this.throttlingPolicies = throttlingPolicies;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[\"Unlimited\"]", value = "The subscription tiers selected for the particular API product")
+  @JsonProperty("throttlingPolicies")
+  public List<String> getThrottlingPolicies() {
+    return throttlingPolicies;
+  }
+  public void setThrottlingPolicies(List<String> throttlingPolicies) {
+    this.throttlingPolicies = throttlingPolicies;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -120,12 +141,13 @@ public class APIProductInfoDTO   {
         Objects.equals(name, apIProductInfo.name) &&
         Objects.equals(description, apIProductInfo.description) &&
         Objects.equals(provider, apIProductInfo.provider) &&
-        Objects.equals(thumbnailUri, apIProductInfo.thumbnailUri);
+        Objects.equals(thumbnailUri, apIProductInfo.thumbnailUri) &&
+        Objects.equals(throttlingPolicies, apIProductInfo.throttlingPolicies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, provider, thumbnailUri);
+    return Objects.hash(id, name, description, provider, thumbnailUri, throttlingPolicies);
   }
 
   @Override
@@ -138,6 +160,7 @@ public class APIProductInfoDTO   {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
+    sb.append("    throttlingPolicies: ").append(toIndentedString(throttlingPolicies)).append("\n");
     sb.append("}");
     return sb.toString();
   }

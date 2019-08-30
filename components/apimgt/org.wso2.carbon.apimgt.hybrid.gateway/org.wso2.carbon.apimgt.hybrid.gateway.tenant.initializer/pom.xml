@@ -145,8 +145,8 @@
                             org.wso2.carbon.core.multitenancy.*;
                             version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.core.*; version="${carbon.kernel.package.import.version.range}",
-                            org.osgi.framework.*,
-                            org.osgi.service.component.*,
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",					
                             org.wso2.carbon.stratos.common.*; version="${carbon.commons.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.*; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",

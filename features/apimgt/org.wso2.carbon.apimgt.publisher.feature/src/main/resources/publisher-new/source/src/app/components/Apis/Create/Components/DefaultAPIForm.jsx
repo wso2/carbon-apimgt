@@ -24,13 +24,38 @@ import { makeStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import APIValidation from 'AppData/APIValidation';
 
-import SelectPolicies from './components/SelectPolicies';
+import SelectPolicies from './SelectPolicies';
 
 const useStyles = makeStyles(theme => ({
     mandatoryStar: {
         color: theme.palette.error.main,
     },
 }));
+
+/**
+ *
+ * Return the actual API context that will be exposed in the gateway.
+ * If the context value contains `{version}` placeholder text it will be replaced with the actual version value.
+ * If there is no such placeholder text in the context, The version will be appended to the context
+ * i:e /context/version
+ * Parameter expect an object containing `context` and `version` properties.
+ * @param {String} context API Context
+ * @param {String} version API Version string
+ * @returns {String} Derived actual context string
+ */
+function actualContext({ context, version }) {
+    let initialContext = '{context}/{version}';
+    if (context) {
+        initialContext = context;
+        if (context.indexOf('{version}') < 0) {
+            initialContext = context + '/{version}';
+        }
+    }
+    if (version) {
+        initialContext = initialContext.replace('{version}', version);
+    }
+    return initialContext;
+}
 
 /**
  * Improved API create default form
@@ -47,7 +72,7 @@ export default function DefaultAPIForm(props) {
     // Check the provided API validity on mount, TODO: Better to use Joi schema here ~tmkb
     useEffect(() => {
         onValidate(Boolean(api.name) && Boolean(api.version) && Boolean(api.context));
-    });
+    }, []);
     /**
      * Trigger the provided onValidate call back on each input validation run
      * Do the validation state aggregation and call the onValidate method with aggregated value
@@ -58,9 +83,11 @@ export default function DefaultAPIForm(props) {
         let isFormValid = Object.values(state)
             .map(value => value === null || value === undefined) // Map the validation entries to booleans
             .reduce((acc, cVal) => acc && cVal); // Aggregate the individual validation states
+        // API Name , Version & Context is a must that's why `&&` chain
         isFormValid = isFormValid && Boolean(api.name) && Boolean(api.version) && Boolean(api.context);
         onValidate(isFormValid, state);
     }
+
     return (
         <Grid item md={9}>
             <form noValidate autoComplete='off'>
@@ -151,7 +178,7 @@ export default function DefaultAPIForm(props) {
                             }}
                             helperText={
                                 (validity.context && validity.context.message) ||
-                                'API will be exposed in this context at the gateway'
+                                `API will be exposed in ${actualContext(api)} context at the gateway`
                             }
                             margin='normal'
                             variant='outlined'

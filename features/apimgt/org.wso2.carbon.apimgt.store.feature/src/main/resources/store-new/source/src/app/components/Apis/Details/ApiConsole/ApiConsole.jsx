@@ -34,7 +34,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
-
+import APIProduct from 'AppData/APIProduct';
+import CONSTS from 'AppData/Constants';
+import { ApiContext } from '../ApiContext';
 import Progress from '../../../Shared/Progress';
 import Api from '../../../../data/api';
 import SwaggerUI from './SwaggerUI';
@@ -78,6 +80,8 @@ const styles = theme => ({
  * @extends {React.Component}
  */
 class ApiConsole extends React.Component {
+    static contextType = ApiContext;
+
     /**
      *Creates an instance of ApiConsole.
      * @param {*} props properties
@@ -86,7 +90,6 @@ class ApiConsole extends React.Component {
     constructor(props) {
         super(props);
         this.state = { showToken: false };
-        this.apiClient = new Api();
         this.handleChanges = this.handleChanges.bind(this);
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
         this.handleClickShowToken = this.handleClickShowToken.bind(this);
@@ -99,10 +102,10 @@ class ApiConsole extends React.Component {
      * @memberof ApiConsole
      */
     componentDidMount() {
-        const { match } = this.props;
-        const apiID = match.params.api_uuid;
+        const { apiType, api } = this.context;
+        const apiID = api.id;
         const user = AuthManager.getUser();
-        let api;
+        let apiData;
         let environments;
         let labels;
         let selectedEnvironment;
@@ -112,16 +115,23 @@ class ApiConsole extends React.Component {
         let keys;
         let selectedKeyType;
         let accessToken;
+
+        if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            this.apiClient = new APIProduct();
+        } else if (apiType === CONSTS.API_TYPE) {
+            this.apiClient = new Api();
+        }
+
         const promiseAPI = this.apiClient.getAPIById(apiID);
 
         promiseAPI
             .then((apiResponse) => {
-                api = apiResponse.obj;
-                if (api.endpointURLs) {
-                    environments = api.endpointURLs.map((endpoint) => { return endpoint.environmentName; });
+                apiData = apiResponse.obj;
+                if (apiData.endpointURLs) {
+                    environments = apiData.endpointURLs.map((endpoint) => { return endpoint.environmentName; });
                 }
-                if (api.labels) {
-                    labels = api.labels.map((label) => { return label.name; });
+                if (apiData.labels) {
+                    labels = apiData.labels.map((label) => { return label.name; });
                 }
                 if (environments && environments.length > 0) {
                     [selectedEnvironment] = environments;
@@ -163,7 +173,7 @@ class ApiConsole extends React.Component {
                                 }
 
                                 this.setState({
-                                    api,
+                                    api: apiData,
                                     swagger,
                                     subscriptions,
                                     environments,
@@ -177,7 +187,7 @@ class ApiConsole extends React.Component {
                             });
                     } else {
                         this.setState({
-                            api,
+                            api: apiData,
                             swagger,
                             subscriptions,
                             environments,
@@ -191,7 +201,7 @@ class ApiConsole extends React.Component {
                     }
                 } else {
                     this.setState({
-                        api,
+                        api: apiData,
                         swagger,
                         subscriptions,
                         environments,

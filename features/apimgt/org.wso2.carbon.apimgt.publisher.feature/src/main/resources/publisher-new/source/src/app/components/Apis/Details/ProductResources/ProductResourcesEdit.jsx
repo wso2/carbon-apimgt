@@ -391,7 +391,7 @@ function ProductResourcesEdit() {
                                         component='div'
                                     >
                                         <FormattedMessage
-                                            id='Apis.Details.ProductResources.ProductResources.api.resources'
+                                            id='Apis.Details.ProductResources.ProductResources.api.all.resources'
                                             defaultMessage={
                                                 'All resources available with the API are displayed bellow.' +
                                                 'Click the right hand side arrow to add them to the api product.'

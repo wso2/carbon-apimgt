@@ -603,7 +603,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
-                                                       APIIdentifier identifier, String groupingId) throws APIManagementException;
+                                                Identifier identifier, String groupingId) throws APIManagementException;
     
     Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException;
 

@@ -125,7 +125,7 @@ class Details extends Component {
      */
     static isValidURL(pathname) {
         for (const [subPathKey, subPath] of Object.entries(Details.subPaths)) {
-            // Skip the BASE path , because it's will match for any `/apis/:apiUUID/*` values
+            // Skip the BASE path , because it will match for any `/apis/:apiUUID/*` values
             if (subPathKey !== 'BASE') {
                 const matched = matchPath(pathname, subPath);
                 if (matched) {
