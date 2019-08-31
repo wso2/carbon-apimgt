@@ -1212,5 +1212,11 @@ public interface APIProvider extends APIManager {
      */
     public void addProductDocumentationContent(APIProduct apiProduct, String documentationName, String text) throws APIManagementException;
 
-
+    /**
+     *
+     * @param api
+     * @param schemaDefinition
+     * @throws APIManagementException
+     */
+     void saveGraphqlSchemaDefinition(API api, String schemaDefinition) throws APIManagementException;
 }

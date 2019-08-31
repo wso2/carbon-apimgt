@@ -21,13 +21,26 @@ package org.wso2.carbon.apimgt.impl.definitions;
 
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.entity.ContentType;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.registry.api.Registry;
+import org.wso2.carbon.registry.api.RegistryException;
+import org.wso2.carbon.registry.api.Resource;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -36,7 +49,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
+
 public class GraphQLSchemaDefinition {
+
+    protected Log log = LogFactory.getLog(getClass());
 
     /**
      * build schema with scopes and roles
@@ -104,7 +121,7 @@ public class GraphQLSchemaDefinition {
                 schemaDefinitionBuilder.append(operationScopeMappingBuilder.toString());
             }
 
-            if (scopeOperationMap.size() > 0) {
+            if (scopeRoleMap.size() > 0) {
                 List<String> scopeRoles = new ArrayList<>();
                 String[] roleList;
                 String scopeType;
@@ -121,16 +138,16 @@ public class GraphQLSchemaDefinition {
                     roleList = entry.getValue().split(",");
 
                     for (String role : roleList) {
-                        if (!scopeRoles.contains(role)) {
+                        if (!role.equals("") && !scopeRoles.contains(role)) {
                             base64EncodedURLRole = Base64.getUrlEncoder().withoutPadding().
                                     encodeToString(role.getBytes(Charset.defaultCharset()));
                             roleField = base64EncodedURLRole + ": String\n";
                             scopeRoleBuilder.append(roleField);
+                            scopeRoles.add(role);
                         }
-                        scopeRoles.add(role);
                     }
 
-                    if (!StringUtils.isEmpty(scopeRoleBuilder.toString())) {
+                    if (scopeRoles.size() > 0 && !StringUtils.isEmpty(scopeRoleBuilder.toString())) {
                         scopeRoleMappingType = scopeRoleBuilder.toString() + "}\n";
                         scopeRoleMappingBuilder.append(scopeRoleMappingType);
                     }
@@ -196,5 +213,91 @@ public class GraphQLSchemaDefinition {
                 pathsObject.put(resourcePath.getKey().toString(), pathItemObject);
             }
         }
+    }
+
+
+    /**
+     * This method saves schema definition of GraphQL APIs in the registry
+     *
+     * @param api               API to be saved
+     * @param schemaDefinition  Graphql API definition as String
+     * @param registry          user registry
+     * @throws APIManagementException
+     */
+    public void saveGraphQLSchemaDefinition(API api, String schemaDefinition, Registry registry)
+            throws APIManagementException {
+        String apiName = api.getId().getApiName();
+        String apiVersion = api.getId().getVersion();
+        String apiProviderName = api.getId().getProviderName();
+        String resourcePath = APIUtil.getGraphqlDefinitionFilePath(apiName, apiVersion, apiProviderName);
+        try {
+            resourcePath = resourcePath + apiProviderName + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+                    apiName + apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+            Resource resource;
+            if (!registry.resourceExists(resourcePath)) {
+                resource = registry.newResource();
+            } else {
+                resource = registry.get(resourcePath);
+            }
+
+            resource.setContent(schemaDefinition);
+            resource.setMediaType(String.valueOf(ContentType.TEXT_PLAIN));
+            registry.put(resourcePath, resource);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully imported the schema: " + schemaDefinition );
+            }
+
+            String[] visibleRoles = null;
+            if (api.getVisibleRoles() != null) {
+                visibleRoles = api.getVisibleRoles().split(",");
+            }
+
+            //Need to set anonymous if the visibility is public
+            APIUtil.clearResourcePermissions(resourcePath, api.getId(), ((UserRegistry) registry).getTenantId());
+            APIUtil.setResourcePermissions(apiProviderName, api.getVisibility(), visibleRoles, resourcePath);
+
+        } catch (RegistryException e) {
+            String errorMessage = "Error while adding Graphql Definition for " + apiName + '-' + apiVersion;
+            log.error(errorMessage, e);
+            handleException(errorMessage, e);
+        }
+    }
+
+    /**
+     * Returns the graphQL content in registry specified by the wsdl name
+     *
+     * @param apiId Api Identifier
+     * @return graphQL content matching name if exist else null
+     */
+    public String getGraphqlSchemaDefinition(APIIdentifier apiId, Registry registry) throws APIManagementException {
+        String apiName = apiId.getApiName();
+        String apiVersion = apiId.getVersion();
+        String apiProviderName = apiId.getProviderName();
+        String resourcePath = APIUtil.getGraphqlDefinitionFilePath(apiName, apiVersion, apiProviderName);
+
+        String schemaDoc = null;
+        String schemaName = apiId.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+                apiId.getApiName() + apiId.getVersion() + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
+        String schemaResourePath = resourcePath + schemaName;
+        try {
+            if (registry.resourceExists(schemaResourePath)) {
+                Resource schemaResource = registry.get(schemaResourePath);
+                schemaDoc = IOUtils.toString(schemaResource.getContentStream(),
+                        RegistryConstants.DEFAULT_CHARSET_ENCODING);
+            }
+        } catch (org.wso2.carbon.registry.core.exceptions.RegistryException e) {
+            String msg = "Error while getting schema file from the registry " + schemaResourePath;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (IOException e) {
+            String error = "Error occurred while getting the content of schema " + schemaName;
+            log.error(error);
+            throw new APIManagementException(error, e);
+        } catch (RegistryException e) {
+            String msg = "Failed to get swagger documentation of API : " + apiId;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return schemaDoc;
     }
 }

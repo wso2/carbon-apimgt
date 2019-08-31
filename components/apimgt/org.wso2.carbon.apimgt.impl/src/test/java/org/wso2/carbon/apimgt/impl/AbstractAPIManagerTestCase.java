@@ -159,7 +159,11 @@ public class AbstractAPIManagerTestCase {
                 .thenReturn("/test");
         try {
             new AbstractAPIManager(null) {
+                @Override
+                public String getGraphqlSchemaDefinition(APIIdentifier apiId) throws APIManagementException {
 
+                    return null;
+                }
             };
             Assert.fail("User store exception not thrown for error scenario");
         } catch (APIManagementException e) {

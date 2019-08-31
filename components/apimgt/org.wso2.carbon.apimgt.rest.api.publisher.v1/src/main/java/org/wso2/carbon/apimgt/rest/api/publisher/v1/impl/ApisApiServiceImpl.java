@@ -486,13 +486,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationArray);
             originalAPI.setUriTemplates(uriTemplates);
 
-            String resourcePath = apiIdentifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
-                    apiIdentifier.getApiName() + apiIdentifier.getVersion() +
-                    APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
-            resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
-            apiProvider.uploadGraphqlSchema(resourcePath, schemaDefinition);
+            apiProvider.saveGraphqlSchemaDefinition(originalAPI, schemaDefinition);
             apiProvider.updateAPI(originalAPI);
-
             String schema = apiProvider.getGraphqlSchema(apiIdentifier);
             return Response.ok().entity(schema).build();
         } catch (APIManagementException | UnsupportedEncodingException | FaultGatewaysException e) {
@@ -2056,6 +2051,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
+
             //adding the api
             apiProvider.addAPI(apiToAdd);
 
@@ -2065,20 +2061,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiProvider.saveSwagger20Definition(apiToAdd.getId(), apiDefinition);
 
             APIIdentifier createdApiId = apiToAdd.getId();
+            apiProvider.saveGraphqlSchemaDefinition(apiToAdd, schema);
 
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPI(createdApiId);
 
-            String resourcePath = createdApiId.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
-                    createdApiId.getApiName() + createdApiId.getVersion() +
-                    APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
-            resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
-
-            if (apiProvider.checkIfResourceExists(resourcePath)) {
-                RestApiUtil.handleConflict("schema resource already exists for the API " +
-                        additionalPropertiesAPI.getId(), log);
-            }
-            apiProvider.uploadGraphqlSchema(resourcePath, schema);
             APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
 
             //This URI used to set the location header of the POST response
