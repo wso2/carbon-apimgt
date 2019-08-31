@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
+
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
@@ -41,7 +41,7 @@ import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
 import { PageNotFound } from 'AppComponents/Base/Errors';
-import Api from 'AppData/api';
+import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
@@ -53,8 +53,8 @@ import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
 import Operations from './Operations/Operations';
 import Resources from './Resources/Resources';
-import ProductResourcesView from './Resources/ProductResourcesView';
-import ProductResourcesEdit from './ProductResources/ProductResourcesEdit';
+import ProductResourcesView from './Resources/Resources';
+import ProductResourcesEdit from './Resources/Resources';
 import Endpoints from './Endpoints/Endpoints';
 import Environments from './Environments/Environments';
 import Subscriptions from './Subscriptions/Subscriptions';
@@ -212,7 +212,7 @@ class Details extends Component {
             this.setState({ api: newAPI });
         } else {
             const { apiUUID } = this.props.match.params;
-            const promisedApi = Api.get(apiUUID);
+            const promisedApi = API.get(apiUUID);
             promisedApi
                 .then((api) => {
                     this.setState({ api });
@@ -307,12 +307,18 @@ class Details extends Component {
                 );
         }
     }
+
     /**
+     * This method is similar to ReactJS `setState` method, In this `updateAPI()` method, we accept partially updated
+     * API object or comple API object. When updating , the provided updatedAPI object will be merged with the existing
+     * API object in the state and use it as the payload in the /apis PUT operation.
      *
-     *
-     * @param {*} updatedProperties
-     * @param {*} isAPIProduct
-     * @memberof Details
+     * Partially updated API object means: {description: "Here is my new description.."} kind of object. It should have
+     * a key in API object and value contains the updated value of that property
+     * @param {Object} [_updatedProperties={}] Partially updated API object or complete API object
+     * (even an instance of API class is accepted here)
+     * @param {Boolean} isAPIProduct Whether the update operation should execute on an API or API Product
+     * @returns {Promise} promise object that resolve to update (/apis PUT operation) response
      */
     updateAPI(updatedProperties = {}) {
         const { api } = this.state;
@@ -320,6 +326,7 @@ class Details extends Component {
         if (api.apiType === 'APIProduct') {
             isAPIProduct = true;
         }
+        const updatedProperties = _updatedProperties instanceof API ? _updatedProperties.toJson() : _updatedProperties;
         let promisedUpdate;
         // TODO: Ideally, The state should hold the corresponding API object
         // which we could call it's `update` method safely ~tmkb
@@ -327,8 +334,10 @@ class Details extends Component {
             // newApi object has to be provided as the updatedProperties. Then api will be updated.
             promisedUpdate = api.update(updatedProperties);
         } else {
-            // this is to get the updated api when api properties are updated, but we do not have the newApi object
-            promisedUpdate = Api.get(api.id);
+            // Just like calling noArg `setState()` will just trigger a re-render without modifying the state,
+            // Calling `updateAPI()` without args wil return the API without any update.
+            // Just sync-up the api state with backend
+            promisedUpdate = API.get(api.id);
         }
         return promisedUpdate
             .then((updatedAPI) => {
