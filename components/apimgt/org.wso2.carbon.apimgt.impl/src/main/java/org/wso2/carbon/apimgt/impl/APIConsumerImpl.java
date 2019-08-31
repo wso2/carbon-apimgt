@@ -368,7 +368,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<API> apiSet = new TreeSet<API>(new APINameComparator());
         try {
             List<GovernanceArtifact> genericArtifacts =
-                    GovernanceUtils.findGovernanceArtifacts(getSearchQuery(APIConstants.TAG_SEARCH_TYPE_PREFIX2 + tag), registry,
+                    GovernanceUtils.findGovernanceArtifacts(getSearchQuery(APIConstants.TAGS_EQ_SEARCH_TYPE_PREFIX + tag), registry,
                                                             APIConstants.API_RXT_MEDIA_TYPE);
             for (GovernanceArtifact genericArtifact : genericArtifacts) {
                 try {
