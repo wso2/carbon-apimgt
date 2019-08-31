@@ -434,7 +434,6 @@
   "Apis.Details.Scopes.CreateScope.scope.updated.successfully": "Scope updated successfully",
   "Apis.Details.Scopes.CreateScope.short.description.about.the.scope": "Short description about the scope",
   "Apis.Details.Scopes.CreateScope.short.description.name": "Enter Scope Name ( Ex: creator )",
-  "Apis.Details.Scopes.CreateScope.something.went.wrong.while.updating.the.scope": "Something went wrong while updating the scope",
   "Apis.Details.Scopes.EditScope.update.scope": "Update Scope",
   "Apis.Details.Scopes.Scope.scope.add.a.valid.role": "add a valid role",
   "Apis.Details.Scopes.Scope.scope.deleted.successfully": "{scopeName} Scope deleted successfully!",

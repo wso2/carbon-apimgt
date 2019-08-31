@@ -838,4 +838,9 @@ throws APIManagementException {
         swaggerObject.put(APIConstants.SWAGGER_SECURITY_DEFINITIONS, securityDefinitionAttr);
         return swaggerObject;
     }
+
+    @Override
+    public String populateCustomManagementInfo(String oasDefinition, API api) throws APIManagementException {
+        return oasDefinition;
+    }
 }

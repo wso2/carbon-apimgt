@@ -121,26 +121,24 @@ class CreateScope extends React.Component {
             // return status of the validation
             return;
         }
-        const restApi = new Api();
         const scope = this.state.apiScope;
-
         scope.bindings = {
             type: 'role',
             values: this.state.roles,
         };
-        // temp fix to deep copy
-        // eslint-disable-next-line no-underscore-dangle
-        const newApi = JSON.parse(JSON.stringify(api._data));
-        newApi.scopes.push(scope);
-        const promisedApiUpdate = restApi.update(newApi);
+
+        const scopes = api.scopes.map((aScope) => { return aScope; });
+        scopes.push(scope);
+        const updateProperties = { scopes };
+        const promisedApiUpdate = api.update(updateProperties);
         promisedApiUpdate.then((response) => {
-            if (response.status !== 200) {
-                Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.Scopes.CreateScope.something.went.wrong.while.updating.the.scope',
-                    defaultMessage: 'Something went wrong while adding a scope',
-                }));
-                return;
-            }
+            // if (response.status !== 201) {
+            //     Alert.info(intl.formatMessage({
+            //         id: 'Apis.Details.Scopes.CreateScope.something.went.wrong.while.updating.the.scope',
+            //         defaultMessage: 'Something went wrong while adding a scope',
+            //     }));
+            //     return;
+            // }
             Alert.info(intl.formatMessage({
                 id: 'Apis.Details.Scopes.CreateScope.scope.added.successfully',
                 defaultMessage: 'Scope added successfully',
@@ -153,6 +151,7 @@ class CreateScope extends React.Component {
             });
         });
         promisedApiUpdate.catch((error) => {
+            console.log(error);
             const { response } = error;
             if (response.body) {
                 const { description } = response.body;

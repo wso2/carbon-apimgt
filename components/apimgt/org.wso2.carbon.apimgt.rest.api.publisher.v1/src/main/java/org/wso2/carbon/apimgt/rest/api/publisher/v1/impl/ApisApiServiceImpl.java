@@ -1516,7 +1516,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //Update API is called to update URITemplates and scopes of the API
             apiProvider.updateAPI(existingAPI);
-            apiProvider.saveSwagger20Definition(existingAPI.getId(), apiDefinition);
+            String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, existingAPI);
+            apiProvider.saveSwagger20Definition(existingAPI.getId(), updatedApiDefinition);
             //retrieves the updated swagger definition
             String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
             return Response.ok().entity(apiSwagger).build();

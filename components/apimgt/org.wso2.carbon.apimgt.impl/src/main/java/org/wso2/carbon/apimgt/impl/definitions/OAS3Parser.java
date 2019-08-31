@@ -420,4 +420,8 @@ public class OAS3Parser extends APIDefinition {
         return validationResponse;
     }
 
+    @Override
+    public String populateCustomManagementInfo(String oasDefinition, API api) throws APIManagementException {
+        return oasDefinition;
+    }
 }

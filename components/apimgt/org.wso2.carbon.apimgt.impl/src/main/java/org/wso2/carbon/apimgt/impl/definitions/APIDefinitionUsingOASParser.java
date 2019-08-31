@@ -684,4 +684,9 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
         @JsonSetter("schema")
         public abstract void setResponseSchema(Model var1);
     }
+
+    @Override
+    public String populateCustomManagementInfo(String oasDefinition, API api) throws APIManagementException {
+        return oasDefinition;
+    }
 }

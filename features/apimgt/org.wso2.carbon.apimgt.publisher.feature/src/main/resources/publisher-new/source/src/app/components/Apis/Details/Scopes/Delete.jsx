@@ -52,7 +52,6 @@ const styles = {
 };
 
 function Delete(props) {
-    const restApi = new Api();
     const { intl } = props;
     const [open, setOpen] = useState(false);
     const toggleOpen = () => {
@@ -60,20 +59,20 @@ function Delete(props) {
     };
     const deleteScope = () => {
         const { api, scopeName } = props;
-        // eslint-disable-next-line no-underscore-dangle
-        const apiData = api._data;
-        apiData.operations = apiData.operations.map((op) => {
+        const ops = JSON.parse(JSON.stringify(api.operations));
+        const operations = ops.map((op) => {
             // eslint-disable-next-line no-param-reassign
             op.scopes = op.scopes.filter((scope) => {
                 return scope !== scopeName;
             });
             return op;
         });
-        apiData.scopes = apiData.scopes.filter((scope) => {
+        const scopes = api.scopes.filter((scope) => {
             return scope.name !== scopeName;
         });
+        const updateProperties = { scopes, operations };
         const setOpenLocal = setOpen; // Need to copy this to access inside the promise.then
-        const promisedUpdate = restApi.update(apiData);
+        const promisedUpdate = api.update(updateProperties);
         promisedUpdate
             .then(() => {
                 Alert.info(intl.formatMessage({

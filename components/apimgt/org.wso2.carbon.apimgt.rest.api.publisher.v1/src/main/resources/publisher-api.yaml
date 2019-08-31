@@ -285,7 +285,7 @@ paths:
           schema:
             $ref: '#/definitions/API'
         - in: query
-          name: oas_version
+          name: openAPIVersion
           description: Open api version
           type: string
       tags:

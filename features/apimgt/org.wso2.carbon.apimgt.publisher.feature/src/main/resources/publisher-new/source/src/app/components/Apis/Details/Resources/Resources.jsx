@@ -436,18 +436,20 @@ class Resources extends React.Component {
     }
 
     updateAPI() {
-        const api = new Api();
-        const { intl, api: { id } } = this.props;
+        debugger;
+        const { intl, api, api: { id } } = this.props;
         const { policyLevel, selectedPolicy } = this.state;
         const promisedApi = api.get(id);
         promisedApi
             .then((getResponse) => {
-                const apiData = getResponse.body;
+                let apiThrottlingPolicy;
                 if ('perAPI' === policyLevel) {
-                    apiData.apiThrottlingPolicy = selectedPolicy;
+                    apiThrottlingPolicy = selectedPolicy;
                 } else {
-                    apiData.apiThrottlingPolicy = null;
+                    apiThrottlingPolicy = null;
                 }
+                let apiData = getResponse.body;
+                apiData.apiThrottlingPolicy = apiThrottlingPolicy;
                 const promisedUpdate = api.update(apiData);
                 promisedUpdate
                     .then(() => {

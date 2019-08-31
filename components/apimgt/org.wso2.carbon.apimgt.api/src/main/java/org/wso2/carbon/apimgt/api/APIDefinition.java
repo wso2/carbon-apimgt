@@ -42,6 +42,7 @@ public abstract class APIDefinition {
 
 
     private static final Pattern CURLY_BRACES_PATTERN = Pattern.compile("(?<=\\{)(?!\\s*\\{)[^{}]+");
+    private static final String KEEP_LEGACY_EXTENSION_PROP = "preserveLegacyExtensions";
 
     /**
      * This method extracts the URI templates from the API definition
@@ -153,5 +154,10 @@ public abstract class APIDefinition {
     public abstract APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition,
             boolean returnJsonContent) throws APIManagementException;
 
+    public abstract String populateCustomManagementInfo(String oasDefinition, API api) throws APIManagementException;
 
+    protected boolean isLegacyExtensionsPreserved() {
+        String keepLegacyExtension = System.getProperty(KEEP_LEGACY_EXTENSION_PROP);
+        return Boolean.parseBoolean(keepLegacyExtension);
+    }
 }

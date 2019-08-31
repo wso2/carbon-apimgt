@@ -306,7 +306,7 @@ class API extends Resource {
             const payload = {
                 body: data,
                 'Content-Type': 'application/json',
-                oas_version: query,
+                openAPIVersion: query,
             };
             return client.apis['APIs'].post_apis(payload, this._requestMetaData());
         });
