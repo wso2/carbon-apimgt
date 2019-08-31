@@ -514,19 +514,17 @@ class APIDefinition extends React.Component {
                         </div>
                     )}
                 </div>
-                <div>
-                    {isAuditApiClicked ? (
-                        <APISecurityAudit apiId={api.id} />
-                    ) : (
-                        <MonacoEditor
-                            width='100%'
-                            height='calc(100vh - 51px)'
-                            theme='vs-dark'
-                            value={swagger !== null ? swagger : graphQL}
-                            options={editorOptions}
-                        />
-                    )}
-                </div>
+                {isAuditApiClicked ? (
+                    <APISecurityAudit apiId={api.id} />
+                ) : (
+                    <MonacoEditor
+                        width='100%'
+                        height='calc(100vh - 51px)'
+                        theme='vs-dark'
+                        value={swagger !== null ? swagger : graphQL}
+                        options={editorOptions}
+                    />
+                )}
                 <Dialog fullScreen open={openEditor} onClose={this.closeEditor} TransitionComponent={this.transition}>
                     <Paper square className={classes.popupHeader}>
                         <IconButton

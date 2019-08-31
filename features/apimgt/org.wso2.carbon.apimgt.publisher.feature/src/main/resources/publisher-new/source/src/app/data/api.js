@@ -229,10 +229,10 @@ class API extends Resource {
     /**
      * Get API Security Audit Report
      */
-    getSecurityAuditReport(id) {
+    getSecurityAuditReport(apiId) {
         const promiseGetAuditReport = this.client.then((client) => {
-            return client.apis['API Audit'].get_apis_apiId_auditapi({
-                id: id
+            return client.apis['API Audit'].get_apis__apiId__auditapi({
+                apiId: apiId
             }, this._requestMetaData());
         });
         return promiseGetAuditReport;

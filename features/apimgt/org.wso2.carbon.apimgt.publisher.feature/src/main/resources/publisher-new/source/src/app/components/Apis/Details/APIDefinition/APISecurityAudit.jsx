@@ -32,7 +32,9 @@ class APISecurityAudit extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            items: [],
+            report: null,
+            overallGrade: 0,
+            numErrors: 0,
         };
         this.keyCount = 0;
     }
@@ -43,11 +45,16 @@ class APISecurityAudit extends Component {
     componentDidMount() {
         // Include code to pass in the data from the backend
         const { apiId } = this.props;
-        const Api = new API();
+        const api = new API();
 
-        Api.getSecurityAuditReport(apiId.id)
-            .then(response => response.json())
-            .then(response => this.setState({ items: response }))
+        api.getSecurityAuditReport(apiId)
+            .then((response) => {
+                this.setState({
+                    report: response.body.report,
+                    overallGrade: response.body.grade,
+                    numErrors: response.body.numErrors,
+                });
+            })
             .catch((error) => {
                 console.error(error);
                 if (error.response) {
@@ -59,8 +66,7 @@ class APISecurityAudit extends Component {
     }
 
     /**
-     * Method to return the index number
-     * @returns {int} this.keyCount
+     * @inheritdoc
      */
     getKey() {
         return this.keyCount++;
@@ -70,82 +76,83 @@ class APISecurityAudit extends Component {
      * @inheritdoc
      */
     render() {
-        // TODO - Change header elements to Typography
+        // TODO - Change header elements to Typography - Check on this
         // TODO - Make a criticality map where 1 is lowest and 4 is highest and color code if possible
+        // TODO - Add the Progress Circle and Progress Bars
+        // TODO - Test the json data after finishing the structure
+        const { report, overallGrade, numErrors } = this.state;
+        const reportObject = JSON.parse(report);
         return (
-            <div
-                width='100%'
-                height='calc(100vh - 51px)'
-            >
-                <Typography variant='h6'>API Security Audit Report</Typography>
-                <p>API Security Audit works!</p>
-                {/** Test the json data after finishing the structure */}
-                {this.state.items.map((item) => {
-                    return (
+            <div>
+                {report && (
+                    <div
+                        width='100%'
+                        height='calc(100vh - 51px)'
+                    >
+                        <Typography variant='h6'>API Security Audit Report</Typography>
                         <div>
                             <h1>Audit Score and Summary</h1>
                             {/** Show total score and possibly a Progress Ring */}
-                            <p>Overall Grade: {item.grade}</p>
-                            <p>Number of issues: {item.issueCounter}</p>
-                            <p>Overall Criticality: {item.criticality}</p>
-
-                            {/** Properties to be used are: issueCounter, grade, issues[], criticality */}
-                            <h4>OpenAPI format requirements</h4>
-                            {/** Show score out of 25 and progress bar here */}
-                            <p>Score: {item.validation.grade} / 25</p>
-                            <p>Number of issues: {item.validation.issueCounter}</p>
-                            <p>Criticality: {item.validation.criticality}</p>
-                            { (item.validation.issueCounter !== 0)
-                                ? (item.validation.issues.map((issue) => {
-                                    return (
-                                        <ul>
-                                            <li key={this.getKey()}>Description: {issue.message}</li>
-                                            <li key={this.getKey()}>Score Impact: {issue.configScore}</li>
-                                            <li key={this.getKey()}>Criticality: {issue.criticality}</li>
-                                        </ul>
-                                    );
-                                }))
-                                : (null)
-                            }
-
-                            <h4>Security</h4>
-                            {/** Show score out of 25 and progress bar here */}
-                            <p>Score: {item.security.grade} / 25 </p>
-                            <p>Number of issues: {item.security.issueCounter}</p>
-                            <p>Criticality: {item.security.criticality}</p>
-                            { (item.security.issueCounter !== 0)
-                                ? (item.security.issues.map((issue) => {
-                                    return (
-                                        <ul>
-                                            <li key={this.getKey()}>Description: {issue.message}</li>
-                                            <li key={this.getKey()}>Score Impact: {issue.configScore}</li>
-                                            <li key={this.getKey()}>Criticality: {issue.criticality}</li>
-                                        </ul>
-                                    );
-                                }))
-                                : (null)
-                            }
-
-                            <h4>Data Validation</h4>
-                            {/** Show score out of 50 and progress bar here */}
-                            <p>Score: {item.data.grade} / 50 </p>
-                            <p>Number of issues: {item.data.issueCounter}</p>
-                            <p>Criticality: {item.data.criticality}</p>
-                            { (item.data.issueCounter !== 0)
-                                ? (item.data.issues.map((issue) => {
-                                    return (
-                                        <ul>
-                                            <li key={this.getKey()}>Description: {issue.message}</li>
-                                            <li key={this.getKey()}>Score Impact: {issue.configScore}</li>
-                                            <li key={this.getKey()}>Criticality: {issue.criticality}</li>
-                                        </ul>
-                                    );
-                                }))
-                                : (null)
-                            }
+                            <p>Overall Criticality: {reportObject.criticality}</p>
+                            <p>Overall Grade: {overallGrade}</p>
+                            <p>Number of Errors: {numErrors}</p>
                         </div>
-                    );
-                })}
+                        <div>
+                            <h1>OpenAPI Format Requirements</h1>
+                            <p>Number of Issues: {reportObject.validation.issueCounter}</p>
+                            <p>Grade: {reportObject.validation.grade} / 25</p>
+                            <p>Criticality: {reportObject.validation.criticality}</p>
+                            <p>{
+                                (reportObject.validation.issueCounter !== 0) ?
+                                    (reportObject.validation.issues.map((issue) => {
+                                        return (
+                                            <ul>
+                                                <li key={this.getKey()}>Description: {issue.message}</li>
+                                                <li key={this.getKey()}>Score Impact: {issue.score}</li>
+                                            </ul>
+                                        );
+                                    })) : (null)
+                            }
+                            </p>
+                        </div>
+                        <div>
+                            <h1>Security</h1>
+                            <p>Number of Issues: {reportObject.security.issueCounter}</p>
+                            <p>Grade: {reportObject.security.grade} / 25</p>
+                            <p>Criticality: {reportObject.security.criticality}</p>
+                            <p>{
+                                (reportObject.security.issueCounter !== 0) ?
+                                    (reportObject.security.issues.map((issue) => {
+                                        return (
+                                            <ul>
+                                                <li key={this.getKey()}>Description: {issue.message}</li>
+                                                <li key={this.getKey()}>Score Impact: {issue.score}</li>
+                                            </ul>
+                                        );
+                                    })) : (null)
+                            }
+                            </p>
+                        </div>
+                        <div>
+                            <h1>Data Validation</h1>
+                            <p>Number of Issues: {reportObject.data.issueCounter}</p>
+                            <p>Grade: {reportObject.data.grade} / 50</p>
+                            <p>Criticality: {reportObject.data.criticality}</p>
+                            <p>{
+                                (reportObject.data.issueCounter !== 0) ?
+                                    (reportObject.data.issues.map((issue) => {
+                                        return (
+                                            <ul>
+                                                <li key={this.getKey()}>Description: {issue.message}</li>
+                                                <li key={this.getKey()}>Score Impact: {issue.score}</li>
+                                            </ul>
+                                        );
+                                    })) : (null)
+                            }
+                            </p>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
