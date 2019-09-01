@@ -1,3 +1,4 @@
+const APP_CONTEXT = '/store-new';
 const Configurations = {
     themes: {
         light: {
@@ -19,9 +20,9 @@ const Configurations = {
                     paper: '#ffffff',
                     appBar: '#1d344f',
                     leftMenu: '#1a1f2f',
-                    leftMenuActive: '#000000',
+                    leftMenuActive: '#254061',
                     drawer: '#1a1f2f',
-                    activeMenuItem: '#000000',
+                    activeMenuItem: '#254061',
                 },
             },
             typography: {
@@ -63,6 +64,8 @@ const Configurations = {
                 thumbnail: {
                     width: 240,
                     contentPictureOverlap: false,
+                    iconColor: '#ffffff',
+                    listViewIconSize: 20,
                     contentBackgroundColor: 'rgba(239, 239, 239, 0.5)',
                     defaultApiImage: false, // put false to render the system generated and user provided image.
                     // And put a string to render a custom image
@@ -75,6 +78,13 @@ const Configurations = {
                         { prime: 0xff9700ff, sub: 0xffeb3cff },
                         { prime: 0xff9700ff, sub: 0xfe5722ff },
                     ],
+                    document: {
+                        icon: 'library_books',
+                        backgrounds: {
+                            prime: 0xcff7ffff,
+                            sub: 0xe2fff7ff,
+                        },
+                    },
                 },
                 landingPage: {
                     active: true,
@@ -140,5 +150,8 @@ const Configurations = {
                 },
             },
         },
+    },
+    app: {
+        context: APP_CONTEXT,
     },
 };

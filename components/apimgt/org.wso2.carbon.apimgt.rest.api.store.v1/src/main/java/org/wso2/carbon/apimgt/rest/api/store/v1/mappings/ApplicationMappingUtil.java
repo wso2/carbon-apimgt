@@ -53,10 +53,11 @@ public class ApplicationMappingUtil {
         applicationDTO.setAttributes(applicationAttributes);
         applicationDTO.setName(application.getName());
         applicationDTO.setStatus(application.getStatus());
+        applicationDTO.setOwner(application.getOwner());
+
         if (StringUtils.isNotEmpty(application.getGroupId())) {
             applicationDTO.setGroups(Arrays.asList(application.getGroupId().split(",")));
         }
-        applicationDTO.setSubscriber(application.getSubscriber().getName());
         applicationDTO.setTokenType(ApplicationDTO.TokenTypeEnum.OAUTH);
         applicationDTO.setSubscriptionCount(application.getSubscriptionCount());
         if (StringUtils.isNotEmpty(application.getTokenType()) && !APIConstants.DEFAULT_TOKEN_TYPE
@@ -161,7 +162,6 @@ public class ApplicationMappingUtil {
         }
         Map<String,String> applicationAttributes = application.getApplicationAttributes();
         applicationInfoDTO.setAttributes(applicationAttributes);
-        applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
         applicationInfoDTO.setSubscriptionCount(application.getSubscriptionCount());
         applicationInfoDTO.setOwner(application.getOwner());
         return applicationInfoDTO;

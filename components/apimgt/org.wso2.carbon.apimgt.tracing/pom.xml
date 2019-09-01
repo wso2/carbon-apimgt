@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.5.62-SNAPSHOT</version>
+        <version>6.5.70-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -161,9 +161,9 @@
                         <Import-Package>
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
                             org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",
-                            org.osgi.framework,
-                            org.osgi.service.component,
                             org.wso2.carbon.utils.*,
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",					
                             org.wso2.carbon.apimgt.api.*; version="${carbon.apimgt.imp.pkg.version}"
                         </Import-Package>
                         <Export-Package>

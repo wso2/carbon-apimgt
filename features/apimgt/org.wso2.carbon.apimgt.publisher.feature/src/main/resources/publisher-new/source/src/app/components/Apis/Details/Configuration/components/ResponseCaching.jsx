@@ -26,6 +26,7 @@ import FormLabel from '@material-ui/core/FormLabel';
 import { FormattedMessage } from 'react-intl';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
+import TextField from '@material-ui/core/TextField';
 
 /**
  *
@@ -36,6 +37,7 @@ import HelpOutline from '@material-ui/icons/HelpOutline';
  */
 export default function ResponseCaching(props) {
     const { api, configDispatcher } = props;
+    const isResponseCachingEnabled = api.responseCachingEnabled;
     return (
         <Grid container spacing={1} alignItems='flex-start'>
             <Grid item>
@@ -49,10 +51,10 @@ export default function ResponseCaching(props) {
                     <FormControlLabel
                         control={
                             <Switch
-                                checked={api.responseCaching}
+                                checked={api.responseCachingEnabled}
                                 onChange={({ target: { checked } }) =>
                                     configDispatcher({
-                                        action: 'responseCaching',
+                                        action: 'responseCachingEnabled',
                                         value: checked,
                                     })
                                 }
@@ -79,6 +81,26 @@ export default function ResponseCaching(props) {
                 >
                     <HelpOutline />
                 </Tooltip>
+            </Grid>
+            <Grid item>
+                {isResponseCachingEnabled && (
+                    <TextField
+                        value={api.cacheTimeout}
+                        onChange={({ target: { value } }) =>
+                            configDispatcher({
+                                action: 'cacheTimeout',
+                                value,
+                            })
+                        }
+                        margin='normal'
+                        helperText={
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.Configuration.cache.timeout'
+                                defaultMessage='Cache Timeout (seconds)'
+                            />
+                        }
+                    />
+                )}
             </Grid>
         </Grid>
     );

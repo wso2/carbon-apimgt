@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.events.APIMOAuthEventInterceptor;
+import org.wso2.carbon.apimgt.keymgt.handlers.SessionDataPublisherImpl;
 import org.wso2.carbon.apimgt.keymgt.issuers.AbstractScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.issuers.PermissionBasedScopeIssuer;
 import org.wso2.carbon.apimgt.keymgt.issuers.RoleBasedScopesIssuer;
@@ -35,6 +36,7 @@ import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
+import org.wso2.carbon.identity.application.authentication.framework.AuthenticationDataPublisher;
 import org.wso2.carbon.identity.oauth.event.OAuthEventInterceptor;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.listener.UserOperationEventListener;
@@ -84,6 +86,14 @@ public class APIKeyMgtServiceComponent {
                 log.debug("Key Manager OAuth Event Interceptor is enabled.");
             } else {
                 log.debug("Token Revocation Notifier Feature is disabled.");
+            }
+            // registering logout token revoke listener
+            try {
+                SessionDataPublisherImpl dataPublisher = new SessionDataPublisherImpl();
+                ctxt.getBundleContext().registerService(AuthenticationDataPublisher.class.getName(), dataPublisher, null);
+                log.debug("SessionDataPublisherImpl bundle is activated");
+            } catch (Throwable e) {
+                log.error("SessionDataPublisherImpl bundle activation Failed", e);
             }
             // loading white listed scopes
             List<String> whitelist = null;

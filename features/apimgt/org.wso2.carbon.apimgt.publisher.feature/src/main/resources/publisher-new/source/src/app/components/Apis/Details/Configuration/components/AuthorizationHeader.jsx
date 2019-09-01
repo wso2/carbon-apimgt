@@ -35,7 +35,7 @@ export default function AuthorizationHeader(props) {
     const { api, configDispatcher } = props;
     return (
         <Grid container spacing={1} alignItems='center'>
-            <Grid item>
+            <Grid item xs={11}>
                 <TextField
                     id='outlined-name'
                     label={
@@ -48,9 +48,10 @@ export default function AuthorizationHeader(props) {
                     margin='normal'
                     variant='outlined'
                     onChange={({ target: { value } }) => configDispatcher({ action: 'authorizationHeader', value })}
+                    style={{ display: 'flex' }}
                 />
             </Grid>
-            <Grid item>
+            <Grid item xs={1}>
                 <Tooltip
                     title={
                         <FormattedMessage

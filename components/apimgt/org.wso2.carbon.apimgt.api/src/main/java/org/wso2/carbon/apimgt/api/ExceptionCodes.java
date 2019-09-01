@@ -154,6 +154,9 @@ public enum ExceptionCodes implements ErrorHandler {
     UNSUPPORTED_WSDL_EXTENSIBILITY_ELEMENT(900678, "Invalid WSDL", 400, "WSDL extensibility element not supported"),
     ERROR_WHILE_INITIALIZING_WSDL_FACTORY(900679, "Internal WSDL error", 500, "Error while initializing WSDL factory"),
     ERROR_WHILE_CREATING_WSDL_ARCHIVE(900680, "Internal WSDL error", 500, "Error while creating WSDL archive"),
+    NO_WSDL_FOUND_IN_WSDL_ARCHIVE(900681, "Invalid WSDL Archive", 400, "No valid WSDLs found in the provided WSDL archive"),
+    CONTENT_NOT_RECOGNIZED_AS_WSDL(900682, "Invalid WSDL Content", 400, "Provided content is not recognized as a WSDL"),
+    URL_NOT_RECOGNIZED_AS_WSDL(900683, "Invalid WSDL URL", 400, "Provided URL is not recognized as a WSDL"),
 
 
     //OpenAPI/Swagger related codes [900750 900???)

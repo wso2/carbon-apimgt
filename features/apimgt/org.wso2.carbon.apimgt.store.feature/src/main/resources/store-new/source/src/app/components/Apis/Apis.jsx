@@ -45,6 +45,11 @@ function Apis() {
                     <CommonListing {...props} apiType={CONSTS.API_PRODUCT_TYPE} />)}
             />
             <Route
+                path='/apis/search'
+                render={props => (
+                    <CommonListing {...props} apiType={CONSTS.API_TYPE} />)}
+            />
+            <Route
                 path='/apis/:api_uuid/'
                 render={props => (
                     <Details {...props} apiType={CONSTS.API_TYPE} />)}

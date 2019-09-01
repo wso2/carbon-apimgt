@@ -31,6 +31,7 @@ import Grid from '@material-ui/core/Grid';
 import classNames from 'classnames';
 import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = theme => ({
     root: {
@@ -116,7 +117,9 @@ class CreateScope extends React.Component {
      * @memberof Scopes
      */
     addScope() {
-        const { intl, api } = this.props;
+        const {
+            intl, api, history,
+        } = this.props;
         if (this.validateScopeName('name', this.state.apiScope.name)) {
             // return status of the validation
             return;
@@ -126,24 +129,18 @@ class CreateScope extends React.Component {
             type: 'role',
             values: this.state.roles,
         };
-
         const scopes = api.scopes.map((aScope) => { return aScope; });
         scopes.push(scope);
         const updateProperties = { scopes };
         const promisedApiUpdate = api.update(updateProperties);
-        promisedApiUpdate.then((response) => {
-            // if (response.status !== 201) {
-            //     Alert.info(intl.formatMessage({
-            //         id: 'Apis.Details.Scopes.CreateScope.something.went.wrong.while.updating.the.scope',
-            //         defaultMessage: 'Something went wrong while adding a scope',
-            //     }));
-            //     return;
-            // }
+        promisedApiUpdate.then(() => {
             Alert.info(intl.formatMessage({
                 id: 'Apis.Details.Scopes.CreateScope.scope.added.successfully',
                 defaultMessage: 'Scope added successfully',
             }));
             const { apiScopes } = this.state;
+            const redirectURL = '/apis/' + api.id + '/scopes/';
+            history.push(redirectURL);
             this.setState({
                 apiScopes,
                 apiScope: {},
@@ -151,7 +148,6 @@ class CreateScope extends React.Component {
             });
         });
         promisedApiUpdate.catch((error) => {
-            console.log(error);
             const { response } = error;
             if (response.body) {
                 const { description } = response.body;
@@ -345,6 +341,7 @@ CreateScope.propTypes = {
     api: PropTypes.shape({
         id: PropTypes.string,
     }).isRequired,
+    history: PropTypes.shape({ push: PropTypes.func }).isRequired,
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
@@ -353,4 +350,4 @@ CreateScope.defaultProps = {
     match: { params: {} },
 };
 
-export default injectIntl(withRouter(withStyles(styles)(CreateScope)));
+export default withAPI(injectIntl(withRouter(withStyles(styles)(CreateScope))));

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import cloneDeep from 'lodash.clonedeep';
+
 /**
  * Utility method to get the endpoint property name based on the given endpoint type and category.
  *
@@ -85,8 +87,6 @@ function getEndpointTemplateByType(endpointType, isAddressEndpoint, currentEndpo
         tmpEndpointConfig.failOver = 'False';
     } else {
         tmpEndpointConfig.endpoint_type = isAddressEndpoint === true ? 'address' : endpointType;
-        tmpEndpointConfig.production_failovers = null;
-        tmpEndpointConfig.sandbox_failovers = null;
         tmpEndpointConfig.production_endpoints = Array.isArray(currentEndpointConfig.production_endpoints) ?
             currentEndpointConfig.production_endpoints[0] : currentEndpointConfig.production_endpoints;
         tmpEndpointConfig.sandbox_endpoints =
@@ -97,8 +97,14 @@ function getEndpointTemplateByType(endpointType, isAddressEndpoint, currentEndpo
     return tmpEndpointConfig;
 }
 
+/**
+ * Returns all the endpoints as a list.
+ *
+ * @param {object} endpointConfig The endpoint config object from the api.
+ * @return {array} The list of endpoints.
+ * */
 function endpointsToList(endpointConfig) {
-    const config = JSON.parse(JSON.stringify(endpointConfig));
+    const config = cloneDeep(endpointConfig);
     const endpoints = [];
 
     if (Array.isArray(config.production_endpoints)) {
@@ -117,9 +123,36 @@ function endpointsToList(endpointConfig) {
         endpoints.push(...config.sandbox_failovers);
         endpoints.push(...config.production_failovers);
     }
-
-    console.log('1', endpoints);
     return endpoints;
 }
 
-export { getEndpointTypeProperty, mergeEndpoints, getEndpointTemplateByType, endpointsToList };
+/**
+ * Returns an endpoint config object template based on the implementation method.
+ * Eg: Managed, Prototyped.
+ *
+ * @param {string} implementationType The endpoint implementation type.
+ * @return {object} The endpoint template.
+ * */
+function getEndpointConfigByImpl(implementationType) {
+    const tmpEndpointConfig = {};
+    if (implementationType === 'PROTOTYPED') {
+        tmpEndpointConfig.endpoint_type = 'http';
+        tmpEndpointConfig.implementation_status = 'prototyped';
+        tmpEndpointConfig.production_endpoints = { config: null, url: 'http://localhost' };
+        tmpEndpointConfig.sandbox_endpoints = { config: null, url: 'http://localhost' };
+    } else {
+        tmpEndpointConfig.endpoint_type = 'http';
+        tmpEndpointConfig.production_endpoints = { url: 'http://myservice/resource' };
+        tmpEndpointConfig.sandbox_endpoints = { url: 'http://myservice/resource' };
+        tmpEndpointConfig.failOver = 'False';
+    }
+    return tmpEndpointConfig;
+}
+
+export {
+    getEndpointTypeProperty,
+    mergeEndpoints,
+    getEndpointTemplateByType,
+    endpointsToList,
+    getEndpointConfigByImpl,
+};

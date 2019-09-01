@@ -27,6 +27,7 @@ import {
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import cloneDeep from 'lodash.clonedeep';
 
 import EndpointListing from './EndpointListing';
 import { getEndpointTemplateByType, getEndpointTypeProperty } from './endpointUtils';
@@ -101,7 +102,7 @@ const styles = theme => ({
 });
 
 const endpointTypes = [{ key: 'http', value: 'HTTP/REST Endpoint' },
-    { key: 'address', value: 'HTTP/SOAP Endpoint' }];
+    { key: 'address', value: 'HTTP/SOAP Endpoint' }, { key: 'default', value: 'Dynamic Endpoints' }];
 
 /**
  * The endpoint overview component. This component holds the views of endpoint creation and configuration.
@@ -136,6 +137,8 @@ function EndpointOverview(props) {
             return endpointTypes[0];
         } else if (type === 'address') {
             return endpointTypes[1];
+        } else if (type === 'default') {
+            return endpointTypes[2];
         } else {
             const prodEndpoints = endpointConfig.production_endpoints;
             if (Array.isArray(prodEndpoints)) {
@@ -171,7 +174,7 @@ function EndpointOverview(props) {
     const editEndpoint = (index, category, url) => {
         let modifiedEndpoint = null;
         // Make a copy of the endpoint config.
-        const endpointConfigCopy = JSON.parse(JSON.stringify(epConfig));
+        const endpointConfigCopy = cloneDeep(epConfig);
 
         /*
         * If the index > 0, it means that the endpoint is load balance or fail over.
@@ -218,7 +221,7 @@ function EndpointOverview(props) {
      * @param {string} newURL The url of the new endpoint.
      * */
     const addEndpoint = (category, type, newURL) => {
-        const endpointConfigCopy = JSON.parse(JSON.stringify(epConfig));
+        const endpointConfigCopy = cloneDeep(epConfig);
         let endpointTemplate = {};
         if (endpointType.key === 'address' || type === 'failover') {
             endpointTemplate = {
@@ -277,11 +280,15 @@ function EndpointOverview(props) {
             endpointTemplate = {
                 endpoint_type: 'address',
                 template_not_supported: false,
-                url: 'http://myservice/resource',
+                url: '',
+            };
+        } else if (selectedKey === 'default') {
+            endpointTemplate = {
+                url: 'default',
             };
         } else {
             endpointTemplate = {
-                url: 'http://myservice/resource',
+                url: '',
             };
         }
 
@@ -399,18 +406,18 @@ function EndpointOverview(props) {
     const saveAdvanceConfig = (advanceConfig) => {
         const endpointConfigProperty =
             getEndpointTypeProperty(advanceConfigOptions.type, advanceConfigOptions.category);
-        const endpoints = epConfig[endpointConfigProperty];
-        if (Array.isArray(endpoints)) {
+        const selectedEndpoints = cloneDeep(epConfig[endpointConfigProperty]);
+        if (Array.isArray(selectedEndpoints)) {
             if (advanceConfigOptions.type === 'failover') {
-                endpoints[advanceConfigOptions.index - 1].config = advanceConfig;
+                selectedEndpoints[advanceConfigOptions.index - 1].config = advanceConfig;
             } else {
-                endpoints[advanceConfigOptions.index].config = advanceConfig;
+                selectedEndpoints[advanceConfigOptions.index].config = advanceConfig;
             }
         } else {
-            endpoints.config = advanceConfig;
+            selectedEndpoints.config = advanceConfig;
         }
         setAdvancedConfigOptions({ open: false });
-        setEpConfig({ ...epConfig, [endpointConfigProperty]: endpoints });
+        setEpConfig({ ...epConfig, [endpointConfigProperty]: selectedEndpoints });
     };
 
     /**
@@ -420,13 +427,12 @@ function EndpointOverview(props) {
         setAdvancedConfigOptions({ open: false });
     };
 
-    console.log(api.type);
     return (
         <React.Fragment className={classes.overviewWrapper}>
             <Grid container xs={12}>
                 <Grid container item xs={12}>
                     <GeneralConfiguration
-                        epConfig={(JSON.parse(JSON.stringify(epConfig)))}
+                        epConfig={(cloneDeep(epConfig))}
                         endpointSecurityInfo={endpointSecurityInfo}
                         onChangeEndpointCategory={onChangeEndpointCategory}
                         handleToggleEndpointSecurity={handleToggleEndpointSecurity}
@@ -436,7 +442,7 @@ function EndpointOverview(props) {
                         apiType={api.type}
                     />
                 </Grid>
-                <Paper className={classes.endpointContainer}>
+                <Paper className={classes.endpointContainer} hidden={endpointType.key === 'default'}>
                     <Grid container item xs={12}>
                         <Grid item container xs spacing={2}>
                             <Grid xs className={classes.endpointsWrapperLeft}>
@@ -448,8 +454,9 @@ function EndpointOverview(props) {
                                 </Typography>
                                 <GenericEndpoint
                                     className={classes.defaultEndpointWrapper}
-                                    endpointURL={epConfig.production_endpoints.length > 0 ?
-                                        epConfig.production_endpoints[0].url : epConfig.production_endpoints.url}
+                                    endpointURL={
+                                        epConfig.production_endpoints && epConfig.production_endpoints.length > 0 ?
+                                            epConfig.production_endpoints[0].url : epConfig.production_endpoints.url}
                                     type=''
                                     index={0}
                                     category='production_endpoints'
@@ -468,7 +475,7 @@ function EndpointOverview(props) {
                                 </div>
                                 <GenericEndpoint
                                     className={classes.defaultEndpointWrapper}
-                                    endpointURL={epConfig.sandbox_endpoints.length > 0 ?
+                                    endpointURL={epConfig.sandbox_endpoints && epConfig.sandbox_endpoints.length > 0 ?
                                         epConfig.sandbox_endpoints[0].url : epConfig.sandbox_endpoints.url}
                                     type=''
                                     index={0}
@@ -552,8 +559,8 @@ function EndpointOverview(props) {
                                     />
                                 </Grid>
                             </Grid>
-                        </Grid>
-                        : <div /> }
+                            {/* TODO : Integrate the mediation sequence upload component here. */}
+                        </Grid> : <div /> }
                 </Paper>
             </Grid>
             <Dialog open={isLBConfigOpen}>

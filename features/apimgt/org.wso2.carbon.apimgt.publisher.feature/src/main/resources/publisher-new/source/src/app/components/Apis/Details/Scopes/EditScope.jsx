@@ -22,7 +22,6 @@ import APIPropertyField from 'AppComponents/Apis/Details/Overview/APIPropertyFie
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import TagsInput from 'react-tagsinput';
-import Api from 'AppData/api';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router';
@@ -84,14 +83,7 @@ class EditScope extends React.Component {
         });
         const updateProperties = { scopes };
         const promisedApiUpdate = api.update(updateProperties);
-        promisedApiUpdate.then((response) => {
-            // if (response.status !== 200) {
-            //     Alert.info(intl.formatMessage({
-            //         id: 'Apis.Details.Scopes.CreateScope.something.went.wrong.while.updating.the.scope',
-            //         defaultMessage: 'Something went wrong while updating the scope',
-            //     }));
-            //     return;
-            // }
+        promisedApiUpdate.then(() => {
             Alert.info(intl.formatMessage({
                 id: 'Apis.Details.Scopes.CreateScope.scope.updated.successfully',
                 defaultMessage: 'Scope updated successfully',

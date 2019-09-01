@@ -28,7 +28,6 @@ function Landing(props) {
     const listByTagActive = theme.custom.landingPage.listByTag.active;
     const parallaxActive = theme.custom.landingPage.parallax.active;
     const listByTagContent = theme.custom.landingPage.listByTag.content;
-
     return (
         <div className={classes.superRoot}>
             <div className={classes.root}>

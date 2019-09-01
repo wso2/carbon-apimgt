@@ -18,11 +18,6 @@
 
 package org.wso2.carbon.apimgt.hostobjects;
 
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.Swagger;
-import io.swagger.models.auth.SecuritySchemeDefinition;
-import io.swagger.parser.SwaggerParser;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -33,7 +28,6 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,12 +77,11 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.WSDLArchiveInfo;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.hostobjects.util.Json;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -112,7 +105,6 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
-import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -1002,7 +994,8 @@ public class APIProviderHostObject extends ScriptableObject {
             wsdlFile = (FileHostObject) apiData.get(APIConstants.WSDL_FILE, apiData);
             if (wsdlFile != null) {
                 if (wsdlFile.getName().endsWith(APIConstants.ZIP_FILE_EXTENSION)) {
-                    WSDLArchiveInfo archiveInfo = APIUtil.extractAndValidateWSDLArchive(wsdlFile.getInputStream());
+                    WSDLArchiveInfo archiveInfo = APIMWSDLReader
+                            .extractAndValidateWSDLArchive(wsdlFile.getInputStream()).getWsdlArchiveInfo();
                     if (archiveInfo != null) {
                         api.setWsdlArchivePath(archiveInfo.getAbsoluteFilePath());
                         if (log.isDebugEnabled()) {
@@ -5644,7 +5637,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return result;
     }
-    
+
     /**
      * Download microgateway usage report
      *

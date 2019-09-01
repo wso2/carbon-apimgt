@@ -131,7 +131,6 @@ class ApiThumb extends React.Component {
     componentDidMount() {
         const { apiType } = this.context;
         const { api } = this.props;
-
         let restApi = null;
 
         if (apiType === CONSTS.API_TYPE) {
@@ -203,6 +202,10 @@ class ApiThumb extends React.Component {
         const {
             name, version, context, provider,
         } = api;
+
+        if (!api.lifeCycleStatus) {
+            api.lifeCycleStatus = api.status;
+        }
         const imageWidth = thumbnail.width;
         const defaultImage = thumbnail.defaultApiImage;
 

@@ -125,8 +125,20 @@ class Credentials extends React.Component {
         } else {
             updateSubscriptionData(this.updateData);
         }
+        const { history: { location: {state} }} = this.props;
+        if(state) {
+            const {openWizard} = state;
+            if(openWizard) {
+                this.setState({wizardOn: true, openNew: true});
+                this.props.history.replace({
+                    pathname: this.props.location.pathname,
+                    state: {}
+                });
+            }
+        }
+            
     }
-
+    
     updateData = () => {
         const { api, applicationsAvailable } = this.context;
         const { subscriptionRequest } = this.state;
@@ -160,12 +172,12 @@ class Credentials extends React.Component {
      * @memberof Credentials
      */
     handleSubscribe = () => {
-        const { updateSubscriptionData } = this.context;
+        const { updateSubscriptionData, apiType } = this.context;
         const { subscriptionRequest } = this.state;
         const { intl } = this.props;
         const api = new Api();
         api.subscribe(subscriptionRequest.apiId, subscriptionRequest.applicationId,
-            subscriptionRequest.throttlingPolicy)
+            subscriptionRequest.throttlingPolicy, apiType)
             .then((response) => {
                 console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
                 Alert.info(intl.formatMessage({

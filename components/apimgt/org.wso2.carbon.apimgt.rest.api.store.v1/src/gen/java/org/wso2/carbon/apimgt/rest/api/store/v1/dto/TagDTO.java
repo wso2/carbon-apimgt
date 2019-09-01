@@ -14,43 +14,41 @@ import javax.xml.bind.annotation.*;
 
 public class TagDTO   {
   
-    private String name = null;
-    private Integer weight = null;
+    private String value = null;
+    private Integer count = null;
 
   /**
    **/
-  public TagDTO name(String name) {
-    this.name = name;
+  public TagDTO value(String value) {
+    this.value = value;
     return this;
   }
 
   
-  @ApiModelProperty(example = "tag1", required = true, value = "")
-  @JsonProperty("name")
-  @NotNull
-  public String getName() {
-    return name;
+  @ApiModelProperty(example = "tag1", value = "")
+  @JsonProperty("value")
+  public String getValue() {
+    return value;
   }
-  public void setName(String name) {
-    this.name = name;
+  public void setValue(String value) {
+    this.value = value;
   }
 
   /**
    **/
-  public TagDTO weight(Integer weight) {
-    this.weight = weight;
+  public TagDTO count(Integer count) {
+    this.count = count;
     return this;
   }
 
   
-  @ApiModelProperty(example = "5", required = true, value = "")
-  @JsonProperty("weight")
-  @NotNull
-  public Integer getWeight() {
-    return weight;
+  @ApiModelProperty(example = "5", value = "")
+  @JsonProperty("count")
+  public Integer getCount() {
+    return count;
   }
-  public void setWeight(Integer weight) {
-    this.weight = weight;
+  public void setCount(Integer count) {
+    this.count = count;
   }
 
 
@@ -63,13 +61,13 @@ public class TagDTO   {
       return false;
     }
     TagDTO tag = (TagDTO) o;
-    return Objects.equals(name, tag.name) &&
-        Objects.equals(weight, tag.weight);
+    return Objects.equals(value, tag.value) &&
+        Objects.equals(count, tag.count);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, weight);
+    return Objects.hash(value, count);
   }
 
   @Override
@@ -77,8 +75,8 @@ public class TagDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class TagDTO {\n");
     
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    weight: ").append(toIndentedString(weight)).append("\n");
+    sb.append("    value: ").append(toIndentedString(value)).append("\n");
+    sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.TenantsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.TenantsApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -47,7 +48,7 @@ TenantsApiService delegate = new TenantsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Tenant names returned. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested application does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response tenantsGet( @ApiParam(value = "The state represents the current state of the tenant  Supported states are [ active, inactive] ", allowableValues="active, inactive", defaultValue="active") @DefaultValue("active") @QueryParam("state") String state,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) {
+    public Response tenantsGet( @ApiParam(value = "The state represents the current state of the tenant  Supported states are [ active, inactive] ", allowableValues="active, inactive", defaultValue="active") @DefaultValue("active") @QueryParam("state") String state,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
         return delegate.tenantsGet(state, limit, offset, securityContext);
     }
 }

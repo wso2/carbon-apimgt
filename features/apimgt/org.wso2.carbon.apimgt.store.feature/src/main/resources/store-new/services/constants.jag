@@ -27,4 +27,5 @@ var REVOKE_URL_SUFFIX = "/oauth2/revoke";
 var LOGIN_CALLBACK_URL_SUFFIX = "/services/auth/callback/login";
 var LOGOUT_CALLBACK_URL_SUFFIX = "/services/auth/callback/logout"
 
+var STORE_CLIENT_APP_NAME = "admin_store";
 %>

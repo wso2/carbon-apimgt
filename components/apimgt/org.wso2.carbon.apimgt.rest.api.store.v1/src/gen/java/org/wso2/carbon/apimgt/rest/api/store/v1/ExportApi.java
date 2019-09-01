@@ -4,6 +4,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ExportApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.ExportApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -49,7 +50,7 @@ ExportApiService delegate = new ExportApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. Requested Application does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response exportApplicationsGet( @NotNull @ApiParam(value = "Application Search Query ",required=true)  @QueryParam("appId") String appId) {
+    public Response exportApplicationsGet( @NotNull @ApiParam(value = "Application Search Query ",required=true)  @QueryParam("appId") String appId) throws APIManagementException{
         return delegate.exportApplicationsGet(appId, securityContext);
     }
 }

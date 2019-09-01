@@ -387,7 +387,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
 
         if (fallbackToV2) {
             SwaggerParser parser = new SwaggerParser();
-            SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(apiDefinition, null, false);
+            SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(apiDefinition);
             if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
                 for (String message : parseAttemptForV2.getMessages()) {
                     ErrorItem errorItem = addErrorToValidationResponse(validationResponse, message);

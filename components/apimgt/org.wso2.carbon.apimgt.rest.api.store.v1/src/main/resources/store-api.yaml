@@ -2229,6 +2229,7 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/applicationId-Q'
+        - $ref: '#/parameters/apiType-Q'
         - $ref: '#/parameters/groupId'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/limit'
@@ -3943,6 +3944,15 @@ parameters:
       **API ID** consisting of the **UUID** of the API.
     type: string
 
+# API Type
+# Specified as part of the query string
+  apiType-Q:
+    name: apiType
+    in: query
+    description: |
+      **API TYPE** Identifies the type API(API or API_PRODUCT).
+    type: string
+
 # SDK language
   language:
     name: language
@@ -4444,6 +4454,12 @@ definitions:
       thumbnailUri:
         type: string
         example: /api-products/01234567-0123-0123-0123-012345678901/thumbnail
+      throttlingPolicies:
+        type: array
+        description: The subscription tiers selected for the particular API product
+        items:
+          type: string
+        example: ["Unlimited"]
 
 #-----------------------------------------------------
 # The API resource
@@ -4558,11 +4574,6 @@ definitions:
       name:
         type: string
         example: CalculatorApp
-      subscriber:
-        description: |
-          If subscriber is not given user invoking the API will be taken as the subscriber.
-        type: string
-        example: admin
       throttlingPolicy:
         type: string
         example: Unlimited
@@ -4625,9 +4636,6 @@ definitions:
       name:
         type: string
         example: CalculatorApp
-      subscriber:
-        type: string
-        example: admin
       throttlingPolicy:
         type: string
         example: Unlimited
@@ -4855,8 +4863,8 @@ definitions:
       type:
         type: string
         enum:
-          - api
-          - apiProduct
+          - API
+          - API_PRODUCT
       status:
         type: string
         enum:
@@ -4877,10 +4885,10 @@ definitions:
       - name
       - weight
     properties:
-      name:
+      value:
         type: string
         example: tag1
-      weight:
+      count:
         type: integer
         example: 5
 
@@ -5506,6 +5514,9 @@ definitions:
         items:
           type: string
       applicationSharingEnabled:
+        type: boolean
+        default: false
+      mapExistingAuthApps:
         type: boolean
         default: false
 

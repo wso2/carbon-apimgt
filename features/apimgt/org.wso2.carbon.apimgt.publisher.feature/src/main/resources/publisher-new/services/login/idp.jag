@@ -45,30 +45,40 @@
     var SystemApplicationDAO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
     var systemApplicationDAO = new SystemApplicationDAO();
     var clientId;
-    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_publisher");
+    systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME);
 
+    var lock = SystemApplicationDAO.getLock();
     if (systemApplicationDTO !== null) {
         clientId = systemApplicationDTO.getConsumerKey();
     } else {
-        var dcrRequestData = {
-            "callbackUrl": callbackUrl,
-            "clientName": "publisher",
-            "owner": "admin",
-            "grantType": "authorization_code refresh_token",
-            "saasApp": true
-        };
+        try {
+            lock.acquire();
+            systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication(PUBLISHER_CLIENT_APP_NAME);
+            if (systemApplicationDTO == null) {
+                var dcrRequestData = {
+                    "callbackUrl": callbackUrl,
+                    "clientName": PUBLISHER_CLIENT_APP_NAME,
+                    "owner": String(utils.getAdminUsername()),
+                    "grantType": "authorization_code refresh_token",
+                    "saasApp": true
+                };
 
-        var result = post(dcrUrl, JSON.stringify(dcrRequestData), {
-            "Authorization": authorizationHeader,
-            "Content-Type": "application/json"
-        }, "json");
-        clientId = result.data.clientId;
-        var clientSecret = result.data.clientSecret;
+                var result = post(dcrUrl, JSON.stringify(dcrRequestData), {
+                    "Authorization": authorizationHeader,
+                    "Content-Type": "application/json"
+                }, "json");
+                clientId = result.data.clientId;
+                var clientSecret = result.data.clientSecret;
 
-        var addApplicationKey = systemApplicationDAO.addApplicationKey("admin_publisher", clientId, clientSecret);
-        if (!addApplicationKey) {
-            log.error("Error while persisting application information in system application DB table!!");
-            log.error("Client ID = " + clientId);
+                var addApplicationKey = systemApplicationDAO
+                                                .addApplicationKey(PUBLISHER_CLIENT_APP_NAME, clientId, clientSecret);
+                if (!addApplicationKey) {
+                    log.error("Error while persisting application information in system application DB table!!");
+                    log.error("Client ID = " + clientId);
+                }
+            }
+        } finally {
+            lock.release();
         }
     }
 

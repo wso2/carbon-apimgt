@@ -15,6 +15,7 @@
  */
 
 
+import CONSTS from 'AppData/Constants';
 import APIClientFactory from './APIClientFactory';
 import Resource from './Resource';
 import Utils from './Utils';
@@ -257,7 +258,7 @@ export default class API extends Resource {
      */
     getAllApplicationAttributes() {
         return this.client.then((client) => {
-            return client.apis['Settings'].get_settings_application_attributes(this._requestMetaData());
+            return client.apis.Settings.get_settings_application_attributes(this._requestMetaData());
         });
     }
 
@@ -319,7 +320,7 @@ export default class API extends Resource {
      */
     getAllComments(apiId, callback = null) {
         const promiseGet = this.client.then((client) => {
-            return client.apis['Comment (Collection)'].get_apis__apiId__comments({ apiId }, this._requestMetaData());
+            return client.apis['Comments'].get_apis__apiId__comments({ apiId }, this._requestMetaData());
         }).catch((error) => {
             console.error(error);
         });
@@ -509,17 +510,26 @@ export default class API extends Resource {
 
     /**
      * Create a subscription
-     * @param apiId id of the API that needs to be subscribed
-     * @param applicationId id of the application that needs to be subscribed
-     * @param policy throttle policy applicable for the subscription
-     * @param callback callback url
-     * @param apiType API type
+     * @param {string} apiId id of the API that needs to be subscribed
+     * @param {string} applicationId id of the application that needs to be subscribed
+     * @param {string} policy throttle policy applicable for the subscription
+     * @param {string} apiType API type
+     * @param {function} callback callback url
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    subscribe(apiId, applicationId, policy, callback = null, apiType = 'API') {
+    subscribe(apiId, applicationId, policy, apiType = CONSTS.API_TYPE, callback = null) {
         const promiseCreateSubscription = this.client.then((client) => {
-            const subscriptionData = {
-                apiId, applicationId, throttlingPolicy: policy, type: apiType,
-            };
+            let subscriptionData = null;
+
+            if (apiType === CONSTS.API_TYPE) {
+                subscriptionData = {
+                    apiId, applicationId, throttlingPolicy: policy, type: apiType,
+                };
+            } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+                subscriptionData = {
+                    apiProductId: apiId, applicationId, throttlingPolicy: policy, type: apiType,
+                };
+            }
             const payload = { body: subscriptionData };
             return client.apis.Subscriptions.post_subscriptions(payload, { 'Content-Type': 'application/json' });
         });
@@ -602,6 +612,19 @@ export default class API extends Resource {
     }
 
     /**
+     * Get all tags
+     * @returns {promise} promise all tags of APIs
+     */
+    getAllTags() {
+        const promiseGet = this.client.then((client) => {
+            return client.apis.Tags.get_tags(this._requestMetaData());
+        }).catch((error) => {
+            console.error(error);
+        });
+        return promiseGet;
+    }
+
+    /**
      * Get the thumnail of an API
      *
      * @param id {string} UUID of the api
@@ -615,5 +638,17 @@ export default class API extends Resource {
         });
 
         return promised_getAPIThumbnail;
+    }
+
+    /**
+     * method to search apis and documents based on content
+     * @param {Object} params APIs, Documents filtering parameters i:e { "name": "MyBank API"}
+     * @returns {Promise} promise object return from SwaggerClient-js
+     * @memberof API
+     */
+    search(params) {
+        return this.client.then((client) => {
+            return client.apis['Unified Search'].get_search(params, Resource._requestMetaData());
+        });
     }
 }

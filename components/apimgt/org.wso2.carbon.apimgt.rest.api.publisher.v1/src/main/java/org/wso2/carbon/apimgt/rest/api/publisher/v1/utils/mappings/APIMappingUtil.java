@@ -48,6 +48,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeBindingsDTO;
@@ -131,7 +133,11 @@ public class APIMappingUtil {
         if (dto.isEnableSchemaValidation() != null) {
             model.setEnableSchemaValidation(dto.isEnableSchemaValidation());
         }
-        model.setResponseCache(dto.getResponseCaching());
+        if (dto.isResponseCachingEnabled() != null && dto.isResponseCachingEnabled()) {
+            model.setResponseCache(APIConstants.ENABLED);
+        } else {
+            model.setResponseCache(APIConstants.DISABLED);
+        }
         if (dto.getCacheTimeout() != null) {
             model.setCacheTimeout(dto.getCacheTimeout());
         } else {
@@ -594,7 +600,12 @@ public class APIMappingUtil {
 
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
-        dto.setResponseCaching(model.getResponseCache());
+        if (APIConstants.ENABLED.equals(model.getResponseCache())) {
+            dto.setResponseCachingEnabled(Boolean.TRUE);
+        } else {
+            dto.setResponseCachingEnabled(Boolean.FALSE);
+        }
+
         dto.setCacheTimeout(model.getCacheTimeout());
         try {
             JSONParser parser = new JSONParser();
@@ -722,6 +733,8 @@ public class APIMappingUtil {
             }
             dto.setAdditionalProperties(additionalPropertiesMap);
         }
+
+        dto.setEndpointImplementationType(APIDTO.EndpointImplementationTypeEnum.valueOf(model.getImplementation()));
 
         dto.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY.equals(model.getAccessControl()) ?
                 APIDTO.AccessControlEnum.RESTRICTED :
@@ -1251,6 +1264,16 @@ public class APIMappingUtil {
             dto.setDescription(handler.getErrorDescription());
             errorListItemDTOs.add(dto);
         }
+        return errorListItemDTOs;
+    }
+
+    public static List<ErrorListItemDTO> getErrorListItemsDTOsFromErrorHandler(ErrorHandler error) {
+        List<ErrorListItemDTO> errorListItemDTOs = new ArrayList<>();
+        ErrorListItemDTO dto = new ErrorListItemDTO();
+        dto.setCode(error.getErrorCode() + "");
+        dto.setMessage(error.getErrorMessage());
+        dto.setDescription(error.getErrorDescription());
+        errorListItemDTOs.add(dto);
         return errorListItemDTOs;
     }
 
@@ -1785,7 +1808,8 @@ public class APIMappingUtil {
                 URITemplate template = new URITemplate();
                 template.setHTTPVerb(resourceItem.getVerb());
                 template.setResourceURI(resourceItem.getTarget());
-                template.setUriTemplate(resourceItem.getAuthType());
+                template.setUriTemplate(resourceItem.getTarget());
+                template.setAuthType(resourceItem.getAuthType());
                 template.setThrottlingTier(resourceItem.getThrottlingPolicy());
 
                 APIProductResource resource = new APIProductResource();
@@ -1961,7 +1985,50 @@ public class APIMappingUtil {
         return product.getId();
     }
 
-        /**
+    /**
+     * Converts a WSDL validation response model to DTO
+     *
+     * @param validationResponse validation response model
+     * @return Converted WSDL validation response model to DTO
+     */
+    public static WSDLValidationResponseDTO fromWSDLValidationResponseToDTO(WSDLValidationResponse validationResponse) {
+        WSDLValidationResponseDTO wsdlValidationResponseDTO = new WSDLValidationResponseDTO();
+        WSDLInfo wsdlInfo;
+        if (validationResponse.isValid()) {
+            wsdlValidationResponseDTO.setIsValid(true);
+            wsdlInfo = validationResponse.getWsdlInfo();
+            WSDLValidationResponseWsdlInfoDTO wsdlInfoDTO = new WSDLValidationResponseWsdlInfoDTO();
+            wsdlInfoDTO.setVersion(wsdlInfo.getVersion());
+            List<WSDLValidationResponseWsdlInfoEndpointsDTO> endpointsDTOList =
+                    fromEndpointsMapToWSDLValidationResponseEndpointsDTO(wsdlInfo.getEndpoints());
+            wsdlInfoDTO.setEndpoints(endpointsDTOList);
+            wsdlValidationResponseDTO.setWsdlInfo(wsdlInfoDTO);
+        } else {
+            wsdlValidationResponseDTO.setIsValid(false);
+            wsdlValidationResponseDTO.setErrors(getErrorListItemsDTOsFromErrorHandler(validationResponse.getError()));
+        }
+        return wsdlValidationResponseDTO;
+    }
+
+    /**
+     * Converts the provided WSDL endpoint map to REST API DTO
+     *
+     * @param endpoints endpoint map
+     * @return converted map to DTO
+     */
+    private static List<WSDLValidationResponseWsdlInfoEndpointsDTO>
+            fromEndpointsMapToWSDLValidationResponseEndpointsDTO(Map<String, String> endpoints) {
+        List<WSDLValidationResponseWsdlInfoEndpointsDTO> endpointsDTOList = new ArrayList<>();
+        for (String endpointName: endpoints.keySet()) {
+            WSDLValidationResponseWsdlInfoEndpointsDTO endpointDTO = new WSDLValidationResponseWsdlInfoEndpointsDTO();
+            endpointDTO.setName(endpointName);
+            endpointDTO.setLocation(endpoints.get(endpointName));
+            endpointsDTOList.add(endpointDTO);
+        }
+        return endpointsDTOList;
+    }
+
+    /**
      * Extract scopes from the swagger
      *
      * @param swagger swagger document

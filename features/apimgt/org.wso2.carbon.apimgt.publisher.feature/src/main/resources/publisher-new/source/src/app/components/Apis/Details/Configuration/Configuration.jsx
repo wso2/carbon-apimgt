@@ -26,6 +26,8 @@ import Button from '@material-ui/core/Button';
 import { FormattedMessage } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Alert from 'AppComponents/Shared/Alert';
+import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
@@ -52,6 +54,40 @@ const useStyles = makeStyles(theme => ({
     root: {
         padding: theme.spacing(3, 2),
     },
+    titleWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: theme.spacing.unit * 3,
+    },
+    mainTitle: {
+        paddingLeft: 0,
+    },
+    paper: {
+        padding: theme.spacing.unit * 3,
+    },
+    heading: {
+        fontSize: '1.5rem',
+        fontWeight: 100,
+        marginBottom: theme.spacing.unit * 3,
+    },
+    itemPadding: {
+        marginBottom: theme.spacing.unit * 3,
+    },
+    arrowForwardIcon: {
+        fontSize: 50,
+        color: '#ccc',
+        position: 'absolute',
+        top: 90,
+        right: -43,
+    },
+    arrowBackIcon: {
+        fontSize: 50,
+        color: '#ccc',
+        position: 'absolute',
+        top: 50,
+        right: -71,
+    },
 }));
 
 /**
@@ -68,7 +104,7 @@ function copyAPIConfig(api) {
         description: api.description,
         accessControl: api.accessControl,
         authorizationHeader: api.authorizationHeader,
-        responseCaching: api.responseCaching,
+        responseCachingEnabled: api.responseCachingEnabled,
         cacheTimeout: api.cacheTimeout,
         visibility: api.visibility,
         isDefaultVersion: api.isDefaultVersion,
@@ -109,7 +145,8 @@ export default function Configuration() {
             case 'description':
             case 'isDefaultVersion':
             case 'authorizationHeader':
-            case 'responseCaching':
+            case 'responseCachingEnabled':
+            case 'cacheTimeout':
             case 'enableSchemaValidation':
             case 'accessControl':
             case 'visibility':
@@ -156,13 +193,15 @@ export default function Configuration() {
                             newState[action].includes(API_SECURITY_BASIC_AUTH)
                         )
                     ) {
-                        const noMandatoryOAuthBasicAuth = newState[action].filter(schema => schema !== API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+                        const noMandatoryOAuthBasicAuth = newState[action]
+                            .filter(schema => schema !== API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
                         return {
                             ...newState,
                             [action]: noMandatoryOAuthBasicAuth,
                         };
                     } else if (!newState[action].includes(API_SECURITY_MUTUAL_SSL)) {
-                        const noMandatoryMutualSSL = newState[action].filter(schema => schema !== API_SECURITY_MUTUAL_SSL_MANDATORY);
+                        const noMandatoryMutualSSL = newState[action]
+                            .filter(schema => schema !== API_SECURITY_MUTUAL_SSL_MANDATORY);
                         return {
                             ...newState,
                             [action]: noMandatoryMutualSSL,
@@ -203,6 +242,7 @@ export default function Configuration() {
     const [isUpdating, setIsUpdating] = useState(false);
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
     const classes = useStyles();
+    const paperHeight = window.innerHeight - 200;
 
     /**
      *
@@ -220,93 +260,168 @@ export default function Configuration() {
     }
 
     return (
-        <Paper className={classes.root}>
-            <Typography variant='h4'>
-                <FormattedMessage
-                    id='Apis.Details.Configuration.Configuration.topic.header'
-                    defaultMessage='Configuration'
-                />
-            </Typography>
-
-            <Grid container>
-                <Grid item xs={12} md={2}>
-                    <ThumbnailView api={api} width={200} height={200} isEditable />
-                </Grid>
-                <Grid item xs={12} md={10}>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} md={9}>
-                            <Description api={apiConfig} configDispatcher={configDispatcher} />
-                        </Grid>
-
-                        <Grid item xs={12} md={9}>
-                            <ResponseCaching api={apiConfig} configDispatcher={configDispatcher} />
-                        </Grid>
-
-                        <Grid item xs={12} md={9}>
-                            <Transports api={apiConfig} configDispatcher={configDispatcher} />
-                        </Grid>
-
-                        <Grid item xs={12} md={9}>
-                            <DefaultVersion api={apiConfig} configDispatcher={configDispatcher} />
-                        </Grid>
-
-                        <Grid item xs={12} md={9}>
-                            <AuthorizationHeader api={apiConfig} configDispatcher={configDispatcher} />
-                        </Grid>
-
-                        <Grid item xs={12} md={9}>
-                            <AccessControl api={apiConfig} configDispatcher={configDispatcher} />
-                        </Grid>
-
-                        <Grid item xs={12} md={9}>
-                            <StoreVisibility api={apiConfig} configDispatcher={configDispatcher} />
-                        </Grid>
-
-                        <Grid item xs={12} md={9}>
-                            <APISecurity api={apiConfig} configDispatcher={configDispatcher} />
-                        </Grid>
-
-                        <Grid item xs={12} md={9}>
-                            <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />
-                        </Grid>
-
-                        <Grid item xs={12} md={9}>
-                            <CORSConfiguration api={apiConfig} configDispatcher={configDispatcher} />
-                        </Grid>
-
-                        <Grid item xs={12} md={9}>
-                            <Tags api={apiConfig} configDispatcher={configDispatcher} />
-                        </Grid>
-                    </Grid>
-                </Grid>
-                <Grid container direction='row' alignItems='flex-start' spacing={4}>
-                    <Grid item>
-                        <Button
-                            disabled={isUpdating}
-                            type='submit'
-                            variant='contained'
-                            color='primary'
-                            onClick={handleSave}
-                        >
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.Configuration.save'
-                                defaultMessage='Save'
-                            />
-                            {isUpdating && <CircularProgress size={15} />}
-                        </Button>
-                    </Grid>
-                    <Grid item>
-                        <Link to={'/apis/' + api.id + '/overview'}>
-                            <Button>
+        <React.Fragment>
+            <div className={classes.titleWrapper}>
+                <Typography variant='h4' align='left' className={classes.mainTitle}>
+                    <FormattedMessage
+                        id='Apis.Details.Configuration.Configuration.topic.header'
+                        defaultMessage='Configuration'
+                    />
+                </Typography>
+            </div>
+            {
+                // TODO:
+                // Move design configurations to a sub page
+            }
+            <div className={classes.contentWrapper}>
+                <Grid
+                    container
+                    direction='row'
+                    justify='space-around'
+                    alignItems='flex-start'
+                    spacing={8}
+                >
+                    <Grid item xs={4}>
+                        <Paper className={classes.paper} style={{ minHeight: paperHeight }}>
+                            <Typography className={classes.heading} variant='h6'>
                                 <FormattedMessage
-                                    id='Apis.Details.Configuration.Configuration.cancel'
-                                    defaultMessage='Cancel'
+                                    id='Apis.Details.Configuration.Configuration.section.design'
+                                    defaultMessage='Design'
                                 />
-                            </Button>
-                        </Link>
+                            </Typography>
+                            <Grid
+                                container
+                                direction='row'
+                                justify='space-around'
+                                alignItems='flex-start'
+                                spacing={1}
+                                style={{ marginBottom: 20 }}
+                            >
+                                <Grid item xs={12} md={4}>
+                                    <ThumbnailView api={api} width={100} height={100} isEditable />
+                                </Grid>
+                                <Grid item xs={12} md={8}>
+                                    <Description api={apiConfig} configDispatcher={configDispatcher} />
+                                </Grid>
+                            </Grid>
+                            <div className={classes.itemPadding}>
+                                <AccessControl
+                                    api={apiConfig}
+                                    configDispatcher={configDispatcher}
+                                />
+                            </div>
+                            <div className={classes.itemPadding}>
+                                <StoreVisibility
+                                    api={apiConfig}
+                                    configDispatcher={configDispatcher}
+                                />
+                            </div>
+                            <div className={classes.itemPadding}>
+                                <Tags api={apiConfig} configDispatcher={configDispatcher} />
+                            </div>
+                            <div className={classes.itemPadding}>
+                                <Grid
+                                    container
+                                    direction='row'
+                                >
+                                    <Grid item xs={12} md={6}>
+                                        <DefaultVersion api={apiConfig} configDispatcher={configDispatcher} />
+                                    </Grid>
+                                    <Grid item xs={12} md={6}>
+                                        <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />
+                                    </Grid>
+                                </Grid>
+                            </div>
+                            <div className={classes.itemPadding}>
+                                <Transports api={apiConfig} configDispatcher={configDispatcher} />
+                            </div>
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={4}>
+                        <Grid
+                            direction=' column'
+                            justify='space-between'
+                            alignItems='flex-start'
+                            spacing={6}
+                            style={{ minHeight: paperHeight }}
+                        >
+                            <Grid item xs={12} style={{ marginBottom: 30, position: 'relative' }}>
+                                <Paper className={classes.paper}>
+                                    <Typography className={classes.heading} variant='h6'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Configuration.Configuration.section.mediate'
+                                            defaultMessage='Mediate'
+                                        />
+                                    </Typography>
+                                    <CORSConfiguration api={apiConfig} configDispatcher={configDispatcher} />
+                                    <AuthorizationHeader api={apiConfig} configDispatcher={configDispatcher} />
+                                </Paper>
+                                <ArrowForwardIcon className={classes.arrowForwardIcon} />
+                            </Grid>
+                            {
+                                // TODO:
+                                // Add Mediation Policies
+                            }
+                            <Grid item xs={12} style={{ position: 'relative' }}>
+                                <Paper className={classes.paper}>
+                                    <Typography className={classes.heading} variant='h6'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Configuration.Configuration.section.response'
+                                            defaultMessage='Response'
+                                        />
+                                    </Typography>
+                                    <ResponseCaching api={apiConfig} configDispatcher={configDispatcher} />
+                                </Paper>
+                                <ArrowBackIcon className={classes.arrowBackIcon} />
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid item xs={4}>
+                        <Paper className={classes.paper} style={{ minHeight: paperHeight }}>
+                            <Typography className={classes.heading} variant='h6'>
+                                <FormattedMessage
+                                    id='Apis.Details.Configuration.Configuration.section.backend'
+                                    defaultMessage='Backend'
+                                />
+                            </Typography>
+                            {
+                                // TODO:
+                                // Add Subscription Tiers
+                            }
+                            <APISecurity api={apiConfig} configDispatcher={configDispatcher} />
+                        </Paper>
                     </Grid>
                 </Grid>
-            </Grid>
-        </Paper>
+                <Grid container>
+                    <Grid container direction='row' alignItems='flex-start' spacing={4} style={{ marginTop: 20 }}>
+                        <Grid item>
+                            <Button
+                                disabled={isUpdating}
+                                type='submit'
+                                variant='contained'
+                                color='primary'
+                                onClick={handleSave}
+                            >
+                                <FormattedMessage
+                                    id='Apis.Details.Configuration.Configuration.save'
+                                    defaultMessage='Save'
+                                />
+                                {isUpdating && <CircularProgress size={15} />}
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <Link to={'/apis/' + api.id + '/overview'}>
+                                <Button>
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.Configuration.cancel'
+                                        defaultMessage='Cancel'
+                                    />
+                                </Button>
+                            </Link>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </div>
+        </React.Fragment>
     );
 }

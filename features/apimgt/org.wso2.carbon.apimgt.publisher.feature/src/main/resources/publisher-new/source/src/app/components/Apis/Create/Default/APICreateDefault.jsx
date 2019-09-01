@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,171 +15,180 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { Component } from 'react';
-import 'react-toastify/dist/ReactToastify.min.css';
-import Button from '@material-ui/core/Button';
+import React, { useReducer, useState } from 'react';
+import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import { withStyles } from '@material-ui/core/styles';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
-import APIInputForm from 'AppComponents/Apis/Create/Components/APIInputForm';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
+import Button from '@material-ui/core/Button';
+import { Link } from 'react-router-dom';
+import { withRouter } from 'react-router';
+import Alert from 'AppComponents/Shared/Alert';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import API from 'AppData/api';
 
-const styles = theme => ({
-    root: {
-        flexGrow: 1,
-        marginLeft: 0,
-        marginTop: 0,
-        paddingLeft: theme.spacing.unit * 4,
-        paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
-        width: theme.custom.contentAreaWidth,
-    },
-    buttonProgress: {
-        position: 'relative',
-        marginTop: theme.spacing.unit * 5,
-        marginLeft: theme.spacing.unit * 6.25,
-    },
-    button: {
-        marginTop: theme.spacing.unit * 2,
-        marginRight: theme.spacing.unit,
-    },
-    buttonSection: {
-        paddingTop: theme.spacing.unit * 2,
-    },
-    subTitle: {
-        color: theme.palette.grey[500],
-    },
-});
+import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
+import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm';
 
 /**
- * Create API with inline Endpoint
- * @class APICreateForm
- * @extends {Component}
+ * Handle API creation from WSDL.
+ *
+ * @export
+ * @param {*} props
+ * @returns
  */
-class APICreateDefault extends Component {
+function APICreateDefault(props) {
     /**
-     * Creates an instance of APICreateForm.
-     * @param {any} props @inheritDoc
-     * @memberof APICreateForm
+     *
+     * Reduce the events triggered from API input fields to current state
      */
-    constructor(props) {
-        super(props);
-        this.state = {
-            loading: false,
-        };
+    function apiInputsReducer(currentState, inputAction) {
+        const { action, value } = inputAction;
+        switch (action) {
+            case 'name':
+            case 'version':
+            case 'endpoint':
+            case 'context':
+            case 'policies':
+            case 'isFormValid':
+                return { ...currentState, [action]: value };
+            default:
+                return currentState;
+        }
+    }
+
+    const [apiInputs, inputsDispatcher] = useReducer(apiInputsReducer, {
+        formValidity: false,
+    });
+
+    /**
+     *
+     *
+     * @param {*} event
+     */
+    function handleOnChange(event) {
+        const { name: action, value } = event.target;
+        inputsDispatcher({ action, value });
     }
 
     /**
-     * @inheritDoc
-     * @returns {React.Component} Render API Create with endpoint UI
-     * @memberof APICreateForm
+     *
+     * Set the validity of the API Inputs form
+     * @param {*} isValidForm
+     * @param {*} validationState
      */
-    render() {
-        const {
-            classes, type, handleSubmit, isAPIProduct, inputChange, api, valid, oasVersion, handleOASVersionChange,
-        } = this.props;
-        const { loading } = this.state;
-        let mainTitle = <FormattedMessage id='create.new.rest.api' defaultMessage='New REST API' />;
+    function handleOnValidate(isFormValid) {
+        inputsDispatcher({
+            action: 'isFormValid',
+            value: isFormValid,
+        });
+    }
 
-        if (isAPIProduct) {
-            mainTitle = <FormattedMessage id='create.new.api.product' defaultMessage='New API Product' />;
+    const [isCreating, setCreating] = useState();
+    /**
+     *
+     *
+     * @param {*} params
+     */
+    function createAPI() {
+        setCreating(true);
+        const {
+            name, version, context, endpoint, policies,
+        } = apiInputs;
+        const apiData = {
+            name,
+            version,
+            context,
+            policies,
+        };
+        if (endpoint) {
+            apiData.endpointConfig = {
+                endpoint_type: 'http',
+                sandbox_endpoints: {
+                    url: endpoint,
+                },
+                production_endpoints: {
+                    url: endpoint,
+                },
+            };
         }
-        return (
-            <Grid container spacing={7} className={classes.root}>
-                <Grid item xs={12}>
-                    <div className={classes.titleWrapper}>
-                        <Typography variant='h4' align='left' className={classes.mainTitle}>
-                            {type === 'ws' ? (
-                                <FormattedMessage id='create.new.websocket.api' defaultMessage='New WebSocket API' />
-                            ) : (mainTitle)}
-                        </Typography>
-                        <Typography variant='h5' align='left' className={classes.subTitle}>
-                            <FormattedMessage
-                                id='Apis.Create.Default.APICreateDefault.gateway.url'
-                                defaultMessage='Gateway_URL/'
-                            />
-                            {api.version ? api.version : '{apiVersion}'}/{api.context ? api.context : '{context}'}
-                        </Typography>
-                    </div>
-                    <form onSubmit={handleSubmit}>
-                        <FormControl component='fieldset' className={classes.formControl}>
-                            <FormLabel component='legend'>Open API version</FormLabel>
-                            <RadioGroup
-                                aria-label='oas_version'
-                                name='oas_version'
-                                className={classes.group}
-                                value={oasVersion}
-                                onChange={handleOASVersionChange}
-                            >
-                                <FormControlLabel value='v3' control={<Radio />} label='OpenAPI 3' />
-                                <FormControlLabel value='v2' control={<Radio />} label='OpenAPI 2' />
-                            </RadioGroup>
-                        </FormControl>
-                        <APIInputForm
-                            api={api}
-                            handleInputChange={inputChange}
-                            valid={valid}
-                            isAPIProduct={isAPIProduct}
+        apiData.gatewayEnvironments = ['Production and Sandbox'];
+        const newAPI = new API(apiData);
+        newAPI
+            .save()
+            .then((api) => {
+                Alert.info('API created successfully');
+                props.history.push(`/apis/${api.id}/overview`);
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while adding the API');
+                }
+                console.error(error);
+            })
+            .finally(() => setCreating(false));
+    }
+
+    return (
+        <APICreateBase
+            title={
+                <React.Fragment>
+                    <Typography variant='h5'>
+                        <FormattedMessage
+                            id='Apis.Create.Default.APICreateDefault.heading'
+                            defaultMessage='Create an API'
                         />
-                        <Grid
-                            container
-                            direction='row'
-                            alignItems='flex-start'
-                            spacing={4}
-                            className={classes.buttonSection}
-                        >
-                            <Grid item>
-                                <ScopeValidation
-                                    resourcePath={isAPIProduct ? resourcePath.API_PRODUCTS : resourcePath.APIS}
-                                    resourceMethod={resourceMethod.POST}
-                                >
-                                    <div>
-                                        <Button type='submit' disabled={loading} variant='contained' color='primary'>
-                                            <FormattedMessage id='create' defaultMessage='Create' />
-                                        </Button>
-                                        {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
-                                    </div>
-                                </ScopeValidation>
-                            </Grid>
-                            <Grid item>
-                                <Button
-                                    onClick={() => this.props.history.push(isAPIProduct ? '/api-products' : '/apis')}
-                                >
-                                    <FormattedMessage id='cancel' defaultMessage='Cancel' />
-                                </Button>
-                            </Grid>
+                    </Typography>
+                    <Typography variant='caption'>
+                        <FormattedMessage
+                            id='Apis.Create.Default.APICreateDefault.sub.heading'
+                            defaultMessage={
+                                'Create an API providing Name, Version and Context parameters' +
+                                ' and optionally backend endpoint and bushiness plans'
+                            }
+                        />
+                    </Typography>
+                </React.Fragment>
+            }
+        >
+            <Grid container spacing={3}>
+                <Grid item md={12} />
+                <Grid item md={1} />
+                <Grid item md={11}>
+                    <DefaultAPIForm onValidate={handleOnValidate} onChange={handleOnChange} api={apiInputs} />
+                </Grid>
+                <Grid item md={1} />
+                <Grid item md={9}>
+                    <Grid container direction='row' justify='flex-start' alignItems='center' spacing={2}>
+                        <Grid item>
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                disabled={!apiInputs.isFormValid || isCreating}
+                                onClick={createAPI}
+                            >
+                                Create {isCreating && <CircularProgress size={24} />}
+                            </Button>
                         </Grid>
-                    </form>
+                        <Grid item>
+                            <Link to='/apis/'>
+                                <Button variant='outlined'>
+                                    <FormattedMessage
+                                        id='Apis.Create.Default.APICreateDefault.cancel'
+                                        defaultMessage='Cancel'
+                                    />
+                                </Button>
+                            </Link>
+                        </Grid>
+                    </Grid>
                 </Grid>
             </Grid>
-        );
-    }
+        </APICreateBase>
+    );
 }
-
 APICreateDefault.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    history: PropTypes.shape({
-        push: PropTypes.func.isRequired,
-    }).isRequired,
-    type: PropTypes.shape({}).isRequired,
-    valid: PropTypes.shape({}).isRequired,
-    location: PropTypes.shape({
-        pathname: PropTypes.string,
-    }).isRequired,
-    handleSubmit: PropTypes.func.isRequired,
-    inputChange: PropTypes.func.isRequired,
-    isAPIProduct: PropTypes.bool.isRequired,
-    api: PropTypes.shape({}).isRequired,
-    oasVersion: PropTypes.string.isRequired,
-    handleOASVersionChange: PropTypes.func.isRequired,
+    history: PropTypes.shape({ push: PropTypes.func }).isRequired,
 };
-
-export default withStyles(styles)(APICreateDefault);
+export default withRouter(APICreateDefault);

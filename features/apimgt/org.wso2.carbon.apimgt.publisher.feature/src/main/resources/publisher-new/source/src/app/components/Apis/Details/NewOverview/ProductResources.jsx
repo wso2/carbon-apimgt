@@ -88,7 +88,7 @@ class ProductResources extends React.PureComponent {
                     <Typography variant='h5' component='h3' className={parentClasses.title}>
                         API Resources
                     </Typography>
-                    <Link to={'/api-products/' + api.id + '/resources'}>
+                    <Link to={'/api-products/' + api.id + '/resources/edit'}>
                         <Button variant='contained' color='default'>
                             Edit
                         </Button>

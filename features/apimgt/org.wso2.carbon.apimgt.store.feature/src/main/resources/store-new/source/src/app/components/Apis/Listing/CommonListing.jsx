@@ -22,6 +22,9 @@ import { FormattedMessage } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
 import { withStyles } from '@material-ui/core/styles';
+import API from 'AppData/api';
+import CONSTS from 'AppData/Constants';
+import ApiTagCloud from 'AppComponents/Apis/Listing/ApiTagCloud';
 import CustomIcon from '../../Shared/CustomIcon';
 import ApiTableView from './ApiTableView';
 import { ApiContext } from '../Details/ApiContext';
@@ -65,7 +68,7 @@ const styles = theme => ({
     },
     listContentWrapper: {
         padding: `0 ${theme.spacing.unit * 3}px`,
-    }
+    },
 });
 
 /**
@@ -84,8 +87,29 @@ class CommonListing extends React.Component {
         super(props);
         this.state = {
             listType: props.theme.custom.defaultApiView,
+            allTags: null,
         };
     }
+
+    /**
+     * @memberof CommonListing
+     */
+    componentDidMount() {
+        const api = new API();
+        const promisedTags = api.getAllTags();
+        promisedTags
+            .then((response) => {
+                if (response.body.count !== 0) {
+                    this.setState({ allTags: response.body.list });
+                }
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+            });
+    }
+
 
     /**
      *
@@ -105,9 +129,9 @@ class CommonListing extends React.Component {
      */
     render() {
         const {
-            apis, apiType, theme, classes,
+            apis, apiType, theme, classes, location: { search }
         } = this.props;
-        const { listType } = this.state;
+        const { listType, allTags } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
 
         return (
@@ -137,20 +161,25 @@ class CommonListing extends React.Component {
                         </IconButton>
                     </div>
                 </div>
-                <div className={classes.listContentWrapper}>
-                    {listType === 'grid'
-                    && (
-                        <ApiContext.Provider value={{ apiType }}>
-                            <ApiTableView gridView />
-                        </ApiContext.Provider>
-                    )}
-                    {listType === 'list'
-                    && (
-                        <ApiContext.Provider value={{ apiType }}>
-                            <ApiTableView gridView={false} />
-                        </ApiContext.Provider>
-                    )}
-                </div>
+                {(allTags && apiType === CONSTS.API_TYPE)
+                    ? <ApiTagCloud data={allTags} listType={listType} apiType={apiType} />
+                    : (
+                        <div className={classes.listContentWrapper}>
+                            {listType === 'grid'
+                            && (
+                                <ApiContext.Provider value={{ apiType }}>
+                                    <ApiTableView gridView query={search} />
+                                </ApiContext.Provider>
+                            )}
+                            {listType === 'list'
+                            && (
+                                <ApiContext.Provider value={{ apiType }}>
+                                    <ApiTableView gridView={false} query={search}/>
+                                </ApiContext.Provider>
+                            )}
+                        </div>
+                    )
+                }
             </main>
         );
     }
@@ -161,6 +190,15 @@ CommonListing.propTypes = {
     theme: PropTypes.shape({}).isRequired,
     apiType: PropTypes.string.isRequired,
     apis: PropTypes.shape({}).isRequired,
+    location: PropTypes.shape({
+        search: PropTypes.string,
+    }),
 };
 
-export default withStyles(styles, { withTheme: true })(CommonListing);
+CommonListing.defaultProps = {
+    location: PropTypes.shape({
+        search: '',
+    }),
+}
+
+export default  withStyles(styles, { withTheme: true })(CommonListing);

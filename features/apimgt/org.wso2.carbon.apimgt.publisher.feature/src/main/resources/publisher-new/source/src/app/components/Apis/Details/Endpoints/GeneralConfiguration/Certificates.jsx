@@ -38,20 +38,21 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import Dropzone from 'react-dropzone';
 import API from '../../../../../data/api';
 
+const dropzoneStyles = {
+    border: '1px dashed ',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    height: 75,
+    padding: '8px 0px',
+    position: 'relative',
+    textAlign: 'center',
+    width: '100%',
+    margin: '10px 0',
+};
+
 const styles = theme => ({
     fileinput: {
         display: 'none',
-    },
-    dropzone: {
-        border: '1px dashed ' + theme.palette.primary.main,
-        borderRadius: '5px',
-        cursor: 'pointer',
-        height: 75,
-        padding: `${theme.spacing.unit * 2}px 0px`,
-        position: 'relative',
-        textAlign: 'center',
-        width: '100%',
-        margin: '10px 0',
     },
     dropZoneWrapper: {
         height: '100%',
@@ -68,6 +69,7 @@ const styles = theme => ({
     },
     certificatesHeader: {
         fontWeight: 600,
+        marginTop: 20,
     },
     addCertificateBtn: {
         borderColor: '#c4c4c4',
@@ -95,10 +97,7 @@ const styles = theme => ({
  */
 function Certificates(props) {
     const {
-        classes,
-        certificates,
-        uploadCertificate,
-        deleteCertificate,
+        classes, certificates, uploadCertificate, deleteCertificate,
     } = props;
     const [certificate, setCertificate] = useState({ name: '', content: {} });
     const [certificateList, setCertificateList] = useState([]);
@@ -130,16 +129,18 @@ function Certificates(props) {
      * @param {string} certAlias  The alias of the certificate which information is required.
      * */
     const showCertificateDetails = (event, certAlias) => {
-        API.getCertificateStatus(certAlias).then((response) => {
-            setOpenCertificateDetails({
-                details: response.body,
-                open: true,
-                alias: certAlias,
-                anchor: event.currentTarget,
+        API.getCertificateStatus(certAlias)
+            .then((response) => {
+                setOpenCertificateDetails({
+                    details: response.body,
+                    open: true,
+                    alias: certAlias,
+                    anchor: event.currentTarget,
+                });
+            })
+            .catch((err) => {
+                console.error(err);
             });
-        }).catch((err) => {
-            console.error(err);
-        });
     };
 
     /**
@@ -180,51 +181,39 @@ function Certificates(props) {
             </Grid>
             <Grid item>
                 <List className={classes.certificateList}>
-                    {(certificateList.length > 0 ? (
+                    {certificateList.length > 0 ? (
                         certificateList.map((cert) => {
                             return (
                                 <ListItem>
                                     <ListItemAvatar>
-                                        <Icon>
-                                            lock
-                                        </Icon>
+                                        <Icon>lock</Icon>
                                     </ListItemAvatar>
-                                    <ListItemText
-                                        primary={cert.alias}
-                                        secondary={cert.endpoint}
-                                    />
+                                    <ListItemText primary={cert.alias} secondary={cert.endpoint} />
                                     <ListItemSecondaryAction>
-                                        <IconButton edge='end'
+                                        <IconButton
+                                            edge='end'
                                             onClick={event => showCertificateDetails(event, cert.alias)}
                                         >
-                                            <Icon>
-                                                info
-                                            </Icon>
+                                            <Icon>info</Icon>
                                         </IconButton>
                                         <IconButton
                                             onClick={() => setCertificateToDelete({ open: true, alias: cert.alias })}
                                             color='secondary'
                                         >
-                                            <Icon>
-                                                delete
-                                            </Icon>
+                                            <Icon>delete</Icon>
                                         </IconButton>
                                     </ListItemSecondaryAction>
                                 </ListItem>
                             );
-                        }))
-                        : (
-                            <ListItem>
-                                <ListItemAvatar>
-                                    <Icon color='primary'>
-                                        info
-                                    </Icon>
-                                </ListItemAvatar>
-                                <ListItemText>
-                                    You do not have any certificates uploaded
-                                </ListItemText>
-                            </ListItem>
-                        ))}
+                        })
+                    ) : (
+                        <ListItem>
+                            <ListItemAvatar>
+                                <Icon color='primary'>info</Icon>
+                            </ListItemAvatar>
+                            <ListItemText>You do not have any certificates uploaded</ListItemText>
+                        </ListItem>
+                    )}
                 </List>
                 <List>
                     <ListItem
@@ -234,9 +223,7 @@ function Certificates(props) {
                     >
                         <ListItemAvatar>
                             <IconButton>
-                                <Icon>
-                                    add
-                                </Icon>
+                                <Icon>add</Icon>
                             </IconButton>
                         </ListItemAvatar>
                         <ListItemText primary='Add Certificate' />
@@ -245,9 +232,7 @@ function Certificates(props) {
             </Grid>
             <Dialog open={certificateToDelete.open}>
                 <DialogTitle>
-                    <Icon style={{ color: '#dd1c30' }}>
-                        warning
-                    </Icon>
+                    <Icon style={{ color: '#dd1c30' }}>warning</Icon>
                     {'Delete Certificate'}
                 </DialogTitle>
                 <DialogContent>
@@ -255,7 +240,8 @@ function Certificates(props) {
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.confirm.certificate.delete'
                             defaultMessage='Do you want to delete the Certificate'
-                        /> { ' ' + certificateToDelete.alias + '?'}
+                        />{' '}
+                        {' ' + certificateToDelete.alias + '?'}
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.delete.cannot.undone'
                             defaultMessage=' This cannot be undone.'
@@ -273,10 +259,7 @@ function Certificates(props) {
                             defaultMessage='OK'
                         />
                     </Button>
-                    <Button
-                        onClick={() => setCertificateToDelete({ open: false, alias: '' })}
-                        color='secondary'
-                    >
+                    <Button onClick={() => setCertificateToDelete({ open: false, alias: '' })} color='secondary'>
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.delete.cancel.button'
                             defaultMessage='Cancel'
@@ -337,10 +320,12 @@ function Certificates(props) {
                             <TextField
                                 required
                                 id='certificateEndpoint'
-                                label={<FormattedMessage
-                                    id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.endpoint'
-                                    defaultMessage='Endpoint'
-                                />}
+                                label={
+                                    <FormattedMessage
+                                        id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.endpoint'
+                                        defaultMessage='Endpoint'
+                                    />
+                                }
                                 value={endpoint}
                                 placeholder='Endpoint'
                                 onChange={event => setEndpoint(event.target.value)}
@@ -350,10 +335,12 @@ function Certificates(props) {
                             <TextField
                                 required
                                 id='certificateAlias'
-                                label={<FormattedMessage
-                                    id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.alias'
-                                    defaultMessage='Alias'
-                                />}
+                                label={
+                                    <FormattedMessage
+                                        id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.alias'
+                                        defaultMessage='Alias'
+                                    />
+                                }
                                 value={alias}
                                 placeholder='My Alias'
                                 onChange={event => setAlias(event.target.value)}
@@ -381,28 +368,35 @@ function Certificates(props) {
                                     onDrop(dropFile);
                                 }}
                             >
-                                <div className={classes.dropZoneWrapper}>
-                                    {certificate.name === '' ?
-                                        <div>
-                                            <Icon style={{ fontSize: 56 }}>
-                                                cloud_upload
-                                            </Icon>
-                                            <Typography>
-                                                <FormattedMessage
-                                                    id={'Apis.Details.Endpoints.GeneralConfiguration.Certificates.'
-                                                    + 'click.or.drop.to.upload.file'}
-                                                    defaultMessage='Click or drag the certificate file to upload.'
-                                                />
-                                            </Typography>
-                                        </div> :
-                                        <div className={classes.uploadedFile}>
-                                            <Icon style={{ fontSize: 56 }}>
-                                                insert_drive_file
-                                            </Icon>
-                                            {certificate.name}
+                                {({ getRootProps, getInputProps }) => (
+                                    <div {...getRootProps({ style: dropzoneStyles })}>
+                                        <input {...getInputProps()} />
+                                        <div className={classes.dropZoneWrapper}>
+                                            {certificate.name === '' ? (
+                                                <div>
+                                                    <Icon style={{ fontSize: 56 }}>cloud_upload</Icon>
+                                                    <Typography>
+                                                        <FormattedMessage
+                                                            id={
+                                                                'Apis.Details.Endpoints.GeneralConfiguration' +
+                                                                '.Certificates.click.or.drop.to.upload.file'
+                                                            }
+                                                            defaultMessage={
+                                                                'Click or drag the certificate ' +
+                                                                ' file to upload.'
+                                                            }
+                                                        />
+                                                    </Typography>
+                                                </div>
+                                            ) : (
+                                                <div className={classes.uploadedFile}>
+                                                    <Icon style={{ fontSize: 56 }}>insert_drive_file</Icon>
+                                                    {certificate.name}
+                                                </div>
+                                            )}
                                         </div>
-                                    }
-                                </div>
+                                    </div>
+                                )}
                             </Dropzone>
                         </div>
                     </Grid>
@@ -439,6 +433,5 @@ Certificates.propTypes = {
     certificates: PropTypes.shape({}).isRequired,
     uploadCertificate: PropTypes.func.isRequired,
     deleteCertificate: PropTypes.func.isRequired,
-
 };
 export default injectIntl(withStyles(styles)(Certificates));

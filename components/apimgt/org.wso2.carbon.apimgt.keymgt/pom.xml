@@ -16,7 +16,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.5.62-SNAPSHOT</version>
+        <version>6.5.70-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -27,7 +27,6 @@
     <name>WSO2 Carbon - API Key Mgt</name>
     <description>Key Management functionality for API Mgt/Store solution</description>
     <url>http://wso2.org</url>
-
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
@@ -46,6 +45,10 @@
         <dependency>
             <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
             <artifactId>org.wso2.carbon.identity.oauth</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.datapublisher.authentication</groupId>
+            <artifactId>org.wso2.carbon.identity.data.publisher.application.authentication</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -93,7 +96,7 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.12</version>
+            <version>1.13</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.metrics</groupId>

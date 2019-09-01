@@ -70,6 +70,8 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
             //carbon context. Scope validation should come here.
             //If access token is valid then we will perform scope check for given resource.
             if (validateScopes(message, tokenInfo)) {
+                //Add the user scopes list extracted from token to the cxf message
+                message.put(RestApiConstants.USER_REST_API_SCOPES, tokenInfo.getScopes());
                 //If scope validation successful then set tenant name and user name to current context
                 String tenantDomain = MultitenantUtils.getTenantDomain(tokenInfo.getEndUserName());
                 int tenantId;
@@ -110,7 +112,9 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
      */
     private boolean validateScopes(Message message, AccessTokenInfo tokenInfo) {
         String basePath = (String) message.get(Message.BASE_PATH);
-        String path = (String) message.get(Message.PATH_INFO);
+        // path is obtained from Message.REQUEST_URI instead of Message.PATH_INFO, as Message.PATH_INFO contains
+        // decoded values of request parameters
+        String path = (String) message.get(Message.REQUEST_URI);
         String verb = (String) message.get(Message.HTTP_REQUEST_METHOD);
         String resource = path.substring(basePath.length() - 1);
         String[] scopes = tokenInfo.getScopes();

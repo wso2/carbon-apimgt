@@ -27,6 +27,16 @@ const applicationTableHead = (props) => {
             sorting: true,
         },
         {
+            id: 'owner',
+            numeric: false,
+            disablePadding: false,
+            label: (<FormattedMessage
+                id='Applications.Listing.ApplicationTableHead.owner'
+                defaultMessage='Owner'
+            />),
+            sorting: true,
+        },
+        {
             id: 'throttlingTier',
             numeric: false,
             disablePadding: false,

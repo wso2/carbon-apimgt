@@ -36,8 +36,7 @@ public final class RestApiConstants {
     public static final String REQUEST_AUTHENTICATION_SCHEME = "request_authentication_scheme";
     public static final String OAUTH2_AUTHENTICATION = "oauth2";
     public static final String BASIC_AUTHENTICATION = "basic_auth";
-    public static final String REST_API_SCOPE_CACHE = "REST_API_SCOPE_CACHE";
-    
+
     public static final String USER_REST_API_SCOPES = "user_rest_api_scopes";
 
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;

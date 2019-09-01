@@ -168,7 +168,7 @@ public class GraphQLSchemaDefinition {
                         parameter = "query";
                         inValue = "query";
                         type = "string";
-                        description = "query to be passed to graphQL API";
+                        description = "Query to be passed to graphQL API";
                     } else if (resourceObject.getKey().toString().equals("post")) {
                         JSONObject schema = new JSONObject();
                         JSONObject payload = new JSONObject();
@@ -180,7 +180,7 @@ public class GraphQLSchemaDefinition {
                         queryParamObj.put("schema", schema);
                         parameter = "payload";
                         inValue = "body";
-                        description = "query or mutation to be passed to graphQL API";
+                        description = "Query or mutation to be passed to graphQL API";
                     }
                 }
 

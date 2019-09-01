@@ -15,7 +15,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Divider, Icon, IconButton, InputAdornment, TextField, withStyles } from '@material-ui/core';
+import {
+    Divider,
+    Icon,
+    IconButton,
+    InputAdornment,
+    TextField,
+    withStyles,
+} from '@material-ui/core';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 
@@ -82,15 +89,18 @@ function GenericEndpoint(props) {
                 InputProps={{
                     endAdornment: (
                         <InputAdornment position='end'>
-                            <IconButton
-                                className={classes.iconButton}
-                                aria-label='Settings'
-                                onClick={() => setAdvancedConfigOpen(index, type, category)}
-                            >
-                                <Icon>
-                                    settings
-                                </Icon>
-                            </IconButton>
+                            {type === 'prototyped' ?
+                                <div /> :
+                                <IconButton
+                                    className={classes.iconButton}
+                                    aria-label='Settings'
+                                    onClick={() => setAdvancedConfigOpen(index, type, category)}
+                                >
+                                    <Icon>
+                                        settings
+                                    </Icon>
+                                </IconButton>
+                            }
                             {(index > 0) ? <Divider className={classes.divider} /> : <div />}
                             {(type === 'load_balance' || type === 'failover') ? (
                                 <IconButton

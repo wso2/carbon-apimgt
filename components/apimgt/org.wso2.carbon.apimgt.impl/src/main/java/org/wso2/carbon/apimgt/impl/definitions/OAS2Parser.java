@@ -151,7 +151,7 @@ public class OAS2Parser extends APIDefinition {
 
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
         OAuth2Definition oAuth2Definition;
-        if (securityDefinitions != null
+        if (oauth2SchemeKey != null && securityDefinitions != null
                 && (oAuth2Definition = (OAuth2Definition) securityDefinitions.get(oauth2SchemeKey)) != null
                 && oAuth2Definition.getScopes() != null) {
             Set<Scope> scopeSet = new HashSet<>();
@@ -345,18 +345,20 @@ public class OAS2Parser extends APIDefinition {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(apiDefinition);
-        if (parseAttemptForV2.getSwagger() == null) {
-            validationResponse.setValid(false);
-            for (String message : parseAttemptForV2.getMessages()) {
-                OASParserUtil.addErrorToValidationResponse(validationResponse, message);
-                if (message.contains(APIConstants.SWAGGER_IS_MISSING_MSG)) {
-                    ErrorItem errorItem = new ErrorItem();
-                    errorItem.setErrorCode(ExceptionCodes.INVALID_OAS2_FOUND.getErrorCode());
-                    errorItem.setMessage(ExceptionCodes.INVALID_OAS2_FOUND.getErrorMessage());
-                    errorItem.setDescription(ExceptionCodes.INVALID_OAS2_FOUND.getErrorMessage());
-                    validationResponse.getErrorItems().add(errorItem);
-                }
+        boolean swaggerErrorFound = false;
+        for (String message : parseAttemptForV2.getMessages()) {
+            OASParserUtil.addErrorToValidationResponse(validationResponse, message);
+            if (message.contains(APIConstants.SWAGGER_IS_MISSING_MSG)) {
+                ErrorItem errorItem = new ErrorItem();
+                errorItem.setErrorCode(ExceptionCodes.INVALID_OAS2_FOUND.getErrorCode());
+                errorItem.setMessage(ExceptionCodes.INVALID_OAS2_FOUND.getErrorMessage());
+                errorItem.setDescription(ExceptionCodes.INVALID_OAS2_FOUND.getErrorMessage());
+                validationResponse.getErrorItems().add(errorItem);
+                swaggerErrorFound = true;
             }
+        }
+        if (parseAttemptForV2.getSwagger() == null || swaggerErrorFound) {
+            validationResponse.setValid(false);
         } else {
             Swagger swagger = parseAttemptForV2.getSwagger();
             Info info = swagger.getInfo();
@@ -531,12 +533,13 @@ public class OAS2Parser extends APIDefinition {
     private String getOAuth2SecuritySchemeKey(Swagger swagger) {
         final String oauth2Type = new OAuth2Definition().getType();
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
-        for (Map.Entry<String, SecuritySchemeDefinition> definitionEntry : securityDefinitions.entrySet()) {
-            if (oauth2Type.equals(definitionEntry.getValue().getType())) {
-                return definitionEntry.getKey();
+        if (securityDefinitions != null) {
+            for (Map.Entry<String, SecuritySchemeDefinition> definitionEntry : securityDefinitions.entrySet()) {
+                if (oauth2Type.equals(definitionEntry.getValue().getType())) {
+                    return definitionEntry.getKey();
+                }
             }
         }
-
         return null;
     }
 

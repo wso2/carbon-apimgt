@@ -34,7 +34,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
-
+import APIProduct from 'AppData/APIProduct';
+import CONSTS from 'AppData/Constants';
+import { ApiContext } from '../ApiContext';
 import Progress from '../../../Shared/Progress';
 import Api from '../../../../data/api';
 import SwaggerUI from './SwaggerUI';
@@ -78,6 +80,8 @@ const styles = theme => ({
  * @extends {React.Component}
  */
 class ApiConsole extends React.Component {
+    static contextType = ApiContext;
+
     /**
      *Creates an instance of ApiConsole.
      * @param {*} props properties
@@ -86,7 +90,6 @@ class ApiConsole extends React.Component {
     constructor(props) {
         super(props);
         this.state = { showToken: false };
-        this.apiClient = new Api();
         this.handleChanges = this.handleChanges.bind(this);
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
         this.handleClickShowToken = this.handleClickShowToken.bind(this);
@@ -99,9 +102,10 @@ class ApiConsole extends React.Component {
      * @memberof ApiConsole
      */
     componentDidMount() {
-        const { match } = this.props;
-        const apiID = match.params.api_uuid;
-        let api;
+        const { apiType, api } = this.context;
+        const apiID = api.id;
+        const user = AuthManager.getUser();
+        let apiData;
         let environments;
         let labels;
         let selectedEnvironment;
@@ -111,16 +115,23 @@ class ApiConsole extends React.Component {
         let keys;
         let selectedKeyType;
         let accessToken;
+
+        if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            this.apiClient = new APIProduct();
+        } else if (apiType === CONSTS.API_TYPE) {
+            this.apiClient = new Api();
+        }
+
         const promiseAPI = this.apiClient.getAPIById(apiID);
 
         promiseAPI
             .then((apiResponse) => {
-                api = apiResponse.obj;
-                if (api.endpointURLs) {
-                    environments = api.endpointURLs.map((endpoint) => { return endpoint.environmentName; });
+                apiData = apiResponse.obj;
+                if (apiData.endpointURLs) {
+                    environments = apiData.endpointURLs.map((endpoint) => { return endpoint.environmentName; });
                 }
-                if (api.labels) {
-                    labels = api.labels.map((label) => { return label.name; });
+                if (apiData.labels) {
+                    labels = apiData.labels.map((label) => { return label.name; });
                 }
                 if (environments && environments.length > 0) {
                     [selectedEnvironment] = environments;
@@ -134,44 +145,63 @@ class ApiConsole extends React.Component {
             })
             .then((swaggerResponse) => {
                 swagger = swaggerResponse.obj;
-                return this.apiClient.getSubscriptions(apiID);
+                if (user != null) {
+                    return this.apiClient.getSubscriptions(apiID);
+                } else {
+                    return null;
+                }
             })
             .then((subscriptionsResponse) => {
-                subscriptions = subscriptionsResponse.obj.list.filter(item => item.status === 'UNBLOCKED');
+                if (subscriptionsResponse != null) {
+                    subscriptions = subscriptionsResponse.obj.list.filter(item => item.status === 'UNBLOCKED');
 
-                if (subscriptions && subscriptions.length > 0) {
-                    selectedApplication = subscriptions[0].applicationId;
-                    const promiseApp = Application.get(selectedApplication);
+                    if (subscriptions && subscriptions.length > 0) {
+                        selectedApplication = subscriptions[0].applicationId;
+                        const promiseApp = Application.get(selectedApplication);
 
-                    promiseApp
-                        .then((application) => {
-                            return application.getKeys();
-                        })
-                        .then((appKeys) => {
-                            if (appKeys.get('SANDBOX')) {
-                                selectedKeyType = 'SANDBOX';
-                                ({ accessToken } = appKeys.get('SANDBOX').token);
-                            } else if (appKeys.get('PRODUCTION')) {
-                                selectedKeyType = 'PRODUCTION';
-                                ({ accessToken } = appKeys.get('PRODUCTION').token);
-                            }
+                        promiseApp
+                            .then((application) => {
+                                return application.getKeys();
+                            })
+                            .then((appKeys) => {
+                                if (appKeys.get('SANDBOX')) {
+                                    selectedKeyType = 'SANDBOX';
+                                    ({ accessToken } = appKeys.get('SANDBOX').token);
+                                } else if (appKeys.get('PRODUCTION')) {
+                                    selectedKeyType = 'PRODUCTION';
+                                    ({ accessToken } = appKeys.get('PRODUCTION').token);
+                                }
 
-                            this.setState({
-                                api,
-                                swagger,
-                                subscriptions,
-                                environments,
-                                labels,
-                                selectedEnvironment,
-                                selectedApplication,
-                                keys: appKeys,
-                                selectedKeyType,
-                                accessToken,
+                                this.setState({
+                                    api: apiData,
+                                    swagger,
+                                    subscriptions,
+                                    environments,
+                                    labels,
+                                    selectedEnvironment,
+                                    selectedApplication,
+                                    keys: appKeys,
+                                    selectedKeyType,
+                                    accessToken,
+                                });
                             });
+                    } else {
+                        this.setState({
+                            api: apiData,
+                            swagger,
+                            subscriptions,
+                            environments,
+                            labels,
+                            selectedEnvironment,
+                            selectedApplication,
+                            keys,
+                            selectedKeyType,
+                            accessToken,
                         });
+                    }
                 } else {
                     this.setState({
-                        api,
+                        api: apiData,
                         swagger,
                         subscriptions,
                         environments,
@@ -339,7 +369,7 @@ class ApiConsole extends React.Component {
                             </Paper>
                         </Grid>
                     )}
-                    {subscriptions && (
+                    {user != null && subscriptions && (
                         <Grid container>
                             <Grid item md={4} xs={4} className={classes.gridWrapper}>
                                 <FormControl className={classes.formControl} disabled={subscriptions.length === 0}>

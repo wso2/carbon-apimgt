@@ -19,10 +19,11 @@ const Configurations = {
                     default: '#f6f6f6',
                     paper: '#ffffff',
                     appBar: '#1d344f',
+                    appBarSelected: '#1d344f',
                     leftMenu: '#1a1f2f',
-                    leftMenuActive: '#000000',
+                    leftMenuActive: '#254061',
                     drawer: '#1a1f2f',
-                    activeMenuItem: '#000000',
+                    activeMenuItem: '#254061',
                 },
             },
             typography: {

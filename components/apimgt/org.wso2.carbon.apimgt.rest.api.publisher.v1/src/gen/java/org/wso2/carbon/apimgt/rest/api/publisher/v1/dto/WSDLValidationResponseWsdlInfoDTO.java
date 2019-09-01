@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoBindingInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoEndpointsDTO;
 import javax.validation.constraints.*;
 
@@ -24,7 +23,6 @@ public class WSDLValidationResponseWsdlInfoDTO   {
   
     private String version = null;
     private List<WSDLValidationResponseWsdlInfoEndpointsDTO> endpoints = new ArrayList<>();
-    private WSDLValidationResponseWsdlInfoBindingInfoDTO bindingInfo = null;
 
   /**
    * WSDL version 
@@ -62,23 +60,6 @@ public class WSDLValidationResponseWsdlInfoDTO   {
     this.endpoints = endpoints;
   }
 
-  /**
-   **/
-  public WSDLValidationResponseWsdlInfoDTO bindingInfo(WSDLValidationResponseWsdlInfoBindingInfoDTO bindingInfo) {
-    this.bindingInfo = bindingInfo;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("bindingInfo")
-  public WSDLValidationResponseWsdlInfoBindingInfoDTO getBindingInfo() {
-    return bindingInfo;
-  }
-  public void setBindingInfo(WSDLValidationResponseWsdlInfoBindingInfoDTO bindingInfo) {
-    this.bindingInfo = bindingInfo;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -90,13 +71,12 @@ public class WSDLValidationResponseWsdlInfoDTO   {
     }
     WSDLValidationResponseWsdlInfoDTO wsDLValidationResponseWsdlInfo = (WSDLValidationResponseWsdlInfoDTO) o;
     return Objects.equals(version, wsDLValidationResponseWsdlInfo.version) &&
-        Objects.equals(endpoints, wsDLValidationResponseWsdlInfo.endpoints) &&
-        Objects.equals(bindingInfo, wsDLValidationResponseWsdlInfo.bindingInfo);
+        Objects.equals(endpoints, wsDLValidationResponseWsdlInfo.endpoints);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(version, endpoints, bindingInfo);
+    return Objects.hash(version, endpoints);
   }
 
   @Override
@@ -106,7 +86,6 @@ public class WSDLValidationResponseWsdlInfoDTO   {
     
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");
-    sb.append("    bindingInfo: ").append(toIndentedString(bindingInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }
