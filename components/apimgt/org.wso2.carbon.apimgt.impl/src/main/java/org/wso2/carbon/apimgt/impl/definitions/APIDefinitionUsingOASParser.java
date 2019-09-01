@@ -685,6 +685,14 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
         public abstract void setResponseSchema(Model var1);
     }
 
+    /**
+     * Populate definition with wso2 APIM specific information
+     *
+     * @param oasDefinition OAS definition
+     * @param api           API
+     * @return Generated OAS definition
+     * @throws APIManagementException If an error occurred
+     */
     @Override
     public String populateCustomManagementInfo(String oasDefinition, API api) throws APIManagementException {
         return oasDefinition;

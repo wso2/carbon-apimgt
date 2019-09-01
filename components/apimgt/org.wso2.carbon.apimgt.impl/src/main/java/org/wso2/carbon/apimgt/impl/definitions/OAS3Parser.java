@@ -420,6 +420,14 @@ public class OAS3Parser extends APIDefinition {
         return validationResponse;
     }
 
+    /**
+     * Populate definition with wso2 APIM specific information
+     *
+     * @param oasDefinition OAS definition
+     * @param api           API
+     * @return Generated OAS definition
+     * @throws APIManagementException If an error occurred
+     */
     @Override
     public String populateCustomManagementInfo(String oasDefinition, API api) throws APIManagementException {
         return oasDefinition;

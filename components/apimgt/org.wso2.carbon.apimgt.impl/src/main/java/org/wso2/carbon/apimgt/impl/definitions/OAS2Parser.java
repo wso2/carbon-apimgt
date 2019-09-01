@@ -176,6 +176,13 @@ public class OAS2Parser extends APIDefinition {
         }
     }
 
+    /**
+     * Get scope information from the extensions
+     *
+     * @param swagger swagger object
+     * @return Scope set
+     * @throws APIManagementException if an error occurred
+     */
     private Set<Scope> getScopesFromExtensions(Swagger swagger) throws APIManagementException {
         Set<Scope> scopeList = new LinkedHashSet<>();
         Map<String, Object> extensions = swagger.getVendorExtensions();
@@ -368,11 +375,16 @@ public class OAS2Parser extends APIDefinition {
             if (returnJsonContent) {
                 validationResponse.setJsonContent(OASParserUtil.getSwaggerJsonString(parseAttemptForV2.getSwagger()));
             }
-
         }
         return validationResponse;
     }
 
+    /**
+     * Update swagger with security definition
+     *
+     * @param swagger swagger object
+     * @param api     API
+     */
     private void updateSwaggerSecurityDefinition(Swagger swagger, API api) {
         OAuth2Definition oAuth2Definition = new OAuth2Definition().password("https://test.com");
         Set<Scope> scopes = api.getScopes();
@@ -429,6 +441,11 @@ public class OAS2Parser extends APIDefinition {
         }
     }
 
+    /**
+     * Remove legacy scope information from swagger operation
+     *
+     * @param operation
+     */
     private void removeLegacyScopesFromOperation(Operation operation) {
         if(isLegacyExtensionsPreserved()) {
             log.debug("preserveLegacyExtensions is enabled.");
@@ -440,6 +457,11 @@ public class OAS2Parser extends APIDefinition {
         }
     }
 
+    /**
+     * Remove legacy scope from swagger
+     *
+     * @param swagger
+     */
     private void removeLegacyScopesFromSwagger(Swagger swagger) {
         if(isLegacyExtensionsPreserved()) {
             log.debug("preserveLegacyExtensions is enabled.");
@@ -562,6 +584,12 @@ public class OAS2Parser extends APIDefinition {
         return getScopeOfOperationsFromExtensions(operation);
     }
 
+    /**
+     * Get scope of operation
+     *
+     * @param operation
+     * @return
+     */
     private List<String> getScopeOfOperationsFromExtensions(Operation operation) {
         Map<String, Object> extensions = operation.getVendorExtensions();
         if (extensions.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
@@ -571,6 +599,14 @@ public class OAS2Parser extends APIDefinition {
         return Collections.emptyList();
     }
 
+    /**
+     * Populate definition with wso2 APIM specific information
+     *
+     * @param oasDefinition OAS definition
+     * @param api           API
+     * @return Generated OAS definition
+     * @throws APIManagementException If an error occurred
+     */
     @Override
     public String populateCustomManagementInfo(String oasDefinition, API api) throws APIManagementException {
         return generateAPIDefinition(api, oasDefinition, true);

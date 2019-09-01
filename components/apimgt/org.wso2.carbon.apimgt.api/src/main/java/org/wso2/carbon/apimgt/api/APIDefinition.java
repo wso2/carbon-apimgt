@@ -154,8 +154,21 @@ public abstract class APIDefinition {
     public abstract APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition,
             boolean returnJsonContent) throws APIManagementException;
 
+    /**
+     * Populate definition with wso2 APIM specific information
+     *
+     * @param oasDefinition OAS definition
+     * @param api           API
+     * @return Generated OAS definition
+     * @throws APIManagementException If an error occurred
+     */
     public abstract String populateCustomManagementInfo(String oasDefinition, API api) throws APIManagementException;
 
+    /**
+     * Check extension migration is disabled
+     *
+     * @return boolean
+     */
     protected boolean isLegacyExtensionsPreserved() {
         String keepLegacyExtension = System.getProperty(KEEP_LEGACY_EXTENSION_PROP);
         return Boolean.parseBoolean(keepLegacyExtension);
