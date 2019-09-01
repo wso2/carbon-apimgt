@@ -52,12 +52,4 @@ public interface APIPublisher {
      * @return   deleted/not
      */
     public boolean isAPIAvailable(API api, APIStore store) throws APIManagementException;
-
-    /**
-     * The method to publish new version of existing  API to external Store
-     * @param api      API
-     * @param store    Store
-     * @return   published/not
-     */
-    public boolean createVersionedAPIToStore(API api, APIStore store, String version) throws APIManagementException;
 }
