@@ -19,6 +19,9 @@ import Typography from '@material-ui/core/Typography';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import Alert from 'AppComponents/Shared/Alert';
+import { CircularProgressbar } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
+import VisibilitySensor from 'react-visibility-sensor';
 
 /**
  * This Component hosts the API Security Audit Component
@@ -94,8 +97,21 @@ class APISecurityAudit extends Component {
                             <h1>Audit Score and Summary</h1>
                             {/** Show total score and possibly a Progress Ring */}
                             <p>Overall Criticality: {reportObject.criticality}</p>
-                            <p>Overall Grade: {overallGrade}</p>
+                            <p>Overall Grade: {overallGrade} / 100</p>
                             <p>Number of Errors: {numErrors}</p>
+                            <div style={{ width: '100px' }}>
+                                <VisibilitySensor>
+                                    {({ isVisible }) => {
+                                        const gradeProgressScore = isVisible ? overallGrade : 0;
+                                        return (
+                                            <CircularProgressbar
+                                                value={gradeProgressScore}
+                                                text={`${gradeProgressScore}`}
+                                            />
+                                        );
+                                    }}
+                                </VisibilitySensor>
+                            </div>
                         </div>
                         <div>
                             <h1>OpenAPI Format Requirements</h1>
