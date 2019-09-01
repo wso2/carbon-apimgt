@@ -16,6 +16,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExternalStoreListDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
@@ -51,6 +52,7 @@ public interface ApisApiService {
       public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, DocumentDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdExternalStoresGet(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdGet(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdGraphqlSchemaGet(String apiId, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdGraphqlSchemaPut(String apiId, String schemaDefinition, String ifMatch, MessageContext messageContext) throws APIManagementException;
@@ -64,6 +66,7 @@ public interface ApisApiService {
       public Response apisApiIdMediationPoliciesPost(MediationDTO body, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdMonetizationGet(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdMonetizePost(String apiId, APIMonetizationInfoDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdPublishToExternalStoresPost(String apiId, List<String> externalStoreIds, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdResourcePathsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String resourcePath, String verb, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

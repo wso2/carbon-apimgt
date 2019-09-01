@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExternalStoreListDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
@@ -199,6 +200,24 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = Void.class) })
     public Response apisApiIdDocumentsPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Document object that needs to be added " ,required=true) DocumentDTO body, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.apisApiIdDocumentsPost(apiId, body, ifMatch, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/external-stores")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get the list of external stores which an API is published to", notes = "This operation can be used to retrieve a list of external stores which an API is published to by providing the id of the API. ", response = ExternalStoreListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "External-Store (Collection)",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. External Store list is returned. ", response = ExternalStoreListDTO.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
+    public Response apisApiIdExternalStoresGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.apisApiIdExternalStoresGet(apiId, ifNoneMatch, securityContext);
     }
 
     @GET
@@ -432,6 +451,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
     public Response apisApiIdMonetizePost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Monetization data object " ,required=true) APIMonetizationInfoDTO body) throws APIManagementException{
         return delegate.apisApiIdMonetizePost(apiId, body, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/publish-to-external-stores")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Publish an API to external stores", notes = "This operation can be used to publish an API to a list of external stores. ", response = ExternalStoreListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+        })
+    }, tags={ "Publish API To External Stores",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API was successfully published to all the selected external stores. ", response = ExternalStoreListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal server error while publishing to external stores", response = ErrorDTO.class) })
+    public Response apisApiIdPublishToExternalStoresPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "List of External Store Ids.",required=true)  @QueryParam("externalStoreIds") List<String> externalStoreIds, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.apisApiIdPublishToExternalStoresPost(apiId, externalStoreIds, ifMatch, securityContext);
     }
 
     @PUT

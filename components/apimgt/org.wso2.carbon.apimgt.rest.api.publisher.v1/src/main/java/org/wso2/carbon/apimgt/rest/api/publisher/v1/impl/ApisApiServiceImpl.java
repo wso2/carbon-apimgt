@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -72,6 +73,7 @@ import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
@@ -91,6 +93,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
@@ -102,6 +105,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
@@ -121,6 +125,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.DocumentationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.ExternalStoreMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -991,6 +996,38 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
+     * Get external store list which the given API is already published to.
+     * @param apiId API Identifier
+     * @param ifNoneMatch If-None-Match header value
+     * @param messageContext CXF Message Context
+     * @return External Store list of published API
+     */
+    @Override
+    public Response apisApiIdExternalStoresGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(apiIdentifier);
+            if (publishedStores == null) {
+                String errorMessage = "Published external stores corresponding to API :" + apiId + " do not exist";
+                RestApiUtil.handleResourceNotFoundError(errorMessage, log);
+            }
+            ExternalStoreListDTO externalStoreListDTO =
+                    ExternalStoreMappingUtil.fromExternalStoreCollectionToDTO(publishedStores);
+            return Response.ok().entity(externalStoreListDTO).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving published external stores for API: " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return Response.serverError().build();
+    }
+
+    /**
      * Retrieves API Lifecycle history information
      *
      * @param apiId API Id
@@ -1209,6 +1246,62 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (APIManagementException e) {
             String errorMessage = "Error while configuring monetization for API ID : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return Response.serverError().build();
+    }
+
+    /**
+     * Publish API to given external stores.
+     *
+     * @param apiId API Id
+     * @param externalStoreIds  External Store Ids
+     * @param ifMatch   If-match header value
+     * @param messageContext CXF Message Context
+     * @return Response of published external store list
+     */
+    @Override
+    public Response apisApiIdPublishToExternalStoresPost(String apiId, List<String> externalStoreIds, String ifMatch,
+                                                         MessageContext messageContext) {
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            API api = apiProvider.getAPI(apiIdentifier);
+            Set<APIStore> inputStores = new HashSet<>();
+            for (String store : externalStoreIds) {
+                if (StringUtils.isNotEmpty(store)) {
+                    APIStore inputStore = APIUtil.getExternalAPIStore(store,
+                            APIUtil.getTenantIdFromTenantDomain(tenantDomain));
+                    if (inputStore == null) {
+                        String errorMessage = "Invalid External Store Id: " + store;
+                        RestApiUtil.handleBadRequest(errorMessage, log);
+                    }
+                    inputStores.add(inputStore);
+                }
+            }
+            Set<String> versions = apiProvider.getAPIVersions(apiIdentifier.getProviderName(),
+                    apiIdentifier.getName());
+            APIVersionStringComparator comparator = new APIVersionStringComparator();
+            boolean apiOlderVersionExist = false;
+            for (String tempVersion : versions) {
+                if (comparator.compare(tempVersion, apiIdentifier.getVersion()) < 0) {
+                    apiOlderVersionExist = true;
+                    break;
+                }
+            }
+            if (apiProvider.updateAPIsInExternalAPIStores(api, inputStores, apiOlderVersionExist)) {
+                Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(apiIdentifier);
+                ExternalStoreListDTO externalStoreListDTO =
+                        ExternalStoreMappingUtil.fromExternalStoreCollectionToDTO(publishedStores);
+                return Response.ok().entity(externalStoreListDTO).build();
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while publishing API: " + apiId + "for external stores";
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         }
         return Response.serverError().build();
     }
