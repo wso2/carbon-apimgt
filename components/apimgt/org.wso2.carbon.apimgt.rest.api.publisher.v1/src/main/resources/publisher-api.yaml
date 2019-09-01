@@ -284,6 +284,10 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/API'
+        - in: query
+          name: openAPIVersion
+          description: Open api version
+          type: string
       tags:
         - APIs
       responses:

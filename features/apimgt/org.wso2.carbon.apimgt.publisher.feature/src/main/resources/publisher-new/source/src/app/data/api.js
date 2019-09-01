@@ -276,8 +276,9 @@ class API extends Resource {
         }
     }
 
-    save() {
-        const promisedAPIResponse = this.client.then(client => {
+    save(query) {
+        query = query ? query : 'v2';
+        const promisedAPIResponse = this.client.then((client) => {
             const properties = client.spec.definitions.API.properties;
             const data = {};
             Object.keys(this).forEach(apiAttribute => {
@@ -288,6 +289,7 @@ class API extends Resource {
             const payload = {
                 body: data,
                 'Content-Type': 'application/json',
+                openAPIVersion: query,
             };
             return client.apis['APIs'].post_apis(payload, this._requestMetaData());
         });

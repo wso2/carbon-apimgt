@@ -26,11 +26,10 @@ import java.util.ArrayList;
  */
 public class APIDefinitionValidationResponse {
     private boolean isValid = false;
-
     private String content;
     private String jsonContent;
     private Info info;
-
+    private APIDefinition parser;
     private ArrayList<ErrorHandler> errorItems = new ArrayList<>();
 
     public boolean isValid() {
@@ -119,5 +118,13 @@ public class APIDefinitionValidationResponse {
         public void setContext(String context) {
             this.context = context;
         }
+    }
+
+    public APIDefinition getParser() {
+        return parser;
+    }
+
+    public void setParser(APIDefinition parser) {
+        this.parser = parser;
     }
 }
