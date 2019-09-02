@@ -26,9 +26,6 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
-import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.clustering.ClusteringAgent;
-import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
@@ -40,6 +37,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -90,6 +88,8 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -112,17 +112,12 @@ import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
-import org.wso2.carbon.apimgt.impl.utils.StatUpdateClusterMessage;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
-import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceAPIManagementExceptionException;
-import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteringFaultException;
-import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
-import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceStub;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
@@ -150,7 +145,6 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
@@ -161,7 +155,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2667,13 +2660,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(api.getId().getApiName(),
                     api.getId().getVersion(), api.getId().getProviderName());
             if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
-                String apiDefinition = definitionFromOpenAPISpec.getAPIDefinition(api.getId(), registry);
+                String apiDefinition = OASParserUtil.getAPIDefinition(api.getId(), registry);
                 LinkedHashMap map = new ObjectMapper().readValue(apiDefinition, LinkedHashMap.class);
                 Map infoObject = (Map) map.get("info");
                 infoObject.remove("version");
                 infoObject.put("version", newAPI.getId().getVersion());
                 String json = new ObjectMapper().writeValueAsString(map);
-                definitionFromOpenAPISpec.saveAPIDefinition(newAPI, json, registry);
+                OASParserUtil.saveAPIDefinition(newAPI, json, registry);
             }
 
             // copy wsdl in case of a SOAP API
@@ -4515,7 +4508,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            definitionFromOpenAPISpec.saveAPIDefinition(api, jsonText, registry);
+            OASParserUtil.saveAPIDefinition(api, jsonText, registry);
 
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
@@ -4539,6 +4532,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
             definitionFromOpenAPISpec.saveAPIDefinition(apiProduct, jsonText, registry);
 
         } finally {

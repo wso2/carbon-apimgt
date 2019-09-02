@@ -16,10 +16,7 @@
  * under the License.
  */
 import React, { Component } from 'react';
-import {
-    withStyles,
-    FormHelperText,
-} from '@material-ui/core';
+import { withStyles, FormHelperText } from '@material-ui/core';
 import ErrorOutline from '@material-ui/icons/ErrorOutline';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
@@ -171,13 +168,15 @@ class ProvideGraphQL extends Component {
                 const { isValid, graphQLInfo } = response.obj;
                 if (graphQLInfo === null) {
                     validNew.graphQLFile.invalidFile = true;
-                    const message =
-                    intl.formatMessage({
+                    const message = intl.formatMessage({
                         id: 'Apis.GraphQL.Steps.ProvideGraphQL.file.invalid.file',
                         defaultMessage: 'Invalid file',
                     });
                     this.setState({
-                        isValid, errorMessage: message, loading: false, file,
+                        isValid,
+                        errorMessage: message,
+                        loading: false,
+                        file,
                     });
                 } else {
                     graphQLBean.info = graphQLInfo;
@@ -193,8 +192,7 @@ class ProvideGraphQL extends Component {
                 validNew.graphQLFile.invalidFile = true;
                 updateFileErrors(validNew);
                 updateGraphQLBean(graphQLBean);
-                const message =
-                intl.formatMessage({
+                const message = intl.formatMessage({
                     id: 'Apis.GraphQL.Steps.ProvideGraphQL.file.invalid.file',
                     defaultMessage: 'Invalid file',
                 });
@@ -234,30 +232,32 @@ class ProvideGraphQL extends Component {
                             [classes.dropZoneErrorBox]: valid.graphQLFile.empty,
                         })}
                     >
-
-                        {file.name ? (
-                            <div>
-                                <Icon className={classes.largeIcon}>
-                                    insert_drive_file
-                                </Icon>
-                                <div className={classes.fileNameWrapper}>
-                                    <Typography variant='body2' gutterBottom>
-                                        {file.name} - {file.size} bytes
-                                    </Typography>
-                                </div>
-                            </div>
-                        ) : (
-                            <div>
-                                <Backup className={classes.dropZoneIcon} />
-                                <div>
-                                    <FormattedMessage
-                                        id='Apis.GraphQL.Steps.ProvideGraphQL.try.dropping.schema.file'
-                                        defaultMessage='Try dropping schema file here, or click to select
+                        {({ getRootProps, getInputProps }) => (
+                            <div {...getRootProps()}>
+                                <input {...getInputProps()} />
+                                {file.name ? (
+                                    <div>
+                                        <Icon className={classes.largeIcon}>insert_drive_file</Icon>
+                                        <div className={classes.fileNameWrapper}>
+                                            <Typography variant='body2' gutterBottom>
+                                                {file.name} - {file.size} bytes
+                                            </Typography>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <Backup className={classes.dropZoneIcon} />
+                                        <div>
+                                            <FormattedMessage
+                                                id='Apis.GraphQL.Steps.ProvideGraphQL.try.dropping.schema.file'
+                                                defaultMessage='Try dropping schema file here, or click to select
                                         schema to upload.'
-                                    />
-                                </div>
-                            </div>)}
-
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </Dropzone>
                     <FormHelperText className={classes.errorMessage}>
                         {valid.graphQLFile.empty && (

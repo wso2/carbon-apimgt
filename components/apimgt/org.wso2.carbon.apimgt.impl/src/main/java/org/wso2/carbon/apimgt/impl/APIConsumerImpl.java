@@ -368,7 +368,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<API> apiSet = new TreeSet<API>(new APINameComparator());
         try {
             List<GovernanceArtifact> genericArtifacts =
-                    GovernanceUtils.findGovernanceArtifacts(getSearchQuery(APIConstants.TAG_SEARCH_TYPE_PREFIX2 + tag), registry,
+                    GovernanceUtils.findGovernanceArtifacts(getSearchQuery(APIConstants.TAGS_EQ_SEARCH_TYPE_PREFIX + tag), registry,
                                                             APIConstants.API_RXT_MEDIA_TYPE);
             for (GovernanceArtifact genericArtifact : genericArtifacts) {
                 try {
@@ -4162,12 +4162,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber, APIIdentifier identifier, String groupingId)
+    public Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber, Identifier identifier, String groupingId)
             throws APIManagementException {
         Set<SubscribedAPI> subscribedAPISet = new HashSet<>();
         Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
-            if (api.getApiId().equals(identifier)) {
+            if (identifier instanceof APIIdentifier && identifier.equals(api.getApiId())) {
+                Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
+                for (APIKey key : keys) {
+                    api.addKey(key);
+                }
+                subscribedAPISet.add(api);
+            } else if (identifier instanceof APIProductIdentifier && identifier.equals(api.getProductId())) {
                 Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
                 for (APIKey key : keys) {
                     api.addKey(key);

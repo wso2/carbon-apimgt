@@ -160,7 +160,7 @@ public class SubscribedAPI {
     @Override
     public int hashCode() {
         int result = subscriber.hashCode();
-        result = 31 * result + apiId.hashCode();
+        result = (31 * result) + ((apiId == null) ? productId.hashCode() : apiId.hashCode());
         result = 31 * result + application.hashCode();
         return result;
     }

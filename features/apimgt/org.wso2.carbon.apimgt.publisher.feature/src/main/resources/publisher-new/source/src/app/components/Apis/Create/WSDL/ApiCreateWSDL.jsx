@@ -16,7 +16,6 @@
  * under the License.
  */
 import React, { useReducer, useState } from 'react';
-import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -27,43 +26,13 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import Wsdl from 'AppData/Wsdl';
+import Alert from 'AppComponents/Shared/Alert';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm';
+import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
 
 import ProvideWSDL from './Steps/ProvideWSDL';
-import DefaultAPIForm from './Steps/DefaultAPIForm';
 
-/**
- * Base component for all API create forms
- *
- * @param {Object} props title and children components are expected
- * @returns {React.Component} Base element
- */
-function APICreateBase(props) {
-    const { title, children } = props;
-    return (
-        <Grid container spacing={3}>
-            <Grid item sm={12} md={12} />
-            {/*
-            Following two grids control the placement of whole create page
-            For centering the content better use `container` props, but instead used an empty grid item for flexibility
-             */}
-            <Grid item sm={0} md={3} />
-            <Grid item sm={12} md={6}>
-                <Grid container spacing={5}>
-                    <Grid item md={12}>
-                        {title}
-                    </Grid>
-                    <Grid item md={12}>
-                        <Paper elevation={0}>{children}</Paper>
-                    </Grid>
-                </Grid>
-            </Grid>
-        </Grid>
-    );
-}
-APICreateBase.propTypes = {
-    title: PropTypes.element.isRequired,
-    children: PropTypes.element.isRequired,
-};
 /**
  * Handle API creation from WSDL.
  *
@@ -121,46 +90,55 @@ export default function SOAPToREST() {
      * @param {*} validationState
      */
     function handleOnValidate(isFormValid) {
-        // API Name , Version & Context is a must that's why `&&` chain
         inputsDispatcher({
             action: 'isFormValid',
             value: isFormValid,
         });
     }
 
+    const [isCreating, setCreating] = useState();
     /**
      *
      *
      * @param {*} params
      */
     function createAPI() {
+        setCreating(true);
         const {
             name, version, context, endpoint, policies,
         } = apiInputs;
-        const endpointConfig = {
-            endpoint_type: 'http',
-            sandbox_endpoints: {
-                url: endpoint,
-            },
-            production_endpoints: {
-                url: endpoint,
-            },
+        const additionalProperties = {
+            name,
+            version,
+            context,
+            policies,
         };
-        const promisedWSDLImport = Wsdl.import(
-            apiInputs.inputValue,
-            {
-                name,
-                version,
-                context,
-                endpointConfig,
-                policies,
-            },
-            'SOAPTOREST',
-        );
-        promisedWSDLImport.then((response) => {
-            console.log(response);
-        });
-        // TODO: catch error ~tmkb
+        if (endpoint) {
+            additionalProperties.endpointConfig = {
+                endpoint_type: 'http',
+                sandbox_endpoints: {
+                    url: endpoint,
+                },
+                production_endpoints: {
+                    url: endpoint,
+                },
+            };
+        }
+
+        const promisedWSDLImport = Wsdl.import(apiInputs.inputValue, additionalProperties, 'SOAPTOREST');
+        promisedWSDLImport
+            .then(() => {
+                Alert.info('API created successfully');
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while adding the API');
+                }
+                console.error(error);
+            })
+            .finally(() => setCreating(false));
     }
 
     return (
@@ -218,9 +196,9 @@ export default function SOAPToREST() {
                         <Grid item>
                             {wizardStep === 0 && (
                                 <Link to='/apis/'>
-                                    <Button>
+                                    <Button variant='outlined'>
                                         <FormattedMessage
-                                            id='Apis.Details.Configuration.Configuration.cancel'
+                                            id='Apis.Create.WSDL.ApiCreateWSDL.cancel'
                                             defaultMessage='Cancel'
                                         />
                                     </Button>
@@ -243,10 +221,10 @@ export default function SOAPToREST() {
                                 <Button
                                     variant='contained'
                                     color='primary'
-                                    disabled={!apiInputs.isFormValid}
+                                    disabled={!apiInputs.isFormValid || isCreating}
                                     onClick={createAPI}
                                 >
-                                    Create
+                                    Create {isCreating && <CircularProgress size={24} />}
                                 </Button>
                             )}
                         </Grid>

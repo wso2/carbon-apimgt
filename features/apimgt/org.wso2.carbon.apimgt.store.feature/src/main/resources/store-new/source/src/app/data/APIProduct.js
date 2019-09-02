@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import CONSTS from 'AppData/Constants';
 import APIClientFactory from './APIClientFactory';
 import Resource from './Resource';
 import Utils from './Utils';
@@ -76,7 +77,7 @@ export default class APIProduct extends Resource {
      */
     getAPIThumbnail(id, callback = null) {
         const promisedThumbnail = this.client.then((client) => {
-            return client.apis['API Product (Individual)'].get_api_products__apiProductId__thumbnail({
+            return client.apis['API Products'].get_api_products__apiProductId__thumbnail({
                 apiProductId: id,
             },
             this._requestMetaData());
@@ -174,17 +175,17 @@ export default class APIProduct extends Resource {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSubscriptions(apiId, applicationId, callback = null) {
-        const promiseGet = this.client.then(
-            (client) => {
-                return client.apis.Subscription.get_subscriptions(
-                    { apiId, applicationId }, this._requestMetaData(),
-                );
-            },
-        );
+        const payload = { apiId, apiType: CONSTS.API_PRODUCT_TYPE };
+        if (applicationId) {
+            payload[applicationId] = applicationId;
+        }
+        const promisedGet = this.client.then((client) => {
+            return client.apis.Subscriptions.get_subscriptions(payload, this._requestMetaData());
+        });
         if (callback) {
-            return promiseGet.then(callback);
+            return promisedGet.then(callback);
         } else {
-            return promiseGet;
+            return promisedGet;
         }
     }
 }

@@ -86,7 +86,7 @@ public interface ApisApiService {
       public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, Boolean expand, String accept, String tenantDomain, MessageContext messageContext) throws APIManagementException;
       public Response apisHead(String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisImportGraphqlSchemaPost(String type, InputStream fileInputStream, Attachment fileDetail, String additionalProperties, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisPost(APIDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response apisPost(APIDTO body, String openAPIVersion, MessageContext messageContext) throws APIManagementException;
       public Response apisValidateGraphqlSchemaPost(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
       public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, MessageContext messageContext) throws APIManagementException;
       public Response importWSDLDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, MessageContext messageContext) throws APIManagementException;

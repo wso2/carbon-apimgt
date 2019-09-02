@@ -1175,6 +1175,9 @@ public final class APIConstants {
     public static final String OPEN_API_V3 = "3.0.x";
     public static final String OPEN_API = "openapi";
     public static final String OPEN_API_VERSION_REGEX = "3\\.0\\.\\d{1,}";
+    public static final String SWAGGER_IS_MISSING_MSG = "swagger is missing";
+    public static final String OPENAPI_IS_MISSING_MSG = "openapi is missing";
+    public static final String SWAGGER_X_SCOPES_BINDINGS = "x-scopes-bindings";
 
     //swagger v1.2 constants
     public static final String SWAGGER_RESOURCES = "resources";
@@ -1369,10 +1372,10 @@ public final class APIConstants {
     public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS = "doc=";
-    public static final String TAG_SEARCH_TYPE_PREFIX = "tags";
-    public static final String TAG_SEARCH_TYPE_PREFIX2 = "tags=";
-    public static final String TAG_SEARCH_TYPE_PREFIX3 = "tag";
-    public static final String TAG_SEARCH_TYPE_PREFIX4 = "tag:";
+    public static final String TAGS_SEARCH_TYPE_PREFIX = "tags";
+    public static final String TAGS_EQ_SEARCH_TYPE_PREFIX = "tags=";
+    public static final String TAG_SEARCH_TYPE_PREFIX = "tag";
+    public static final String TAG_COLON_SEARCH_TYPE_PREFIX = "tag:";
     public static final String NAME_TYPE_PREFIX = "name";
     private static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
     private static final String VERSION_SEARCH_TYPE_PREFIX = "version";
@@ -1571,7 +1574,7 @@ public final class APIConstants {
     // Prefix used for saving the custom properties related with APIs
     public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "api_meta.";
     // Reserved keywords for search.
-    public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAG_SEARCH_TYPE_PREFIX,
+    public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
             NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
             VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
             API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX };

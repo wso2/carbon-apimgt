@@ -18,7 +18,7 @@
     <parent>
         <artifactId>org.wso2.carbon.apimgt.hybrid.gateway</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.5.70-SNAPSHOT</version>
+        <version>6.5.72-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -119,8 +119,9 @@
                             org.wso2.carbon.core; version="${carbon.kernel.package.import.version.range}",
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
                             org.apache.commons.lang3; version="${org.apache.commons.lang3.version}",
-                            org.osgi.service.component; version="${org.osgi.service.version}",
-                            org.osgi.framework; version="${org.osgi.framework.version}",
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.util.*;version="${imp.package.version.osgi.util}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",					
                             com.fasterxml.jackson.databind; version="${com.fasterxml.jackson.databind.version}",
                             org.apache.commons.codec.binary; version="${org.apache.commons.codec.binary.version}",
                             org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",
@@ -153,8 +154,6 @@
 
     <properties>
         <org.apache.commons.lang3.version>[3.8.1,4)</org.apache.commons.lang3.version>
-        <org.osgi.service.version>[1.2,2)</org.osgi.service.version>
-        <org.osgi.framework.version>[1.7,2)</org.osgi.framework.version>
         <com.fasterxml.jackson.databind.version>[2.9,3)</com.fasterxml.jackson.databind.version>
         <org.apache.commons.codec.binary.version>[1.4,2)</org.apache.commons.codec.binary.version>
         <org.apache.version>[4.3,5)</org.apache.version>

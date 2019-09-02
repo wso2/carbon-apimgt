@@ -33,7 +33,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
@@ -66,7 +65,7 @@ import org.wso2.carbon.apimgt.api.model.Wsdl;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
@@ -90,8 +89,6 @@ import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.config.RegistryConfiguration;
-import org.wso2.carbon.registry.core.config.RegistryConfigurationProcessor;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
@@ -137,7 +134,6 @@ import java.net.URLDecoder;
 public abstract class AbstractAPIManager implements APIManager {
 
     // API definitions from swagger v2.0
-    protected static final APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
     protected Log log = LogFactory.getLog(getClass());
     protected Registry registry;
     protected UserRegistry configRegistry;
@@ -1136,7 +1132,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 registryType = registry;
             }
-            swaggerDoc = definitionFromOpenAPISpec.getAPIDefinition(apiId, registryType);
+            swaggerDoc = OASParserUtil.getAPIDefinition(apiId, registryType);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get swagger documentation of API : " + apiId;
             log.error(msg, e);
@@ -2870,7 +2866,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 registryType = registry;
             }
-            return definitionFromOpenAPISpec.getAPIOpenAPIDefinitionTimeStamps(apiIdentifier, registryType);
+            return OASParserUtil.getAPIOpenAPIDefinitionTimeStamps(apiIdentifier, registryType);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             log.error("Error while getting the lastUpdated time due to " + e.getMessage(), e);
 

@@ -35,13 +35,13 @@ const endpointImplementationTypes = [{ key: 'INLINE', value: 'Inline' }, { key: 
 
 const styles = theme => ({
     prototypeEndpointSelectorWrapper: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
     },
     prototypeEndpointsWrapper: {
-        marginTop: theme.spacing.unit,
+        marginTop: theme.spacing(),
     },
     genericEndpointWrapper: {
-        padding: theme.spacing.unit,
+        padding: theme.spacing(),
     },
     radioGroup: {
         display: 'flex',

@@ -93,6 +93,7 @@ import java.util.regex.Pattern;
 /**
  * Models API definition using OAS (swagger 2.0) parser
  */
+@Deprecated
 public class APIDefinitionUsingOASParser extends APIDefinition {
 
     private static final Log log = LogFactory.getLog(APIDefinitionUsingOASParser.class);
@@ -149,7 +150,6 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
         return scopeSet;
     }
 
-    @Override
     public void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry)
             throws APIManagementException {
 
@@ -160,7 +160,6 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
 
     }
 
-    @Override
     public String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry)
             throws APIManagementException {
         return null;
@@ -352,7 +351,6 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
         return getSwaggerJsonString(swaggerObj);
     }
 
-    @Override
     public Map<String, String> getAPIOpenAPIDefinitionTimeStamps(APIIdentifier apiIdentifier,
             Registry registry) throws APIManagementException {
         return null;
@@ -456,7 +454,6 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
         return errorItem;
     }
 
-    @Override
     public APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, boolean returnJsonContent)
             throws APIManagementException {
 
@@ -686,5 +683,18 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
 
         @JsonSetter("schema")
         public abstract void setResponseSchema(Model var1);
+    }
+
+    /**
+     * Populate definition with wso2 APIM specific information
+     *
+     * @param oasDefinition OAS definition
+     * @param api           API
+     * @return Generated OAS definition
+     * @throws APIManagementException If an error occurred
+     */
+    @Override
+    public String populateCustomManagementInfo(String oasDefinition, API api) throws APIManagementException {
+        return oasDefinition;
     }
 }
