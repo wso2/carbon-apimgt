@@ -24,6 +24,7 @@ import 'react-circular-progressbar/dist/styles.css';
 import VisibilitySensor from 'react-visibility-sensor';
 import Paper from '@material-ui/core/Paper';
 import { withStyles } from '@material-ui/core/styles';
+import { Line } from 'rc-progress';
 
 const styles = theme => ({
     rootPaper: {
@@ -138,14 +139,27 @@ class APISecurityAudit extends Component {
                                                 }}
                                             </VisibilitySensor>
                                         </div>
-                                        <div style={{ 'flex-grow': 1, marginLeft: 200, marginTop: 50 }}>
+                                        <div style={{ flexGrow: 1, marginLeft: 200, marginTop: 10 }}>
                                             <Typography variant='body1'>
                                                 Overall Grade: {Math.round(overallGrade)} / 100
                                             </Typography>
-                                            <Typography variant='body1'>Number of Errors: {numErrors}</Typography>
+                                            <Typography variant='body1'>Total Number of Errors: {numErrors}</Typography>
                                             <Typography variant='body1'>
                                                 Overall Criticality: {reportObject.criticality}
                                             </Typography>
+                                            <hr />
+                                            <Typography variant='body1'>OpenAPI Format Requirements</Typography>
+                                            <Line
+                                                percent={Math.round(reportObject.validation.grade)}
+                                                strokeColor='#3d98c7'
+                                            />
+                                            <Typography variant='body1'>Security</Typography>
+                                            <Line
+                                                percent={Math.round(reportObject.security.grade)}
+                                                strokeColor='#3d98c7'
+                                            />
+                                            <Typography variant='body1'>Data Validation</Typography>
+                                            <Line percent={Math.round(reportObject.data.grade)} strokeColor='#3d98c7' />
                                         </div>
                                     </div>
                                 </div>
