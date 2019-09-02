@@ -36,6 +36,7 @@ import javax.cache.Caching;
 public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor {
 
     private static final Log logger = LogFactory.getLog(SubscriberRegistrationInterceptor.class);
+    private static final String LOCK_POSTFIX = "_SubscriberRegistration";
 
     public SubscriberRegistrationInterceptor() {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
@@ -73,7 +74,7 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             Subscriber subscriber = apiConsumer.getSubscriber(username);
             if (subscriber == null) {
-                synchronized (this) {
+                synchronized (username + LOCK_POSTFIX) {
                     subscriber = apiConsumer.getSubscriber(username);
                     if (subscriber == null) {
                         try {
