@@ -285,7 +285,7 @@ public class GraphQLSchemaDefinition {
                 schemaDoc = IOUtils.toString(schemaResource.getContentStream(),
                         RegistryConstants.DEFAULT_CHARSET_ENCODING);
             }
-        } catch (org.wso2.carbon.registry.core.exceptions.RegistryException e) {
+        } catch (RegistryException e) {
             String msg = "Error while getting schema file from the registry " + schemaResourePath;
             log.error(msg, e);
             throw new APIManagementException(msg, e);
@@ -293,10 +293,6 @@ public class GraphQLSchemaDefinition {
             String error = "Error occurred while getting the content of schema " + schemaName;
             log.error(error);
             throw new APIManagementException(error, e);
-        } catch (RegistryException e) {
-            String msg = "Failed to get swagger documentation of API : " + apiId;
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
         }
         return schemaDoc;
     }

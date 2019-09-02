@@ -1067,8 +1067,7 @@ public abstract class AbstractAPIManager implements APIManager {
             Registry registryType;
             //Tenant store anonymous mode if current tenant and the required tenant is not matching
             if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
-                int tenantId = getTenantManager().getTenantId(
-                        apiTenantDomain);
+                int tenantId = getTenantManager().getTenantId(apiTenantDomain);
                 registryType = getRegistryService().getGovernanceUserRegistry(
                         CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
             } else {
