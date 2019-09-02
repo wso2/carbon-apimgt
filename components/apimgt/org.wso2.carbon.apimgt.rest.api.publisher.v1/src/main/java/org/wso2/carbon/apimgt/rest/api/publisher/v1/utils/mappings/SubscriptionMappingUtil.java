@@ -83,7 +83,6 @@ public class SubscriptionMappingUtil {
             subscriptionDTOs.add(fromSubscriptionToDTO(subscription));
         }
         subscriptionListDTO.setCount(subscriptionDTOs.size());
-
         return subscriptionListDTO;
     }
 
@@ -113,7 +112,6 @@ public class SubscriptionMappingUtil {
             }
         }
         subscriptionListDTO.setCount(subscriptionDTOs.size());
-
         return subscriptionListDTO;
     }
 
@@ -140,12 +138,10 @@ public class SubscriptionMappingUtil {
         int end = offset + limit - 1 <= size - 1 ? offset + limit - 1 : size - 1;
 
         List<SubscriptionDTO> subscriptions = subscriptionListDTO.getList();
-
         for (int i = start; i <= end; i++) {
             subscriptionDTOs.add(subscriptions.get(i));
         }
         paginatedSubscriptionListDTO.setCount(subscriptionDTOs.size());
-
         return paginatedSubscriptionListDTO;
     }
 

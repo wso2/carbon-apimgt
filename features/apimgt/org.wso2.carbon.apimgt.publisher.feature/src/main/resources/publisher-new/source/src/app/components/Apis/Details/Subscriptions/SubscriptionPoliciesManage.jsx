@@ -78,7 +78,6 @@ class SubscriptionPoliciesManage extends Component {
      */
     handleChange(event) {
         this.setState({ updateInProgress: true });
-
         const { name, checked } = event.target;
         const { intl, api, updateAPI } = this.props;
         let updatedSelectedPolicies = [...api.policies];
