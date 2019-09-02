@@ -301,7 +301,7 @@ class SubscriptionsTable extends Component {
                 this.fetchSubscriptionData();
             })
             .catch((errorResponse) => {
-                console.log(errorResponse);
+                console.error(errorResponse);
                 const { message } = errorResponse.response.body;
                 const messages = defineMessages({
                     errorMessage: {
@@ -332,7 +332,7 @@ class SubscriptionsTable extends Component {
                 this.fetchSubscriptionData();
             })
             .catch((errorResponse) => {
-                console.log(errorResponse);
+                console.error(errorResponse);
                 const { message } = errorResponse.response.body;
                 const messages = defineMessages({
                     errorMessage: {
@@ -363,7 +363,7 @@ class SubscriptionsTable extends Component {
                 this.fetchSubscriptionData();
             })
             .catch((errorResponse) => {
-                console.log(errorResponse);
+                console.error(errorResponse);
                 const { message } = errorResponse.response.body;
                 const messages = defineMessages({
                     errorMessage: {
@@ -387,11 +387,11 @@ class SubscriptionsTable extends Component {
         promisedSubscriptions
             .then(response =>
                 this.setState({
-                    subscriptions: response.obj.list,
-                    totalSubscription: response.obj.pagination.total,
+                    subscriptions: response.body.list,
+                    totalSubscription: response.body.pagination.total,
                 }))
             .catch((errorMessage) => {
-                console.log(errorMessage);
+                console.error(errorMessage);
                 Alert.error(JSON.stringify(errorMessage));
             });
     }
