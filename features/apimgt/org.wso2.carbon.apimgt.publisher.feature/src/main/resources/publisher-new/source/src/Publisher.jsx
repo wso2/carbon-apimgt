@@ -25,7 +25,6 @@ import Utils from 'AppData/Utils';
 import Logout from 'AppComponents/Logout';
 import Progress from 'AppComponents/Shared/Progress';
 import PublisherRootErrorBoundary from 'AppComponents/Shared/PublisherRootErrorBoundary';
-import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import Configurations from 'Config';
 
 // Localization
@@ -156,13 +155,6 @@ class Publisher extends React.Component {
         const locale = languageWithoutRegionCode || language;
         if (!userResolved) {
             return <Progress />;
-        }
-        if (!user) {
-            return (
-                <IntlProvider locale={locale} messages={messages}>
-                    <RedirectToLogin />
-                </IntlProvider>
-            );
         }
         return (
             <IntlProvider locale={locale} messages={messages}>
