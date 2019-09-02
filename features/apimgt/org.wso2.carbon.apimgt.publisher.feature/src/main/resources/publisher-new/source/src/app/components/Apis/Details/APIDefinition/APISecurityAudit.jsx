@@ -174,7 +174,7 @@ class APISecurityAudit extends Component {
                                                 </strong>
                                             </Typography>
                                             <Line
-                                                percent={Math.round(reportObject.validation.grade)}
+                                                percent={((Math.round(reportObject.validation.grade)) / 25) * 100}
                                                 strokeColor='#3d98c7'
                                             />
                                             <Typography variant='body1'>
@@ -183,7 +183,7 @@ class APISecurityAudit extends Component {
                                                 </strong>
                                             </Typography>
                                             <Line
-                                                percent={Math.round(reportObject.security.grade)}
+                                                percent={((Math.round(reportObject.security.grade)) / 25) * 100}
                                                 strokeColor='#3d98c7'
                                             />
                                             <Typography variant='body1'>
@@ -191,7 +191,10 @@ class APISecurityAudit extends Component {
                                                     Data Validation - ({Math.round(reportObject.data.grade)} / 50)
                                                 </strong>
                                             </Typography>
-                                            <Line percent={Math.round(reportObject.data.grade)} strokeColor='#3d98c7' />
+                                            <Line
+                                                percent={((Math.round(reportObject.data.grade)) / 50) * 100}
+                                                strokeColor='#3d98c7'
+                                            />
                                         </div>
                                     </div>
                                 </div>
