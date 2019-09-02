@@ -91,7 +91,7 @@ function Endpoints(props) {
         const implType = api.endpointConfig.implementation_status;
         setModifiedAPI(cloneDeep(api));
         setEndpointImplementation(() => {
-            return lifeCycleStatus === 'PROTOTYPED' && implType === 'prototyped' ?
+            return lifeCycleStatus === 'PROTOTYPED' || implType === 'prototyped' ?
                 endpointImplType[1] : endpointImplType[0];
         });
     }, []);
