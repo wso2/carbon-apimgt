@@ -290,7 +290,7 @@ public class GraphQLSchemaDefinition {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (IOException e) {
-            String error = "Error occurred while getting the content of schema " + schemaName;
+            String error = "Error occurred while getting the content of schema: " + schemaName;
             log.error(error);
             throw new APIManagementException(error, e);
         }

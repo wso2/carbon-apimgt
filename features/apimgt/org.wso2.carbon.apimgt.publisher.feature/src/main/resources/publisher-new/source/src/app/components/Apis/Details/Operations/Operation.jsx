@@ -49,7 +49,7 @@ const styles = theme => ({
         width: 400,
     },
     dropDown: {
-        width: 90,
+        width: theme.spacing.unit * 11.25,
     },
     divider: {
         marginTop: 20,
