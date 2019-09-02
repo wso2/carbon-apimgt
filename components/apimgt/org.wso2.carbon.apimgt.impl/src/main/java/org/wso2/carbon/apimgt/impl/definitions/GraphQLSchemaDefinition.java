@@ -297,3 +297,4 @@ public class GraphQLSchemaDefinition {
         return schemaDoc;
     }
 }
+
