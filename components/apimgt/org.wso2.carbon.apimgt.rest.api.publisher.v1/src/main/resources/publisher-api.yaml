@@ -1913,6 +1913,8 @@ paths:
         type: string
         required: true
       - $ref: '#/parameters/If-Match'
+      consumes:
+      - application/x-www-form-urlencoded
       tags:
       - GraphQL Schema (Individual)
       responses:
@@ -7809,7 +7811,6 @@ definitions:
         description: |
           This attribute declares the validation error message
         type: string
-        meesage: String
       graphQLInfo:
         description:
           Summary of the GraphQL including the basic information
@@ -7820,7 +7821,7 @@ definitions:
               $ref: '#/definitions/APIOperations'
           graphQLSchema:
             items:
-            $ref: '#/definitions/GraphQLSchema'
+              $ref: '#/definitions/GraphQLSchema'
 
 #-----------------------------------------------------
 # The Threat Protection Policy List Resource
