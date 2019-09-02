@@ -25,11 +25,17 @@ import VisibilitySensor from 'react-visibility-sensor';
 import Paper from '@material-ui/core/Paper';
 import { withStyles } from '@material-ui/core/styles';
 import { Line } from 'rc-progress';
+import Grid from '@material-ui/core/Grid';
+import Progress from 'AppComponents/Shared/Progress';
 
 const styles = theme => ({
     rootPaper: {
         padding: theme.spacing.unit * 3,
         margin: theme.spacing.unit * 2,
+    },
+    gridDiv: {
+        display: 'flex',
+        'flex-direction': 'row',
     },
 });
 
@@ -48,6 +54,7 @@ class APISecurityAudit extends Component {
             report: null,
             overallGrade: 0,
             numErrors: 0,
+            loading: false,
         };
         this.keyCount = 0;
     }
@@ -57,6 +64,7 @@ class APISecurityAudit extends Component {
      */
     componentDidMount() {
         // Include code to pass in the data from the backend
+        this.setState({ loading: true });
         const { apiId } = this.props;
         const api = new API();
 
@@ -66,9 +74,11 @@ class APISecurityAudit extends Component {
                     report: response.body.report,
                     overallGrade: response.body.grade,
                     numErrors: response.body.numErrors,
+                    loading: false,
                 });
             })
             .catch((error) => {
+                this.setState({ loading: false });
                 console.error(error);
                 if (error.response) {
                     Alert.error(error.response.body.message);
@@ -93,8 +103,14 @@ class APISecurityAudit extends Component {
         // TODO - Add the Progress Circle and Progress Bars
         // TODO - Test the json data after finishing the structure
         const { classes } = this.props;
-        const { report, overallGrade, numErrors } = this.state;
+        const {
+            report, overallGrade, numErrors, loading,
+        } = this.state;
         const reportObject = JSON.parse(report);
+
+        if (loading) {
+            return <Progress />;
+        }
         return (
             <div>
                 {report && (
@@ -141,24 +157,40 @@ class APISecurityAudit extends Component {
                                         </div>
                                         <div style={{ flexGrow: 1, marginLeft: 200, marginTop: 10 }}>
                                             <Typography variant='body1'>
-                                                Overall Grade: {Math.round(overallGrade)} / 100
+                                                <strong>Overall Grade:</strong> {Math.round(overallGrade)} / 100
                                             </Typography>
-                                            <Typography variant='body1'>Total Number of Errors: {numErrors}</Typography>
                                             <Typography variant='body1'>
-                                                Overall Criticality: {reportObject.criticality}
+                                                <strong>
+                                                    Total Number of Errors:
+                                                </strong> {numErrors}
+                                            </Typography>
+                                            <Typography variant='body1'>
+                                                <strong>Overall Criticality:</strong> {reportObject.criticality}
                                             </Typography>
                                             <hr />
-                                            <Typography variant='body1'>OpenAPI Format Requirements</Typography>
+                                            <Typography variant='body1'>
+                                                <strong>OpenAPI Format
+                                                 Requirements - ({Math.round(reportObject.validation.grade)} / 25)
+                                                </strong>
+                                            </Typography>
                                             <Line
                                                 percent={Math.round(reportObject.validation.grade)}
                                                 strokeColor='#3d98c7'
                                             />
-                                            <Typography variant='body1'>Security</Typography>
+                                            <Typography variant='body1'>
+                                                <strong>
+                                                    Security - ({Math.round(reportObject.security.grade)} / 25)
+                                                </strong>
+                                            </Typography>
                                             <Line
                                                 percent={Math.round(reportObject.security.grade)}
                                                 strokeColor='#3d98c7'
                                             />
-                                            <Typography variant='body1'>Data Validation</Typography>
+                                            <Typography variant='body1'>
+                                                <strong>
+                                                    Data Validation - ({Math.round(reportObject.data.grade)} / 50)
+                                                </strong>
+                                            </Typography>
                                             <Line percent={Math.round(reportObject.data.grade)} strokeColor='#3d98c7' />
                                         </div>
                                     </div>
@@ -171,24 +203,42 @@ class APISecurityAudit extends Component {
                                         OpenAPI Format Requirements
                                 </Typography>
                                 <Typography variant='body1'>
-                                        Number of Issues: {reportObject.validation.issueCounter}
+                                    <strong>Number of Issues:</strong> {reportObject.validation.issueCounter}
                                 </Typography>
                                 <Typography variant='body1'>
-                                        Grade: {Math.round(reportObject.validation.grade)} / 25
+                                    <strong>Grade:</strong> {Math.round(reportObject.validation.grade)} / 25
                                 </Typography>
                                 <Typography variant='body1'>
-                                        Criticality: {reportObject.validation.criticality}
+                                    <strong>Criticality:</strong> {reportObject.validation.criticality}
                                 </Typography>
                                 <Typography variant='body1'>{
                                     (reportObject.validation.issueCounter !== 0) ?
                                         (reportObject.validation.issues.map((issue) => {
                                             return (
-                                                <ul>
-                                                    <li key={this.getKey()}>Description: {issue.message}</li>
-                                                    <li key={this.getKey()}>
-                                                            Score Impact: {Math.round(issue.score)}
-                                                    </li>
-                                                </ul>
+                                                <Grid container spacing={3}>
+                                                    <Grid item xs={12}>
+                                                        <Paper elevation={1} className={classes.rootPaper}>
+                                                            <div className={classes.gridDiv}>
+                                                                <Typography
+                                                                    variant='body1'
+                                                                    style={{ width: '75%' }}
+                                                                    key={this.getKey()}
+                                                                >
+                                                                    <strong>Description:</strong> {issue.message}
+                                                                </Typography>
+                                                                <Typography
+                                                                    variant='body1'
+                                                                    style={{ width: '25%' }}
+                                                                    key={this.getKey()}
+                                                                >
+                                                                    <strong>
+                                                                        Score Impact:
+                                                                    </strong> {Math.round(issue.score)}
+                                                                </Typography>
+                                                            </div>
+                                                        </Paper>
+                                                    </Grid>
+                                                </Grid>
                                             );
                                         })) : (null)
                                 }
@@ -200,24 +250,42 @@ class APISecurityAudit extends Component {
                             <div>
                                 <Typography variant='h5' style={{ marginBottom: 18 }}>Security</Typography>
                                 <Typography variant='body1'>
-                                        Number of Issues: {reportObject.security.issueCounter}
+                                    <strong>Number of Issues:</strong> {reportObject.security.issueCounter}
                                 </Typography>
                                 <Typography variant='body1'>
-                                        Grade: {Math.round(reportObject.security.grade)} / 25
+                                    <strong>Grade:</strong> {Math.round(reportObject.security.grade)} / 25
                                 </Typography>
                                 <Typography variant='body1'>
-                                        Criticality: {reportObject.security.criticality}
+                                    <strong>Criticality:</strong> {reportObject.security.criticality}
                                 </Typography>
                                 <Typography variant='body1'>{
                                     (reportObject.security.issueCounter !== 0) ?
                                         (reportObject.security.issues.map((issue) => {
                                             return (
-                                                <ul>
-                                                    <li key={this.getKey()}>Description: {issue.message}</li>
-                                                    <li key={this.getKey()}>
-                                                            Score Impact: {Math.round(issue.score)}
-                                                    </li>
-                                                </ul>
+                                                <Grid container spacing={3}>
+                                                    <Grid item xs={12}>
+                                                        <Paper elevation={1} className={classes.rootPaper}>
+                                                            <div className={classes.gridDiv}>
+                                                                <Typography
+                                                                    variant='body1'
+                                                                    style={{ width: '75%' }}
+                                                                    key={this.getKey()}
+                                                                >
+                                                                    <strong>Description:</strong> {issue.message}
+                                                                </Typography>
+                                                                <Typography
+                                                                    variant='body1'
+                                                                    style={{ width: '25%' }}
+                                                                    key={this.getKey()}
+                                                                >
+                                                                    <strong>
+                                                                        Score Impact:
+                                                                    </strong> {Math.round(issue.score)}
+                                                                </Typography>
+                                                            </div>
+                                                        </Paper>
+                                                    </Grid>
+                                                </Grid>
                                             );
                                         })) : (null)
                                 }
@@ -228,24 +296,43 @@ class APISecurityAudit extends Component {
                             <div>
                                 <Typography variant='h5' style={{ marginBottom: 18 }}>Data Validation</Typography>
                                 <Typography variant='body1'>
-                                        Number of Issues: {reportObject.data.issueCounter}
+                                    <strong>Number of Issues:</strong> {reportObject.data.issueCounter}
                                 </Typography>
                                 <Typography variant='body1'>
-                                        Grade: {Math.round(reportObject.data.grade)} / 50
+                                    <strong>Grade:</strong> {Math.round(reportObject.data.grade)} / 50
                                 </Typography>
                                 <Typography variant='body1'>
-                                        Criticality: {reportObject.data.criticality}
+                                    <strong>Criticality:</strong> {reportObject.data.criticality}
                                 </Typography>
+                                <hr />
                                 <Typography variant='body1'>{
                                     (reportObject.data.issueCounter !== 0) ?
                                         (reportObject.data.issues.map((issue) => {
                                             return (
-                                                <ul>
-                                                    <li key={this.getKey()}>Description: {issue.message}</li>
-                                                    <li key={this.getKey()}>
-                                                            Score Impact: {Math.round(issue.score)}
-                                                    </li>
-                                                </ul>
+                                                <Grid container spacing={3}>
+                                                    <Grid item xs={12}>
+                                                        <Paper elevation={1} className={classes.rootPaper}>
+                                                            <div className={classes.gridDiv}>
+                                                                <Typography
+                                                                    variant='body1'
+                                                                    style={{ width: '75%' }}
+                                                                    key={this.getKey()}
+                                                                >
+                                                                    <strong>Description:</strong> {issue.message}
+                                                                </Typography>
+                                                                <Typography
+                                                                    variant='body1'
+                                                                    style={{ width: '25%' }}
+                                                                    key={this.getKey()}
+                                                                >
+                                                                    <strong>
+                                                                        Score Impact:
+                                                                    </strong> {Math.round(issue.score)}
+                                                                </Typography>
+                                                            </div>
+                                                        </Paper>
+                                                    </Grid>
+                                                </Grid>
                                             );
                                         })) : (null)
                                 }
