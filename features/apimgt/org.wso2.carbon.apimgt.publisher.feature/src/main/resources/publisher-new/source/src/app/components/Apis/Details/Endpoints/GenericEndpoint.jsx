@@ -36,11 +36,11 @@ const styles = theme => ({
         width: '100%',
     },
     input: {
-        marginLeft: theme.spacing.unit,
+        marginLeft: theme.spacing(),
         flex: 1,
     },
     iconButton: {
-        padding: theme.spacing.unit,
+        padding: theme.spacing(),
     },
     divider: {
         width: 1,
@@ -65,6 +65,7 @@ function GenericEndpoint(props) {
         setAdvancedConfigOpen,
         deleteEndpoint,
         index,
+        readOnly,
     } = props;
     const [serviceUrl, setServiceUrl] = useState(endpointURL);
 
@@ -87,6 +88,7 @@ function GenericEndpoint(props) {
                 margin='normal'
                 required
                 InputProps={{
+                    readOnly,
                     endAdornment: (
                         <InputAdornment position='end'>
                             {type === 'prototyped' ?
@@ -121,6 +123,10 @@ function GenericEndpoint(props) {
         </React.Fragment>);
 }
 
+GenericEndpoint.defaultProps = {
+    readOnly: false,
+};
+
 GenericEndpoint.propTypes = {
     endpointURL: PropTypes.string.isRequired,
     deleteEndpoint: PropTypes.func.isRequired,
@@ -130,6 +136,7 @@ GenericEndpoint.propTypes = {
     index: PropTypes.number.isRequired,
     editEndpoint: PropTypes.func.isRequired,
     category: PropTypes.string.isRequired,
+    readOnly: PropTypes.bool,
 };
 
 export default withStyles(styles)(GenericEndpoint);
