@@ -84,12 +84,12 @@ public class DefaultMonetizationImpl implements Monetization {
             throws MonetizationException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
-        monetizationUsagePublishInfo.setState(APIConstants.MonetizationUsagePublisher.COMPLETED);
-        monetizationUsagePublishInfo.setStatus(APIConstants.MonetizationUsagePublisher.SUCCESSFULL);
-        DateFormat df = new SimpleDateFormat(APIConstants.MonetizationUsagePublisher.TIME_FORMAT);
+        monetizationUsagePublishInfo.setState(APIConstants.Monetization.COMPLETED);
+        monetizationUsagePublishInfo.setStatus(APIConstants.Monetization.SUCCESSFULL);
+        DateFormat df = new SimpleDateFormat(APIConstants.Monetization.USAGE_PUBLISH_TIME_FORMAT);
         Date dateobj = new Date();
         //get the time in UTC format
-        df.setTimeZone(TimeZone.getTimeZone(APIConstants.MonetizationUsagePublisher.TIME_ZONE));
+        df.setTimeZone(TimeZone.getTimeZone(APIConstants.Monetization.USAGE_PUBLISH_TIME_ZONE));
         String currentDate = df.format(dateobj);
         long currentTimestamp = apiAdmin.getTimestamp(currentDate);
         monetizationUsagePublishInfo.setLastPublishTime(currentTimestamp);
