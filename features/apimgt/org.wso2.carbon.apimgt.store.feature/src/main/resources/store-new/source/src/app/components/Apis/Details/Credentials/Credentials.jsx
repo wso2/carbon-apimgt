@@ -231,7 +231,7 @@ class Credentials extends React.Component {
      * @param {*} updateSubscriptionData method to update global subscription data
      * @memberof Subscriptions
      */
-    handleSubscriptionDelete(subscriptionId, updateSubscriptionData) {
+    handleSubscriptionDelete = (subscriptionId, updateSubscriptionData) => {
         const { intl } = this.props;
         const client = new Subscription();
         const promisedDelete = client.deleteSubscription(subscriptionId);
