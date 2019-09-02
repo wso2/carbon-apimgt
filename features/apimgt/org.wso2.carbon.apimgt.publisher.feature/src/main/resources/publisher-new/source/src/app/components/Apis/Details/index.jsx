@@ -469,8 +469,7 @@ class Details extends Component {
                                 id: 'Apis.Details.index.subscriptions',
                                 defaultMessage: 'subscriptions',
                             })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
+                            to={pathPrefix + 'subscriptions'}
                             Icon={<SubscriptionsIcon />}
                         />
                         <LeftMenuItem
