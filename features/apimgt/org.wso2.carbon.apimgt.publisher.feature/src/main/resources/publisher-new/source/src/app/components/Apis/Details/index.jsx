@@ -28,6 +28,7 @@ import BusinessIcon from '@material-ui/icons/Business';
 import CodeIcon from '@material-ui/icons/Code';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
+import SubscriptionsIcon from '@material-ui/icons/RssFeed';
 import MonetizationIcon from '@material-ui/icons/LocalAtm';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl, defineMessages } from 'react-intl';
@@ -465,6 +466,14 @@ class Details extends Component {
                         />
                         <LeftMenuItem
                             text={intl.formatMessage({
+                                id: 'Apis.Details.index.subscriptions',
+                                defaultMessage: 'subscriptions',
+                            })}
+                            to={pathPrefix + 'subscriptions'}
+                            Icon={<SubscriptionsIcon />}
+                        />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
                                 id: 'Apis.Details.index.monetization',
                                 defaultMessage: 'monetization',
                             })}
@@ -523,7 +532,7 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.SUBSCRIPTIONS}
-                                    component={() => <Subscriptions api={api} />}
+                                    component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
                                 />
                                 <Route path={Details.subPaths.SECURITY} component={() => <Security api={api} />} />
                                 <Route path={Details.subPaths.COMMENTS} component={() => <Comments api={api} />} />
@@ -541,6 +550,7 @@ class Details extends Component {
                                     component={() => <Properties api={api} />}
                                 />
                                 <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
+                                <Route path={Details.subPaths.SUBSCRIPTIONS} component={() => <Subscriptions />} />
                                 <Route
                                     path={Details.subPaths.MONETIZATION}
                                     component={() => <Monetization api={api} />}
