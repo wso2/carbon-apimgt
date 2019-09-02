@@ -2331,6 +2331,7 @@ public class APIProviderImplTest {
         //API Status is CREATED and user has permission
         Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)).thenReturn("PUBLISHED");
         Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME)).thenReturn("user1");
+        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)).thenReturn("password");
         Mockito.when(artifactManager.getGenericArtifact(apiSourceArtifact.getUUID())).thenReturn(artifact);
 
         PowerMockito.when(APIUtil.hasPermission(null, APIConstants.Permissions.API_PUBLISH)).thenReturn(true);
