@@ -16,6 +16,68 @@
  * under the License.
  */
 import Joi from '@hapi/joi';
+import APIClientFactory from './APIClientFactory';
+import Utils from './Utils';
+
+const roleSchema = Joi.extend((joi) => ({
+    base: joi.string(),
+    name: 'systemRole',
+    language: {
+        role: 'needs to be a valid role',
+    },
+    rules: [
+        {
+            name: 'role',
+            validate(params, value, state, options) {
+                const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+                const promise = apiClient.then((client) => {
+                    return client.apis.Roles.validateSystemRole({roleId:value}).then(resp => {
+                        return resp.ok;
+                    }).catch(err => {
+                        return false;
+                    });
+                });
+                return promise;
+                // return APIClient.me.roles(value).then(response=>{
+                //     return response.body.isValid
+                // });
+
+                // callee of `validate` method
+                /* validate()..then(valid => {
+                if(valid){
+                    /..../
+                }
+            })
+            */
+
+            }
+        }
+    ]
+}));
+
+const userRoleSchema = Joi.extend((joi) => ({
+    base: joi.string(),
+    name: 'userRole',
+    language: {
+        role: 'needs to be a valid role',
+    },
+    rules: [
+        {
+            name: 'role',
+            validate(params, value, state, options) {
+                const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+                const promise = apiClient.then((client) => {
+                    return client.apis.roles.validateUserRole({roleId:value}).then(resp => {
+                        return resp.ok;
+                    }).catch(err => {
+                        return false;
+                    });
+                });
+                return promise;
+            }
+        }
+    ]
+}));
 
 const definition = {
     apiName: Joi.string()
@@ -26,6 +88,8 @@ const definition = {
         .regex(/^[a-zA-Z0-9]{1,30}$/),
     url: Joi.string()
         .uri(),
+    role: roleSchema.systemRole().role(),
+    userRole: userRoleSchema.userRole().role(),
 };
 
 

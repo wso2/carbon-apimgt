@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
@@ -24,11 +24,15 @@ import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 import Input from '@material-ui/core/Input';
-import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
+import ChipInput from 'material-ui-chip-input';
+import APIValidation from 'AppData/APIValidation';
+import base64url from 'base64url';
+import Error from '@material-ui/icons/Error';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
 /**
  *
@@ -38,8 +42,43 @@ import Select from '@material-ui/core/Select';
  * @returns
  */
 export default function AccessControl(props) {
+    const [roleValidity, setRoleValidity] = useState(true);
+    const [userRoleValidity, setUserRoleValidity] = useState(true);
     const { api, configDispatcher } = props;
     const isRestricted = api.accessControl === 'RESTRICTED';
+    const [validRoles, setValidRoles] = useState([...api.accessControlRoles]);
+
+    const handleRoleAddition = (systemValidation, userValidation, role) => {
+        systemValidation.then((resp) => {
+            if (resp) {
+                setRoleValidity(true);
+                userValidation.then((resp) => {
+                    if (resp) {
+                        setUserRoleValidity(true);
+                        setValidRoles([...validRoles, role]);
+                    } else {
+                        setUserRoleValidity(false);
+                    }
+                }).catch((error) => {
+                    console.error('Error when validating user roles ' + error);
+                });
+            } else {
+                setRoleValidity(false);
+            }
+        }).catch((error) => {
+            console.error('Error when validating roles ' + error);
+        });
+        configDispatcher({ action: 'accessControlRoles', value: validRoles.join(',') });
+    };
+
+    const handleRoleDeletion = role => {
+        const index = validRoles.indexOf(role);
+        if (index > -1) {
+            validRoles.splice(index, 1);
+        }
+        setValidRoles(validRoles);
+        configDispatcher({ action: 'accessControlRoles', value: validRoles.join(',') });
+    };
     return (
         <Grid container spacing={0} alignItems='flex-start'>
             <Grid item>
@@ -119,14 +158,44 @@ export default function AccessControl(props) {
             </Grid>
             {isRestricted && (
                 <Grid item>
-                    <TextField
-                        label='Role(s)'
-                        margin='dense'
-                        variant='outlined'
-                        value={api.accessControlRoles.join(',')}
-                        onChange={({ target: { value } }) => configDispatcher({ action: 'accessControlRoles', value })}
-                        helperText={'Enter role name(s). If there are multiple roles, ' +
-                        'separate them using comma (i:e role1,role2,...)'}
+                    <ChipInput
+                        value={validRoles}
+                        alwaysShowPlaceholder={false}
+                        placeholder='Enter roles and press Enter'
+                        blurBehavior='clear'
+                        InputProps={{
+                            endAdornment: !roleValidity && (
+                                <InputAdornment position='end'>
+                                    <Error color='error' />
+                                </InputAdornment>
+                            ),
+                        }}
+                        onAdd={(role) => {
+                            handleRoleAddition(APIValidation.role.validate(base64url.encode(role)),
+                                APIValidation.userRole.validate(base64url.encode(role)), role);
+                        }}
+                        onDelete={(role) => {
+                            handleRoleDeletion(role);
+                        }}
+                        error={!roleValidity || !userRoleValidity}
+                        helperText={
+                            !roleValidity ? (
+                                <FormattedMessage
+                                    id='Apis.Details.Scopes.Roles.Invalid'
+                                    defaultMessage='Role is invalid'
+                                />
+                            ) : !userRoleValidity ? (
+                                <FormattedMessage
+                                    id='Apis.Details.Scopes.Roles.User.Invalid'
+                                    defaultMessage='user does not have role'
+                                />
+                            ) : (
+                                <FormattedMessage
+                                    id='Apis.Details.Scopes.CreateScope.roles.help'
+                                    defaultMessage='Enter valid role and press enter'
+                                />
+                            )
+                        }
                     />
                 </Grid>
             )}

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
@@ -24,11 +24,15 @@ import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 import Input from '@material-ui/core/Input';
-import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
+import ChipInput from 'material-ui-chip-input';
+import APIValidation from 'AppData/APIValidation';
+import base64url from 'base64url';
+import Error from '@material-ui/icons/Error';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
 /**
  *
@@ -38,8 +42,37 @@ import Select from '@material-ui/core/Select';
  * @returns
  */
 export default function StoreVisibility(props) {
+    const [roleValidity, setRoleValidity] = useState(true);
     const { api, configDispatcher } = props;
+    const [invalidRoles, setInvalidRoles] = useState([]);
     const isPublic = api.visibility === 'PUBLIC';
+    const validateSystemRole = (value, role) => {
+        value.then((resp) => {
+            if (resp) {
+                setRoleValidity(true);
+                configDispatcher({ action: 'visibleRoles', value: api.visibleRoles + ',' + role });
+            } else {
+                setRoleValidity(false);
+                setInvalidRoles([...invalidRoles, role]);
+            }
+        }).catch((error) => {
+            console.error('Error when validating roles ' + error);
+        });
+    };
+
+    const handleRoleDeletion = role => {
+        var index = invalidRoles.indexOf(role);
+        if (index > -1) {
+            invalidRoles.splice(index, 1);
+            setInvalidRoles(invalidRoles);
+        } else {
+            const validRoles = [...api.visibleRoles];
+            index = validRoles.indexOf(role);
+            validRoles.splice(index, 1);
+            configDispatcher({ action: 'visibleRoles', value: validRoles.join(',') });
+        }
+    };
+
     return (
         <Grid container spacing={0} alignItems='flex-start'>
             <Grid item>
@@ -122,17 +155,41 @@ export default function StoreVisibility(props) {
                 </Tooltip>
             </Grid>
             {!isPublic && (
-                <Grid item>
-                    <TextField
-                        label='Role(s)'
-                        margin='dense'
-                        variant='outlined'
-                        value={api.visibleRoles.join(',')}
-                        onChange={({ target: { value } }) => configDispatcher({ action: 'visibleRoles', value })}
+                <Grid item sm={5}>
+                    <ChipInput
+                        value={api.visibleRoles}
+                        alwaysShowPlaceholder={false}
+                        placeholder='Enter roles and press Enter'
+                        blurBehavior='clear'
+                        InputProps={{
+                            color: 'red',
+                            endAdornment: !roleValidity && (
+                                <InputAdornment position='end'>
+                                    <Error color='error' />
+                                </InputAdornment>
+                            ),
+                        }}
+                        onAdd={(role) => {
+                            validateSystemRole(APIValidation.role.validate(base64url.encode(role)), role);
+                        }}
+                        onDelete={(role) => {
+                            handleRoleDeletion(role);
+                        }}
+                        error={!roleValidity}
                         helperText={
-                            'Enter role name(s). If there are multiple roles,' +
-                            ' separate them using comma (i:e role1,role2,...)'
+                            roleValidity ? (
+                                <FormattedMessage
+                                    id='Apis.Details.Scopes.CreateScope.roles.help'
+                                    defaultMessage='Enter valid role and press enter'
+                                />
+                            ) : (
+                                <FormattedMessage
+                                    id='Apis.Details.Scopes.Roles.Invalid'
+                                    defaultMessage='Role is invalid'
+                                />
+                            )
                         }
+                        variant='outlined'
                     />
                 </Grid>
             )}

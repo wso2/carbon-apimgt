@@ -5610,6 +5610,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+      operationId: validateSystemRole
       summary:
         Check given role name is already exist
       description: |
@@ -5639,6 +5640,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+      operationId: validateUserRole
       summary:
         Validate whether the logged-in user has the given role
       description: |
@@ -5646,7 +5648,7 @@ paths:
       parameters:
         - $ref : '#/parameters/roleId'
       tags:
-        - roles
+        - Roles
       responses:
         200:
           description:
