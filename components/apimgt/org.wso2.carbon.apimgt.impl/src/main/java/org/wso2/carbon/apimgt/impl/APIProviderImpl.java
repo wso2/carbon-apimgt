@@ -1056,6 +1056,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
                 updatePermissions = true;
             }
+
+            //to keep the old endpointsecurity username and password if the new password is empty
+            if (StringUtils.isEmpty(api.getEndpointUTPassword()) &&
+                    !StringUtils.isEmpty(oldApi.getEndpointUTPassword())) {
+                api.setEndpointUTUsername(oldApi.getEndpointUTUsername());
+                api.setEndpointUTPassword(oldApi.getEndpointUTPassword());
+            }
+
             updateApiArtifact(api, true, updatePermissions);
             if (!oldApi.getContext().equals(api.getContext())) {
                 api.setApiHeaderChanged(true);
