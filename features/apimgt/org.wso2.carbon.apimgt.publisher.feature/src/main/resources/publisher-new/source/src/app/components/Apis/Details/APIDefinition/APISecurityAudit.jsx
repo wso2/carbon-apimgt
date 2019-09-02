@@ -19,9 +19,18 @@ import Typography from '@material-ui/core/Typography';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import Alert from 'AppComponents/Shared/Alert';
-import { CircularProgressbar } from 'react-circular-progressbar';
+import { CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import VisibilitySensor from 'react-visibility-sensor';
+import Paper from '@material-ui/core/Paper';
+import { withStyles } from '@material-ui/core/styles';
+
+const styles = theme => ({
+    rootPaper: {
+        padding: theme.spacing.unit * 3,
+        margin: theme.spacing.unit * 2,
+    },
+});
 
 /**
  * This Component hosts the API Security Audit Component
@@ -79,10 +88,10 @@ class APISecurityAudit extends Component {
      * @inheritdoc
      */
     render() {
-        // TODO - Change header elements to Typography - Check on this
         // TODO - Make a criticality map where 1 is lowest and 4 is highest and color code if possible
         // TODO - Add the Progress Circle and Progress Bars
         // TODO - Test the json data after finishing the structure
+        const { classes } = this.props;
         const { report, overallGrade, numErrors } = this.state;
         const reportObject = JSON.parse(report);
         return (
@@ -92,81 +101,143 @@ class APISecurityAudit extends Component {
                         width='100%'
                         height='calc(100vh - 51px)'
                     >
-                        <Typography variant='h6'>API Security Audit Report</Typography>
-                        <div>
-                            <h1>Audit Score and Summary</h1>
-                            {/** Show total score and possibly a Progress Ring */}
-                            <p>Overall Criticality: {reportObject.criticality}</p>
-                            <p>Overall Grade: {overallGrade} / 100</p>
-                            <p>Number of Errors: {numErrors}</p>
-                            <div style={{ width: '100px' }}>
-                                <VisibilitySensor>
-                                    {({ isVisible }) => {
-                                        const gradeProgressScore = isVisible ? overallGrade : 0;
-                                        return (
-                                            <CircularProgressbar
-                                                value={gradeProgressScore}
-                                                text={`${gradeProgressScore}`}
-                                            />
-                                        );
-                                    }}
-                                </VisibilitySensor>
+                        <Typography variant='h4' styles={{ padding: 30 }}>API Security Audit Report</Typography>
+                        <div style={{ marginTop: 30 }}>
+                            <Paper elevation={1} className={classes.rootPaper}>
+                                <div>
+                                    <Typography variant='h5' styles={{ marginLeft: '40px' }}>
+                                        Audit Score and Summary
+                                    </Typography>
+                                    {/** Show total score and possibly a Progress Ring */}
+                                    <div style={{ display: 'flex', marginTop: 25 }}>
+                                        <div style={{ width: 250, marginLeft: 40, marginRight: 40 }}>
+                                            <VisibilitySensor>
+                                                {({ isVisible }) => {
+                                                    const gradeProgressScore = isVisible ? overallGrade : 0;
+                                                    return (
+                                                        <CircularProgressbarWithChildren
+                                                            value={gradeProgressScore}
+                                                        >
+                                                            <Typography
+                                                                variant='body1'
+                                                                style={{
+                                                                    fontSize: 70,
+                                                                    color: '#3d98c7',
+                                                                    marginTop: 18,
+                                                                }}
+                                                            >
+                                                                <strong>{Math.round(overallGrade)}</strong>
+                                                            </Typography>
+                                                            <Typography
+                                                                variant='body1'
+                                                                style={{ fontSize: 18, marginTop: 10 }}
+                                                            >out of 100
+                                                            </Typography>
+                                                        </CircularProgressbarWithChildren>
+                                                    );
+                                                }}
+                                            </VisibilitySensor>
+                                        </div>
+                                        <div style={{ 'flex-grow': 1, marginLeft: 200, marginTop: 50 }}>
+                                            <Typography variant='body1'>
+                                                Overall Grade: {Math.round(overallGrade)} / 100
+                                            </Typography>
+                                            <Typography variant='body1'>Number of Errors: {numErrors}</Typography>
+                                            <Typography variant='body1'>
+                                                Overall Criticality: {reportObject.criticality}
+                                            </Typography>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Paper>
+                        </div>
+                        <Paper elevation={1} className={classes.rootPaper}>
+                            <div>
+                                <Typography variant='h5' style={{ marginBottom: 18 }}>
+                                        OpenAPI Format Requirements
+                                </Typography>
+                                <Typography variant='body1'>
+                                        Number of Issues: {reportObject.validation.issueCounter}
+                                </Typography>
+                                <Typography variant='body1'>
+                                        Grade: {Math.round(reportObject.validation.grade)} / 25
+                                </Typography>
+                                <Typography variant='body1'>
+                                        Criticality: {reportObject.validation.criticality}
+                                </Typography>
+                                <Typography variant='body1'>{
+                                    (reportObject.validation.issueCounter !== 0) ?
+                                        (reportObject.validation.issues.map((issue) => {
+                                            return (
+                                                <ul>
+                                                    <li key={this.getKey()}>Description: {issue.message}</li>
+                                                    <li key={this.getKey()}>
+                                                            Score Impact: {Math.round(issue.score)}
+                                                    </li>
+                                                </ul>
+                                            );
+                                        })) : (null)
+                                }
+                                </Typography>
                             </div>
-                        </div>
-                        <div>
-                            <h1>OpenAPI Format Requirements</h1>
-                            <p>Number of Issues: {reportObject.validation.issueCounter}</p>
-                            <p>Grade: {reportObject.validation.grade} / 25</p>
-                            <p>Criticality: {reportObject.validation.criticality}</p>
-                            <p>{
-                                (reportObject.validation.issueCounter !== 0) ?
-                                    (reportObject.validation.issues.map((issue) => {
-                                        return (
-                                            <ul>
-                                                <li key={this.getKey()}>Description: {issue.message}</li>
-                                                <li key={this.getKey()}>Score Impact: {issue.score}</li>
-                                            </ul>
-                                        );
-                                    })) : (null)
-                            }
-                            </p>
-                        </div>
-                        <div>
-                            <h1>Security</h1>
-                            <p>Number of Issues: {reportObject.security.issueCounter}</p>
-                            <p>Grade: {reportObject.security.grade} / 25</p>
-                            <p>Criticality: {reportObject.security.criticality}</p>
-                            <p>{
-                                (reportObject.security.issueCounter !== 0) ?
-                                    (reportObject.security.issues.map((issue) => {
-                                        return (
-                                            <ul>
-                                                <li key={this.getKey()}>Description: {issue.message}</li>
-                                                <li key={this.getKey()}>Score Impact: {issue.score}</li>
-                                            </ul>
-                                        );
-                                    })) : (null)
-                            }
-                            </p>
-                        </div>
-                        <div>
-                            <h1>Data Validation</h1>
-                            <p>Number of Issues: {reportObject.data.issueCounter}</p>
-                            <p>Grade: {reportObject.data.grade} / 50</p>
-                            <p>Criticality: {reportObject.data.criticality}</p>
-                            <p>{
-                                (reportObject.data.issueCounter !== 0) ?
-                                    (reportObject.data.issues.map((issue) => {
-                                        return (
-                                            <ul>
-                                                <li key={this.getKey()}>Description: {issue.message}</li>
-                                                <li key={this.getKey()}>Score Impact: {issue.score}</li>
-                                            </ul>
-                                        );
-                                    })) : (null)
-                            }
-                            </p>
-                        </div>
+                        </Paper>
+
+                        <Paper elevation={1} className={classes.rootPaper}>
+                            <div>
+                                <Typography variant='h5' style={{ marginBottom: 18 }}>Security</Typography>
+                                <Typography variant='body1'>
+                                        Number of Issues: {reportObject.security.issueCounter}
+                                </Typography>
+                                <Typography variant='body1'>
+                                        Grade: {Math.round(reportObject.security.grade)} / 25
+                                </Typography>
+                                <Typography variant='body1'>
+                                        Criticality: {reportObject.security.criticality}
+                                </Typography>
+                                <Typography variant='body1'>{
+                                    (reportObject.security.issueCounter !== 0) ?
+                                        (reportObject.security.issues.map((issue) => {
+                                            return (
+                                                <ul>
+                                                    <li key={this.getKey()}>Description: {issue.message}</li>
+                                                    <li key={this.getKey()}>
+                                                            Score Impact: {Math.round(issue.score)}
+                                                    </li>
+                                                </ul>
+                                            );
+                                        })) : (null)
+                                }
+                                </Typography>
+                            </div>
+                        </Paper>
+                        <Paper elevation={1} className={classes.rootPaper}>
+                            <div>
+                                <Typography variant='h5' style={{ marginBottom: 18 }}>Data Validation</Typography>
+                                <Typography variant='body1'>
+                                        Number of Issues: {reportObject.data.issueCounter}
+                                </Typography>
+                                <Typography variant='body1'>
+                                        Grade: {Math.round(reportObject.data.grade)} / 50
+                                </Typography>
+                                <Typography variant='body1'>
+                                        Criticality: {reportObject.data.criticality}
+                                </Typography>
+                                <Typography variant='body1'>{
+                                    (reportObject.data.issueCounter !== 0) ?
+                                        (reportObject.data.issues.map((issue) => {
+                                            return (
+                                                <ul>
+                                                    <li key={this.getKey()}>Description: {issue.message}</li>
+                                                    <li key={this.getKey()}>
+                                                            Score Impact: {Math.round(issue.score)}
+                                                    </li>
+                                                </ul>
+                                            );
+                                        })) : (null)
+                                }
+                                </Typography>
+                            </div>
+                        </Paper>
                     </div>
                 )}
             </div>
@@ -175,7 +246,9 @@ class APISecurityAudit extends Component {
 }
 
 APISecurityAudit.propTypes = {
+    classes: PropTypes.shape({}).isRequired,
     apiId: PropTypes.string.isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
-export default APISecurityAudit;
+export default withStyles(styles)(APISecurityAudit);
