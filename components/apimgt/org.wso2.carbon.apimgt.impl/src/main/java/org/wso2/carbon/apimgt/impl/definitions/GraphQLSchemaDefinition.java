@@ -231,18 +231,18 @@ public class GraphQLSchemaDefinition {
         String apiProviderName = api.getId().getProviderName();
         String resourcePath = APIUtil.getGraphqlDefinitionFilePath(apiName, apiVersion, apiProviderName);
         try {
-            resourcePath = resourcePath + apiProviderName + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
+            String saveResourcePath = resourcePath + apiProviderName + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
                     apiName + apiVersion + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
             Resource resource;
-            if (!registry.resourceExists(resourcePath)) {
+            if (!registry.resourceExists(saveResourcePath)) {
                 resource = registry.newResource();
             } else {
-                resource = registry.get(resourcePath);
+                resource = registry.get(saveResourcePath);
             }
 
             resource.setContent(schemaDefinition);
             resource.setMediaType(String.valueOf(ContentType.TEXT_PLAIN));
-            registry.put(resourcePath, resource);
+            registry.put(saveResourcePath, resource);
             if (log.isDebugEnabled()) {
                 log.debug("Successfully imported the schema: " + schemaDefinition );
             }

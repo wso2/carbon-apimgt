@@ -4521,7 +4521,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            GraphQLSchemaDefinition schemaDef= new GraphQLSchemaDefinition();
+            GraphQLSchemaDefinition schemaDef = new GraphQLSchemaDefinition();
             schemaDef.saveGraphQLSchemaDefinition(api, schemaDefinition, registry);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
