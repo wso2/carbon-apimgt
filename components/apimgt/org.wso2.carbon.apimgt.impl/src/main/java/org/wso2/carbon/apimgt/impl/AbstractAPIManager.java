@@ -1105,7 +1105,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 registryType = registry;
             }
-            swaggerDoc = definitionFromOpenAPISpec.getAPIDefinition(apiId, registryType);
+            swaggerDoc = OASParserUtil.getAPIDefinition(apiId, registryType);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get swagger documentation of API : " + apiId;
             log.error(msg, e);
@@ -2839,7 +2839,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 registryType = registry;
             }
-            return definitionFromOpenAPISpec.getAPIOpenAPIDefinitionTimeStamps(apiIdentifier, registryType);
+            return OASParserUtil.getAPIOpenAPIDefinitionTimeStamps(apiIdentifier, registryType);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             log.error("Error while getting the lastUpdated time due to " + e.getMessage(), e);
 
