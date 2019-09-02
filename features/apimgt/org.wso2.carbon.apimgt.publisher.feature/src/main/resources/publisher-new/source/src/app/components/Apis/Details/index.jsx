@@ -422,18 +422,17 @@ class Details extends Component {
                                 to={pathPrefix + 'endpoints'}
                                 Icon={<EndpointIcon />}
                             />
-                        }
-                        {!isAPIProduct &&
+                        )}
+                        {!isAPIProduct && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.environments',
                                     defaultMessage: 'environments',
                                 })}
-                                handleMenuSelect={this.handleMenuSelect}
-                                active={active}
+                                to={pathPrefix + 'environments'}
                                 Icon={<EndpointIcon />}
                             />
-                        }
+                        )}
                         {this.getLeftMenuItemForAPIType(api.type)}
                         <LeftMenuItem
                             text={intl.formatMessage({
