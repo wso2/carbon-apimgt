@@ -127,6 +127,7 @@ function EndpointListing(props) {
                             if (index > 0) {
                                 return (
                                     <GenericEndpoint
+                                        readOnly
                                         endpointURL={endpoints[index] ? endpoints[index].url : ''}
                                         type={endpointType}
                                         index={index}
