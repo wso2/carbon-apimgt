@@ -140,7 +140,7 @@ class Publisher extends React.Component {
      * @param {string} locale Locale name
      */
     loadLocale(locale) {
-        fetch(`${Utils.CONST.CONTEXT_PATH}/site/public/locales/${locale}.json`)
+        fetch(`${Configurations.app.context}/site/public/locales/${locale}.json`)
             .then(resp => resp.json())
             .then(messages => this.setState({ messages }));
     }
