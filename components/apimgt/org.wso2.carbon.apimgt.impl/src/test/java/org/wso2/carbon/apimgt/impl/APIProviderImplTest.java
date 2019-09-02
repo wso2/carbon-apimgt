@@ -4378,7 +4378,6 @@ public class APIProviderImplTest {
         resourceMock.setContent(schemaContent);
         resourceMock.setMediaType(String.valueOf(ContentType.TEXT_PLAIN));
 
-        //org.wso2.carbon.registry.api.RegistryException
         ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
         RegistryService registryService = Mockito.mock(RegistryService.class);
@@ -4390,7 +4389,17 @@ public class APIProviderImplTest {
                 Mockito.anyInt());
         PowerMockito.doNothing().when(APIUtil.class, "setResourcePermissions", Mockito.any(), Mockito.any(),
                 Mockito.any(),Mockito.any());
-        GraphQLSchemaDefinition graphQLSchemaDefinition = Mockito.mock(GraphQLSchemaDefinition.class);;
+
+        GraphQLSchemaDefinition graphQLSchemaDefinition = Mockito.mock(GraphQLSchemaDefinition.class);
         PowerMockito.doCallRealMethod().when(graphQLSchemaDefinition).saveGraphQLSchemaDefinition(api, schemaContent, userRegistry);
+
+        //org.wso2.carbon.registry.api.RegistryException
+        Mockito.doThrow(RegistryException.class).when(registry).put(Matchers.anyString(), any(Resource.class));
+        try {
+            graphQLSchemaDefinition.saveGraphQLSchemaDefinition(api, schemaContent, registry);
+        } catch (APIManagementException e) {
+            String msg = "Error while adding Graphql Definition for API1-1.0.0";
+            Assert.assertEquals(msg, e.getMessage());
+        }
     }
 }
