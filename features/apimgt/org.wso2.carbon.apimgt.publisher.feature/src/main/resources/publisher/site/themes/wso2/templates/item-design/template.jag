@@ -882,7 +882,7 @@
                 <td class="resource-method-td resource_expand" data-path="$.paths.['{{ path }}'].{{ @key }}">
                     <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
                 </td>
-                <td class="resource_expand"><a class="resource-path" title="resource-path">{{ path }}</a></td>
+                <td class="resource_expand"><a class="resource-path" title="resource-path">{{ displayPath }}</a></td>
                 <td><span class="operation-summary change_summary" data-path="$.paths.['{{ path }}'].{{@key}}" data-attr="summary" >{{ summary }}</span></td>
                 <td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ path }}" data-path="$.paths.['{{ path }}'].{{@key}}" data-index="{{ @index }}">
             <span class="fw-stack" style="font-size:10px">
