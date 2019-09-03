@@ -943,6 +943,8 @@ paths:
         - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+      x-examples:
+        $ref: docs/examples/apis/comments.yaml#/get
       tags:
         - Comments
       responses:
@@ -983,6 +985,8 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Comment'
+      x-examples:
+        $ref: docs/examples/apis/comments.yaml#/post
       tags:
         - Comments
       responses:
@@ -1043,6 +1047,8 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/If-None-Match'
+      x-examples:
+        $ref: docs/examples/apis/comment_id-comments.yaml#/get
       tags:
         - Comments
       responses:
@@ -1102,6 +1108,8 @@ paths:
         - $ref: '#/parameters/commentId'
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-Match'
+      x-examples:
+        $ref: docs/examples/apis/comment_id-comments.yaml#/delete
       tags:
         - Comments
       responses:
