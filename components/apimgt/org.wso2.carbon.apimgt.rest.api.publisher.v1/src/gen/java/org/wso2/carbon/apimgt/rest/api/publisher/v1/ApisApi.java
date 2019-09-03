@@ -213,9 +213,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }, tags={ "External-Store (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. External Store list is returned. ", response = ExternalStoreListDTO.class),
-        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
+        @ApiResponse(code = 500, message = "Internal server error while getting external stores of the API.", response = ErrorDTO.class) })
     public Response apisApiIdExternalStoresGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.apisApiIdExternalStoresGet(apiId, ifNoneMatch, securityContext);
     }
@@ -465,6 +464,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API was successfully published to all the selected external stores. ", response = ExternalStoreListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Request API resource is not found. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal server error while publishing to external stores", response = ErrorDTO.class) })
     public Response apisApiIdPublishToExternalStoresPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "List of External Store Ids.",required=true)  @QueryParam("externalStoreIds") List<String> externalStoreIds, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.apisApiIdPublishToExternalStoresPost(apiId, externalStoreIds, ifMatch, securityContext);

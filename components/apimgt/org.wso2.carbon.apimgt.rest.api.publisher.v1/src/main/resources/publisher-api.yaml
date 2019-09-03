@@ -3428,23 +3428,16 @@ paths:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
               type: string
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        500:
+          description: Internal server error while getting external stores of the API.
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: |
             Not Found.
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
-
 
 ######################################################
 # The "Publish to External Stores" resource APIs
@@ -3505,6 +3498,12 @@ paths:
             $ref: '#/definitions/Error'
         500:
           description: Internal server error while publishing to external stores
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Request API resource is not found.
           schema:
             $ref: '#/definitions/Error'
 
