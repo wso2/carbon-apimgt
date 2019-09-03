@@ -103,6 +103,7 @@ import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
 import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
+import org.wso2.carbon.apimgt.impl.publishers.WSO2PublisherNew;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
@@ -3664,7 +3665,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             try {
                 // First trying to publish the API to external APIStore
-                boolean published = publisher.publishToStore(api, store);
+                boolean published;
+                String version = ApiMgtDAO.getInstance().getLastPublishedAPIVersionFromAPIStore(api.getId(),
+                        store.getName());
+
+                if (apiOlderVersionExist && version != null && !(publisher instanceof WSO2PublisherNew)) {
+                    published = publisher.createVersionedAPIToStore(api, store, version);
+                    publisher.updateToStore(api, store);
+                } else {
+                    published = publisher.publishToStore(api, store);
+                }
 
                 if (published) { // If published,then save to database.
                     publishedStores.add(store);
