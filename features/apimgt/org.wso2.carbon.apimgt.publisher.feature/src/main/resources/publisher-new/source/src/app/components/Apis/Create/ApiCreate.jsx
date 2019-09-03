@@ -26,7 +26,7 @@ import APICreateWrapper from './Default/APICreateWrapper';
 import APIProductCreateWrapper from './Default/APIProductCreateWrapper';
 import ApiCreateSwagger from './OpenAPI/ApiCreateOpenAPI';
 import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
-import ApiCreateGraphQL from './GraphQL/APICreateGrpahQL';
+import ApiCreateGraphQL from './GraphQL/ApiCreateGraphQL';
 import ApiCreateWebSocket from './WebSocket/ApiCreateWebSocket';
 
 const styles = {
