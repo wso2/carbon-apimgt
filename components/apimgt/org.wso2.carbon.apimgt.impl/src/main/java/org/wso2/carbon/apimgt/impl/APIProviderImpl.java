@@ -1059,10 +1059,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             if (api.isEndpointSecured() && StringUtils.isBlank(api.getEndpointUTPassword()) &&
                     !StringUtils.isBlank(oldApi.getEndpointUTPassword())) {
-                log.debug("Given endpointsecurity password is empty");
+                if (log.isDebugEnabled()) {
+                    log.debug("Given endpointsecurity password is empty");
+                }
                 api.setEndpointUTUsername(oldApi.getEndpointUTUsername());
                 api.setEndpointUTPassword(oldApi.getEndpointUTPassword());
-                log.debug("Using the previous username and password for endpoint security");
+                if (log.isDebugEnabled()) {
+                    log.debug("Using the previous username and password for endpoint security");
+                }
             }
 
             updateApiArtifact(api, true, updatePermissions);
