@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
@@ -78,12 +79,6 @@ public class APIKeyValidator {
 
     private boolean isGatewayAPIResourceValidationEnabled = true;
 
-    private static boolean gatewayKeyCacheInit = false;
-
-    private static boolean gatewayTokenCacheInit = false;
-
-    private static boolean resourceCacheInit = false;
-
     protected Log log = LogFactory.getLog(getClass());
 
     public APIKeyValidator(AxisConfiguration axisConfig) {
@@ -96,12 +91,6 @@ public class APIKeyValidator {
         this.gatewayKeyCacheEnabled = isGatewayTokenCacheEnabled();
 
         this.isGatewayAPIResourceValidationEnabled = isAPIResourceValidationEnabled();
-
-        this.getGatewayKeyCache();
-
-        this.getResourceCache();
-
-        this.getGatewayTokenCache();
     }
 
     protected String getKeyValidatorClientType() {
@@ -109,19 +98,7 @@ public class APIKeyValidator {
     }
 
     protected Cache getGatewayKeyCache() {
-        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
-        if (!gatewayKeyCacheInit) {
-            gatewayKeyCacheInit = true;
-            if (apimGWCacheExpiry != null) {
-                return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_KEY_CACHE_NAME, Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
-            } else {
-                long defaultCacheTimeout =
-                        getDefaultCacheTimeout();
-                return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_KEY_CACHE_NAME, defaultCacheTimeout, defaultCacheTimeout);
-
-            }
-        }
-        return getCacheFromCacheManager(APIConstants.GATEWAY_KEY_CACHE_NAME);
+        return CacheProvider.getGatewayKeyCache();
     }
 
     protected Cache getCache(final String cacheManagerName, final String cacheName, final long modifiedExp,
@@ -134,61 +111,16 @@ public class APIKeyValidator {
     }
 
     protected Cache getGatewayTokenCache() {
-        String apimGWCacheExpiry = getApiManagerConfiguration().
-                getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
-
-        if (!gatewayTokenCacheInit) {
-            gatewayTokenCacheInit = true;
-            if (apimGWCacheExpiry != null) {
-                return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_TOKEN_CACHE_NAME,
-                        Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
-            } else {
-                long defaultCacheTimeout = getDefaultCacheTimeout();
-                return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_TOKEN_CACHE_NAME,
-                        defaultCacheTimeout, defaultCacheTimeout);
-            }
-        }
-        return getCacheFromCacheManager(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
+        return CacheProvider.getGatewayTokenCache();
     }
 
     protected Cache getInvalidTokenCache() {
-        String apimGWCacheExpiry = getApiManagerConfiguration().
-                getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
-
-        if (!gatewayTokenCacheInit) {
-            gatewayTokenCacheInit = true;
-            if (apimGWCacheExpiry != null) {
-                return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_INVALID_TOKEN_CACHE_NAME,
-                        Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
-            } else {
-                long defaultCacheTimeout = getDefaultCacheTimeout();
-                return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_INVALID_TOKEN_CACHE_NAME,
-                        defaultCacheTimeout, defaultCacheTimeout);
-            }
-        }
-        return getCacheFromCacheManager(APIConstants.GATEWAY_INVALID_TOKEN_CACHE_NAME);
+        return CacheProvider.getInvalidTokenCache();
     }
 
     @MethodStats
     protected Cache getResourceCache() {
-
-        if (!resourceCacheInit) {
-            resourceCacheInit = true;
-            long defaultCacheTimeout = getDefaultCacheTimeout();
-            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.RESOURCE_CACHE_NAME,
-                    defaultCacheTimeout, defaultCacheTimeout);
-        }
-        return getCacheFromCacheManager(APIConstants.RESOURCE_CACHE_NAME);
-    }
-
-    protected Cache getCacheFromCacheManager(String cacheName) {
-        return Caching.getCacheManager(
-                APIConstants.API_MANAGER_CACHE_MANAGER).getCache(cacheName);
-    }
-
-    protected long getDefaultCacheTimeout() {
-        return Long.valueOf(ServerConfiguration.getInstance().getFirstProperty(APIConstants.DEFAULT_CACHE_TIMEOUT))
-                * 60;
+        return CacheProvider.getResourceCache();
     }
 
     /**
@@ -251,15 +183,6 @@ public class APIKeyValidator {
             }
         }
 
-        //synchronized (apiKey.intern()) {
-        // We synchronize on the API key here to allow concurrent processing
-        // of different API keys - However when a burst of requests with the
-        // same key is encountered, only one will be allowed to execute the logic,
-        // and the rest will pick the value from the cache.
-        //   info = (APIKeyValidationInfoDTO) infoCache.get(cacheKey);
-        // if (info != null) {
-        //   return info;
-        //}
         APIKeyValidationInfoDTO info = doGetKeyValidationInfo(context, prefixedVersion, apiKey, authenticationScheme, clientDomain,
                 matchingResource, httpVerb);
         if (info != null) {
@@ -305,8 +228,6 @@ public class APIKeyValidator {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     warnMsg);
         }
-
-
     }
 
     protected void endTenantFlow() {
@@ -326,7 +247,6 @@ public class APIKeyValidator {
     protected APIKeyValidationInfoDTO doGetKeyValidationInfo(String context, String apiVersion, String apiKey,
                                                              String authenticationScheme, String clientDomain,
                                                              String matchingResource, String httpVerb) throws APISecurityException {
-
 
         return dataStore.getAPIKeyData(context, apiVersion, apiKey, authenticationScheme, clientDomain,
                 matchingResource, httpVerb);
@@ -401,83 +321,6 @@ public class APIKeyValidator {
             //No matching resource found. return the highest level of security
             return APIConstants.NO_MATCHING_AUTH_SCHEME;
         }
-
-        //Match the case where the direct selectedApi context is matched
-        /*if ("/".equals(requestPath)) {
-            String requestCacheKey = apiContext + "/" + apiVersion + requestPath + ":" + httpMethod;
-
-            //Get decision from cache.
-            VerbInfoDTO matchingVerb = null;
-            if (gatewayKeyCacheEnabled) {
-                matchingVerb = (VerbInfoDTO) getResourceCache().get(requestCacheKey);
-            }
-            //On a cache hit
-            if (matchingVerb != null) {
-                return matchingVerb.getAuthType();
-            } else {
-                for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
-                    String urlPattern = resourceInfoDTO.getUrlPattern();
-
-                    //If the request patch is '/', it can only be matched with a resource whose url-context is '*//*'
-                    if ("*//*".equals(urlPattern)) {
-                        for (VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()) {
-                            if (verbDTO.getHttpVerb().equals(httpMethod)) {
-                                //Store verb in cache
-                                getResourceCache().put(requestCacheKey, verbDTO);
-                                return verbDTO.getAuthType();
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        //Remove the ending '/' from request
-        requestPath = RESTUtils.trimTrailingSlashes(requestPath);
-
-        while (requestPath.length() > 1) {
-
-            String requestCacheKey = apiContext + "/" + apiVersion + requestPath + ":" + httpMethod;
-
-            //Get decision from cache.
-            VerbInfoDTO matchingVerb = null;
-            if (gatewayKeyCacheEnabled) {
-                matchingVerb = (VerbInfoDTO) getResourceCache().get(requestCacheKey);
-            }
-
-            //On a cache hit
-            if (matchingVerb != null) {
-                return matchingVerb.getAuthType();
-            }
-            //On a cache miss
-            else {
-                for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
-                    String urlPattern = resourceInfoDTO.getUrlPattern();
-                    if (urlPattern.endsWith("*//*")) {
-                        //Remove the ending '*//*'
-                        urlPattern = urlPattern.substring(0, urlPattern.length() - 2);
-                    }
-                    //If the urlPattern ends with a '/', remove that as well.
-                    urlPattern = RESTUtils.trimTrailingSlashes(urlPattern);
-                    if (requestPath.endsWith(urlPattern)) {
-                        for (VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()) {
-                            if (verbDTO.getHttpVerb().equals(httpMethod)) {
-                                //Store verb in cache
-                                getResourceCache().put(requestCacheKey, verbDTO);
-                                return verbDTO.getAuthType();
-                            }
-                        }
-                    }
-                }
-            }
-
-
-            //Remove the section after the last occurrence of the '/' character
-            int index = requestPath.lastIndexOf("/");
-            requestPath = requestPath.substring(0, index <= 0 ? 0 : index);
-        }
-        //nothing found. return the highest level of security
-        return APIConstants.NO_MATCHING_AUTH_SCHEME;*/
     }
 
     public List<VerbInfoDTO> findMatchingVerb(MessageContext synCtx) throws ResourceNotFoundException, APISecurityException {
@@ -848,7 +691,6 @@ public class APIKeyValidator {
                     }
                 }
             }
-
 
             //Remove the section after the last occurrence of the '/' character
             int index = requestPath.lastIndexOf('/');
