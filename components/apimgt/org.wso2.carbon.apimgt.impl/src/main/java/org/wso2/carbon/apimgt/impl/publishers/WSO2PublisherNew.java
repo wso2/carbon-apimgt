@@ -81,15 +81,17 @@ public class WSO2PublisherNew implements APIPublisher {
     private static final Log log = LogFactory.getLog(WSO2PublisherNew.class);
 
     /**
-     * Publish an API to external Store.
+     * Publish an API to External Store.
      *
-     * @param api   API
-     * @param store Store
-     * @return published/not
+     * @param api   API to publish
+     * @param store External APIStore
+     * @return Whether API publish is successful or not
+     * @throws APIManagementException If an error occurs while publishing API to external store
      */
     @Override
     public boolean publishToStore(API api, APIStore store) throws APIManagementException {
 
+        evaluateCredentialsAndEndpointURL(store);
         if (log.isDebugEnabled()) {
             log.debug("Publishing API: " + api.getId().getApiName() + " version: " + api.getId().getVersion()
                     + " to external store: " + store.getName());
@@ -98,8 +100,23 @@ public class WSO2PublisherNew implements APIPublisher {
         File file = exportAPIArchive(api);
         //Call the Admin REST API of external Store to publish the exported advertised only API
         HttpResponse response = importAPIToExternalStore(file, store, Boolean.FALSE);
-        FileUtils.deleteQuietly(file);
         return evaluateImportAPIResponse(response);
+    }
+
+    /**
+     * Check if external store endpoint and credentials are not blank.
+     *
+     * @param store APIStore configurations
+     * @throws APIManagementException If either one of the credentials and endpoint URL is blank
+     */
+    private void evaluateCredentialsAndEndpointURL(APIStore store) throws APIManagementException {
+
+        if (StringUtils.isBlank(store.getEndpoint()) || StringUtils.isBlank(store.getUsername())
+                || StringUtils.isBlank(store.getPassword())) {
+            String msg = "External APIStore endpoint URL or credentials are not defined. " +
+                    "Cannot proceed with publishing API to the APIStore - " + store.getDisplayName();
+            throw new APIManagementException(msg);
+        }
     }
 
     /**
@@ -142,7 +159,8 @@ public class WSO2PublisherNew implements APIPublisher {
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, e);
         } catch (UserStoreException e) {
-            String errorMessage = "Error while getting tenantId for tenant domain: " + tenantDomain;
+            String errorMessage = "Error while getting tenantId for tenant domain: " + tenantDomain
+                    + " when exporting API:" + api.getId().getApiName() + " version: " + api.getId().getVersion();
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, e);
         }
@@ -201,6 +219,8 @@ public class WSO2PublisherNew implements APIPublisher {
             String errorMessage = "Error while importing to external Store: " + storeEndpoint;
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, e);
+        } finally {
+            FileUtils.deleteQuietly(apiArchive);
         }
         return httpResponse;
     }
@@ -212,13 +232,35 @@ public class WSO2PublisherNew implements APIPublisher {
      * @param storeEndpoint Store endpoint URL with "/store" context
      * @return Admin REST API URL of external store
      */
-    private String getAdminRESTURLFromStoreURL(String storeEndpoint) {
+    private String getAdminRESTURLFromStoreURL(String storeEndpoint) throws APIManagementException {
+
         //Get Admin REST import API endpoint from given store endpoint
-        if (storeEndpoint.contains(APIConstants.RestApiConstants.STORE_CONTEXT)) {
-            storeEndpoint = storeEndpoint.split(APIConstants.RestApiConstants.STORE_CONTEXT)[0]
-                    + APIConstants.RestApiConstants.REST_API_ADMIN_CONTEXT_FULL_0;
+        return getStoreHostURLFromEndpoint(storeEndpoint)
+                .concat(APIConstants.RestApiConstants.REST_API_ADMIN_CONTEXT_FULL_0);
+    }
+
+    /**
+     * Get actual store host URL (without the path name) from the given store endpoint URL.
+     *
+     * @param storeEndpoint Store endpoint URL given in configuration (Eg:https://localhost:9443)
+     * @return Actual store host URL (Eg:https://localhost:9443)
+     * @throws APIManagementException If a malformed store endpoint is provided
+     */
+    private String getStoreHostURLFromEndpoint(String storeEndpoint) throws APIManagementException {
+
+        try {
+            URL storeURL = new URL(storeEndpoint);
+            int port = storeURL.getPort();
+            String host = storeURL.getHost();
+            String protocol = storeURL.getProtocol();
+            storeURL = new URL(protocol, host, port, StringUtils.EMPTY);
+            return storeURL.toString();
+        } catch (MalformedURLException e) {
+            String errorMessage = "Error while getting Store host URL of external store due to provided malformed Store "
+                    + "endpoint URL: " + storeEndpoint;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         }
-        return storeEndpoint;
     }
 
     /**
@@ -228,12 +270,11 @@ public class WSO2PublisherNew implements APIPublisher {
      * @param storeEndpoint Store endpoint URL with "/store" context
      * @return Publisher REST API URL of external store
      */
-    private String getPublisherRESTURLFromStoreURL(String storeEndpoint) {
-        if (storeEndpoint.contains(APIConstants.RestApiConstants.STORE_CONTEXT)) {
-            storeEndpoint = storeEndpoint.split(APIConstants.RestApiConstants.STORE_CONTEXT)[0]
-                    + APIConstants.RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_1;
-        }
-        return storeEndpoint;
+    private String getPublisherRESTURLFromStoreURL(String storeEndpoint) throws APIManagementException {
+
+        //Get Publisher REST API endpoint from given store endpoint
+        return getStoreHostURLFromEndpoint(storeEndpoint)
+                .concat(APIConstants.RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_1);
     }
 
     /**
@@ -243,6 +284,7 @@ public class WSO2PublisherNew implements APIPublisher {
      * @return Base64 encoded Basic Authorization header
      */
     private String getBasicAuthorizationHeader(APIStore store) {
+
         //Set Authorization Header of external store admin
         byte[] encodedAuth = Base64
                 .encodeBase64((store.getUsername() + ":" + store.getPassword()).getBytes(StandardCharsets.ISO_8859_1));
@@ -262,24 +304,26 @@ public class WSO2PublisherNew implements APIPublisher {
         String responseString;
         try {
             //If API is imported successfully, return true
-            if (evaluateResponseStatus(response)) {
-                entity = response.getEntity();
-                responseString = EntityUtils.toString(entity);
-                //release all resources held by the responseHttpEntity
-                EntityUtils.consume(entity);
-                if (StringUtils.containsIgnoreCase(responseString, APIConstants.RestApiConstants.IMPORT_API_SUCCESS)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Import API service call received successful response: " + responseString);
-                    }
-                    return true;
+            entity = response.getEntity();
+            responseString = EntityUtils.toString(entity);
+            //release all resources held by the responseHttpEntity
+            EntityUtils.consume(entity);
+            if (evaluateResponseStatus(response)
+                    && StringUtils.containsIgnoreCase(responseString, APIConstants.RestApiConstants.IMPORT_API_SUCCESS)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Import API service call received successful response: " + responseString);
                 }
-                log.error("Import API service call received unsuccessful response: " + responseString);
+                return true;
+            } else {
+                String errorMessage = "Import API service call received unsuccessful response: " + responseString
+                        + " status: " + response.getStatusLine().getStatusCode();
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
             }
         } catch (IOException e) {
             String errorMessage = "Error while evaluating HTTP response";
             throw new APIManagementException(errorMessage, e);
         }
-        return false;
     }
 
     /**
@@ -291,23 +335,21 @@ public class WSO2PublisherNew implements APIPublisher {
     private Boolean evaluateResponseStatus(HttpResponse response) {
 
         int statusCode = response.getStatusLine().getStatusCode();
-        if (statusCode == HttpStatus.SC_OK) {
-            return true;
-        }
-        log.error("API service call failed with unsuccessful status:" + statusCode);
-        return false;
+        return statusCode == HttpStatus.SC_OK;
     }
 
     /**
-     * The method to update an already published API in external Store.
+     * Update API in external store.
      *
-     * @param api   API
-     * @param store Store
-     * @return updated/not
+     * @param api   API to update
+     * @param store External APIStore
+     * @return Whether API update is successful or nor
+     * @throws APIManagementException If an error occurs while updating API in external store
      */
     @Override
     public boolean updateToStore(API api, APIStore store) throws APIManagementException {
 
+        evaluateCredentialsAndEndpointURL(store);
         if (log.isDebugEnabled()) {
             log.debug("Updating API: " + api.getId().getApiName() + " version: " + api.getId().getVersion()
                     + " to external store: " + store.getName());
@@ -316,20 +358,21 @@ public class WSO2PublisherNew implements APIPublisher {
         File file = exportAPIArchive(api);
         //Call the Admin REST API of external Store to publish the exported advertised only API
         HttpResponse response = importAPIToExternalStore(file, store, Boolean.TRUE);
-        FileUtils.deleteQuietly(file);
         return evaluateImportAPIResponse(response);
     }
 
     /**
-     * The method to publish API to external Store.
+     * Publish API to external Store.
      *
      * @param apiId APIIdentifier
-     * @param store Store
-     * @return deleted/not
+     * @param store External APIStore
+     * @return Whether API is successfully deleted or not
+     * @throws APIManagementException If an error occurs while deleting API from external store
      */
     @Override
     public boolean deleteFromStore(APIIdentifier apiId, APIStore store) throws APIManagementException {
 
+        evaluateCredentialsAndEndpointURL(store);
         if (log.isDebugEnabled()) {
             log.debug("Delete API: " + apiId.getApiName() + " version: " + apiId.getVersion()
                     + " from external store: " + store.getName());
@@ -348,7 +391,19 @@ public class WSO2PublisherNew implements APIPublisher {
                 //Call import API of external store
                 HttpResponse httpResponse = httpclient.execute(httpDelete);
                 if (evaluateResponseStatus(httpResponse)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("API: " + apiId.getApiName() + " version: " + apiId.getVersion()
+                                + " removed from external store: " + store.getName() + " successfully");
+                    }
                     return true;
+                } else {
+                    HttpEntity entity = httpResponse.getEntity();
+                    String responseString = EntityUtils.toString(entity);
+                    //release all resources held by the responseHttpEntity
+                    EntityUtils.consume(entity);
+                    String errorMessage = "API Delete service call received unsuccessful response status: "
+                            + httpResponse.getStatusLine().getStatusCode() + " response: " + responseString;
+                    throw new APIManagementException(errorMessage);
                 }
             } catch (IOException e) {
                 String errorMessage = "Error while deleting API UUID: " + apiUUID + " from external store: "
@@ -364,19 +419,38 @@ public class WSO2PublisherNew implements APIPublisher {
     }
 
     /**
-     * The method to publish API to external Store.
+     * Check whether API exists in external Store.
      *
-     * @param api   API
-     * @param store Store
-     * @return deleted/not
+     * @param api   API to check existence of
+     * @param store External API Store
+     * @return Whether API is available or not
+     * @throws APIManagementException If an error occurs while checking existence of API in external store
      */
     @Override
     public boolean isAPIAvailable(API api, APIStore store) throws APIManagementException {
+
+        evaluateCredentialsAndEndpointURL(store);
         if (log.isDebugEnabled()) {
             log.debug("Check if API: " + api.getId().getApiName() + " version: " + api.getId().getVersion()
                     + " available in external store: " + store.getName());
         }
         return getAPIUUID(store, api.getId()) != null;
+    }
+
+    /**
+     * Publish new version of an existing API to external Store.
+     *
+     * @param api     API to create new version of
+     * @param store   External APIStore
+     * @param version New Version
+     * @return If creating new version is successful or not
+     * @throws APIManagementException If an error occurs while creating new version.
+     */
+    @Override
+    public boolean createVersionedAPIToStore(API api, APIStore store, String version) throws APIManagementException {
+        //We do not perform a separate call for creating a new version. Import API REST API is used for creating the
+        //new versioned API as well.
+        return publishToStore(api, store);
     }
 
     /**
@@ -390,16 +464,17 @@ public class WSO2PublisherNew implements APIPublisher {
      */
     private String getAPIUUID(APIStore store, APIIdentifier apiIdentifier) throws APIManagementException {
 
-        String apiUUID = null;
+        String apiUUID;
         //Get Publisher REST endpoint from given store endpoint
         String storeEndpoint = getPublisherRESTURLFromStoreURL(store.getEndpoint())
                 + APIConstants.RestApiConstants.REST_API_PUB_RESOURCE_PATH_APIS;
         try {
             HttpClient httpclient = getHttpClient(storeEndpoint);
             URIBuilder uriBuilder = new URIBuilder(storeEndpoint);
-            String searchQuery = APIConstants.RestApiConstants.PUB_SEARCH_API_QUERY_PARAMS_NAME
-                    + apiIdentifier.getApiName() + StringUtils.SPACE
-                    + APIConstants.RestApiConstants.PUB_SEARCH_API_QUERY_PARAMS_VERSION + apiIdentifier.getVersion();
+            String searchQuery = APIConstants.RestApiConstants.PUB_SEARCH_API_QUERY_PARAMS_NAME + "\""
+                    + apiIdentifier.getApiName() + "\"" + StringUtils.SPACE
+                    + APIConstants.RestApiConstants.PUB_SEARCH_API_QUERY_PARAMS_VERSION + "\""
+                    + apiIdentifier.getVersion() + "\"";
             uriBuilder.addParameter(APIConstants.RestApiConstants.REST_API_PUB_SEARCH_API_QUERY, searchQuery);
             HttpGet httpGet = new HttpGet(uriBuilder.build());
 
@@ -408,11 +483,11 @@ public class WSO2PublisherNew implements APIPublisher {
 
             //Call Publisher REST API of external store
             HttpResponse httpResponse = httpclient.execute(httpGet);
+            HttpEntity entity = httpResponse.getEntity();
+            String responseString = EntityUtils.toString(entity);
+            //release all resources held by the responseHttpEntity
+            EntityUtils.consume(entity);
             if (evaluateResponseStatus(httpResponse)) {
-                HttpEntity entity = httpResponse.getEntity();
-                String responseString = EntityUtils.toString(entity);
-                //release all resources held by the responseHttpEntity
-                EntityUtils.consume(entity);
                 JSONParser parser = new JSONParser();
                 JSONObject responseJson = (JSONObject) parser.parse(responseString);
                 if ((long) responseJson.get(APIConstants.RestApiConstants.PUB_API_LIST_RESPONSE_PARAMS_COUNT) == 1) {
@@ -425,9 +500,16 @@ public class WSO2PublisherNew implements APIPublisher {
                                 + " exists in external store: " + store.getName() + " with UUID: " + apiUUID);
                     }
                 } else {
-                    log.error("Duplicate APIs exists in external store for API name:" + apiIdentifier.getApiName()
-                            + " version: " + apiIdentifier.getVersion());
+                    String errorMessage = "Duplicate APIs exists in external store for API name:"
+                            + apiIdentifier.getApiName() + " version: " + apiIdentifier.getVersion();
+                    log.error(errorMessage);
+                    throw new APIManagementException(errorMessage);
                 }
+            } else {
+                String errorMessage = "API Search service call received unsuccessful response with status: "
+                        + httpResponse.getStatusLine().getStatusCode() + " response: " + responseString;
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
             }
         } catch (ParseException e) {
             String errorMessage = "Error while reading API response from external store for API: "
@@ -451,9 +533,10 @@ public class WSO2PublisherNew implements APIPublisher {
      * Get APIProvider instance for the logged in user.
      *
      * @return APIProvider instance
-     * @throws APIManagementException If na error occurs while getting APIProvider instance
+     * @throws APIManagementException If an error occurs while getting APIProvider instance
      */
-    private static APIProvider getLoggedInUserProvider() throws APIManagementException {
+    protected APIProvider getLoggedInUserProvider() throws APIManagementException {
+
         return APIManagerFactory.getInstance().getAPIProvider(getLoggedInUsername());
     }
 
@@ -462,7 +545,8 @@ public class WSO2PublisherNew implements APIPublisher {
      *
      * @return username
      */
-    private static String getLoggedInUsername() {
+    protected String getLoggedInUsername() {
+
         return CarbonContext.getThreadLocalCarbonContext().getUsername();
     }
 
@@ -474,6 +558,7 @@ public class WSO2PublisherNew implements APIPublisher {
      * @throws APIManagementException If an error occurs while getting redirect URL.
      */
     private String getExternalStoreRedirectURL(int tenantId) throws APIManagementException {
+
         UserRegistry registry;
         String redirectURL;
         redirectURL = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
@@ -520,7 +605,8 @@ public class WSO2PublisherNew implements APIPublisher {
      * @return HTTP Client
      * @throws APIManagementException If an error occurs due to malformed URL.
      */
-    private HttpClient getHttpClient(String storeEndpoint) throws APIManagementException {
+    protected HttpClient getHttpClient(String storeEndpoint) throws APIManagementException {
+
         try {
             URL storeURL = new URL(storeEndpoint);
             int externalStorePort = storeURL.getPort();
