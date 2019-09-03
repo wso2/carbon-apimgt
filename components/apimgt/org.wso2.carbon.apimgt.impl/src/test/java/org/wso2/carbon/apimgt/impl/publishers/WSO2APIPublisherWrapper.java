@@ -19,16 +19,36 @@
 package org.wso2.carbon.apimgt.impl.publishers;
 
 import org.apache.http.client.HttpClient;
+import org.wso2.carbon.apimgt.api.APIProvider;
 
-public class WSO2APIPublisherWrapper extends WSO2APIPublisher {
+public class WSO2APIPublisherWrapper extends WSO2PublisherNew {
     private HttpClient client;
+    private String username;
+    private APIProvider apiProvider;
 
-    public WSO2APIPublisherWrapper(HttpClient client) {
+    public WSO2APIPublisherWrapper(HttpClient client, String username, APIProvider apiProvider) {
         this.client = client;
+        this.username = username;
+        this.apiProvider = apiProvider;
+    }
+
+    public WSO2APIPublisherWrapper(String username, APIProvider apiProvider) {
+        this.username = username;
+        this.apiProvider = apiProvider;
     }
 
     @Override
     protected HttpClient getHttpClient(String storeEndpoint) {
         return client;
+    }
+
+    @Override
+    protected APIProvider getLoggedInUserProvider() {
+        return apiProvider;
+    }
+
+    @Override
+    protected String getLoggedInUsername() {
+        return username;
     }
 }

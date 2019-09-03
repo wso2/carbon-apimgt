@@ -18,34 +18,43 @@
 
 package org.wso2.carbon.apimgt.impl.publishers;
 
-import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.protocol.HttpContext;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.TestUtils;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportManager;
+import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.io.File;
 import java.net.HttpURLConnection;
@@ -53,334 +62,296 @@ import java.net.URL;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({EntityUtils.class, CarbonUtils.class, ServiceReferenceHolder.class, URL.class, HttpURLConnection.class,
-        FileUtils.class, WSO2APIPublisher.class})
+        FileUtils.class, WSO2PublisherNew.class, MultipartEntityBuilder.class})
 public class WSO2APIPublisherTestCase {
-    @Test
-    public void testPublishToStoreWithNullStoreArguments() throws Exception {
-        //Error path - When username or password or endpoint is not defined
-        WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisher();
-        API api = Mockito.mock(API.class);
-        APIStore store = new APIStore();
-        store.setDisplayName("Sample");
-        try {
-            wso2APIPublisher.publishToStore(api, store);
-            Assert.fail("APIManagement exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            String msg = "External APIStore endpoint URL or credentials are not defined. " +
-                    "Cannot proceed with publishing API to the APIStore - " + store.getDisplayName();
-            Assert.assertEquals(msg, e.getMessage());
-        }
-    }
 
-    @Test
-    public void testPublishToStoreWithAccessFailures() throws Exception {
-        //Error path - When accessing the external store got failed
-        HttpClient defaultHttpClient = Mockito.mock(HttpClient.class);
+    private int tenantID = -1234;
+    private String username = "admin";
+    private String tenantDomain = "carbon.super";
+    private String apiIdentifier = "P1_API1_v1.0.0";
+    private String storeName = "Sample";
+    private String storeUserName = "admin";
+    private String storePassword = "admin";
+    private String storeEndpoint = "https://localhost:9292/sample";
+    private String storeRedirectURL = "http://localhost:9292/redirect";
+    private APIStore store;
+    private APIIdentifier identifier;
+    private API api;
+    private WSO2PublisherNew wso2APIPublisher;
+    private TenantManager tenantManager;
+    private File file;
+    private StatusLine statusLine;
+    private APIImportExportManager apiImportExportManager;
+    private HttpClient defaultHttpClient;
+
+    @Before
+    public void init() throws Exception {
+        store = new APIStore();
+        store.setDisplayName(storeName);
+        store.setUsername(storeUserName);
+        store.setPassword(storePassword);
+        store.setEndpoint(storeEndpoint);
+        identifier = new APIIdentifier(apiIdentifier);
+        api = new API(identifier);
+        defaultHttpClient = Mockito.mock(HttpClient.class);
+        wso2APIPublisher = new WSO2APIPublisherWrapper(defaultHttpClient, username, Mockito.mock(APIProvider.class));
         HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
-        HttpEntity entity = Mockito.mock(HttpEntity.class);
-        WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisherWrapper(defaultHttpClient);
-        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        API api = new API(identifier);
-        APIStore store = new APIStore();
-        store.setDisplayName("Sample");
-        store.setUsername("admin");
-        store.setPassword("admin");
-        store.setEndpoint("https://localhost:9292/sample");
-        Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(Mockito.any(HttpPost.class), Mockito.any(HttpContext.class));
-        Mockito.doReturn(entity).when(httpResponse).getEntity();
-        PowerMockito.mockStatic(EntityUtils.class);
-        PowerMockito.when(EntityUtils.toString((HttpEntity) Mockito.anyObject(), Mockito.anyString()))
-                .thenReturn("{\"error\" : true, \"message\" : \"Login failed. Please recheck the username and password and try again..\"}");
-        try {
-            wso2APIPublisher.publishToStore(api, store);
-            Assert.fail("APIManagement exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            String errorMsg = "\"Login failed. Please recheck the username and password and try again..\"";
-            String msg = " Authentication with external APIStore - " + store.getDisplayName()
-                    + "  failed due to " + errorMsg + ".API publishing to APIStore- " +
-                    store.getDisplayName() + " failed.";
-            Assert.assertEquals(msg, e.getMessage());
-        }
-    }
-
-    @Test(expected = APIManagementException.class)
-    public void testPublishToStoreWithErrorInAddingAPI() throws Exception {
-        //Error path - When an adding API failed
-        HttpClient defaultHttpClient = Mockito.mock(HttpClient.class);
-        HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
-        HttpEntity entity = Mockito.mock(HttpEntity.class);
-        WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisherWrapper(defaultHttpClient);
-
-        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        API api = new API(identifier);
-        api.setThumbnailUrl("/thumbnail");
-        APIStore store = new APIStore();
-        store.setDisplayName("Sample");
-        store.setUsername("admin");
-        store.setPassword("admin");
-        store.setEndpoint("https://localhost:9292/store");
-
-        Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(Mockito.any(HttpPost.class), Mockito.any(HttpContext.class));
-        Mockito.doReturn(entity).when(httpResponse).getEntity();
-        PowerMockito.mockStatic(EntityUtils.class);
-        PowerMockito.when(EntityUtils.toString((HttpEntity) Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
-        ServerConfiguration serverConfig = Mockito.mock(ServerConfiguration.class);
-        PowerMockito.mockStatic(CarbonUtils.class);
-        PowerMockito.when(CarbonUtils.getServerConfiguration()).thenReturn(serverConfig);
-        PowerMockito.when(CarbonUtils.getTransportProxyPort(Mockito.any(ConfigurationContext.class), Mockito.anyString())).thenReturn(9292);
-        Mockito.doReturn("").when(serverConfig).getFirstProperty("MgtProxyContextPath");
-        Mockito.doReturn("localhost").when(serverConfig).getFirstProperty("HostName");
-        ConfigurationContextService configurationContextService = Mockito.mock(ConfigurationContextService.class);
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(ServiceReferenceHolder.getContextService()).thenReturn(configurationContextService);
-        ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
-        Mockito.doReturn(configurationContext).when(configurationContextService).getServerConfigContext();
-        wso2APIPublisher.publishToStore(api, store);
-    }
-
-    @Test
-    public void testPublishToStore() throws Exception {
-        //Happy path
-        HttpClient defaultHttpClient = Mockito.mock(HttpClient.class);
-        HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
-        HttpEntity entity = Mockito.mock(HttpEntity.class);
-        WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisherWrapper(defaultHttpClient);
-
-        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        API api = new API(identifier);
-        api.setThumbnailUrl("/thumbnail");
-        api.setContext("/store");
-        api.setBusinessOwner("user");
-        api.setBusinessOwnerEmail("user@gmail.com");
-        api.setTechnicalOwner("admin");
-        api.setTechnicalOwnerEmail("admin@gmail.com");
-        api.setVisibility("Public");
-        api.setVisibleRoles("admin");
-        api.setEndpointSecured(true);
-        api.setEndpointAuthDigest(true);
-        api.setEndpointUTUsername("admin");
-        api.setEndpointUTPassword("admin");
-        APIStore store = new APIStore();
-        store.setDisplayName("Sample");
-        store.setUsername("admin");
-        store.setPassword("admin");
-        store.setEndpoint("https://localhost:9292/store");
-
-        Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(Mockito.any(HttpPost.class), Mockito.any(HttpContext.class));
-        Mockito.doReturn(entity).when(httpResponse).getEntity();
-        PowerMockito.mockStatic(EntityUtils.class);
-        PowerMockito.when(EntityUtils.toString((HttpEntity) Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
-        ServerConfiguration serverConfig = Mockito.mock(ServerConfiguration.class);
-        PowerMockito.mockStatic(CarbonUtils.class);
-        PowerMockito.when(CarbonUtils.getServerConfiguration()).thenReturn(serverConfig);
-        PowerMockito.when(CarbonUtils.getTransportProxyPort(Mockito.any(ConfigurationContext.class), Mockito.anyString())).thenReturn(9292);
-        Mockito.doReturn("").when(serverConfig).getFirstProperty("MgtProxyContextPath");
-        Mockito.doReturn("localhost").when(serverConfig).getFirstProperty("HostName");
-        ConfigurationContextService configurationContextService = Mockito.mock(ConfigurationContextService.class);
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(ServiceReferenceHolder.getContextService()).thenReturn(configurationContextService);
-        ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
-        Mockito.doReturn(configurationContext).when(configurationContextService).getServerConfigContext();
-        URL url = PowerMockito.mock(URL.class);
-        PowerMockito.whenNew(URL.class).withAnyArguments().thenReturn(url);
-        HttpURLConnection urlConnection = PowerMockito.mock(HttpURLConnection.class);
-        PowerMockito.when(url.openConnection()).thenReturn(urlConnection);
-        PowerMockito.when(urlConnection.getResponseCode()).thenReturn(200);
-        File file = PowerMockito.mock(File.class);
-        PowerMockito.whenNew(File.class).withAnyArguments().thenReturn(file);
-        PowerMockito.when(file.exists()).thenReturn(true);
-        PowerMockito.mockStatic(FileUtils.class);
-        PowerMockito.doNothing().when(FileUtils.class);
-        FileUtils.copyURLToFile((URL) Mockito.anyObject(), (File) Mockito.anyObject());
+        ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
         RealmService realmService = Mockito.mock(RealmService.class);
+        tenantManager = Mockito.mock(TenantManager.class);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(1234);
+        HttpEntity entity = Mockito.mock(HttpEntity.class);
+        statusLine = Mockito.mock(StatusLine.class);
+        Mockito.doReturn(statusLine).when(httpResponse).getStatusLine();
+        Mockito.doReturn(entity).when(httpResponse).getEntity();
+        PowerMockito.mockStatic(EntityUtils.class);
         APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORES_STORE_URL))
-                .thenReturn("http://localhost:9292/redirect");
-        boolean published = wso2APIPublisher.publishToStore(api, store);
-        Assert.assertTrue(published);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.EXTERNAL_API_STORES + "."
+                + APIConstants.EXTERNAL_API_STORES_STORE_URL)).thenReturn(storeRedirectURL);
+        file = Mockito.mock(File.class);
+        HttpGet httpGet = Mockito.mock(HttpGet.class);
+        HttpPost httpPost = Mockito.mock(HttpPost.class);
+        HttpDelete httpDelete = Mockito.mock(HttpDelete.class);
+        PowerMockito.whenNew(HttpGet.class).withAnyArguments().thenReturn(httpGet);
+        PowerMockito.whenNew(HttpPost.class).withAnyArguments().thenReturn(httpPost);
+        PowerMockito.whenNew(HttpDelete.class).withAnyArguments().thenReturn(httpDelete);
+        Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(httpPost);
+        Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(httpGet);
+        Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(httpDelete);
+        MultipartEntityBuilder multipartEntityBuilder = Mockito.mock(MultipartEntityBuilder.class);
+        PowerMockito.mockStatic(MultipartEntityBuilder.class);
+        Mockito.when(MultipartEntityBuilder.create()).thenReturn(multipartEntityBuilder);
+        Mockito.when(multipartEntityBuilder.build()).thenReturn(Mockito.mock(HttpEntity.class));
+        Mockito.doNothing().when(httpPost).setEntity(Matchers.any());
+        apiImportExportManager = Mockito.mock(APIImportExportManager.class);
+        PowerMockito.whenNew(APIImportExportManager.class).withAnyArguments().thenReturn(apiImportExportManager);
     }
 
     @Test
-    public void testDeleteFromStoreWithNullStoreArguments() throws Exception {
+    public void testPublishToStoreWithNullStoreArguments() {
+
         //Error path - When username or password or endpoint is not defined
-        WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisher();
-        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
-        APIStore store = new APIStore();
-        store.setDisplayName("Sample");
+        APIStore nullStore = new APIStore();
+        nullStore.setDisplayName(storeName);
         try {
-            wso2APIPublisher.deleteFromStore(apiIdentifier, store);
+            wso2APIPublisher.publishToStore(api, nullStore);
             Assert.fail("APIManagement exception not thrown for error scenario");
         } catch (APIManagementException e) {
             String msg = "External APIStore endpoint URL or credentials are not defined. " +
-                    "Cannot proceed with deleting API from the APIStore - " + store.getDisplayName();
+                    "Cannot proceed with publishing API to the APIStore - " + nullStore.getDisplayName();
             Assert.assertEquals(msg, e.getMessage());
         }
     }
 
     @Test
-    public void testDeleteFromStore() throws Exception {
-        //Happy path
-        HttpClient defaultHttpClient = Mockito.mock(HttpClient.class);
-        HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
-        HttpEntity entity = Mockito.mock(HttpEntity.class);
-        WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisherWrapper(defaultHttpClient);
-        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        APIStore store = new APIStore();
-        store.setDisplayName("Sample");
-        store.setUsername("admin");
-        store.setPassword("admin");
-        store.setEndpoint("https://localhost:9292/store");
-        Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(Mockito.any(HttpPost.class), Mockito.any(HttpContext.class));
-        Mockito.doReturn(entity).when(httpResponse).getEntity();
-        PowerMockito.mockStatic(EntityUtils.class);
-        PowerMockito.when(EntityUtils.toString((HttpEntity) Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
-        boolean deleted = wso2APIPublisher.deleteFromStore(identifier, store);
-        Assert.assertTrue(deleted);
-    }
+    public void testPublishAndUpdateToStore() throws Exception {
 
-    @Test
-    public void testUpdateToStoreWithNullStoreArguments() throws Exception {
-        //Error path - When username or password or endpoint is not defined
-        WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisher();
-        API api = Mockito.mock(API.class);
-        APIStore store = new APIStore();
-        store.setDisplayName("Sample");
+        Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantID);
+        Mockito.doReturn(file).when(apiImportExportManager).exportAPIArchive(Matchers.any(API.class),
+                Matchers.anyBoolean(), Matchers.any(ExportFormat.class));
+        //Test Unauthenticated scenario for publishing API
+        Mockito.doReturn(HttpStatus.SC_UNAUTHORIZED).when(statusLine).getStatusCode();
+        String unauthenticatedResponse = "{\"code\":401,\"message\":\"\",\"description\":\"Unauthenticated request\"," +
+                "\"moreInfo\":\"\",\"error\":[]}";
+        PowerMockito.when(EntityUtils.toString(Matchers.any())).thenReturn(unauthenticatedResponse);
+        String errorMsg = "Import API service call received unsuccessful response: " + unauthenticatedResponse
+                + " status: " + HttpStatus.SC_UNAUTHORIZED;
+        try {
+            wso2APIPublisher.publishToStore(api, store);
+            Assert.fail("APIManagement exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(errorMsg, e.getMessage());
+        }
+        //Test Unauthenticated scenario for updating API
         try {
             wso2APIPublisher.updateToStore(api, store);
             Assert.fail("APIManagement exception not thrown for error scenario");
         } catch (APIManagementException e) {
-            String msg = "External APIStore endpoint URL or credentials are not defined.Cannot proceed with " +
-                    "publishing API to the APIStore - " + store.getDisplayName();
-            Assert.assertEquals(msg, e.getMessage());
+            Assert.assertEquals(errorMsg, e.getMessage());
+        }
+        //Test Successful scenario for publishing and updating API
+        Mockito.doReturn(HttpStatus.SC_OK).when(statusLine).getStatusCode();
+        String successResponse = "API imported successfully.";
+        PowerMockito.when(EntityUtils.toString(Matchers.any())).thenReturn(successResponse);
+        Assert.assertTrue("API Publish is unsuccessful", wso2APIPublisher.publishToStore(api, store));
+        Assert.assertTrue("API Update is unsuccessful", wso2APIPublisher.updateToStore(api, store));
+    }
+
+    @Test
+    public void testFailureWhileExportingAPI() throws Exception {
+
+        //Error path - When exporting API failed
+        PowerMockito.doThrow(new APIImportExportException("Error while exporting API")).when(apiImportExportManager)
+                .exportAPIArchive(Matchers.any(API.class), Matchers.anyBoolean(), Matchers.any(ExportFormat.class));
+        try {
+            wso2APIPublisher.publishToStore(api, store);
+            Assert.fail("APIManagement exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            String errorMsg = "Error while exporting API: " + api.getId().getApiName() + " version: "
+                    + api.getId().getVersion();
+            Assert.assertEquals(errorMsg, e.getMessage());
+        }
+
+        PowerMockito.doThrow(
+                new UserStoreException("Error in getting the tenant id with tenant domain: " + tenantDomain + "."))
+                .when(tenantManager).getTenantId(tenantDomain);
+        try {
+            wso2APIPublisher.publishToStore(api, store);
+            Assert.fail("APIManagement exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            String errorMsg = "Error while getting tenantId for tenant domain: " + tenantDomain
+                    + " when exporting API:" + api.getId().getApiName() + " version: " + api.getId().getVersion();
+            Assert.assertEquals(errorMsg, e.getMessage());
         }
     }
 
     @Test
-    public void testUpdateToStore() throws Exception {
-        //Happy path
-        HttpClient defaultHttpClient = Mockito.mock(HttpClient.class);
-        HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
-        HttpEntity entity = Mockito.mock(HttpEntity.class);
-        WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisherWrapper(defaultHttpClient);
-        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        API api = new API(identifier);
-        APIStore store = new APIStore();
-        store.setDisplayName("Sample");
-        store.setUsername("admin");
-        store.setPassword("admin");
-        store.setEndpoint("https://localhost:9292/store");
-        Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(Mockito.any(HttpPost.class), Mockito.any(HttpContext.class));
-        Mockito.doReturn(entity).when(httpResponse).getEntity();
-        PowerMockito.mockStatic(EntityUtils.class);
-        PowerMockito.when(EntityUtils.toString((HttpEntity) Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(1234);
-        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
-        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
-        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORES_STORE_URL))
-                .thenReturn("http://localhost:9292/redirect");
-        boolean updated = wso2APIPublisher.updateToStore(api, store);
-        Assert.assertTrue(updated);
-    }
+    public void testCheckingAPIExists() throws Exception {
 
-    @Test
-    public void testIsAPIAvailableWithNullStoreArguments() throws Exception {
-        //Error path - When username or password or endpoint is not defined
-        WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisher();
-        API api = Mockito.mock(API.class);
-        APIStore store = new APIStore();
-        store.setDisplayName("Sample");
+        //Test error path when multiple APIs received for search request
+        Mockito.doReturn(HttpStatus.SC_OK).when(statusLine).getStatusCode();
+        String apiGetResponse = "{\n" +
+                "    \"count\": 2,\n" +
+                "    \"list\": [\n" +
+                "        {\n" +
+                "            \"id\": \"735ad20d-f382-4ab3-8000-97fce885c853\",\n" +
+                "            \"name\": \"API1\",\n" +
+                "            \"version\": \"v1.0.0\",\n" +
+                "        },\n" +
+                "        {\n" +
+                "            \"id\": \"2346e0cc-926c-4b1d-8624-9d08371494c6\",\n" +
+                "            \"name\": \"TestAPI1\",\n" +
+                "            \"version\": \"v1.0.0\",\n" +
+                "        }\n" +
+                "    ],\n" +
+                "    \"pagination\": {\n" +
+                "        \"offset\": 0,\n" +
+                "        \"limit\": 25,\n" +
+                "        \"total\": 2,\n" +
+                "        \"next\": \"\",\n" +
+                "        \"previous\": \"\"\n" +
+                "    }\n" +
+                "}";
+        PowerMockito.when(EntityUtils.toString(Matchers.any())).thenReturn(apiGetResponse);
+        String errorMessage = "Duplicate APIs exists in external store for API name:"
+                + identifier.getApiName() + " version: " + identifier.getVersion();
         try {
             wso2APIPublisher.isAPIAvailable(api, store);
             Assert.fail("APIManagement exception not thrown for error scenario");
         } catch (APIManagementException e) {
-            String msg = "External APIStore endpoint URL or credentials are not defined. " +
-                    "Cannot proceed with checking API availability from the APIStore - "
-                    + store.getDisplayName();
-            Assert.assertEquals(msg, e.getMessage());
+            Assert.assertEquals(errorMessage, e.getMessage());
         }
+
+        //Test successful API non existence response
+        apiGetResponse = "{\n" +
+                "    \"count\": 0,\n" +
+                "    \"list\": [],\n" +
+                "    \"pagination\": {\n" +
+                "        \"offset\": 0,\n" +
+                "        \"limit\": 25,\n" +
+                "        \"total\": 0,\n" +
+                "        \"next\": \"\",\n" +
+                "        \"previous\": \"\"\n" +
+                "    }\n" +
+                "}";
+        PowerMockito.when(EntityUtils.toString(Matchers.any())).thenReturn(apiGetResponse);
+        Assert.assertFalse("API Exists response received", wso2APIPublisher.isAPIAvailable(api, store));
+
+        //Test successful API existence response
+        apiGetResponse = "{\n" +
+                "    \"count\": 1,\n" +
+                "    \"list\": [\n" +
+                "        {\n" +
+                "            \"id\": \"735ad20d-f382-4ab3-8000-97fce885c853\",\n" +
+                "            \"name\": \"API1\",\n" +
+                "            \"version\": \"1.0.0\",\n" +
+                "        }\n" +
+                "    ],\n" +
+                "    \"pagination\": {\n" +
+                "        \"offset\": 0,\n" +
+                "        \"limit\": 25,\n" +
+                "        \"total\": 1,\n" +
+                "        \"next\": \"\",\n" +
+                "        \"previous\": \"\"\n" +
+                "    }\n" +
+                "}";
+        PowerMockito.when(EntityUtils.toString(Matchers.any())).thenReturn(apiGetResponse);
+        Assert.assertTrue("API non exists response received", wso2APIPublisher.isAPIAvailable(api, store));
     }
 
     @Test
-    public void testIsAPIAvailable() throws Exception {
-        //Happy path
-        HttpClient defaultHttpClient = Mockito.mock(HttpClient.class);
-        HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
-        HttpEntity entity = Mockito.mock(HttpEntity.class);
-        WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisherWrapper(defaultHttpClient);
-        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        API api = new API(identifier);
-        APIStore store = new APIStore();
-        store.setDisplayName("Sample");
-        store.setUsername("admin");
-        store.setPassword("admin");
-        store.setEndpoint("https://localhost:9292/store");
-        Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(Mockito.any(HttpPost.class), Mockito.any(HttpContext.class));
-        Mockito.doReturn(entity).when(httpResponse).getEntity();
-        PowerMockito.mockStatic(EntityUtils.class);
-        PowerMockito.when(EntityUtils.toString((HttpEntity) Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
-        boolean available = wso2APIPublisher.isAPIAvailable(api, store);
-        Assert.assertTrue(available);
-    }
+    public void testDeletingAPI() throws Exception {
 
-    @Test
-    public void testCreateVersionedAPIToStoreWithNullStoreArguments() throws Exception {
-        //Error path - When username or password or endpoint is not defined
-        WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisher();
-        API api = Mockito.mock(API.class);
-        APIStore store = new APIStore();
-        store.setDisplayName("Sample");
-        String version = "v1.0.0";
+        //Test error path when deleting non existing API
+        Mockito.doReturn(HttpStatus.SC_OK).when(statusLine).getStatusCode();
+        String apiGetResponse = "{\n" +
+                "    \"count\": 0,\n" +
+                "    \"list\": [],\n" +
+                "    \"pagination\": {\n" +
+                "        \"offset\": 0,\n" +
+                "        \"limit\": 25,\n" +
+                "        \"total\": 0,\n" +
+                "        \"next\": \"\",\n" +
+                "        \"previous\": \"\"\n" +
+                "    }\n" +
+                "}";
+        PowerMockito.when(EntityUtils.toString(Matchers.any())).thenReturn(apiGetResponse);
         try {
-            wso2APIPublisher.createVersionedAPIToStore(api, store, version);
+            wso2APIPublisher.deleteFromStore(identifier, store);
             Assert.fail("APIManagement exception not thrown for error scenario");
         } catch (APIManagementException e) {
-            String msg = "External APIStore endpoint URL or credentials are not defined. Cannot proceed with " +
-                    "publishing API to the APIStore - " + store.getDisplayName();
-            Assert.assertEquals(msg, e.getMessage());
+            String errorMessage = "API: " + identifier.getApiName() + " version: " + identifier.getVersion()
+                    + " does not exist in external store: " + store.getName();
+            Assert.assertEquals(errorMessage, e.getMessage());
+        }
+
+        //Test successful API deletion
+        apiGetResponse = "{\n" +
+                "    \"count\": 1,\n" +
+                "    \"list\": [\n" +
+                "        {\n" +
+                "            \"id\": \"735ad20d-f382-4ab3-8000-97fce885c853\",\n" +
+                "            \"name\": \"API1\",\n" +
+                "            \"version\": \"1.0.0\",\n" +
+                "        }\n" +
+                "    ],\n" +
+                "    \"pagination\": {\n" +
+                "        \"offset\": 0,\n" +
+                "        \"limit\": 25,\n" +
+                "        \"total\": 1,\n" +
+                "        \"next\": \"\",\n" +
+                "        \"previous\": \"\"\n" +
+                "    }\n" +
+                "}";
+        PowerMockito.when(EntityUtils.toString(Matchers.any())).thenReturn(apiGetResponse);
+        Assert.assertTrue("API deletion failed", wso2APIPublisher.deleteFromStore(identifier, store));
+
+        //Test error path API deletion failed due to server error
+        String apiDeleteResponse = "{\"code\":500,\"message\":\"\",\"description\":\"Internal Server Error\"," +
+                "\"moreInfo\":\"\",\"error\":[]}";
+        HttpDelete httpDeleteFail = Mockito.mock(HttpDelete.class);
+        PowerMockito.whenNew(HttpDelete.class).withAnyArguments().thenReturn(httpDeleteFail);
+        HttpResponse deletionFailedResponse = Mockito.mock(HttpResponse.class);
+        StatusLine deletionFailedStatusLine = Mockito.mock(StatusLine.class);
+        Mockito.doReturn(deletionFailedStatusLine).when(deletionFailedResponse).getStatusLine();
+        HttpEntity deletionFailedEntity = Mockito.mock(HttpEntity.class);
+        Mockito.doReturn(deletionFailedEntity).when(deletionFailedResponse).getEntity();
+        PowerMockito.when(EntityUtils.toString(deletionFailedEntity)).thenReturn(apiDeleteResponse);
+        Mockito.doReturn(deletionFailedResponse).when(defaultHttpClient).execute(httpDeleteFail);
+
+        //Error path when deleting API
+        Mockito.doReturn(HttpStatus.SC_INTERNAL_SERVER_ERROR).when(deletionFailedStatusLine).getStatusCode();
+        try {
+            wso2APIPublisher.deleteFromStore(identifier, store);
+            Assert.fail("APIManagement exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            String errorMessage = "API Delete service call received unsuccessful response status: "
+                    + HttpStatus.SC_INTERNAL_SERVER_ERROR + " response: " + apiDeleteResponse;
+            Assert.assertEquals(errorMessage, e.getMessage());
         }
     }
-
-    @Test
-    public void testCreateVersionedAPIToStore() throws Exception {
-        //Happy path
-        HttpClient defaultHttpClient = Mockito.mock(HttpClient.class);
-        HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
-        HttpEntity entity = Mockito.mock(HttpEntity.class);
-        WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisherWrapper(defaultHttpClient);
-        APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
-        API api = new API(identifier);
-        APIStore store = new APIStore();
-        store.setDisplayName("Sample");
-        store.setUsername("admin");
-        store.setPassword("admin");
-        store.setEndpoint("https://localhost:9292/store");
-        String version = "v1.0.0";
-        Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(Mockito.any(HttpPost.class), Mockito.any(HttpContext.class));
-        Mockito.doReturn(entity).when(httpResponse).getEntity();
-        PowerMockito.mockStatic(EntityUtils.class);
-        PowerMockito.when(EntityUtils.toString((HttpEntity) Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
-        boolean published = wso2APIPublisher.createVersionedAPIToStore(api, store, version);
-        Assert.assertTrue(published);
-    }
-
 }
