@@ -139,9 +139,6 @@ public class WSO2PublisherNew implements APIPublisher {
             api.setAdvertiseOnly(true);
             //Change owner to original provider as the provider will be overriding after importing
             api.setApiOwner(api.getId().getProviderName());
-            //Set Store visibility to public and publisher access control to ALL
-            api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
-            api.setAccessControl(APIConstants.NO_ACCESS_CONTROL);
             //set redirect URL for the original Store
             tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(
                     api.getId().getProviderName()));
