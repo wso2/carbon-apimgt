@@ -466,8 +466,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Request API resource is not found. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal server error while publishing to external stores", response = ErrorDTO.class) })
-    public Response apisApiIdPublishToExternalStoresPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "List of External Store Ids.",required=true)  @QueryParam("externalStoreIds") List<String> externalStoreIds, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.apisApiIdPublishToExternalStoresPost(apiId, externalStoreIds, ifMatch, securityContext);
+    public Response apisApiIdPublishToExternalStoresPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "External Store Ids of stores which the API needs to be published or updated.",required=true)  @QueryParam("externalStoreId") List<String> externalStoreId, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.apisApiIdPublishToExternalStoresPost(apiId, externalStoreId, ifMatch, securityContext);
     }
 
     @PUT

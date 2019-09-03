@@ -3451,19 +3451,19 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreIds=StoreABC'\""
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreId=StoreABC&externalStoreId=StoreXYZ'\""
       x-wso2-request: |
-        POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreIds=StoreABC
+        POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreId=StoreABC&externalStoreId=StoreXYZ
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
         Content-Type: application/json
-      x-wso2-response: "HTTP/1.1 200\nContent-Type: application/json\n{\"count\":1,\"list\":[{\"id\":\"StoreABC\",\"displayName\":\"StoreABC\",\"type\":\"wso2\"}]}"
+      x-wso2-response: "HTTP/1.1 200\nContent-Type: application/json\n{\"count\":2,\"list\":[{\"id\":\"StoreABC\",\"displayName\":\"StoreABC\",\"type\":\"wso2\"},{\"id\":\"StoreXYZ\",\"displayName\":\"StoreXYZ\",\"type\":\"wso2\"}]}"
       summary: Publish an API to external stores
       description: |
         This operation can be used to publish an API to a list of external stores.
       parameters:
         - $ref: '#/parameters/apiId'
-        - name: externalStoreIds
-          description: List of External Store Ids.
+        - name: externalStoreId
+          description: External Store Ids of stores which the API needs to be published or updated.
           type: array
           items:
             type: string

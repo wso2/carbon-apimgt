@@ -66,7 +66,7 @@ public interface ApisApiService {
       public Response apisApiIdMediationPoliciesPost(MediationDTO body, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdMonetizationGet(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdMonetizePost(String apiId, APIMonetizationInfoDTO body, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdPublishToExternalStoresPost(String apiId, List<String> externalStoreIds, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdPublishToExternalStoresPost(String apiId, List<String> externalStoreId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdResourcePathsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String resourcePath, String verb, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
