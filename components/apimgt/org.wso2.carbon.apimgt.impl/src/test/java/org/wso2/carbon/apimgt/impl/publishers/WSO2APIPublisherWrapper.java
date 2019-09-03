@@ -18,22 +18,22 @@
 
 package org.wso2.carbon.apimgt.impl.publishers;
 
-import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.wso2.carbon.apimgt.api.APIProvider;
 
 public class WSO2APIPublisherWrapper extends WSO2APIPublisher {
-    private HttpClient client;
+    private CloseableHttpClient client;
     private String username;
     private APIProvider apiProvider;
 
-    public WSO2APIPublisherWrapper(HttpClient client, String username, APIProvider apiProvider) {
+    public WSO2APIPublisherWrapper(CloseableHttpClient client, String username, APIProvider apiProvider) {
         this.client = client;
         this.username = username;
         this.apiProvider = apiProvider;
     }
 
     @Override
-    protected HttpClient getHttpClient(String storeEndpoint) {
+    protected CloseableHttpClient getHttpClient(String storeEndpoint) {
         return client;
     }
 

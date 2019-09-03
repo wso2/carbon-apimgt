@@ -27,15 +27,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -99,7 +99,7 @@ public class WSO2APIPublisher implements APIPublisher {
         //Export API as an advertised only API as a zipped file
         File file = exportAPIArchive(api);
         //Call the Admin REST API of external Store to publish the exported advertised only API
-        HttpResponse response = importAPIToExternalStore(file, store, Boolean.FALSE);
+        CloseableHttpResponse response = importAPIToExternalStore(file, store, Boolean.FALSE);
         return evaluateImportAPIResponse(response);
     }
 
@@ -174,15 +174,15 @@ public class WSO2APIPublisher implements APIPublisher {
      * @return HTTP Response whether import is successful or not
      * @throws APIManagementException If an error occurs while importing API.
      */
-    private HttpResponse importAPIToExternalStore(File apiArchive, APIStore store, Boolean overwrite)
+    private CloseableHttpResponse importAPIToExternalStore(File apiArchive, APIStore store, Boolean overwrite)
             throws APIManagementException {
 
         MultipartEntityBuilder multipartEntityBuilder;
         String storeEndpoint = null;
-        HttpClient httpclient;
+        CloseableHttpClient httpclient;
         URIBuilder uriBuilder;
         HttpPost httppost;
-        HttpResponse httpResponse;
+        CloseableHttpResponse httpResponse;
 
         try {
             multipartEntityBuilder = MultipartEntityBuilder.create();
@@ -295,7 +295,7 @@ public class WSO2APIPublisher implements APIPublisher {
      * @return Successful or not
      * @throws APIManagementException If an error occurs while checking the response
      */
-    private Boolean evaluateImportAPIResponse(HttpResponse response) throws APIManagementException {
+    private Boolean evaluateImportAPIResponse(CloseableHttpResponse response) throws APIManagementException {
 
         HttpEntity entity;
         String responseString;
@@ -320,6 +320,8 @@ public class WSO2APIPublisher implements APIPublisher {
         } catch (IOException e) {
             String errorMessage = "Error while evaluating HTTP response";
             throw new APIManagementException(errorMessage, e);
+        } finally {
+            closeHTTPResponse(response);
         }
     }
 
@@ -329,10 +331,28 @@ public class WSO2APIPublisher implements APIPublisher {
      * @param response HTTP Response
      * @return whether status code matches or not.
      */
-    private Boolean evaluateResponseStatus(HttpResponse response) {
+    private Boolean evaluateResponseStatus(CloseableHttpResponse response) {
 
         int statusCode = response.getStatusLine().getStatusCode();
         return statusCode == HttpStatus.SC_OK;
+    }
+
+    /**
+     * Close HTTP Response to ensure correct deallocate of system resources
+     *
+     * @param response CloseableHttpResponse
+     * @throws APIManagementException If an error occurs while closing response
+     */
+    private void closeHTTPResponse(CloseableHttpResponse response) throws APIManagementException {
+        if (response != null) {
+            try {
+                response.close();
+            } catch (IOException e) {
+                String errorMessage = "Error occurred while closing the buffers reader.";
+                log.error(errorMessage, e);
+                throw new APIManagementException(errorMessage, e);
+            }
+        }
     }
 
     /**
@@ -354,7 +374,7 @@ public class WSO2APIPublisher implements APIPublisher {
         //Export API as an advertised only API as a zipped file
         File file = exportAPIArchive(api);
         //Call the Admin REST API of external Store to publish the exported advertised only API
-        HttpResponse response = importAPIToExternalStore(file, store, Boolean.TRUE);
+        CloseableHttpResponse response = importAPIToExternalStore(file, store, Boolean.TRUE);
         return evaluateImportAPIResponse(response);
     }
 
@@ -369,6 +389,7 @@ public class WSO2APIPublisher implements APIPublisher {
     @Override
     public boolean deleteFromStore(APIIdentifier apiId, APIStore store) throws APIManagementException {
 
+        CloseableHttpResponse httpResponse = null;
         evaluateCredentialsAndEndpointURL(store);
         if (log.isDebugEnabled()) {
             log.debug("Delete API: " + apiId.getApiName() + " version: " + apiId.getVersion()
@@ -381,12 +402,12 @@ public class WSO2APIPublisher implements APIPublisher {
                     + APIConstants.RestApiConstants.REST_API_PUB_RESOURCE_PATH_APIS + "/" + apiUUID;
             //Delete API
             try {
-                HttpClient httpclient = getHttpClient(storeEndpoint);
+                CloseableHttpClient httpclient = getHttpClient(storeEndpoint);
                 HttpDelete httpDelete = new HttpDelete(storeEndpoint);
                 //Set Authorization Header of external store admin
                 httpDelete.setHeader(HttpHeaders.AUTHORIZATION, getBasicAuthorizationHeader(store));
                 //Call import API of external store
-                HttpResponse httpResponse = httpclient.execute(httpDelete);
+                httpResponse = httpclient.execute(httpDelete);
                 if (evaluateResponseStatus(httpResponse)) {
                     if (log.isDebugEnabled()) {
                         log.debug("API: " + apiId.getApiName() + " version: " + apiId.getVersion()
@@ -407,6 +428,8 @@ public class WSO2APIPublisher implements APIPublisher {
                         + store.getName();
                 log.error(errorMessage, e);
                 throw new APIManagementException(errorMessage, e);
+            } finally {
+                closeHTTPResponse(httpResponse);
             }
         } else {
             String errorMessage = "API: " + apiId.getApiName() + " version: " + apiId.getVersion()
@@ -463,11 +486,12 @@ public class WSO2APIPublisher implements APIPublisher {
     private String getAPIUUID(APIStore store, APIIdentifier apiIdentifier) throws APIManagementException {
 
         String apiUUID;
+        CloseableHttpResponse httpResponse = null;
         //Get Publisher REST endpoint from given store endpoint
         String storeEndpoint = getPublisherRESTURLFromStoreURL(store.getEndpoint())
                 + APIConstants.RestApiConstants.REST_API_PUB_RESOURCE_PATH_APIS;
         try {
-            HttpClient httpclient = getHttpClient(storeEndpoint);
+            CloseableHttpClient httpclient = getHttpClient(storeEndpoint);
             URIBuilder uriBuilder = new URIBuilder(storeEndpoint);
             String searchQuery = APIConstants.RestApiConstants.PUB_SEARCH_API_QUERY_PARAMS_NAME + "\""
                     + apiIdentifier.getApiName() + "\"" + StringUtils.SPACE
@@ -480,7 +504,7 @@ public class WSO2APIPublisher implements APIPublisher {
             httpGet.setHeader(HttpHeaders.AUTHORIZATION, getBasicAuthorizationHeader(store));
 
             //Call Publisher REST API of external store
-            HttpResponse httpResponse = httpclient.execute(httpGet);
+            httpResponse = httpclient.execute(httpGet);
             HttpEntity entity = httpResponse.getEntity();
             String responseString = EntityUtils.toString(entity);
             //release all resources held by the responseHttpEntity
@@ -532,6 +556,8 @@ public class WSO2APIPublisher implements APIPublisher {
             String errorMessage = "Error while building URI for store endpoint: " + storeEndpoint;
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, e);
+        } finally {
+            closeHTTPResponse(httpResponse);
         }
         return null;
     }
@@ -611,13 +637,13 @@ public class WSO2APIPublisher implements APIPublisher {
      * @return HTTP Client
      * @throws APIManagementException If an error occurs due to malformed URL.
      */
-    protected HttpClient getHttpClient(String storeEndpoint) throws APIManagementException {
+    protected CloseableHttpClient getHttpClient(String storeEndpoint) throws APIManagementException {
 
         try {
             URL storeURL = new URL(storeEndpoint);
             int externalStorePort = storeURL.getPort();
             String externalStoreProtocol = storeURL.getProtocol();
-            return APIUtil.getHttpClient(externalStorePort, externalStoreProtocol);
+            return (CloseableHttpClient) APIUtil.getHttpClient(externalStorePort, externalStoreProtocol);
         } catch (MalformedURLException e) {
             throw new APIManagementException("Error while initializing HttpClient due to malformed URL", e);
         }

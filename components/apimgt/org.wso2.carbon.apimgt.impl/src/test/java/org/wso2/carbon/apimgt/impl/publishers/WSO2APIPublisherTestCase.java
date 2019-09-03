@@ -22,12 +22,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -82,7 +82,7 @@ public class WSO2APIPublisherTestCase {
     private File file;
     private StatusLine statusLine;
     private APIImportExportManager apiImportExportManager;
-    private HttpClient defaultHttpClient;
+    private CloseableHttpClient defaultHttpClient;
 
     @Before
     public void init() throws Exception {
@@ -93,9 +93,9 @@ public class WSO2APIPublisherTestCase {
         store.setEndpoint(storeEndpoint);
         identifier = new APIIdentifier(apiIdentifier);
         api = new API(identifier);
-        defaultHttpClient = Mockito.mock(HttpClient.class);
+        defaultHttpClient = Mockito.mock(CloseableHttpClient.class);
         wso2APIPublisher = new WSO2APIPublisherWrapper(defaultHttpClient, username, Mockito.mock(APIProvider.class));
-        HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
+        CloseableHttpResponse httpResponse = Mockito.mock(CloseableHttpResponse.class);
         ServiceReferenceHolder serviceReferenceHolder = TestUtils.getServiceReferenceHolder();
         RealmService realmService = Mockito.mock(RealmService.class);
         tenantManager = Mockito.mock(TenantManager.class);
@@ -335,7 +335,7 @@ public class WSO2APIPublisherTestCase {
                 "\"moreInfo\":\"\",\"error\":[]}";
         HttpDelete httpDeleteFail = Mockito.mock(HttpDelete.class);
         PowerMockito.whenNew(HttpDelete.class).withAnyArguments().thenReturn(httpDeleteFail);
-        HttpResponse deletionFailedResponse = Mockito.mock(HttpResponse.class);
+        CloseableHttpResponse deletionFailedResponse = Mockito.mock(CloseableHttpResponse.class);
         StatusLine deletionFailedStatusLine = Mockito.mock(StatusLine.class);
         Mockito.doReturn(deletionFailedStatusLine).when(deletionFailedResponse).getStatusLine();
         HttpEntity deletionFailedEntity = Mockito.mock(HttpEntity.class);
