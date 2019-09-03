@@ -18,7 +18,7 @@
 
 import React, { useContext, useState } from 'react';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
-import { useSettings } from 'AppComponents/Shared/SettingsContext';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
 
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage } from 'react-intl';
@@ -42,7 +42,7 @@ import Paper from '@material-ui/core/Paper';
  */
 export default function Environments() {
     const { api, updateAPI } = useContext(APIContext);
-    const { settings } = useSettings();
+    const { settings } = useAppContext();
     const [gatewayEnvironments, setGatewayEnvironments] = useState([...api.gatewayEnvironments]);
 
     /**

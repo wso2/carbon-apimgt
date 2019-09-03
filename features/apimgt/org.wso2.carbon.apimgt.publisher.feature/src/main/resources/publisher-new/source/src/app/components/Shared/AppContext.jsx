@@ -17,8 +17,7 @@
  */
 import React, { useContext } from 'react';
 
-const Settings = React.createContext({ });
-export const useSettings = () => useContext(Settings);
-export const SettingsProvider = Settings.Provider;
-export const SettingsConsumer = Settings.Consumer;
-export default Settings;
+const AppContext = React.createContext({ });
+export const useAppContext = () => useContext(AppContext);
+export const AppContextProvider = AppContext.Provider;
+export default AppContext;

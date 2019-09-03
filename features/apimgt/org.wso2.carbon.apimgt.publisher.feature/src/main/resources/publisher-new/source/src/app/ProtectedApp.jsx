@@ -33,7 +33,7 @@ import Configurations from 'Config';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import { IntlProvider } from 'react-intl';
-import { SettingsProvider } from 'AppComponents/Shared/SettingsContext';
+import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 
 const theme = createMuiTheme(Configurations.themes.light);
 
@@ -77,6 +77,7 @@ export default class Protected extends Component {
             // user information via redirection
             const userPromise = AuthManager.getUserFromToken();
             userPromise.then(loggedUser => this.setState({ user: loggedUser }));
+            settingPromise.then(settingsNew => this.setState({ settings: settingsNew }));
         }
     }
 
@@ -98,7 +99,7 @@ export default class Protected extends Component {
         }
         return (
             settings && (
-                <SettingsProvider value={{ settings }}>
+                <AppContextProvider value={{ settings, user }}>
                     <MuiThemeProvider theme={theme}>
                         <AppErrorBoundary>
                             <Base header={header}>
@@ -111,7 +112,7 @@ export default class Protected extends Component {
                             </Base>
                         </AppErrorBoundary>
                     </MuiThemeProvider>
-                </SettingsProvider>
+                </AppContextProvider>
             )
         );
     }
