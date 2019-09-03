@@ -130,7 +130,6 @@ class CommentOptions extends React.Component {
             hour: '2-digit',
             minute: '2-digit',
         });
-
         return localDateString + ' ' + localTimeString;
     }
 
@@ -145,7 +144,27 @@ class CommentOptions extends React.Component {
         } = this.props;
         return (
             <Grid container spacing={8} className={classes.verticalSpace} key={comment.commentId}>
-                {comment.parentCommentId == null && [
+                {/* only the comment owner or admin can delete a comment */}
+                {(comment.createdBy === AuthManager.getUser().name
+                    || AuthManager.getUser().name === theme.custom.adminRole) && [
+                        <Grid item key='key-delete'>
+                            <Typography
+                                component='a'
+                                className={editIndex === -1 ? classes.link : classes.disable}
+                                onClick={() => this.handleClickOpen(comment)}
+                            >
+                                <FormattedMessage
+                                    id='Apis.Details.Comments.CommentOptions.delete'
+                                    defaultMessage='Delete'
+                                />
+                            </Typography>
+                        </Grid>,
+                        <Grid item key='key-delete-vertical-divider'>
+                            <VerticalDivider height={15} />
+                        </Grid>,
+                    ]}
+
+                {/* {comment.parentCommentId == null && [
                     <Grid item key='key-reply'>
                         <Typography
                             component='a'
@@ -158,47 +177,29 @@ class CommentOptions extends React.Component {
                     <Grid item key='key-reply-vertical-divider'>
                         <VerticalDivider height={15} />
                     </Grid>,
-                ]}
+                ]} */}
 
-                {/* only the comment owner or admin can delete a comment */}
-                {(comment.createdBy === AuthManager.getUser().name
-                    || AuthManager.getUser().name === theme.custom.adminRole) && [
-                    <Grid item key='key-delete'>
-                            <Typography
-                            component='a'
-                            className={editIndex === -1 ? classes.link : classes.disable}
-                            onClick={() => this.handleClickOpen(comment)}
-                        >
-                            <FormattedMessage
-                                    id='Apis.Details.Comments.CommentOptions.delete'
-                                    defaultMessage='Delete'
-                                />
-                        </Typography>
-                        </Grid>,
-                    <Grid item key='key-delete-vertical-divider'>
-                            <VerticalDivider height={15} />
-                        </Grid>,
-                ]}
+
 
                 {/* only the comment owner can modify the comment from the exact entry point */}
                 {comment.createdBy === AuthManager.getUser().name
                     && comment.entryPoint === 'APIStore' && [
                         <Grid item key='key-edit'>
-                        <Typography
+                            <Typography
                                 component='a'
                                 className={editIndex === -1 ? classes.link : classes.disable}
                                 onClick={() => this.showEditComment(index)}
                             >
                                 <FormattedMessage
-                                id='Apis.Details.Comments.CommentOptions.edit'
-                                defaultMessage='Edit'
-                            />
+                                    id='Apis.Details.Comments.CommentOptions.edit'
+                                    defaultMessage='Edit'
+                                />
                             </Typography>
-                    </Grid>,
+                        </Grid>,
                         <Grid item key='key-edit-verical-divider'>
-                        <VerticalDivider height={15} />
-                    </Grid>,
-                ]}
+                            <VerticalDivider height={15} />
+                        </Grid>,
+                    ]}
                 <Grid item className={classes.time}>
                     <Typography component='a' variant='caption'>
                         {this.displayDate(comment.createdTime)}

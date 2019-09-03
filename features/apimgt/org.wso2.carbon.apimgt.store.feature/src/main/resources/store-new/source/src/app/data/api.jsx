@@ -296,39 +296,23 @@ export default class API extends Resource {
     /**
      * Add new comment to an existing API
      * @param apiId apiId of the api to which the comment is added
-     * @param commentInfo comment text
+     * @param comment comment text
      */
-    addComment(apiId, commentInfo, callback = null) {
-        const promise = this.client.then((client) => {
-            return client.apis['Comment (Individual)'].post_apis__apiId__comments(
-                { apiId, body: commentInfo },
-                this._requestMetaData(),
-            );
-        }).catch((error) => {
-            console.error(error);
+    addComment(apiId, comment) {
+        return this.client.then((client) => {
+            const payload = { apiId, body: comment };
+            return client.apis['Comments'].addCommentToAPI(payload, this._requestMetaData());
         });
-        if (callback) {
-            return promise.then(callback);
-        } else {
-            return promise;
-        }
     }
 
     /**
      * Get all comments for a particular API
      * @param apiId api id of the api to which the comment is added
      */
-    getAllComments(apiId, callback = null) {
-        const promiseGet = this.client.then((client) => {
-            return client.apis['Comments'].get_apis__apiId__comments({ apiId }, this._requestMetaData());
-        }).catch((error) => {
-            console.error(error);
+    getAllComments(apiId) {
+        return this.client.then((client) => {
+            return client.apis['Comments'].getAllCommentsOfAPI({ apiId }, this._requestMetaData());
         });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
-        }
     }
 
     /**
@@ -336,20 +320,10 @@ export default class API extends Resource {
      * @param apiId api id of the api to which the comment belongs to
      * @param commentId comment id of the comment which has to be deleted
      */
-    deleteComment(apiId, commentId, callback = null) {
-        const promise = this.client.then((client) => {
-            return client.apis['Comment (Individual)'].delete_apis__apiId__comments__commentId_(
-                { apiId, commentId },
-                this._requestMetaData(),
-            );
-        }).catch((error) => {
-            console.error(error);
+    deleteComment(apiId, commentId) {
+        return this.client.then((client) => {
+            return client.apis['Comments'].deleteComment({ apiId, commentId }, this._requestMetaData());
         });
-        if (callback) {
-            return promise.then(callback);
-        } else {
-            return promise;
-        }
     }
 
     /**

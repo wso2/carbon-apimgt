@@ -29,9 +29,9 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApiProductsApiService {
-      public Response apiProductsApiProductIdCommentsCommentIdDelete(String commentId, String apiProductId, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdCommentsCommentIdGet(String commentId, String apiProductId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdCommentsCommentIdPut(String commentId, String apiProductId, CommentDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apiProductsApiProductIdCommentsCommentIdDelete(Integer commentId, String apiProductId, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apiProductsApiProductIdCommentsCommentIdGet(Integer commentId, String apiProductId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apiProductsApiProductIdCommentsCommentIdPut(Integer commentId, String apiProductId, CommentDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdCommentsGet(String apiProductId, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdCommentsPost(String apiProductId, CommentDTO body, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdDocumentsDocumentIdContentGet(String apiProductId, String documentId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

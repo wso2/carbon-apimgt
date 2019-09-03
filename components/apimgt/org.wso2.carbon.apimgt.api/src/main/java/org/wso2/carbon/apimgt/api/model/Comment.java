@@ -49,7 +49,25 @@ public class Comment {
         this.createdTime = createdTime;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getApiId() {
+        return apiId;
+    }
+
+    public void setApiId(String apiId) {
+        this.apiId = apiId;
+    }
+
     private String user;
     private String text;
     private Date createdTime;
+    private String id;
+    private String apiId;
 }
