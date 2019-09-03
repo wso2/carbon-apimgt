@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>org.wso2.carbon.apimgt.hybrid.gateway</artifactId>
-        <version>6.5.70-SNAPSHOT</version>
+        <version>6.5.74-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -159,8 +159,8 @@
                             org.wso2.carbon.apimgt.hybrid.gateway.common.*;version="${project.version}"
                         </Export-Package>
                         <Import-Package>
-                            org.osgi.framework.*,
-                            org.osgi.service.component.*,
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",					
                             org.apache.commons.codec.binary.*,
                             org.apache.commons.io.*; version="${commons-io.version}",
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",

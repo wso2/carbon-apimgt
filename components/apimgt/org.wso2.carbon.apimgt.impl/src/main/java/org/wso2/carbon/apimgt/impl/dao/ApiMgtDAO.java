@@ -26,8 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
@@ -78,6 +76,7 @@ import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
@@ -92,9 +91,7 @@ import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
-import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 import org.wso2.carbon.apimgt.impl.utils.RemoteUserManagerClient;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
@@ -134,7 +131,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1683,88 +1679,39 @@ public class ApiMgtDAO {
     public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName,
                                                          int startSubIndex, int endSubIndex, String groupingId)
             throws APIManagementException {
-        Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet result = null;
+        Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
+        String sqlQuery =
+                appendSubscriptionQueryWhereClause(groupingId, SQLConstants.GET_PAGINATED_SUBSCRIBED_APIS_SQL)
+                + " UNION " +
+                appendSubscriptionQueryWhereClause(groupingId, SQLConstants.GET_PAGINATED_SUBSCRIBED_API_PRODUCTS_SQL);
 
-        String sqlQuery = SQLConstants.GET_PAGINATED_SUBSCRIBED_APIS_SQL;
-
-        String whereClause = " AND  SUB.USER_ID = ? ";
-        String whereClauseForceCaseInsensitiveComp = " AND LOWER(SUB.USER_ID) = LOWER(?)  ";
-        String whereClauseWithGroupId = " AND (APP.GROUP_ID = ? OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL)"
-                + " AND SUB.USER_ID = ?))";
-        String whereClauseWithGroupIdorceCaseInsensitiveComp = " AND (APP.GROUP_ID = ?"
-                + " OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL) AND LOWER(SUB.USER_ID) = LOWER(?)))";
-
-        String whereClauseWithMultiGroupId = " AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM " +
-                "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( SUB.USER_ID = ? ))";
-        String whereClauseWithMultiGroupIdCaseInsensitive = " AND  ( (APP.APPLICATION_ID IN  (SELECT APPLICATION_ID " +
-                "FROM AM_APPLICATION_GROUP_MAPPING  WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( LOWER(SUB.USER_ID) = LOWER" +
-                "(?) ))";
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            int tenantId = APIUtil.getTenantId(subscriber.getName());
-            if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
-                if (multiGroupAppSharingEnabled) {
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                    if (forceCaseInsensitiveComparisons) {
-                        sqlQuery += whereClauseWithMultiGroupIdCaseInsensitive;
-                    } else {
-                        sqlQuery += whereClauseWithMultiGroupId;
-                    }
-                    String groupIDArray[] = groupingId.split(",");
-
-                    ps = fillQueryParams(connection, sqlQuery, groupIDArray, 3);
-                    ps.setInt(1, tenantId);
-                    ps.setString(2, applicationName);
-                    // dynamically seeting the parameter index
-                    int paramIndex = groupIDArray.length + 2;
-                    ps.setString(++paramIndex, tenantDomain);
-                    ps.setString(++paramIndex, subscriber.getName());
-                } else {
-                    if (forceCaseInsensitiveComparisons) {
-                        sqlQuery += whereClauseWithGroupIdorceCaseInsensitiveComp;
-                    } else {
-                        sqlQuery += whereClauseWithGroupId;
-                    }
-                    ps = connection.prepareStatement(sqlQuery);
-                    ps.setInt(1, tenantId);
-                    ps.setString(2, applicationName);
-                    ps.setString(3, groupingId);
-                    ps.setString(4, subscriber.getName());
-                }
-
-            } else {
-                if (forceCaseInsensitiveComparisons) {
-                    sqlQuery += whereClauseForceCaseInsensitiveComp;
-                } else {
-                    sqlQuery += whereClause;
-                }
-
-                ps = connection.prepareStatement(sqlQuery);
-                ps.setInt(1, tenantId);
-                ps.setString(2, applicationName);
-                ps.setString(3, subscriber.getName());
-            }
-            result = ps.executeQuery();
-
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sqlQuery);
+             ResultSet result = getSubscriptionResultSet(groupingId, subscriber, applicationName, ps)) {
             int index = 0;
             while (result.next()) {
                 if (index >= startSubIndex && index < endSubIndex) {
-                    APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
-                            ("API_PROVIDER")), result.getString("API_NAME"), result.getString("API_VERSION"));
+                    String apiType = result.getString("TYPE");
 
-                    SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
-                    subscribedAPI.setUUID(result.getString("SUB_UUID"));
-                    subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
-                    subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
-                    subscribedAPI.setTier(new Tier(result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
+                    if (APIType.API.toString().equals(apiType)) {
+                        APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
+                                ("API_PROVIDER")), result.getString("API_NAME"),
+                                result.getString("API_VERSION"));
 
-                    Application application = new Application(result.getString("APP_NAME"), subscriber);
-                    application.setUUID(result.getString("APP_UUID"));
-                    subscribedAPI.setApplication(application);
-                    subscribedAPIs.add(subscribedAPI);
+                        SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
+                        initSubscribedAPI(subscribedAPI, subscriber, result);
+                        subscribedAPIs.add(subscribedAPI);
+
+                    } else if (APIType.API_PRODUCT.toString().equals(apiType)) {
+                        APIProductIdentifier identifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(result.getString
+                                ("API_PROVIDER")), result.getString("API_NAME"),
+                                result.getString("API_VERSION"));
+
+                        SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
+                        initSubscribedAPI(subscribedAPI, subscriber, result);
+                        subscribedAPIs.add(subscribedAPI);
+                    }
+
                     if (index == endSubIndex - 1) {
                         break;
                     }
@@ -1773,10 +1720,101 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to get SubscribedAPI of :" + subscriber.getName(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, result);
         }
+
         return subscribedAPIs;
+    }
+
+    private String appendSubscriptionQueryWhereClause(final String groupingId, String sqlQuery) {
+        if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
+            if (multiGroupAppSharingEnabled) {
+                String[] groupIDArray = groupingId.split(",");
+                List<String> questionMarks = new ArrayList<>(Collections.nCopies(groupIDArray.length, "?"));
+                final String paramString = String.join(",", questionMarks);
+
+                if (forceCaseInsensitiveComparisons) {
+                    sqlQuery += " AND  ( (APP.APPLICATION_ID IN  (SELECT APPLICATION_ID " +
+                            " FROM AM_APPLICATION_GROUP_MAPPING  " +
+                            " WHERE GROUP_ID IN (" + paramString + ") AND TENANT = ?))" +
+                            "  OR  ( LOWER(SUB.USER_ID) = LOWER(?) ))";
+                } else {
+                    sqlQuery += " AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM " +
+                            "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN (" + paramString + ") AND TENANT = ?))  " +
+                            "OR  ( SUB.USER_ID = ? ))";
+                }
+            } else {
+                if (forceCaseInsensitiveComparisons) {
+                    sqlQuery += " AND (APP.GROUP_ID = ? OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL)" +
+                            " AND LOWER(SUB.USER_ID) = LOWER(?)))";
+                } else {
+                    sqlQuery += " AND (APP.GROUP_ID = ? OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL)" +
+                            " AND SUB.USER_ID = ?))";
+                }
+            }
+        } else {
+            if (forceCaseInsensitiveComparisons) {
+                sqlQuery += " AND LOWER(SUB.USER_ID) = LOWER(?)  ";
+            } else {
+                sqlQuery += " AND  SUB.USER_ID = ? ";
+            }
+        }
+
+        return sqlQuery;
+    }
+
+    private ResultSet getSubscriptionResultSet(String groupingId, Subscriber subscriber, String applicationName,
+                                          PreparedStatement statement) throws SQLException {
+        int tenantId = APIUtil.getTenantId(subscriber.getName());
+        int paramIndex = 0;
+
+        if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
+            if (multiGroupAppSharingEnabled) {
+                String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+
+                String[] groupIDArray = groupingId.split(",");
+
+                // Set the same parameters for each of the 2 SELECT statements of the UNION
+                for (int i = 0; i < 2; ++i) {
+                    statement.setInt(++paramIndex, tenantId);
+                    statement.setString(++paramIndex, applicationName);
+
+                    for (String groupId : groupIDArray) {
+                        statement.setString(++paramIndex, groupId);
+                    }
+                    statement.setString(++paramIndex, tenantDomain);
+                    statement.setString(++paramIndex, subscriber.getName());
+                }
+            } else {
+                // Set the same parameters for each of the 2 SELECT statements of the UNION
+                for (int i = 0; i < 2; ++i) {
+                    statement.setInt(++paramIndex, tenantId);
+                    statement.setString(++paramIndex, applicationName);
+                    statement.setString(++paramIndex, groupingId);
+                    statement.setString(++paramIndex, subscriber.getName());
+                }
+            }
+        } else {
+            // Set the same parameters for each of the 2 SELECT statements of the UNION
+            for (int i = 0; i < 2; ++i) {
+                statement.setInt(++paramIndex, tenantId);
+                statement.setString(++paramIndex, applicationName);
+                statement.setString(++paramIndex, subscriber.getName());
+            }
+        }
+
+        return statement.executeQuery();
+    }
+
+    private void initSubscribedAPI(SubscribedAPI subscribedAPI, Subscriber subscriber, ResultSet resultSet)
+            throws SQLException {
+        subscribedAPI.setUUID(resultSet.getString("SUB_UUID"));
+        subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
+        subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
+        subscribedAPI.setTier(new Tier(resultSet.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
+
+        Application application = new Application(resultSet.getString("APP_NAME"), subscriber);
+        application.setUUID(resultSet.getString("APP_UUID"));
+        subscribedAPI.setApplication(application);
     }
 
     /**
@@ -1887,132 +1925,115 @@ public class ApiMgtDAO {
      */
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String groupingId)
             throws APIManagementException {
-        Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet result = null;
+        Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<>();
 
         //identify subscribeduser used email/ordinalusername
         String subscribedUserName = getLoginUserName(subscriber.getName());
         subscriber.setName(subscribedUserName);
 
-        String sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_SUBSCRIBER_SQL;
-        String whereClause = " AND  SUB.USER_ID = ? ";
-        String whereClauseCaseInSensitive = " AND  LOWER(SUB.USER_ID) = LOWER(?) ";
-        String whereClauseWithGroupId = " AND (APP.GROUP_ID = ? OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL)"
-                + " AND SUB.USER_ID = ?))";
-        String whereClauseWithGroupIdorceCaseInsensitiveComp = " AND (APP.GROUP_ID = ? "
-                + "OR ((APP.GROUP_ID='' OR APP.GROUP_ID IS NULL) AND LOWER(SUB.USER_ID) = LOWER(?)))";
+        String sqlQuery =
+                        appendSubscriptionQueryWhereClause(groupingId,
+                                SQLConstants.GET_SUBSCRIBED_APIS_OF_SUBSCRIBER_SQL) +
+                        " UNION " +
+                        appendSubscriptionQueryWhereClause(groupingId,
+                                SQLConstants.GET_SUBSCRIBED_API_PRODUCTS_OF_SUBSCRIBER_SQL);
 
-        String whereClauseWithMultiGroupId = " AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
-                "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( SUB.USER_ID = ? ))";
-        String whereClauseWithMultiGroupIdCaseInsensitiveComp = "  AND  ( (APP.APPLICATION_ID IN (SELECT " +
-                "APPLICATION_ID  FROM " +
-                "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( LOWER(SUB.USER_ID) = LOWER(?) ))";
-        try {
-            connection = APIMgtDBUtil.getConnection();
-
-            if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
-
-                if (multiGroupAppSharingEnabled) {
-                    if (forceCaseInsensitiveComparisons) {
-                        sqlQuery += whereClauseWithMultiGroupIdCaseInsensitiveComp;
-                    } else {
-                        sqlQuery += whereClauseWithMultiGroupId;
-                    }
-                    String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                    String[] groupIdArr = groupingId.split(",");
-
-                    ps = fillQueryParams(connection, sqlQuery, groupIdArr, 2);
-                    int tenantId = APIUtil.getTenantId(subscriber.getName());
-                    ps.setInt(1, tenantId);
-                    int paramIndex = groupIdArr.length + 1;
-                    ps.setString(++paramIndex, tenantDomain);
-                    ps.setString(++paramIndex, subscriber.getName());
-                } else {
-                    if (forceCaseInsensitiveComparisons) {
-                        sqlQuery += whereClauseWithGroupIdorceCaseInsensitiveComp;
-                    } else {
-                        sqlQuery += whereClauseWithGroupId;
-                    }
-                    ps = connection.prepareStatement(sqlQuery);
-                    int tenantId = APIUtil.getTenantId(subscriber.getName());
-                    ps.setInt(1, tenantId);
-                    ps.setString(2, groupingId);
-                    ps.setString(3, subscriber.getName());
-                }
-            } else {
-                if (forceCaseInsensitiveComparisons) {
-                    sqlQuery += whereClauseCaseInSensitive;
-                } else {
-                    sqlQuery += whereClause;
-                }
-                ps = connection.prepareStatement(sqlQuery);
-                int tenantId = APIUtil.getTenantId(subscriber.getName());
-                ps.setInt(1, tenantId);
-                ps.setString(2, subscriber.getName());
-            }
-
-            result = ps.executeQuery();
-
-            Map<String, Set<SubscribedAPI>> map = new TreeMap<String, Set<SubscribedAPI>>();
-            LRUCache<Integer, Application> applicationCache = new LRUCache<Integer, Application>(100);
-
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sqlQuery);
+             ResultSet result = getSubscriptionResultSet(groupingId, subscriber, ps)) {
             while (result.next()) {
-                APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
-                        ("API_PROVIDER")), result.getString("API_NAME"), result.getString("API_VERSION"));
+                String apiType = result.getString("TYPE");
 
-                SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
-                subscribedAPI.setSubscriptionId(result.getInt("SUBS_ID"));
-                subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
-                subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
-                String tierName = result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID);
-                subscribedAPI.setTier(new Tier(tierName));
-                subscribedAPI.setUUID(result.getString("SUB_UUID"));
-                //setting NULL for subscriber. If needed, Subscriber object should be constructed &
-                // passed in
-                int applicationId = result.getInt("APP_ID");
-                Application application = applicationCache.get(applicationId);
-                if (application == null) {
-                    application = new Application(result.getString("APP_NAME"), subscriber);
-                    application.setId(result.getInt("APP_ID"));
-                    application.setTokenType(result.getString("APP_TOKEN_TYPE"));
-                    application.setCallbackUrl(result.getString("CALLBACK_URL"));
-                    application.setUUID(result.getString("APP_UUID"));
+                if (APIType.API.toString().equals(apiType)) {
+                    APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(result.getString
+                            ("API_PROVIDER")), result.getString("API_NAME"),
+                            result.getString("API_VERSION"));
+                    SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
 
-                    if (multiGroupAppSharingEnabled) {
-                        application.setGroupId(getGroupId(application.getId()));
-                        application.setOwner(result.getString("OWNER"));
-                    }
+                    initSubscribedAPIDetailed(subscribedAPI, subscriber, result);
+                    subscribedAPIs.add(subscribedAPI);
+                } else if (APIType.API_PRODUCT.toString().equals(apiType)) {
+                    APIProductIdentifier identifier =
+                            new APIProductIdentifier(APIUtil.replaceEmailDomain(result.getString("API_PROVIDER")),
+                                    result.getString("API_NAME"), result.getString("API_VERSION"));
 
-                    applicationCache.put(applicationId, application);
+                    SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, identifier);
+
+                    initSubscribedAPIDetailed(subscribedAPI, subscriber, result);
+                    subscribedAPIs.add(subscribedAPI);
                 }
-                subscribedAPI.setApplication(application);
-
-                if (!map.containsKey(application.getName())) {
-                    map.put(application.getName(), new TreeSet<>(new Comparator<SubscribedAPI>() {
-                        public int compare(SubscribedAPI o1, SubscribedAPI o2) {
-                            int placement = o1.getApiId().getApiName().compareTo(o2.getApiId().getApiName());
-                            if (placement == 0) {
-                                return new APIVersionComparator().compare(new API(o1.getApiId()), new API(o2.getApiId
-                                        ()));
-                            }
-                            return placement;
-                        }
-                    }));
-                }
-                map.get(application.getName()).add(subscribedAPI);
-            }
-
-            for (Map.Entry<String, Set<SubscribedAPI>> entry : map.entrySet()) {
-                subscribedAPIs.addAll(entry.getValue());
             }
         } catch (SQLException e) {
             handleException("Failed to get SubscribedAPI of :" + subscriber.getName(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, result);
         }
+
         return subscribedAPIs;
+    }
+
+    private ResultSet getSubscriptionResultSet(String groupingId, Subscriber subscriber,
+                                               PreparedStatement statement) throws SQLException {
+        int tenantId = APIUtil.getTenantId(subscriber.getName());
+        int paramIndex = 0;
+
+        if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
+            if (multiGroupAppSharingEnabled) {
+                String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                String[] groupIDArray = groupingId.split(",");
+
+                // Set the same parameters for each of the 2 SELECT statements of the UNION
+                for (int i = 0; i < 2; ++i) {
+                    statement.setInt(++paramIndex, tenantId);
+
+                    for (String groupId : groupIDArray) {
+                        statement.setString(++paramIndex, groupId);
+                    }
+
+                    statement.setString(++paramIndex, tenantDomain);
+                    statement.setString(++paramIndex, subscriber.getName());
+                }
+            } else {
+                // Set the same parameters for each of the 2 SELECT statements of the UNION
+                for (int i = 0; i < 2; ++i) {
+                    statement.setInt(++paramIndex, tenantId);
+                    statement.setString(++paramIndex, groupingId);
+                    statement.setString(++paramIndex, subscriber.getName());
+                }
+            }
+        } else {
+            // Set the same parameters for each of the 2 SELECT statements of the UNION
+            for (int i = 0; i < 2; ++i) {
+                statement.setInt(++paramIndex, tenantId);
+                statement.setString(++paramIndex, subscriber.getName());
+            }
+        }
+
+        return statement.executeQuery();
+    }
+
+    private void initSubscribedAPIDetailed(SubscribedAPI subscribedAPI, Subscriber subscriber, ResultSet result)
+            throws SQLException, APIManagementException {
+        subscribedAPI.setSubscriptionId(result.getInt("SUBS_ID"));
+        subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
+        subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
+        String tierName = result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID);
+        subscribedAPI.setTier(new Tier(tierName));
+        subscribedAPI.setUUID(result.getString("SUB_UUID"));
+        //setting NULL for subscriber. If needed, Subscriber object should be constructed &
+        // passed in
+        int applicationId = result.getInt("APP_ID");
+
+        Application application = new Application(result.getString("APP_NAME"), subscriber);
+        application.setId(result.getInt("APP_ID"));
+        application.setTokenType(result.getString("APP_TOKEN_TYPE"));
+        application.setCallbackUrl(result.getString("CALLBACK_URL"));
+        application.setUUID(result.getString("APP_UUID"));
+
+        if (multiGroupAppSharingEnabled) {
+            application.setGroupId(getGroupId(application.getId()));
+            application.setOwner(result.getString("OWNER"));
+        }
+
+        subscribedAPI.setApplication(application);
     }
 
     public boolean isAccessTokenExists(String accessToken) throws APIManagementException {
@@ -9915,16 +9936,16 @@ public class ApiMgtDAO {
             if (hasCustomAttrib) {
                 policyStatement.setBytes(16, policy.getCustomAttributes());
                 policyStatement.setString(17, policy.getMonetizationPlan());
-                policyStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
-                policyStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
-                policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
-                policyStatement.setString(21, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                policyStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                policyStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                policyStatement.setString(21, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
             } else {
                 policyStatement.setString(16, policy.getMonetizationPlan());
-                policyStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
-                policyStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
-                policyStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
-                policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                policyStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                policyStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                policyStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
 
             }
             policyStatement.executeUpdate();
@@ -10499,13 +10520,13 @@ public class ApiMgtDAO {
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
                 subPolicy.setMonetizationPlan(rs.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
                 Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
-                monetizationPlanProperties.put(APIConstants.FIXED_PRICE,
+                monetizationPlanProperties.put(APIConstants.Monetization.FIXED_PRICE,
                         rs.getString(ThrottlePolicyConstants.COLUMN_FIXED_RATE));
-                monetizationPlanProperties.put(APIConstants.BILLING_CYCLE,
+                monetizationPlanProperties.put(APIConstants.Monetization.BILLING_CYCLE,
                         rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_CYCLE));
-                monetizationPlanProperties.put(APIConstants.PRICE_PER_REQUEST,
+                monetizationPlanProperties.put(APIConstants.Monetization.PRICE_PER_REQUEST,
                         rs.getString(ThrottlePolicyConstants.COLUMN_PRICE_PER_REQUEST));
-                monetizationPlanProperties.put(APIConstants.CURRENCY,
+                monetizationPlanProperties.put(APIConstants.Monetization.CURRENCY,
                         rs.getString(ThrottlePolicyConstants.COLUMN_CURRENCY));
                 subPolicy.setMonetizationPlanProperties(monetizationPlanProperties);
                 InputStream binary = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
@@ -10564,13 +10585,13 @@ public class ApiMgtDAO {
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
                 subPolicy.setMonetizationPlan(rs.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
                 Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
-                monetizationPlanProperties.put(APIConstants.FIXED_PRICE,
+                monetizationPlanProperties.put(APIConstants.Monetization.FIXED_PRICE,
                         rs.getString(ThrottlePolicyConstants.COLUMN_FIXED_RATE));
-                monetizationPlanProperties.put(APIConstants.BILLING_CYCLE,
+                monetizationPlanProperties.put(APIConstants.Monetization.BILLING_CYCLE,
                         rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_CYCLE));
-                monetizationPlanProperties.put(APIConstants.PRICE_PER_REQUEST,
+                monetizationPlanProperties.put(APIConstants.Monetization.PRICE_PER_REQUEST,
                         rs.getString(ThrottlePolicyConstants.COLUMN_PRICE_PER_REQUEST));
-                monetizationPlanProperties.put(APIConstants.CURRENCY,
+                monetizationPlanProperties.put(APIConstants.Monetization.CURRENCY,
                         rs.getString(ThrottlePolicyConstants.COLUMN_CURRENCY));
                 subPolicy.setMonetizationPlanProperties(monetizationPlanProperties);
                 InputStream binary = rs.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
@@ -11459,36 +11480,36 @@ public class ApiMgtDAO {
                         lengthOfStream);
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
                     updateStatement.setString(13, policy.getMonetizationPlan());
-                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
-                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
-                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
-                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
                     updateStatement.setString(18, policy.getPolicyName());
                     updateStatement.setInt(19, policy.getTenantId());
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
                     updateStatement.setString(13, policy.getMonetizationPlan());
-                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
-                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
-                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
-                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
                     updateStatement.setString(18, policy.getUUID());
                 }
             } else {
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
                     updateStatement.setString(12, policy.getMonetizationPlan());
-                    updateStatement.setString(13, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
-                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
-                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
-                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(13, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
                     updateStatement.setString(17, policy.getPolicyName());
                     updateStatement.setInt(18, policy.getTenantId());
 
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
                     updateStatement.setString(12, policy.getMonetizationPlan());
-                    updateStatement.setString(13, policy.getMonetizationPlanProperties().get(APIConstants.FIXED_PRICE));
-                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.BILLING_CYCLE));
-                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.PRICE_PER_REQUEST));
-                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.CURRENCY));
+                    updateStatement.setString(13, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
+                    updateStatement.setString(14, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
+                    updateStatement.setString(15, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
+                    updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
                     updateStatement.setString(17, policy.getUUID());
                 }
             }

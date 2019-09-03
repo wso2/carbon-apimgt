@@ -71,7 +71,7 @@ import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -146,10 +146,11 @@ import static org.mockito.Matchers.any;
 
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor("org.wso2.carbon.context.PrivilegedCarbonContext")
-@PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class, APIGatewayManager.class,
+@PrepareForTest({ ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class, APIGatewayManager.class,
         GovernanceUtils.class, PrivilegedCarbonContext.class, WorkflowExecutorFactory.class, JavaUtils.class,
         APIProviderImpl.class, APIManagerFactory.class, RegistryUtils.class, ThrottlePolicyDeploymentManager.class,
-        LifecycleBeanPopulator.class, Caching.class, PaginationContext.class, MultitenantUtils.class, org.wso2.carbon.apimgt.impl.AbstractAPIManager.class })
+        LifecycleBeanPopulator.class, Caching.class, PaginationContext.class, MultitenantUtils.class,
+        AbstractAPIManager.class, OASParserUtil.class })
 public class APIProviderImplTest {
 
     private static String EP_CONFIG_WSDL = "{\"production_endpoints\":{\"url\":\"http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl\""
@@ -1762,10 +1763,8 @@ public class APIProviderImplTest {
                 api.getId().getProviderName());
         Mockito.when(apiProvider.registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)).
                 thenReturn(true);
-        APIDefinitionFromOpenAPISpec apiDefinitionFromOpenAPISpec = Mockito.mock(APIDefinitionFromOpenAPISpec.class);
-        setFinalStatic(AbstractAPIManager.class.getDeclaredField("definitionFromOpenAPISpec"),
-                apiDefinitionFromOpenAPISpec);
-        Mockito.when(apiDefinitionFromOpenAPISpec.getAPIDefinition(apiId, apiProvider.registry)).thenReturn(
+        PowerMockito.mockStatic(OASParserUtil.class);
+        Mockito.when(OASParserUtil.getAPIDefinition(apiId, apiProvider.registry)).thenReturn(
                 "{\"info\": {\"swagger\":\"data\"}}");
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
 
@@ -2374,6 +2373,9 @@ public class APIProviderImplTest {
         Mockito.when(gatewayManager.getAPIEndpointSecurityType(any(API.class), Matchers.anyString()))
                 .thenReturn(APIConstants.APIEndpointSecurityConstants.BASIC_AUTH,
                         APIConstants.APIEndpointSecurityConstants.DIGEST_AUTH);
+        PowerMockito.mockStatic(OASParserUtil.class);
+        Mockito.when(OASParserUtil.getAPIDefinition(api.getId(), apiProvider.registry)).thenReturn(
+                "{\"info\": {\"swagger\":\"data\"}}");
         apiProvider.updateAPI(api);
         Assert.assertEquals(1, api.getEnvironments().size());
         Assert.assertEquals(true, api.getEnvironments().contains("SANDBOX"));
@@ -2606,6 +2608,9 @@ public class APIProviderImplTest {
         Mockito.when(gatewayManager.publishToGateway(any(API.class), any(APITemplateBuilder.class),
                 Matchers.anyString())).thenReturn(failedToPubGWEnv);
         Mockito.when(APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, "carbon.super")).thenReturn(tiers);
+        PowerMockito.mockStatic(OASParserUtil.class);
+        Mockito.when(OASParserUtil.getAPIDefinition(api.getId(), apiProvider.registry)).thenReturn(
+                "{\"info\": {\"swagger\":\"data\"}}");
         apiProvider.updateAPI(api);
     }
 

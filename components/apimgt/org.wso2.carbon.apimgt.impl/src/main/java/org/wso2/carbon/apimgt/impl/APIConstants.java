@@ -385,18 +385,6 @@ public final class APIConstants {
     public static final String ENDPOINT_PASSWORD_ELEMENT = "endpointPpassword";
     public static final String FEDERATED_USER = "FEDERATED";
 
-    //Monetization related constants
-    public static final String MONETIZATION_IMPL = "Monetization." + "MonetizationImpl";
-    public static final String TYPE = "type";
-    public static final String CURRENCY = "currencyType";
-    public static final String BILLING_CYCLE = "billingCycle";
-    public static final String FIXED_RATE = "fixedRate";
-    public static final String DYNAMIC_RATE = "dynamicRate";
-    public static final String FIXED_PRICE = "fixedPrice";
-    public static final String PRICE_PER_REQUEST = "pricePerRequest";
-    public static final String API_MONETIZATION_STATUS = "isMonetizationEnabled";
-    public static final String API_MONETIZATION_PROPERTIES = "monetizationProperties";
-
     //documentation rxt
 
     public static final String DOC_NAME = "overview_name";
@@ -1176,6 +1164,9 @@ public final class APIConstants {
     public static final String OPEN_API_V3 = "3.0.x";
     public static final String OPEN_API = "openapi";
     public static final String OPEN_API_VERSION_REGEX = "3\\.0\\.\\d{1,}";
+    public static final String SWAGGER_IS_MISSING_MSG = "swagger is missing";
+    public static final String OPENAPI_IS_MISSING_MSG = "openapi is missing";
+    public static final String SWAGGER_X_SCOPES_BINDINGS = "x-scopes-bindings";
 
     //swagger v1.2 constants
     public static final String SWAGGER_RESOURCES = "resources";
@@ -1370,10 +1361,10 @@ public final class APIConstants {
     public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS = "doc=";
-    public static final String TAG_SEARCH_TYPE_PREFIX = "tags";
-    public static final String TAG_SEARCH_TYPE_PREFIX2 = "tags=";
-    public static final String TAG_SEARCH_TYPE_PREFIX3 = "tag";
-    public static final String TAG_SEARCH_TYPE_PREFIX4 = "tag:";
+    public static final String TAGS_SEARCH_TYPE_PREFIX = "tags";
+    public static final String TAGS_EQ_SEARCH_TYPE_PREFIX = "tags=";
+    public static final String TAG_SEARCH_TYPE_PREFIX = "tag";
+    public static final String TAG_COLON_SEARCH_TYPE_PREFIX = "tag:";
     public static final String NAME_TYPE_PREFIX = "name";
     private static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
     private static final String VERSION_SEARCH_TYPE_PREFIX = "version";
@@ -1572,7 +1563,7 @@ public final class APIConstants {
     // Prefix used for saving the custom properties related with APIs
     public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "api_meta.";
     // Reserved keywords for search.
-    public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAG_SEARCH_TYPE_PREFIX,
+    public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
             NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
             VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
             API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX };
@@ -1635,6 +1626,7 @@ public final class APIConstants {
     public static final String PRODUCTSCOPE_PREFIX = "productscope";
     public static final String API_PRODUCT_SUBSCRIPTION_TYPE = "APIProduct";
     public static final String API_SUBSCRIPTION_TYPE = "API";
+    public static final String TYPE = "type";
 
     public static class OASResourceAuthTypes {
         public static final String APPLICATION_OR_APPLICATION_USER = "Application & Application User";
@@ -1643,27 +1635,44 @@ public final class APIConstants {
         public static final String NONE = "None";
     }
 
-    /**
-     * Constants for monetization usage publishing
-     */
-    public static class MonetizationUsagePublisher {
+    public static class Monetization {
 
-        public static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-        public static final String TIME_ZONE = "UTC";
+        public static final String USAGE_PUBLISH_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+        public static final String USAGE_PUBLISH_TIME_ZONE = "UTC";
         public static final String COMPLETED = "COMPLETED";
         public static final String RUNNING = "RUNNING";
         public static final String INPROGRESS = "INPROGRESS";
         public static final String INITIATED = "INITIATED";
         public static final String SUCCESSFULL = "SUCCESSFULL";
         public static final String FAILED = "FAILED";
-        public static final String ADDITIONAL_PROPERTY_LOCATION = "Monetization.AdditionalProperties.Property";
-        public static final String DEFAULT_GRANULARITY = "days";
-        public static final String DEFAULT_TIME_GAP_IN_DAYS = "1";
-        public static final String JOB_NAME = "USAGE_PUBLISHER";
+        public static final String USAGE_PUBLISH_DEFAULT_GRANULARITY = "days";
+        public static final String USAGE_PUBLISH_DEFAULT_TIME_GAP_IN_DAYS = "1";
+        public static final String USAGE_PUBLISHER_JOB_NAME = "USAGE_PUBLISHER";
         public static final String FROM_TIME_CONFIGURATION_PROPERTY =
                 "Monetization.UsagePubliser.PublishTimeDurationInDays";
-        public static final String GRANULARITY_PROERTY_LOCATION = "Monetization.UsagePubliser.Granularity";
+        public static final String MONETIZATION_CONFIG = "Monetization";
+        public static final String MONETIZATION_IMPL = MONETIZATION_CONFIG + ".MonetizationImpl";
+        public static final String USAGE_PUBLISHER = MONETIZATION_CONFIG + ".UsagePublisher";
+        public static final String USAGE_PUBLISHER_GRANULARITY = USAGE_PUBLISHER + ".Granularity";
+        public static final String ADDITIONAL_ATTRIBUTES = "AdditionalAttributes";
+        public static final String ATTRIBUTE = "Attribute";
+        public static final String IS_ATTRIBITE_REQUIRED = "Required";
+        public static final String IS_ATTRIBUTE_HIDDEN = "Hidden";
+        public static final String ATTRIBUTE_DESCRIPTION = "Description";
+        public static final String ATTRIBUTE_DEFAULT = "Default";
+        public static final String ATTRIBUTE_DISPLAY_NAME = "DisplayName";
+        public static final String ATTRIBUTE_NAME = "Name";
+
+        public static final String CURRENCY = "currencyType";
+        public static final String BILLING_CYCLE = "billingCycle";
+        public static final String FIXED_RATE = "fixedRate";
+        public static final String DYNAMIC_RATE = "dynamicRate";
+        public static final String FIXED_PRICE = "fixedPrice";
+        public static final String PRICE_PER_REQUEST = "pricePerRequest";
+        public static final String API_MONETIZATION_STATUS = "isMonetizationEnabled";
+        public static final String API_MONETIZATION_PROPERTIES = "monetizationProperties";
     }
+
     // HTTP methods
     public static final String HTTP_GET = "GET";
     public static final String HTTP_POST = "POST";

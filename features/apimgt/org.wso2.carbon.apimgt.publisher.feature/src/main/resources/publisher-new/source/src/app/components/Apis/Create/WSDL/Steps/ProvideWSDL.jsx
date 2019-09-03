@@ -32,7 +32,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 
 import APIValidation from 'AppData/APIValidation';
 import Wsdl from 'AppData/Wsdl';
-import DropZoneLocal from './components/DropZoneLocal';
+import DropZoneLocal from 'AppComponents/Shared/DropZoneLocal';
 
 const useStyles = makeStyles(theme => ({
     mandatoryStar: {
@@ -85,7 +85,7 @@ export default function ProvideWSDL(props) {
                 setIsValidating(false);
             });
             // Valid URL string
-            // Do API call
+            // TODO: Handle catch network or api call failures ~tmkb
         } else {
             setValidity(state);
             onValidate(false);

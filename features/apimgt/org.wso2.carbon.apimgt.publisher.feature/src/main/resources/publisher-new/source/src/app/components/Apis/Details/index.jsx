@@ -28,6 +28,7 @@ import BusinessIcon from '@material-ui/icons/Business';
 import CodeIcon from '@material-ui/icons/Code';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
+import SubscriptionsIcon from '@material-ui/icons/RssFeed';
 import MonetizationIcon from '@material-ui/icons/LocalAtm';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl, defineMessages } from 'react-intl';
@@ -52,6 +53,7 @@ import Resources from './Resources/Resources';
 import ProductResourcesView from './Resources/ProductResourcesView';
 import ProductResourcesEdit from './ProductResources/ProductResourcesEdit';
 import Endpoints from './Endpoints/Endpoints';
+import Environments from './Environments/Environments';
 import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
 import Scope from './Scopes';
@@ -125,7 +127,7 @@ class Details extends Component {
      */
     static isValidURL(pathname) {
         for (const [subPathKey, subPath] of Object.entries(Details.subPaths)) {
-            // Skip the BASE path , because it's will match for any `/apis/:apiUUID/*` values
+            // Skip the BASE path , because it will match for any `/apis/:apiUUID/*` values
             if (subPathKey !== 'BASE') {
                 const matched = matchPath(pathname, subPath);
                 if (matched) {
@@ -422,6 +424,16 @@ class Details extends Component {
                                 Icon={<EndpointIcon />}
                             />
                         )}
+                        {!isAPIProduct && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.environments',
+                                    defaultMessage: 'environments',
+                                })}
+                                to={pathPrefix + 'environments'}
+                                Icon={<EndpointIcon />}
+                            />
+                        )}
                         {this.getLeftMenuItemForAPIType(api.type)}
                         <LeftMenuItem
                             text={intl.formatMessage({
@@ -465,6 +477,14 @@ class Details extends Component {
                         />
                         <LeftMenuItem
                             text={intl.formatMessage({
+                                id: 'Apis.Details.index.subscriptions',
+                                defaultMessage: 'subscriptions',
+                            })}
+                            to={pathPrefix + 'subscriptions'}
+                            Icon={<SubscriptionsIcon />}
+                        />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
                                 id: 'Apis.Details.index.monetization',
                                 defaultMessage: 'monetization',
                             })}
@@ -500,7 +520,10 @@ class Details extends Component {
                                     component={() => <Configuration api={api} />}
                                 />
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
-
+                                <Route
+                                    path={Details.subPaths.ENVIRONMENTS}
+                                    component={() => <Environments api={api} />}
+                                />
                                 <Route path={Details.subPaths.OPERATIONS} component={() => <Operations api={api} />} />
                                 <Route
                                     exact
@@ -523,7 +546,7 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.SUBSCRIPTIONS}
-                                    component={() => <Subscriptions api={api} />}
+                                    component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
                                 />
                                 <Route path={Details.subPaths.SECURITY} component={() => <Security api={api} />} />
                                 <Route path={Details.subPaths.COMMENTS} component={() => <Comments api={api} />} />
@@ -541,6 +564,7 @@ class Details extends Component {
                                     component={() => <Properties api={api} />}
                                 />
                                 <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
+                                <Route path={Details.subPaths.SUBSCRIPTIONS} component={() => <Subscriptions />} />
                                 <Route
                                     path={Details.subPaths.MONETIZATION}
                                     component={() => <Monetization api={api} />}
@@ -569,6 +593,7 @@ Details.subPaths = {
     CONFIGURATION: '/apis/:api_uuid/configuration',
     CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/configuration',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
+    ENVIRONMENTS: '/apis/:api_uuid/environments',
     OPERATIONS: '/apis/:api_uuid/operations',
     RESOURCES: '/apis/:api_uuid/resources',
     RESOURCES_PRODUCT: '/api-products/:apiprod_uuid/resources',

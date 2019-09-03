@@ -19,7 +19,6 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useDropzone } from 'react-dropzone';
 
-
 /**
  *
  * Convert raw byte values to human readable format
@@ -71,14 +70,19 @@ const acceptStyle = {
 const rejectStyle = {
     borderColor: '#ff1744',
 };
+
 /**
  *
- *
+ * Provide a class friendly Dropzone wrapper using hooks.
  * @export
  * @returns
  */
 export default function DropZoneLocal(props) {
-    const { message, onDrop, files } = props;
+    let { files } = props;
+    const {
+        message, onDrop, error, showFilesList, children,
+    } = props;
+    files = files instanceof File ? [files] : files;
     const dropZoneObject = useDropzone({ onDrop });
     const {
         getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject,
@@ -90,6 +94,7 @@ export default function DropZoneLocal(props) {
             {file.path} - {humanFileSize(file.size)}
         </li>
     ));
+    baseStyle.borderColor = error ? rejectStyle.borderColor : '#eeeeee';
     const style = useMemo(
         () => ({
             ...baseStyle,
@@ -97,28 +102,36 @@ export default function DropZoneLocal(props) {
             ...(isDragAccept ? acceptStyle : {}),
             ...(isDragReject ? rejectStyle : {}),
         }),
-        [isDragActive, isDragReject],
+        [isDragActive, isDragReject, error],
     );
     return (
         <section className='container'>
             <div {...getRootProps({ style })}>
                 <input {...getInputProps()} />
-                <p>{message}</p>
+                {children || <p>{message}</p>}
             </div>
-            <aside>
-                <h4>Files</h4>
-                <ul>{filesList}</ul>
-            </aside>
+            {showFilesList && (
+                <aside>
+                    <h4>Files</h4>
+                    <ul>{filesList}</ul>
+                </aside>
+            )}
         </section>
     );
 }
 DropZoneLocal.defaultProps = {
     message: "Drag 'n' drop some files here, or click to select files",
     onDrop: () => {},
+    showFilesList: true,
     files: null,
+    children: null,
+    error: false,
 };
 DropZoneLocal.propTypes = {
     message: PropTypes.string,
     onDrop: PropTypes.func,
-    files: PropTypes.arrayOf(PropTypes.object),
+    showFilesList: PropTypes.bool,
+    files: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.object), PropTypes.instanceOf(File)]),
+    children: PropTypes.oneOfType([PropTypes.element, PropTypes.array]),
+    error: PropTypes.oneOfType([PropTypes.bool, PropTypes.shape({})]),
 };

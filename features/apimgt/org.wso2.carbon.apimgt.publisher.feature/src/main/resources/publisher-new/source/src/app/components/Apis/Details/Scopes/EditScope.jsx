@@ -22,7 +22,6 @@ import APIPropertyField from 'AppComponents/Apis/Details/Overview/APIPropertyFie
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import TagsInput from 'react-tagsinput';
-import Api from 'AppData/api';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router';
@@ -58,10 +57,11 @@ class EditScope extends React.Component {
         // this.api = new Api();
         this.api_uuid = props.match.params.api_uuid;
         const { api, location } = this.props;
+        const thisScope = api.scopes.find((scope) => {
+            return scope.name === location.state.scopeName;
+        });
         this.state = {
-            apiScope: api.scopes.find((scope) => {
-                return scope.name === location.state.scopeName;
-            }),
+            apiScope: { ...thisScope },
         };
         this.updateScope = this.updateScope.bind(this);
         this.handleInputs = this.handleInputs.bind(this);
@@ -72,28 +72,18 @@ class EditScope extends React.Component {
      * @memberof Scopes
      */
     updateScope() {
-        const restApi = new Api();
-        const updatedScope = this.state.apiScope;
+        const { apiScope } = this.state;
         const { intl, api, history } = this.props;
-        // temp fix to deep copy
-        // eslint-disable-next-line no-underscore-dangle
-        const apiData = JSON.parse(JSON.stringify(api._data));
-        apiData.scopes = api.scopes.map((scope) => {
-            if (scope.name === updatedScope.name) {
-                return updatedScope;
+        const scopes = api.scopes.map((scope) => {
+            if (scope.name === apiScope.name) {
+                return apiScope;
             } else {
                 return scope;
             }
         });
-        const promisedApiUpdate = restApi.update(apiData);
-        promisedApiUpdate.then((response) => {
-            if (response.status !== 200) {
-                Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.Scopes.CreateScope.something.went.wrong.while.updating.the.scope',
-                    defaultMessage: 'Something went wrong while updating the scope',
-                }));
-                return;
-            }
+        const updateProperties = { scopes };
+        const promisedApiUpdate = api.update(updateProperties);
+        promisedApiUpdate.then(() => {
             Alert.info(intl.formatMessage({
                 id: 'Apis.Details.Scopes.CreateScope.scope.updated.successfully',
                 defaultMessage: 'Scope updated successfully',

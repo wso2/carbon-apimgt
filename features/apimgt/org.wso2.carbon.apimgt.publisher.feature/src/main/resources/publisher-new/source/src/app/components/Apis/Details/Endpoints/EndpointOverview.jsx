@@ -39,27 +39,27 @@ import AdvanceEndpointConfig from './AdvancedConfig/AdvanceEndpointConfig';
 
 const styles = theme => ({
     overviewWrapper: {
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
     },
     listing: {
-        margin: theme.spacing.unit,
-        padding: theme.spacing.unit,
+        margin: theme.spacing(),
+        padding: theme.spacing(),
     },
     endpointContainer: {
-        paddingBottom: theme.spacing.unit,
-        paddingTop: theme.spacing.unit,
+        paddingBottom: theme.spacing(),
+        paddingTop: theme.spacing(),
         width: '100%',
-        marginTop: theme.spacing.unit,
+        marginTop: theme.spacing(),
     },
     endpointName: {
-        paddingLeft: theme.spacing.unit,
+        paddingLeft: theme.spacing(),
         fontSize: '1rem',
-        paddingTop: theme.spacing.unit,
-        paddingBottom: theme.spacing.unit,
+        paddingTop: theme.spacing(),
+        paddingBottom: theme.spacing(),
     },
     endpointTypesWrapper: {
-        padding: theme.spacing.unit * 3,
-        marginTop: theme.spacing.unit * 2,
+        padding: theme.spacing(3),
+        marginTop: theme.spacing(2),
     },
     sandboxHeading: {
         display: 'flex',
@@ -68,20 +68,21 @@ const styles = theme => ({
     radioGroup: {
         display: 'flex',
         flexDirection: 'row',
+        paddingTop: theme.spacing(),
     },
     endpointsWrapperLeft: {
-        padding: theme.spacing.unit,
+        padding: theme.spacing(),
         borderRight: '#c4c4c4',
         borderRightStyle: 'solid',
         borderRightWidth: 'thin',
     },
     endpointsWrapperRight: {
-        padding: theme.spacing.unit,
+        padding: theme.spacing(),
     },
     endpointsTypeSelectWrapper: {
-        marginLeft: theme.spacing.unit * 2,
-        marginRight: theme.spacing.unit * 2,
-        padding: theme.spacing.unit,
+        marginLeft: theme.spacing(2),
+        marginRight: theme.spacing(2),
+        padding: theme.spacing(),
         display: 'flex',
         justifyContent: 'space-between',
     },
@@ -89,15 +90,15 @@ const styles = theme => ({
         display: 'flex',
     },
     defaultEndpointWrapper: {
-        paddingLeft: theme.spacing.unit,
-        paddingRight: theme.spacing.unit,
-        marginRight: theme.spacing.unit,
+        paddingLeft: theme.spacing(),
+        paddingRight: theme.spacing(),
+        marginRight: theme.spacing(),
     },
     configDialogHeader: {
         fontWeight: '600',
     },
     addLabel: {
-        padding: theme.spacing.unit * 2,
+        padding: theme.spacing(2),
     },
 });
 
@@ -444,46 +445,46 @@ function EndpointOverview(props) {
                 </Grid>
                 <Paper className={classes.endpointContainer} hidden={endpointType.key === 'default'}>
                     <Grid container item xs={12}>
-                        <Grid item container xs spacing={2}>
-                            <Grid xs className={classes.endpointsWrapperLeft}>
+                        <Grid xs className={classes.endpointsWrapperLeft}>
+                            <div className={classes.sandboxHeading}>
                                 <Typography className={classes.endpointName}>
                                     <FormattedMessage
                                         id='Apis.Details.Endpoints.EndpointOverview.production'
                                         defaultMessage='Production'
                                     />
                                 </Typography>
-                                <GenericEndpoint
-                                    className={classes.defaultEndpointWrapper}
-                                    endpointURL={
-                                        epConfig.production_endpoints && epConfig.production_endpoints.length > 0 ?
-                                            epConfig.production_endpoints[0].url : epConfig.production_endpoints.url}
-                                    type=''
-                                    index={0}
-                                    category='production_endpoints'
-                                    editEndpoint={editEndpoint}
-                                    setAdvancedConfigOpen={toggleAdvanceConfig}
-                                />
-                            </Grid>
-                            <Grid xs className={classes.endpointsWrapperRight}>
-                                <div className={classes.sandboxHeading}>
-                                    <Typography className={classes.endpointName}>
-                                        <FormattedMessage
-                                            id='Apis.Details.Endpoints.EndpointOverview.sandbox'
-                                            defaultMessage='Sandbox'
-                                        />
-                                    </Typography>
-                                </div>
-                                <GenericEndpoint
-                                    className={classes.defaultEndpointWrapper}
-                                    endpointURL={epConfig.sandbox_endpoints && epConfig.sandbox_endpoints.length > 0 ?
-                                        epConfig.sandbox_endpoints[0].url : epConfig.sandbox_endpoints.url}
-                                    type=''
-                                    index={0}
-                                    category='sandbox_endpoints'
-                                    editEndpoint={editEndpoint}
-                                    setAdvancedConfigOpen={toggleAdvanceConfig}
-                                />
-                            </Grid>
+                            </div>
+                            <GenericEndpoint
+                                className={classes.defaultEndpointWrapper}
+                                endpointURL={
+                                    epConfig.production_endpoints && epConfig.production_endpoints.length > 0 ?
+                                        epConfig.production_endpoints[0].url : epConfig.production_endpoints.url}
+                                type=''
+                                index={0}
+                                category='production_endpoints'
+                                editEndpoint={editEndpoint}
+                                setAdvancedConfigOpen={toggleAdvanceConfig}
+                            />
+                        </Grid>
+                        <Grid xs className={classes.endpointsWrapperRight}>
+                            <div className={classes.sandboxHeading}>
+                                <Typography className={classes.endpointName}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Endpoints.EndpointOverview.sandbox'
+                                        defaultMessage='Sandbox'
+                                    />
+                                </Typography>
+                            </div>
+                            <GenericEndpoint
+                                className={classes.defaultEndpointWrapper}
+                                endpointURL={epConfig.sandbox_endpoints && epConfig.sandbox_endpoints.length > 0 ?
+                                    epConfig.sandbox_endpoints[0].url : epConfig.sandbox_endpoints.url}
+                                type=''
+                                index={0}
+                                category='sandbox_endpoints'
+                                editEndpoint={editEndpoint}
+                                setAdvancedConfigOpen={toggleAdvanceConfig}
+                            />
                         </Grid>
                     </Grid>
                     {api.type === 'HTTP' ?

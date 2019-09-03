@@ -129,14 +129,15 @@ class Policies extends Component {
                         ))}
                     </Select>
                     <FormHelperText>
-                        isAPIProduct ?
+                        {isAPIProduct ?
                             <FormattedMessage id='Apis.Details.LifeCycle.Policies.select.plan.api.product'
                                 defaultMessage='Select a plan for the API product.'
                              />
                             :
                             <FormattedMessage id='Apis.Details.LifeCycle.Policies.select.plan.api'
                                 defaultMessage='Select a plan for the API and enable API level throttling.'
-                            />;
+                            />
+                        }
                     </FormHelperText>
                 </FormControl>
             </React.Fragment>
