@@ -40,7 +40,7 @@ const styles = theme => ({
     },
     commentText: {
         color: theme.palette.getContrastText(theme.palette.background.default),
-        marginTop: theme.spacing.unig,
+        marginTop: theme.spacing.unig * 0.1,
         width: '100%',
         whiteSpace: 'pre-wrap',
         overflowWrap: 'break-word',
@@ -192,15 +192,15 @@ class Comment extends React.Component {
             apiId, allComments, commentsUpdate, intl,
         } = this.props;
         const commentIdOfCommentToDelete = deleteComment.id;
-        const parentCommentIdOfCommentToDelete = deleteComment.parentCommentId;
+        // const parentCommentIdOfCommentToDelete = deleteComment.parentCommentId;
         this.handleClose();
 
         apiClient.deleteComment(apiId, commentIdOfCommentToDelete)
             .then((result) => {
                 // if (parentCommentIdOfCommentToDelete === undefined) {
-                    const remainingComments = allComments.filter(this.filterRemainingComments);
-                    commentsUpdate(remainingComments);
-                    Alert.message("Comment" + commentIdOfCommentToDelete + "has been successfully deleted");
+                const remainingComments = allComments.filter(this.filterRemainingComments);
+                commentsUpdate(remainingComments);
+                Alert.message("Comment" + commentIdOfCommentToDelete + "has been successfully deleted");
                 // } else {
                 //     const index = allComments.findIndex(this.filterCommentToDelete);
                 //     const remainingReplies = allComments[index].replies.filter(this.filterRemainingComments);
@@ -210,9 +210,10 @@ class Comment extends React.Component {
             })
             .catch((error) => {
                 console.error(error);
-                // if (error.response) {
-                //     Alert.error(error.response.body.message);
-                // } else {
+                if (error.response) {
+                    Alert.error(error.response.body.message);
+                }
+                //else {
                 //     Alert.error(
                 //         intl.formatMessage({
                 //             defaultMessage: 'Something went wrong while deleting comment',

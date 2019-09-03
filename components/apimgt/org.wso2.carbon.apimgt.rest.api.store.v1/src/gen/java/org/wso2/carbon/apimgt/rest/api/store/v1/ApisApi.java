@@ -56,7 +56,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = CommentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
-        @ApiResponse(code = 401, message = "Un authorized. The user is not authorized to view the application . ", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized to view the application . ", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = ErrorDTO.class) })
     public Response addCommentToAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Comment object that should to be added " ,required=true) CommentDTO body) throws APIManagementException{
         return delegate.addCommentToAPI(apiId, body, securityContext);
@@ -74,7 +74,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Comment updated. ", response = CommentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
-        @ApiResponse(code = 401, message = "Un authorized. The user is not authorized to view the application . ", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized to view the application . ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
     public Response apisApiIdCommentsCommentIdPut(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") Integer commentId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Comment object that needs to be updated " ,required=true) CommentDTO body, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
@@ -357,7 +357,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }, tags={ "Comments",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
-        @ApiResponse(code = 401, message = "Un authorized. The user is not authorized to view the application . ", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized to view the application . ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = ErrorDTO.class) })
     public Response deleteComment(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") Integer commentId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.deleteComment(commentId, apiId, ifMatch, securityContext);
@@ -374,7 +374,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }, tags={ "Comments",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Comments list is returned. ", response = CommentListDTO.class),
-        @ApiResponse(code = 401, message = "Un authorized. The user is not authorized to view the application . ", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized to view the application . ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
     public Response getAllCommentsOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
         return delegate.getAllCommentsOfAPI(apiId, xWSO2Tenant, limit, offset, securityContext);
@@ -392,7 +392,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Comment returned. ", response = CommentDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
-        @ApiResponse(code = 401, message = "Un authorized. The user is not authorized to view the application . ", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized to view the application . ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested comment does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
     public Response getCommentOfAPI(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") Integer commentId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{

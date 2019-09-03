@@ -954,7 +954,7 @@ paths:
             $ref: '#/definitions/CommentList'
         401:
           description: |
-            Un authorized.
+            Unauthorized.
             The user is not authorized to view the application .
           schema:
             $ref: '#/definitions/Error'
@@ -1010,7 +1010,7 @@ paths:
             $ref: '#/definitions/Error'
         401:
           description: |
-            Un authorized.
+            Unauthorized.
             The user is not authorized to view the application .
           schema:
             $ref: '#/definitions/Error'
@@ -1069,7 +1069,7 @@ paths:
             Empty body because the client has already the latest version of the requested resource.
         401:
           description: |
-            Un authorized.
+            Unauthorized.
             The user is not authorized to view the application .
           schema:
             $ref: '#/definitions/Error'
@@ -1111,7 +1111,7 @@ paths:
             Resource successfully deleted.
         401:
           description: |
-            Un authorized.
+            Unauthorized.
             The user is not authorized to view the application .
           schema:
             $ref: '#/definitions/Error'
@@ -1175,7 +1175,7 @@ paths:
             $ref: '#/definitions/Error'
         401:
           description: |
-            Un authorized.
+            Unauthorized.
             The user is not authorized to view the application .
           schema:
             $ref: '#/definitions/Error'

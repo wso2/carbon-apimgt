@@ -183,8 +183,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                     RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + createdCommentId;
-            URI comments = new URI(uriString);
-            return Response.created(comments).entity(commentDTO).build();
+            URI uri = new URI(uriString);
+            return Response.created(uri).entity(commentDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
@@ -211,13 +211,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
 
-            Comment[] createdComment = apiConsumer.getComments(apiIdentifier);
-            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(createdComment, limit, offset);
+            Comment[] comments = apiConsumer.getComments(apiIdentifier);
+            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, limit, offset);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                     RestApiConstants.RESOURCE_PATH_COMMENTS;
-            URI comments = new URI(uriString);
-            return Response.created(comments).entity(commentDTO).build();
+            URI uri = new URI(uriString);
+            return Response.created(uri).entity(commentDTO).build();
 
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -239,14 +239,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
 
-            Comment createdComment = apiConsumer.getComment(apiIdentifier, commentId);
+            Comment comment = apiConsumer.getComment(apiIdentifier, commentId);
 
-            if (createdComment != null) {
-                CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
+            if (comment != null) {
+                CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
                 String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                         RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
-                URI comments = new URI(uriString);
-                return Response.created(comments).entity(commentDTO).build();
+                URI uri = new URI(uriString);
+                return Response.created(uri).entity(commentDTO).build();
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
                         String.valueOf(commentId), log);
