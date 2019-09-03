@@ -1914,9 +1914,9 @@ paths:
         required: true
       - $ref: '#/parameters/If-Match'
       consumes:
-      - application/x-www-form-urlencoded
+      - multipart/form-data
       tags:
-      - GraphQL Schema (Individual)
+      - GraphQL Schema
       responses:
         200:
           description: |
