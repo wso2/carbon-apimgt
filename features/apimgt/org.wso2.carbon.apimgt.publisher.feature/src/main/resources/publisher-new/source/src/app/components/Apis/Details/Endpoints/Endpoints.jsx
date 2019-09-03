@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Grid, FormControlLabel, Radio, RadioGroup } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -22,13 +22,13 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
+import NewEndpointCreate from 'AppComponents/Apis/Details/Endpoints/NewEndpointCreate';
+import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import cloneDeep from 'lodash.clonedeep';
 import AuthManager from 'AppData/AuthManager';
-
 import EndpointOverview from './EndpointOverview';
-import ApiContext from '../components/ApiContext';
 import PrototypeEndpoints from './Prototype/PrototypeEndpoints';
-import { getEndpointConfigByImpl } from './endpointUtils';
+import { getEndpointConfigByImpl, createEndpointConfig } from './endpointUtils';
 
 const styles = theme => ({
     endpointTypesWrapper: {
@@ -63,7 +63,8 @@ const defaultSwagger = { paths: {} };
  * @returns {any} HTML representation.
  */
 function Endpoints(props) {
-    const { classes, api } = props;
+    const { classes } = props;
+    const { api, updateAPI } = useContext(APIContext);
     const [apiObject, setModifiedAPI] = useState(api);
     const [endpointImplementation, setEndpointImplementation] = useState('');
     const [swagger, setSwagger] = useState(defaultSwagger);
@@ -74,9 +75,9 @@ function Endpoints(props) {
      *
      * @param {function} updateFunc The api update function.
      */
-    const saveAPI = (updateFunc) => {
+    const saveAPI = () => {
         if (apiObject !== {}) {
-            updateFunc(apiObject);
+            updateAPI(apiObject);
         }
         if (Object.getOwnPropertyNames(defaultSwagger).length !== Object.getOwnPropertyNames(swagger).length) {
             console.log('Updating swagger...');
@@ -90,8 +91,9 @@ function Endpoints(props) {
 
     useEffect(() => {
         const { lifeCycleStatus } = api;
-        const implType = api.endpointConfig.implementation_status;
-        setModifiedAPI(cloneDeep(api));
+        const apiClone = cloneDeep(api.toJSON());
+        setModifiedAPI(apiClone);
+        const implType = apiClone.endpointConfig === null ? undefined : apiClone.endpointConfig.implementation_status;
         setEndpointImplementation(() => {
             return lifeCycleStatus === 'PROTOTYPED' || implType === 'prototyped' ?
                 endpointImplType[1] : endpointImplType[0];
@@ -132,48 +134,74 @@ function Endpoints(props) {
         setModifiedAPI({ ...apiObject, endpointConfig: tmpEndpointConfig });
     };
 
-    return (
-        <React.Fragment className={classes.root}>
-            <Grid container spacing={16}>
-                <Grid item>
-                    <Typography variant='h4' align='left' className={classes.titleWrapper}>
-                        <FormattedMessage
-                            id='Apis.Details.Endpoints.Endpoints.endpoints.header'
-                            defaultMessage='Endpoints'
-                        />
-                    </Typography>
-                </Grid>
-                {apiObject.type === 'HTTP' ?
-                    <Grid item>
-                        <RadioGroup
-                            aria-label='endpointImpl'
-                            name='endpointImpl'
-                            className={classes.radioGroup}
-                            value={endpointImplementation}
-                            onChange={handleEndpointManagedChange}
-                        >
-                            <FormControlLabel
-                                value='managed'
-                                control={<Radio />}
-                                label={<FormattedMessage
-                                    id='Apis.Details.Endpoints.Endpoints.managed'
-                                    defaultMessage='Managed'
-                                />}
-                            />
-                            <FormControlLabel
-                                value='PROTOTYPED'
-                                control={<Radio />}
-                                label={<FormattedMessage
-                                    id='Apis.Details.Endpoints.Endpoints.prototyped'
-                                    defaultMessage='Prototyped'
-                                />}
-                            />
-                        </RadioGroup>
-                    </Grid> : <div />
+    /**
+     * Generate endpoint configuration based on the selected endpoint type and set to the api object.
+     *
+     * @param {string} endpointType The endpoint type.
+     * @param {string} implementationType The endpoint implementationType. (Required only for prototype endpoints)
+     * */
+    const generateEndpointConfig = (endpointType, implementationType) => {
+        const config = createEndpointConfig(endpointType, implementationType);
+        setModifiedAPI(() => {
+            if (endpointType === 'prototype') {
+                if (implementationType === 'mock') {
+                    return { ...apiObject, endpointConfig: config, endpointImplementationType: 'INLINE' };
                 }
-            </Grid>
-            <ApiContext.Consumer>
-                {({ updateAPI }) => (
+                return { ...apiObject, endpointConfig: config, endpointImplementationType: 'ENDPOINT' };
+            } else {
+                return { ...apiObject, endpointConfig: config };
+            }
+        });
+        setEndpointImplementation(() => {
+            return apiObject.lifeCycleStatus === 'PROTOTYPED' || endpointType === 'prototyped' ?
+                endpointImplType[1] : endpointImplType[0];
+        });
+    };
+
+    return (
+        <React.Fragment>
+            {/* Since the api is set to the state in component did mount, check both the api and the apiObject. */}
+            {api.endpointConfig === null && apiObject.endpointConfig === null ?
+                <NewEndpointCreate generateEndpointConfig={generateEndpointConfig} /> :
+                <div className={classes.root}>
+                    <Grid container spacing={16}>
+                        <Grid item>
+                            <Typography variant='h4' align='left' className={classes.titleWrapper}>
+                                <FormattedMessage
+                                    id='Apis.Details.Endpoints.Endpoints.endpoints.header'
+                                    defaultMessage='Endpoints'
+                                />
+                            </Typography>
+                        </Grid>
+                        {apiObject.type === 'HTTP' ?
+                            <Grid item>
+                                <RadioGroup
+                                    aria-label='endpointImpl'
+                                    name='endpointImpl'
+                                    className={classes.radioGroup}
+                                    value={endpointImplementation}
+                                    onChange={handleEndpointManagedChange}
+                                >
+                                    <FormControlLabel
+                                        value='managed'
+                                        control={<Radio />}
+                                        label={<FormattedMessage
+                                            id='Apis.Details.Endpoints.Endpoints.managed'
+                                            defaultMessage='Managed'
+                                        />}
+                                    />
+                                    <FormControlLabel
+                                        value='PROTOTYPED'
+                                        control={<Radio />}
+                                        label={<FormattedMessage
+                                            id='Apis.Details.Endpoints.Endpoints.prototyped'
+                                            defaultMessage='Prototyped'
+                                        />}
+                                    />
+                                </RadioGroup>
+                            </Grid> : <div />
+                        }
+                    </Grid>
                     <div>
                         <Grid container>
                             <Grid item xs={12} className={classes.endpointsContainer}>
@@ -201,8 +229,8 @@ function Endpoints(props) {
                                     type='submit'
                                     variant='contained'
                                     color='primary'
-                                    onClick={() => saveAPI(updateAPI)}
                                     disabled={isNotCreator}
+                                    onClick={() => saveAPI()}
                                 >
                                     <FormattedMessage
                                         id='Apis.Details.Endpoints.Endpoints.save'
@@ -234,9 +262,11 @@ function Endpoints(props) {
                                 )
                             }
                         </Grid>
-                    </div>)}
-            </ApiContext.Consumer>
+                    </div>
+                </div>
+            }
         </React.Fragment>
+
     );
 }
 
