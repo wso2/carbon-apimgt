@@ -43,6 +43,7 @@ import SearchParser from 'AppComponents/Base/Header/headersearch/SearchParser';
 import MethodView from 'AppComponents/Apis/Details/ProductResources/MethodView';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import CONSTS from 'AppData/Constants';
+import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -67,11 +68,22 @@ const useStyles = makeStyles(theme => ({
         overflowY: 'auto',
         height: 400,
     },
-    colTitle: {
+    leftMost: {
         background: theme.palette.grey[700],
         color: theme.palette.getContrastText(theme.palette.grey[700]),
         padding: theme.spacing.unit,
+    },
+    rightMost: {
+        background: theme.palette.grey[600],
+        color: theme.palette.getContrastText(theme.palette.grey[600]),
+        padding: theme.spacing.unit,
+    },
+    colTitle: {
+        background: theme.palette.grey[400],
+        color: theme.palette.getContrastText(theme.palette.grey[400]),
+        padding: theme.spacing.unit,
         fontWeight: 200,
+        minHeight: 25,
     },
     treeItemMain: {
         background: theme.palette.grey[100],
@@ -117,6 +129,28 @@ const useStyles = makeStyles(theme => ({
     selectedApiDescription: {
         padding: theme.spacing.unit * 2,
     },
+    messageWrapper: {
+        padding: theme.spacing.unit * 3,
+    },
+    tootBar: {
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        margin: '0 16px',
+        background: theme.palette.grey[100],
+        color: theme.palette.getContrastText(theme.palette.grey[100]),
+        padding: 5,
+        borderRadius: 5,
+        '& a': {
+            cursor: 'pointer',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+        },
+    },
+    inactiveIcon: {
+        color: theme.palette.grey[300],
+    },
 }));
 
 function ProductResourcesEdit() {
@@ -130,7 +164,6 @@ function ProductResourcesEdit() {
     // Define states
     const [allApis, setAllApis] = useState([]);
     const [notFound, setNotFound] = useState(false);
-    const [checked] = useState([0]);
     const [searchText, setSearchText] = useState('');
     const [selectedApiPaths, setSelectedApiPaths] = useState([]);
     const [selectedApi, setSelectedApi] = useState(null);
@@ -160,6 +193,49 @@ function ProductResourcesEdit() {
             return API.all({});
         }
     };
+    const addPropsToSelectedApiPaths = (paths, apiId, latestApiResources = apiResources) => {
+        /* Add checked field to each resource object */
+        Object.keys(paths).map((key) => {
+            const methodObj = paths[key];
+            Object.keys(methodObj).map((innerKey) => {
+                // We are setting the check property at this level because we need to
+                // add resources for each verb ( post, get, put etc.. )
+                methodObj[innerKey].checked = false;
+
+                // We need to check the latestApiResources for the same
+                // API/Resource Name / Verb and  indicate it differently
+                // Loop latestApiResources object
+                const target = key;
+                const verb = innerKey;
+                let resourceFound = false;
+                Object.keys(latestApiResources).map((resourcekey) => {
+                    const apiResource = latestApiResources[resourcekey];
+
+                    // Check if the the api slected from UI is same as the operation api id checking
+                    if (apiResource && apiId === apiResource.apiId) {
+                        // API is the same
+                        Object.keys(apiResource.operations).map((operationKey) => {
+                            const operation = apiResource.operations[operationKey];
+                            if (
+                                operation &&
+                                operation.target === target &&
+                                operation.verb.toLowerCase() === verb.toLowerCase()
+                            ) {
+                                // Operation is already there
+                                resourceFound = true;
+                            }
+                        });
+                    }
+                });
+                if (resourceFound) {
+                    methodObj[innerKey].allreadyAdded = true;
+                } else {
+                    methodObj[innerKey].allreadyAdded = false;
+                }
+            });
+        });
+        setSelectedApiPaths(paths);
+    };
 
     // Get the api swagger after an api is selected
     const getApiSwagger = (apiSelected) => {
@@ -168,7 +244,7 @@ function ProductResourcesEdit() {
         promisedAPI
             .then((response) => {
                 if (response.obj.paths !== undefined) {
-                    setSelectedApiPaths(response.obj.paths);
+                    addPropsToSelectedApiPaths(response.obj.paths, id);
                     setSelectedApi(apiSelected);
                 }
             })
@@ -205,8 +281,17 @@ function ProductResourcesEdit() {
             });
         setSearchText(event.target.value);
     };
-    const updateResourceTree = (resourceToAdd, action) => {
-        const newApiResources = JSON.parse(JSON.stringify(apiResources));
+    const updateResourceTree = (resourceToAdd, action, inputApiResources = null) => {
+        let updateStateHere = false;
+        let newApiResources = null;
+        if (!inputApiResources) {
+            // If a copy of the state variable is not passed from the calling method we
+            // have to make a copy inside here before doing modifications to that
+            newApiResources = JSON.parse(JSON.stringify(apiResources));
+            updateStateHere = true;
+        } else {
+            newApiResources = inputApiResources;
+        }
         const {
             target, verb, apiId, name,
         } = resourceToAdd;
@@ -240,10 +325,8 @@ function ProductResourcesEdit() {
                         if (action === 'remove') {
                             if (apiResource.operations.length > 1) {
                                 apiResource.operations.splice(indexB, 1);
-                                setApiResources(newApiResources);
                             } else {
                                 newApiResources.splice(indexA, 1);
-                                setApiResources(newApiResources);
                             }
                         }
                     }
@@ -251,7 +334,6 @@ function ProductResourcesEdit() {
                 // Operation not added .. so we need to add that
                 if (!operationFound && action === 'add') {
                     apiResource.operations.push(newResource);
-                    setApiResources(newApiResources);
                 }
             }
         });
@@ -263,8 +345,16 @@ function ProductResourcesEdit() {
                 apiId,
                 operations: [newResource],
             });
-            setApiResources(newApiResources);
         }
+        // When we are adding the resources in a loop we do not care about the return but we simply set the state here.
+        if (updateStateHere) {
+            setApiResources(newApiResources);
+            // We need to call this in order to set other properties
+            if (apiId === selectedApi.id) {
+                addPropsToSelectedApiPaths(JSON.parse(JSON.stringify(selectedApiPaths)), apiId, newApiResources);
+            }
+        }
+        return newApiResources;
     };
     const save = () => {
         const updatePromise = updateAPI(apiCopy, true);
@@ -279,6 +369,42 @@ function ProductResourcesEdit() {
                     doRedirectToLogin();
                 }
             });
+    };
+    const updateCheckBox = (key, innerKey) => {
+        // we need to copy the object from the state and modify it before set it to the state
+        const prevSelectedApiPaths = { ...selectedApiPaths };
+
+        // Now we inverse the checked value
+        prevSelectedApiPaths[key][innerKey].checked = !prevSelectedApiPaths[key][innerKey].checked;
+
+        // Then we set state
+        setSelectedApiPaths(prevSelectedApiPaths);
+    };
+    const addSelectedResourcesToTree = (addAll = false) => {
+        /* Add checked field to each resource object */
+        const newApiResources = JSON.parse(JSON.stringify(apiResources));
+        Object.keys(selectedApiPaths).map((key) => {
+            const methodObj = selectedApiPaths[key];
+            Object.keys(methodObj).map((innerKey) => {
+                // We are setting the check property at this level because we need to
+                // add resources for each verb ( post, get, put etc.. )
+                if (methodObj[innerKey].checked || addAll) {
+                    // We need to add this to apiResources array
+                    updateResourceTree(
+                        {
+                            target: key,
+                            verb: innerKey,
+                            apiId: selectedApi.id,
+                            name: selectedApi.name,
+                        },
+                        'add',
+                        newApiResources,
+                    );
+                }
+            });
+        });
+        setApiResources(newApiResources);
+        addPropsToSelectedApiPaths(JSON.parse(JSON.stringify(selectedApiPaths)), selectedApi.id, newApiResources);
     };
     useEffect(() => {
         // Get all apis
@@ -307,6 +433,7 @@ function ProductResourcesEdit() {
     if (notFound) {
         return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
     }
+    console.info(api);
     return (
         <div className={classes.root}>
             <div className={classes.titleWrapper}>
@@ -319,6 +446,24 @@ function ProductResourcesEdit() {
             </div>
             <div className={classes.contentWrapper}>
                 <Grid container>
+                    <Grid item xs={7} className={classes.leftMost}>
+                        <FormattedMessage
+                            id='Apis.Details.ProductResources.ProductResources.find.and.select'
+                            defaultMessage='Find and select resources for the API Product'
+                        />
+                    </Grid>
+                    <Grid item xs={5} className={classes.rightMost}>
+                        <FormattedMessage
+                            id='Apis.Details.ProductResources.ProductResources.find.and.select'
+                            defaultMessage='Find and select resources for the API Product'
+                        />
+                        <div />
+                    </Grid>
+                </Grid>
+                <Grid container>
+                    {/* ************************************************ */}
+                    {/* 1st column API search and select column          */}
+                    {/* ************************************************ */}
                     <Grid item xs={3}>
                         <div className={classes.colTitle}>
                             <FormattedMessage
@@ -372,6 +517,9 @@ function ProductResourcesEdit() {
                             </div>
                         </Paper>
                     </Grid>
+                    {/* ************************************************ */}
+                    {/* 2nd column Resource Selection                    */}
+                    {/* ************************************************ */}
                     <Grid item xs={4}>
                         <Paper className={classes.paper}>
                             <div className={classes.colTitle}>
@@ -400,6 +548,33 @@ function ProductResourcesEdit() {
                                     </Typography>
                                 </React.Fragment>
                             )}
+                            <div className={classes.tootBar}>
+                                <a
+                                    onClick={() => addSelectedResourcesToTree()}
+                                    onKeyDown={() => addSelectedResourcesToTree()}
+                                >
+                                    <Typography variant='body2'>
+                                        <FormattedMessage
+                                            id='Apis.Details.ProductResources.ProductResources.toolbar.addall'
+                                            defaultMessage='Add Selected'
+                                        />
+                                    </Typography>
+                                    <Icon>fast_forward</Icon>
+                                </a>
+                                <VerticalDivider />
+                                <a
+                                    onClick={() => addSelectedResourcesToTree(true)}
+                                    onKeyDown={() => addSelectedResourcesToTree(true)}
+                                >
+                                    <Typography variant='body2'>
+                                        <FormattedMessage
+                                            id='Apis.Details.ProductResources.ProductResources.toolbar.addall'
+                                            defaultMessage='Add All'
+                                        />
+                                    </Typography>
+                                    <Icon>fast_forward</Icon>
+                                </a>
+                            </div>
                             <List dense>
                                 {Object.keys(selectedApiPaths).map((key) => {
                                     const path = selectedApiPaths[key];
@@ -412,10 +587,10 @@ function ProductResourcesEdit() {
                                                     <ListItemIcon>
                                                         <Checkbox
                                                             edge='start'
-                                                            checked={checked}
+                                                            checked={methodObj.checked}
                                                             tabIndex={-1}
                                                             disableRipple
-                                                            inputProps={{ 'aria-labelledby': labelId }}
+                                                            onChange={() => updateCheckBox(key, innerKey)}
                                                         />
                                                     </ListItemIcon>
                                                     <ListItemText
@@ -450,23 +625,28 @@ function ProductResourcesEdit() {
                                                         className={classes.middleText}
                                                     />
                                                     <ListItemSecondaryAction>
-                                                        <IconButton
-                                                            edge='end'
-                                                            aria-label='comments'
-                                                            onClick={() =>
-                                                                updateResourceTree(
-                                                                    {
-                                                                        target: key,
-                                                                        verb: innerKey,
-                                                                        apiId: selectedApi.id,
-                                                                        name: selectedApi.name,
-                                                                    },
-                                                                    'add',
-                                                                )
-                                                            }
-                                                        >
-                                                            <Icon>fast_forward</Icon>
-                                                        </IconButton>
+                                                        {methodObj.allreadyAdded && (
+                                                            <Icon className={classes.inactiveIcon}>chevron_right</Icon>
+                                                        )}
+                                                        {!methodObj.allreadyAdded && (
+                                                            <IconButton
+                                                                edge='end'
+                                                                aria-label='comments'
+                                                                onClick={() =>
+                                                                    updateResourceTree(
+                                                                        {
+                                                                            target: key,
+                                                                            verb: innerKey,
+                                                                            apiId: selectedApi.id,
+                                                                            name: selectedApi.name,
+                                                                        },
+                                                                        'add',
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Icon>chevron_right</Icon>
+                                                            </IconButton>
+                                                        )}
                                                     </ListItemSecondaryAction>
                                                 </ListItem>
                                             )
@@ -476,51 +656,70 @@ function ProductResourcesEdit() {
                             </List>
                         </Paper>
                     </Grid>
+                    {/* ************************************************ */}
+                    {/* Third column with  selected resources            */}
+                    {/* ************************************************ */}
                     <Grid item xs={5}>
                         <Paper className={classes.paper}>
-                            <div className={classes.colTitle}>
-                                <FormattedMessage
-                                    id='Apis.Details.ProductResources.ProductResources.current.resources'
-                                    defaultMessage='Current Resources'
-                                />
-                            </div>
+                            <div className={classes.colTitle} />
                             <div className={classes.treeViewRoot}>
-                                {Object.keys(apiResources).map((key) => {
-                                    const apiResource = apiResources[key];
-                                    return (
-                                        <div key={apiResource.name}>
-                                            <div className={classes.treeItemMain}>{apiResource.name}</div>
-                                            <div className={classes.treeItemMainWrapper}>
-                                                {Object.keys(apiResource.operations).map((innerKey) => {
-                                                    const operation = apiResource.operations[innerKey];
-                                                    const { target, verb } = operation;
-                                                    return (
-                                                        <div key={verb} className={classes.treeItem}>
-                                                            <Typography variant='body2'>{target}</Typography>
-                                                            <MethodView method={verb} className={classes.methodView} />
-                                                            <hr className={classes.hr} />
-                                                            <Icon
-                                                                onClick={() =>
-                                                                    updateResourceTree(
-                                                                        {
-                                                                            target,
-                                                                            verb,
-                                                                            apiId: apiResource.apiId,
-                                                                            name: apiResource.name,
-                                                                        },
-                                                                        'remove',
-                                                                    )
-                                                                }
-                                                            >
-                                                                delete
-                                                            </Icon>
-                                                        </div>
-                                                    );
-                                                })}
+                                {apiResources && apiResources.length === 0 && (
+                                    <div className={classes.messageWrapper}>
+                                        <Typography variant='h5' component='h3'>
+                                            <FormattedMessage
+                                                id='Apis.Details.ProductResources.ProductResources.empty.title'
+                                                defaultMessage='No resources are avaialable'
+                                            />
+                                        </Typography>
+                                        <Typography component='p'>
+                                            <FormattedMessage
+                                                id='Apis.Details.ProductResources.ProductResources.empty.content'
+                                                defaultMessage='Use the left side panel to add resources'
+                                            />
+                                        </Typography>
+                                    </div>
+                                )}
+                                {apiResources &&
+                                    apiResources.length > 0 &&
+                                    Object.keys(apiResources).map((key) => {
+                                        const apiResource = apiResources[key];
+                                        return (
+                                            <div key={apiResource.name}>
+                                                <div className={classes.treeItemMain}>{apiResource.name}</div>
+                                                <div className={classes.treeItemMainWrapper}>
+                                                    {Object.keys(apiResource.operations).map((innerKey) => {
+                                                        const operation = apiResource.operations[innerKey];
+                                                        const { target, verb } = operation;
+                                                        return (
+                                                            <div key={verb} className={classes.treeItem}>
+                                                                <Typography variant='body2'>{target}</Typography>
+                                                                <MethodView
+                                                                    method={verb}
+                                                                    className={classes.methodView}
+                                                                />
+                                                                <hr className={classes.hr} />
+                                                                <Icon
+                                                                    onClick={() =>
+                                                                        updateResourceTree(
+                                                                            {
+                                                                                target,
+                                                                                verb,
+                                                                                apiId: apiResource.apiId,
+                                                                                name: apiResource.name,
+                                                                            },
+                                                                            'remove',
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    delete
+                                                                </Icon>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
                             </div>
                         </Paper>
                     </Grid>
