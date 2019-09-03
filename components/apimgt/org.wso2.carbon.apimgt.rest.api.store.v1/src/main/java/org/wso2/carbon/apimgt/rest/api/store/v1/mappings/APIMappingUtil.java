@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductEndpointURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
@@ -45,6 +46,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
@@ -127,7 +129,7 @@ public class APIMappingUtil {
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
 
-        dto.setEndpointURLs(extractEnpointURLs(model, tenantDomain));
+        dto.setEndpointURLs(extractEndpointURLs(model, tenantDomain));
 
         APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(model.getBusinessOwner());
@@ -414,7 +416,7 @@ public class APIMappingUtil {
      * @return the API environment details
      * @throws APIManagementException error while extracting the information
      */
-    private static List<APIEndpointURLsDTO> extractEnpointURLs(API api, String tenantDomain)
+    private static List<APIEndpointURLsDTO> extractEndpointURLs(API api, String tenantDomain)
             throws APIManagementException {
         List<APIEndpointURLsDTO> apiEndpointsList = new ArrayList<>();
 
@@ -501,6 +503,76 @@ public class APIMappingUtil {
     }
 
     /**
+     * Extracts the API environment details with access url for each endpoint
+     *
+     * @param apiProduct API object
+     * @param tenantDomain Tenant domain of the API
+     * @return the API environment details
+     * @throws APIManagementException error while extracting the information
+     */
+    private static List<APIProductEndpointURLsDTO> extractEndpointURLs(APIProduct apiProduct, String tenantDomain)
+            throws APIManagementException {
+        List<APIProductEndpointURLsDTO> apiEndpointsList = new ArrayList<>();
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        Map<String, Environment> environments = config.getApiGatewayEnvironments();
+
+        Set<String> environmentsPublishedByAPI = new HashSet<>(apiProduct.getEnvironments());
+        environmentsPublishedByAPI.remove("none");
+
+        Set<String> apiTransports = new HashSet<>(Arrays.asList(apiProduct.getTransports().split(",")));
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+
+        for (String environmentName : environmentsPublishedByAPI) {
+            Environment environment = environments.get(environmentName);
+            if (environment != null) {
+                APIProductURLsDTO apiURLsDTO = new APIProductURLsDTO();
+                String[] gwEndpoints = null;
+                gwEndpoints = environment.getApiGatewayEndpoint().split(",");
+
+                Map<String, String> domains = new HashMap<>();
+                if (tenantDomain != null) {
+                    domains = apiConsumer.getTenantDomainMappings(tenantDomain,
+                            APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
+                }
+
+                String customGatewayUrl = null;
+                if (domains != null) {
+                    customGatewayUrl = domains.get(APIConstants.CUSTOM_URL);
+                }
+
+                for (String gwEndpoint : gwEndpoints) {
+                    StringBuilder endpointBuilder = new StringBuilder(gwEndpoint);
+
+                    if (customGatewayUrl != null) {
+                        int index = endpointBuilder.indexOf("//");
+                        endpointBuilder.replace(index + 2, endpointBuilder.length(), customGatewayUrl);
+                        endpointBuilder.append(apiProduct.getContext().replace("/t/" + tenantDomain, ""));
+                    } else {
+                        endpointBuilder.append(apiProduct.getContext());
+                    }
+
+                    if (gwEndpoint.contains("http:") && apiTransports.contains("http")) {
+                        apiURLsDTO.setHttp(endpointBuilder.toString());
+                    } else if (gwEndpoint.contains("https:") && apiTransports.contains("https")) {
+                        apiURLsDTO.setHttps(endpointBuilder.toString());
+                    }
+                }
+
+                APIProductEndpointURLsDTO apiEndpointURLsDTO = new APIProductEndpointURLsDTO();
+                apiEndpointURLsDTO.setUrLs(apiURLsDTO);
+                apiEndpointURLsDTO.setEnvironmentName(environment.getName());
+                apiEndpointURLsDTO.setEnvironmentType(environment.getType());
+
+                apiEndpointsList.add(apiEndpointURLsDTO);
+            }
+        }
+
+        return apiEndpointsList;
+    }
+
+    /**
      * Returns label details of the API in REST API DTO format.
      *
      * @param gatewayLabels Gateway label details from the API model object 
@@ -573,12 +645,14 @@ public class APIMappingUtil {
         return listDto;
     }
     
-    public static APIProductDTO fromAPIProductToDTO(APIProduct product) throws APIManagementException {
+    public static APIProductDTO fromAPIProductToDTO(APIProduct product, String tenantDomain)
+            throws APIManagementException {
         APIProductDTO dto = new APIProductDTO();
         dto.setId(product.getUuid());
         dto.setName(product.getId().getName());
         dto.setDescription(product.getDescription());
         dto.setProvider(product.getId().getProviderName());
+        dto.setContext(product.getContext());
         dto.setApiDefinition(product.getDefinition());
         dto.setThumbnailUrl(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                 .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
@@ -586,6 +660,10 @@ public class APIMappingUtil {
         businessInformation.setBusinessOwner(product.getBusinessOwner());
         businessInformation.setBusinessOwnerEmail(product.getBusinessOwnerEmail());
         dto.setBusinessInformation(businessInformation);
+        dto.setEnvironmentList(new ArrayList<>(product.getEnvironments()));
+
+        dto.setEndpointURLs(extractEndpointURLs(product, tenantDomain));
+
         Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = product.getAvailableTiers();
         List<String> tiersToReturn = new ArrayList<>();
         for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {

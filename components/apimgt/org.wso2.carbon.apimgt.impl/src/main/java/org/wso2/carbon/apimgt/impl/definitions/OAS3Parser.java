@@ -40,13 +40,12 @@ import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.registry.api.Registry;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -65,13 +64,13 @@ public class OAS3Parser extends APIDefinition {
     /**
      * This method returns URI templates according to the given swagger file
      *
-     * @param api                 API
+     * @param swaggerData                 API
      * @param resourceConfigsJSON swaggerJSON
      * @return URI Templates
      * @throws APIManagementException
      */
     @Override
-    public Set<URITemplate> getURITemplates(API api, String resourceConfigsJSON) throws APIManagementException {
+    public Set<URITemplate> getURITemplates(SwaggerData swaggerData, String resourceConfigsJSON) throws APIManagementException {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(resourceConfigsJSON, null, null);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
@@ -167,56 +166,45 @@ public class OAS3Parser extends APIDefinition {
         return scopeList;
     }
 
-    @Override
-    public void saveAPIDefinition(APIProduct apiProduct, String apiDefinitionJSON, Registry registry)
-            throws APIManagementException {
-
-    }
-
     /**
      * This method generates API definition to the given api
      *
-     * @param api api
+     * @param swaggerData api
      * @return API definition in string format
      * @throws APIManagementException
      */
     @Override
-    public String generateAPIDefinition(API api) throws APIManagementException {
+    public String generateAPIDefinition(SwaggerData swaggerData) throws APIManagementException {
         OpenAPI openAPI = new OpenAPI();
 
         //Create info object
         Info info = new Info();
-        info.setTitle(api.getId().getApiName());
-        if (api.getDescription() != null) {
-            info.setDescription(api.getDescription());
+        info.setTitle(swaggerData.getTitle());
+        if (swaggerData.getDescription() != null) {
+            info.setDescription(swaggerData.getDescription());
         }
 
         Contact contact = new Contact();
         //Create contact object and map business owner info
-        if (api.getBusinessOwner() != null) {
-            contact.setName(api.getBusinessOwner());
+        if (swaggerData.getContactName() != null) {
+            contact.setName(swaggerData.getContactName());
         }
-        if (api.getBusinessOwnerEmail() != null) {
-            contact.setEmail(api.getBusinessOwnerEmail());
+        if (swaggerData.getContactEmail() != null) {
+            contact.setEmail(swaggerData.getContactEmail());
         }
-        if (api.getBusinessOwner() != null || api.getBusinessOwnerEmail() != null) {
+        if (swaggerData.getContactName() != null || swaggerData.getContactEmail() != null) {
             //put contact object to info object
             info.setContact(contact);
         }
 
-        info.setVersion(api.getId().getVersion());
+        info.setVersion(swaggerData.getVersion());
         openAPI.setInfo(info);
 
-        for (URITemplate uriTemplate : api.getUriTemplates()) {
-            createOperationFromTemplate(openAPI, uriTemplate);
+        for (SwaggerData.Resource resource : swaggerData.getResources()) {
+            createOperationFromTemplate(openAPI, resource);
         }
-        updateScopesInDefinition(openAPI, api);
+        updateScopesInDefinition(openAPI, swaggerData);
         return Json.pretty(openAPI);
-    }
-
-    @Override
-    public String generateAPIDefinition(APIProduct apiProduct) throws APIManagementException {
-        return null;
     }
 
     /**
@@ -226,7 +214,7 @@ public class OAS3Parser extends APIDefinition {
      * additional resources inside the swagger will be removed from the swagger. Changes to scopes, throtting policies,
      * on the resource will be updated on the swagger
      *
-     * @param api            api
+     * @param swaggerData            api
      * @param swagger        swagger definition
      * @param syncOperations whether to sync operations between API and swagger. If true, the operations of the swagger
      *                       will be synced from the API's operations. Additional operations of the swagger will be
@@ -236,24 +224,24 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException if error occurred when generating API Definition
      */
     @Override
-    public String generateAPIDefinition(API api, String swagger, boolean syncOperations) throws APIManagementException {
+    public String generateAPIDefinition(SwaggerData swaggerData, String swagger, boolean syncOperations) throws APIManagementException {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(swagger, null, null);
         OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
-        Set<URITemplate> copy = new HashSet<>(api.getUriTemplates());
+        Set<SwaggerData.Resource> copy = new HashSet<>(swaggerData.getResources());
 
         for (String pathKey : openAPI.getPaths().keySet()) {
             PathItem pathItem = openAPI.getPaths().get(pathKey);
             for (Map.Entry<PathItem.HttpMethod, Operation> entry : pathItem.readOperationsMap().entrySet()) {
                 Operation operation = entry.getValue();
                 boolean operationFound = false;
-                for (URITemplate uriTemplate : api.getUriTemplates()) {
-                    if (pathKey.equalsIgnoreCase(uriTemplate.getUriTemplate()) && entry.getKey().name()
-                            .equalsIgnoreCase(uriTemplate.getHTTPVerb())) {
+                for (SwaggerData.Resource resource : swaggerData.getResources()) {
+                    if (pathKey.equalsIgnoreCase(resource.getPath()) && entry.getKey().name()
+                            .equalsIgnoreCase(resource.getVerb())) {
                         //update operations in definition
                         operationFound = true;
-                        copy.remove(uriTemplate);
-                        updateOperationManagedInfo(uriTemplate, operation);
+                        copy.remove(resource);
+                        updateOperationManagedInfo(resource, operation);
                         break;
                     }
                 }
@@ -266,21 +254,21 @@ public class OAS3Parser extends APIDefinition {
         }
 
         //adding new opeations to the deinifition
-        for (URITemplate uriTemplate : copy) {
-            createOperationFromTemplate(openAPI, uriTemplate);
+        for (SwaggerData.Resource resource : copy) {
+            createOperationFromTemplate(openAPI, resource);
         }
-        updateScopesInDefinition(openAPI, api);
+        updateScopesInDefinition(openAPI, swaggerData);
         return Json.pretty(openAPI);
     }
 
     /**
      * Updates managed info of a provided operation such as auth type and throttling
      *
-     * @param uriTemplate URI template
+     * @param resource URI template
      * @param operation   swagger operation
      */
-    private void updateOperationManagedInfo(URITemplate uriTemplate, Operation operation) {
-        String authType = uriTemplate.getAuthType();
+    private void updateOperationManagedInfo(SwaggerData.Resource resource, Operation operation) {
+        String authType = resource.getAuthType();
         if (APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.equals(authType)) {
             authType = "Application & Application User";
         }
@@ -291,9 +279,9 @@ public class OAS3Parser extends APIDefinition {
             authType = "Application";
         }
         operation.addExtension(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
-        operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, uriTemplate.getThrottlingTier());
-        if (uriTemplate.getScope() != null) {
-            operation.addExtension(APIConstants.SWAGGER_X_SCOPE, uriTemplate.getScope().getKey());
+        operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
+        if (resource.getScope() != null) {
+            operation.addExtension(APIConstants.SWAGGER_X_SCOPE, resource.getScope().getKey());
         } else {
             if (operation.getExtensions().containsKey(APIConstants.SWAGGER_X_SCOPE)) {
                 operation.getExtensions().remove(APIConstants.SWAGGER_X_SCOPE);
@@ -304,25 +292,25 @@ public class OAS3Parser extends APIDefinition {
     /**
      * Creates a new operation object using the URI template object
      *
-     * @param uriTemplate URI template
+     * @param resource Swagger Resource data
      * @return a new operation object using the URI template object
      */
-    private void createOperationFromTemplate(OpenAPI openAPI, URITemplate uriTemplate) {
+    private void createOperationFromTemplate(OpenAPI openAPI, SwaggerData.Resource resource) {
         if (openAPI.getPaths() == null) {
             openAPI.setPaths(new Paths());
         }
-        String pathName = uriTemplate.getUriTemplate();
+        String pathName = resource.getPath();
         PathItem pathItem;
-        if (openAPI.getPaths().keySet().contains(pathName)) {
+        if (openAPI.getPaths().containsKey(pathName)) {
             pathItem = openAPI.getPaths().get(pathName);
         } else {
             pathItem = new PathItem();
             openAPI.getPaths().addPathItem(pathName, pathItem);
         }
         Operation operation = new Operation();
-        PathItem.HttpMethod httpMethod = PathItem.HttpMethod.valueOf(uriTemplate.getHTTPVerb());
+        PathItem.HttpMethod httpMethod = PathItem.HttpMethod.valueOf(resource.getVerb());
         pathItem.operation(httpMethod, operation);
-        updateOperationManagedInfo(uriTemplate, operation);
+        updateOperationManagedInfo(resource, operation);
 
         ApiResponses apiResponses = new ApiResponses();
         ApiResponse apiResponse = new ApiResponse();
@@ -358,12 +346,11 @@ public class OAS3Parser extends APIDefinition {
 
     /**
      * Include Scope details to the definition
-     *
-     * @param openAPI openapi definition
-     * @param api     API data
+     *  @param openAPI openapi definition
+     * @param swaggerData     API data
      */
-    private void updateScopesInDefinition(OpenAPI openAPI, API api) {
-        Set<Scope> scopes = api.getScopes();
+    private void updateScopesInDefinition(OpenAPI openAPI, SwaggerData swaggerData) {
+        Set<Scope> scopes = swaggerData.getScopes();
         List<Map<String, String>> scopesList = new ArrayList<>();
         Map<String, String> aScope;
         for (Scope scope : scopes) {
@@ -424,12 +411,12 @@ public class OAS3Parser extends APIDefinition {
      * Populate definition with wso2 APIM specific information
      *
      * @param oasDefinition OAS definition
-     * @param api           API
+     * @param swaggerData           API
      * @return Generated OAS definition
      * @throws APIManagementException If an error occurred
      */
     @Override
-    public String populateCustomManagementInfo(String oasDefinition, API api) throws APIManagementException {
+    public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData) throws APIManagementException {
         return oasDefinition;
     }
 }

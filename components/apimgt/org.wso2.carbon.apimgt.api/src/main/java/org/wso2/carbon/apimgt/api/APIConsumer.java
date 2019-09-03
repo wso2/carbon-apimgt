@@ -774,7 +774,7 @@ public interface APIConsumer extends APIManager {
      * @return swagger string
      * @throws APIManagementException if error occurred while obtaining the swagger definition
      */
-    String getOpenAPIDefinitionForEnvironment(APIIdentifier apiId, String environmentName)
+    String getOpenAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
             throws APIManagementException;
 
     /**
@@ -785,7 +785,7 @@ public interface APIConsumer extends APIManager {
      * @return swagger string
      * @throws APIManagementException if error occurred while obtaining the swagger definition
      */
-    String getOpenAPIDefinitionForLabel(APIIdentifier apiId, String labelName)
+    String getOpenAPIDefinitionForLabel(Identifier apiId, String labelName)
             throws APIManagementException;
 
     /**

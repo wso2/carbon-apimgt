@@ -47,6 +47,8 @@ import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
@@ -325,11 +327,19 @@ public class OASParserUtil {
      * @return api definition json as json string
      * @throws APIManagementException
      */
-    public static String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry)
+    public static String getAPIDefinition(Identifier apiIdentifier, Registry registry)
             throws APIManagementException {
-        String resourcePath = APIUtil
-                .getOpenAPIDefinitionFilePath(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
-                        apiIdentifier.getProviderName());
+        String resourcePath = "";
+
+        if (apiIdentifier instanceof APIIdentifier) {
+            resourcePath = APIUtil
+                    .getOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
+                            apiIdentifier.getProviderName());
+        } else if (apiIdentifier instanceof APIProductIdentifier) {
+            resourcePath = APIUtil
+                    .getAPIProductOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
+                            apiIdentifier.getProviderName());
+        }
 
         JSONParser parser = new JSONParser();
         String apiDocContent = null;
@@ -346,11 +356,11 @@ public class OASParserUtil {
             }
         } catch (RegistryException e) {
             handleException(
-                    "Error while retrieving OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getApiName() + '-'
+                    "Error while retrieving OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getName() + '-'
                             + apiIdentifier.getVersion(), e);
         } catch (ParseException e) {
             handleException(
-                    "Error while parsing OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getApiName() + '-'
+                    "Error while parsing OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getName() + '-'
                             + apiIdentifier.getVersion() + " in " + resourcePath, e);
         }
         return apiDocContent;

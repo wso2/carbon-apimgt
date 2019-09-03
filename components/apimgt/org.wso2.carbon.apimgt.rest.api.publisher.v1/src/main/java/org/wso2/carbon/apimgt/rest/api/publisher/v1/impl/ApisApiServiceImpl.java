@@ -60,6 +60,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -263,7 +264,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 } else {
                     oasParser = new OAS3Parser();
                 }
-                String apiDefinition = oasParser.generateAPIDefinition(apiToAdd);
+                SwaggerData swaggerData = new SwaggerData(apiToAdd);
+                String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
                 apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
             }
 
@@ -578,7 +580,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     return null;
                 }
                 APIDefinition apiDefinition = definitionOptional.get();
-                String newDefinition = apiDefinition.generateAPIDefinition(apiToUpdate, oldDefinition,
+                SwaggerData swaggerData = new SwaggerData(apiToUpdate);
+                String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition,
                         true);
                 apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
             }
@@ -1517,7 +1520,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIDefinition oasParser = response.getParser();
             Set<URITemplate> uriTemplates = null;
             try {
-                uriTemplates = oasParser.getURITemplates(existingAPI, response.getJsonContent());
+                SwaggerData swaggerData = new SwaggerData(existingAPI);
+                uriTemplates = oasParser.getURITemplates(swaggerData, response.getJsonContent());
             } catch (APIManagementException e) {
                 // catch APIManagementException inside again to capture validation error
                 RestApiUtil.handleBadRequest(e.getMessage(), log);
@@ -1539,7 +1543,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //Update API is called to update URITemplates and scopes of the API
             apiProvider.updateAPI(existingAPI);
-            String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, existingAPI);
+            SwaggerData swaggerData = new SwaggerData(existingAPI);
+            String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
             apiProvider.saveSwagger20Definition(existingAPI.getId(), updatedApiDefinition);
             //retrieves the updated swagger definition
             String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
@@ -1632,7 +1637,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     return null;
                 }
                 APIDefinition apiDefinition = definitionOptional.get();
-                Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(api, apiSwaggerDefinition);
+                SwaggerData swaggerData = new SwaggerData(api);
+                Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerData, apiSwaggerDefinition);
                 api.setUriTemplates(uriTemplates);
 
                 // scopes
@@ -1783,11 +1789,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             // Rearrange paths according to the API payload and save the OpenAPI definition
 
             APIDefinition apiDefinition = validationResponse.getParser();
-
-            definitionToAdd = apiDefinition.generateAPIDefinition(apiToAdd,
+            SwaggerData swaggerData = new SwaggerData(apiToAdd);
+            definitionToAdd = apiDefinition.generateAPIDefinition(swaggerData,
                     validationResponse.getJsonContent(), syncOperations);
 
-            Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(apiToAdd, definitionToAdd);
+            Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerData, definitionToAdd);
             Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
             apiToAdd.setUriTemplates(uriTemplates);
             apiToAdd.setScopes(scopes);
@@ -2061,7 +2067,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //Save swagger definition of graphQL
             APIDefinitionFromOpenAPISpec apiDefinitionUsingOASParser = new APIDefinitionFromOpenAPISpec();
-            String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(apiToAdd);
+            SwaggerData swaggerData = new SwaggerData(apiToAdd);
+            String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(swaggerData);
             apiProvider.saveSwagger20Definition(apiToAdd.getId(), apiDefinition);
 
             APIIdentifier createdApiId = apiToAdd.getId();
