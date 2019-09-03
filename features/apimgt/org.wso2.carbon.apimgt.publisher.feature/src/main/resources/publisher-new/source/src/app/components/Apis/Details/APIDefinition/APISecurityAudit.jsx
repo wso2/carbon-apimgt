@@ -25,8 +25,13 @@ import VisibilitySensor from 'react-visibility-sensor';
 import Paper from '@material-ui/core/Paper';
 import { withStyles } from '@material-ui/core/styles';
 import { Line } from 'rc-progress';
-import Grid from '@material-ui/core/Grid';
 import Progress from 'AppComponents/Shared/Progress';
+
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
 
 const styles = theme => ({
     rootPaper: {
@@ -36,6 +41,9 @@ const styles = theme => ({
     gridDiv: {
         display: 'flex',
         'flex-direction': 'row',
+    },
+    table: {
+        minWidth: 650,
     },
 });
 
@@ -94,6 +102,27 @@ class APISecurityAudit extends Component {
     getKey() {
         return this.keyCount++;
     }
+    /**
+     * @inheritdoc
+     * @param {Object} issue object
+     * @return {String} issueType
+     */
+    getSeverity(issue) {
+        switch (issue.criticality) {
+            case 1:
+                return 'INFO';
+            case 2:
+                return 'LOW';
+            case 3:
+                return 'MEDIUM';
+            case 4:
+                return 'HIGH';
+            case 5:
+                return 'CRITICAL';
+            default:
+                return 'UNDEFINED';
+        }
+    }
 
     /**
      * @inheritdoc
@@ -106,6 +135,15 @@ class APISecurityAudit extends Component {
         const {
             report, overallGrade, numErrors, loading,
         } = this.state;
+
+        const criticalityMap = {
+            1: 'INFO',
+            2: 'LOW',
+            3: 'MEDIUM',
+            4: 'HIGH',
+            5: 'CRITICAL',
+        };
+
         const reportObject = JSON.parse(report);
 
         if (loading) {
@@ -214,7 +252,7 @@ class APISecurityAudit extends Component {
                                 <Typography variant='body1'>
                                     <strong>Criticality:</strong> {reportObject.validation.criticality}
                                 </Typography>
-                                <Typography variant='body1'>{
+                                {/* <Typography variant='body1'>{
                                     (reportObject.validation.issueCounter !== 0) ?
                                         (reportObject.validation.issues.map((issue) => {
                                             return (
@@ -245,7 +283,44 @@ class APISecurityAudit extends Component {
                                             );
                                         })) : (null)
                                 }
-                                </Typography>
+                                </Typography> */}
+                                {(reportObject.validation.issueCounter !== 0) &&
+                                    <div>
+                                        <hr />
+                                        <Typography variant='h6'>Issues</Typography>
+                                        <Typography variant='body1'>
+                                            <Paper elevation={1} className={classes.rootPaper}>
+                                                <Table className={classes.table}>
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell>Severity</TableCell>
+                                                            <TableCell>Description</TableCell>
+                                                            <TableCell>Score Impact</TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {
+                                                            (reportObject.validation.issueCounter !== 0) ?
+                                                                (reportObject.validation.issues.map((issue) => {
+                                                                    return (
+                                                                        <TableRow>
+                                                                            <TableCell>
+                                                                                {criticalityMap[issue.criticality]}
+                                                                            </TableCell>
+                                                                            <TableCell>{issue.message}</TableCell>
+                                                                            <TableCell>
+                                                                                {Math.round(issue.score)}
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    );
+                                                                })) : (null)
+                                                        }
+                                                    </TableBody>
+                                                </Table>
+                                            </Paper>
+                                        </Typography>
+                                    </div>
+                                }
                             </div>
                         </Paper>
 
@@ -261,38 +336,43 @@ class APISecurityAudit extends Component {
                                 <Typography variant='body1'>
                                     <strong>Criticality:</strong> {reportObject.security.criticality}
                                 </Typography>
-                                <Typography variant='body1'>{
-                                    (reportObject.security.issueCounter !== 0) ?
-                                        (reportObject.security.issues.map((issue) => {
-                                            return (
-                                                <Grid container spacing={3}>
-                                                    <Grid item xs={12}>
-                                                        <Paper elevation={1} className={classes.rootPaper}>
-                                                            <div className={classes.gridDiv}>
-                                                                <Typography
-                                                                    variant='body1'
-                                                                    style={{ width: '75%' }}
-                                                                    key={this.getKey()}
-                                                                >
-                                                                    <strong>Description:</strong> {issue.message}
-                                                                </Typography>
-                                                                <Typography
-                                                                    variant='body1'
-                                                                    style={{ width: '25%' }}
-                                                                    key={this.getKey()}
-                                                                >
-                                                                    <strong>
-                                                                        Score Impact:
-                                                                    </strong> {Math.round(issue.score)}
-                                                                </Typography>
-                                                            </div>
-                                                        </Paper>
-                                                    </Grid>
-                                                </Grid>
-                                            );
-                                        })) : (null)
+                                {(reportObject.security.issueCounter !== 0) &&
+                                    <div>
+                                        <hr />
+                                        <Typography variant='h6'>Issues</Typography>
+                                        <Typography variant='body1'>
+                                            <Paper elevation={1} className={classes.rootPaper}>
+                                                <Table className={classes.table}>
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell>Severity</TableCell>
+                                                            <TableCell>Description</TableCell>
+                                                            <TableCell>Score Impact</TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {
+                                                            (reportObject.security.issueCounter !== 0) ?
+                                                                (reportObject.security.issues.map((issue) => {
+                                                                    return (
+                                                                        <TableRow>
+                                                                            <TableCell>
+                                                                                {criticalityMap[issue.criticality]}
+                                                                            </TableCell>
+                                                                            <TableCell>{issue.message}</TableCell>
+                                                                            <TableCell>
+                                                                                {Math.round(issue.score)}
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    );
+                                                                })) : (null)
+                                                        }
+                                                    </TableBody>
+                                                </Table>
+                                            </Paper>
+                                        </Typography>
+                                    </div>
                                 }
-                                </Typography>
                             </div>
                         </Paper>
                         <Paper elevation={1} className={classes.rootPaper}>
@@ -307,39 +387,43 @@ class APISecurityAudit extends Component {
                                 <Typography variant='body1'>
                                     <strong>Criticality:</strong> {reportObject.data.criticality}
                                 </Typography>
-                                <hr />
-                                <Typography variant='body1'>{
-                                    (reportObject.data.issueCounter !== 0) ?
-                                        (reportObject.data.issues.map((issue) => {
-                                            return (
-                                                <Grid container spacing={3}>
-                                                    <Grid item xs={12}>
-                                                        <Paper elevation={1} className={classes.rootPaper}>
-                                                            <div className={classes.gridDiv}>
-                                                                <Typography
-                                                                    variant='body1'
-                                                                    style={{ width: '75%' }}
-                                                                    key={this.getKey()}
-                                                                >
-                                                                    <strong>Description:</strong> {issue.message}
-                                                                </Typography>
-                                                                <Typography
-                                                                    variant='body1'
-                                                                    style={{ width: '25%' }}
-                                                                    key={this.getKey()}
-                                                                >
-                                                                    <strong>
-                                                                        Score Impact:
-                                                                    </strong> {Math.round(issue.score)}
-                                                                </Typography>
-                                                            </div>
-                                                        </Paper>
-                                                    </Grid>
-                                                </Grid>
-                                            );
-                                        })) : (null)
+                                {(reportObject.data.issueCounter !== 0) &&
+                                    <div>
+                                        <hr />
+                                        <Typography variant='h6'>Issues</Typography>
+                                        <Typography variant='body1'>
+                                            <Paper elevation={1} className={classes.rootPaper}>
+                                                <Table className={classes.table}>
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell>Severity</TableCell>
+                                                            <TableCell>Description</TableCell>
+                                                            <TableCell>Score Impact</TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {
+                                                            (reportObject.data.issueCounter !== 0) ?
+                                                                (reportObject.data.issues.map((issue) => {
+                                                                    return (
+                                                                        <TableRow>
+                                                                            <TableCell>
+                                                                                {criticalityMap[issue.criticality]}
+                                                                            </TableCell>
+                                                                            <TableCell>{issue.message}</TableCell>
+                                                                            <TableCell>
+                                                                                {Math.round(issue.score)}
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    );
+                                                                })) : (null)
+                                                        }
+                                                    </TableBody>
+                                                </Table>
+                                            </Paper>
+                                        </Typography>
+                                    </div>
                                 }
-                                </Typography>
                             </div>
                         </Paper>
                     </div>
