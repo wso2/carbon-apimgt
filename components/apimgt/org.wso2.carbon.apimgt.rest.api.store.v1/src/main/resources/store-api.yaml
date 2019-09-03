@@ -955,7 +955,7 @@ paths:
         401:
           description: |
             Unauthorized.
-            The user is not authorized to view the application .
+            The user is not authorized to view the comments.
           schema:
             $ref: '#/definitions/Error'
         406:
@@ -1011,7 +1011,7 @@ paths:
         401:
           description: |
             Unauthorized.
-            The user is not authorized to view the application .
+            The user is not authorized to add the comment.
           schema:
             $ref: '#/definitions/Error'
         415:
@@ -1070,7 +1070,7 @@ paths:
         401:
           description: |
             Unauthorized.
-            The user is not authorized to view the application .
+            The user is not authorized to view the comment.
           schema:
             $ref: '#/definitions/Error'
         404:
@@ -1112,7 +1112,7 @@ paths:
         401:
           description: |
             Unauthorized.
-            The user is not authorized to view the application .
+            The user is not authorized to delete the comment.
           schema:
             $ref: '#/definitions/Error'
         404:
@@ -1176,7 +1176,7 @@ paths:
         401:
           description: |
             Unauthorized.
-            The user is not authorized to view the application .
+            The user is not authorized to update the comment.
           schema:
             $ref: '#/definitions/Error'
         404:
