@@ -87,7 +87,7 @@
     };
     response.addCookie(cookie);
 
-    log.debug("redirecting to login");
-    response.sendRedirect(site.context + "/login");
+    log.debug("redirecting to logout");
+    response.sendRedirect(site.context + "/logout");
 
 %>

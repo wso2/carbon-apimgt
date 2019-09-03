@@ -16,8 +16,9 @@
  * under the License.
  */
 
-import AuthManager from "./AuthManager";
 import Axios from "axios";
+import Configurations from 'Config';
+import AuthManager from "./AuthManager";
 
 /**
  * Utility class for Store application
@@ -178,19 +179,19 @@ class Utils {
     }
 
     static getDCRappInfoRequestURL(environment = Utils.getEnvironment()) {
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}${Utils.CONST.CONTEXT_PATH}`;
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}${Configurations.app.context}`;
     }
 
     static getAppLogoutURL() {
-        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGOUT + Utils.CONST.CONTEXT_PATH;
+        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGOUT + Configurations.app.context;
     }
 
     static getLoginTokenPath(environment = Utils.getEnvironment()) {
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Utils.CONST.CONTEXT_PATH}`;
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Configurations.app.context}`;
     }
 
     static getSignUpTokenPath(environment) {
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_SIGN_UP_PATH}${Utils.CONST.CONTEXT_PATH}`;
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_SIGN_UP_PATH}${Configurations.app.context}`;
     }
 
     static getSwaggerURL() {
@@ -209,8 +210,6 @@ Utils.CONST = {
     LOGOUT_CALLBACK: '/services/auth/callback/logout',
     SWAGGER_YAML: '/api/am/store/v1.0/swagger.yaml',
     PROTOCOL: 'https://',
-    // TODO: remove this and use the one from the configuration
-    CONTEXT_PATH: '/store-new',
 };
 
 /**

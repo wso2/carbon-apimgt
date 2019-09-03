@@ -1,0 +1,59 @@
+
+post:
+- id: postAPIComments
+  request:
+    method: POST
+    url: https://localhost:9443/api/am/store/v1.0/apis/b72b00c0-af2a-450a-a2e8-fbb526cf1ae8/comments
+    headers: |
+      Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
+      Content-Type: application/json
+    body:
+      {
+        "content": "This is a comment"
+      }
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "id": "5",
+        "content": "This is a comment",
+        "createdTime": "2019-09-03 14:27:47.02",
+        "createdBy": "john"
+      }
+
+get:
+- id: getAPIComments
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/store/v1.0/apis/06a3726b-1b8c-4c42-b37f-abf0e72696a7/comments
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      X-WSO2-Tenant: test.com
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "count": 2,
+        "list": [
+        {
+          "id": "1",
+          "content": "This is a normal comment",
+          "createdTime": "2019-09-03 12:31:19.785",
+          "createdBy": "admin"
+        },
+        {
+          "id": "2",
+          "content": "This is a sample comment",
+          "createdTime": "2019-09-03 13:12:17.077",
+          "createdBy": "admin"
+        }
+        ]
+      }

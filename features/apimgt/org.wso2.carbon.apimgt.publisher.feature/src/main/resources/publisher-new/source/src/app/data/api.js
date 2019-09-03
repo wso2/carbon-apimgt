@@ -81,12 +81,12 @@ class API extends Resource {
      * @param {Array} [userExcludes=[]] List of properties that are need to be excluded from the generated JSON object
      * @returns {JSON} JSON representation of the API
      */
-    toJSON(userExcludes = []) {
+    toJSON(resource = this, userExcludes = []) {
         var copy = {},
             excludes = ['_data', 'client', 'apiType', ...userExcludes];
-        for (var prop in this) {
+        for (var prop in resource) {
             if (!excludes.includes(prop)) {
-                copy[prop] = this[prop];
+                copy[prop] = resource[prop];
             }
         }
         return copy;
@@ -829,7 +829,7 @@ class API extends Resource {
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
     update(updatedProperties) {
-        const updatedAPI = { ...this.toJSON(), ...updatedProperties };
+        const updatedAPI = { ...this.toJSON(), ...this.toJSON(updatedProperties) };
         const promisedUpdate = this.client.then(client => {
             const payload = {
                 apiId: updatedAPI.id,
@@ -861,14 +861,11 @@ class API extends Resource {
      * @param {String} apiId API UUID
      * @returns {Promise} With given callback attached to the success chain else API invoke promise.
      */
-    subscriptions(id, callback = null) {
-        const promise_subscription = this.client.then(client => {
+    subscriptions(apiId, offset = null, limit = null, query = null, callback = null) {
+        const promise_subscription = this.client.then((client) => {
             return client.apis['Subscriptions'].get_subscriptions(
-                {
-                    apiId: id,
-                },
-                this._requestMetaData(),
-            );
+                { apiId, limit, offset, query },
+                this._requestMetaData());
         });
         if (callback) {
             return promise_subscription.then(callback);

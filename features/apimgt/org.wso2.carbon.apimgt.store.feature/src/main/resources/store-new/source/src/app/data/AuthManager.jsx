@@ -19,6 +19,7 @@
 
 import axios from 'axios';
 import qs from 'qs';
+import Configurations from 'Config';
 import Utils from './Utils';
 import User from './User';
 import APIClient from './APIClient';
@@ -108,9 +109,15 @@ class AuthManager {
             .then(response => response.json())
             .then((data) => {
                 let user = null;
+                let username;
                 if (data.active) {
                     const currentEnv = Utils.getCurrentEnvironment();
-                    user = new User(currentEnv.label, data.username);
+                    if (data.username.includes("@carbon.super")) {
+                        username = data.username.replace('@carbon.super', '');
+                    } else {
+                        username = data.username;
+                    }
+                    user = new User(currentEnv.label, username);
                     user.scopes = data.scope.split(' ');
                     AuthManager.setUser(user, currentEnv.label);
                 } else {
@@ -207,7 +214,7 @@ class AuthManager {
                 const validityPeriod = response.data.validityPeriod; // In seconds
                 const WSO2_AM_TOKEN_1 = response.data.partialToken;
                 const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
-                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
+                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Configurations.app.context);
                 user.scopes = response.data.scopes.split(' ');
                 AuthManager.setUser(user);
             })
@@ -232,7 +239,7 @@ class AuthManager {
         };
         const promisedLogout = axios.post(url, null, { headers });
         return promisedLogout.then((response) => {
-            Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH);
+            Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Configurations.app.context);
             localStorage.removeItem(User.CONST.LOCALSTORAGE_USER);
             new APIClientFactory().destroyAPIClient(Utils.getEnvironment().label); // Single client should be re initialize after log out
         });
@@ -250,7 +257,7 @@ class AuthManager {
             scopes: AuthManager.CONST.USER_SCOPES,
         };
         const referrer = document.referrer.indexOf('https') !== -1 ? document.referrer : null;
-        const url = Utils.CONST.CONTEXT_PATH + environment.refreshTokenPath;
+        const url = Configurations.app.context + environment.refreshTokenPath;
         const headers = {
             Accept: 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -290,7 +297,7 @@ class AuthManager {
                 const validityPeriod = response.data.validityPeriod;
                 const WSO2_AM_TOKEN_1 = response.data.partialToken;
                 const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
-                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
+                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Configurations.app.context);
                 user.scopes = response.data.scopes;
                 AuthManager.setUser(user);
             })

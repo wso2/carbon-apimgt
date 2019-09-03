@@ -1520,11 +1520,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             Set<Scope> scopes = oasParser.getScopes(apiDefinition);
             //validating scope roles
             for (Scope scope : scopes) {
-                for (String aRole : scope.getRoles().split(",")) {
-                    boolean isValidRole = APIUtil.isRoleNameExist(RestApiUtil.getLoggedInUsername(), aRole);
-                    if (!isValidRole) {
-                        String error = "Role '" + aRole + "' Does not exist.";
-                        RestApiUtil.handleBadRequest(error, log);
+                String roles = scope.getRoles();
+                if (roles != null) {
+                    for (String aRole : roles.split(",")) {
+                        boolean isValidRole = APIUtil.isRoleNameExist(RestApiUtil.getLoggedInUsername(), aRole);
+                        if (!isValidRole) {
+                            String error = "Role '" + aRole + "' Does not exist.";
+                            RestApiUtil.handleBadRequest(error, log);
+                        }
                     }
                 }
             }

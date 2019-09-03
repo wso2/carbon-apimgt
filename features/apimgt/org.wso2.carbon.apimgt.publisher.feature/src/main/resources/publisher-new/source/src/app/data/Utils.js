@@ -17,6 +17,7 @@
  */
 
 import Axios from 'axios';
+import Configurations from 'Config';
 
 /**
  * Utility class for Publisher application
@@ -170,12 +171,12 @@ class Utils {
 
     static getAppLogoutURL() {
         return (
-            Utils.CONST.PROTOCOL + Utils.getCurrentEnvironment().host + Utils.CONST.LOGOUT + Utils.CONST.CONTEXT_PATH
+            Utils.CONST.PROTOCOL + Utils.getCurrentEnvironment().host + Utils.CONST.LOGOUT + Configurations.app.context
         );
     }
 
     static getLoginTokenPath(environment = Utils.getCurrentEnvironment()) {
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Utils.CONST.CONTEXT_PATH}`;
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Configurations.app.context}`;
     }
 
     /**
@@ -277,8 +278,6 @@ Utils.CONST = {
     LOGOUT_CALLBACK: '/services/auth/callback/logout',
     SWAGGER_YAML: '/api/am/publisher/v1.0/swagger.yaml',
     PROTOCOL: 'https://',
-    // TODO: remove this and use the one from the configuration
-    CONTEXT_PATH: '/publisher-new',
 };
 
 /**

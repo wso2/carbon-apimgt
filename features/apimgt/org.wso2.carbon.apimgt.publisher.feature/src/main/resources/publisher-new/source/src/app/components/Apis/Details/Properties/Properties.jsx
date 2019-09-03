@@ -235,7 +235,7 @@ class Properties extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            additionalProperties: null,
+            additionalProperties: {},
             showAddProperty: false,
             propertyKey: null,
             propertyValue: null,

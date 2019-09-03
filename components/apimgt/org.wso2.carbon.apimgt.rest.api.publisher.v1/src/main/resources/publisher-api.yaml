@@ -3418,6 +3418,11 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/If-None-Match'
+        - name : query
+          in: query
+          description: |
+            Keywords to filter subscriptions
+          type: string
       tags:
         - Subscriptions
       responses:
@@ -8048,10 +8053,10 @@ definitions:
         type: array
         items:
           type: string
-      MonetizationProperties:
+      monetizationAttributes:
         type: array
         items:
-          type: string
+          $ref: '#/definitions/MonetizationAttribute'
 
 #-----------------------------------------------------
 # The pagination resource
@@ -8078,6 +8083,34 @@ definitions:
         description: |
           Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
+  MonetizationAttribute:
+    title: Monetization attribute object
+    properties:
+      required:
+        type: boolean
+        description: |
+          Is attribute required
+        example: true
+      name:
+        type: string
+        description: |
+          Name of the attribute
+      displayName:
+        type: string
+        description: |
+          Display name of the attribute
+      description:
+        type: string
+        description: |
+          Description of the attribute
+      hidden:
+        type: boolean
+        description: |
+          Is attribute hidden
+      default:
+        type: string
+        description: |
+          Default value of the attribute
 
 #-----------------------------------------------------
 # END-OF-FILE

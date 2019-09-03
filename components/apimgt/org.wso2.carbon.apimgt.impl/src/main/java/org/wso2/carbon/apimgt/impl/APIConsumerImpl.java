@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
+import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -3116,9 +3117,24 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
+    public int addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException {
+        return apiMgtDAO.addComment(identifier, comment, user);
+    }
+
+    @Override
     public org.wso2.carbon.apimgt.api.model.Comment[] getComments(APIIdentifier identifier)
             throws APIManagementException {
         return apiMgtDAO.getComments(identifier);
+    }
+
+    @Override
+    public Comment getComment(APIIdentifier identifier, int commentId) throws APIManagementException {
+        return apiMgtDAO.getComment(identifier, commentId);
+    }
+
+    @Override
+    public void deleteComment(APIIdentifier identifier, int commentId) throws APIManagementException {
+        apiMgtDAO.deleteComment(identifier, commentId);
     }
 
     /**

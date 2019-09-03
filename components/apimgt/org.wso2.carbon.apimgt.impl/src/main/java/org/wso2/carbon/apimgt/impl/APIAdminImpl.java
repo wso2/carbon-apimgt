@@ -135,7 +135,7 @@ public class APIAdminImpl implements APIAdmin {
         if (configuration == null) {
             log.error("API Manager configuration is not initialized.");
         } else {
-            String monetizationImplClass = configuration.getFirstProperty(APIConstants.MONETIZATION_IMPL);
+            String monetizationImplClass = configuration.getFirstProperty(APIConstants.Monetization.MONETIZATION_IMPL);
             if (monetizationImplClass == null) {
                 monetizationImpl = new DefaultMonetizationImpl();
             } else {
@@ -187,8 +187,8 @@ public class APIAdminImpl implements APIAdmin {
      */
     public long getTimestamp(String date) {
 
-        SimpleDateFormat formatter = new SimpleDateFormat(APIConstants.MonetizationUsagePublisher.TIME_FORMAT);
-        formatter.setTimeZone(TimeZone.getTimeZone(APIConstants.MonetizationUsagePublisher.TIME_ZONE));
+        SimpleDateFormat formatter = new SimpleDateFormat(APIConstants.Monetization.USAGE_PUBLISH_TIME_FORMAT);
+        formatter.setTimeZone(TimeZone.getTimeZone(APIConstants.Monetization.USAGE_PUBLISH_TIME_ZONE));
         long time = 0;
         Date parsedDate = null;
         try {

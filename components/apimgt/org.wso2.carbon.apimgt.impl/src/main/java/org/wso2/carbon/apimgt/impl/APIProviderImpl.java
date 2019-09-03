@@ -5143,13 +5143,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
             //set monetization status (i.e - enabled or disabled)
-            artifact.setAttribute(APIConstants.API_MONETIZATION_STATUS,
+            artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS,
                     Boolean.toString(api.getMonetizationStatus()));
             //clear existing monetization properties
-            artifact.removeAttribute(APIConstants.API_MONETIZATION_PROPERTIES);
+            artifact.removeAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
             //set new additional monetization data
             if (api.getMonetizationProperties() != null) {
-                artifact.setAttribute(APIConstants.API_MONETIZATION_PROPERTIES,
+                artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES,
                         api.getMonetizationProperties().toJSONString());
             }
             artifactManager.updateGenericArtifact(artifact);
@@ -5248,7 +5248,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (configuration == null) {
             log.error("API Manager configuration is not initialized.");
         } else {
-            String monetizationImplClass = configuration.getFirstProperty(APIConstants.MONETIZATION_IMPL);
+            String monetizationImplClass = configuration.getFirstProperty(APIConstants.Monetization.MONETIZATION_IMPL);
             if (monetizationImplClass == null) {
                 monetizationImpl = new DefaultMonetizationImpl();
             } else {
