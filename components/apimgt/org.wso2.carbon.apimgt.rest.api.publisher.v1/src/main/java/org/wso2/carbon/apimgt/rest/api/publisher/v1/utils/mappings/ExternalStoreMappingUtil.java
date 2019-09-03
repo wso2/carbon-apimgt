@@ -58,7 +58,7 @@ public class ExternalStoreMappingUtil {
     public static ExternalStoreListDTO fromExternalStoreCollectionToDTO(Collection<APIStore> externalStoreCollection) {
         ExternalStoreListDTO externalStoreListDTO = new ExternalStoreListDTO();
         List<ExternalStoreDTO> externalStoreDTOS = externalStoreListDTO.getList();
-        if (externalStoreDTOS == null) { //TODO: check if this is really needed
+        if (externalStoreDTOS == null) {
             externalStoreDTOS = new ArrayList<>();
         }
         for (APIStore externalStore : externalStoreCollection) {
