@@ -62,7 +62,7 @@ import java.net.URL;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({EntityUtils.class, CarbonUtils.class, ServiceReferenceHolder.class, URL.class, HttpURLConnection.class,
-        FileUtils.class, WSO2PublisherNew.class, MultipartEntityBuilder.class})
+        FileUtils.class, WSO2APIPublisher.class, MultipartEntityBuilder.class})
 public class WSO2APIPublisherTestCase {
 
     private int tenantID = -1234;
@@ -77,7 +77,7 @@ public class WSO2APIPublisherTestCase {
     private APIStore store;
     private APIIdentifier identifier;
     private API api;
-    private WSO2PublisherNew wso2APIPublisher;
+    private WSO2APIPublisher wso2APIPublisher;
     private TenantManager tenantManager;
     private File file;
     private StatusLine statusLine;
