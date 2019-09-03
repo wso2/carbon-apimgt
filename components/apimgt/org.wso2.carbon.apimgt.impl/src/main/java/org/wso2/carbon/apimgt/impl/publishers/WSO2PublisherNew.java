@@ -409,10 +409,11 @@ public class WSO2PublisherNew implements APIPublisher {
                 throw new APIManagementException(errorMessage, e);
             }
         } else {
-            log.error("API: " + apiId.getApiName() + " version: " + apiId.getVersion()
-                    + " does not exist in external store: " + store.getName());
+            String errorMessage = "API: " + apiId.getApiName() + " version: " + apiId.getVersion()
+                    + " does not exist in external store: " + store.getName();
+            log.error(errorMessage);
+            throw new APIManagementException(errorMessage);
         }
-        return false;
     }
 
     /**
@@ -487,7 +488,9 @@ public class WSO2PublisherNew implements APIPublisher {
             if (evaluateResponseStatus(httpResponse)) {
                 JSONParser parser = new JSONParser();
                 JSONObject responseJson = (JSONObject) parser.parse(responseString);
-                if ((long) responseJson.get(APIConstants.RestApiConstants.PUB_API_LIST_RESPONSE_PARAMS_COUNT) == 1) {
+                long apiListResultCount =
+                        (long) responseJson.get(APIConstants.RestApiConstants.PUB_API_LIST_RESPONSE_PARAMS_COUNT);
+                if (apiListResultCount == 1) {
                     JSONArray apiList =
                             (JSONArray) responseJson.get(APIConstants.RestApiConstants.PUB_API_LIST_RESPONSE_PARAMS_LIST);
                     JSONObject apiJson = (JSONObject) apiList.get(0);
@@ -496,11 +499,18 @@ public class WSO2PublisherNew implements APIPublisher {
                         log.debug("API: " + apiIdentifier.getApiName() + " version: " + apiIdentifier.getVersion()
                                 + " exists in external store: " + store.getName() + " with UUID: " + apiUUID);
                     }
-                } else {
+                    return apiUUID;
+                } else if (apiListResultCount > 1) {
+                    //Duplicate APIs exists
                     String errorMessage = "Duplicate APIs exists in external store for API name:"
                             + apiIdentifier.getApiName() + " version: " + apiIdentifier.getVersion();
                     log.error(errorMessage);
                     throw new APIManagementException(errorMessage);
+                }
+                //Response count is 0. Hence API does not exists in external store.
+                if (log.isDebugEnabled()) {
+                    log.debug("API: " + apiIdentifier.getApiName() + " version: " + apiIdentifier.getVersion()
+                            + " does not exists in external store: " + store.getName());
                 }
             } else {
                 String errorMessage = "API Search service call received unsuccessful response with status: "
@@ -523,7 +533,7 @@ public class WSO2PublisherNew implements APIPublisher {
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, e);
         }
-        return apiUUID;
+        return null;
     }
 
     /**
@@ -533,7 +543,7 @@ public class WSO2PublisherNew implements APIPublisher {
      * @throws APIManagementException If an error occurs while getting APIProvider instance
      */
     protected APIProvider getLoggedInUserProvider() throws APIManagementException {
-
+        //Get APIProvider instance for logged in user
         return APIManagerFactory.getInstance().getAPIProvider(getLoggedInUsername());
     }
 
@@ -591,7 +601,6 @@ public class WSO2PublisherNew implements APIPublisher {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
-
     }
 
     /**
