@@ -93,7 +93,7 @@ class Comments extends Component {
         let {
             apiId, theme, match, intl, isOverview, setCount
         } = this.props;
-        if (match) apiId = match.params.api_uuid;
+        if (match) apiId = match.params.apiUuid;
 
         let restApi = null;
         if (apiType === CONSTS.API_TYPE) {

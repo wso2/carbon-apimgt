@@ -40,7 +40,7 @@ const styles = theme => ({
     },
     commentText: {
         color: theme.palette.getContrastText(theme.palette.background.default),
-        marginTop: theme.spacing.unig * 0.1,
+        marginTop: theme.spacing.unit * 0.8,
         width: '100%',
         whiteSpace: 'pre-wrap',
         overflowWrap: 'break-word',
