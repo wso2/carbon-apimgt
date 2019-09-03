@@ -81,12 +81,12 @@ class API extends Resource {
      * @param {Array} [userExcludes=[]] List of properties that are need to be excluded from the generated JSON object
      * @returns {JSON} JSON representation of the API
      */
-    toJSON(userExcludes = []) {
+    toJSON(resource = this, userExcludes = []) {
         var copy = {},
             excludes = ['_data', 'client', 'apiType', ...userExcludes];
-        for (var prop in this) {
+        for (var prop in resource) {
             if (!excludes.includes(prop)) {
-                copy[prop] = this[prop];
+                copy[prop] = resource[prop];
             }
         }
         return copy;
@@ -829,7 +829,7 @@ class API extends Resource {
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
     update(updatedProperties) {
-        const updatedAPI = { ...this.toJSON(), ...updatedProperties };
+        const updatedAPI = { ...this.toJSON(), ...this.toJSON(updatedProperties) };
         const promisedUpdate = this.client.then(client => {
             const payload = {
                 apiId: updatedAPI.id,

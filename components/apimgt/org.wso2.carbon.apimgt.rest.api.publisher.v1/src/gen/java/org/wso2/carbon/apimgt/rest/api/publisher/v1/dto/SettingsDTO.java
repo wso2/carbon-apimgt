@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import javax.validation.constraints.*;
 
 
@@ -19,7 +20,7 @@ public class SettingsDTO   {
   
     private List<EnvironmentDTO> environment = new ArrayList<>();
     private List<String> scopes = new ArrayList<>();
-    private List<String> monetizationProperties = new ArrayList<>();
+    private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<>();
 
   /**
    **/
@@ -57,19 +58,19 @@ public class SettingsDTO   {
 
   /**
    **/
-  public SettingsDTO monetizationProperties(List<String> monetizationProperties) {
-    this.monetizationProperties = monetizationProperties;
+  public SettingsDTO monetizationAttributes(List<MonetizationAttributeDTO> monetizationAttributes) {
+    this.monetizationAttributes = monetizationAttributes;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("MonetizationProperties")
-  public List<String> getMonetizationProperties() {
-    return monetizationProperties;
+  @JsonProperty("monetizationAttributes")
+  public List<MonetizationAttributeDTO> getMonetizationAttributes() {
+    return monetizationAttributes;
   }
-  public void setMonetizationProperties(List<String> monetizationProperties) {
-    this.monetizationProperties = monetizationProperties;
+  public void setMonetizationAttributes(List<MonetizationAttributeDTO> monetizationAttributes) {
+    this.monetizationAttributes = monetizationAttributes;
   }
 
 
@@ -84,12 +85,12 @@ public class SettingsDTO   {
     SettingsDTO settings = (SettingsDTO) o;
     return Objects.equals(environment, settings.environment) &&
         Objects.equals(scopes, settings.scopes) &&
-        Objects.equals(monetizationProperties, settings.monetizationProperties);
+        Objects.equals(monetizationAttributes, settings.monetizationAttributes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environment, scopes, monetizationProperties);
+    return Objects.hash(environment, scopes, monetizationAttributes);
   }
 
   @Override
@@ -99,7 +100,7 @@ public class SettingsDTO   {
     
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
-    sb.append("    monetizationProperties: ").append(toIndentedString(monetizationProperties)).append("\n");
+    sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");
     sb.append("}");
     return sb.toString();
   }

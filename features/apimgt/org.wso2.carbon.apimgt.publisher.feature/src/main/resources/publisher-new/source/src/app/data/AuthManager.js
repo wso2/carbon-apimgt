@@ -18,6 +18,7 @@
 
 import axios from 'axios';
 import qs from 'qs';
+import Configurations from 'Config';
 import Utils from './Utils';
 import User from './User';
 import APIClient from './APIClient';
@@ -215,7 +216,7 @@ class AuthManager {
         const { data } = response;
         const { AM_ACC_TOKEN_DEFAULT_P1, expires_in: expiresIn } = data;
         const user = new User(environmentName, data.authUser);
-        user.setPartialToken(AM_ACC_TOKEN_DEFAULT_P1, expiresIn, Utils.CONST.CONTEXT_PATH);
+        user.setPartialToken(AM_ACC_TOKEN_DEFAULT_P1, expiresIn, Configurations.app.context);
         user.setExpiryTime(expiresIn);
         user.scopes = data.scopes.split(' ');
         return user;
@@ -240,7 +241,7 @@ class AuthManager {
         });
         promisedLogout
             .then(() => {
-                Utils.deleteCookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH, environmentName);
+                Utils.deleteCookie(User.CONST.WSO2_AM_TOKEN_1, Configurations.app.context, environmentName);
                 AuthManager.dismissUser(environmentName);
                 new APIClientFactory().destroyAPIClient(environmentName);
                 // Single client should be re initialize after log out
@@ -296,7 +297,7 @@ class AuthManager {
             scopes: AuthManager.CONST.USER_SCOPES,
         };
         const referrer = document.referrer.indexOf('https') !== -1 ? document.referrer : null;
-        const url = Utils.CONST.CONTEXT_PATH + environment.refreshTokenPath;
+        const url = Configurations.app.context + environment.refreshTokenPath;
         const headers = {
             Accept: 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',

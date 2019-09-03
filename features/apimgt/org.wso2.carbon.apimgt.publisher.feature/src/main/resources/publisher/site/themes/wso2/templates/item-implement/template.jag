@@ -1157,7 +1157,7 @@
                 <td class="resource-method-td resource_expand" data-path="$.paths.{{ path}}.{{ @key }}">
                     <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
                 </td>
-                <td class="resource_expand"><a class="resource-path" title="{{ path }}">{{ path }}</a></td>
+                <td class="resource_expand"><a class="resource-path" title="{{ path }}">{{ displayPath }}</a></td>
                 <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
             </tr>
             <tr><td colspan="3" class="resource_body " data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
