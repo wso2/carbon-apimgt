@@ -27,20 +27,12 @@ import { withStyles } from '@material-ui/core/styles';
 import { Line } from 'rc-progress';
 import Progress from 'AppComponents/Shared/Progress';
 
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
+import MUIDataTable from 'mui-datatables';
 
 const styles = theme => ({
     rootPaper: {
         padding: theme.spacing.unit * 3,
         margin: theme.spacing.unit * 2,
-    },
-    gridDiv: {
-        display: 'flex',
-        'flex-direction': 'row',
     },
     table: {
         minWidth: 650,
@@ -65,6 +57,9 @@ class APISecurityAudit extends Component {
             loading: false,
         };
         this.keyCount = 0;
+        this.dataArray = [];
+        this.securityArray = [];
+        this.validationArray = [];
     }
 
     /**
@@ -102,27 +97,6 @@ class APISecurityAudit extends Component {
     getKey() {
         return this.keyCount++;
     }
-    /**
-     * @inheritdoc
-     * @param {Object} issue object
-     * @return {String} issueType
-     */
-    getSeverity(issue) {
-        switch (issue.criticality) {
-            case 1:
-                return 'INFO';
-            case 2:
-                return 'LOW';
-            case 3:
-                return 'MEDIUM';
-            case 4:
-                return 'HIGH';
-            case 5:
-                return 'CRITICAL';
-            default:
-                return 'UNDEFINED';
-        }
-    }
 
     /**
      * @inheritdoc
@@ -149,6 +123,13 @@ class APISecurityAudit extends Component {
         if (loading) {
             return <Progress />;
         }
+
+        const columns = ['Severity', 'Description', 'Score Impact'];
+        const options = {
+            filterType: 'dropdown',
+            responsive: 'stacked',
+            selectableRows: false,
+        };
         return (
             <div>
                 {report && (
@@ -156,7 +137,9 @@ class APISecurityAudit extends Component {
                         width='100%'
                         height='calc(100vh - 51px)'
                     >
-                        <Typography variant='h4' styles={{ padding: 30 }}>API Security Audit Report</Typography>
+                        <Typography variant='h4' style={{ paddingTop: 30, paddingLeft: 20 }}>
+                            API Security Audit Report
+                        </Typography>
                         <div style={{ marginTop: 30 }}>
                             <Paper elevation={1} className={classes.rootPaper}>
                                 <div>
@@ -287,37 +270,23 @@ class APISecurityAudit extends Component {
                                 {(reportObject.validation.issueCounter !== 0) &&
                                     <div>
                                         <hr />
-                                        <Typography variant='h6'>Issues</Typography>
                                         <Typography variant='body1'>
-                                            <Paper elevation={1} className={classes.rootPaper}>
-                                                <Table className={classes.table}>
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <TableCell>Severity</TableCell>
-                                                            <TableCell>Description</TableCell>
-                                                            <TableCell>Score Impact</TableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        {
-                                                            (reportObject.validation.issueCounter !== 0) ?
-                                                                (reportObject.validation.issues.map((issue) => {
-                                                                    return (
-                                                                        <TableRow>
-                                                                            <TableCell>
-                                                                                {criticalityMap[issue.criticality]}
-                                                                            </TableCell>
-                                                                            <TableCell>{issue.message}</TableCell>
-                                                                            <TableCell>
-                                                                                {Math.round(issue.score)}
-                                                                            </TableCell>
-                                                                        </TableRow>
-                                                                    );
-                                                                })) : (null)
-                                                        }
-                                                    </TableBody>
-                                                </Table>
-                                            </Paper>
+                                            {
+                                                reportObject.validation.issues.forEach((issue) => {
+                                                    const rowData = [];
+                                                    rowData.push(
+                                                        criticalityMap[issue.criticality],
+                                                        issue.message, Math.round(issue.score),
+                                                    );
+                                                    this.validationArray.push(rowData);
+                                                })
+                                            }
+                                            <MUIDataTable
+                                                title='Issues'
+                                                data={this.validationArray}
+                                                columns={columns}
+                                                options={options}
+                                            />
                                         </Typography>
                                     </div>
                                 }
@@ -339,37 +308,23 @@ class APISecurityAudit extends Component {
                                 {(reportObject.security.issueCounter !== 0) &&
                                     <div>
                                         <hr />
-                                        <Typography variant='h6'>Issues</Typography>
                                         <Typography variant='body1'>
-                                            <Paper elevation={1} className={classes.rootPaper}>
-                                                <Table className={classes.table}>
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <TableCell>Severity</TableCell>
-                                                            <TableCell>Description</TableCell>
-                                                            <TableCell>Score Impact</TableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        {
-                                                            (reportObject.security.issueCounter !== 0) ?
-                                                                (reportObject.security.issues.map((issue) => {
-                                                                    return (
-                                                                        <TableRow>
-                                                                            <TableCell>
-                                                                                {criticalityMap[issue.criticality]}
-                                                                            </TableCell>
-                                                                            <TableCell>{issue.message}</TableCell>
-                                                                            <TableCell>
-                                                                                {Math.round(issue.score)}
-                                                                            </TableCell>
-                                                                        </TableRow>
-                                                                    );
-                                                                })) : (null)
-                                                        }
-                                                    </TableBody>
-                                                </Table>
-                                            </Paper>
+                                            {
+                                                reportObject.security.issues.forEach((issue) => {
+                                                    const rowData = [];
+                                                    rowData.push(
+                                                        criticalityMap[issue.criticality],
+                                                        issue.message, Math.round(issue.score),
+                                                    );
+                                                    this.securityArray.push(rowData);
+                                                })
+                                            }
+                                            <MUIDataTable
+                                                title='Issues'
+                                                data={this.securityArray}
+                                                columns={columns}
+                                                options={options}
+                                            />
                                         </Typography>
                                     </div>
                                 }
@@ -390,37 +345,23 @@ class APISecurityAudit extends Component {
                                 {(reportObject.data.issueCounter !== 0) &&
                                     <div>
                                         <hr />
-                                        <Typography variant='h6'>Issues</Typography>
                                         <Typography variant='body1'>
-                                            <Paper elevation={1} className={classes.rootPaper}>
-                                                <Table className={classes.table}>
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <TableCell>Severity</TableCell>
-                                                            <TableCell>Description</TableCell>
-                                                            <TableCell>Score Impact</TableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        {
-                                                            (reportObject.data.issueCounter !== 0) ?
-                                                                (reportObject.data.issues.map((issue) => {
-                                                                    return (
-                                                                        <TableRow>
-                                                                            <TableCell>
-                                                                                {criticalityMap[issue.criticality]}
-                                                                            </TableCell>
-                                                                            <TableCell>{issue.message}</TableCell>
-                                                                            <TableCell>
-                                                                                {Math.round(issue.score)}
-                                                                            </TableCell>
-                                                                        </TableRow>
-                                                                    );
-                                                                })) : (null)
-                                                        }
-                                                    </TableBody>
-                                                </Table>
-                                            </Paper>
+                                            {
+                                                reportObject.data.issues.forEach((issue) => {
+                                                    const rowData = [];
+                                                    rowData.push(
+                                                        criticalityMap[issue.criticality],
+                                                        issue.message, Math.round(issue.score),
+                                                    );
+                                                    this.dataArray.push(rowData);
+                                                })
+                                            }
+                                            <MUIDataTable
+                                                title='Issues'
+                                                data={this.dataArray}
+                                                columns={columns}
+                                                options={options}
+                                            />
                                         </Typography>
                                     </div>
                                 }
