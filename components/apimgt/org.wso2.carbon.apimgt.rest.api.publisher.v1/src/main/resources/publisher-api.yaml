@@ -3403,7 +3403,7 @@ paths:
       x-wso2-request: |
         GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/external-stores
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n{\"count\":1,\"list\":[{\"id\":\"StoreABC\",\"displayName\":\"StoreABC\",\"type\":\"wso2\"}]}"
       summary: Get the list of external stores which an API is published to
       description: |
         This operation can be used to retrieve a list of external stores which an API is published to by providing the id of the API.
@@ -3458,9 +3458,12 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores\""
-      x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/scopes\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json"
-      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/publish-to-external-stores\nContent-Type: application/json"
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreIds=StoreABC'\""
+      x-wso2-request: |
+        POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreIds=StoreABC
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+        Content-Type: application/json
+      x-wso2-response: "HTTP/1.1 200\nContent-Type: application/json\n{\"count\":1,\"list\":[{\"id\":\"StoreABC\",\"displayName\":\"StoreABC\",\"type\":\"wso2\"}]}"
       summary: Publish an API to external stores
       description: |
         This operation can be used to publish an API to a list of external stores.
@@ -5794,12 +5797,17 @@ paths:
     # Retrieve configured external store list
     #-----------------------------------------------------
     get:
-      summary: Retrieve external store list to publish an API
-      tags:
-        - External Store (Collection)
       security:
         - OAuth2Security:
             - apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/external-stores\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v1.0/external-stores
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n{\"count\":1,\"list\":[{\"id\":\"StoreABC\",\"displayName\":\"StoreABC\",\"type\":\"wso2\"}]}"
+      summary: Retrieve external store list to publish an API
+      tags:
+        - External Store (Collection)
       description: |
         Retrieve external stores list configured to publish an API
       responses:
