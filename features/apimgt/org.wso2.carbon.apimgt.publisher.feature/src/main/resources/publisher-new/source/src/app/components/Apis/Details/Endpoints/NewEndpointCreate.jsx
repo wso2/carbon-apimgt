@@ -69,7 +69,7 @@ function NewEndpointCreate(props) {
             }),
             description: intl.formatMessage({
                 id: 'Apis.Details.Endpoints.NewEndpointCreate.create.soap.endpoint.description',
-                defaultMessage: 'The Direct URI of the web service.',
+                defaultMessage: 'The direct URI of the web service.',
             }),
             options: null,
         },
@@ -121,7 +121,7 @@ function NewEndpointCreate(props) {
             }),
             description: intl.formatMessage({
                 id: 'Apis.Details.Endpoints.NewEndpointCreate.create.aws.endpoint.description',
-                defaultMessage: '',
+                defaultMessage: 'If you need to invoke AWS Lambda functions through WSO2 API gateway.',
             }),
             options: null,
         },
