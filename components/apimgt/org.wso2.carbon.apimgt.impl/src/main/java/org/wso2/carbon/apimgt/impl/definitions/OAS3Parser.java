@@ -198,7 +198,6 @@ public class OAS3Parser extends APIDefinition {
     @Override
     public String generateAPIDefinition(API api) throws APIManagementException {
         OpenAPI openAPI = new OpenAPI();
-
         //Create info object
         Info info = new Info();
         info.setTitle(api.getId().getApiName());
@@ -281,7 +280,6 @@ public class OAS3Parser extends APIDefinition {
 
         //adding new opeations to the deinifition
         for (URITemplate uriTemplate : copy) {
-            //            createOperationFromTemplate(openAPI, uriTemplate);
             addOrUpdatePathToSwagger(openAPI, uriTemplate);
         }
         updateSwaggerSecurityDefinition(openAPI, api);
@@ -369,7 +367,7 @@ public class OAS3Parser extends APIDefinition {
      * @return "Auth2" security scheme key
      */
     private String getOAuth2SecuritySchemeKey(OpenAPI openAPI) {
-        return "default";
+        return APIConstants.SWAGGER_APIM_DEFAULT_SECURITY;
     }
 
     /**
@@ -430,7 +428,6 @@ public class OAS3Parser extends APIDefinition {
                         scope.setName(anOauthScope.get(APIConstants.SWAGGER_NAME));
                         scope.setDescription(anOauthScope.get(APIConstants.SWAGGER_DESCRIPTION));
                         scope.setRoles(anOauthScope.get(APIConstants.SWAGGER_ROLES));
-
                         scopeList.add(scope);
                     }
                 }
@@ -512,7 +509,6 @@ public class OAS3Parser extends APIDefinition {
         Operation operation = createOperation(uriTemplate);
         PathItem.HttpMethod httpMethod = PathItem.HttpMethod.valueOf(uriTemplate.getHTTPVerb());
         path.operation(httpMethod, operation);
-
         openAPI.getPaths().addPathItem(uriTemplate.getUriTemplate(), path);
     }
 
@@ -525,7 +521,6 @@ public class OAS3Parser extends APIDefinition {
     private Operation createOperation(URITemplate uriTemplate) {
         Operation operation = new Operation();
         populatePathParameters(operation, uriTemplate.getUriTemplate());
-
         updateOperationManagedInfo(uriTemplate, operation);
 
         ApiResponses apiResponses = new ApiResponses();
