@@ -97,10 +97,35 @@ class APIClient {
         }
         return APIClient.spec.then((resolved) => {
             return (
-                resolved.spec.paths[resourcePath] &&
-                resolved.spec.paths[resourcePath][resourceMethod] &&
-                resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0]
+                resolved.spec.paths[resourcePath]
+                && resolved.spec.paths[resourcePath][resourceMethod]
+                && resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0]
             );
+        });
+    }
+
+    /**
+     * Get the scopes allowed for updating the given API field. These scopes are defined in publisher-api REST API
+     * definition, under the API resource definition as scope(s) applicable for all the API fields, i.e.
+     *    API:
+     *      x-scopes:
+     *           - apim:api_create
+     * or as scope(s) separately applicable for particular fields, under API resource. i.e.
+     *      businessInformation:
+     *           x-otherScopes:
+     *                - apim:api_publish
+     * @param field
+     * @returns {*}
+     */
+    static geAPIUpdateAllowedFieldScopes(field) {
+        if (!APIClient.spec) {
+            SwaggerClient.http.withCredentials = true;
+            APIClient.spec = SwaggerClient.resolve({ url: Utils.getSwaggerURL() });
+        }
+
+        return APIClient.spec.then((resolved) => {
+            return (resolved.spec.definitions.API.properties[field]['x-otherScopes'])
+                .concat(resolved.spec.definitions.API['x-scopes']);
         });
     }
 
@@ -189,8 +214,8 @@ class APIClient {
                 });
             });
 
-            if (APIClient.getETag(request.url) &&
-                (request.method === 'PUT' || request.method === 'DELETE' || request.method === 'POST')) {
+            if (APIClient.getETag(request.url)
+                && (request.method === 'PUT' || request.method === 'DELETE' || request.method === 'POST')) {
                 request.headers['If-Match'] = APIClient.getETag(request.url);
             }
             return promise;

@@ -29,6 +29,7 @@ import { FormattedMessage } from 'react-intl';
 import FormControl from '@material-ui/core/FormControl';
 import API from 'AppData/api.js';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import AuthManager from '../../../../data/AuthManager';
 
 const styles = theme => ({
     FormControl: {
@@ -77,6 +78,8 @@ class BusinessInformation extends React.Component {
             technicalOwner,
             technicalOwnerEmail,
         };
+        this.isNotCreator = AuthManager.isNotCreator();
+        this.isNotPublisher = AuthManager.isNotPublisher();
     }
 
     handleChange = name => (event) => {
@@ -148,6 +151,7 @@ class BusinessInformation extends React.Component {
                         <Paper className={classes.paperRoot} elevation={1}>
                             <FormControl margin='normal' className={classes.FormControlOdd}>
                                 <TextField
+                                    disabled={this.isNotCreator && this.isNotPublisher}
                                     fullWidth
                                     id='name'
                                     label={
@@ -181,6 +185,7 @@ class BusinessInformation extends React.Component {
                             </FormControl>
                             <FormControl margin='normal' className={classes.FormControl}>
                                 <TextField
+                                    disabled={this.isNotCreator && this.isNotPublisher}
                                     fullWidth
                                     id='name'
                                     label={
@@ -214,6 +219,7 @@ class BusinessInformation extends React.Component {
                             </FormControl>
                             <FormControl margin='normal' className={classes.FormControlOdd}>
                                 <TextField
+                                    disabled={this.isNotCreator && this.isNotPublisher}
                                     fullWidth
                                     id='name'
                                     label={
@@ -247,6 +253,7 @@ class BusinessInformation extends React.Component {
                             </FormControl>
                             <FormControl margin='normal' className={classes.FormControl}>
                                 <TextField
+                                    disabled={this.isNotCreator && this.isNotPublisher}
                                     fullWidth
                                     id='name'
                                     label={
@@ -293,6 +300,7 @@ class BusinessInformation extends React.Component {
                                             variant='contained'
                                             color='primary'
                                             onClick={() => this.handleSubmit(api, updateAPI)}
+                                            disabled={this.isNotCreator && this.isNotPublisher}
                                         >
                                             <FormattedMessage id='save' defaultMessage='Save' />
                                         </Button>

@@ -31,7 +31,9 @@ import AddCircle from '@material-ui/icons/AddCircle';
 import MUIDataTable from 'mui-datatables';
 import Icon from '@material-ui/core/Icon';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import Grid from '@material-ui/core/Grid';
 import Delete from './Delete';
+import AuthManager from '../../../../data/AuthManager';
 
 const styles = theme => ({
     buttonProgress: {
@@ -88,6 +90,8 @@ class Scopes extends React.Component {
         this.api = new Api();
         this.api_uuid = props.match.params.api_uuid;
         this.api_data = props.api;
+        this.isNotPublisher = AuthManager.isNotPublisher();
+        this.isNotCreator = AuthManager.isNotCreator();
     }
 
     /**
@@ -162,14 +166,15 @@ class Scopes extends React.Component {
                                     <tr>
                                         <td>
                                             <Link
-                                                to={{
-                                                    pathname: editUrl,
-                                                    state: {
-                                                        scopeName,
-                                                    },
-                                                }}
+                                                to={
+                                                    !this.isNotCreator && {
+                                                        pathname: editUrl,
+                                                        state: {
+                                                            scopeName,
+                                                        },
+                                                    }}
                                             >
-                                                <Button>
+                                                <Button disabled={this.isNotCreator && this.isNotPublisher}>
                                                     <Icon>edit</Icon>
                                                     <FormattedMessage
                                                         id='Apis.Details.Documents.Edit.documents.text.editor.edit'
@@ -179,7 +184,11 @@ class Scopes extends React.Component {
                                             </Link>
                                         </td>
                                         <td>
-                                            <Delete scopeName={scopeName} apiId={this.apiId} api={api} />
+                                            <Delete
+                                                scopeName={scopeName}
+                                                apiId={this.apiId}
+                                                api={api}
+                                            />
                                         </td>
                                     </tr>
                                 </table>
@@ -235,8 +244,8 @@ class Scopes extends React.Component {
                             <FormattedMessage
                                 id='Apis.Details.Scopes.Scopes.scopes.enable.fine.gained.access.control'
                                 defaultMessage={
-                                    'Scopes enable fine-grained access control to API resources' +
-                                    ' based on user roles.'
+                                    'Scopes enable fine-grained access control to API resources'
+                                    + ' based on user roles.'
                                 }
                             />
                         </Typography>
@@ -264,8 +273,8 @@ class Scopes extends React.Component {
                             defaultMessage='Scopes'
                         />
                     </Typography>
-                    <Link to={url}>
-                        <Button size='small' className={classes.button}>
+                    <Link to={!this.isNotCreator && url}>
+                        <Button size='small' className={classes.button} disabled={this.isNotCreator}>
                             <AddCircle className={classes.buttonIcon} />
                             <FormattedMessage
                                 id='Apis.Details.Scopes.Scopes.heading.scope.add_new'
@@ -273,6 +282,19 @@ class Scopes extends React.Component {
                             />
                         </Button>
                     </Link>
+                    {this.isNotCreator
+                        && (
+                            <Grid item>
+                                <Typography variant='body2' color='primary'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Scopes.Scopes.update.not.allowed'
+                                        defaultMessage='*You are not authorized to update Scopes of
+                                                    the API due to insufficient permissions'
+                                    />
+                                </Typography>
+                            </Grid>
+                        )
+                    }
                 </div>
 
                 <MUIDataTable

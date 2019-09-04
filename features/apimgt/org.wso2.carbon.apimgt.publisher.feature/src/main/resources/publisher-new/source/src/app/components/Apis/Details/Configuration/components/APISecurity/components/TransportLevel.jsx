@@ -36,6 +36,7 @@ import {
     DEFAULT_API_SECURITY_OAUTH2,
     API_SECURITY_BASIC_AUTH,
 } from '../APISecurity';
+import AuthManager from '../../../../../../../data/AuthManager';
 
 /**
  *
@@ -47,6 +48,8 @@ import {
 export default function TransportLevel(props) {
     const { haveMultiLevelSecurity, securityScheme, configDispatcher } = props;
     const isMutualSSLEnabled = securityScheme.includes(API_SECURITY_MUTUAL_SSL);
+    const isNotCreator = AuthManager.isNotCreator();
+
     let mandatoryValue = 'optional';
     // If not mutual ssl security is selected, no mandatory values should be pre-selected
     if (!isMutualSSLEnabled) {
@@ -70,18 +73,18 @@ export default function TransportLevel(props) {
                     </FormLabel>
                     <FormGroup>
                         <FormControlLabel
-                            control={
+                            control={(
                                 <Checkbox
+                                    disabled={isNotCreator}
                                     checked={isMutualSSLEnabled}
-                                    onChange={({ target: { checked, value } }) =>
-                                        configDispatcher({
-                                            action: 'securityScheme',
-                                            event: { checked, value },
-                                        })
+                                    onChange={({ target: { checked, value } }) => configDispatcher({
+                                        action: 'securityScheme',
+                                        event: { checked, value },
+                                    })
                                     }
                                     value={API_SECURITY_MUTUAL_SSL}
                                 />
-                            }
+                            )}
                             label='Mutual SSL'
                         />
                     </FormGroup>
@@ -92,11 +95,10 @@ export default function TransportLevel(props) {
                             aria-label='HTTP security SSL mandatory selection'
                             name={API_SECURITY_MUTUAL_SSL_MANDATORY}
                             value={mandatoryValue}
-                            onChange={({ target: { name, value } }) =>
-                                configDispatcher({
-                                    action: 'securityScheme',
-                                    event: { name, value },
-                                })
+                            onChange={({ target: { name, value } }) => configDispatcher({
+                                action: 'securityScheme',
+                                event: { name, value },
+                            })
                             }
                             row
                         >

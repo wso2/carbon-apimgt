@@ -24,6 +24,7 @@ import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
 import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
+import AuthManager from '../../../../data/AuthManager';
 
 const styles = {
     appBar: {
@@ -97,9 +98,10 @@ function Delete(props) {
         }
     };
     const { scopeName } = props;
+    const isNotCreator = AuthManager.isNotCreator();
     return (
         <div>
-            <Button onClick={toggleOpen}>
+            <Button onClick={toggleOpen} disabled={isNotCreator}>
                 <Icon>delete_forever</Icon>
                 <FormattedMessage
                     id='Apis.Details.Documents.Delete.document.delete'

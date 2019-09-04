@@ -28,6 +28,7 @@ import EndpointOverview from './EndpointOverview';
 import ApiContext from '../components/ApiContext';
 import PrototypeEndpoints from './Prototype/PrototypeEndpoints';
 import { getEndpointConfigByImpl } from './endpointUtils';
+import AuthManager from '../../../../data/AuthManager';
 
 const styles = theme => ({
     endpointTypesWrapper: {
@@ -66,6 +67,7 @@ function Endpoints(props) {
     const [apiObject, setModifiedAPI] = useState(api);
     const [endpointImplementation, setEndpointImplementation] = useState('');
     const [swagger, setSwagger] = useState(defaultSwagger);
+    const isNotCreator = AuthManager.isNotCreator();
 
     /**
      * Method to update the api.
@@ -200,6 +202,7 @@ function Endpoints(props) {
                                     variant='contained'
                                     color='primary'
                                     onClick={() => saveAPI(updateAPI)}
+                                    disabled={isNotCreator}
                                 >
                                     <FormattedMessage
                                         id='Apis.Details.Endpoints.Endpoints.save'
@@ -217,6 +220,19 @@ function Endpoints(props) {
                                     </Button>
                                 </Link>
                             </Grid>
+                            {isNotCreator
+                                && (
+                                    <Grid item>
+                                        <Typography variant='body2' color='primary'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Endpoints.Endpoints.update.not.allowed'
+                                                defaultMessage='*You are not authorized to update Endpoints of
+                                                the API due to insufficient permissions'
+                                            />
+                                        </Typography>
+                                    </Grid>
+                                )
+                            }
                         </Grid>
                     </div>)}
             </ApiContext.Consumer>

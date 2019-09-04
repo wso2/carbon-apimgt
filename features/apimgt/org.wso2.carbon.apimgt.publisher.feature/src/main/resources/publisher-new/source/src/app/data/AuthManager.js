@@ -131,6 +131,7 @@ class AuthManager {
                 return user;
             });
     }
+
     /**
      * Persist an user in browser local storage and in-memory, Since only one use can be
      * logged into the application at a time,
@@ -172,6 +173,14 @@ class AuthManager {
         return validScope.then((scope) => {
             return userscopes.includes(scope);
         });
+    }
+
+    static isNotCreator() {
+        return !AuthManager.getUser().scopes.includes('apim:api_create');
+    }
+
+    static isNotPublisher() {
+        return !AuthManager.getUser().scopes.includes('apim:api_publish');
     }
 
     /**
@@ -346,7 +355,7 @@ class AuthManager {
 
 // TODO: derive this from swagger definitions ~tmkb
 AuthManager.CONST = {
-    USER_SCOPES: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage ' +
-        'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
+    USER_SCOPES: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
+        + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
 };
 export default AuthManager;

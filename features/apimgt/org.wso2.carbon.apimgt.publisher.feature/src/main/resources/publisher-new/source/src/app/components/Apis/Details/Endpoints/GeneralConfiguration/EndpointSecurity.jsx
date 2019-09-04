@@ -25,6 +25,7 @@ import {
     FormControl,
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import AuthManager from '../../../../../data/AuthManager';
 
 /**
  * The base component for advanced endpoint configurations.
@@ -63,6 +64,8 @@ function EndpointSecurity(props) {
         setEndpointSecurityInfo(securityInfo !== null ? securityInfo : endpointSecurityInfo);
     }, [props]);
 
+    const isNotCreator = AuthManager.isNotCreator();
+
     return (
         <Grid container direction='column'>
             <Grid item xs={12}>
@@ -74,6 +77,7 @@ function EndpointSecurity(props) {
                         />
                     </InputLabel>
                     <Select
+                        disabled={isNotCreator}
                         fullwidth
                         value={endpointSecurityInfo.type}
                         onChange={(event) => { onChangeEndpointAuth(event, 'type'); }}
@@ -93,12 +97,15 @@ function EndpointSecurity(props) {
             <Grid item container xs={12}>
                 <Grid item xs>
                     <TextField
+                        disabled={isNotCreator}
                         required
                         id='auth-userName'
-                        label={<FormattedMessage
-                            id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.user.name.input'
-                            defaultMessage='User Name'
-                        />}
+                        label={(
+                            <FormattedMessage
+                                id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.user.name.input'
+                                defaultMessage='User Name'
+                            />
+                        )}
                         onChange={
                             event => setEndpointSecurityInfo({ ...endpointSecurityInfo, username: event.target.value })}
                         value={endpointSecurityInfo.username}
@@ -107,13 +114,16 @@ function EndpointSecurity(props) {
                 </Grid>
                 <Grid item xs>
                     <TextField
+                        disabled={isNotCreator}
                         required
                         type='password'
                         id='auth-password'
-                        label={<FormattedMessage
-                            id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.password.input'
-                            defaultMessage='Password'
-                        />}
+                        label={(
+                            <FormattedMessage
+                                id='Apis.Details.Endpoints.GeneralConfiguration.EndpointSecurity.password.input'
+                                defaultMessage='Password'
+                            />
+                        )}
                         value={endpointSecurityInfo.password}
                         onChange={
                             event => setEndpointSecurityInfo({ ...endpointSecurityInfo, password: event.target.value })}

@@ -25,6 +25,7 @@ import DoneIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Select from '@material-ui/core/Select';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import AuthManager from '../../../../data/AuthManager';
 
 const styles = theme => ({
     container: {
@@ -60,6 +61,7 @@ class InlineEditableField extends React.Component {
         };
         this.editInlineToggle = this.editInlineToggle.bind(this);
         this.saveField = this.saveField.bind(this);
+        this.isNotCreator = AuthManager.isNotCreator();
     }
     editInlineToggle() {
         this.setState({ editable: !this.state.editable, newValue: this.props.fieldValue });
@@ -102,6 +104,7 @@ class InlineEditableField extends React.Component {
                             native
                             value={this.state.newValue}
                             onChange={this.handleChange('newValue')}
+                            disabled={this.isNotCreator}
                             inputProps={{
                                 name: 'newValue',
                                 id: 'newValue-native-simple',
@@ -113,7 +116,9 @@ class InlineEditableField extends React.Component {
                         </Select>
                     )}
                     {this.props.type === 'input' &&
-                    <input type='text' onChange={this.handleChange('newValue')} value={this.state.newValue} />}
+                    <input type='text' onChange={this.handleChange('newValue')} value={this.state.newValue}
+                           disabled={this.isNotCreator}
+                    />}
                     {this.props.type === 'textarea' &&
                     <TextField
                         id='standard-textarea'
@@ -126,11 +131,12 @@ class InlineEditableField extends React.Component {
                         margin='normal'
                         onChange={this.handleChange('newValue')}
                         value={this.state.newValue}
+                        disabled={this.isNotCreator}
                     />}
-                    <Button className={classes.button} onClick={this.saveField}>
+                    <Button className={classes.button} onClick={this.saveField} disabled={this.isNotCreator}>
                         <DoneIcon />
                     </Button>
-                    <Button className={classes.button} onClick={this.editInlineToggle}>
+                    <Button className={classes.button} onClick={this.editInlineToggle} disabled={this.isNotCreator}>
                         <CancelIcon />
                     </Button>
                 </form>

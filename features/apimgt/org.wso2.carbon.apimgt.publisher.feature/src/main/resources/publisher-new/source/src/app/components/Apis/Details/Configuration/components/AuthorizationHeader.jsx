@@ -23,6 +23,7 @@ import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
+import AuthManager from '../../../../../data/AuthManager';
 
 /**
  *
@@ -33,17 +34,20 @@ import { FormattedMessage } from 'react-intl';
  */
 export default function AuthorizationHeader(props) {
     const { api, configDispatcher } = props;
+    const isNotCreator = AuthManager.isNotCreator();
+
     return (
         <Grid container spacing={1} alignItems='center'>
             <Grid item xs={11}>
                 <TextField
+                    disabled={isNotCreator}
                     id='outlined-name'
-                    label={
+                    label={(
                         <FormattedMessage
                             id='Apis.Details.Configuration.Configuration.auth.header.label'
                             defaultMessage='Authorization Header'
                         />
-                    }
+                    )}
                     value={api.authorizationHeader || ' '}
                     margin='normal'
                     variant='outlined'
@@ -53,16 +57,16 @@ export default function AuthorizationHeader(props) {
             </Grid>
             <Grid item xs={1}>
                 <Tooltip
-                    title={
+                    title={(
                         <FormattedMessage
                             id='Apis.Details.Configuration.Configuration.AuthHeader.tooltip'
                             defaultMessage={
-                                'If you want to send the authorization ' +
-                                'information under different header name other than Authorization,' +
-                                'You may specify that header name here'
+                                'If you want to send the authorization '
+                                + 'information under different header name other than Authorization,'
+                                + 'You may specify that header name here'
                             }
                         />
-                    }
+                    )}
                     aria-label='Auth Header'
                     placement='right-end'
                     interactive

@@ -30,6 +30,7 @@ import {
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
+import AuthManager from '../../../../../data/AuthManager';
 
 const itemHeight = 48;
 const itemPaddingTop = 8;
@@ -278,6 +279,8 @@ function AdvanceEndpointConfig(props) {
         setAdvanceConfig(di);
     };
 
+    const isNotCreator = AuthManager.isNotCreator();
+
     return (
         <Grid container direction='column' className={classes.configContainer}>
             {(isSOAPEndpoint) ? (
@@ -502,6 +505,7 @@ function AdvanceEndpointConfig(props) {
                     onClick={() => onSaveAdvanceConfig(advanceConfigObj)}
                     color='primary'
                     autoFocus
+                    disabled={isNotCreator}
                 >
                     <FormattedMessage
                         id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.config.save.button'

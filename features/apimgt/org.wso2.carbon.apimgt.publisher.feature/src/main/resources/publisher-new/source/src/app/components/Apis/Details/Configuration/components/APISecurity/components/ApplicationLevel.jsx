@@ -34,6 +34,7 @@ import {
     API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
 } from '../APISecurity';
+import AuthManager from '../../../../../../../data/AuthManager';
 
 /**
  *
@@ -44,6 +45,7 @@ import {
  */
 export default function ApplicationLevel(props) {
     const { haveMultiLevelSecurity, securityScheme, configDispatcher } = props;
+    const isNotCreator = AuthManager.isNotCreator();
 
     let mandatoryValue = 'optional';
     // If not Oauth2 or Basic auth security is selected, no mandatory values should be pre-selected
@@ -67,33 +69,33 @@ export default function ApplicationLevel(props) {
                     </FormLabel>
                     <FormGroup style={{ display: 'flow-root' }}>
                         <FormControlLabel
-                            control={
+                            control={(
                                 <Checkbox
+                                    disabled={isNotCreator}
                                     checked={securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2)}
-                                    onChange={({ target: { checked, value } }) =>
-                                        configDispatcher({
-                                            action: 'securityScheme',
-                                            event: { checked, value },
-                                        })
+                                    onChange={({ target: { checked, value } }) => configDispatcher({
+                                        action: 'securityScheme',
+                                        event: { checked, value },
+                                    })
                                     }
                                     value={DEFAULT_API_SECURITY_OAUTH2}
                                 />
-                            }
+                            )}
                             label='OAuth2'
                         />
                         <FormControlLabel
-                            control={
+                            control={(
                                 <Checkbox
+                                    disabled={isNotCreator}
                                     checked={securityScheme.includes(API_SECURITY_BASIC_AUTH)}
-                                    onChange={({ target: { checked, value } }) =>
-                                        configDispatcher({
-                                            action: 'securityScheme',
-                                            event: { checked, value },
-                                        })
+                                    onChange={({ target: { checked, value } }) => configDispatcher({
+                                        action: 'securityScheme',
+                                        event: { checked, value },
+                                    })
                                     }
                                     value={API_SECURITY_BASIC_AUTH}
                                 />
-                            }
+                            )}
                             label='Basic'
                         />
                     </FormGroup>
@@ -104,11 +106,10 @@ export default function ApplicationLevel(props) {
                             aria-label='HTTP security HTTP mandatory selection'
                             name={API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY}
                             value={mandatoryValue}
-                            onChange={({ target: { name, value } }) =>
-                                configDispatcher({
-                                    action: 'securityScheme',
-                                    event: { name, value },
-                                })
+                            onChange={({ target: { name, value } }) => configDispatcher({
+                                action: 'securityScheme',
+                                event: { name, value },
+                            })
                             }
                             row
                         >

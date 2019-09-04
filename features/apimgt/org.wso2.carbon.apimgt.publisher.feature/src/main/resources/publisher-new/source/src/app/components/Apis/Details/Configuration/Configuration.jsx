@@ -49,6 +49,7 @@ import APISecurity, {
     API_SECURITY_MUTUAL_SSL_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
 } from './components/APISecurity/APISecurity';
+import AuthManager from '../../../../data/AuthManager';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -243,7 +244,7 @@ export default function Configuration() {
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
     const classes = useStyles();
     const paperHeight = window.innerHeight - 200;
-
+    const isNotCreator = AuthManager.isNotCreator();
     /**
      *
      * Handle the configuration view save button action
@@ -393,7 +394,7 @@ export default function Configuration() {
                     </Grid>
                 </Grid>
                 <Grid container>
-                    <Grid container direction='row' alignItems='flex-start' spacing={4} style={{ marginTop: 20 }}>
+                    <Grid container direction='row' alignItems='center' spacing={4} style={{ marginTop: 20 }}>
                         <Grid item>
                             <Button
                                 disabled={isUpdating}
@@ -419,6 +420,19 @@ export default function Configuration() {
                                 </Button>
                             </Link>
                         </Grid>
+                        {(isNotCreator)
+                            && (
+                                <Grid item>
+                                    <Typography variant='body2' color='primary'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Configuration.Configuration.update.not.allowed'
+                                            defaultMessage='* You are not authorized to update particular fields of
+                                                    the API due to insufficient permissions'
+                                        />
+                                    </Typography>
+                                </Grid>
+                            )
+                        }
                     </Grid>
                 </Grid>
             </div>

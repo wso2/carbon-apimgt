@@ -9,6 +9,7 @@ import { withStyles } from '@material-ui/core/styles';
 import API from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import { classes } from 'istanbul-lib-coverage';
+import AuthManager from '../../../../data/AuthManager';
 
 const styles = theme => ({
     root: {
@@ -48,6 +49,8 @@ class BusinessPlans extends Component {
             monetizedPolices: null,
         };
         this.monetizationQuery = this.monetizationQuery.bind(this);
+        this.isNotCreator = AuthManager.isNotCreator();
+        this.isNotPublisher = AuthManager.isNotPublisher();
     }
 
     /**
@@ -85,9 +88,13 @@ class BusinessPlans extends Component {
         const policiesList = policies.map(policy => (
             <Grid item xs={6} spacing={2}>
                 <FormControlLabel
-                    control={
-                        <Checkbox id='monetizationStatus' checked={this.monetizationQuery(policy.name)} />
-                    }
+                    control={(
+                        <Checkbox
+                            id='monetizationStatus'
+                            checked={this.monetizationQuery(policy.name)}
+                            disabled={this.isNotCreator && this.isNotPublisher}
+                        />
+                    )}
                     label={policy.name}
                 />
                 {

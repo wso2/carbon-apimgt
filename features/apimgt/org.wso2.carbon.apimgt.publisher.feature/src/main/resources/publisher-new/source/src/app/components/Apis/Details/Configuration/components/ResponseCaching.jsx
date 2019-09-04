@@ -26,7 +26,7 @@ import FormLabel from '@material-ui/core/FormLabel';
 import { FormattedMessage } from 'react-intl';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
-import TextField from '@material-ui/core/TextField';
+import AuthManager from '../../../../../data/AuthManager';
 
 /**
  *
@@ -37,7 +37,8 @@ import TextField from '@material-ui/core/TextField';
  */
 export default function ResponseCaching(props) {
     const { api, configDispatcher } = props;
-    const isResponseCachingEnabled = api.responseCachingEnabled;
+    const isNotCreator = AuthManager.isNotCreator();
+
     return (
         <Grid container spacing={1} alignItems='flex-start'>
             <Grid item>
@@ -49,58 +50,38 @@ export default function ResponseCaching(props) {
                         />
                     </FormLabel>
                     <FormControlLabel
-                        control={
+                        control={(
                             <Switch
+                                disabled={isNotCreator}
                                 checked={api.responseCachingEnabled}
-                                onChange={({ target: { checked } }) =>
-                                    configDispatcher({
-                                        action: 'responseCachingEnabled',
-                                        value: checked,
-                                    })
+                                onChange={({ target: { checked } }) => configDispatcher({
+                                    action: 'responseCachingEnabled',
+                                    value: checked,
+                                })
                                 }
                                 color='primary'
                             />
-                        }
+                        )}
                     />
                 </FormControl>
             </Grid>
             <Grid item>
                 <Tooltip
-                    title={
+                    title={(
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.ResponseCaching.tooltip'
                             defaultMessage={
-                                'If enabled, API response will be cached at the gateway level' +
-                                ' to improve the response time and minimize the backend load'
+                                'If enabled, API response will be cached at the gateway level'
+                                + ' to improve the response time and minimize the backend load'
                             }
                         />
-                    }
+                    )}
                     aria-label='Response cache'
                     placement='right-end'
                     interactive
                 >
                     <HelpOutline />
                 </Tooltip>
-            </Grid>
-            <Grid item>
-                {isResponseCachingEnabled && (
-                    <TextField
-                        value={api.cacheTimeout}
-                        onChange={({ target: { value } }) =>
-                            configDispatcher({
-                                action: 'cacheTimeout',
-                                value,
-                            })
-                        }
-                        margin='normal'
-                        helperText={
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.Configuration.cache.timeout'
-                                defaultMessage='Cache Timeout (seconds)'
-                            />
-                        }
-                    />
-                )}
             </Grid>
         </Grid>
     );

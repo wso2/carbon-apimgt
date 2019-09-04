@@ -29,6 +29,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
+import AuthManager from '../../../../../data/AuthManager';
 
 /**
  *
@@ -40,6 +41,8 @@ import Select from '@material-ui/core/Select';
 export default function StoreVisibility(props) {
     const { api, configDispatcher } = props;
     const isPublic = api.visibility === 'PUBLIC';
+    const isNotCreator = AuthManager.isNotCreator();
+    const isNotPublisher = AuthManager.isNotPublisher();
     return (
         <Grid container spacing={0} alignItems='flex-start'>
             <Grid item xs={11}>
@@ -51,6 +54,7 @@ export default function StoreVisibility(props) {
                         />
                     </InputLabel>
                     <Select
+                        disabled={isNotCreator && isNotPublisher}
                         value={api.visibility}
                         onChange={({ target: { value } }) => configDispatcher({ action: 'visibility', value })}
                         input={<Input name='storeVisibility' id='storeVisibility-selector' />}
@@ -78,7 +82,7 @@ export default function StoreVisibility(props) {
             </Grid>
             <Grid item xs={1}>
                 <Tooltip
-                    title={
+                    title={(
                         <React.Fragment>
                             <p>
                                 <strong>
@@ -113,7 +117,7 @@ export default function StoreVisibility(props) {
                                 />
                             </p>
                         </React.Fragment>
-                    }
+                    )}
                     aria-label='Store Visibility'
                     placement='right-end'
                     interactive
@@ -124,6 +128,7 @@ export default function StoreVisibility(props) {
             {!isPublic && (
                 <Grid item>
                     <TextField
+                        disabled={isNotCreator && isNotPublisher}
                         label='Role(s)'
                         margin='dense'
                         variant='outlined'

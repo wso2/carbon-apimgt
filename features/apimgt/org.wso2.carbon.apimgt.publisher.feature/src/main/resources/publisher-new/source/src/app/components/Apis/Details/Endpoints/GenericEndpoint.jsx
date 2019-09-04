@@ -25,6 +25,7 @@ import {
 } from '@material-ui/core';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
+import AuthManager from '../../../../data/AuthManager';
 
 const styles = theme => ({
     endpointInputWrapper: {
@@ -72,9 +73,12 @@ function GenericEndpoint(props) {
     useEffect(() => {
         setServiceUrl(endpointURL);
     }, [endpointURL]);
+    const isNotCreator = AuthManager.isNotCreator();
+
     return (
         <React.Fragment className={classes.endpointInputWrapper}>
             <TextField
+                disabled={isNotCreator}
                 label={<FormattedMessage
                     id='Apis.Details.Endpoints.GenericEndpoint.service.url.input'
                     defaultMessage='Service URL'

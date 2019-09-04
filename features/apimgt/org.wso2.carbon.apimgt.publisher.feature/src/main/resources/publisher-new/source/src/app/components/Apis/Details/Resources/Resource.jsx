@@ -43,6 +43,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import SelectContentType from './SelectContentType';
 import InlineEditableField from './InlineEditableField';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import AuthManager from '../../../../data/AuthManager';
 
 const styles = theme => ({
     root: {
@@ -176,6 +177,7 @@ class Resource extends React.Component {
         this.changeContentTypes = this.changeContentTypes.bind(this);
         this.handlePolicyChange = this.handlePolicyChange.bind(this);
         this.handleAuthTypeChange = this.handleAuthTypeChange.bind(this);
+        this.isNotCreator = AuthManager.isNotCreator();
     }
     componentDidMount() {
         this.props.onRef(this);
@@ -307,7 +309,7 @@ class Resource extends React.Component {
                         type='textarea'
                         fieldName='summery'
                     />
-                        <IconButton onClick={this.deleteResource} className={classes.deleteButton}>
+                        <IconButton onClick={this.deleteResource} className={classes.deleteButton} disabled={this.isNotCreator}>
                             <Icon>
                                 delete
                             </Icon>
@@ -379,6 +381,7 @@ class Resource extends React.Component {
                                         </TableCell>
                                         <TableCell>
                                                 <Select className={classes.selectWidth}
+                                                        disabled={this.isNotCreator}
                                                     value={resource['x-scope']}
                                                     onChange={this.handleScopeChange}
                                                     inputProps={{
@@ -428,6 +431,7 @@ class Resource extends React.Component {
                                                 value={resource['x-auth-type']}
                                                 onChange={this.handleAuthTypeChange}
                                                 fieldName='Auth Type'
+                                                disabled={this.isNotCreator}
                                             >
                                                 <MenuItem
                                                     key='None'
@@ -506,11 +510,13 @@ class Resource extends React.Component {
                                         variant='outlined'
                                         value={this.state.newPropName}
                                         onChange={this.onChangePropName}
+                                        disabled={this.isNotCreator}
                                     />
                                     <Button
                                         variant='contained'
                                         className={classes.button}
                                         onClick={this.propsSubmitHandler}
+                                        disabled={this.isNotCreator}
                                     >
                                         <FormattedMessage
                                             id='Apis.Details.Resources.Resource.add'
@@ -584,9 +590,13 @@ class Resource extends React.Component {
                                                             <InlineEditableField type='select' saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.required} defaultValues={['true', 'false']} fieldName='param.required' />
                                                         </TableCell>
                                                         <TableCell>
-                                                            <a onClick={() => this.deleteParam(i)} className={classes.deleteLink}>
-                                                                <DeleteIcon />
-                                                            </a>
+                                                            {this.isNotCreator ?
+                                                            (
+                                                                <DeleteIcon color={"disabled"}/>
+                                                            ): (<a onClick={() => this.deleteParam(i)} className={classes.deleteLink}>
+                                                                    <DeleteIcon />
+                                                                </a>)
+                                                            }
                                                         </TableCell>
                                                     </TableRow>
                                                 );
