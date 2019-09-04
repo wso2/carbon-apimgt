@@ -181,10 +181,10 @@ function createEndpointConfig(endpointType) {
             tmpEndpointConfig.production_endpoints = { url: 'http://localhost' };
             tmpEndpointConfig.sandbox_endpoints = { url: 'http://localhost' };
             break;
-        case 'aws':
-            tmpEndpointConfig.endpoint_type = 'aws';
-            tmpEndpointConfig.client_key = 'aws';
-            tmpEndpointConfig.secret = 'aws';
+        case 'awslambda':
+            tmpEndpointConfig.endpoint_type = 'awslambda';
+            tmpEndpointConfig.accessKey = '';
+            tmpEndpointConfig.secretKey = '';
             break;
         default:
             tmpEndpointConfig.endpoint_type = 'default';

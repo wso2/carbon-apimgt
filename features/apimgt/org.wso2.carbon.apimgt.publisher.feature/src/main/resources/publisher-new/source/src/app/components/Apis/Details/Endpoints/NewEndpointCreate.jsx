@@ -114,7 +114,7 @@ function NewEndpointCreate(props) {
             options: null,
         },
         {
-            type: 'aws',
+            type: 'awslambda',
             name: intl.formatMessage({
                 id: 'Apis.Details.Endpoints.NewEndpointCreate.create.aws.endpoint',
                 defaultMessage: 'AWS Lambda Endpoint',
