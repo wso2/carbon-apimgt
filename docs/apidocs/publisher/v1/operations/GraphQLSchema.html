@@ -1,11 +1,11 @@
 <div class="main-content">
-    <h1><a name="GraphQL Schema (Individual)"></a>GraphQL Schema (Individual)</h1>
+    <h1><a name="GraphQL Schema"></a>GraphQL Schema</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdGraphqlSchemaGet"></a>Get the Schema of a GraphQL API</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/graphql-schema</code>
+            <h4 class="operation-heading"><a name="apisApiIdGraphqlSchemaPut"></a>Add a Schema to a GraphQL API</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/graphql-schema</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to retrieve the Schema definition of a GraphQL API.
+            <p class="marked">This operation can be used to add a GraphQL Schema definition to an existing GraphQL API.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
@@ -63,22 +63,21 @@
                     </tr>
                     <tr>
                         <td class="parameter">
+                            <span class="param-in">Form </span>
                             
                             
                             
-                            <span class="param-in">Header </span>
                             
                         </td>
                         <td class="param-name">
-                            <p>Accept</p>
+                            <p>schemaDefinition</p>
                             <p class="param-required">
+                                required
                                 
-                                optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Media types acceptable for the response. Default is application/json.
-</p>
+                            <p class="param-description marked">schema definition of the GraphQL API</p>
                         </td>
                         <td>
                             <span class="param-type">
@@ -86,7 +85,7 @@
                             </span>
                         </td>
                         <td>
-                            <p class="marked">application/json</p>
+                            <p class="marked"></p>
                         </td>
                     </tr>
                     <tr>
@@ -98,15 +97,14 @@
                             
                         </td>
                         <td class="param-name">
-                            <p>If-None-Match</p>
+                            <p>If-Match</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resource.
+                            <p class="param-description marked">Validator for conditional requests; based on ETag.
 </p>
                         </td>
                         <td>
@@ -138,16 +136,7 @@ variant of the resource.
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. Requested GraphQL Schema DTO object belongs to the API </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#GraphQLSchema">GraphQLSchema</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter"><p class="marked">OK. Successful response with updated schema definition </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     
@@ -155,8 +144,8 @@ variant of the resource.
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
@@ -164,8 +153,26 @@ variant of the resource.
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter"><p class="marked">403</p></td>
+                        <td class="parameter"><p class="marked">Forbidden. The request must be conditional but no condition has been specified. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. The resource to be updated does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">412</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>
