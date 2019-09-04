@@ -14,7 +14,10 @@ import EditApp from './components/Applications/Edit/EditApp';
  * @returns {*}
  */
 function AppRouts(props) {
-    const { isAuthenticated, isUserFound, theme } = props;
+    const {
+        isAuthenticated, isUserFound, theme,
+    } = props;
+
     return (
         <Switch>
             <Redirect exact from='/' to={theme.custom.landingPage.active ? '/home' : '/apis'} />

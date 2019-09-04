@@ -22,12 +22,17 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { addLocaleData, defineMessages, IntlProvider } from 'react-intl';
 import Configurations from 'Config';
 import Tenants from 'AppData/Tenants';
+import SettingsContext from 'AppComponents/Shared/SettingsContext';
+import queryString from 'query-string';
+import PropTypes from 'prop-types';
 import Base from './components/Base/index';
 import AuthManager from './data/AuthManager';
 import Loading from './components/Base/Loading/Loading';
 import Utils from './data/Utils';
 import ConfigManager from './data/ConfigManager';
 import AppRouts from './AppRouts';
+import TenantListing from './TenantListing';
+
 /**
  * Language.
  * @type {string}
@@ -36,16 +41,11 @@ const language = (navigator.languages && navigator.languages[0])
     || navigator.language || navigator.userLanguage;
 
 /**
- * Language without region code.
- */
-const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
-
-// import './materialize.css'
-
-/**
  * Render protected application paths
  */
 export default class ProtectedApp extends Component {
+    static contextType = SettingsContext;
+
     /**
      *  constructor
      * @param {*} props props passed to constructor
@@ -56,7 +56,7 @@ export default class ProtectedApp extends Component {
             messages: {},
             userResolved: false,
             scopesFound: false,
-            hasTenants: false,
+            tenantList: [],
         };
         this.environments = [];
         this.loadLocale = this.loadLocale.bind(this);
@@ -67,8 +67,22 @@ export default class ProtectedApp extends Component {
      *  Check if data available ,if not get the user info from existing token information
      */
     componentDidMount() {
+        const { location: { search } } = this.props;
+        const { setTenantDomain } = this.context;
+        const { tenant } = queryString.parse(search);
         const tenantApi = new Tenants();
-        tenantApi.getTenantsByState();
+
+        // Check if tenant domain is present as a query param if not retrieve the tenant list
+        if (tenant) {
+            setTenantDomain(tenant);
+        } else {
+            tenantApi.getTenantsByState().then((response) => {
+                this.setState({ tenantList: response.body.list });
+            }).catch((error) => {
+                console.error('error when getting tenants ' + error);
+            });
+        }
+
         ConfigManager.getConfigs()
             .environments.then((response) => {
                 this.environments = response.data.environments;
@@ -150,10 +164,10 @@ export default class ProtectedApp extends Component {
      */
     handleEnvironmentQueryParam() {
         const { location } = this.props;
-        let queryString = location.search;
-        queryString = queryString.replace(/^\?/, '');
+        const { search } = { ...location };
+        const query = search.replace(/^\?/, '');
         /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
-        const queryParams = qs.parse(queryString);
+        const queryParams = qs.parse(query);
         const environmentName = queryParams.environment;
 
         if (!environmentName || Utils.getEnvironment() === environmentName) {
@@ -179,7 +193,8 @@ export default class ProtectedApp extends Component {
      * @returns {Component}
      */
     render() {
-        const { userResolved, hasTenants } = this.state;
+        const { userResolved, tenantList } = this.state;
+        const { tenantDomain } = this.context;
         if (!userResolved) {
             return <Loading />;
         }
@@ -188,6 +203,12 @@ export default class ProtectedApp extends Component {
         let isAuthenticated = false;
         if (scopesFound && isUserFound) {
             isAuthenticated = true;
+        }
+
+        // user is redirected to tenant listing page if there are any tenants present and
+        // if the user is not authenticated and if there is no tenant domain prsent in the context
+        if (tenantList.length > 0 && !isAuthenticated && tenantDomain === null) {
+            return <TenantListing tenantList={tenantList} />;
         }
         /**
          * Note: AuthManager.getUser() method is a passive check, which simply
@@ -199,10 +220,15 @@ export default class ProtectedApp extends Component {
             <IntlProvider locale={language} messages={messages}>
                 <MuiThemeProvider theme={createMuiTheme(Configurations.themes.light)}>
                     <Base>
-                        <AppRouts hasTenants={hasTenants} isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
+                        <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
                     </Base>
                 </MuiThemeProvider>
             </IntlProvider>
         );
     }
 }
+ProtectedApp.propTypes = {
+    location: PropTypes.shape({
+        search: PropTypes.string.isRequired,
+    }).isRequired,
+};

@@ -36,7 +36,7 @@ class Tenants {
      */
     getTenantsByState = (state = 'active') => {
         return this.client.then((client) => {
-            console.log(client);
+            return client.apis.tenants.get_tenants({ state });
         });
     }
 }
