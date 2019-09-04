@@ -1153,8 +1153,9 @@ class API extends Resource {
         }
     }
 
-    validateGraphQLFile(file) {
-        const promised_validationResponse = this.client.then(client => {
+    static validateGraphQLFile(file) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promised_validationResponse = apiClient.then(client => {
             return client.apis['API (Collection)'].post_apis_validate_graphql_schema(
                 {
                     type: 'GraphQL',

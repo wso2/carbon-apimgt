@@ -31,7 +31,7 @@ function createTestProps(props) {
         apiId: '6e770272-212b-404e-ab9c-333fdba02f2f',
         cancelButton: true,
         allComments: [],
-        theme: { custom: { maxCommentLength: 1300 } },
+        theme: { custom: { maxCommentLength: 512 } },
         ...props,
     };
 }

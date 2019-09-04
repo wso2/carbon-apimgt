@@ -861,6 +861,7 @@ public final class APIConstants {
     public static final String APP_SUBSCRIPTION_FILTERED_SCOPE_CACHE = "appSubscriptionFilteredScopeCache";
     public static final String API_USER_ROLE_CACHE = "appPublisherUserRoleCache";
     public static final String API_PUBLISHER_ADMIN_PERMISSION_CACHE = "apimAdminPermissionCache";
+    public static final String API_SUBSCRIBER_CACHE = "subscriberCache";
 
     //URI Authentication Schemes
     public static final Set<String> SUPPORTED_METHODS =

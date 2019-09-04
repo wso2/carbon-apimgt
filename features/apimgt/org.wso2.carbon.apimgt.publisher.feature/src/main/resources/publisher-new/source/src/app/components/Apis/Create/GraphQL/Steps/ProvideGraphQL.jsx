@@ -11,283 +11,120 @@
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { Component } from 'react';
-import { withStyles, FormHelperText } from '@material-ui/core';
-import ErrorOutline from '@material-ui/icons/ErrorOutline';
-import Typography from '@material-ui/core/Typography';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import Progress from 'AppComponents/Shared/Progress';
-import { FormattedMessage, injectIntl } from 'react-intl';
-import Dropzone from 'react-dropzone';
-import classNames from 'classnames';
-import Backup from '@material-ui/icons/Backup';
-import Icon from '@material-ui/core/Icon';
+import Grid from '@material-ui/core/Grid';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
+import { makeStyles } from '@material-ui/core/styles';
+import { FormattedMessage } from 'react-intl';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import API from 'AppData/api';
+import DropZoneLocal from 'AppComponents/Shared/DropZoneLocal';
 
-const styles = theme => ({
-    radioWrapper: {
-        display: 'flex',
-        flexDirection: 'row',
-    },
-    dropZoneInside: {},
-    dropZone: {
-        color: theme.palette.grey[500],
-        border: 'dashed 1px ' + theme.palette.grey[500],
-        background: theme.palette.grey[100],
-        padding: theme.spacing.unit * 4,
-        textAlign: 'center',
-        cursor: 'pointer',
-    },
-    dropZoneIcon: {
-        color: theme.palette.grey[500],
-        width: 100,
-        height: 100,
-    },
-    fileIcon: {
-        width: 100,
-        height: 100,
-        size: 32,
-    },
-    dropZoneError: {
+const useStyles = makeStyles(theme => ({
+    mandatoryStar: {
         color: theme.palette.error.main,
     },
-    dropZoneErrorBox: {
-        border: 'dashed 1px ' + theme.palette.error.main,
-    },
-    errorMessage: {
-        color: theme.palette.error.main,
-    },
-    errorIcon: {
-        color: theme.palette.error.main,
-        marginRight: theme.spacing.unit * 2,
-    },
-    fileNameWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        '& div': {
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-        },
-    },
-    largeIcon: {
-        fontSize: 60,
-    },
-    FormControl: {
-        padding: 0,
-        width: '100%',
-        marginTop: 0,
-    },
-    errorMessageWrapper: {
-        display: 'flex',
-        alignItems: 'center',
-    },
-    urlWrapper: {
-        display: 'flex',
-        alignItems: 'center',
-    },
-    button: {
-        whiteSpace: 'nowrap',
-    },
-});
+}));
 
 /**
- *
- * @class ProvideGraphQL
- * @extends {Component}
+ * Sub component of API Create using GraphQL UI, This is handling the taking input of GraphQL file or URL from the user
+ * In the create API using OpenAPI wizard first step out of 2 steps
+ * @export
+ * @param {*} props
+ * @returns {React.Component} @inheritdoc
  */
-class ProvideGraphQL extends Component {
-    /**
-     * Creates an instance of ProvideGraphQL.
-     * @param {any} props @inheritDoc
-     * @memberof ProvideGraphQL
-     */
-    constructor(props) {
-        super(props);
-        const { file } = props;
-        this.state = {
-            file,
-            isValid: null,
-            errorMessage: '',
-            loading: false,
-        };
-        this.validateGraphQL = this.validateGraphQL.bind(this);
-    }
-
-    /**
-     * @inheritDoc
-     * @param {any} nextProps New props received
-     * @memberof ProvideGraphQL
-     */
-    componentDidUpdate(nextProps) {
-        const { validate, updateGraphQLValidity } = nextProps;
-        if (validate) {
-            this.validateGraphQL(updateGraphQLValidity);
-        }
-    }
-
-    handleUploadFile = (acceptedFiles) => {
-        this.setState({ file: acceptedFiles[0] }, () => {
-            this.validateGraphQL();
-        });
-    };
-
+export default function ProvideGraphQL(props) {
+    const { apiInputs, inputsDispatcher, onValidate } = props;
+    const classes = useStyles();
+    // If valid value is `null`,that means valid, else an error object will be there
+    const [isValid, setValidity] = useState({ file: null });
+    const [isValidating, setIsValidating] = useState(false);
     /**
      *
-     * @param validity {Function} Call back function to trigger after pass/fail the validation
+     *
+     * @param {*} files
      */
-    validateGraphQL() {
-        // do not invoke callback in case of React SyntheticMouseEvent
-        const { file } = this.state;
-        const {
-            valid, updateFileErrors, updateGraphQLBean, intl,
-        } = this.props;
-        this.setState({ loading: true });
-        const newAPI = new API();
-        let promisedValidation = {};
-        const graphQLBean = {};
-        const validNew = JSON.parse(JSON.stringify(valid));
+    function onDrop(files) {
+        setIsValidating(true);
 
-        if (!file) {
-            // Update the parent's state
-            validNew.graphQLFile.empty = true;
-            updateFileErrors(validNew);
-            return;
-        }
-        // Update the parent's state
-        validNew.graphQLFile.empty = false;
-        updateFileErrors(validNew);
-        promisedValidation = newAPI.validateGraphQLFile(file);
-
-        promisedValidation
+        // Why `files.pop()` below is , We only handle one graphQL file at a time,
+        // So if use provide multiple, We would only
+        // accept the first file. This information is shown in the dropdown helper text
+        const file = files.pop();
+        let validFile = null;
+        API.validateGraphQLFile(file)
             .then((response) => {
-                const { isValid, graphQLInfo } = response.obj;
-                if (graphQLInfo === null) {
-                    validNew.graphQLFile.invalidFile = true;
-                    const message = intl.formatMessage({
-                        id: 'Apis.GraphQL.Steps.ProvideGraphQL.file.invalid.file',
-                        defaultMessage: 'Invalid file',
-                    });
-                    this.setState({
-                        isValid,
-                        errorMessage: message,
-                        loading: false,
-                        file,
-                    });
+                const {
+                    body: { isValid: isValidFile, info: graphQLInfo },
+                } = response;
+                if (isValidFile) {
+                    validFile = file;
+                    inputsDispatcher({ action: 'graphQLBean', value: graphQLInfo });
+                    setValidity({ ...isValid, file: null });
                 } else {
-                    graphQLBean.info = graphQLInfo;
-                    graphQLBean.file = file;
-                    validNew.graphQLFile.invalidFile = false;
+                    setValidity({ ...isValid, file: { message: 'GraphQL content validation failed!' } });
                 }
-                updateFileErrors(validNew);
-                updateGraphQLBean(graphQLBean);
-                this.setState({ isValid, loading: false, file });
             })
-            .catch(() => {
-                // Update the parent's state
-                validNew.graphQLFile.invalidFile = true;
-                updateFileErrors(validNew);
-                updateGraphQLBean(graphQLBean);
-                const message = intl.formatMessage({
-                    id: 'Apis.GraphQL.Steps.ProvideGraphQL.file.invalid.file',
-                    defaultMessage: 'Invalid file',
-                });
-                this.setState({ isValid: false, errorMessage: message, loading: false });
+            .catch((error) => {
+                setValidity({ ...isValid, file: { message: 'GraphQL content validation failed!' } });
+                console.error(error);
+            })
+            .finally(() => {
+                setIsValidating(false); // Stop the loading animation
+                onValidate(validFile !== null); // If there is a valid file then validation has passed
+                // If the given file is valid , we set it as the inputValue else set `null`
+                inputsDispatcher({ action: 'inputValue', value: validFile });
             });
     }
 
-    /**
-     * @inheritDoc
-     * @returns {React.Component}
-     * @memberof ProvideGraphQL
-     */
-    render() {
-        const {
-            isValid, errorMessage, file, loading,
-        } = this.state;
-        const { classes, valid } = this.props;
-        const error = isValid === false; // Because of null case, which means validation haven't done yet
-        if (loading) {
-            return <Progress error={error} />;
-        }
-        return (
-            <React.Fragment>
-                <React.Fragment>
-                    {valid.graphQLFile.invalidFile && (
-                        <div className={classes.errorMessageWrapper}>
-                            <ErrorOutline className={classes.errorIcon} />
-                            <Typography variant='body2' gutterBottom className={classes.errorMessage}>
-                                {errorMessage}
-                            </Typography>
-                        </div>
-                    )}
-                    <Dropzone
-                        onDrop={this.handleUploadFile}
-                        multiple={false}
-                        className={classNames(classes.dropZone, {
-                            [classes.dropZoneErrorBox]: valid.graphQLFile.empty,
-                        })}
-                    >
-                        {({ getRootProps, getInputProps }) => (
-                            <div {...getRootProps()}>
-                                <input {...getInputProps()} />
-                                {file.name ? (
-                                    <div>
-                                        <Icon className={classes.largeIcon}>insert_drive_file</Icon>
-                                        <div className={classes.fileNameWrapper}>
-                                            <Typography variant='body2' gutterBottom>
-                                                {file.name} - {file.size} bytes
-                                            </Typography>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div>
-                                        <Backup className={classes.dropZoneIcon} />
-                                        <div>
-                                            <FormattedMessage
-                                                id='Apis.GraphQL.Steps.ProvideGraphQL.try.dropping.schema.file'
-                                                defaultMessage='Try dropping schema file here, or click to select
-                                        schema to upload.'
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </Dropzone>
-                    <FormHelperText className={classes.errorMessage}>
-                        {valid.graphQLFile.empty && (
+    return (
+        <React.Fragment>
+            <Grid container spacing={5}>
+                <Grid item md={12}>
+                    <FormControl component='fieldset'>
+                        <FormLabel component='legend'>
+                            <React.Fragment>
+                                <sup className={classes.mandatoryStar}>*</sup>{' '}
+                                <FormattedMessage
+                                    id='Apis.Create.GraphQL.Steps.ProvideGraphQL.Input.type'
+                                    defaultMessage='Provide GraphQL File'
+                                />
+                            </React.Fragment>
+                        </FormLabel>
+                    </FormControl>
+                </Grid>
+                <Grid item md={7}>
+                    <DropZoneLocal error={isValid.file} onDrop={onDrop} files={apiInputs.inputValue}>
+                        {isValidating && <CircularProgress />}
+                        {isValid.file ? (
+                            isValid.file.message
+                        ) : (
                             <FormattedMessage
-                                id='Apis.GraphQL.Steps.ProvideGraphQL.error.empty'
-                                defaultMessage='This field can not be empty.'
+                                id='Apis.Create.GraphQL.Steps.ProvideGraphQL.Input.file.dropzone'
+                                defaultMessage='Select an GraphQL definition file'
                             />
                         )}
-                    </FormHelperText>
-                </React.Fragment>
-            </React.Fragment>
-        );
-    }
+                    </DropZoneLocal>
+                </Grid>
+            </Grid>
+        </React.Fragment>
+    );
 }
 
 ProvideGraphQL.defaultProps = {
-    file: {},
+    onValidate: () => {},
 };
-
 ProvideGraphQL.propTypes = {
-    updateGraphQLBean: PropTypes.func.isRequired,
-    validate: PropTypes.bool.isRequired,
-    valid: PropTypes.shape({ name: PropTypes.string.isRequired }).isRequired,
-    file: PropTypes.shape({ name: PropTypes.string.isRequired }),
-    classes: PropTypes.shape({}).isRequired,
-    updateFileErrors: PropTypes.func.isRequired,
-    updateGraphQLValidity: PropTypes.func.isRequired,
-    intl: PropTypes.shape({
-        formatMessage: PropTypes.func,
+    apiInputs: PropTypes.shape({
+        type: PropTypes.string,
+        inputType: PropTypes.string,
     }).isRequired,
+    inputsDispatcher: PropTypes.func.isRequired,
+    onValidate: PropTypes.func,
 };
-
-export default withStyles(styles)(injectIntl(ProvideGraphQL));

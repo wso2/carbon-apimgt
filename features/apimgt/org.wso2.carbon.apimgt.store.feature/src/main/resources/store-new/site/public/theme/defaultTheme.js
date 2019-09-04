@@ -46,7 +46,7 @@ const Configurations = {
                 leftMenuTextStyle: 'uppercase',
                 adminRole: 'admin',
                 commentsLimit: 5,
-                maxCommentLength: 1300,
+                maxCommentLength: 512,
                 resourceChipColors: {
                     get: '#02a8f4',
                     post: '#8ac149',

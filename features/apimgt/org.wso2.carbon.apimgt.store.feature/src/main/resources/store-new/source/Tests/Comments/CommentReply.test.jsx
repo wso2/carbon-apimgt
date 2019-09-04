@@ -65,7 +65,7 @@ function createTestProps (props) {
         allComments: [
             comment
         ],
-        theme: { custom: { maxCommentLength: 1300 } },
+        theme: { custom: { maxCommentLength: 512 } },
         comments:  [
             reply
         ],

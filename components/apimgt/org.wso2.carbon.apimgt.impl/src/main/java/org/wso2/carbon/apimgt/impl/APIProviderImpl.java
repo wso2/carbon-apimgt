@@ -90,6 +90,7 @@ import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -1056,6 +1057,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
                 updatePermissions = true;
             }
+
+            if (api.isEndpointSecured() && StringUtils.isBlank(api.getEndpointUTPassword()) &&
+                    !StringUtils.isBlank(oldApi.getEndpointUTPassword())) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Given endpointsecurity password is empty");
+                }
+                api.setEndpointUTUsername(oldApi.getEndpointUTUsername());
+                api.setEndpointUTPassword(oldApi.getEndpointUTPassword());
+                if (log.isDebugEnabled()) {
+                    log.debug("Using the previous username and password for endpoint security");
+                }
+            }
+
             updateApiArtifact(api, true, updatePermissions);
             if (!oldApi.getContext().equals(api.getContext())) {
                 api.setApiHeaderChanged(true);
@@ -3021,6 +3035,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(errorMessage);
             throw new APIManagementException(errorMessage);
         }
+
+        if (api.isEndpointSecured() && StringUtils.isEmpty(api.getEndpointUTPassword())) {
+            String errorMessage = "Empty password is given for endpointSecurity when creating API "
+                    + api.getId().getApiName();
+            log.error(errorMessage);
+            throw new APIManagementException(errorMessage);
+        }
+
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
@@ -4516,8 +4538,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void saveSwagger20Definition(APIProductIdentifier apiId, String jsonText) throws APIManagementException {
+    public void saveGraphqlSchemaDefinition(API api, String schemaDefinition) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            GraphQLSchemaDefinition schemaDef = new GraphQLSchemaDefinition();
+            schemaDef.saveGraphQLSchemaDefinition(api, schemaDefinition, registry);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
 
+    @Override
+    public void saveSwagger20Definition(APIProductIdentifier apiId, String jsonText) throws APIManagementException {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -4542,7 +4575,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
             throws APIManagementException, FaultGatewaysException {
-
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -7137,4 +7169,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
+        return getGraphqlSchemaDefinition(apiId);
+    }
 }

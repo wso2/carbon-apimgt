@@ -55,17 +55,17 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     private static final Log log = LogFactory.getLog(ApiProductsApiServiceImpl.class);
 
     @Override
-    public Response apiProductsApiProductIdCommentsCommentIdDelete(String commentId, String apiProductId, String ifMatch, MessageContext messageContext) {
+    public Response apiProductsApiProductIdCommentsCommentIdDelete(Integer commentId, String apiProductId, String ifMatch, MessageContext messageContext) {
         return null;
     }
 
     @Override
-    public Response apiProductsApiProductIdCommentsCommentIdGet(String commentId, String apiProductId, String ifNoneMatch, MessageContext messageContext) {
+    public Response apiProductsApiProductIdCommentsCommentIdGet(Integer commentId, String apiProductId, String ifNoneMatch, MessageContext messageContext) {
         return null;
     }
 
     @Override
-    public Response apiProductsApiProductIdCommentsCommentIdPut(String commentId, String apiProductId, CommentDTO body, String ifMatch, MessageContext messageContext) {
+    public Response apiProductsApiProductIdCommentsCommentIdPut(Integer commentId, String apiProductId, CommentDTO body, String ifMatch, MessageContext messageContext) {
         return null;
     }
 
