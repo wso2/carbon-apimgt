@@ -90,6 +90,7 @@ import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -4537,8 +4538,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void saveSwagger20Definition(APIProductIdentifier apiId, String jsonText) throws APIManagementException {
+    public void saveGraphqlSchemaDefinition(API api, String schemaDefinition) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            GraphQLSchemaDefinition schemaDef = new GraphQLSchemaDefinition();
+            schemaDef.saveGraphQLSchemaDefinition(api, schemaDefinition, registry);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
 
+    @Override
+    public void saveSwagger20Definition(APIProductIdentifier apiId, String jsonText) throws APIManagementException {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -4563,7 +4575,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
             throws APIManagementException, FaultGatewaysException {
-
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -7158,4 +7169,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
+        return getGraphqlSchemaDefinition(apiId);
+    }
 }

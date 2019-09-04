@@ -170,4 +170,8 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         }
     }
 
+    @Override
+    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
+        return null;
+    }
 }

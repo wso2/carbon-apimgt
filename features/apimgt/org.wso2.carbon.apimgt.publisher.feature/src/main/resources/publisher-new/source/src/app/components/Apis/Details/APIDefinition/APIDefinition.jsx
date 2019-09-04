@@ -240,7 +240,7 @@ class APIDefinition extends React.Component {
                 this.setState({ graphQL: response.data });
                 Alert.success(intl.formatMessage({
                     id: 'Apis.Details.APIDefinition.APIDefinition.graphQLDefinition.updated.successfully',
-                    defaultMessage: 'GraphQL API Definition Updated Successfully',
+                    defaultMessage: 'Schema Definition Updated Successfully',
                 }));
             })
             .catch((err) => {
