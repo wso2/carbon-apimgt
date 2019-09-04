@@ -1784,5 +1784,7 @@
         <org.json.version.range>[3.0.0,4.0.0)</org.json.version.range>
         <pax.logging.api.version>1.11.0</pax.logging.api.version>
         <import.package.version.commons.logging>[1.2.0,2.0.0)</import.package.version.commons.logging>
+        <reflection.util.version>2.4.1</reflection.util.version>
+        <jsonassert.version>1.5.0</jsonassert.version>
     </properties>
 </project>
