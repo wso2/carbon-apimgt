@@ -41,7 +41,7 @@ const styles = theme => ({
         paddingRight: '10px',
     },
     buttonSection: {
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
     },
     titleWrapper: {
         paddingTop: '10px',
@@ -49,6 +49,7 @@ const styles = theme => ({
     radioGroup: {
         display: 'flex',
         flexDirection: 'row',
+        marginLeft: theme.spacing(2),
     },
 });
 
@@ -90,7 +91,7 @@ function Endpoints(props) {
         const implType = api.endpointConfig.implementation_status;
         setModifiedAPI(cloneDeep(api));
         setEndpointImplementation(() => {
-            return lifeCycleStatus === 'PROTOTYPED' && implType === 'prototyped' ?
+            return lifeCycleStatus === 'PROTOTYPED' || implType === 'prototyped' ?
                 endpointImplType[1] : endpointImplType[0];
         });
     }, []);

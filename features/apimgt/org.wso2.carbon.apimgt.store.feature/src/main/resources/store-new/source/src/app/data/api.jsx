@@ -15,6 +15,7 @@
  */
 
 
+import CONSTS from 'AppData/Constants';
 import APIClientFactory from './APIClientFactory';
 import Resource from './Resource';
 import Utils from './Utils';
@@ -257,7 +258,7 @@ export default class API extends Resource {
      */
     getAllApplicationAttributes() {
         return this.client.then((client) => {
-            return client.apis['Settings'].get_settings_application_attributes(this._requestMetaData());
+            return client.apis.Settings.get_settings_application_attributes(this._requestMetaData());
         });
     }
 
@@ -295,39 +296,23 @@ export default class API extends Resource {
     /**
      * Add new comment to an existing API
      * @param apiId apiId of the api to which the comment is added
-     * @param commentInfo comment text
+     * @param comment comment text
      */
-    addComment(apiId, commentInfo, callback = null) {
-        const promise = this.client.then((client) => {
-            return client.apis['Comment (Individual)'].post_apis__apiId__comments(
-                { apiId, body: commentInfo },
-                this._requestMetaData(),
-            );
-        }).catch((error) => {
-            console.error(error);
+    addComment(apiId, comment) {
+        return this.client.then((client) => {
+            const payload = { apiId, body: comment };
+            return client.apis['Comments'].addCommentToAPI(payload, this._requestMetaData());
         });
-        if (callback) {
-            return promise.then(callback);
-        } else {
-            return promise;
-        }
     }
 
     /**
      * Get all comments for a particular API
      * @param apiId api id of the api to which the comment is added
      */
-    getAllComments(apiId, callback = null) {
-        const promiseGet = this.client.then((client) => {
-            return client.apis['Comments'].get_apis__apiId__comments({ apiId }, this._requestMetaData());
-        }).catch((error) => {
-            console.error(error);
+    getAllComments(apiId) {
+        return this.client.then((client) => {
+            return client.apis['Comments'].getAllCommentsOfAPI({ apiId }, this._requestMetaData());
         });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
-        }
     }
 
     /**
@@ -335,20 +320,10 @@ export default class API extends Resource {
      * @param apiId api id of the api to which the comment belongs to
      * @param commentId comment id of the comment which has to be deleted
      */
-    deleteComment(apiId, commentId, callback = null) {
-        const promise = this.client.then((client) => {
-            return client.apis['Comment (Individual)'].delete_apis__apiId__comments__commentId_(
-                { apiId, commentId },
-                this._requestMetaData(),
-            );
-        }).catch((error) => {
-            console.error(error);
+    deleteComment(apiId, commentId) {
+        return this.client.then((client) => {
+            return client.apis['Comments'].deleteComment({ apiId, commentId }, this._requestMetaData());
         });
-        if (callback) {
-            return promise.then(callback);
-        } else {
-            return promise;
-        }
     }
 
     /**
@@ -509,17 +484,26 @@ export default class API extends Resource {
 
     /**
      * Create a subscription
-     * @param apiId id of the API that needs to be subscribed
-     * @param applicationId id of the application that needs to be subscribed
-     * @param policy throttle policy applicable for the subscription
-     * @param callback callback url
-     * @param apiType API type
+     * @param {string} apiId id of the API that needs to be subscribed
+     * @param {string} applicationId id of the application that needs to be subscribed
+     * @param {string} policy throttle policy applicable for the subscription
+     * @param {string} apiType API type
+     * @param {function} callback callback url
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    subscribe(apiId, applicationId, policy, callback = null, apiType = 'API') {
+    subscribe(apiId, applicationId, policy, apiType = CONSTS.API_TYPE, callback = null) {
         const promiseCreateSubscription = this.client.then((client) => {
-            const subscriptionData = {
-                apiId, applicationId, throttlingPolicy: policy, type: apiType,
-            };
+            let subscriptionData = null;
+
+            if (apiType === CONSTS.API_TYPE) {
+                subscriptionData = {
+                    apiId, applicationId, throttlingPolicy: policy, type: apiType,
+                };
+            } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+                subscriptionData = {
+                    apiProductId: apiId, applicationId, throttlingPolicy: policy, type: apiType,
+                };
+            }
             const payload = { body: subscriptionData };
             return client.apis.Subscriptions.post_subscriptions(payload, { 'Content-Type': 'application/json' });
         });

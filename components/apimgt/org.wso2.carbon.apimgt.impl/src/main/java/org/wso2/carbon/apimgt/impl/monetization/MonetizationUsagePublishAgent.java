@@ -49,11 +49,11 @@ public class MonetizationUsagePublishAgent implements Runnable {
         try {
             apiAdmin = new APIAdminImpl();
             monetizationImpl = apiAdmin.getMonetizationImplClass();
-            monetizationUsagePublishInfo.setState(APIConstants.MonetizationUsagePublisher.RUNNING);
-            monetizationUsagePublishInfo.setStatus(APIConstants.MonetizationUsagePublisher.INPROGRESS);
-            DateFormat df = new SimpleDateFormat(APIConstants.MonetizationUsagePublisher.TIME_FORMAT);
+            monetizationUsagePublishInfo.setState(APIConstants.Monetization.RUNNING);
+            monetizationUsagePublishInfo.setStatus(APIConstants.Monetization.INPROGRESS);
+            DateFormat df = new SimpleDateFormat(APIConstants.Monetization.USAGE_PUBLISH_TIME_FORMAT);
             Date dateobj = new Date();
-            df.setTimeZone(TimeZone.getTimeZone(APIConstants.MonetizationUsagePublisher.TIME_ZONE));
+            df.setTimeZone(TimeZone.getTimeZone(APIConstants.Monetization.USAGE_PUBLISH_TIME_ZONE));
             String currentDate = df.format(dateobj);
             long currentTimestamp = apiAdmin.getTimestamp(currentDate);
             //set the current time as starting time of the job
@@ -63,8 +63,8 @@ public class MonetizationUsagePublishAgent implements Runnable {
         } catch (Exception e) {
             try {
                 //update the state and status of the job incase of any execptions
-                monetizationUsagePublishInfo.setState(APIConstants.MonetizationUsagePublisher.COMPLETED);
-                monetizationUsagePublishInfo.setStatus(APIConstants.MonetizationUsagePublisher.FAILED);
+                monetizationUsagePublishInfo.setState(APIConstants.Monetization.COMPLETED);
+                monetizationUsagePublishInfo.setStatus(APIConstants.Monetization.FAILED);
                 apiAdmin.updateMonetizationUsagePublishInfo(monetizationUsagePublishInfo);
             } catch (APIManagementException ex) {
                 String errorMsg = "Failed to update the state of monetization ussge publisher";

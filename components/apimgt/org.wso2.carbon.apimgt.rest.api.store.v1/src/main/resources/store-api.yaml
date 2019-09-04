@@ -937,10 +937,14 @@ paths:
         - OAuth2Security: []
       description: |
         Get a list of Comments that are already added to APIs
+      operationId: getAllCommentsOfAPI
       parameters:
         - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+      x-examples:
+        $ref: docs/examples/apis/comments.yaml#/get
       tags:
         - Comments
       responses:
@@ -950,6 +954,12 @@ paths:
             Comments list is returned.
           schema:
             $ref: '#/definitions/CommentList'
+        401:
+          description: |
+            Unauthorized.
+            The user is not authorized to view the comments.
+          schema:
+            $ref: '#/definitions/Error'
         406:
           description: |
             Not Acceptable. The requested media type is not supported
@@ -965,6 +975,7 @@ paths:
         - OAuth2Security:
           - apim:subscribe
       x-scope: apim:subscribe
+      operationId: addCommentToAPI
       parameters:
         - $ref: '#/parameters/apiId'
         - in: body
@@ -974,6 +985,8 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Comment'
+      x-examples:
+        $ref: docs/examples/apis/comments.yaml#/post
       tags:
         - Comments
       responses:
@@ -999,6 +1012,12 @@ paths:
             Invalid request or validation error.
           schema:
             $ref: '#/definitions/Error'
+        401:
+          description: |
+            Unauthorized.
+            The user is not authorized to add the comment.
+          schema:
+            $ref: '#/definitions/Error'
         415:
           description: |
             Unsupported media type.
@@ -1022,10 +1041,14 @@ paths:
         - OAuth2Security: []
       description: |
         Get the individual comment given by a username for a certain API.
+      operationId: getCommentOfAPI
       parameters:
         - $ref: '#/parameters/commentId'
         - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/If-None-Match'
+      x-examples:
+        $ref: docs/examples/apis/comment_id-comments.yaml#/get
       tags:
         - Comments
       responses:
@@ -1050,6 +1073,12 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
+        401:
+          description: |
+            Unauthorized.
+            The user is not authorized to view the comment.
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: |
             Not Found.
@@ -1074,10 +1103,13 @@ paths:
       x-scope: apim:subscribe
       description: |
         Remove a Comment
+      operationId: deleteComment
       parameters:
         - $ref: '#/parameters/commentId'
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-Match'
+      x-examples:
+        $ref: docs/examples/apis/comment_id-comments.yaml#/delete
       tags:
         - Comments
       responses:
@@ -1085,6 +1117,12 @@ paths:
           description: |
             OK.
             Resource successfully deleted.
+        401:
+          description: |
+            Unauthorized.
+            The user is not authorized to delete the comment.
+          schema:
+            $ref: '#/definitions/Error'
         404:
           description: |
             Not Found.
@@ -1141,6 +1179,12 @@ paths:
           description: |
             Bad Request.
             Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: |
+            Unauthorized.
+            The user is not authorized to update the comment.
           schema:
             $ref: '#/definitions/Error'
         404:
@@ -2229,6 +2273,7 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/applicationId-Q'
+        - $ref: '#/parameters/apiType-Q'
         - $ref: '#/parameters/groupId'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/limit'
@@ -3943,6 +3988,15 @@ parameters:
       **API ID** consisting of the **UUID** of the API.
     type: string
 
+# API Type
+# Specified as part of the query string
+  apiType-Q:
+    name: apiType
+    in: query
+    description: |
+      **API TYPE** Identifies the type API(API or API_PRODUCT).
+    type: string
+
 # SDK language
   language:
     name: language
@@ -4028,7 +4082,7 @@ parameters:
     description: |
       Comment Id
     required: true
-    type: string
+    type: integer
 
 # Rating Identifier
 # Specified as part of the path expression
@@ -4444,6 +4498,12 @@ definitions:
       thumbnailUri:
         type: string
         example: /api-products/01234567-0123-0123-0123-012345678901/thumbnail
+      throttlingPolicies:
+        type: array
+        description: The subscription tiers selected for the particular API product
+        items:
+          type: string
+        example: ["Unlimited"]
 
 #-----------------------------------------------------
 # The API resource
@@ -4847,8 +4907,8 @@ definitions:
       type:
         type: string
         enum:
-          - api
-          - apiProduct
+          - API
+          - API_PRODUCT
       status:
         type: string
         enum:
@@ -4949,31 +5009,18 @@ definitions:
   Comment:
     title: Comment
     required:
-      - commentId
-      - apiId
-      - username
-      - commentText
+      - content
     properties:
-      commentId:
+      id:
         type: string
-      apiId:
-        type: string
-      username:
-        type: string
-        description: |
-          If username is not given user invoking the API will be taken as the username.
-      commentText:
+      content:
         type: string
       createdTime:
         type: string
         example: 2017-02-20T13:57:16.229
       createdBy:
         type: string
-      lastUpdatedTime:
-        type: string
-        example: 2017-02-20T13:57:16.229
-      lastUpdatedBy:
-        type: string
+
 
 #-----------------------------------------------------
 # The Comments List resource

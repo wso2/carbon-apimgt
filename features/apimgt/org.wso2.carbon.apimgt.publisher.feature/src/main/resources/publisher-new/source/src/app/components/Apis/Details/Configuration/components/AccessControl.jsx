@@ -91,8 +91,8 @@ export default function AccessControl(props) {
     };
     return (
         <Grid container spacing={0} alignItems='flex-start'>
-            <Grid item>
-                <FormControl>
+            <Grid item xs={11}>
+                <FormControl style={{ display: 'flex' }} >
                     <InputLabel htmlFor='accessControl-selector'>
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.AccessControl.head.topic'
@@ -125,7 +125,7 @@ export default function AccessControl(props) {
                     </FormHelperText>
                 </FormControl>
             </Grid>
-            <Grid item>
+            <Grid item xs={1}>
                 <Tooltip
                     title={
                         <React.Fragment>

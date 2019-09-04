@@ -33,7 +33,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
@@ -66,7 +65,8 @@ import org.wso2.carbon.apimgt.api.model.Wsdl;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
@@ -90,8 +90,6 @@ import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.config.RegistryConfiguration;
-import org.wso2.carbon.registry.core.config.RegistryConfigurationProcessor;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
@@ -137,7 +135,6 @@ import java.net.URLDecoder;
 public abstract class AbstractAPIManager implements APIManager {
 
     // API definitions from swagger v2.0
-    protected static final APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
     protected Log log = LogFactory.getLog(getClass());
     protected Registry registry;
     protected UserRegistry configRegistry;
@@ -145,6 +142,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected String tenantDomain;
     protected String username;
+    protected static final GraphQLSchemaDefinition schemaDef = new GraphQLSchemaDefinition();
     // Property to indicate whether access control restriction feature is enabled.
     protected boolean isAccessControlRestrictionEnabled = false;
 
@@ -1062,56 +1060,26 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return graphQL content matching name if exist else null
      */
     @Override
-    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
-        String schemaDoc = null;
-        String schemaName = apiId.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR + apiId.getApiName() +
-                apiId.getVersion() + APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
-        String schemaResourePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + schemaName;
+    public String getGraphqlSchemaDefinition(APIIdentifier apiId) throws APIManagementException {
+        String apiTenantDomain = getTenantDomain(apiId);
+        String schema;
         try {
-            if (registry.resourceExists(schemaResourePath)) {
-                Resource schemaResource = registry.get(schemaResourePath);
-                schemaDoc = IOUtils.toString(schemaResource.getContentStream(),
-                        RegistryConstants.DEFAULT_CHARSET_ENCODING);
-            }
-        } catch (RegistryException e) {
-            String msg = "Error while getting schema file from the registry " + schemaResourePath;
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (IOException e) {
-            String error = "Error occurred while getting the content of schema " + schemaName;
-            log.error(error);
-            throw new APIManagementException(error, e);
-        }
-        return schemaDoc;
-    }
-
-    /**
-     * Create a graphql schema in the path specified.
-     *
-     * @param resourcePath   Registry path of the resource
-     * @param schemaDefinition wsdl content
-     */
-    @Override
-    public void uploadGraphqlSchema(String resourcePath, String schemaDefinition)
-            throws APIManagementException {
-        try {
-            Resource resource;
-            if (!registry.resourceExists(resourcePath)) {
-                resource = registry.newResource();
+            Registry registryType;
+            //Tenant store anonymous mode if current tenant and the required tenant is not matching
+            if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
+                int tenantId = getTenantManager().getTenantId(apiTenantDomain);
+                registryType = getRegistryService().getGovernanceUserRegistry(
+                        CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
             } else {
-                resource = registry.get(resourcePath);
+                registryType = registry;
             }
-            resource.setContent(schemaDefinition);
-            resource.setMediaType(String.valueOf(ContentType.TEXT_PLAIN));
-            registry.put(resourcePath, resource);
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully imported the schema: " + schemaDefinition );
-            }
-        } catch (RegistryException e) {
-            String msg = "Error while uploading schema to " + resourcePath + "in the registry";
+            schema = schemaDef.getGraphqlSchemaDefinition(apiId, registryType);
+        } catch (org.wso2.carbon.user.api.UserStoreException | RegistryException e) {
+            String msg = "Failed to get graphql schema definition of Graphql API : " + apiId;
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
+        return schema;
     }
 
     /**
@@ -1136,7 +1104,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 registryType = registry;
             }
-            swaggerDoc = definitionFromOpenAPISpec.getAPIDefinition(apiId, registryType);
+            swaggerDoc = OASParserUtil.getAPIDefinition(apiId, registryType);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get swagger documentation of API : " + apiId;
             log.error(msg, e);
@@ -2870,7 +2838,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 registryType = registry;
             }
-            return definitionFromOpenAPISpec.getAPIOpenAPIDefinitionTimeStamps(apiIdentifier, registryType);
+            return OASParserUtil.getAPIOpenAPIDefinitionTimeStamps(apiIdentifier, registryType);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             log.error("Error while getting the lastUpdated time due to " + e.getMessage(), e);
 

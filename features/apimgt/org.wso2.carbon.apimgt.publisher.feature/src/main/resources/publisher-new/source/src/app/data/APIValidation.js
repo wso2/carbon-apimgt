@@ -54,14 +54,10 @@ const userRoleSchema = Joi.extend((joi) => ({
 }));
 
 const definition = {
-    apiName: Joi.string()
-        .regex(/^[a-zA-Z0-9]{1,30}$/),
-    apiVersion: Joi.string()
-        .regex(/^[a-zA-Z0-9]{1,30}$/),
-    apiContext: Joi.string()
-        .regex(/^[a-zA-Z0-9]{1,30}$/),
-    url: Joi.string()
-        .uri(),
+    apiName: Joi.string().regex(/^[a-zA-Z0-9]{1,30}$/),
+    apiVersion: Joi.string().regex(/^[a-zA-Z0-9.]{1,30}$/),
+    apiContext: Joi.string().regex(/^[a-zA-Z0-9{}/]{1,30}$/),
+    url: Joi.string().uri(),
     role: roleSchema.systemRole().role(),
     userRole: userRoleSchema.userRole().role(),
 };

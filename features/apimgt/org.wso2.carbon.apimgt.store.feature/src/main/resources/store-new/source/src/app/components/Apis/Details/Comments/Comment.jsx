@@ -40,7 +40,7 @@ const styles = theme => ({
     },
     commentText: {
         color: theme.palette.getContrastText(theme.palette.background.default),
-        marginTop: theme.spacing.unig,
+        marginTop: theme.spacing.unit * 0.8,
         width: '100%',
         whiteSpace: 'pre-wrap',
         overflowWrap: 'break-word',
@@ -92,7 +92,7 @@ class Comment extends React.Component {
      */
     filterRemainingComments(commentToFilter) {
         const { deleteComment } = this.state;
-        return commentToFilter.commentId !== deleteComment.commentId;
+        return commentToFilter.id !== deleteComment.id;
     }
 
     /**
@@ -101,7 +101,8 @@ class Comment extends React.Component {
      */
     filterCommentToDelete(commentToFilter) {
         const { deleteComment } = this.state;
-        return commentToFilter.commentId === deleteComment.parentCommentId;
+        // return commentToFilter.id === deleteComment.parentCommentId;
+        return commentToFilter.id;
     }
 
     /**
@@ -190,36 +191,38 @@ class Comment extends React.Component {
         const {
             apiId, allComments, commentsUpdate, intl,
         } = this.props;
-        const commentIdOfCommentToDelete = deleteComment.commentId;
-        const parentCommentIdOfCommentToDelete = deleteComment.parentCommentId;
+        const commentIdOfCommentToDelete = deleteComment.id;
+        // const parentCommentIdOfCommentToDelete = deleteComment.parentCommentId;
         this.handleClose();
 
         apiClient.deleteComment(apiId, commentIdOfCommentToDelete)
             .then((result) => {
-                if (parentCommentIdOfCommentToDelete === undefined) {
-                    const remainingComments = allComments.filter(this.filterRemainingComments);
-                    commentsUpdate(remainingComments);
-                } else {
-                    const index = allComments.findIndex(this.filterCommentToDelete);
-                    const remainingReplies = allComments[index].replies.filter(this.filterRemainingComments);
-                    allComments[index].replies = remainingReplies;
-                    commentsUpdate(allComments);
-                }
+                // if (parentCommentIdOfCommentToDelete === undefined) {
+                const remainingComments = allComments.filter(this.filterRemainingComments);
+                commentsUpdate(remainingComments);
+                Alert.message("Comment" + commentIdOfCommentToDelete + "has been successfully deleted");
+                // } else {
+                //     const index = allComments.findIndex(this.filterCommentToDelete);
+                //     const remainingReplies = allComments[index].replies.filter(this.filterRemainingComments);
+                //     allComments[index].replies = remainingReplies;
+                //     commentsUpdate(allComments);
+                // }
             })
             .catch((error) => {
                 console.error(error);
                 if (error.response) {
                     Alert.error(error.response.body.message);
-                } else {
-                    Alert.error(
-                        intl.formatMessage({
-                            defaultMessage: 'Something went wrong while deleting comment',
-                            id: 'Apis.Details.Comments.Comment.something.went.wrong',
-                        })
-                            + ' - '
-                            + commentIdOfCommentToDelete,
-                    );
                 }
+                //else {
+                //     Alert.error(
+                //         intl.formatMessage({
+                //             defaultMessage: 'Something went wrong while deleting comment',
+                //             id: 'Apis.Details.Comments.Comment.something.went.wrong',
+                //         })
+                //         + ' - '
+                //         + commentIdOfCommentToDelete,
+                //     );
+                // }
             });
     }
 
@@ -235,57 +238,56 @@ class Comment extends React.Component {
         const { editIndex, replyIndex, openDialog } = this.state;
         return [
             comments
-                && comments
-                    .slice(0)
-                    .reverse()
-                    .map((comment, index) => (
-                        <div key={comment.commentId + '-' + index} className={classes.contentWrapper}>
-                            <Grid container spacing={8} className={classes.root}>
-                                <Grid item>
-                                    <Icon className={classes.commentIcon}>
-                                        account_box
+            && comments
+                .slice(0)
+                .reverse()
+                .map((comment, index) => (
+                    <div key={comment.commentId + '-' + index} className={classes.contentWrapper}>
+                        <Grid container spacing={8} className={classes.root}>
+                            <Grid item>
+                                <Icon className={classes.commentIcon}>
+                                    account_box
                                     </Icon>
-                                </Grid>
-                                <Grid item xs zeroMinWidth>
-                                    <Typography noWrap className={classes.commentText} variant='body2'>
-                                        {comment.createdBy}
-                                    </Typography>
+                            </Grid>
+                            <Grid item xs zeroMinWidth>
+                                <Typography noWrap className={classes.commentText} >
+                                    {comment.createdBy}
+                                </Typography>
 
-                                    {index !== editIndex && (
-                                        <Typography className={classes.commentText}>{comment.commentText}</Typography>
-                                    )}
+                                {index !== editIndex && (
+                                    <Typography className={classes.commentText}>{comment.content}</Typography>
+                                )}
 
-                                    {index === editIndex && (
-                                        <CommentEdit
-                                            apiId={apiId}
-                                            allComments={allComments}
-                                            commentsUpdate={commentsUpdate}
-                                            comment={comment}
-                                            toggleShowEdit={this.handleShowEdit}
-                                        />
-                                    )}
-
-                                    <CommentOptions
-                                        classes={classes}
+                                {index === editIndex && (
+                                    <CommentEdit
+                                        apiId={apiId}
+                                        allComments={allComments}
+                                        commentsUpdate={commentsUpdate}
                                         comment={comment}
-                                        editIndex={editIndex}
-                                        index={index}
-                                        showAddComment={this.showAddComment}
-                                        handleClickOpen={this.handleClickOpen}
-                                        showEditComment={this.showEditComment}
+                                        toggleShowEdit={this.handleShowEdit}
                                     />
+                                )}
 
-                                    {index === replyIndex && (
+                                <CommentOptions
+                                    classes={classes}
+                                    comment={comment}
+                                    editIndex={editIndex}
+                                    index={index}
+                                    showAddComment={this.showAddComment}
+                                    handleClickOpen={this.handleClickOpen}
+                                    showEditComment={this.showEditComment}
+                                />
+
+                                {/* {index === replyIndex && (
                                         <CommentAdd
                                             apiId={apiId}
-                                            parentCommentId={comment.commentId}
+                                            //parentCommentId={comment.commentId}
                                             allComments={allComments}
                                             commentsUpdate={commentsUpdate}
-                                            toggleShowReply={this.handleShowReply}
                                             cancelButton
                                         />
                                     )}
-                                    {comment.replies.length !== 0 && (
+                                    {comment.replies !== 0 && (
                                         <CommentReply
                                             classes={classes}
                                             apiId={apiId}
@@ -293,11 +295,11 @@ class Comment extends React.Component {
                                             commentsUpdate={commentsUpdate}
                                             allComments={allComments}
                                         />
-                                    )}
-                                </Grid>
+                                    )} */}
                             </Grid>
-                        </div>
-                    )),
+                        </Grid>
+                    </div>
+                )),
             <ConfirmDialog
                 key='key-dialog'
                 labelCancel='Cancel'

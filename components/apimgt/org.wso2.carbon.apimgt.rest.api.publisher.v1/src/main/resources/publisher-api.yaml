@@ -284,6 +284,10 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/API'
+        - in: query
+          name: openAPIVersion
+          description: Open api version
+          type: string
       tags:
         - APIs
       responses:
@@ -1909,8 +1913,10 @@ paths:
         type: string
         required: true
       - $ref: '#/parameters/If-Match'
+      consumes:
+      - multipart/form-data
       tags:
-      - GraphQL Schema (Individual)
+      - GraphQL Schema
       responses:
         200:
           description: |
@@ -3412,6 +3418,11 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/If-None-Match'
+        - name : query
+          in: query
+          description: |
+            Keywords to filter subscriptions
+          type: string
       tags:
         - Subscriptions
       responses:
@@ -7807,7 +7818,6 @@ definitions:
         description: |
           This attribute declares the validation error message
         type: string
-        meesage: String
       graphQLInfo:
         description:
           Summary of the GraphQL including the basic information
@@ -7818,7 +7828,7 @@ definitions:
               $ref: '#/definitions/APIOperations'
           graphQLSchema:
             items:
-            $ref: '#/definitions/GraphQLSchema'
+              $ref: '#/definitions/GraphQLSchema'
 
 #-----------------------------------------------------
 # The Threat Protection Policy List Resource
@@ -8045,10 +8055,10 @@ definitions:
         type: array
         items:
           type: string
-      MonetizationProperties:
+      monetizationAttributes:
         type: array
         items:
-          type: string
+          $ref: '#/definitions/MonetizationAttribute'
 
 #-----------------------------------------------------
 # The pagination resource
@@ -8075,6 +8085,34 @@ definitions:
         description: |
           Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
+  MonetizationAttribute:
+    title: Monetization attribute object
+    properties:
+      required:
+        type: boolean
+        description: |
+          Is attribute required
+        example: true
+      name:
+        type: string
+        description: |
+          Name of the attribute
+      displayName:
+        type: string
+        description: |
+          Display name of the attribute
+      description:
+        type: string
+        description: |
+          Description of the attribute
+      hidden:
+        type: boolean
+        description: |
+          Is attribute hidden
+      default:
+        type: string
+        description: |
+          Default value of the attribute
 
 #-----------------------------------------------------
 # END-OF-FILE

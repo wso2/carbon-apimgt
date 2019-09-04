@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.dao.constants;
 
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIType;
 
 public class SQLConstants {
     public static final String GET_API_FOR_CONTEXT_TEMPLATE_SQL =
@@ -785,6 +786,7 @@ public class SQLConstants {
 
     public static final String GET_PAGINATED_SUBSCRIBED_APIS_SQL =
             " SELECT " +
+            "'" + APIType.API.toString() + "' AS TYPE, " +
             "   SUBS.UUID AS SUB_UUID, " +
             "   SUBS.SUBSCRIPTION_ID, " +
             "   API.API_PROVIDER AS API_PROVIDER, " +
@@ -810,6 +812,34 @@ public class SQLConstants {
             "   AND APP.NAME= ? " +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
+    public static final String GET_PAGINATED_SUBSCRIBED_API_PRODUCTS_SQL =
+            " SELECT " +
+            "'" + APIType.API_PRODUCT.toString() + "' AS TYPE, " +
+            "   SUBS.UUID AS SUB_UUID, " +
+            "   SUBS.SUBSCRIPTION_ID, " +
+            "   API_PRODUCT.API_PRODUCT_PROVIDER AS API_PROVIDER, " +
+            "   API_PRODUCT.API_PRODUCT_NAME AS API_NAME, " +
+            "   API_PRODUCT.API_PRODUCT_VERSION AS API_VERSION, " +
+            "   SUBS.TIER_ID AS TIER_ID, " +
+            "   APP.APPLICATION_ID AS APP_ID, " +
+            "   APP.UUID AS APP_UUID, " +
+            "   SUBS.SUB_STATUS AS SUB_STATUS, " +
+            "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+            "   APP.NAME AS APP_NAME, " +
+            "   APP.CALLBACK_URL AS CALLBACK_URL " +
+            " FROM " +
+            "   AM_SUBSCRIBER SUB," +
+            "   AM_APPLICATION APP, " +
+            "   AM_SUBSCRIPTION SUBS, " +
+            "   AM_API_PRODUCT API_PRODUCT " +
+            " WHERE " +
+            "   SUB.TENANT_ID = ? " +
+            "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
+            "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
+            "   AND API_PRODUCT.API_PRODUCT_ID=SUBS.API_PRODUCT_ID " +
+            "   AND APP.NAME= ? " +
+            "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
     public static final String GET_PAGINATED_SUBSCRIBED_APIS_BY_APP_ID_SQL =
             " SELECT " +
                     "   SUBS.SUBSCRIPTION_ID, " +
@@ -831,12 +861,13 @@ public class SQLConstants {
                     "   SUB.TENANT_ID = ? " +
                     "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
                     "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
-                    "   AND API.API_ID=SUBS.API_ID" +
+                    "   AND API.API_ID=SUBS.API_ID " +
                     "   AND APP.APPLICATION_ID= ? " +
                     "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
     public static final String GET_SUBSCRIBED_APIS_OF_SUBSCRIBER_SQL =
             " SELECT " +
+            "'" + APIType.API.toString() + "' AS TYPE, " +
             "   SUBS.SUBSCRIPTION_ID AS SUBS_ID, " +
             "   API.API_PROVIDER AS API_PROVIDER, " +
             "   API.API_NAME AS API_NAME, " +
@@ -860,7 +891,36 @@ public class SQLConstants {
             "   SUB.TENANT_ID = ? " +
             "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
             "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID" +
-            "   AND API.API_ID=SUBS.API_ID" +
+            "   AND API.API_ID=SUBS.API_ID " +
+            "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
+
+    public static final String GET_SUBSCRIBED_API_PRODUCTS_OF_SUBSCRIBER_SQL =
+            " SELECT " +
+            "'" + APIType.API_PRODUCT.toString() + "' AS TYPE, " +
+            "   SUBS.SUBSCRIPTION_ID AS SUBS_ID, " +
+            "   API_PRODUCT.API_PRODUCT_PROVIDER AS API_PROVIDER, " +
+            "   API_PRODUCT.API_PRODUCT_NAME AS API_NAME, " +
+            "   API_PRODUCT.API_PRODUCT_VERSION AS API_VERSION, " +
+            "   SUBS.TIER_ID AS TIER_ID, " +
+            "   APP.APPLICATION_ID AS APP_ID, " +
+            "   SUBS.SUB_STATUS AS SUB_STATUS, " +
+            "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+            "   APP.NAME AS APP_NAME, " +
+            "   APP.TOKEN_TYPE AS APP_TOKEN_TYPE, " +
+            "   APP.CALLBACK_URL AS CALLBACK_URL, " +
+            "   SUBS.UUID AS SUB_UUID, " +
+            "   APP.UUID AS APP_UUID, " +
+            "   APP.CREATED_BY AS OWNER" +
+            " FROM " +
+            "   AM_SUBSCRIBER SUB," +
+            "   AM_APPLICATION APP, " +
+            "   AM_SUBSCRIPTION SUBS, " +
+            "   AM_API_PRODUCT API_PRODUCT " +
+            " WHERE " +
+            "   SUB.TENANT_ID = ? " +
+            "   AND SUB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID " +
+            "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID" +
+            "   AND API_PRODUCT.API_PRODUCT_ID=SUBS.API_PRODUCT_ID " +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
     public static final String GET_API_KEY_BY_SUBSCRIPTION_SQL =
@@ -2165,8 +2225,20 @@ public class SQLConstants {
             " INSERT INTO AM_API_COMMENTS (COMMENT_TEXT,COMMENTED_USER,DATE_COMMENTED,API_ID)" +
             " VALUES (?,?,?,?)";
 
+    public static final String GET_COMMENT_SQL =
+            " SELECT AM_API_COMMENTS.COMMENT_ID AS COMMENT_ID," +
+            "   AM_API_COMMENTS.COMMENT_TEXT AS COMMENT_TEXT," +
+            "   AM_API_COMMENTS.COMMENTED_USER AS COMMENTED_USER," +
+            "   AM_API_COMMENTS.DATE_COMMENTED AS DATE_COMMENTED " +
+            " FROM AM_API_COMMENTS, AM_API API " +
+            " WHERE API.API_PROVIDER = ? " +
+            "   AND API.API_NAME = ? " +
+            "   AND API.API_VERSION = ? " +
+            "   AND API.API_ID = AM_API_COMMENTS.API_ID " +
+            "   AND AM_API_COMMENTS.COMMENT_ID = ?";
+
     public static final String GET_COMMENTS_SQL =
-            " SELECT " +
+            " SELECT AM_API_COMMENTS.COMMENT_ID AS COMMENT_ID," +
             "   AM_API_COMMENTS.COMMENT_TEXT AS COMMENT_TEXT," +
             "   AM_API_COMMENTS.COMMENTED_USER AS COMMENTED_USER," +
             "   AM_API_COMMENTS.DATE_COMMENTED AS DATE_COMMENTED " +
@@ -2178,6 +2250,8 @@ public class SQLConstants {
             "   AND API.API_NAME = ? " +
             "   AND API.API_VERSION  = ? " +
             "   AND API.API_ID = AM_API_COMMENTS.API_ID";
+
+    public static final String DELETE_COMMENT_SQL = "DELETE FROM AM_API_COMMENTS WHERE AM_API_COMMENTS.COMMENT_ID = ?";
 
     public static final String GET_API_CONTEXT_SQL =
             "SELECT CONTEXT FROM AM_API " + " WHERE CONTEXT= ?";

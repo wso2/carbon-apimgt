@@ -239,7 +239,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @PUT
     @Path("/{apiId}/graphql-schema")
-    @Consumes({ "application/json" })
+    @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Add a Schema to a GraphQL API", notes = "This operation can be used to add a GraphQL Schema definition to an existing GraphQL API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
@@ -845,8 +845,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = APIDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was in a not supported format. ", response = ErrorDTO.class) })
-    public Response apisPost(@ApiParam(value = "API object that needs to be added " ,required=true) APIDTO body) throws APIManagementException{
-        return delegate.apisPost(body, securityContext);
+    public Response apisPost(@ApiParam(value = "API object that needs to be added " ,required=true) APIDTO body,  @ApiParam(value = "Open api version")  @QueryParam("openAPIVersion") String openAPIVersion) throws APIManagementException{
+        return delegate.apisPost(body, openAPIVersion, securityContext);
     }
 
     @POST

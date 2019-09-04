@@ -21,26 +21,6 @@
     var site = require("/site/conf/site.json");
     include("/services/constants.jag");
     include("/services/jagg.jag");
-    var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
-
-    var SystemApplicationDTO = Packages.org.wso2.carbon.apimgt.impl.dao.SystemApplicationDAO;
-    var systemApplicationDAO = new SystemApplicationDTO();
-    var systemApplicationDTO = systemApplicationDAO.getClientCredentialsForApplication("admin_store");
-
-    var clientId = systemApplicationDTO.getConsumerKey();
-    var clientSecret = systemApplicationDTO.getConsumerSecret();
-    var Base64 = org.apache.axiom.om.util.Base64;
-    var String = Packages.java.lang.String;
-    var base64encoded = Base64.encode ( new String (clientId + ":" + clientSecret).getBytes());
-    var tokenRevokeEndpoint = MGT_TRANSPORT + HOST + ":" + getServerPort() + REVOKE_URL_SUFFIX;
-    var tokenP1 = request.getCookie("WSO2_AM_TOKEN_1_Default").value;
-    var tokenP2 = request.getCookie("AM_ACC_TOKEN_DEFAULT_P2").value;
-    var token = tokenP1 + tokenP2;
-    var tokenRevokeRequestData = {
-         "token": token
-     };
-
-    var result = post(tokenRevokeEndpoint, tokenRevokeRequestData,{"Authorization": "Basic " + base64encoded});
 
     var cookie = {'name': 'AM_ACC_TOKEN_DEFAULT_P2', 'value': '', 'path': site.context + "/", "HttpOnly": true, "secure": true, "maxAge": 2};
     response.addCookie(cookie);
@@ -55,7 +35,7 @@
     cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P1', 'value':'', 'path': site.context + "/services/logout", "secure": true, "maxAge": 2};
     response.addCookie(cookie);
 
-    log.debug("redirecting to anonymous view");
-    response.sendRedirect(site.context + "/apis");
+    log.debug("redirecting to logout");
+    response.sendRedirect(site.context + "/logout");
 
 %>

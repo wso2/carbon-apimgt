@@ -128,23 +128,21 @@ class CreateScope extends React.Component {
      */
     addScope() {
         const {
-            intl, api, history, updateAPI,
+            intl, api, history,
         } = this.props;
         if (this.validateScopeName('name', this.state.apiScope.name)) {
             // return status of the validation
             return;
         }
         const scope = this.state.apiScope;
-
         scope.bindings = {
             type: 'role',
             values: this.state.validRoles,
         };
-        // temp fix to deep copy
-        // eslint-disable-next-line no-underscore-dangle
-        const newApi = JSON.parse(JSON.stringify(api._data));
-        newApi.scopes.push(scope);
-        const promisedApiUpdate = updateAPI(newApi);
+        const scopes = api.scopes.map((aScope) => { return aScope; });
+        scopes.push(scope);
+        const updateProperties = { scopes };
+        const promisedApiUpdate = api.update(updateProperties);
         promisedApiUpdate.then(() => {
             Alert.info(intl.formatMessage({
                 id: 'Apis.Details.Scopes.CreateScope.scope.added.successfully',
@@ -420,7 +418,6 @@ CreateScope.propTypes = {
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
-    updateAPI: PropTypes.func.isRequired,
 };
 
 CreateScope.defaultProps = {

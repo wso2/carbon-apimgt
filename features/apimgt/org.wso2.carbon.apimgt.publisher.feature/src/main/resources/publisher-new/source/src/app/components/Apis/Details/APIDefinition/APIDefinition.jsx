@@ -49,7 +49,7 @@ import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 
 const EditorDialog = React.lazy(() => import('./SwaggerEditorDrawer'));
 
-const styles = theme => ({
+const styles = () => ({
     titleWrapper: {
         display: 'flex',
         flexDirection: 'row',
@@ -61,13 +61,6 @@ const styles = theme => ({
     },
     buttonIcon: {
         marginRight: 10,
-    },
-    dropzone: {
-        border: 'none',
-        cursor: 'pointer',
-        padding: `${theme.spacing.unit * 2}px 0px`,
-        position: 'relative',
-        textAlign: 'center',
     },
     topBar: {
         display: 'flex',
@@ -247,7 +240,7 @@ class APIDefinition extends React.Component {
                 this.setState({ graphQL: response.data });
                 Alert.success(intl.formatMessage({
                     id: 'Apis.Details.APIDefinition.APIDefinition.graphQLDefinition.updated.successfully',
-                    defaultMessage: 'GraphQL API Definition Updated Successfully',
+                    defaultMessage: 'Schema Definition Updated Successfully',
                 }));
             })
             .catch((err) => {
@@ -440,11 +433,13 @@ class APIDefinition extends React.Component {
                                 <FormattedMessage
                                     id='Apis.Details.APIDefinition.APIDefinition.schema.definition'
                                     defaultMessage='Schema Definition'
-                                />) :
+                                />
+                            ) : (
                                 <FormattedMessage
                                     id='Apis.Details.APIDefinition.APIDefinition.api.definition'
                                     defaultMessage='API Definition'
-                                /> }
+                                />
+                            )}
                         </Typography>
                         {!graphQL && (
                             <Button size='small' className={classes.button} onClick={this.openEditor}>
@@ -453,7 +448,8 @@ class APIDefinition extends React.Component {
                                     id='Apis.Details.APIDefinition.APIDefinition.edit'
                                     defaultMessage='Edit'
                                 />
-                            </Button>)}
+                            </Button>
+                        )}
                         <Dropzone
                             multiple={false}
                             className={classes.dropzone}
@@ -461,13 +457,18 @@ class APIDefinition extends React.Component {
                                 this.onDrop(files);
                             }}
                         >
-                            <Button size='small' className={classes.button}>
-                                <CloudUploadRounded className={classes.buttonIcon} />
-                                <FormattedMessage
-                                    id='Apis.Details.APIDefinition.APIDefinition.import.definition'
-                                    defaultMessage='Import Definition'
-                                />
-                            </Button>
+                            {({ getRootProps, getInputProps }) => (
+                                <div {...getRootProps()}>
+                                    <input {...getInputProps()} />
+                                    <Button size='small' className={classes.button}>
+                                        <CloudUploadRounded className={classes.buttonIcon} />
+                                        <FormattedMessage
+                                            id='Apis.Details.APIDefinition.APIDefinition.import.definition'
+                                            defaultMessage='Import Definition'
+                                        />
+                                    </Button>
+                                </div>
+                            )}
                         </Dropzone>
 
                         <a className={classes.downloadLink} href={downloadLink} download={fileName}>
@@ -479,19 +480,18 @@ class APIDefinition extends React.Component {
                                 />
                             </Button>
                         </a>
-
                     </div>
-                    {isGraphQL === 0 &&
-                    <div className={classes.converterWrapper}>
-                        <Button size='small' className={classes.button} onClick={this.onChangeFormatClick}>
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.convert.to'
-                                defaultMessage='Convert to:'
-                            />
-                            {convertTo}
-                        </Button>
-                    </div>
-                    }
+                    {isGraphQL === 0 && (
+                        <div className={classes.converterWrapper}>
+                            <Button size='small' className={classes.button} onClick={this.onChangeFormatClick}>
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.convert.to'
+                                    defaultMessage='Convert to:'
+                                />
+                                {convertTo}
+                            </Button>
+                        </div>
+                    )}
                 </div>
                 <div>
                     <MonacoEditor
@@ -508,10 +508,12 @@ class APIDefinition extends React.Component {
                             className={classes.button}
                             color='inherit'
                             onClick={this.closeEditor}
-                            aria-label={<FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.btn.close'
-                                defaultMessage='Close'
-                            />}
+                            aria-label={
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.btn.close'
+                                    defaultMessage='Close'
+                                />
+                            }
                         >
                             <Icon>close</Icon>
                         </IconButton>
@@ -528,14 +530,17 @@ class APIDefinition extends React.Component {
                             />
                         </Button>
                     </Paper>
-                    <Suspense fallback={
-                        <div>(
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.loading'
-                                defaultMessage='Loading...'
-                            />
-                        )
-                        </div>}
+                    <Suspense
+                        fallback={
+                            <div>
+                                (
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.loading'
+                                    defaultMessage='Loading...'
+                                />
+                                )
+                            </div>
+                        }
                     >
                         <EditorDialog />
                     </Suspense>
@@ -558,8 +563,10 @@ class APIDefinition extends React.Component {
                         <DialogContentText id='alert-dialog-description'>
                             <FormattedMessage
                                 id='Apis.Details.APIDefinition.APIDefinition.api.definition.save.confirmation'
-                                defaultMessage={'Do you want to save the API Definition? This will affect the' +
-                                ' existing resources.'}
+                                defaultMessage={
+                                    'Do you want to save the API Definition? This will affect the' +
+                                    ' existing resources.'
+                                }
                             />
                         </DialogContentText>
                     </DialogContent>

@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
+import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -368,7 +369,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<API> apiSet = new TreeSet<API>(new APINameComparator());
         try {
             List<GovernanceArtifact> genericArtifacts =
-                    GovernanceUtils.findGovernanceArtifacts(getSearchQuery(APIConstants.TAG_SEARCH_TYPE_PREFIX2 + tag), registry,
+                    GovernanceUtils.findGovernanceArtifacts(getSearchQuery(APIConstants.TAGS_EQ_SEARCH_TYPE_PREFIX + tag), registry,
                                                             APIConstants.API_RXT_MEDIA_TYPE);
             for (GovernanceArtifact genericArtifact : genericArtifacts) {
                 try {
@@ -3116,9 +3117,24 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
+    public int addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException {
+        return apiMgtDAO.addComment(identifier, comment, user);
+    }
+
+    @Override
     public org.wso2.carbon.apimgt.api.model.Comment[] getComments(APIIdentifier identifier)
             throws APIManagementException {
         return apiMgtDAO.getComments(identifier);
+    }
+
+    @Override
+    public Comment getComment(APIIdentifier identifier, int commentId) throws APIManagementException {
+        return apiMgtDAO.getComment(identifier, commentId);
+    }
+
+    @Override
+    public void deleteComment(APIIdentifier identifier, int commentId) throws APIManagementException {
+        apiMgtDAO.deleteComment(identifier, commentId);
     }
 
     /**
@@ -4162,12 +4178,23 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber, APIIdentifier identifier, String groupingId)
+    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
+        return getGraphqlSchemaDefinition(apiId);
+    }
+
+    @Override
+    public Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber, Identifier identifier, String groupingId)
             throws APIManagementException {
         Set<SubscribedAPI> subscribedAPISet = new HashSet<>();
         Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(subscriber, groupingId);
         for (SubscribedAPI api : subscribedAPIs) {
-            if (api.getApiId().equals(identifier)) {
+            if (identifier instanceof APIIdentifier && identifier.equals(api.getApiId())) {
+                Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
+                for (APIKey key : keys) {
+                    api.addKey(key);
+                }
+                subscribedAPISet.add(api);
+            } else if (identifier instanceof APIProductIdentifier && identifier.equals(api.getProductId())) {
                 Set<APIKey> keys = getApplicationKeys(api.getApplication().getId());
                 for (APIKey key : keys) {
                     api.addKey(key);

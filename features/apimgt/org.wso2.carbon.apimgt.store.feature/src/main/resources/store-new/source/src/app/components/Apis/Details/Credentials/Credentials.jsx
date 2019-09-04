@@ -172,12 +172,12 @@ class Credentials extends React.Component {
      * @memberof Credentials
      */
     handleSubscribe = () => {
-        const { updateSubscriptionData } = this.context;
+        const { updateSubscriptionData, apiType } = this.context;
         const { subscriptionRequest } = this.state;
         const { intl } = this.props;
         const api = new Api();
         api.subscribe(subscriptionRequest.apiId, subscriptionRequest.applicationId,
-            subscriptionRequest.throttlingPolicy)
+            subscriptionRequest.throttlingPolicy, apiType)
             .then((response) => {
                 console.log('Subscription created successfully with ID : ' + response.body.subscriptionId);
                 Alert.info(intl.formatMessage({
@@ -231,7 +231,7 @@ class Credentials extends React.Component {
      * @param {*} updateSubscriptionData method to update global subscription data
      * @memberof Subscriptions
      */
-    handleSubscriptionDelete(subscriptionId, updateSubscriptionData) {
+    handleSubscriptionDelete = (subscriptionId, updateSubscriptionData) => {
         const { intl } = this.props;
         const client = new Subscription();
         const promisedDelete = client.deleteSubscription(subscriptionId);

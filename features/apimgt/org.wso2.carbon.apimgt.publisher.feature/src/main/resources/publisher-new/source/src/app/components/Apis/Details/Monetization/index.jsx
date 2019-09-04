@@ -44,7 +44,7 @@ class Monetization extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            properties: [],
+            monetizationAttributes: [],
             monStatus: null,
             property: {},
         };
@@ -54,10 +54,14 @@ class Monetization extends Component {
     }
 
     componentDidMount() {
+        this.getMonetizationData();
+    }
+
+    getMonetizationData() {
         const { api } = this.props;
         api.getSettings().then((settings) => {
-            if (settings.MonetizationProperties != null) {
-                this.setState({ properties: settings.MonetizationProperties });
+            if (settings.monetizationAttributes != null) {
+                this.setState({ monetizationAttributes: settings.monetizationAttributes });
             }
         });
         api.getMonetization(this.props.api.id).then((status) => {
@@ -89,6 +93,7 @@ class Monetization extends Component {
                 id: 'Apis.Details.Monetization.Index.monetization.configured.successfully',
                 defaultMessage: 'Monetization Configured Successfully',
             }));
+            this.setState({ monStatus: !this.state.monStatus });
         }).catch((error) => {
             console.error(error);
             if (error.response) {
@@ -117,21 +122,10 @@ class Monetization extends Component {
 
     render() {
         const { api, classes } = this.props;
-        const { properties, monStatus } = this.state;
-        if (!properties || monStatus === null) {
+        const { monetizationAttributes, monStatus } = this.state;
+        if (!monetizationAttributes || monStatus === null) {
             return <Progress />;
         }
-        const propertiesList = properties.map((property, i) => (
-            <TextField
-                fullWidth
-                id={property + i}
-                label={property}
-                name={property}
-                type='text'
-                margin='normal'
-                onChange={this.handleInputChange}
-                autoFocus
-            />));
         return (
             <Grid item xs={6}>
                 <Typography variant='title' gutterBottom>
@@ -160,8 +154,19 @@ class Monetization extends Component {
                                     />
                                 </Typography>
                                 {
-                                    (properties.length > 0) ?
-                                        (propertiesList) :
+                                    (monetizationAttributes.length > 0) ?
+                                        (monetizationAttributes.map((monetizationAttribute, i) => (
+                                            <TextField
+                                                fullWidth
+                                                id={'attribute' + i}
+                                                label={monetizationAttribute.name}
+                                                name={monetizationAttribute.displayName}
+                                                type='text'
+                                                margin='normal'
+                                                required={monetizationAttribute.required}
+                                                onChange={this.handleInputChange}
+                                                autoFocus
+                                            />))) :
                                         (
                                             <Typography gutterBottom>
                                                 <FormattedMessage
@@ -179,7 +184,7 @@ class Monetization extends Component {
                     <Grid>
                         <Paper className={classes.paper}>
                             <Grid item xs={12} className={classes.grid}>
-                                {<BusinessPlans api={api} />}
+                                {<BusinessPlans api={api} monStatus={monStatus} />}
                             </Grid>
                         </Paper>
                     </Grid>

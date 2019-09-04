@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.5.67-SNAPSHOT</version>
+        <version>6.5.78-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -487,9 +487,9 @@
                             org.apache.axis2.*; version="${imp.pkg.version.axis2}",
                             org.apache.commons.*,
                             org.apache.http.*,
-                            org.osgi.framework.*,
-                            org.osgi.util.*,
-                            org.osgi.service.*,
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.util.*;version="${imp.package.version.osgi.util}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.apache.axiom.*; version="${imp.pkg.version.axiom}",
                             org.wso2.carbon.utils; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",

@@ -49,7 +49,7 @@ const styles = theme => ({
         width: 400,
     },
     dropDown: {
-        width: 100,
+        width: theme.spacing.unit * 11.25,
     },
     divider: {
         marginTop: 20,
@@ -226,6 +226,7 @@ class Operation extends React.Component {
                 </TableCell>
                 <TableCell>
                     <Select
+                        className={classes.dropDown}
                         value={operation.throttlingPolicy}
                         onChange={this.handlePolicyChange}
                         fieldName='Throttling Policy'
@@ -242,6 +243,7 @@ class Operation extends React.Component {
                 </TableCell>
                 <TableCell>
                     <Select
+                        className={classes.dropDown}
                         value={operation.scopes}
                         onChange={this.handleScopeChange}
                         inputProps={{

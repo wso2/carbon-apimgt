@@ -26,9 +26,6 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
-import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.clustering.ClusteringAgent;
-import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
@@ -40,6 +37,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -90,6 +88,9 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -112,17 +113,12 @@ import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
-import org.wso2.carbon.apimgt.impl.utils.StatUpdateClusterMessage;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
-import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceAPIManagementExceptionException;
-import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteringFaultException;
-import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
-import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceStub;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
@@ -150,7 +146,6 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
@@ -161,7 +156,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1063,6 +1057,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
                 updatePermissions = true;
             }
+
+            if (api.isEndpointSecured() && StringUtils.isBlank(api.getEndpointUTPassword()) &&
+                    !StringUtils.isBlank(oldApi.getEndpointUTPassword())) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Given endpointsecurity password is empty");
+                }
+                api.setEndpointUTUsername(oldApi.getEndpointUTUsername());
+                api.setEndpointUTPassword(oldApi.getEndpointUTPassword());
+                if (log.isDebugEnabled()) {
+                    log.debug("Using the previous username and password for endpoint security");
+                }
+            }
+
             updateApiArtifact(api, true, updatePermissions);
             if (!oldApi.getContext().equals(api.getContext())) {
                 api.setApiHeaderChanged(true);
@@ -2667,13 +2674,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(api.getId().getApiName(),
                     api.getId().getVersion(), api.getId().getProviderName());
             if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
-                String apiDefinition = definitionFromOpenAPISpec.getAPIDefinition(api.getId(), registry);
+                String apiDefinition = OASParserUtil.getAPIDefinition(api.getId(), registry);
                 LinkedHashMap map = new ObjectMapper().readValue(apiDefinition, LinkedHashMap.class);
                 Map infoObject = (Map) map.get("info");
                 infoObject.remove("version");
                 infoObject.put("version", newAPI.getId().getVersion());
                 String json = new ObjectMapper().writeValueAsString(map);
-                definitionFromOpenAPISpec.saveAPIDefinition(newAPI, json, registry);
+                OASParserUtil.saveAPIDefinition(newAPI, json, registry);
             }
 
             // copy wsdl in case of a SOAP API
@@ -3028,6 +3035,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(errorMessage);
             throw new APIManagementException(errorMessage);
         }
+
+        if (api.isEndpointSecured() && StringUtils.isEmpty(api.getEndpointUTPassword())) {
+            String errorMessage = "Empty password is given for endpointSecurity when creating API "
+                    + api.getId().getApiName();
+            log.error(errorMessage);
+            throw new APIManagementException(errorMessage);
+        }
+
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
@@ -4515,7 +4530,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            definitionFromOpenAPISpec.saveAPIDefinition(api, jsonText, registry);
+            OASParserUtil.saveAPIDefinition(api, jsonText, registry);
 
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
@@ -4523,8 +4538,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void saveSwagger20Definition(APIProductIdentifier apiId, String jsonText) throws APIManagementException {
+    public void saveGraphqlSchemaDefinition(API api, String schemaDefinition) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            GraphQLSchemaDefinition schemaDef = new GraphQLSchemaDefinition();
+            schemaDef.saveGraphQLSchemaDefinition(api, schemaDefinition, registry);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
 
+    @Override
+    public void saveSwagger20Definition(APIProductIdentifier apiId, String jsonText) throws APIManagementException {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -4539,6 +4565,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
             definitionFromOpenAPISpec.saveAPIDefinition(apiProduct, jsonText, registry);
 
         } finally {
@@ -4548,7 +4575,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
             throws APIManagementException, FaultGatewaysException {
-
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -5138,13 +5164,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
             //set monetization status (i.e - enabled or disabled)
-            artifact.setAttribute(APIConstants.API_MONETIZATION_STATUS,
+            artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS,
                     Boolean.toString(api.getMonetizationStatus()));
             //clear existing monetization properties
-            artifact.removeAttribute(APIConstants.API_MONETIZATION_PROPERTIES);
+            artifact.removeAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
             //set new additional monetization data
             if (api.getMonetizationProperties() != null) {
-                artifact.setAttribute(APIConstants.API_MONETIZATION_PROPERTIES,
+                artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES,
                         api.getMonetizationProperties().toJSONString());
             }
             artifactManager.updateGenericArtifact(artifact);
@@ -5243,7 +5269,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (configuration == null) {
             log.error("API Manager configuration is not initialized.");
         } else {
-            String monetizationImplClass = configuration.getFirstProperty(APIConstants.MONETIZATION_IMPL);
+            String monetizationImplClass = configuration.getFirstProperty(APIConstants.Monetization.MONETIZATION_IMPL);
             if (monetizationImplClass == null) {
                 monetizationImpl = new DefaultMonetizationImpl();
             } else {
@@ -7143,4 +7169,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
+        return getGraphqlSchemaDefinition(apiId);
+    }
 }

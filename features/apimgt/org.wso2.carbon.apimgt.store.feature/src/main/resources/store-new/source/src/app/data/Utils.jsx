@@ -16,8 +16,9 @@
  * under the License.
  */
 
-import AuthManager from "./AuthManager";
 import Axios from "axios";
+import Configurations from 'Config';
+import AuthManager from "./AuthManager";
 
 /**
  * Utility class for Store application
@@ -100,7 +101,7 @@ class Utils {
 
         let environmentData = localStorage.getItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT);
         if (!environmentData) {
-            return Utils._getDefaultEnvironment();
+            return Utils.getDefaultEnvironment();
         }
 
         return JSON.parse(environmentData);
@@ -133,9 +134,10 @@ class Utils {
             label: 'Default',
             host: window.location.host,
             loginTokenPath: '/login/token',
+            refreshTokenPath: '/services/refresh/refresh.jag',
         };
     }
-    
+
     /**
      * Get current environment's index from the given environment array
      * @param {Array} environments
@@ -161,7 +163,7 @@ class Utils {
      */
     static setEnvironment(environment) {
         if (!environment) {
-            environment = Utils._getDefaultEnvironment();
+            environment = Utils.getDefaultEnvironment();
         }
 
         if (!environment.host) {
@@ -177,44 +179,37 @@ class Utils {
     }
 
     static getDCRappInfoRequestURL(environment = Utils.getEnvironment()) {
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}${Utils.CONST.CONTEXT_PATH}`;
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}${Configurations.app.context}`;
     }
 
     static getAppLogoutURL() {
-        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGOUT + Utils.CONST.CONTEXT_PATH;
+        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGOUT + Configurations.app.context;
     }
 
     static getLoginTokenPath(environment = Utils.getEnvironment()) {
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Utils.CONST.CONTEXT_PATH}`;
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Configurations.app.context}`;
     }
 
     static getSignUpTokenPath(environment) {
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_SIGN_UP_PATH}${Utils.CONST.CONTEXT_PATH}`;
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_SIGN_UP_PATH}${Configurations.app.context}`;
     }
 
     static getSwaggerURL() {
         return "https://" + Utils.getEnvironment().host + Utils.CONST.SWAGGER_YAML;
     }
-
-    /**
-     * Get an environment object with default values.
-     * @returns {Object} environment: {label: string, host: string, loginTokenPath: string}
-     * @private
-     */
-    static _getDefaultEnvironment() {
-        return {label: 'Default', host: window.location.host, loginTokenPath: '/login/token'};
-    }
 }
 
 Utils.CONST = {
     LOCALSTORAGE_ENVIRONMENT: 'environment_store',
+    //TODO: fix/remove below wrong paths
     DCR_APP_INFO: '/login/login',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
     LOGIN_SIGN_UP_PATH: '/login/signup',
+
+    LOGOUT_CALLBACK: '/services/auth/callback/logout',
     SWAGGER_YAML: '/api/am/store/v1.0/swagger.yaml',
     PROTOCOL: 'https://',
-    CONTEXT_PATH: '/store-new',
 };
 
 /**

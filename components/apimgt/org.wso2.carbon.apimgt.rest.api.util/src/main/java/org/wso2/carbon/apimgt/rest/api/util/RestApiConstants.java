@@ -61,6 +61,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_TIER_UPDATE_PERMISSION = RESOURCE_TIER + "/update-permission";
     public static final String RESOURCE_TAG = "tag";
     public static final String RESOURCE_WORKFLOW = "workflow";
+    public static final String RESOURCE_COMMENTS = "comments";
 
     public static final String API_ID_DELIMITER = "-";
     public static final String QUERY_PARAM = "{query}";
@@ -118,6 +119,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_DOCUMENT_CONTENT = RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID + "/content";
     public static final String RESOURCE_PATH_PRODUCT_DOCUMENT_CONTENT = RESOURCE_PATH_PRODUCT_DOCUMENTS_DOCUMENT_ID + "/content";
     public static final String RESOURCE_PATH_RESOURCE_PATHS = "/resource-paths";
+    public static final String RESOURCE_PATH_COMMENTS = "/comments";
     public static final String REST_API_STORE_VERSION_0 ="v0.14";
     public static final String REST_API_STORE_VERSION_1 ="v1";
     public static final String REST_API_STORE_CONTEXT="/api/am/store/";
@@ -235,4 +237,7 @@ public final class RestApiConstants {
     public static final String RETURN_MODEL = "model";
     public static final String RETURN_MODEL_BEFORE_ADDED = "model_before_added";
     public static final String RETURN_DTO = "dto";
+
+    public static final String OAS_VERSION_2 = "v2";
+    public static final String OAS_VERSION_3 = "v3";
 }

@@ -48,7 +48,7 @@ export default function CORSConfiguration(props) {
         corsConfiguration.accessControlAllowOrigins.length === 1;
     return (
         <React.Fragment>
-            <Grid container spacing={0} alignItems='flex-start'>
+            <Grid container>
                 <Grid item>
                     <FormControl component='fieldset'>
                         <FormLabel component='legend'>
@@ -88,11 +88,10 @@ export default function CORSConfiguration(props) {
                         <HelpOutline />
                     </Tooltip>
                 </Grid>
-                <Grid container spacing={7}>
-                    <Grid item md={1} />
-                    <Grid item md={11}>
+                <Grid container>
+                    <Grid item md={12}>
                         {isCorsEnabled && (
-                            <Grid container spacing={5} alignItems='flex-start'>
+                            <Grid container>
                                 <Grid item md={12}>
                                     <Typography variant='subtitle1'>
                                         <FormattedMessage
@@ -102,8 +101,8 @@ export default function CORSConfiguration(props) {
                                     </Typography>
                                 </Grid>
                                 <Grid item md={12}>
-                                    <Grid container spacing={5} alignItems='flex-start'>
-                                        <Grid item>
+                                    <Grid container>
+                                        <Grid item md={12}>
                                             <FormControlLabel
                                                 control={
                                                     <Checkbox
@@ -121,8 +120,9 @@ export default function CORSConfiguration(props) {
                                             />
                                         </Grid>
                                         {!isAllowAllOrigins && (
-                                            <Grid item>
+                                            <Grid item md={12}>
                                                 <ChipInput
+                                                    style={{ marginBottom: 40 }}
                                                     value={corsConfiguration.accessControlAllowOrigins}
                                                     helperText={
                                                         <FormattedMessage
@@ -172,6 +172,7 @@ export default function CORSConfiguration(props) {
                                 </Grid>
                                 <Grid item md={12}>
                                     <ChipInput
+                                        style={{ marginBottom: 40 }}
                                         value={corsConfiguration.accessControlAllowHeaders}
                                         helperText={
                                             <FormattedMessage
@@ -213,6 +214,7 @@ export default function CORSConfiguration(props) {
                                 </Grid>
                                 <Grid item md={12}>
                                     <ChipInput
+                                        style={{ marginBottom: 40 }}
                                         value={corsConfiguration.accessControlAllowMethods}
                                         helperText={
                                             <FormattedMessage
@@ -245,24 +247,26 @@ export default function CORSConfiguration(props) {
                                     />
                                 </Grid>
                                 <Grid item>
-                                    <Typography variant='subtitle1'>
-                                        <FormattedMessage
-                                            id={
-                                                'Apis.Details.Configuration.components' +
-                                                '.CORSConfiguration.allow.credentials'
-                                            }
-                                            defaultMessage='Access Control Allow Credentials'
-                                        />
-                                    </Typography>
-                                </Grid>
-                                <Grid item>
-                                    <Checkbox
-                                        checked={corsConfiguration.accessControlAllowCredentials}
-                                        onChange={({ target: { checked } }) =>
-                                            configDispatcher({
-                                                action: 'accessControlAllowCredentials',
-                                                value: checked,
-                                            })
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={corsConfiguration.accessControlAllowCredentials}
+                                                onChange={({ target: { checked } }) =>
+                                                    configDispatcher({
+                                                        action: 'accessControlAllowCredentials',
+                                                        value: checked,
+                                                    })
+                                                }
+                                            />
+                                        }
+                                        label={
+                                            <FormattedMessage
+                                                id={
+                                                    'Apis.Details.Configuration.components' +
+                                                    '.CORSConfiguration.allow.credentials'
+                                                }
+                                                defaultMessage='Access Control Allow Credentials'
+                                            />
                                         }
                                     />
                                 </Grid>

@@ -379,10 +379,20 @@ public interface APIConsumer extends APIManager {
     /**
      * @param identifier Api identifier
      * @param comment comment text
-     * @param user Username of the comment author                        
+     * @param user Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
     void addComment(APIIdentifier identifier, String comment, String user) throws APIManagementException;
+
+    /**
+     * This method is to add a comment.
+     *
+     * @param identifier Api identifier
+     * @param comment comment object
+     * @param user Username of the comment author
+     * @throws APIManagementException if failed to add comment for API
+     */
+    int addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException;
 
     /**
      * @param identifier Api identifier
@@ -390,6 +400,25 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get comments for identifier
      */
     Comment[] getComments(APIIdentifier identifier) throws APIManagementException;
+
+    /**
+     * This method is to get a comment of an API.
+     *
+     * @param identifier API Identifier
+     * @param commentId Comment ID
+     * @return Comment
+     * @throws APIManagementException if failed to get comments for identifier
+     */
+    Comment getComment(APIIdentifier identifier, int commentId) throws APIManagementException;
+
+    /**
+     * This method is to delete a comment.
+     *
+     * @param identifier API Identifier
+     * @param commentId Comment ID
+     * @throws APIManagementException if failed to delete comment for identifier
+     */
+    void deleteComment(APIIdentifier identifier, int commentId) throws APIManagementException;
 
     /**
      * Adds an application
@@ -603,7 +632,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
-                                                       APIIdentifier identifier, String groupingId) throws APIManagementException;
+                                                Identifier identifier, String groupingId) throws APIManagementException;
     
     Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException;
 

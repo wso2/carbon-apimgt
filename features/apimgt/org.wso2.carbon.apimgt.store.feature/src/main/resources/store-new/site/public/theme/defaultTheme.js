@@ -1,3 +1,4 @@
+const APP_CONTEXT = '/store-new';
 const Configurations = {
     themes: {
         light: {
@@ -45,7 +46,7 @@ const Configurations = {
                 leftMenuTextStyle: 'uppercase',
                 adminRole: 'admin',
                 commentsLimit: 5,
-                maxCommentLength: 1300,
+                maxCommentLength: 512,
                 resourceChipColors: {
                     get: '#02a8f4',
                     post: '#8ac149',
@@ -149,5 +150,8 @@ const Configurations = {
                 },
             },
         },
+    },
+    app: {
+        context: APP_CONTEXT,
     },
 };

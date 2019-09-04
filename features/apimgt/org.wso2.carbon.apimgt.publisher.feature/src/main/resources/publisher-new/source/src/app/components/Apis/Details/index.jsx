@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 
 import LifeCycleIcon from '@material-ui/icons/Autorenew';
 import EndpointIcon from '@material-ui/icons/GamesOutlined';
+import PersonPinCircleOutlinedIcon from '@material-ui/icons/PersonPinCircleOutlined';
 import ResourcesIcon from '@material-ui/icons/VerticalSplit';
 import ScopesIcon from '@material-ui/icons/VpnKey';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
@@ -28,11 +29,12 @@ import BusinessIcon from '@material-ui/icons/Business';
 import CodeIcon from '@material-ui/icons/Code';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
+import SubscriptionsIcon from '@material-ui/icons/RssFeed';
 import MonetizationIcon from '@material-ui/icons/LocalAtm';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl, defineMessages } from 'react-intl';
 import { Redirect, Route, Switch, Link, matchPath } from 'react-router-dom';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import Utils from 'AppData/Utils';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
@@ -50,7 +52,9 @@ import Documents from './Documents';
 import Operations from './Operations/Operations';
 import Resources from './Resources/Resources';
 import ProductResourcesView from './Resources/ProductResourcesView';
+import ProductResourcesEdit from './ProductResources/ProductResourcesEdit';
 import Endpoints from './Endpoints/Endpoints';
+import Environments from './Environments/Environments';
 import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
 import Scope from './Scopes';
@@ -124,7 +128,7 @@ class Details extends Component {
      */
     static isValidURL(pathname) {
         for (const [subPathKey, subPath] of Object.entries(Details.subPaths)) {
-            // Skip the BASE path , because it's will match for any `/apis/:apiUUID/*` values
+            // Skip the BASE path , because it will match for any `/apis/:apiUUID/*` values
             if (subPathKey !== 'BASE') {
                 const matched = matchPath(pathname, subPath);
                 if (matched) {
@@ -142,18 +146,10 @@ class Details extends Component {
      */
     constructor(props) {
         super(props);
-        this.handleMenuSelect = this.handleMenuSelect.bind(this);
-        const { location } = this.props;
-        const currentLink = location.pathname.match(/[^/]+(?=\/$|$)/g);
-        let active = null;
         const isAPIProduct = null;
-        if (currentLink && currentLink.length > 0) {
-            [active] = currentLink;
-        }
         this.state = {
             api: null,
             apiNotFound: false,
-            active: active || 'overview',
             // updateAPI: this.updateAPI,
             isAPIProduct,
         };
@@ -168,7 +164,8 @@ class Details extends Component {
      */
     componentDidMount() {
         const {
-            location: { pathname }, isAPIProduct,
+            location: { pathname },
+            isAPIProduct,
         } = this.props;
         // Load API data iff request page is valid
         if (Details.isValidURL(pathname)) {
@@ -256,8 +253,11 @@ class Details extends Component {
     }
 
     getLeftMenuItemForAPIType(apiType) {
-        const { active } = this.state;
-        const { intl } = this.props;
+        const { isAPIProduct } = this.state;
+        const { intl, match } = this.props;
+        const uuid = match.params.apiUUID || match.params.api_uuid || match.params.apiProdUUID;
+        const pathPrefix = '/' + (isAPIProduct ? 'api-products' : 'apis') + '/' + uuid + '/';
+
         switch (apiType) {
             case 'GRAPHQL':
                 return (
@@ -267,17 +267,12 @@ class Details extends Component {
                                 id: 'Apis.Details.index.schema.definition',
                                 defaultMessage: 'Schema Definition',
                             })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
+                            to={pathPrefix + 'schema definition'}
                             Icon={<CodeIcon />}
                         />
-                        <LeftMenuItem
-                            text='operations'
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
-                            Icon={<ResourcesIcon />}
-                        />
-                    </React.Fragment>);
+                        <LeftMenuItem text='operations' to={pathPrefix + 'operations'} Icon={<ResourcesIcon />} />
+                    </React.Fragment>
+                );
             default:
                 return (
                     <React.Fragment>
@@ -286,8 +281,7 @@ class Details extends Component {
                                 id: 'Apis.Details.index.api.definition',
                                 defaultMessage: 'api definition',
                             })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
+                            to={pathPrefix + 'api definition'}
                             Icon={<CodeIcon />}
                         />
                         <LeftMenuItem
@@ -295,11 +289,11 @@ class Details extends Component {
                                 id: 'Apis.Details.index.resources',
                                 defaultMessage: 'resources',
                             })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
+                            to={pathPrefix + 'resources'}
                             Icon={<ResourcesIcon />}
                         />
-                    </React.Fragment>);
+                    </React.Fragment>
+                );
         }
     }
     /**
@@ -324,35 +318,20 @@ class Details extends Component {
             // this is to get the updated api when api properties are updated, but we do not have the newApi object
             promisedUpdate = Api.get(api.id);
         }
-        return promisedUpdate.then((updatedAPI) => {
-            Alert.info(`${updatedAPI.name} API updated successfully`);
-            this.setState({ api: updatedAPI });
-            return updatedAPI;
-        }).catch((error) => {
-            // TODO: Should log and handle the error case by the original callee ~tmkb
-            console.error(error);
-            Alert.error(`Something went wrong while updating the ${api.name} API!!`);
-            // Kinda force render,Resting API object to old one
-            this.setState({ api });
-            throw error;
-        });
-    }
-
-    /**
-     *
-     *
-     * @param {*} menuLink
-     * @memberof Details
-     */
-    handleMenuSelect(menuLink) {
-        const { isAPIProduct } = this.state;
-        const path = isAPIProduct ? '/api-products/'
-         + this.props.match.params.apiProdUUID + '/' + menuLink :
-            '/apis/' + this.props.match.params.apiUUID + '/' + menuLink;
-        this.props.history.push({
-            pathname: path,
-        });
-        this.setState({ active: menuLink });
+        return promisedUpdate
+            .then((updatedAPI) => {
+                Alert.info(`${updatedAPI.name} API updated successfully`);
+                this.setState({ api: updatedAPI });
+                return updatedAPI;
+            })
+            .catch((error) => {
+                // TODO: Should log and handle the error case by the original callee ~tmkb
+                console.error(error);
+                Alert.error(`Something went wrong while updating the ${api.name} API!!`);
+                // Kinda force render,Resting API object to old one
+                this.setState({ api });
+                throw error;
+            });
     }
 
     /**
@@ -362,9 +341,7 @@ class Details extends Component {
      * @returns {Component} Render API Details page
      */
     render() {
-        const {
-            api, apiNotFound, active, isAPIProduct,
-        } = this.state;
+        const { api, apiNotFound, isAPIProduct } = this.state;
         const {
             classes,
             theme,
@@ -378,8 +355,9 @@ class Details extends Component {
         if (!Details.isValidURL(pathname)) {
             return <PageNotFound location={pageLocation} />;
         }
-
-        const redirectUrl = '/' + (isAPIProduct ? 'api-products' : 'apis') + '/' + match.params.api_uuid + '/' + active;
+        const uuid = match.params.apiUUID || match.params.api_uuid || match.params.apiProdUUID;
+        const pathPrefix = '/' + (isAPIProduct ? 'api-products' : 'apis') + '/' + uuid + '/';
+        const redirectUrl = pathPrefix;
         if (apiNotFound) {
             const { apiUUID } = match.params;
             const resourceNotFoundMessageText = defineMessages({
@@ -389,14 +367,13 @@ class Details extends Component {
                 },
                 bodyMessage: {
                     id: 'Apis.Details.index.api.not.found.body',
-                    defaultMessage: "Can't find the API with the id {apiUUID}",
+                    defaultMessage: "Can't find the API with the id {uuid}",
                 },
             });
             const resourceNotFountMessage = {
-                title: (intl.formatMessage(
-                    resourceNotFoundMessageText.titleMessage,
-                    { environmentLabel: `${Utils.getCurrentEnvironment().label}` },
-                )),
+                title: intl.formatMessage(resourceNotFoundMessageText.titleMessage, {
+                    environmentLabel: `${Utils.getCurrentEnvironment().label}`,
+                }),
                 body: intl.formatMessage(resourceNotFoundMessageText.bodyMessage, { apiUUID: `${apiUUID}` }),
             };
             return <ResourceNotFound message={resourceNotFountMessage} />;
@@ -416,7 +393,11 @@ class Details extends Component {
                     <div className={classes.LeftMenu}>
                         <Link to={'/' + (isAPIProduct ? 'api-products' : 'apis') + '/'}>
                             <div className={classes.leftLInkMain}>
-                                <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon='api' />
+                                <CustomIcon
+                                    width={leftMenuIconMainSize}
+                                    height={leftMenuIconMainSize}
+                                    icon={isAPIProduct ? 'api-product' : 'api'}
+                                />
                             </div>
                         </Link>
                         <LeftMenuItem
@@ -424,37 +405,43 @@ class Details extends Component {
                                 id: 'Apis.Details.index.overview',
                                 defaultMessage: 'overview',
                             })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
+                            to={pathPrefix + 'overview'}
                         />
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.configuration',
                                 defaultMessage: 'configuration',
                             })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
+                            to={pathPrefix + 'configuration'}
                             Icon={<ConfigurationIcon />}
                         />
-                        {!isAPIProduct &&
+                        {!isAPIProduct && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.endpoints',
                                     defaultMessage: 'endpoints',
                                 })}
-                                handleMenuSelect={this.handleMenuSelect}
-                                active={active}
+                                to={pathPrefix + 'endpoints'}
                                 Icon={<EndpointIcon />}
                             />
-                        }
+                        )}
+                        {!isAPIProduct && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.environments',
+                                    defaultMessage: 'environments',
+                                })}
+                                to={pathPrefix + 'environments'}
+                                Icon={<PersonPinCircleOutlinedIcon />}
+                            />
+                        )}
                         {this.getLeftMenuItemForAPIType(api.type)}
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.lifecycle',
                                 defaultMessage: 'lifecycle',
                             })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
+                            to={pathPrefix + 'lifecycle'}
                             Icon={<LifeCycleIcon />}
                         />
                         <LeftMenuItem
@@ -462,8 +449,7 @@ class Details extends Component {
                                 id: 'Apis.Details.index.left.menu.scope',
                                 defaultMessage: 'scopes',
                             })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
+                            to={pathPrefix + 'scopes'}
                             Icon={<ScopesIcon />}
                         />
                         <LeftMenuItem
@@ -471,36 +457,15 @@ class Details extends Component {
                                 id: 'Apis.Details.index.documents',
                                 defaultMessage: 'documents',
                             })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
+                            to={pathPrefix + 'documents'}
                             Icon={<DocumentsIcon />}
                         />
-                        {/* TODO: uncomment when component run without errors */}
-                        {/* <LeftMenuItem
-                         text='subscriptions'
-                         handleMenuSelect={this.handleMenuSelect}
-                         active={active}
-                         Icon={<SubscriptionsIcon />}
-                         />
-                         <LeftMenuItem
-                         text='security'
-                         handleMenuSelect={this.handleMenuSelect}
-                         active={active}
-                         Icon={<SecurityIcon />}
-                         />
-                         <LeftMenuItem
-                         text='comments'
-                         handleMenuSelect={this.handleMenuSelect}
-                         active={active}
-                         Icon={<CommentsIcon />}
-                         /> */}
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.business.info',
                                 defaultMessage: 'business info',
                             })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
+                            to={pathPrefix + 'business info'}
                             Icon={<BusinessIcon />}
                         />
                         <LeftMenuItem
@@ -508,20 +473,25 @@ class Details extends Component {
                                 id: 'Apis.Details.index.properties',
                                 defaultMessage: 'properties',
                             })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
+                            to={pathPrefix + 'properties'}
                             Icon={<PropertiesIcon />}
+                        />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.subscriptions',
+                                defaultMessage: 'subscriptions',
+                            })}
+                            to={pathPrefix + 'subscriptions'}
+                            Icon={<SubscriptionsIcon />}
                         />
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.monetization',
                                 defaultMessage: 'monetization',
                             })}
-                            handleMenuSelect={this.handleMenuSelect}
-                            active={active}
+                            to={pathPrefix + 'monetization'}
                             Icon={<MonetizationIcon />}
                         />
-
                     </div>
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} />
@@ -532,10 +502,7 @@ class Details extends Component {
                                     path={Details.subPaths.OVERVIEW_PRODUCT}
                                     component={() => <Overview api={api} />}
                                 />
-                                <Route
-                                    path={Details.subPaths.OVERVIEW}
-                                    component={() => <Overview api={api} />}
-                                />
+                                <Route path={Details.subPaths.OVERVIEW} component={() => <Overview api={api} />} />
                                 <Route
                                     path={Details.subPaths.API_DEFINITION}
                                     component={() => <APIDefinition api={api} />}
@@ -554,12 +521,19 @@ class Details extends Component {
                                     component={() => <Configuration api={api} />}
                                 />
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
-
+                                <Route
+                                    path={Details.subPaths.ENVIRONMENTS}
+                                    component={() => <Environments api={api} />}
+                                />
                                 <Route path={Details.subPaths.OPERATIONS} component={() => <Operations api={api} />} />
                                 <Route
+                                    exact
                                     path={Details.subPaths.RESOURCES_PRODUCT}
-                                    component={() =>
-                                        <ProductResourcesView api={api} />}
+                                    component={() => <ProductResourcesView api={api} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.RESOURCES_PRODUCT_EDIT}
+                                    component={() => <ProductResourcesEdit />}
                                 />
 
                                 <Route path={Details.subPaths.RESOURCES} component={() => <Resources api={api} />} />
@@ -573,7 +547,7 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.SUBSCRIPTIONS}
-                                    component={() => <Subscriptions api={api} />}
+                                    component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
                                 />
                                 <Route path={Details.subPaths.SECURITY} component={() => <Security api={api} />} />
                                 <Route path={Details.subPaths.COMMENTS} component={() => <Comments api={api} />} />
@@ -591,6 +565,7 @@ class Details extends Component {
                                     component={() => <Properties api={api} />}
                                 />
                                 <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
+                                <Route path={Details.subPaths.SUBSCRIPTIONS} component={() => <Subscriptions />} />
                                 <Route
                                     path={Details.subPaths.MONETIZATION}
                                     component={() => <Monetization api={api} />}
@@ -619,9 +594,11 @@ Details.subPaths = {
     CONFIGURATION: '/apis/:api_uuid/configuration',
     CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/configuration',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
+    ENVIRONMENTS: '/apis/:api_uuid/environments',
     OPERATIONS: '/apis/:api_uuid/operations',
     RESOURCES: '/apis/:api_uuid/resources',
     RESOURCES_PRODUCT: '/api-products/:apiprod_uuid/resources',
+    RESOURCES_PRODUCT_EDIT: '/api-products/:apiprod_uuid/resources/edit',
     SCOPES: '/apis/:api_uuid/scopes',
     SCOPES_PRODUCT: '/api-products/:apiprod_uuid/scopes',
     DOCUMENTS: '/apis/:api_uuid/documents',

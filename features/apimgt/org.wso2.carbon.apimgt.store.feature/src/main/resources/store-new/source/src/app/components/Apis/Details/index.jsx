@@ -89,37 +89,37 @@ const LoadableSwitch = withRouter(Loadable.Map({
         const Credentials = loaded.Credentials.default;
         const Comments = loaded.Comments.default;
         const Sdk = loaded.Sdk.default;
-        const api_uuid = match.params.api_uuid;
+        const apiUuid = match.params.api_uuid;
         let path = '/apis/';
         if (apiType === CONSTS.API_PRODUCT_TYPE) {
             path = '/api-products/';
         }
-        const redirectURL = path + api_uuid + '/overview';
+        const redirectURL = path + apiUuid + '/overview';
 
         return (
             <Switch>
-                <Redirect exact from='/apis/:api_uuid' to={redirectURL} />
+                <Redirect exact from='/apis/:apiUuid' to={redirectURL} />
                 <Route
-                    path='/apis/:api_uuid/overview'
+                    path='/apis/:apiUuid/overview'
                     render={props => (
                         <Overview {...props} />)}
                 />
-                <Route path='/apis/:api_uuid/credentials' component={Credentials} />
-                <Route path='/apis/:api_uuid/comments' component={Comments} />
-                <Route path='/apis/:api_uuid/test' component={ApiConsole} />
-                <Route path='/apis/:api_uuid/docs' component={Documentation} />
-                <Route path='/apis/:api_uuid/sdk' component={Sdk} />
-                <Redirect exact from='/api-products/:api_uuid' to={redirectURL} />
+                <Route path='/apis/:apiUuid/credentials' component={Credentials} />
+                <Route path='/apis/:apiUuid/comments' component={Comments} />
+                <Route path='/apis/:apiUuid/test' component={ApiConsole} />
+                <Route path='/apis/:apiUuid/docs' component={Documentation} />
+                <Route path='/apis/:apiUuid/sdk' component={Sdk} />
+                <Redirect exact from='/api-products/:apiUuid' to={redirectURL} />
                 <Route
-                    path='/api-products/:api_uuid/overview'
+                    path='/api-products/:apiUuid/overview'
                     render={props => (
                         <Overview {...props} />)}
                 />
-                <Route path='/api-products/:api_uuid/credentials' component={Credentials} />
-                <Route path='/api-products/:api_uuid/comments' component={Comments} />
-                <Route path='/api-products/:api_uuid/test' component={ApiConsole} />
-                <Route path='/api-products/:api_uuid/docs' component={Documentation} />
-                <Route path='/api-products/:api_uuid/sdk' component={Sdk} />
+                <Route path='/api-products/:apiUuid/credentials' component={Credentials} />
+                <Route path='/api-products/:apiUuid/comments' component={Comments} />
+                <Route path='/api-products/:apiUuid/test' component={ApiConsole} />
+                <Route path='/api-products/:apiUuid/docs' component={Documentation} />
+                <Route path='/api-products/:apiUuid/sdk' component={Sdk} />
                 <Route component={PageNotFound} />
             </Switch>
         );
@@ -213,6 +213,7 @@ class Details extends React.Component {
                 restApi = new APIProduct();
             }
 
+            // const subscriptionClient = new Subscription();
             promisedAPI = restApi.getAPIById(this.api_uuid);
             existingSubscriptions = restApi.getSubscriptions(this.api_uuid, null);
             promisedApplications = restApi.getAllApplications();
@@ -299,7 +300,13 @@ class Details extends React.Component {
      * @memberof Details
      */
     handleMenuSelect = (menuLink) => {
-        this.props.history.push({ pathname: '/apis/' + this.props.match.params.api_uuid + '/' + menuLink });
+        const { apiType } = this.state;
+        let path = '/apis/';
+        if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            path = '/api-products/';
+        }
+
+        this.props.history.push({ pathname: path + this.props.match.params.api_uuid + '/' + menuLink });
         menuLink === 'overview' ? this.infoBar.toggleOverview(true) : this.infoBar.toggleOverview(false);
         this.setState({ active: menuLink });
     };
@@ -369,7 +376,7 @@ class Details extends React.Component {
                     <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />
                     <LeftMenuItem text='credentials' handleMenuSelect={this.handleMenuSelect} active={active} />
                     {/* TODO: uncomment when the feature is working */}
-                    {/* <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={active} /> */}
+                    <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={active} />
                     <LeftMenuItem text='test' handleMenuSelect={this.handleMenuSelect} active={active} />
                     <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} />
                     <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
