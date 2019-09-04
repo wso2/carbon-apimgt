@@ -23,7 +23,7 @@ import { CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import VisibilitySensor from 'react-visibility-sensor';
 import Paper from '@material-ui/core/Paper';
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles, createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { Line } from 'rc-progress';
 import Progress from 'AppComponents/Shared/Progress';
 
@@ -60,6 +60,13 @@ class APISecurityAudit extends Component {
         this.dataArray = [];
         this.securityArray = [];
         this.validationArray = [];
+        this.criticalityMap = {
+            1: 'INFO',
+            2: 'LOW',
+            3: 'MEDIUM',
+            4: 'HIGH',
+            5: 'CRITICAL',
+        };
     }
 
     /**
@@ -98,6 +105,44 @@ class APISecurityAudit extends Component {
         return this.keyCount++;
     }
 
+    getMuiTheme = () => createMuiTheme({
+        overrides: {
+            MUIDataTableBodyCell: {
+                root: {
+                    width: '60px',
+                },
+            },
+            MUIDataTableSelectCell: {
+                root: {
+                    display: 'none',
+                },
+            },
+            MUIDataTableToolbarSelect: {
+                title: {
+                    display: 'none',
+                },
+            },
+        },
+    });
+
+    /**
+     * Get Row data for MUI Table
+     * @param {*} issues Issues array
+     * @return {*} dataArray array
+     */
+    getRowData(issues) {
+        const dataArray = [];
+        issues.forEach((issue) => {
+            const rowData = [];
+            rowData.push(
+                this.criticalityMap[issue.criticality],
+                issue.message, Math.round(issue.score),
+            );
+            dataArray.push(rowData);
+        });
+        return dataArray;
+    }
+
     /**
      * @inheritdoc
      */
@@ -109,14 +154,6 @@ class APISecurityAudit extends Component {
         const {
             report, overallGrade, numErrors, loading,
         } = this.state;
-
-        const criticalityMap = {
-            1: 'INFO',
-            2: 'LOW',
-            3: 'MEDIUM',
-            4: 'HIGH',
-            5: 'CRITICAL',
-        };
 
         const reportObject = JSON.parse(report);
 
@@ -235,58 +272,18 @@ class APISecurityAudit extends Component {
                                 <Typography variant='body1'>
                                     <strong>Criticality:</strong> {reportObject.validation.criticality}
                                 </Typography>
-                                {/* <Typography variant='body1'>{
-                                    (reportObject.validation.issueCounter !== 0) ?
-                                        (reportObject.validation.issues.map((issue) => {
-                                            return (
-                                                <Grid container spacing={3}>
-                                                    <Grid item xs={12}>
-                                                        <Paper elevation={1} className={classes.rootPaper}>
-                                                            <div className={classes.gridDiv}>
-                                                                <Typography
-                                                                    variant='body1'
-                                                                    style={{ width: '75%' }}
-                                                                    key={this.getKey()}
-                                                                >
-                                                                    <strong>Description:</strong> {issue.message}
-                                                                </Typography>
-                                                                <Typography
-                                                                    variant='body1'
-                                                                    style={{ width: '25%' }}
-                                                                    key={this.getKey()}
-                                                                >
-                                                                    <strong>
-                                                                        Score Impact:
-                                                                    </strong> {Math.round(issue.score)}
-                                                                </Typography>
-                                                            </div>
-                                                        </Paper>
-                                                    </Grid>
-                                                </Grid>
-                                            );
-                                        })) : (null)
-                                }
-                                </Typography> */}
                                 {(reportObject.validation.issueCounter !== 0) &&
                                     <div>
                                         <hr />
                                         <Typography variant='body1'>
-                                            {
-                                                reportObject.validation.issues.forEach((issue) => {
-                                                    const rowData = [];
-                                                    rowData.push(
-                                                        criticalityMap[issue.criticality],
-                                                        issue.message, Math.round(issue.score),
-                                                    );
-                                                    this.validationArray.push(rowData);
-                                                })
-                                            }
-                                            <MUIDataTable
-                                                title='Issues'
-                                                data={this.validationArray}
-                                                columns={columns}
-                                                options={options}
-                                            />
+                                            <MuiThemeProvider theme={this.getMuiTheme()}>
+                                                <MUIDataTable
+                                                    title='Issues'
+                                                    data={this.getRowData(reportObject.validation.issues)}
+                                                    columns={columns}
+                                                    options={options}
+                                                />
+                                            </MuiThemeProvider>
                                         </Typography>
                                     </div>
                                 }
@@ -309,22 +306,14 @@ class APISecurityAudit extends Component {
                                     <div>
                                         <hr />
                                         <Typography variant='body1'>
-                                            {
-                                                reportObject.security.issues.forEach((issue) => {
-                                                    const rowData = [];
-                                                    rowData.push(
-                                                        criticalityMap[issue.criticality],
-                                                        issue.message, Math.round(issue.score),
-                                                    );
-                                                    this.securityArray.push(rowData);
-                                                })
-                                            }
-                                            <MUIDataTable
-                                                title='Issues'
-                                                data={this.securityArray}
-                                                columns={columns}
-                                                options={options}
-                                            />
+                                            <MuiThemeProvider theme={this.getMuiTheme()}>
+                                                <MUIDataTable
+                                                    title='Issues'
+                                                    data={this.getRowData(reportObject.security.issues)}
+                                                    columns={columns}
+                                                    options={options}
+                                                />
+                                            </MuiThemeProvider>
                                         </Typography>
                                     </div>
                                 }
@@ -346,22 +335,14 @@ class APISecurityAudit extends Component {
                                     <div>
                                         <hr />
                                         <Typography variant='body1'>
-                                            {
-                                                reportObject.data.issues.forEach((issue) => {
-                                                    const rowData = [];
-                                                    rowData.push(
-                                                        criticalityMap[issue.criticality],
-                                                        issue.message, Math.round(issue.score),
-                                                    );
-                                                    this.dataArray.push(rowData);
-                                                })
-                                            }
-                                            <MUIDataTable
-                                                title='Issues'
-                                                data={this.dataArray}
-                                                columns={columns}
-                                                options={options}
-                                            />
+                                            <MuiThemeProvider theme={this.getMuiTheme()}>
+                                                <MUIDataTable
+                                                    title='Issues'
+                                                    data={this.getRowData(reportObject.data.issues)}
+                                                    columns={columns}
+                                                    options={options}
+                                                />
+                                            </MuiThemeProvider>
                                         </Typography>
                                     </div>
                                 }
