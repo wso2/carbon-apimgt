@@ -226,6 +226,8 @@
                         <Import-Package>
                             org.apache.commons.codec.*,
                             org.slf4j,
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
                             org.wso2.carbon.identity.base.*; version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.identity.core.*; version="${carbon.identity.imp.pkg.version}",
