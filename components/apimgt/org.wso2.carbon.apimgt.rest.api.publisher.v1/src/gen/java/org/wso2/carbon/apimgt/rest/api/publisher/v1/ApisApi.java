@@ -239,7 +239,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
 
     @PUT
     @Path("/{apiId}/graphql-schema")
-    @Consumes({ "application/json" })
+    @Consumes({ "application/x-www-form-urlencoded" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Add a Schema to a GraphQL API", notes = "This operation can be used to add a GraphQL Schema definition to an existing GraphQL API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {

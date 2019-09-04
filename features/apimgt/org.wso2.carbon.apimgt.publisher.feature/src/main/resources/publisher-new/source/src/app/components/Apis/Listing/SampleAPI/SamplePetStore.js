@@ -40,7 +40,6 @@ const getSwagger = policyLevel => ({
                         description: 'Unsupported Media Type. The entity of the request was in a not supported format.',
                     },
                 },
-                security: [{ pizzashack_auth: ['write:order', 'read:order'] }],
             },
         },
         '/menu': {
@@ -68,7 +67,6 @@ const getSwagger = policyLevel => ({
                         description: 'Not Acceptable. The requested media type is not supported',
                     },
                 },
-                security: [{ pizzashack_auth: ['read:menu'] }],
             },
         },
         '/order/{orderId}': {
@@ -123,7 +121,6 @@ const getSwagger = policyLevel => ({
                             'of the preconditions is not met.',
                     },
                 },
-                security: [{ pizzashack_auth: ['write:order', 'read:order'] }],
             },
             get: {
                 'x-auth-type': 'Application & Application User',
@@ -159,7 +156,6 @@ const getSwagger = policyLevel => ({
                         description: 'Not Acceptable. The requested media type is not supported',
                     },
                 },
-                security: [{ pizzashack_auth: ['write:order', 'read:order'] }],
             },
             delete: {
                 'x-auth-type': 'Application & Application User',
@@ -190,25 +186,12 @@ const getSwagger = policyLevel => ({
                             ' preconditions is not met.',
                     },
                 },
-                security: [{ pizzashack_auth: ['write:order', 'read:order'] }],
             },
         },
     },
     schemes: ['https'],
     produces: ['application/json'],
     swagger: '2.0',
-    securityDefinitions: {
-        pizzashack_auth: {
-            type: 'oauth2',
-            authorizationUrl: 'http://wso2.swagger.io/api/oauth/dialog',
-            flow: 'implicit',
-            scopes: {
-                'write:order': 'modify order in your account',
-                'read:order': 'read your order',
-                'read:menu': 'read your menu',
-            },
-        },
-    },
     definitions: {
         ErrorListItem: {
             title: 'Description of individual errors that may have occored during a request.',

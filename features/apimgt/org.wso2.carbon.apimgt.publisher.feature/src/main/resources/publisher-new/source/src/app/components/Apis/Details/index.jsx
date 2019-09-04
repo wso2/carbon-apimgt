@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 
 import LifeCycleIcon from '@material-ui/icons/Autorenew';
 import EndpointIcon from '@material-ui/icons/GamesOutlined';
+import PersonPinCircleOutlinedIcon from '@material-ui/icons/PersonPinCircleOutlined';
 import ResourcesIcon from '@material-ui/icons/VerticalSplit';
 import ScopesIcon from '@material-ui/icons/VpnKey';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
@@ -431,7 +432,7 @@ class Details extends Component {
                                     defaultMessage: 'environments',
                                 })}
                                 to={pathPrefix + 'environments'}
-                                Icon={<EndpointIcon />}
+                                Icon={<PersonPinCircleOutlinedIcon />}
                             />
                         )}
                         {this.getLeftMenuItemForAPIType(api.type)}

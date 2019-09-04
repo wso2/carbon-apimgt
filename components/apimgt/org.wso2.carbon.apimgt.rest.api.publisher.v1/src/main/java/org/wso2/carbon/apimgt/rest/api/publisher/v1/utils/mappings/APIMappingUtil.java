@@ -115,11 +115,13 @@ public class APIMappingUtil {
         model.setContext(context);
         model.setDescription(dto.getDescription());
 
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            model.setEndpointConfig(mapper.writeValueAsString(dto.getEndpointConfig()));
-        } catch (IOException e) {
-            handleException("Error while converting endpointConfig to json", e);
+        if (dto.getEndpointConfig() != null) {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                model.setEndpointConfig(mapper.writeValueAsString(dto.getEndpointConfig()));
+            } catch (IOException e) {
+                handleException("Error while converting endpointConfig to json", e);
+            }
         }
 
         model.setImplementation(dto.getEndpointImplementationType().toString());
