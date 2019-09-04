@@ -18,6 +18,8 @@
 
 import React, { useContext, useState } from 'react';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
+
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
@@ -40,7 +42,7 @@ import Paper from '@material-ui/core/Paper';
  */
 export default function Environments() {
     const { api, updateAPI } = useContext(APIContext);
-
+    const { settings } = useAppContext();
     const [gatewayEnvironments, setGatewayEnvironments] = useState([...api.gatewayEnvironments]);
 
     /**
@@ -50,23 +52,6 @@ export default function Environments() {
     function addEnvironments() {
         updateAPI({ gatewayEnvironments }).then(() => Alert.info('API Update Successfully'));
     }
-
-    // TODO: Get environments from setting API
-    const environments =
-        {
-            environment: [
-                {
-                    name: 'Production and Sandbox',
-                    type: 'hybrid',
-                    serverUrl: 'https://localhost:9443/services/',
-                    showInApiConsole: true,
-                    endpoints: {
-                        http: 'http://localhost:8280',
-                        https: 'https://localhost:8243',
-                    },
-                },
-            ],
-        };
 
     return (
         <div>
@@ -90,7 +75,7 @@ export default function Environments() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {environments.environment.map(row => (
+                        {settings.environment.map(row => (
                             <TableRow key={row.name}>
                                 <TableCell padding='checkbox'>
                                     <Checkbox

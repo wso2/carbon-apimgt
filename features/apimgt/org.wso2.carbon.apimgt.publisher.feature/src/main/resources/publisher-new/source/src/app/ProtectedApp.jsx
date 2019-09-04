@@ -24,6 +24,7 @@ import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 // import MaterialDesignCustomTheme from 'AppComponents/Shared/CustomTheme';
 import { PageNotFound } from 'AppComponents/Base/Errors';
 import Apis from 'AppComponents/Apis/Apis';
+import Api from 'AppData/api';
 import Base from 'AppComponents/Base';
 import AuthManager from 'AppData/AuthManager';
 import Header from 'AppComponents/Base/Header';
@@ -32,6 +33,7 @@ import Configurations from 'Config';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import { IntlProvider } from 'react-intl';
+import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 
 const theme = createMuiTheme(Configurations.themes.light);
 
@@ -52,7 +54,9 @@ export default class Protected extends Component {
      */
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            settings: null,
+        };
         this.environments = [];
     }
 
@@ -62,14 +66,18 @@ export default class Protected extends Component {
      */
     componentDidMount() {
         const user = AuthManager.getUser();
+        const api = new Api();
+        const settingPromise = api.getSettings();
         if (user) {
             this.setState({ user });
+            settingPromise.then(settingsNew => this.setState({ settings: settingsNew }));
         } else {
             // If no user data available , Get the user info from existing token information
             // This could happen when OAuth code authentication took place and could send
             // user information via redirection
             const userPromise = AuthManager.getUserFromToken();
             userPromise.then(loggedUser => this.setState({ user: loggedUser }));
+            settingPromise.then(settingsNew => this.setState({ settings: settingsNew }));
         }
     }
 
@@ -80,6 +88,7 @@ export default class Protected extends Component {
     render() {
         const user = this.state.user || AuthManager.getUser();
         const header = <Header avatar={<Avatar user={user} />} user={user} />;
+        const { settings } = this.state;
 
         if (!user) {
             return (
@@ -89,18 +98,22 @@ export default class Protected extends Component {
             );
         }
         return (
-            <MuiThemeProvider theme={theme}>
-                <AppErrorBoundary>
-                    <Base header={header}>
-                        <Switch>
-                            <Redirect exact from='/' to='/apis' />
-                            <Route path='/apis' component={Apis} />
-                            <Route path='/api-products' component={Apis} />
-                            <Route component={PageNotFound} />
-                        </Switch>
-                    </Base>
-                </AppErrorBoundary>
-            </MuiThemeProvider>
+            settings && (
+                <AppContextProvider value={{ settings, user }}>
+                    <MuiThemeProvider theme={theme}>
+                        <AppErrorBoundary>
+                            <Base header={header}>
+                                <Switch>
+                                    <Redirect exact from='/' to='/apis' />
+                                    <Route path='/apis' component={Apis} />
+                                    <Route path='/api-products' component={Apis} />
+                                    <Route component={PageNotFound} />
+                                </Switch>
+                            </Base>
+                        </AppErrorBoundary>
+                    </MuiThemeProvider>
+                </AppContextProvider>
+            )
         );
     }
 }
