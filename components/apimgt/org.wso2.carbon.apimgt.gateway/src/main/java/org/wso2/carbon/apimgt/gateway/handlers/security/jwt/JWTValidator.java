@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -473,15 +474,15 @@ public class JWTValidator {
     }
 
     private Cache getGatewayTokenCache() {
-        return getCacheFromCacheManager(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
+        return CacheProvider.getGatewayTokenCache();
     }
 
     private Cache getInvalidTokenCache() {
-        return getCacheFromCacheManager(APIConstants.GATEWAY_INVALID_TOKEN_CACHE_NAME);
+        return CacheProvider.getInvalidTokenCache();
     }
 
     private Cache getGatewayKeyCache() {
-        return getCacheFromCacheManager(APIConstants.GATEWAY_KEY_CACHE_NAME);
+        return CacheProvider.getGatewayKeyCache();
     }
 
     private Cache getCacheFromCacheManager(String cacheName) {

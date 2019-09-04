@@ -121,10 +121,10 @@ public class CacheProvider {
      */
     public static Cache createResourceCache() {
         APIManagerConfiguration config = getApiManagerConfiguration();
-        String gatewayTokenCacheExpiry = config.getFirstProperty(APIConstants.GATEWAY_RESOURCE_CACHE_TIMEOUT);
-        if (gatewayTokenCacheExpiry != null) {
+        String gatewayResourceCacheExpiry = config.getFirstProperty(APIConstants.GATEWAY_RESOURCE_CACHE_TIMEOUT);
+        if (gatewayResourceCacheExpiry != null) {
             return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.RESOURCE_CACHE_NAME,
-                    Long.parseLong(gatewayTokenCacheExpiry), Long.parseLong(gatewayTokenCacheExpiry));
+                    Long.parseLong(gatewayResourceCacheExpiry), Long.parseLong(gatewayResourceCacheExpiry));
         } else {
             long defaultCacheTimeout = getDefaultCacheTimeout();
             return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.RESOURCE_CACHE_NAME,
