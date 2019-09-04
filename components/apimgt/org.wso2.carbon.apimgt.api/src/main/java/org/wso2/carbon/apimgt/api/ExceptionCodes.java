@@ -275,9 +275,7 @@ public enum ExceptionCodes implements ErrorHandler {
 
     //External Stores related codes
     EXTERNAL_STORE_ID_NOT_FOUND(901200,"External Store Not Found", 404, "Error while publishing to external stores. " +
-            "External Store Not Found"),
-    EXTERNAL_STORE_PUBLISHING_NOT_ENABLED(902001, "External Stores Not Found", 404,
-            "External Store Publishing not enabled for tenant");
+            "External Store Not Found");
 
     private final long errorCode;
     private final String errorMessage;
