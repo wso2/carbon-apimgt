@@ -17,6 +17,7 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
@@ -172,6 +173,7 @@ public enum SubscriptionAvailabilityEnum {
 }
 
     private SubscriptionAvailabilityEnum subscriptionAvailability = null;
+    @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> subscriptionAvailableTenants = new ArrayList<>();
     private Map<String, String> additionalProperties = new HashMap<>();
     private APIProductBusinessInformationDTO businessInformation = null;

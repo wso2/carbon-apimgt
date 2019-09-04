@@ -6118,6 +6118,8 @@ definitions:
       - name
       - context
       - version
+    x-scopes:
+      - apim:api_create
     properties:
       id:
         type: string
@@ -6189,15 +6191,21 @@ definitions:
         items:
           type: string
         example: ["substract","add"]
+        x-otherScopes:
+          - apim:api_publish
       policies:
         type: array
         items:
           type: string
         example: ["Unlimited"]
+        x-otherScopes:
+          - apim:api_publish
       apiThrottlingPolicy:
         description: The API level throttling policy selected for the particular API
         type: string
         example: "Unlimited"
+        x-otherScopes:
+          - apim:api_publish
       authorizationHeader:
         type: string
         description: |
@@ -6221,12 +6229,16 @@ definitions:
           - RESTRICTED
         example: PUBLIC
         default: PUBLIC
+        x-otherScopes:
+          - apim:api_publish
       visibleRoles:
         type: array
         description: The user roles that are able to access the API in Store
         items:
           type: string
         example: []
+        x-otherScopes:
+          - apim:api_publish
       visibleTenants:
         type: array
         items:
@@ -6240,6 +6252,8 @@ definitions:
         items:
           type: string
         example: ["Production and Sandbox"]
+        x-otherScopes:
+          - apim:api_publish
       labels:
         description: |
           Labels of micro-gateway environments attached to the API.
@@ -6265,6 +6279,8 @@ definitions:
           - specific_tenants
         example: current_tenant
         default: all_tenants
+        x-otherScopes:
+          - apim:api_publish
       subscriptionAvailableTenants:
         type: array
         items:
@@ -6275,6 +6291,8 @@ definitions:
         additionalProperties:
           type: string
         description : Map of custom properties of API
+        x-otherScopes:
+          - apim:api_publish
       monetization:
         $ref: '#/definitions/APIMonetizationInfo'
       accessControl:
@@ -6295,7 +6313,12 @@ definitions:
           type: string
         example: [admin]
       businessInformation:
-        $ref: '#/definitions/APIBusinessInformation'
+        allOf:
+          - $ref: '#/definitions/APIBusinessInformation'
+          # - type:'#/definitions/APIBusinessInformation'
+        x-otherScopes:
+          - apim:api_publish
+          - test_scope
       corsConfiguration:
         $ref: '#/definitions/APICorsConfiguration'
       workflowStatus:
@@ -6607,6 +6630,8 @@ definitions:
         items:
           type: string
         example: ["tenant1", "tenant2"]
+        x-otherScopes:
+          - apim:api_publish
       additionalProperties:
         type: object
         additionalProperties:

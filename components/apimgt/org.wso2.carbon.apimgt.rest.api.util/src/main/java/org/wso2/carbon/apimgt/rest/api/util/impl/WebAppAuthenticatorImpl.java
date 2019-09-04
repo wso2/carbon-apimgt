@@ -118,6 +118,8 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
         String verb = (String) message.get(Message.HTTP_REQUEST_METHOD);
         String resource = path.substring(basePath.length() - 1);
         String[] scopes = tokenInfo.getScopes();
+        // Set the token info into the message context
+        message.getExchange().put(RestApiConstants.MESSAGE_EXCHANGE_TOKEN_INFO, tokenInfo);
         //get all the URI templates of the REST API from the base path
         Set<URITemplate> uriTemplates = RestApiUtil.getURITemplatesForBasePath(basePath);
         if (uriTemplates.isEmpty()) {
