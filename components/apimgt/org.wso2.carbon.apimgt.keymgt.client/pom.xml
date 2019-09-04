@@ -87,6 +87,8 @@
                             ${project.artifactId}
                         </Bundle-SymbolicName>
                         <Import-Package>
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
                             *;resolution:=optional
                         </Import-Package>
