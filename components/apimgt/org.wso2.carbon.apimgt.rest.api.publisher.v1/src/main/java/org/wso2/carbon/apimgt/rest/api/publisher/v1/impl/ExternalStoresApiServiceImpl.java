@@ -37,7 +37,8 @@ public class ExternalStoresApiServiceImpl implements ExternalStoresApiService {
      * @param messageContext CXF Message Context
      * @return External Store list
      */
-    public Response externalStoresGet(MessageContext messageContext) {
+    @Override
+    public Response getAllExternalStores(MessageContext messageContext) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         try {
             Set<APIStore> apiStores = APIUtil.getExternalAPIStores(APIUtil.getTenantIdFromTenantDomain(tenantDomain));

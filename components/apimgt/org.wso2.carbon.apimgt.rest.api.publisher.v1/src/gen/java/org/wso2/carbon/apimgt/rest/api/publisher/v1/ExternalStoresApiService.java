@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ExternalStoresApiService {
-      public Response externalStoresGet(MessageContext messageContext) throws APIManagementException;
+      public Response getAllExternalStores(MessageContext messageContext) throws APIManagementException;
 }

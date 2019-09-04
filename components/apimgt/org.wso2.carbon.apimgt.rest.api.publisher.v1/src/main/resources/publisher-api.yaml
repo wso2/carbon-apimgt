@@ -3396,14 +3396,12 @@ paths:
 # Retrieve the published external stores list of a certain API
 #-------------------------------------------------------------
     get:
+      operationId: getAllPublishedExternalStoresByAPI
       security:
         - OAuth2Security:
             - apim:api_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/external-stores\""
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/external-stores
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n{\"count\":1,\"list\":[{\"id\":\"StoreABC\",\"displayName\":\"StoreABC\",\"type\":\"wso2\"}]}"
+      x-examples:
+        $ref: docs/examples/external-stores/external_stores.yaml#/getPublishedExternalStoresByAPI
       summary: Get the list of external stores which an API is published to
       description: |
         This operation can be used to retrieve a list of external stores which an API is published to by providing the id of the API.
@@ -3411,7 +3409,7 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - External-Store (Collection)
+        - External Stores
       responses:
         200:
           description: |
@@ -3448,15 +3446,12 @@ paths:
 # Publish an API to external stores
 #-----------------------------------------------------
     post:
+      operationId: publishAPIToExternalStores
       security:
         - OAuth2Security:
             - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreId=StoreABC&externalStoreId=StoreXYZ'\""
-      x-wso2-request: |
-        POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreId=StoreABC&externalStoreId=StoreXYZ
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-        Content-Type: application/json
-      x-wso2-response: "HTTP/1.1 200\nContent-Type: application/json\n{\"count\":2,\"list\":[{\"id\":\"StoreABC\",\"displayName\":\"StoreABC\",\"type\":\"wso2\"},{\"id\":\"StoreXYZ\",\"displayName\":\"StoreXYZ\",\"type\":\"wso2\"}]}"
+      x-examples:
+        $ref: docs/examples/external-stores/external_stores.yaml#/publishToExternalStore
       summary: Publish an API to external stores
       description: |
         This operation can be used to publish an API to a list of external stores.
@@ -3471,7 +3466,7 @@ paths:
           required: true
         - $ref: '#/parameters/If-Match'
       tags:
-        - Publish API To External Stores
+        - External Stores
       responses:
         200:
           description: |
@@ -3490,12 +3485,6 @@ paths:
                 Date and time the subscription has been blocked.
                 Used by caches, or in conditional requests (Will be supported in future).
               type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
         500:
           description: Internal server error while publishing to external stores
           schema:
@@ -3503,7 +3492,7 @@ paths:
         404:
           description: |
             Not Found.
-            Request API resource is not found.
+            Request API resource or external store Ids not found.
           schema:
             $ref: '#/definitions/Error'
 
@@ -5796,17 +5785,15 @@ paths:
     # Retrieve configured external store list
     #-----------------------------------------------------
     get:
+      operationId: getAllExternalStores
       security:
         - OAuth2Security:
             - apim:api_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/external-stores\""
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/external-stores
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n{\"count\":1,\"list\":[{\"id\":\"StoreABC\",\"displayName\":\"StoreABC\",\"type\":\"wso2\"}]}"
+      x-examples:
+        $ref: docs/examples/external-stores/external_stores.yaml#/getAllExternalStores
       summary: Retrieve external store list to publish an API
       tags:
-        - External Store (Collection)
+        - External Stores
       description: |
         Retrieve external stores list configured to publish an API
       responses:

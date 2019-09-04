@@ -1003,7 +1003,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return External Store list of published API
      */
     @Override
-    public Response apisApiIdExternalStoresGet(String apiId, String ifNoneMatch, MessageContext messageContext)
+    public Response getAllPublishedExternalStoresByAPI(String apiId, String ifNoneMatch, MessageContext messageContext)
             throws APIManagementException {
 
         APIIdentifier apiIdentifier = null;
@@ -1260,7 +1260,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Response of published external store list
      */
     @Override
-    public Response apisApiIdPublishToExternalStoresPost(String apiId, List<String> externalStoreIds, String ifMatch,
+    public Response publishAPIToExternalStores(String apiId, List<String> externalStoreIds, String ifMatch,
                                                          MessageContext messageContext) throws APIManagementException {
 
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();

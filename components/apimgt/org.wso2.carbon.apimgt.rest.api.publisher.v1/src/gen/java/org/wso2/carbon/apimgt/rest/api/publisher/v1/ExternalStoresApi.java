@@ -44,11 +44,11 @@ ExternalStoresApiService delegate = new ExternalStoresApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
-    }, tags={ "External Store (Collection)" })
+    }, tags={ "External Stores" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. External Stores list returned ", response = ExternalStoreDTO.class),
         @ApiResponse(code = 500, message = "Error retrieving external stores", response = ErrorDTO.class) })
-    public Response externalStoresGet() throws APIManagementException{
-        return delegate.externalStoresGet(securityContext);
+    public Response getAllExternalStores() throws APIManagementException{
+        return delegate.getAllExternalStores(securityContext);
     }
 }
