@@ -22,8 +22,8 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExternalStoreDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExternalStoreListDTO;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -58,8 +58,8 @@ public class ExternalStoreMappingUtil {
     public static ExternalStoreListDTO fromExternalStoreCollectionToDTO(Collection<APIStore> externalStoreCollection) {
         ExternalStoreListDTO externalStoreListDTO = new ExternalStoreListDTO();
         List<ExternalStoreDTO> externalStoreDTOS = externalStoreListDTO.getList();
-        if (externalStoreDTOS == null) {
-            externalStoreDTOS = new ArrayList<>();
+        if (externalStoreCollection == null) {
+            externalStoreCollection = new HashSet<>();
         }
         for (APIStore externalStore : externalStoreCollection) {
             externalStoreDTOS.add(fromExternalStoreToDTO(externalStore));
