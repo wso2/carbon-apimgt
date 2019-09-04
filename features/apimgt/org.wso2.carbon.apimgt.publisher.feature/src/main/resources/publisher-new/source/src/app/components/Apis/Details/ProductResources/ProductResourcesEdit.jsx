@@ -16,6 +16,7 @@
  * under the License.
  */
 /* eslint-disable array-callback-return */
+/* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor": ["operationObj"] }] */
 
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
@@ -168,7 +169,7 @@ function ProductResourcesEdit() {
     const [selectedApiPaths, setSelectedApiPaths] = useState([]);
     const [selectedApi, setSelectedApi] = useState(null);
     const [apiResources, setApiResources] = useState(apis);
-
+    const [updating, setUpdating] = useState(false);
     // Initialize the rest api libraries
     const apiRestClient = new API();
 
@@ -357,10 +358,27 @@ function ProductResourcesEdit() {
         return newApiResources;
     };
     const save = () => {
+        apiCopy.apis = apiResources;
+
+        // Rest api is failing when we send properties other than verb and target in the paylod with operations
+        // Following is a hack to fix it. We need to remove the following when it's fixed
+        apiCopy.apis.map((apiObj) => {
+            const apiObjOperations = apiObj.operations;
+            if (apiObjOperations) {
+                apiObjOperations.map((operationObj) => {
+                    Object.keys(operationObj).map((key) => {
+                        if (key !== 'verb' && key !== 'target') {
+                            delete operationObj[key];
+                        }
+                    });
+                });
+            }
+        });
+        setUpdating(true);
         const updatePromise = updateAPI(apiCopy, true);
         updatePromise
-            .then((response) => {
-                console.info(response);
+            .then(() => {
+                setUpdating(false);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') console.log(error);
@@ -433,7 +451,6 @@ function ProductResourcesEdit() {
     if (notFound) {
         return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
     }
-    console.info(api);
     return (
         <div className={classes.root}>
             <div className={classes.titleWrapper}>
@@ -728,11 +745,19 @@ function ProductResourcesEdit() {
                     <Grid container direction='row' alignItems='flex-start' spacing={4}>
                         <Grid item>
                             <div>
-                                <Button variant='contained' color='primary' onClick={save}>
-                                    <FormattedMessage
-                                        id='Apis.Details.Properties.Properties.save'
-                                        defaultMessage='Save'
-                                    />
+                                <Button variant='contained' color='primary' onClick={save} disabled={updating}>
+                                    {updating && (
+                                        <FormattedMessage
+                                            id='Apis.Details.Properties.Properties.updating'
+                                            defaultMessage='Updating ...'
+                                        />
+                                    )}
+                                    {!updating && (
+                                        <FormattedMessage
+                                            id='Apis.Details.Properties.Properties.save'
+                                            defaultMessage='Save'
+                                        />
+                                    )}
                                 </Button>
                             </div>
                         </Grid>
