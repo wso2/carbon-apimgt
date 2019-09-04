@@ -143,7 +143,7 @@ function Endpoints(props) {
     const generateEndpointConfig = (endpointType, implementationType) => {
         const config = createEndpointConfig(endpointType, implementationType);
         setModifiedAPI(() => {
-            if (endpointType === 'prototype') {
+            if (endpointType === 'prototyped') {
                 if (implementationType === 'mock') {
                     return { ...apiObject, endpointConfig: config, endpointImplementationType: 'INLINE' };
                 }
