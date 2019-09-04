@@ -15,9 +15,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import Joi from '@hapi/joi';
-import APIClientFactory from './APIClientFactory';
-import Utils from './Utils';
+import API from '../data/api';
 
 const roleSchema = Joi.extend((joi) => ({
     base: joi.string(),
@@ -29,30 +29,11 @@ const roleSchema = Joi.extend((joi) => ({
         {
             name: 'role',
             validate(params, value, state, options) {
-                const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-                const promise = apiClient.then((client) => {
-                    return client.apis.Roles.validateSystemRole({roleId:value}).then(resp => {
-                        return resp.ok;
-                    }).catch(err => {
-                        return false;
-                    });
-                });
-                return promise;
-                // return APIClient.me.roles(value).then(response=>{
-                //     return response.body.isValid
-                // });
-
-                // callee of `validate` method
-                /* validate()..then(valid => {
-                if(valid){
-                    /..../
-                }
-            })
-            */
-
-            }
-        }
-    ]
+                const api = new API();
+                return api.validateSystemRole(value);
+            },
+        },
+    ],
 }));
 
 const userRoleSchema = Joi.extend((joi) => ({
@@ -65,18 +46,11 @@ const userRoleSchema = Joi.extend((joi) => ({
         {
             name: 'role',
             validate(params, value, state, options) {
-                const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-                const promise = apiClient.then((client) => {
-                    return client.apis.roles.validateUserRole({roleId:value}).then(resp => {
-                        return resp.ok;
-                    }).catch(err => {
-                        return false;
-                    });
-                });
-                return promise;
-            }
-        }
-    ]
+                const api = new API();
+                return api.validateUSerRole(value);
+            },
+        },
+    ],
 }));
 
 const definition = {
@@ -91,6 +65,5 @@ const definition = {
     role: roleSchema.systemRole().role(),
     userRole: userRoleSchema.userRole().role(),
 };
-
 
 export default definition;

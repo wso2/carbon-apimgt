@@ -33,6 +33,8 @@ import APIValidation from 'AppData/APIValidation';
 import base64url from 'base64url';
 import Error from '@material-ui/icons/Error';
 import InputAdornment from '@material-ui/core/InputAdornment';
+import Chip from '@material-ui/core/Chip';
+import { red } from '@material-ui/core/colors/';
 
 /**
  *
@@ -46,38 +48,46 @@ export default function AccessControl(props) {
     const [userRoleValidity, setUserRoleValidity] = useState(true);
     const { api, configDispatcher } = props;
     const isRestricted = api.accessControl === 'RESTRICTED';
-    const [validRoles, setValidRoles] = useState([...api.accessControlRoles]);
-
+    const [invalidRoles, setInvalidRoles] = useState([]);
     const handleRoleAddition = (systemValidation, userValidation, role) => {
         systemValidation.then((resp) => {
             if (resp) {
                 setRoleValidity(true);
-                userValidation.then((resp) => {
-                    if (resp) {
+                userValidation.then((response) => {
+                    if (response) {
                         setUserRoleValidity(true);
-                        setValidRoles([...validRoles, role]);
+                        configDispatcher({ action: 'accessControlRoles',
+                            value: api.accessControlRoles.length === 0 ? role : (api.accessControlRoles + ',' + role)});
                     } else {
                         setUserRoleValidity(false);
+                        setInvalidRoles([...invalidRoles, role]);
                     }
                 }).catch((error) => {
                     console.error('Error when validating user roles ' + error);
                 });
             } else {
                 setRoleValidity(false);
+                setInvalidRoles([...invalidRoles, role]);
             }
         }).catch((error) => {
             console.error('Error when validating roles ' + error);
         });
-        configDispatcher({ action: 'accessControlRoles', value: validRoles.join(',') });
     };
 
-    const handleRoleDeletion = role => {
+    const handleRoleDeletion = (role) => {
+        const validRoles = api.accessControlRoles;
         const index = validRoles.indexOf(role);
         if (index > -1) {
             validRoles.splice(index, 1);
+        } else {
+            invalidRoles.splice(invalidRoles.indexOf(role), 1);
+            setInvalidRoles(invalidRoles);
+            if (invalidRoles.length === 0) {
+                setRoleValidity(true);
+                setUserRoleValidity(true);
+            }
         }
-        setValidRoles(validRoles);
-        configDispatcher({ action: 'accessControlRoles', value: validRoles.join(',') });
+        configDispatcher({action: 'accessControlRoles', value: validRoles.length ===0 ? '' : validRoles.join(',')});
     };
     return (
         <Grid container spacing={0} alignItems='flex-start'>
@@ -159,7 +169,8 @@ export default function AccessControl(props) {
             {isRestricted && (
                 <Grid item>
                     <ChipInput
-                        value={validRoles}
+                        value={api.accessControlRoles.length ===0 ? invalidRoles :
+                            api.accessControlRoles.concat(invalidRoles)}
                         alwaysShowPlaceholder={false}
                         placeholder='Enter roles and press Enter'
                         blurBehavior='clear'
@@ -171,11 +182,11 @@ export default function AccessControl(props) {
                             ),
                         }}
                         onAdd={(role) => {
-                            handleRoleAddition(APIValidation.role.validate(base64url.encode(role)),
-                                APIValidation.userRole.validate(base64url.encode(role)), role);
-                        }}
-                        onDelete={(role) => {
-                            handleRoleDeletion(role);
+                            handleRoleAddition(
+                                APIValidation.role.validate(base64url.encode(role)),
+                                APIValidation.userRole.validate(base64url.encode(role)),
+                                role,
+                            );
                         }}
                         error={!roleValidity || !userRoleValidity}
                         helperText={
@@ -196,6 +207,20 @@ export default function AccessControl(props) {
                                 />
                             )
                         }
+                        chipRenderer={({ value }, key) => (
+                            <Chip
+                                key={key}
+                                label={value}
+                                onDelete={() => {
+                                    handleRoleDeletion(value);
+                                }}
+                                style={{
+                                    backgroundColor: invalidRoles.includes(value) ? red[300] : null,
+                                    margin: '8px 8px 8px 0',
+                                    float: 'left'
+                                }}
+                            />
+                        )}
                     />
                 </Grid>
             )}

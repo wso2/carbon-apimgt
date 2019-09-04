@@ -33,6 +33,8 @@ import APIValidation from 'AppData/APIValidation';
 import base64url from 'base64url';
 import Error from '@material-ui/icons/Error';
 import InputAdornment from '@material-ui/core/InputAdornment';
+import Chip from '@material-ui/core/Chip';
+import { red } from '@material-ui/core/colors/';
 
 /**
  *
@@ -50,7 +52,8 @@ export default function StoreVisibility(props) {
         value.then((resp) => {
             if (resp) {
                 setRoleValidity(true);
-                configDispatcher({ action: 'visibleRoles', value: api.visibleRoles + ',' + role });
+                configDispatcher({ action: 'visibleRoles', value:
+                    api.visibleRoles.length === 0 ? role : (api.visibleRoles + ',' + role) });
             } else {
                 setRoleValidity(false);
                 setInvalidRoles([...invalidRoles, role]);
@@ -60,17 +63,20 @@ export default function StoreVisibility(props) {
         });
     };
 
-    const handleRoleDeletion = role => {
-        var index = invalidRoles.indexOf(role);
+    const handleRoleDeletion = (role) => {
+        let index = invalidRoles.indexOf(role);
+        const validRoles = [...api.visibleRoles];
         if (index > -1) {
             invalidRoles.splice(index, 1);
             setInvalidRoles(invalidRoles);
+            if (invalidRoles.length === 0) {
+                setRoleValidity(true);
+            }
         } else {
-            const validRoles = [...api.visibleRoles];
             index = validRoles.indexOf(role);
             validRoles.splice(index, 1);
-            configDispatcher({ action: 'visibleRoles', value: validRoles.join(',') });
         }
+        configDispatcher({ action: 'visibleRoles', value: validRoles.length === 0 ? '' : validRoles.join(',') });
     };
 
     return (
@@ -155,14 +161,14 @@ export default function StoreVisibility(props) {
                 </Tooltip>
             </Grid>
             {!isPublic && (
-                <Grid item sm={5}>
+                <Grid item>
                     <ChipInput
-                        value={api.visibleRoles}
+                        value={api.visibleRoles.length ===0 ? invalidRoles :
+                            api.visibleRoles.concat(invalidRoles)}
                         alwaysShowPlaceholder={false}
                         placeholder='Enter roles and press Enter'
                         blurBehavior='clear'
                         InputProps={{
-                            color: 'red',
                             endAdornment: !roleValidity && (
                                 <InputAdornment position='end'>
                                     <Error color='error' />
@@ -171,9 +177,6 @@ export default function StoreVisibility(props) {
                         }}
                         onAdd={(role) => {
                             validateSystemRole(APIValidation.role.validate(base64url.encode(role)), role);
-                        }}
-                        onDelete={(role) => {
-                            handleRoleDeletion(role);
                         }}
                         error={!roleValidity}
                         helperText={
@@ -189,7 +192,20 @@ export default function StoreVisibility(props) {
                                 />
                             )
                         }
-                        variant='outlined'
+                        chipRenderer={({ value }, key) => (
+                            <Chip
+                                key={key}
+                                label={value}
+                                onDelete={() => {
+                                    handleRoleDeletion(value);
+                                }}
+                                style={{
+                                    backgroundColor: invalidRoles.includes(value) ? red[300] : null,
+                                    margin: '8px 8px 8px 0',
+                                    float: 'left',
+                                }}
+                            />
+                        )}
                     />
                 </Grid>
             )}

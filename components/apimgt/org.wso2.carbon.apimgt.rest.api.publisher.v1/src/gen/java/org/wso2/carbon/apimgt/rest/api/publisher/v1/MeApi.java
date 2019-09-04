@@ -42,7 +42,7 @@ MeApiService delegate = new MeApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
-    }, tags={ "roles" })
+    }, tags={ "Roles" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested user has the role.", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested user does not have the role.", response = Void.class) })

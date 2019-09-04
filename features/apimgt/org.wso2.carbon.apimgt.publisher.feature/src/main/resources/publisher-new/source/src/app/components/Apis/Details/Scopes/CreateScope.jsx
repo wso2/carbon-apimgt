@@ -37,6 +37,8 @@ import APIValidation from 'AppData/APIValidation';
 import base64url from 'base64url';
 import Error from '@material-ui/icons/Error';
 import InputAdornment from '@material-ui/core/InputAdornment';
+import Chip from '@material-ui/core/Chip';
+import { red } from '@material-ui/core/colors/';
 
 const styles = theme => ({
     root: {
@@ -117,6 +119,7 @@ class CreateScope extends React.Component {
         this.handleScopeNameInput = this.handleScopeNameInput.bind(this);
         this.validateScopeDescription = this.validateScopeDescription.bind(this);
         this.validateSystemRole = this.validateSystemRole.bind(this);
+        this.handleRoleDeletion = this.handleRoleDeletion.bind(this);
     }
 
     /**
@@ -231,6 +234,28 @@ class CreateScope extends React.Component {
         });
     }
 
+    handleRoleDeletion = (role) => {
+        const { validRoles, invalidRoles } = this.state;
+        let index = invalidRoles.indexOf(role);
+        if (index > -1) {
+            invalidRoles.splice(index, 1);
+            this.setState({
+                invalidRoles,
+            });
+            if (invalidRoles.length === 0) {
+                this.setState({
+                    roleValidity: true,
+                });
+            }
+        } else {
+            index = validRoles.indexOf(role);
+            validRoles.splice(index, 1);
+            this.setState({
+                validRoles,
+            });
+        }
+    };
+
     /**
      *
      *
@@ -240,7 +265,7 @@ class CreateScope extends React.Component {
     render() {
         const { classes } = this.props;
         const url = `/apis/${this.props.api.id}/scopes`;
-        const { roleValidity, validRoles } = this.state;
+        const { roleValidity, validRoles, invalidRoles } = this.state;
 
         return (
             <div className={classes.root}>
@@ -308,7 +333,7 @@ class CreateScope extends React.Component {
                             <FormattedMessage id='Apis.Details.Scopes.CreateScope.roles' defaultMessage='Roles' />
                         </FormLabel>
                         <ChipInput
-                            value={validRoles}
+                            value={validRoles.concat(invalidRoles)}
                             alwaysShowPlaceholder={false}
                             placeholder='Enter roles and press Enter'
                             blurBehavior='clear'
@@ -336,6 +361,20 @@ class CreateScope extends React.Component {
                                     />
                                 )
                             }
+                            chipRenderer={({ value }, key) => (
+                                <Chip
+                                    key={key}
+                                    label={value}
+                                    onDelete={() => {
+                                        this.handleRoleDeletion(value);
+                                    }}
+                                    style={{
+                                        backgroundColor: invalidRoles.includes(value) ? red[300] : null,
+                                        margin: '8px 8px 8px 0',
+                                        float: 'left',
+                                    }}
+                                />
+                            )}
                         />
                     </FormControl>
                     <Grid
@@ -350,7 +389,7 @@ class CreateScope extends React.Component {
                                 variant='contained'
                                 color='primary'
                                 onClick={this.addScope}
-                                disabled={this.state.valid.name.invalid}
+                                disabled={this.state.valid.name.invalid || (invalidRoles.length !== 0)}
                                 className={classes.saveButton}
                             >
                                 <FormattedMessage id='Apis.Details.Scopes.CreateScope.save' defaultMessage='Save' />
