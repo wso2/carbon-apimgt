@@ -3668,10 +3668,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     String errorMessage = "Error while publishing to external stores. Invalid External Store Id: "
                             + store;
                     log.error(errorMessage);
+                    ExceptionCodes exceptionCode = ExceptionCodes.EXTERNAL_STORE_ID_NOT_FOUND;
                     throw new APIManagementException(errorMessage,
-                            new ErrorItem(ExceptionCodes.EXTERNAL_STORE_ID_NOT_FOUND.getErrorMessage(), errorMessage,
-                                    ExceptionCodes.EXTERNAL_STORE_ID_NOT_FOUND.getErrorCode(),
-                                    ExceptionCodes.EXTERNAL_STORE_ID_NOT_FOUND.getHttpStatusCode()));
+                            new ErrorItem(exceptionCode.getErrorMessage(), errorMessage, exceptionCode.getErrorCode(),
+                                    exceptionCode.getHttpStatusCode()));
                 }
                 inputStores.add(inputStore);
             }
@@ -3942,13 +3942,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //Retains only the stores that contained in configuration
             storesSet.retainAll(configuredAPIStores);
             return storesSet;
-        } else {
-            ExceptionCodes exceptionCode = ExceptionCodes.EXTERNAL_STORE_PUBLISHING_NOT_ENABLED;
-            String errorMessage = "External Stores not available for tenant: " + tenantId;
-            log.error(errorMessage);
-            throw new APIManagementException(errorMessage, new ErrorItem(exceptionCode.getErrorMessage(), errorMessage,
-                    exceptionCode.getErrorCode(), exceptionCode.getHttpStatusCode()));
         }
+        return null;
     }
 
     /**
