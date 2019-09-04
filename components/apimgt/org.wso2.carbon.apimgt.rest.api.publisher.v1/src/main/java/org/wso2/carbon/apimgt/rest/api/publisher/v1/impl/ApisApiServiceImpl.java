@@ -1003,30 +1003,30 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return External Store list of published API
      */
     @Override
-    public Response apisApiIdExternalStoresGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
+    public Response apisApiIdExternalStoresGet(String apiId, String ifNoneMatch, MessageContext messageContext)
+            throws APIManagementException {
+
+        APIIdentifier apiIdentifier = null;
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(apiIdentifier);
-            if (publishedStores == null) {
-                String errorMessage = "Published external stores corresponding to API :" + apiId + " do not exist";
-                RestApiUtil.handleResourceNotFoundError(errorMessage, log);
-            }
-            ExternalStoreListDTO externalStoreListDTO =
-                    ExternalStoreMappingUtil.fromExternalStoreCollectionToDTO(publishedStores);
-            return Response.ok().entity(externalStoreListDTO).build();
+            apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
-                String errorMessage = "Error while retrieving published external stores for API: " + apiId;
+                String errorMessage = "Error while getting API: " + apiId;
+                log.error(errorMessage, e);
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
-        return Response.serverError().build();
-    }
 
+        Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(apiIdentifier);
+        ExternalStoreListDTO externalStoreListDTO =
+                ExternalStoreMappingUtil.fromExternalStoreCollectionToDTO(publishedStores);
+        return Response.ok().entity(externalStoreListDTO).build();
+    }
     /**
      * Retrieves API Lifecycle history information
      *
@@ -1261,47 +1261,27 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response apisApiIdPublishToExternalStoresPost(String apiId, List<String> externalStoreIds, String ifMatch,
-                                                         MessageContext messageContext) {
+                                                         MessageContext messageContext) throws APIManagementException {
+
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        API api = null;
         try {
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiProvider.getAPI(apiIdentifier);
-            Set<APIStore> inputStores = new HashSet<>();
-            for (String store : externalStoreIds) {
-                if (StringUtils.isNotEmpty(store)) {
-                    APIStore inputStore = APIUtil.getExternalAPIStore(store,
-                            APIUtil.getTenantIdFromTenantDomain(tenantDomain));
-                    if (inputStore == null) {
-                        String errorMessage = "Invalid External Store Id: " + store;
-                        RestApiUtil.handleBadRequest(errorMessage, log);
-                    }
-                    inputStores.add(inputStore);
-                }
-            }
-            Set<String> versions = apiProvider.getAPIVersions(apiIdentifier.getProviderName(),
-                    apiIdentifier.getName());
-            APIVersionStringComparator comparator = new APIVersionStringComparator();
-            boolean apiOlderVersionExist = false;
-            for (String tempVersion : versions) {
-                if (comparator.compare(tempVersion, apiIdentifier.getVersion()) < 0) {
-                    apiOlderVersionExist = true;
-                    break;
-                }
-            }
-            if (apiProvider.updateAPIsInExternalAPIStores(api, inputStores, apiOlderVersionExist)) {
-                Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(apiIdentifier);
-                ExternalStoreListDTO externalStoreListDTO =
-                        ExternalStoreMappingUtil.fromExternalStoreCollectionToDTO(publishedStores);
-                return Response.ok().entity(externalStoreListDTO).build();
-            }
+            api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
-                String errorMessage = "Error while publishing API: " + apiId + "for external stores";
+                String errorMessage = "Error while getting API: " + apiId;
+                log.error(errorMessage, e);
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        }
+        if (apiProvider.publishToExternalAPIStores(api, externalStoreIds)) {
+            Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(api.getId());
+            ExternalStoreListDTO externalStoreListDTO =
+                    ExternalStoreMappingUtil.fromExternalStoreCollectionToDTO(publishedStores);
+            return Response.ok().entity(externalStoreListDTO).build();
         }
         return Response.serverError().build();
     }
