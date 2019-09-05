@@ -98,6 +98,7 @@ class APIDefinition extends React.Component {
             format: null,
             convertTo: null,
             isAuditApiClicked: false,
+            securityAuditProperties: [],
         };
         this.onDrop = this.onDrop.bind(this);
         this.handleNo = this.handleNo.bind(this);
@@ -154,6 +155,12 @@ class APIDefinition extends React.Component {
                     doRedirectToLogin();
                 }
             });
+
+        api.getSettings().then((settings) => {
+            if (settings.SecurityAuditProperties != null) {
+                this.setState({ securityAuditProperties: settings.SecurityAuditProperties });
+            }
+        });
     }
 
     /**
@@ -336,6 +343,14 @@ class APIDefinition extends React.Component {
     closeEditor() {
         window.localStorage.setItem('swagger-editor-content', '');
         this.setState({ openEditor: false });
+        const { intl } = this.props;
+        const { securityAuditProperties } = this.state;
+        if (!securityAuditProperties.apiToken && !securityAuditProperties.collectionId) {
+            Alert.info(intl.formatMessage({
+                id: 'Apis.Details.APIDefinition.info.updating.auditapi',
+                defaultMessage: 'Please click Audit API button again to reflect the changes made.',
+            }));
+        }
     }
 
     /**
@@ -407,6 +422,7 @@ class APIDefinition extends React.Component {
     render() {
         const {
             swagger, graphQL, openEditor, openDialog, format, convertTo, notFound, isAuditApiClicked,
+            securityAuditProperties,
         } = this.state;
         const { classes, resourceNotFountMessage, api } = this.props;
         let downloadLink;
@@ -494,13 +510,17 @@ class APIDefinition extends React.Component {
                         {/**
                            * Code for the Audit API button
                         */}
-                        <Button size='small' className={classes.button} onClick={this.onAuditApiClick}>
-                            <LockRounded className={classes.buttonIcon} />
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.audit.api'
-                                defaultMessage='Audit API'
-                            />
-                        </Button>
+                        {!securityAuditProperties.apiToken &&
+                        !securityAuditProperties.collectionId ?
+                            <Button size='small' className={classes.button} onClick={this.onAuditApiClick}>
+                                <LockRounded className={classes.buttonIcon} />
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.audit.api'
+                                    defaultMessage='Audit API'
+                                />
+                            </Button> : (null)
+                        }
+
                     </div>
                     {isGraphQL === 0 && (
                         <div className={classes.converterWrapper}>
