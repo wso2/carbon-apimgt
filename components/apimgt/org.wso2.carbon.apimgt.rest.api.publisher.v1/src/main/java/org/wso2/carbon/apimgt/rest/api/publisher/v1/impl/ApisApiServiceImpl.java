@@ -39,6 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.phase.PhaseInterceptorChain;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -133,6 +134,8 @@ import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.Optional;
+import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -483,8 +486,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     tenantDomain);
 
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            schemaDefinition = URLDecoder.decode(schemaDefinition.split
-                    (APIConstants.GRAPHQL_SCHEMA_DEFINITION_SEPARATOR)[1], StandardCharsets.UTF_8.name());
             List<APIOperationsDTO> operationArray = extractGraphQLOperationList(schemaDefinition);
             Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationArray);
             originalAPI.setUriTemplates(uriTemplates);
@@ -493,7 +494,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiProvider.updateAPI(originalAPI);
             String schema = apiProvider.getGraphqlSchema(apiIdentifier);
             return Response.ok().entity(schema).build();
-        } catch (APIManagementException | UnsupportedEncodingException | FaultGatewaysException e) {
+        } catch (APIManagementException | FaultGatewaysException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {

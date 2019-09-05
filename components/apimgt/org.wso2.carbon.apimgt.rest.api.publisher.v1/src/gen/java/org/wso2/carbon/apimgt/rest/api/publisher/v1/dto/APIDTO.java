@@ -205,7 +205,6 @@ public enum AccessControlEnum {
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<>();
     @Scope(name = "apim:api_publish", description="", value ="")
-    @Scope(name = "test_scope", description="", value ="")
     private Object businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String workflowStatus = null;

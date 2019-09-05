@@ -1631,7 +1631,7 @@ paths:
         required: false
       - $ref: '#/parameters/If-Match'
       tags:
-      - API (Collection)
+      - APIs
       responses:
         201:
           description: |
@@ -1805,7 +1805,7 @@ paths:
         type: file
         required: true
       tags:
-      - API (Collection)
+      - Validation
       responses:
         200:
           description: |
@@ -7848,8 +7848,7 @@ definitions:
             items:
               $ref: '#/definitions/APIOperations'
           graphQLSchema:
-            items:
-              $ref: '#/definitions/GraphQLSchema'
+            $ref: '#/definitions/GraphQLSchema'
 
 #-----------------------------------------------------
 # The Threat Protection Policy List Resource
