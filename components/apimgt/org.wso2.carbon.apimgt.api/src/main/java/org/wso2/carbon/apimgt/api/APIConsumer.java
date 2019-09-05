@@ -867,6 +867,14 @@ public interface APIConsumer extends APIManager {
     boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
 
     /**
+     * This methods loads the monetization implementation class
+     *
+     * @return monetization implementation class
+     * @throws APIManagementException if failed to load monetization implementation class
+     */
+    Monetization getMonetizationImplClass() throws APIManagementException;
+
+    /**
      * Returns wsdl document resource to be downloaded from the API store for a SOAP api
      *
      * @param username           user name of the logged in user
