@@ -117,7 +117,10 @@ public class SwaggerData {
         transportType = api.getType();
         security = api.getApiSecurity();
         apiLevelPolicy = api.getApiLevelPolicy();
-        scopes.addAll(api.getScopes());
+        Set<Scope> scopes = api.getScopes();
+        if (scopes != null) {
+            this.scopes.addAll(scopes);
+        }
     }
 
     public SwaggerData(APIProduct apiProduct) {
@@ -146,8 +149,11 @@ public class SwaggerData {
 
             resources.add(resource);
         }
+        Set<Scope> scopes = apiProduct.getScopes();
 
-        scopes.addAll(apiProduct.getScopes());
+        if (scopes != null) {
+            this.scopes.addAll(scopes);
+        }
     }
 
     public Set<Resource> getResources() {
