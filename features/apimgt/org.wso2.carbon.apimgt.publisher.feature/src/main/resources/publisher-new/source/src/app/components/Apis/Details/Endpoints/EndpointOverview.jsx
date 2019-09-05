@@ -30,7 +30,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import cloneDeep from 'lodash.clonedeep';
 
 import EndpointListing from './EndpointListing';
-import { getEndpointTemplateByType, getEndpointTypeProperty } from './endpointUtils';
+import { getEndpointTemplateByType, getEndpointTypeProperty, createEndpointConfig } from './endpointUtils';
 import GeneralConfiguration from './GeneralConfiguration';
 import GenericEndpoint from './GenericEndpoint';
 import LoadBalanceConfig from './LoadBalanceConfig';
@@ -103,7 +103,10 @@ const styles = theme => ({
 });
 
 const endpointTypes = [{ key: 'http', value: 'HTTP/REST Endpoint' },
-    { key: 'address', value: 'HTTP/SOAP Endpoint' }, { key: 'default', value: 'Dynamic Endpoints' }];
+    { key: 'address', value: 'HTTP/SOAP Endpoint' },
+    { key: 'default', value: 'Dynamic Endpoints' },
+    { key: 'awslambda', value: 'AWS Lambda Endpoint' },
+];
 
 /**
  * The endpoint overview component. This component holds the views of endpoint creation and configuration.
@@ -140,6 +143,8 @@ function EndpointOverview(props) {
             return endpointTypes[1];
         } else if (type === 'default') {
             return endpointTypes[2];
+        } else if (type === 'awslambda') {
+            return endpointTypes[3];
         } else {
             const prodEndpoints = endpointConfig.production_endpoints;
             if (Array.isArray(prodEndpoints)) {
@@ -276,31 +281,9 @@ function EndpointOverview(props) {
             return type.key === selectedKey;
         })[0];
 
-        let endpointTemplate = {};
-        if (selectedKey === 'address') {
-            endpointTemplate = {
-                endpoint_type: 'address',
-                template_not_supported: false,
-                url: '',
-            };
-        } else if (selectedKey === 'default') {
-            endpointTemplate = {
-                url: 'default',
-            };
-        } else {
-            endpointTemplate = {
-                url: '',
-            };
-        }
+        const generatedEndpointConfig = createEndpointConfig(selectedKey);
 
-        const endpointConfigCopy = {
-            endpoint_type: selectedKey,
-            production_endpoints: endpointTemplate,
-            sandbox_endpoints: endpointTemplate,
-            failOver: 'False',
-        };
-
-        setEpConfig(endpointConfigCopy);
+        setEpConfig(generatedEndpointConfig);
         setEndpointType(selectedType);
     };
 

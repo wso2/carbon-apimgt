@@ -30,6 +30,7 @@ import {
 import { FormattedMessage } from 'react-intl';
 import InlineEndpoints from 'AppComponents/Apis/Details/Endpoints/Prototype/InlineEndpoints';
 import GenericEndpoint from 'AppComponents/Apis/Details/Endpoints/GenericEndpoint';
+import cloneDeep from 'lodash.clonedeep';
 
 const endpointImplementationTypes = [{ key: 'INLINE', value: 'Inline' }, { key: 'ENDPOINT', value: 'Endpoint' }];
 
@@ -78,7 +79,7 @@ function PrototypeEndpoints(props) {
      * @param {any} event The change event.
      * */
     const handleImplementationTypeChange = (event) => {
-        const tmpApi = JSON.parse(JSON.stringify(api));
+        const tmpApi = cloneDeep(api);
         modifyAPI({ ...tmpApi, endpointImplementationType: event.target.value });
     };
 
