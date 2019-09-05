@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1;
 
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
@@ -117,12 +118,29 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "Subscriptions" })
+    }, tags={ "Subscriptions",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Subscription returned ", response = SubscriptionDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Subscription does not exist. ", response = ErrorDTO.class) })
     public Response subscriptionsSubscriptionIdGet(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.subscriptionsSubscriptionIdGet(subscriptionId, ifNoneMatch, securityContext);
+    }
+
+    @GET
+    @Path("/{subscriptionId}/usage")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get details of a pending invoice for a monetized subscription with meterd billing.", notes = "This operation can be used to get details of a pending invoice for a monetized subscription with meterd billing. ", response = APIMonetizationUsageDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:sub_manage", description = "Manage subscriptions")
+        })
+    }, tags={ "API Monetization" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Details of a pending invoice returned. ", response = APIMonetizationUsageDTO.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested Subscription does not exist. ", response = ErrorDTO.class) })
+    public Response subscriptionsSubscriptionIdUsageGet(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId) throws APIManagementException{
+        return delegate.subscriptionsSubscriptionIdUsageGet(subscriptionId, securityContext);
     }
 }
