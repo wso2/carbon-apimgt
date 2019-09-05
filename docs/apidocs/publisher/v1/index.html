@@ -75,14 +75,6 @@
             <h3>Resources</h3>
             <ul class="nav nav-stacked fixed">
                         <hr/>
-                        <span class="class-name">API (Collection)</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-apisImportGraphqlSchemaPost"><a href="#!/operations#APICollection#apisImportGraphqlSchemaPost">Import API Definition</a></li>
-                                        <li id="op-apisValidateGraphqlSchemaPost"><a href="#!/operations#APICollection#apisValidateGraphqlSchemaPost">Validate GraphQL API definition and retrieve a summary</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
                         <span class="class-name">API Documents</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
@@ -184,6 +176,7 @@
 </a></li>
                                         <li id="op-apisHead"><a href="#!/operations#APIs#apisHead">Check given API attibute name is already exist
 </a></li>
+                                        <li id="op-apisImportGraphqlSchemaPost"><a href="#!/operations#APIs#apisImportGraphqlSchemaPost">Import API Definition</a></li>
                                         <li id="op-apisPost"><a href="#!/operations#APIs#apisPost">Create a new API</a></li>
                                         <li id="op-importOpenAPIDefinition"><a href="#!/operations#APIs#importOpenAPIDefinition">Import an OpenAPI Definition</a></li>
                                         <li id="op-importWSDLDefinition"><a href="#!/operations#APIs#importWSDLDefinition">Import a WSDL Definition</a></li>
@@ -215,11 +208,17 @@
                             </ul>
                         </li>
                         <hr/>
+                        <span class="class-name">GraphQL Schema</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdGraphqlSchemaPut"><a href="#!/operations#GraphQLSchema#apisApiIdGraphqlSchemaPut">Add a Schema to a GraphQL API</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
                         <span class="class-name">GraphQL Schema (Individual)</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                         <li id="op-apisApiIdGraphqlSchemaGet"><a href="#!/operations#GraphQLSchemaIndividual#apisApiIdGraphqlSchemaGet">Get the Schema of a GraphQL API</a></li>
-                                        <li id="op-apisApiIdGraphqlSchemaPut"><a href="#!/operations#GraphQLSchemaIndividual#apisApiIdGraphqlSchemaPut">Add a Schema to a GraphQL API</a></li>
                             </ul>
                         </li>
                         <hr/>
@@ -281,6 +280,7 @@
                         <span class="class-name">Validation</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
+                                        <li id="op-apisValidateGraphqlSchemaPost"><a href="#!/operations#Validation#apisValidateGraphqlSchemaPost">Validate GraphQL API definition and retrieve a summary</a></li>
                                         <li id="op-validateOpenAPIDefinition"><a href="#!/operations#Validation#validateOpenAPIDefinition">Validate an OpenAPI Definition</a></li>
                                         <li id="op-validateWSDLDefinition"><a href="#!/operations#Validation#validateWSDLDefinition">Validate a WSDL Definition</a></li>
                             </ul>

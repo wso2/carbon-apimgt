@@ -83,14 +83,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -98,7 +95,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.Map;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
@@ -130,22 +126,7 @@ import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLConnection;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -480,8 +461,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     tenantDomain);
 
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            schemaDefinition = URLDecoder.decode(schemaDefinition.split
-                    (APIConstants.GRAPHQL_SCHEMA_DEFINITION_SEPARATOR)[1], StandardCharsets.UTF_8.name());
             List<APIOperationsDTO> operationArray = extractGraphQLOperationList(schemaDefinition);
             Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationArray);
             originalAPI.setUriTemplates(uriTemplates);
@@ -490,7 +469,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiProvider.updateAPI(originalAPI);
             String schema = apiProvider.getGraphqlSchema(apiIdentifier);
             return Response.ok().entity(schema).build();
-        } catch (APIManagementException | UnsupportedEncodingException | FaultGatewaysException e) {
+        } catch (APIManagementException | FaultGatewaysException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
