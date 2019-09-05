@@ -49,7 +49,7 @@ import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import { Radio, RadioGroup } from '@material-ui/core';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import Resource from './Resource';
-import AuthManager from '../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 import Grid from "@material-ui/core/Grid";
 
 const styles = theme => ({

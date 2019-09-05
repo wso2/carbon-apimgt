@@ -33,7 +33,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import AuthManager from '../../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  *

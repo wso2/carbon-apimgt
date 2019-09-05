@@ -33,12 +33,12 @@ import {
 import PropTypes from 'prop-types';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import AuthManager from 'AppData/AuthManager';
 import EndpointSecurity from './GeneralConfiguration/EndpointSecurity';
 import Certificates from './GeneralConfiguration/Certificates';
 import API from '../../../../data/api'; // TODO: Use webpack aliases instead of relative paths ~tmkb
 import Alert from '../../../Shared/Alert';
 import { endpointsToList } from './endpointUtils';
-import AuthManager from '../../../../data/AuthManager';
 
 const styles = theme => ({
     endpointTypeSelect: {

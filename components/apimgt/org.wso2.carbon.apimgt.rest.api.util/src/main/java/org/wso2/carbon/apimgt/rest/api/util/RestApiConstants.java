@@ -242,10 +242,4 @@ public final class RestApiConstants {
     public static final String OAS_VERSION_3 = "v3";
 
     public static final String MESSAGE_EXCHANGE_TOKEN_INFO = "message_exchange_token_info";
-
-    //Business owner information fields
-    public static final String BUSINESS_OWNER = "businessOwner";
-    public static final String BUSINESS_OWNER_EMAIL = "businessOwnerEmail";
-    public static final String TECHNICAL_OWNER = "technicalOwner";
-    public static final String TECHNICAL_OWNER_EMAIL = "technicalOwnerEmail";
 }

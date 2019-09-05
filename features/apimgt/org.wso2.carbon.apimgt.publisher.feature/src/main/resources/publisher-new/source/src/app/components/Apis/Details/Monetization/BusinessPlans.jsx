@@ -9,7 +9,7 @@ import { withStyles } from '@material-ui/core/styles';
 import API from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import { classes } from 'istanbul-lib-coverage';
-import AuthManager from '../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 const styles = theme => ({
     root: {

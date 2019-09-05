@@ -26,7 +26,7 @@ import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import Chip from '@material-ui/core/Chip';
 import mimeTypes from './MimeTypes';
-import AuthManager from '../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 const suggestions = mimeTypes;
 
 function renderInput(inputProps) {

@@ -25,7 +25,7 @@ import {
     FormControl,
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import AuthManager from '../../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  * The base component for advanced endpoint configurations.

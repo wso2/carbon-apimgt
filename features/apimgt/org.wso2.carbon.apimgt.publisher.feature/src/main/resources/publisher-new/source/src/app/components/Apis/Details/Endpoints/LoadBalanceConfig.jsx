@@ -18,7 +18,7 @@ import React, { useEffect, useState } from 'react';
 import { TextField, MenuItem, Grid, Button, withStyles } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import AuthManager from '../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 const algorithms = [
     {

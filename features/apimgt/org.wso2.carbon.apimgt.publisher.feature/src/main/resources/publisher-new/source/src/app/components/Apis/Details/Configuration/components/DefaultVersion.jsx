@@ -27,7 +27,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
-import AuthManager from '../../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  *

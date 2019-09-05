@@ -19,7 +19,7 @@
 import SwaggerClient from 'swagger-client';
 import { Mutex } from 'async-mutex';
 import Configurations from 'Config';
-import AuthManager from './AuthManager';
+import AuthManager from 'AppData/AuthManager';
 import Utils from './Utils';
 
 /**

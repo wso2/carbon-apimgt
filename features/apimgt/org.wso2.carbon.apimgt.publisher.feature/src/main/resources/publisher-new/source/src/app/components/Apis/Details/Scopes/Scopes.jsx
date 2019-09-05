@@ -32,8 +32,8 @@ import MUIDataTable from 'mui-datatables';
 import Icon from '@material-ui/core/Icon';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Grid from '@material-ui/core/Grid';
+import AuthManager from 'AppData/AuthManager';
 import Delete from './Delete';
-import AuthManager from '../../../../data/AuthManager';
 
 const styles = theme => ({
     buttonProgress: {

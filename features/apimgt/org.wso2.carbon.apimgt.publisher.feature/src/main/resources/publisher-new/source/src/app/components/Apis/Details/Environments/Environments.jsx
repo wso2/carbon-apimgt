@@ -34,7 +34,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Checkbox from '@material-ui/core/Checkbox';
 import Alert from 'AppComponents/Shared/Alert';
 import Paper from '@material-ui/core/Paper';
-import AuthManager from '../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  * Renders an Environments list

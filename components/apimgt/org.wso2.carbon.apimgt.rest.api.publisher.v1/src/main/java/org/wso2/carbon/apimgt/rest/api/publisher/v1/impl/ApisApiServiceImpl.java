@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import graphql.language.FieldDefinition;
 import graphql.language.ObjectTypeDefinition;
 import graphql.language.TypeDefinition;
@@ -93,8 +92,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -102,7 +99,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.Map;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
@@ -135,23 +131,6 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Optional;
-import javax.ws.rs.core.MediaType;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLConnection;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -516,6 +495,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO updatedApiDTO;
         Object tokenInfo =
                 PhaseInterceptorChain.getCurrentMessage().getExchange().get(RestApiConstants.MESSAGE_EXCHANGE_TOKEN_INFO);
+        // Validate if the MESSAGE_EXCHANGE_TOKEN_INFO is not set in WebAppAuthenticator when scopes are validated
+        if (tokenInfo == null) {
+            RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
+        }
         String tokenScopes[] = ((AccessTokenInfo) tokenInfo).getScopes();
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -654,10 +637,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             for (Field field : fields) {
                 org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] fieldAnnotatedScopes =
                         field.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
-
-                Gson gsonBuilder = new GsonBuilder().create();
-                String originalElementValue = gsonBuilder.toJson(originalApiDtoJson.get(field.getName()));
-                String newElementValue = gsonBuilder.toJson(newApiDtoJson.get(field.getName()));
+                String originalElementValue = mapper.writeValueAsString(originalApiDtoJson.get(field.getName()));
+                String newElementValue = mapper.writeValueAsString(newApiDtoJson.get(field.getName()));
 
                 if (!StringUtils.equals(originalElementValue, newElementValue)) {
                     originalApiDtoJson = overrideDTOValues(originalApiDtoJson, newApiDtoJson, field, tokenScopes,

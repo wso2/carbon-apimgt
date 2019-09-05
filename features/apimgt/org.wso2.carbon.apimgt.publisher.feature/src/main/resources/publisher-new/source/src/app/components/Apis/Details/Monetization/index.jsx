@@ -10,8 +10,9 @@ import { FormattedMessage } from 'react-intl';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
+import AuthManager from 'AppData/AuthManager';
+
 import BusinessPlans from './BusinessPlans';
-import AuthManager from '../../../../data/AuthManager';
 
 const styles = theme => ({
     root: {

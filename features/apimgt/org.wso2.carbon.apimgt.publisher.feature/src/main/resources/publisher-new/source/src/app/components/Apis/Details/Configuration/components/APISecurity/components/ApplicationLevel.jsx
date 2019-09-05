@@ -28,13 +28,13 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { FormattedMessage } from 'react-intl';
+import AuthManager from 'AppData/AuthManager';
 import {
     DEFAULT_API_SECURITY_OAUTH2,
     API_SECURITY_BASIC_AUTH,
     API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
 } from '../APISecurity';
-import AuthManager from '../../../../../../../data/AuthManager';
 
 /**
  *

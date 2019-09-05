@@ -25,7 +25,7 @@ import DoneIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
 import Select from '@material-ui/core/Select';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import AuthManager from '../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 const styles = theme => ({
     container: {

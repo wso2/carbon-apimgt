@@ -22,7 +22,7 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import ChipInput from 'material-ui-chip-input';
 import { FormattedMessage } from 'react-intl';
-import AuthManager from '../../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  *

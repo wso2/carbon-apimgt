@@ -28,7 +28,7 @@ import FormLabel from '@material-ui/core/FormLabel';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
-import AuthManager from '../../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 const useStyles = makeStyles(theme => ({
     error: {

@@ -31,6 +31,7 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
+import AuthManager from 'AppData/AuthManager';
 import AuthorizationHeader from './components/AuthorizationHeader';
 import DefaultVersion from './components/DefaultVersion';
 import ResponseCaching from './components/ResponseCaching';
@@ -49,7 +50,6 @@ import APISecurity, {
     API_SECURITY_MUTUAL_SSL_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
 } from './components/APISecurity/APISecurity';
-import AuthManager from '../../../../data/AuthManager';
 
 const useStyles = makeStyles(theme => ({
     root: {

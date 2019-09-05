@@ -30,7 +30,7 @@ import {
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import AuthManager from '../../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 const itemHeight = 48;
 const itemPaddingTop = 8;

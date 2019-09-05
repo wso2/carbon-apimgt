@@ -43,7 +43,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import SelectContentType from './SelectContentType';
 import InlineEditableField from './InlineEditableField';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import AuthManager from '../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 const styles = theme => ({
     root: {

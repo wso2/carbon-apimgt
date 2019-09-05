@@ -23,12 +23,12 @@ import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import cloneDeep from 'lodash.clonedeep';
+import AuthManager from 'AppData/AuthManager';
 
 import EndpointOverview from './EndpointOverview';
 import ApiContext from '../components/ApiContext';
 import PrototypeEndpoints from './Prototype/PrototypeEndpoints';
 import { getEndpointConfigByImpl } from './endpointUtils';
-import AuthManager from '../../../../data/AuthManager';
 
 const styles = theme => ({
     endpointTypesWrapper: {

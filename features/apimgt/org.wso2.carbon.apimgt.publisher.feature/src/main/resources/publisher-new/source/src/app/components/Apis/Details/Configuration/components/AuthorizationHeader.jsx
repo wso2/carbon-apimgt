@@ -23,7 +23,7 @@ import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
-import AuthManager from '../../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  *

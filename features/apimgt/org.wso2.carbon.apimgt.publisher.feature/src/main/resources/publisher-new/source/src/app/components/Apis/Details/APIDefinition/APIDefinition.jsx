@@ -44,9 +44,8 @@ import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import Dropzone from 'react-dropzone';
 import json2yaml from 'json2yaml';
 import SwaggerParser from 'swagger-parser';
-
+import AuthManager from 'AppData/AuthManager';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
-import AuthManager from '../../../../data/AuthManager';
 
 const EditorDialog = React.lazy(() => import('./SwaggerEditorDrawer'));
 

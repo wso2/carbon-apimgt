@@ -39,7 +39,7 @@ import TableRow from '@material-ui/core/TableRow';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api.js';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-import AuthManager from '../../../../data/AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 const styles = theme => ({
     root: {
