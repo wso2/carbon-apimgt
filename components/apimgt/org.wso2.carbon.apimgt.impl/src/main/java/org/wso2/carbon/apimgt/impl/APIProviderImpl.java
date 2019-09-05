@@ -41,6 +41,8 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ErrorItem;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
@@ -112,6 +114,7 @@ import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -3646,6 +3649,47 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
+     * Publish API to external stores given by external store Ids
+     *
+     * @param api              API which need to published
+     * @param externalStoreIds APIStore Ids which need to publish API
+     * @throws APIManagementException If failed to publish to external stores
+     */
+    @Override
+    public boolean publishToExternalAPIStores(API api, List<String> externalStoreIds) throws APIManagementException {
+
+        Set<APIStore> inputStores = new HashSet<>();
+        boolean apiOlderVersionExist = false;
+        APIIdentifier apiIdentifier = api.getId();
+        for (String store : externalStoreIds) {
+            if (StringUtils.isNotEmpty(store)) {
+                APIStore inputStore = APIUtil.getExternalAPIStore(store,
+                        APIUtil.getTenantIdFromTenantDomain(tenantDomain));
+                if (inputStore == null) {
+                    String errorMessage = "Error while publishing to external stores. Invalid External Store Id: "
+                            + store;
+                    log.error(errorMessage);
+                    ExceptionCodes exceptionCode = ExceptionCodes.EXTERNAL_STORE_ID_NOT_FOUND;
+                    throw new APIManagementException(errorMessage,
+                            new ErrorItem(exceptionCode.getErrorMessage(), errorMessage, exceptionCode.getErrorCode(),
+                                    exceptionCode.getHttpStatusCode()));
+                }
+                inputStores.add(inputStore);
+            }
+        }
+        Set<String> versions = getAPIVersions(apiIdentifier.getProviderName(),
+                apiIdentifier.getName());
+        APIVersionStringComparator comparator = new APIVersionStringComparator();
+        for (String tempVersion : versions) {
+            if (comparator.compare(tempVersion, apiIdentifier.getVersion()) < 0) {
+                apiOlderVersionExist = true;
+                break;
+            }
+        }
+        return updateAPIsInExternalAPIStores(api, inputStores, apiOlderVersionExist);
+    }
+
+    /**
      * When enabled publishing to external APIStores support,publish the API to external APIStores
      *
      * @param api         The API which need to published
@@ -3669,7 +3713,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String version = ApiMgtDAO.getInstance().getLastPublishedAPIVersionFromAPIStore(api.getId(),
                         store.getName());
 
-                if (apiOlderVersionExist && version != null) {
+                if (apiOlderVersionExist && version != null && !(publisher instanceof WSO2APIPublisher)) {
                     published = publisher.createVersionedAPIToStore(api, store, version);
                     publisher.updateToStore(api, store);
                 } else {
@@ -3890,19 +3934,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to update subscription status
      */
     @Override
-    public Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId)
-            throws APIManagementException {
+    public Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId) throws APIManagementException {
         Set<APIStore> storesSet;
-        SortedSet<APIStore> configuredAPIStores = new TreeSet<APIStore>(new APIStoreNameComparator());
+        SortedSet<APIStore> configuredAPIStores = new TreeSet<>(new APIStoreNameComparator());
         configuredAPIStores.addAll(APIUtil.getExternalStores(tenantId));
         if (APIUtil.isAPIsPublishToExternalAPIStores(tenantId)) {
             storesSet = apiMgtDAO.getExternalAPIStoresDetails(apiId);
             //Retains only the stores that contained in configuration
             storesSet.retainAll(configuredAPIStores);
             return storesSet;
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**

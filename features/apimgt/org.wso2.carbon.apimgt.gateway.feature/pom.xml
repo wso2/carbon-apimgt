@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.5.78-SNAPSHOT</version>
+        <version>6.5.80-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -254,7 +254,7 @@
                                 <importBundleDef>org.wso2.orbit.re2j:re2j:${re2j.version}</importBundleDef>
                             </importBundles>
                             <importFeatures>
-                                <importFeatureDef>org.apache.synapse.wso2:${carbon.mediation.version}</importFeatureDef>
+                                <importFeatureDef>org.apache.synapse.wso2:${synapse.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.mediation.initializer:${carbon.mediation.version}
                                 </importFeatureDef>
                             </importFeatures>

@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -22,7 +23,7 @@ import javax.xml.bind.annotation.*;
 public class GraphQLValidationResponseGraphQLInfoDTO   {
   
     private List<APIOperationsDTO> operations = new ArrayList<>();
-    private Object graphQLSchema = null;
+    private GraphQLSchemaDTO graphQLSchema = null;
 
   /**
    **/
@@ -43,7 +44,7 @@ public class GraphQLValidationResponseGraphQLInfoDTO   {
 
   /**
    **/
-  public GraphQLValidationResponseGraphQLInfoDTO graphQLSchema(Object graphQLSchema) {
+  public GraphQLValidationResponseGraphQLInfoDTO graphQLSchema(GraphQLSchemaDTO graphQLSchema) {
     this.graphQLSchema = graphQLSchema;
     return this;
   }
@@ -51,10 +52,10 @@ public class GraphQLValidationResponseGraphQLInfoDTO   {
   
   @ApiModelProperty(value = "")
   @JsonProperty("graphQLSchema")
-  public Object getGraphQLSchema() {
+  public GraphQLSchemaDTO getGraphQLSchema() {
     return graphQLSchema;
   }
-  public void setGraphQLSchema(Object graphQLSchema) {
+  public void setGraphQLSchema(GraphQLSchemaDTO graphQLSchema) {
     this.graphQLSchema = graphQLSchema;
   }
 

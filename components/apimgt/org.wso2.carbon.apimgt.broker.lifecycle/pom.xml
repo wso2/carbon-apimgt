@@ -4,7 +4,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.5.78-SNAPSHOT</version>
+        <version>6.5.80-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -51,6 +51,8 @@
                             org.apache.commons.*,
                             org.wso2.carbon.apimgt.impl.dto.*,
                             org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.imp.pkg.version}",
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>

@@ -1460,7 +1460,6 @@ public class APIMappingUtil {
      */
     private static List<APIOperationsDTO> getOperationsFromSwaggerDef(API api, String swaggerDefinition)
             throws APIManagementException {
-
         Optional<APIDefinition> apiDefinitionOptional = OASParserUtil.getOASParser(swaggerDefinition);
         APIDefinition apiDefinition = apiDefinitionOptional.get();
         SwaggerData swaggerData = new SwaggerData(api);

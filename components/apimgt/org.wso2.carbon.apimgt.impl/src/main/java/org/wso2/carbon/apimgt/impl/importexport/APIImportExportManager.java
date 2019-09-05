@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.importexport;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -77,6 +78,7 @@ public class APIImportExportManager {
                 exportFormat);
         CommonUtil.archiveDirectory(archiveBasePath);
         log.info("API" + apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion() + " exported successfully");
+        FileUtils.deleteQuietly(exportFolder);
         return new File(archiveBasePath + APIConstants.ZIP_FILE_EXTENSION);
     }
 
@@ -101,7 +103,8 @@ public class APIImportExportManager {
 
         APIImportUtil.importAPI(absolutePath + extractedFolderName, loggedInUsername, isProviderPreserved,
                 apiProvider, overwrite);
-        importFolder.deleteOnExit();
+        FileUtils.deleteQuietly(importFolder);
+        FileUtils.deleteQuietly(new File(extractedFolderName));
     }
 
 }

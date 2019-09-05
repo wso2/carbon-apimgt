@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.5.78-SNAPSHOT</version>
+        <version>6.5.80-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -45,6 +45,7 @@
                             javax.transaction.*,
                             org.apache.axis2.*,
                             org.apache.commons.*,
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.wso2.carbon.apimgt.impl.dto.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.broker.lifecycle.service.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.context.*;version="${carbon.kernel.package.import.version.range}",
