@@ -118,7 +118,7 @@ class CreateScope extends React.Component {
         this.validateScopeName = this.validateScopeName.bind(this);
         this.handleScopeNameInput = this.handleScopeNameInput.bind(this);
         this.validateScopeDescription = this.validateScopeDescription.bind(this);
-        this.validateSystemRole = this.validateSystemRole.bind(this);
+        this.handleRoleAddition = this.handleRoleAddition.bind(this);
         this.handleRoleDeletion = this.handleRoleDeletion.bind(this);
     }
 
@@ -213,7 +213,7 @@ class CreateScope extends React.Component {
         });
     }
 
-    validateSystemRole(value, role) {
+    handleRoleAddition(value, role) {
         const { validRoles, invalidRoles } = this.state;
         value.then((resp) => {
             if (resp) {
@@ -343,7 +343,7 @@ class CreateScope extends React.Component {
                                 ),
                             }}
                             onAdd={(role) => {
-                                this.validateSystemRole(APIValidation.role.validate(base64url.encode(role)), role);
+                                this.handleRoleAddition(APIValidation.role.validate(base64url.encode(role)), role);
                             }}
                             error={!roleValidity}
                             helperText={

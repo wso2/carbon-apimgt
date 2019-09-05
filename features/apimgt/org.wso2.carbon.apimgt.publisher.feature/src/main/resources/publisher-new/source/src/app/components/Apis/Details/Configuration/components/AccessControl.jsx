@@ -56,8 +56,10 @@ export default function AccessControl(props) {
                 userValidation.then((response) => {
                     if (response) {
                         setUserRoleValidity(true);
-                        configDispatcher({ action: 'accessControlRoles',
-                            value: api.accessControlRoles.length === 0 ? role : (api.accessControlRoles + ',' + role)});
+                        configDispatcher({
+                            action: 'accessControlRoles',
+                            value: api.accessControlRoles.length === 0 ? role : (api.accessControlRoles + ',' + role),
+                        });
                     } else {
                         setUserRoleValidity(false);
                         setInvalidRoles([...invalidRoles, role]);
@@ -87,8 +89,34 @@ export default function AccessControl(props) {
                 setUserRoleValidity(true);
             }
         }
-        configDispatcher({action: 'accessControlRoles', value: validRoles.length ===0 ? '' : validRoles.join(',')});
+        configDispatcher({ action: 'accessControlRoles', value: validRoles.length === 0 ? '' : validRoles.join(',') });
     };
+
+    const handleRoleValidationFailure = () => {
+        if (!roleValidity) {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Scopes.Roles.Invalid'
+                    defaultMessage='Role is invalid'
+                />
+            );
+        } else if (!userRoleValidity) {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Scopes.Roles.User.Invalid'
+                    defaultMessage='Role must be associated with API creator'
+                />
+            );
+        } else {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Scopes.CreateScope.roles.help'
+                    defaultMessage='Enter valid role and press enter'
+                />
+            );
+        }
+    };
+
     return (
         <Grid container spacing={0} alignItems='flex-start'>
             <Grid item xs={11}>
@@ -169,13 +197,13 @@ export default function AccessControl(props) {
             {isRestricted && (
                 <Grid item>
                     <ChipInput
-                        value={api.accessControlRoles.length ===0 ? invalidRoles :
+                        value={api.accessControlRoles.length === 0 ? invalidRoles :
                             api.accessControlRoles.concat(invalidRoles)}
                         alwaysShowPlaceholder={false}
                         placeholder='Enter roles and press Enter'
                         blurBehavior='clear'
                         InputProps={{
-                            endAdornment: !roleValidity && (
+                            endAdornment: (!roleValidity || !userRoleValidity) && (
                                 <InputAdornment position='end'>
                                     <Error color='error' />
                                 </InputAdornment>
@@ -189,24 +217,7 @@ export default function AccessControl(props) {
                             );
                         }}
                         error={!roleValidity || !userRoleValidity}
-                        helperText={
-                            !roleValidity ? (
-                                <FormattedMessage
-                                    id='Apis.Details.Scopes.Roles.Invalid'
-                                    defaultMessage='Role is invalid'
-                                />
-                            ) : !userRoleValidity ? (
-                                <FormattedMessage
-                                    id='Apis.Details.Scopes.Roles.User.Invalid'
-                                    defaultMessage='user does not have role'
-                                />
-                            ) : (
-                                <FormattedMessage
-                                    id='Apis.Details.Scopes.CreateScope.roles.help'
-                                    defaultMessage='Enter valid role and press enter'
-                                />
-                            )
-                        }
+                        helperText={handleRoleValidationFailure()}
                         chipRenderer={({ value }, key) => (
                             <Chip
                                 key={key}
@@ -217,7 +228,7 @@ export default function AccessControl(props) {
                                 style={{
                                     backgroundColor: invalidRoles.includes(value) ? red[300] : null,
                                     margin: '8px 8px 8px 0',
-                                    float: 'left'
+                                    float: 'left',
                                 }}
                             />
                         )}

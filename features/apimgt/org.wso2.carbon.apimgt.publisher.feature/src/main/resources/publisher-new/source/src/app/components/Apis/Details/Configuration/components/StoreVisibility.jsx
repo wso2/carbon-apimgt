@@ -48,12 +48,14 @@ export default function StoreVisibility(props) {
     const { api, configDispatcher } = props;
     const [invalidRoles, setInvalidRoles] = useState([]);
     const isPublic = api.visibility === 'PUBLIC';
-    const validateSystemRole = (value, role) => {
+    const handleRoleAddition = (value, role) => {
         value.then((resp) => {
             if (resp) {
                 setRoleValidity(true);
-                configDispatcher({ action: 'visibleRoles', value:
-                    api.visibleRoles.length === 0 ? role : (api.visibleRoles + ',' + role) });
+                configDispatcher({
+                    action: 'visibleRoles',
+                    value: api.visibleRoles.length === 0 ? role : (api.visibleRoles + ',' + role),
+                });
             } else {
                 setRoleValidity(false);
                 setInvalidRoles([...invalidRoles, role]);
@@ -163,8 +165,7 @@ export default function StoreVisibility(props) {
             {!isPublic && (
                 <Grid item>
                     <ChipInput
-                        value={api.visibleRoles.length ===0 ? invalidRoles :
-                            api.visibleRoles.concat(invalidRoles)}
+                        value={api.visibleRoles.length === 0 ? invalidRoles : api.visibleRoles.concat(invalidRoles)}
                         alwaysShowPlaceholder={false}
                         placeholder='Enter roles and press Enter'
                         blurBehavior='clear'
@@ -176,7 +177,7 @@ export default function StoreVisibility(props) {
                             ),
                         }}
                         onAdd={(role) => {
-                            validateSystemRole(APIValidation.role.validate(base64url.encode(role)), role);
+                            handleRoleAddition(APIValidation.role.validate(base64url.encode(role)), role);
                         }}
                         error={!roleValidity}
                         helperText={

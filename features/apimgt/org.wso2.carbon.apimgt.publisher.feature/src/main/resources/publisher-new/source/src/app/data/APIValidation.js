@@ -19,16 +19,19 @@
 import Joi from '@hapi/joi';
 import API from '../data/api';
 
-const roleSchema = Joi.extend((joi) => ({
+/*
+* eslint validation rule for no-unused-vars has been disabled in this component.
+* According to the Joi extension, it is required to provide required four input
+* arguments to custom Joi schema validate function.
+* Ref: https://hapi.dev/family/joi/?v=15.1.1#extendextension
+*/
+const roleSchema = Joi.extend(joi => ({
     base: joi.string(),
     name: 'systemRole',
-    language: {
-        role: 'needs to be a valid role',
-    },
     rules: [
         {
             name: 'role',
-            validate(params, value, state, options) {
+            validate(params, value, state, options) { // eslint-disable-line no-unused-vars
                 const api = new API();
                 return api.validateSystemRole(value);
             },
@@ -36,16 +39,13 @@ const roleSchema = Joi.extend((joi) => ({
     ],
 }));
 
-const userRoleSchema = Joi.extend((joi) => ({
+const userRoleSchema = Joi.extend(joi => ({
     base: joi.string(),
     name: 'userRole',
-    language: {
-        role: 'needs to be a valid role',
-    },
     rules: [
         {
             name: 'role',
-            validate(params, value, state, options) {
+            validate(params, value, state, options) { // eslint-disable-line no-unused-vars
                 const api = new API();
                 return api.validateUSerRole(value);
             },
