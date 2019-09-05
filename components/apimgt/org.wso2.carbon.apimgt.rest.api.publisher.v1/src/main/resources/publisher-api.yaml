@@ -6317,10 +6317,8 @@ definitions:
       businessInformation:
         allOf:
           - $ref: '#/definitions/APIBusinessInformation'
-          # - type:'#/definitions/APIBusinessInformation'
         x-otherScopes:
           - apim:api_publish
-          - test_scope
       corsConfiguration:
         $ref: '#/definitions/APICorsConfiguration'
       workflowStatus:
