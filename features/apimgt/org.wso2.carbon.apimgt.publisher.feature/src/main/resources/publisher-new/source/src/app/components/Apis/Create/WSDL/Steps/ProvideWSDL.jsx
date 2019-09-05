@@ -50,6 +50,8 @@ const useStyles = makeStyles(theme => ({
 export default function ProvideWSDL(props) {
     const { apiInputs, inputsDispatcher, onValidate } = props;
     const isFileInput = apiInputs.inputType === 'file';
+    const isArchiveInput = apiInputs.inputType === 'archive';
+    const isGenerateRESTAPI = apiInputs.type === 'SOAPtoREST';
     const classes = useStyles();
     const [isError, setValidity] = useState(); // If valid value is `null` else an error object will be there
     const [isValidating, setIsValidating] = useState(false);
@@ -100,62 +102,6 @@ export default function ProvideWSDL(props) {
                             <React.Fragment>
                                 <sup className={classes.mandatoryStar}>*</sup>{' '}
                                 <FormattedMessage
-                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.type'
-                                    defaultMessage='Input type'
-                                />
-                            </React.Fragment>
-                        </FormLabel>
-                        <RadioGroup
-                            aria-label='Input type'
-                            value={apiInputs.inputType}
-                            onChange={event => inputsDispatcher({ action: 'inputType', value: event.target.value })}
-                        >
-                            <FormControlLabel value='url' control={<Radio />} label='WSDL URL' />
-                            <FormControlLabel value='file' control={<Radio />} label='WSDL Archive/File' />
-                        </RadioGroup>
-                    </FormControl>
-                </Grid>
-                <Grid item md={7}>
-                    {isFileInput ? (
-                        // TODO: Pass message saying accepting only one file ~tmkb
-                        <DropZoneLocal onDrop={onDrop} files={apiInputs.inputValue} />
-                    ) : (
-                        <TextField
-                            autoFocus
-                            id='outlined-full-width'
-                            label='WSDL URL'
-                            placeholder='Enter WSDL URL'
-                            fullWidth
-                            margin='normal'
-                            variant='outlined'
-                            onChange={({ target: { value } }) => inputsDispatcher({ action: 'inputValue', value })}
-                            value={apiInputs.inputValue}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            InputProps={{
-                                onBlur: ({ target: { value } }) => {
-                                    validate(APIValidation.url.required().validate(value).error);
-                                },
-                                endAdornment: isValidating && (
-                                    <InputAdornment position='end'>
-                                        <CircularProgress />
-                                    </InputAdornment>
-                                ),
-                            }}
-                            // 'Give the URL of WSDL endpoint'
-                            helperText={isError && isError.message}
-                            error={Boolean(isError)}
-                            disabled={isValidating}
-                        />
-                    )}
-                </Grid>
-                <Grid item md={12}>
-                    <FormControl component='fieldset'>
-                        <FormLabel component='legend'>
-                            <React.Fragment>
-                                <sup className={classes.mandatoryStar}>*</sup>{' '}
-                                <FormattedMessage
                                     id='Apis.Create.WSDL.Steps.ProvideWSDL.implementation.type'
                                     defaultMessage='Implementation type'
                                 />
@@ -163,12 +109,11 @@ export default function ProvideWSDL(props) {
                         </FormLabel>
                         <RadioGroup
                             aria-label='Implementation type'
-                            value={isFileInput ? 'PASS' : apiInputs.type}
+                            value={apiInputs.type}
                             onChange={event => inputsDispatcher({ action: 'type', value: event.target.value })}
                         >
                             <FormControlLabel value='PASS' control={<Radio />} label='Pass Through' />
                             <FormControlLabel
-                                disabled={isFileInput}
                                 value='SOAPtoREST'
                                 control={<Radio />}
                                 label='Generate REST APIs'
@@ -180,13 +125,70 @@ export default function ProvideWSDL(props) {
                         </FormHelperText>
                     </FormControl>
                 </Grid>
+                <Grid item md={12}>
+                    <FormControl component='fieldset'>
+                        <FormLabel component='legend'>
+                            <React.Fragment>
+                                <sup className={classes.mandatoryStar}>*</sup>{' '}
+                                <FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.type'
+                                    defaultMessage='Input type'
+                                />
+                            </React.Fragment>
+                        </FormLabel>
+                        <RadioGroup
+                            aria-label='Input type'
+                            value={apiInputs.inputType}
+                            onChange={event => inputsDispatcher({ action: 'inputType', value: event.target.value })}
+                        >
+                            <FormControlLabel value='url' control={<Radio />} label='WSDL URL' />
+                            <FormControlLabel value='file' control={<Radio />} label='WSDL File' />
+                            <FormControlLabel disabled={isGenerateRESTAPI} value='archive' control={<Radio />} label='WSDL Archive' />
+                        </RadioGroup>
+                    </FormControl>
+                </Grid>
+                <Grid item md={7}>
+                    {(isFileInput || isArchiveInput) ? (
+                        // TODO: Pass message saying accepting only one file ~tmkb
+                        <DropZoneLocal onDrop={onDrop} files={apiInputs.inputValue} />
+                    ) : (
+                            <TextField
+                                autoFocus
+                                id='outlined-full-width'
+                                label='WSDL URL'
+                                placeholder='Enter WSDL URL'
+                                fullWidth
+                                margin='normal'
+                                variant='outlined'
+                                onChange={({ target: { value } }) => inputsDispatcher({ action: 'inputValue', value })}
+                                value={apiInputs.inputValue}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                InputProps={{
+                                    onBlur: ({ target: { value } }) => {
+                                        validate(APIValidation.url.required().validate(value).error);
+                                    },
+                                    endAdornment: isValidating && (
+                                        <InputAdornment position='end'>
+                                            <CircularProgress />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                                // 'Give the URL of WSDL endpoint'
+                                helperText={isError && isError.message}
+                                error={Boolean(isError)}
+                                disabled={isValidating}
+                            />
+                        )}
+                </Grid>
             </Grid>
         </React.Fragment>
     );
 }
 
 ProvideWSDL.defaultProps = {
-    onValidate: () => {},
+    onValidate: () => { },
 };
 ProvideWSDL.propTypes = {
     apiInputs: PropTypes.shape({
