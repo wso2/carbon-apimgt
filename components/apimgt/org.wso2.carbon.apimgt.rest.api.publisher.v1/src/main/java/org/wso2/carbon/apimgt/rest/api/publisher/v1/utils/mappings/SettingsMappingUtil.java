@@ -34,10 +34,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 public class SettingsMappingUtil {
@@ -61,6 +58,7 @@ public class SettingsMappingUtil {
             }
             settingsDTO.setEnvironment(environmentListDTO.getList());
             settingsDTO.setMonetizationProperties(getMonetizationProperties());
+            settingsDTO.setSecurityAuditProperties(getSecurityAuditProperties());
         }
         settingsDTO.setScopes(GetScopeList());
         return settingsDTO;
@@ -100,6 +98,21 @@ public class SettingsMappingUtil {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         properties = configuration.getProperty(APIConstants.MonetizationUsagePublisher.ADDITIONAL_PROPERTY_LOCATION);
+        return properties;
+    }
+
+    /**
+     * This method returns the Security Audit properties from the configuration
+     *
+     */
+    private Map<String, String> getSecurityAuditProperties() {
+        Map<String, String> properties = new HashMap<>();
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String apiToken = config.getFirstProperty(APIConstants.API_SECURITY_AUDIT_API_TOKEN);
+        String collectionId = config.getFirstProperty(APIConstants.API_SECURITY_AUDIT_CID);
+        properties.put("apiToken", apiToken);
+        properties.put("collectionId", collectionId);
         return properties;
     }
 }

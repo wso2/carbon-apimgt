@@ -8198,6 +8198,10 @@ definitions:
         type: array
         items:
           type: string
+      SecurityAuditProperties:
+        type: object
+        items:
+          type: string
 
 #-----------------------------------------------------
 # The pagination resource
