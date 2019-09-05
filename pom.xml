@@ -1726,7 +1726,7 @@
         <swagger.codegen.version>2.3.1.wso2v2</swagger.codegen.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
         <swagger.parser.version>1.0.32.wso2v1</swagger.parser.version>
-        <swagger.core.version>1.5.22</swagger.core.version>
+        <swagger.core.version>1.5.23</swagger.core.version>
         <swagger.models.version>1.5.22</swagger.models.version>
         <swagger.annotations.version>1.5.22</swagger.annotations.version>
         <google.guava.version>27.0-jre</google.guava.version>
