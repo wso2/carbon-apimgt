@@ -25,6 +25,7 @@ import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { Link } from 'react-router-dom';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -44,13 +45,25 @@ export default function Environments() {
     const { api, updateAPI } = useContext(APIContext);
     const { settings } = useAppContext();
     const [gatewayEnvironments, setGatewayEnvironments] = useState([...api.gatewayEnvironments]);
+    const [isCreating, setCreating] = useState(false);
 
     /**
      *
      * Handle the Environments save button action
      */
     function addEnvironments() {
-        updateAPI({ gatewayEnvironments }).then(() => Alert.info('API Update Successfully'));
+        setCreating(true);
+        updateAPI({ gatewayEnvironments })
+            .then(() => Alert.info('API Update Successfully'))
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while updating the environments');
+                }
+                console.error(error);
+            })
+            .finally(() => setCreating(false));
     }
 
     return (
@@ -123,6 +136,7 @@ export default function Environments() {
                             id='Apis.Details.Environments.Environments.save'
                             defaultMessage='Save'
                         />
+                        {isCreating && <CircularProgress size={20} />}
                     </Button>
                 </Grid>
                 <Grid item>
