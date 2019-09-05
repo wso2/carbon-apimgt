@@ -2540,9 +2540,9 @@ paths:
       security:
         - OAuth2Security:
           - apim:sub_manage
-      summary: Get details of a pending invoice for a monetized subscription with meterd billing.
+      summary: Get details of a pending invoice for a monetized subscription with metered billing.
       description: |
-        This operation can be used to get details of a pending invoice for a monetized subscription with meterd billing.
+        This operation can be used to get details of a pending invoice for a monetized subscription with metered billing.
       parameters:
         - $ref: '#/parameters/subscriptionId'
       tags:

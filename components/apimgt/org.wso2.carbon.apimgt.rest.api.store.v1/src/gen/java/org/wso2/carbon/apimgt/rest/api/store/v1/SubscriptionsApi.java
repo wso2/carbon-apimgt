@@ -131,7 +131,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Path("/{subscriptionId}/usage")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get details of a pending invoice for a monetized subscription with meterd billing.", notes = "This operation can be used to get details of a pending invoice for a monetized subscription with meterd billing. ", response = APIMonetizationUsageDTO.class, authorizations = {
+    @ApiOperation(value = "Get details of a pending invoice for a monetized subscription with metered billing.", notes = "This operation can be used to get details of a pending invoice for a monetized subscription with metered billing. ", response = APIMonetizationUsageDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:sub_manage", description = "Manage subscriptions")
         })

@@ -383,10 +383,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             return Response.ok().entity(apiMonetizationUsageDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Failed to retrieve billing engine usage data for subscription ID : " + subscriptionId;
-            RestApiUtil.handleInternalServerError(errorMessage, log);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (MonetizationException e) {
             String errorMessage = "Failed to get current usage for subscription ID : " + subscriptionId;
-            RestApiUtil.handleInternalServerError(errorMessage, log);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
