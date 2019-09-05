@@ -2484,6 +2484,54 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The get usage billing resource APIs
+######################################################
+  '/subscriptions/{subscriptionId}/usage':
+    get:
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/store/v1.0/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809/usage"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v1.0/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809/usage
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"object\": \"invoice\",\n   \"account_country\": \"US\",\n   \"account_name\": \"test.com\",\n   \"amount_due\": \"0\",\n   \"amount_paid\": \"0\"\n  \"amount_remaining\": \"0\"\n}"
+      security:
+        - OAuth2Security:
+          - apim:sub_manage
+      summary: Get details of a pending invoice for a monetized subscription with meterd billing.
+      description: |
+        This operation can be used to get details of a pending invoice for a monetized subscription with meterd billing.
+      parameters:
+        - $ref: '#/parameters/subscriptionId'
+      tags:
+        - API Monetization
+      responses:
+        200:
+          description: |
+            OK.
+            Details of a pending invoice returned.
+          schema:
+            $ref: '#/definitions/APIMonetizationUsage'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+            ETag:
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).'
+              type: string
+            Last-Modified:
+              description: 'Date and time the resource has been modified the last time. Used by caches, or in conditional requests (Will be supported in future).'
+              type: string
+        '304':
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        '404':
+          description: |
+            Not Found.
+            Requested Subscription does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # The "Throttling Policy Collection" resource APIs
 ######################################################
   /throttling-policies/{policyLevel}:
@@ -5296,6 +5344,18 @@ definitions:
           type: string
         description: roles for this permission
         example: ["manager","developer"]
+
+  #-----------------------------------------------------
+  # The API monetization usage resource
+  #-----------------------------------------------------
+  APIMonetizationUsage:
+    title: API monetization usage object
+    properties:
+      properties:
+        type: object
+        description: Map of custom properties related to monetization usage
+        additionalProperties:
+          type: string
 
 #-----------------------------------------------------
 # The workflow executor's response resource
