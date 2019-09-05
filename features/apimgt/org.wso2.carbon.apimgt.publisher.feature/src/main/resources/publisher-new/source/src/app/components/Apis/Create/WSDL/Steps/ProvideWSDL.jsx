@@ -112,11 +112,15 @@ export default function ProvideWSDL(props) {
                             value={apiInputs.type}
                             onChange={event => inputsDispatcher({ action: 'type', value: event.target.value })}
                         >
-                            <FormControlLabel value='PASS' control={<Radio />} label='Pass Through' />
+                            <FormControlLabel
+                                value='PASS'
+                                control={<Radio />}
+                                label={<FormattedMessage id='Apis.Create.WSDL.Steps.ProvideWSDL.passthrough.label' defaultMessage='Pass Through' />}
+                            />
                             <FormControlLabel
                                 value='SOAPtoREST'
                                 control={<Radio />}
-                                label='Generate REST APIs'
+                                label={<FormattedMessage id='Apis.Create.WSDL.Steps.ProvideWSDL.SOAPtoREST.label' defaultMessage='Generate REST APIs' />}
                             />
                         </RadioGroup>
                         <FormHelperText>
@@ -141,9 +145,22 @@ export default function ProvideWSDL(props) {
                             value={apiInputs.inputType}
                             onChange={event => inputsDispatcher({ action: 'inputType', value: event.target.value })}
                         >
-                            <FormControlLabel value='url' control={<Radio />} label='WSDL URL' />
-                            <FormControlLabel value='file' control={<Radio />} label='WSDL File' />
-                            <FormControlLabel disabled={isGenerateRESTAPI} value='archive' control={<Radio />} label='WSDL Archive' />
+                            <FormControlLabel
+                                value='url'
+                                control={<Radio />}
+                                label={<FormattedMessage id='Apis.Create.WSDL.Steps.ProvideWSDL.url.label' defaultMessage='WSDL URL' />}
+                            />
+                            <FormControlLabel
+                                value='file'
+                                control={<Radio />}
+                                label={<FormattedMessage id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label' defaultMessage='WSDL File' />}
+                            />
+                            <FormControlLabel
+                                disabled={isGenerateRESTAPI}
+                                value='archive'
+                                control={<Radio />}
+                                label={<FormattedMessage id='Apis.Create.WSDL.Steps.ProvideWSDL.archive.label' defaultMessage='WSDL Archive' />}
+                            />
                         </RadioGroup>
                     </FormControl>
                 </Grid>
@@ -152,35 +169,35 @@ export default function ProvideWSDL(props) {
                         // TODO: Pass message saying accepting only one file ~tmkb
                         <DropZoneLocal onDrop={onDrop} files={apiInputs.inputValue} />
                     ) : (
-                            <TextField
-                                autoFocus
-                                id='outlined-full-width'
-                                label='WSDL URL'
-                                placeholder='Enter WSDL URL'
-                                fullWidth
-                                margin='normal'
-                                variant='outlined'
-                                onChange={({ target: { value } }) => inputsDispatcher({ action: 'inputValue', value })}
-                                value={apiInputs.inputValue}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                InputProps={{
-                                    onBlur: ({ target: { value } }) => {
-                                        validate(APIValidation.url.required().validate(value).error);
-                                    },
-                                    endAdornment: isValidating && (
-                                        <InputAdornment position='end'>
-                                            <CircularProgress />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                                // 'Give the URL of WSDL endpoint'
-                                helperText={isError && isError.message}
-                                error={Boolean(isError)}
-                                disabled={isValidating}
-                            />
-                        )}
+                        <TextField
+                            autoFocus
+                            id='outlined-full-width'
+                            label='WSDL URL'
+                            placeholder='Enter WSDL URL'
+                            fullWidth
+                            margin='normal'
+                            variant='outlined'
+                            onChange={({ target: { value } }) => inputsDispatcher({ action: 'inputValue', value })}
+                            value={apiInputs.inputValue}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            InputProps={{
+                                onBlur: ({ target: { value } }) => {
+                                    validate(APIValidation.url.required().validate(value).error);
+                                },
+                                endAdornment: isValidating && (
+                                    <InputAdornment position='end'>
+                                        <CircularProgress />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            // 'Give the URL of WSDL endpoint'
+                            helperText={isError && isError.message}
+                            error={Boolean(isError)}
+                            disabled={isValidating}
+                        />
+                    )}
                 </Grid>
             </Grid>
         </React.Fragment>
