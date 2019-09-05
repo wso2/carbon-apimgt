@@ -271,7 +271,11 @@ public enum ExceptionCodes implements ErrorHandler {
     COMMENT_LENGTH_EXCEEDED(901103, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
             + "number of characters"),
     NEED_ADMIN_PERMISSION(901100, "Admin permission needed", 403,
-            "This user is not an admin");
+            "This user is not an admin"),
+
+    //External Stores related codes
+    EXTERNAL_STORE_ID_NOT_FOUND(901200,"External Store Not Found", 404, "Error while publishing to external stores. " +
+            "External Store Not Found");
 
     private final long errorCode;
     private final String errorMessage;

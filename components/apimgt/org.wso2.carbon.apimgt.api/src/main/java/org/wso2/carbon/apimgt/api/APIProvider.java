@@ -234,7 +234,7 @@ public interface APIProvider extends APIManager {
 
     /**
      * Returns true if key template given by the global policy already exists.
-     * But this check will exclude the policy represented by the policy name 
+     * But this check will exclude the policy represented by the policy name
      *
      * @param policy Global policy
      * @return true if Global policy key template already exists
@@ -255,7 +255,7 @@ public interface APIProvider extends APIManager {
     void updatePolicy(Policy policy) throws APIManagementException;
 
     void updateTier(Tier tier) throws APIManagementException;
-    
+
     void removeTier(Tier tier) throws APIManagementException;
 
     String getDefaultVersion(APIIdentifier apiid) throws APIManagementException;
@@ -267,7 +267,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to add API
      */
     void addAPI(API api) throws APIManagementException;
-    
+
     public boolean isAPIUpdateValid(API api) throws APIManagementException;
 
     /**
@@ -372,7 +372,7 @@ public interface APIProvider extends APIManager {
     void addDocumentation(Identifier id, Documentation documentation) throws APIManagementException;
 
     /**
-     * Add a file to a document of source type FILE 
+     * Add a file to a document of source type FILE
      *
      * @param apiId API identifier the document belongs to
      * @param documentation document
@@ -401,7 +401,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to add the document as a resource to registry
      */
     void addDocumentationContent(API api, String documentationName, String text) throws APIManagementException;
-   
+
     /**
      * Updates a given documentation
      *
@@ -466,27 +466,27 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to update subscription
      */
     void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException;
-    
+
     /**
      * Update the Tier Permissions
      *
      * @param tierName Tier Name
      * @param permissionType Permission Type
-     * @param roles Roles          
+     * @param roles Roles
      * @throws APIManagementException
      *          If failed to update subscription status
      */
     void updateTierPermissions(String tierName, String permissionType, String roles) throws APIManagementException;
-    
+
     /**
      * Get the list of Tier Permissions
-     * 
+     *
      * @return Tier Permission Set
      * @throws APIManagementException
      *          If failed to update subscription status
      */
     Set getTierPermissions() throws APIManagementException;
-    
+
     /**
      * Get the list of Custom InSequences.
      * @return List of available sequences
@@ -536,8 +536,8 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     List<String> getCustomInSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
-    
-    
+
+
     /**
      * Get the list of Custom InSequences including API defined in sequences.
      * @return List of available sequences
@@ -552,7 +552,7 @@ public interface APIProvider extends APIManager {
      */
 
     List<String> getCustomFaultSequences()  throws APIManagementException;
-    
+
     /**
      * Get the list of Custom Fault Sequences including per API sequences.
      * @return List of available fault sequences
@@ -586,45 +586,51 @@ public interface APIProvider extends APIManager {
 
     List<String> getCustomApiFaultSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
 
+    /**
+     * Publish API to external stores given by external store Ids
+     *
+     * @param api              API which need to published
+     * @param externalStoreIds APIStore Ids which need to publish API
+     * @throws APIManagementException If failed to publish to external stores
+     */
+    boolean publishToExternalAPIStores(API api, List<String> externalStoreIds) throws APIManagementException;
 
     /**
      * When enabled publishing to external APIStores support,publish the API to external APIStores
-     * @param api The API which need to published
+     *
+     * @param api         The API which need to published
      * @param apiStoreSet The APIStores set to which need to publish API
-     * @throws APIManagementException
-     *          If failed to update subscription status
+     * @throws APIManagementException If failed to publish to external stores
      */
     void publishToExternalAPIStores(API api, Set<APIStore> apiStoreSet, boolean apiOlderVersionExist)
             throws APIManagementException;
 
     /**
      * Update the API to external APIStores and database
-     * @param api The API which need to published
-     * @param apiStoreSet The APIStores set to which need to publish API
+     *
+     * @param api                  The API which need to published
+     * @param apiStoreSet          The APIStores set to whsich need to publish API
      * @param apiOlderVersionExist The api contained older versions
-     * @throws APIManagementException
-     *          If failed to update subscription status
+     * @throws APIManagementException If failed to update the APIs  in externals stores
      */
     boolean updateAPIsInExternalAPIStores(API api, Set<APIStore> apiStoreSet, boolean apiOlderVersionExist)
             throws APIManagementException;
 
-
     /**
      * When enabled publishing to external APIStores support,get all the external apistore details which are
      * published and stored in db and which are not unpublished
+     *
      * @param apiId The API Identifier which need to update in db
-     * @throws APIManagementException
-     *          If failed to update subscription status
+     * @throws APIManagementException If failed to get all external stores for the API
      */
-
     Set<APIStore> getExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * When enabled publishing to external APIStores support,get only the published external apistore details which are
      * stored in db
+     *
      * @param apiId The API Identifier which need to update in db
-     * @throws APIManagementException
-     *          If failed to update subscription status
+     * @throws APIManagementException If failed to get all the published external stores for the API
      */
     Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
     
@@ -740,11 +746,11 @@ public interface APIProvider extends APIManager {
     boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
             throws APIManagementException;
 
-    /** 
+    /**
      * This method is to set a lifecycle check list item given the APIIdentifier and the checklist item name.
-     * If the given item not in the allowed lifecycle check items list or item is already checked, this will stay 
+     * If the given item not in the allowed lifecycle check items list or item is already checked, this will stay
      * silent and return false. Otherwise, the checklist item will be updated and returns true.
-     * 
+     *
      * @param apiIdentifier APIIdentifier
      * @param checkItemName Name of the checklist item
      * @param checkItemValue Value to be set to the checklist item
@@ -761,7 +767,7 @@ public interface APIProvider extends APIManager {
      * @return Map<String,Object> a map with lifecycle data
      */
      Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException;
-     
+
      /**
       * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
       * according to the new state.
@@ -783,7 +789,7 @@ public interface APIProvider extends APIManager {
      */
     Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus)
             throws APIManagementException;
-     
+
      /**
       * Update api related information such as database entries, registry updates for state change.
       * @param identifier
@@ -828,8 +834,8 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to get Apis
      */
     Map<String, Object> getAllPaginatedAPIs(String tenantDomain, int start, int end) throws APIManagementException;
-    
-    
+
+
     /**
      * Get a policy names for given policy level and user name
      * @param username
@@ -847,7 +853,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void deletePolicy(String username, String policyLevel, String policyName) throws APIManagementException;
-    
+
     boolean hasAttachments(String username, String policyName, String policyLevel)throws APIManagementException;
 
     /**
@@ -866,7 +872,7 @@ public interface APIProvider extends APIManager {
 
     /**
      * Retrieves a block condition by its UUID
-     * 
+     *
      * @param uuid uuid of the block condition
      * @return Retrieve a block Condition
      * @throws APIManagementException
@@ -875,7 +881,7 @@ public interface APIProvider extends APIManager {
 
     /**
      * Updates a block condition given its id
-     * 
+     *
      * @param conditionId id of the condition
      * @param state state of condition
      * @return state change success or not
@@ -885,7 +891,7 @@ public interface APIProvider extends APIManager {
 
     /**
      * Updates a block condition given its UUID
-     * 
+     *
      * @param uuid uuid of the block condition
      * @param state state of condition
      * @return state change success or not
@@ -895,7 +901,7 @@ public interface APIProvider extends APIManager {
 
     /**
      *  Add a block condition
-     * 
+     *
      * @param conditionType type of the condition (IP, Context .. )
      * @param conditionValue value of the condition
      * @return UUID of the new Block Condition
@@ -905,7 +911,7 @@ public interface APIProvider extends APIManager {
 
     /**
      * Deletes a block condition given its Id
-     * 
+     *
      * @param conditionId Id of the condition
      * @return true if successfully deleted
      * @throws APIManagementException
@@ -914,7 +920,7 @@ public interface APIProvider extends APIManager {
 
     /**
      * Deletes a block condition given its UUID
-     * 
+     *
      * @param uuid uuid of the block condition
      * @return true if successfully deleted
      * @throws APIManagementException
@@ -1127,7 +1133,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     String getSequenceFileContent(APIIdentifier apiIdentifier, String type, String name) throws APIManagementException;
-    
+
     /**
      * Create API product
      * @param product product object containing details of the prouct
@@ -1150,17 +1156,17 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void updateAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException;
-    
+
     /**
      * Check whether api product exists for the given name and the provider
-     * @param productName product name 
+     * @param productName product name
      * @param provider provider name
      * @param tenantDomain tenant
      * @return boolean
      * @throws APIManagementException
      */
     boolean isProductExist(String productName, String provider, String tenantDomain) throws APIManagementException;
-    
+
     /**
      * Update openapi definition to the product
      * @param apiDefinition definition to add to the product
@@ -1168,7 +1174,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     void updateAPIDefinitionOfAPIProduct(String apiDefinition, APIProduct product) throws APIManagementException;
-    
+
     /**
      * Remove openapi definition of the product
      * @param APIProduct product
