@@ -44,12 +44,29 @@ MediationPoliciesApiService delegate = new MediationPoliciesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mediation_policy_view", description = "View mediation policies")
         })
-    }, tags={ "Mediation Policies" })
+    }, tags={ "Global Mediation Policies",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of mediation policies is returned. ", response = MediationListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
     public Response mediationPoliciesGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "-Not supported yet-")  @QueryParam("query") String query, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.mediationPoliciesGet(limit, offset, query, ifNoneMatch, securityContext);
+    }
+
+    @GET
+    @Path("/{mediationPolicyId}/content")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Downloadt specific global mediation policy", notes = "This operation can be used to download a particular global mediation policy. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "Global Mediation Policy" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Mediation policy returned. ", response = Void.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested file does not exist. ", response = ErrorDTO.class) })
+    public Response mediationPoliciesMediationPolicyIdContentGet(@ApiParam(value = "Mediation policy Id ",required=true) @PathParam("mediationPolicyId") String mediationPolicyId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.mediationPoliciesMediationPolicyIdContentGet(mediationPolicyId, ifNoneMatch, securityContext);
     }
 }

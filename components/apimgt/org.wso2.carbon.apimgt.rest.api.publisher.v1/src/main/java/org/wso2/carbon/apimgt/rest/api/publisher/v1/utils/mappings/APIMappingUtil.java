@@ -25,6 +25,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -63,6 +64,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2059,5 +2062,81 @@ public class APIMappingUtil {
         }
         return scopeDTOS;
     }
+    /**
+     * This method is used to retrieve APIIdentifier from the apiId or UUID
+     *
+     * @param apiId
+     * @param requestedTenantDomain
+     */
+    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+            throws APIManagementException {
 
+        APIIdentifier apiIdentifier;
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        if (RestApiUtil.isUUID(apiId)) {
+            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain).getId();
+        } else {
+            apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId)).getId();
+        }
+        return apiIdentifier;
+    }
+
+    public static APIIdentifier getAPIIdentifierFromApiId(String apiId) throws APIManagementException {
+        //if apiId contains -AT-, that need to be replaced before splitting
+        apiId = APIUtil.replaceEmailDomainBack(apiId);
+        String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
+
+        if (apiIdDetails.length < 3) {
+            RestApiUtil.handleBadRequest("Provided API identifier '" + apiId + "' is invalid", log);
+        }
+
+        // apiId format: provider-apiName-version
+        String providerName = null;
+        try {
+            providerName = URLDecoder.decode(apiIdDetails[0], "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            String errorMsg = "Couldn't decode value providerName: " + providerName;
+            throw new APIManagementException(errorMsg, e);
+        }
+        String apiName = null;
+        try {
+            apiName = URLDecoder.decode(apiIdDetails[1], "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            String errorMsg = "Couldn't decode value apiName : " + apiName;
+            throw new APIManagementException(errorMsg, e);
+        }
+        String version = null;
+        try {
+            version = URLDecoder.decode(apiIdDetails[2], "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            String errorMsg = "Couldn't decode value version : " + version;
+            throw new APIManagementException(errorMsg, e);
+        }
+        String providerNameEmailReplaced = APIUtil.replaceEmailDomain(providerName);
+        return new APIIdentifier(providerNameEmailReplaced, apiName, version);
+    }
+
+    /**
+     * Returns the API given the uuid or the id in {provider}-{api}-{version} format
+     *
+     * @param apiId                 uuid or the id in {provider}-{api}-{version} format
+     * @param requestedTenantDomain tenant domain of the API
+     * @return API which represents the given id
+     * @throws APIManagementException
+     */
+    public static API getAPIFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+            throws APIManagementException {
+
+        API api;
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        if (RestApiUtil.isUUID(apiId)) {
+            api = apiProvider.getAPIbyUUID(apiId, requestedTenantDomain);
+        } else {
+            APIIdentifier apiIdentifier = getAPIIdentifierFromApiId(apiId);
+            //Checks whether the logged in user's tenant and the API's tenant is equal
+            RestApiUtil.validateUserTenantWithAPIIdentifier(apiIdentifier);
+            api = apiProvider.getAPI(apiIdentifier);
+        }
+        return api;
+    }
 }

@@ -62,6 +62,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_TAG = "tag";
     public static final String RESOURCE_WORKFLOW = "workflow";
     public static final String RESOURCE_COMMENTS = "comments";
+    public static final String RESOURCE_MEDIATION_POLICY = "mediation-policy";
 
     public static final String API_ID_DELIMITER = "-";
     public static final String QUERY_PARAM = "{query}";

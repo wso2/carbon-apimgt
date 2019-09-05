@@ -61,6 +61,8 @@ import Scope from './Scopes';
 import Security from './Security';
 import APIDefinition from './APIDefinition/APIDefinition';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
+import MediationPoliciesOverview from './MediationPolicies/Overview';
+import MediationPolicyComponent from './MediationPolicies/MediationPolicyComponent';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
 import Monetization from './Monetization';
@@ -492,6 +494,15 @@ class Details extends Component {
                             to={pathPrefix + 'monetization'}
                             Icon={<MonetizationIcon />}
                         />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.left.menu.mediation.policy',
+                                defaultMessage: 'Mediation Policies',
+                            })}
+                            to={pathPrefix + 'mediation policies'}
+                            Icon={<ScopesIcon />}
+                        />
+
                     </div>
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} />
@@ -570,6 +581,14 @@ class Details extends Component {
                                     path={Details.subPaths.MONETIZATION}
                                     component={() => <Monetization api={api} />}
                                 />
+                                <Route
+                                    path={Details.subPaths.MEDIATION_POLICIES}
+                                    component={() => <MediationPoliciesOverview api={api} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.MEDIATION_POLICY}
+                                    component={() => <MediationPolicyComponent api={api} />}
+                                />
                             </Switch>
                         </div>
                     </div>
@@ -612,6 +631,9 @@ Details.subPaths = {
     PROPERTIES_PRODUCT: '/api-products/:apiprod_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
     MONETIZATION: '/apis/:api_uuid/monetization',
+    MEDIATION_POLICIES: '/apis/:api_uuid/Mediation Policies',
+    // MEDIATION_POLICY: '/apis/:api_uuid/mediation-policy-add/',
+    MEDIATION_POLICY: '/apis/:api_uuid/mediation-policy-add/{:api}/{:sequence}/{:handleInputChange}/{:classes}/{:type}',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum
