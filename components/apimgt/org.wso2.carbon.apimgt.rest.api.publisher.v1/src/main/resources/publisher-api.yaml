@@ -6845,6 +6845,11 @@ definitions:
         items:
           type: string
         example: ["http","https"]
+      tags:
+        type: array
+        items:
+          type: string
+        example: ["substract","add"]
       policies:
         type: array
         items:

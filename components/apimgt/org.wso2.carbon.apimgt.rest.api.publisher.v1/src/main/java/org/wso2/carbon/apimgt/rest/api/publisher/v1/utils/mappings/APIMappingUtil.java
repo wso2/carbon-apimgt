@@ -1567,10 +1567,30 @@ public class APIMappingUtil {
         productDto.setId(product.getUuid());
         productDto.setContext(product.getContext());
         productDto.setDescription(product.getDescription());
+
+        Set<String> apiTags = product.getTags();
+        List<String> tagsToReturn = new ArrayList<>(apiTags);
+        productDto.setTags(tagsToReturn);
+
         APIProductBusinessInformationDTO businessInformation = new APIProductBusinessInformationDTO();
         businessInformation.setBusinessOwner(product.getBusinessOwner());
         businessInformation.setBusinessOwnerEmail(product.getBusinessOwnerEmail());
         productDto.setBusinessInformation(businessInformation );
+
+        APICorsConfigurationDTO apiCorsConfigurationDTO = new APICorsConfigurationDTO();
+        CORSConfiguration corsConfiguration = product.getCorsConfiguration();
+        if (corsConfiguration == null) {
+            corsConfiguration = APIUtil.getDefaultCorsConfiguration();
+        }
+        apiCorsConfigurationDTO
+                .setAccessControlAllowOrigins(corsConfiguration.getAccessControlAllowOrigins());
+        apiCorsConfigurationDTO
+                .setAccessControlAllowHeaders(corsConfiguration.getAccessControlAllowHeaders());
+        apiCorsConfigurationDTO
+                .setAccessControlAllowMethods(corsConfiguration.getAccessControlAllowMethods());
+        apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
+        apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
+        productDto.setCorsConfiguration(apiCorsConfigurationDTO);
 
         productDto.setState(StateEnum.valueOf(product.getState()));
         productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
