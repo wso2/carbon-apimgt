@@ -45,14 +45,14 @@ export default function Environments() {
     const { api, updateAPI } = useContext(APIContext);
     const { settings } = useAppContext();
     const [gatewayEnvironments, setGatewayEnvironments] = useState([...api.gatewayEnvironments]);
-    const [isCreating, setCreating] = useState(false);
+    const [isUpdating, setUpdating] = useState(false);
 
     /**
      *
      * Handle the Environments save button action
      */
     function addEnvironments() {
-        setCreating(true);
+        setUpdating(true);
         updateAPI({ gatewayEnvironments })
             .then(() => Alert.info('API Update Successfully'))
             .catch((error) => {
@@ -63,7 +63,7 @@ export default function Environments() {
                 }
                 console.error(error);
             })
-            .finally(() => setCreating(false));
+            .finally(() => setUpdating(false));
     }
 
     return (
@@ -130,13 +130,14 @@ export default function Environments() {
                         type='submit'
                         variant='contained'
                         color='primary'
+                        disabled={isUpdating}
                         onClick={addEnvironments}
                     >
                         <FormattedMessage
                             id='Apis.Details.Environments.Environments.save'
                             defaultMessage='Save'
                         />
-                        {isCreating && <CircularProgress size={20} />}
+                        {isUpdating && <CircularProgress size={20} />}
                     </Button>
                 </Grid>
                 <Grid item>
