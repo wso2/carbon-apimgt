@@ -376,7 +376,7 @@ class Details extends React.Component {
                     <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />
                     <LeftMenuItem text='credentials' handleMenuSelect={this.handleMenuSelect} active={active} />
                     {/* TODO: uncomment when the feature is working */}
-                    {/* <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={active} /> */}
+                    <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={active} />
                     <LeftMenuItem text='test' handleMenuSelect={this.handleMenuSelect} active={active} />
                     <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} />
                     <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />

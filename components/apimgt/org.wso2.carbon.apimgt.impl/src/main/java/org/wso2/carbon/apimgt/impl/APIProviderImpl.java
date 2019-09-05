@@ -41,6 +41,8 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ErrorItem;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
@@ -90,6 +92,7 @@ import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -111,6 +114,7 @@ import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -1056,6 +1060,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
                 updatePermissions = true;
             }
+
+            if (api.isEndpointSecured() && StringUtils.isBlank(api.getEndpointUTPassword()) &&
+                    !StringUtils.isBlank(oldApi.getEndpointUTPassword())) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Given endpointsecurity password is empty");
+                }
+                api.setEndpointUTUsername(oldApi.getEndpointUTUsername());
+                api.setEndpointUTPassword(oldApi.getEndpointUTPassword());
+                if (log.isDebugEnabled()) {
+                    log.debug("Using the previous username and password for endpoint security");
+                }
+            }
+
             updateApiArtifact(api, true, updatePermissions);
             if (!oldApi.getContext().equals(api.getContext())) {
                 api.setApiHeaderChanged(true);
@@ -3021,6 +3038,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(errorMessage);
             throw new APIManagementException(errorMessage);
         }
+
+        if (api.isEndpointSecured() && StringUtils.isEmpty(api.getEndpointUTPassword())) {
+            String errorMessage = "Empty password is given for endpointSecurity when creating API "
+                    + api.getId().getApiName();
+            log.error(errorMessage);
+            throw new APIManagementException(errorMessage);
+        }
+
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
@@ -3623,6 +3648,47 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
+     * Publish API to external stores given by external store Ids
+     *
+     * @param api              API which need to published
+     * @param externalStoreIds APIStore Ids which need to publish API
+     * @throws APIManagementException If failed to publish to external stores
+     */
+    @Override
+    public boolean publishToExternalAPIStores(API api, List<String> externalStoreIds) throws APIManagementException {
+
+        Set<APIStore> inputStores = new HashSet<>();
+        boolean apiOlderVersionExist = false;
+        APIIdentifier apiIdentifier = api.getId();
+        for (String store : externalStoreIds) {
+            if (StringUtils.isNotEmpty(store)) {
+                APIStore inputStore = APIUtil.getExternalAPIStore(store,
+                        APIUtil.getTenantIdFromTenantDomain(tenantDomain));
+                if (inputStore == null) {
+                    String errorMessage = "Error while publishing to external stores. Invalid External Store Id: "
+                            + store;
+                    log.error(errorMessage);
+                    ExceptionCodes exceptionCode = ExceptionCodes.EXTERNAL_STORE_ID_NOT_FOUND;
+                    throw new APIManagementException(errorMessage,
+                            new ErrorItem(exceptionCode.getErrorMessage(), errorMessage, exceptionCode.getErrorCode(),
+                                    exceptionCode.getHttpStatusCode()));
+                }
+                inputStores.add(inputStore);
+            }
+        }
+        Set<String> versions = getAPIVersions(apiIdentifier.getProviderName(),
+                apiIdentifier.getName());
+        APIVersionStringComparator comparator = new APIVersionStringComparator();
+        for (String tempVersion : versions) {
+            if (comparator.compare(tempVersion, apiIdentifier.getVersion()) < 0) {
+                apiOlderVersionExist = true;
+                break;
+            }
+        }
+        return updateAPIsInExternalAPIStores(api, inputStores, apiOlderVersionExist);
+    }
+
+    /**
      * When enabled publishing to external APIStores support,publish the API to external APIStores
      *
      * @param api         The API which need to published
@@ -3646,7 +3712,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String version = ApiMgtDAO.getInstance().getLastPublishedAPIVersionFromAPIStore(api.getId(),
                         store.getName());
 
-                if (apiOlderVersionExist && version != null) {
+                if (apiOlderVersionExist && version != null && !(publisher instanceof WSO2APIPublisher)) {
                     published = publisher.createVersionedAPIToStore(api, store, version);
                     publisher.updateToStore(api, store);
                 } else {
@@ -3867,19 +3933,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to update subscription status
      */
     @Override
-    public Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId)
-            throws APIManagementException {
+    public Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId) throws APIManagementException {
         Set<APIStore> storesSet;
-        SortedSet<APIStore> configuredAPIStores = new TreeSet<APIStore>(new APIStoreNameComparator());
+        SortedSet<APIStore> configuredAPIStores = new TreeSet<>(new APIStoreNameComparator());
         configuredAPIStores.addAll(APIUtil.getExternalStores(tenantId));
         if (APIUtil.isAPIsPublishToExternalAPIStores(tenantId)) {
             storesSet = apiMgtDAO.getExternalAPIStoresDetails(apiId);
             //Retains only the stores that contained in configuration
             storesSet.retainAll(configuredAPIStores);
             return storesSet;
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -4516,8 +4580,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void saveSwagger20Definition(APIProductIdentifier apiId, String jsonText) throws APIManagementException {
+    public void saveGraphqlSchemaDefinition(API api, String schemaDefinition) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            GraphQLSchemaDefinition schemaDef = new GraphQLSchemaDefinition();
+            schemaDef.saveGraphQLSchemaDefinition(api, schemaDefinition, registry);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
 
+    @Override
+    public void saveSwagger20Definition(APIProductIdentifier apiId, String jsonText) throws APIManagementException {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -4542,7 +4617,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
             throws APIManagementException, FaultGatewaysException {
-
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -7137,4 +7211,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
+        return getGraphqlSchemaDefinition(apiId);
+    }
 }

@@ -107,7 +107,7 @@ public class ExportApiServiceImpl extends ExportApiService {
             apiProvider = RestApiUtil.getLoggedInUserProvider();
             // Checking whether the API exists
             if (!apiProvider.isAPIAvailable(apiIdentifier)) {
-                String errorMessage = "Error occurred while updating. API: " + name + " version: " + version
+                String errorMessage = "Error occurred while exporting. API: " + name + " version: " + version
                         + " not found";
                 RestApiUtil.handleResourceNotFoundError(errorMessage, log);
             }

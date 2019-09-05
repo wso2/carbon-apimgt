@@ -80,6 +80,7 @@ public class APISecurityConstants {
 
     public static final int API_AUTH_MISSING_OPEN_API_DEF = 900918;
     public static final String API_AUTH_MISSING_OPEN_API_DEF_ERROR_MESSAGE = "Internal Server Error";
+    public static final String GRAPHQL_API_FAILURE_HANDLER = "_graphql_failure_handler";
 
     // We have added this because we need to add an additional description to the original one and we need to
     // separate the 2 messages

@@ -4882,6 +4882,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
+            String username = ((APIProviderHostObject) thisObj).getUsername();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
 
             APIProvider apiProvider = getAPIProvider(thisObj);
 

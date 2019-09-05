@@ -56,7 +56,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdCommentsCommentIdDelete(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId, @ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+    public Response apiProductsApiProductIdCommentsCommentIdDelete(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") Integer commentId, @ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdCommentsCommentIdDelete(commentId, apiProductId, ifMatch, securityContext);
     }
 
@@ -74,7 +74,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested comment does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdCommentsCommentIdGet(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId, @ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+    public Response apiProductsApiProductIdCommentsCommentIdGet(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") Integer commentId, @ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdCommentsCommentIdGet(commentId, apiProductId, ifNoneMatch, securityContext);
     }
 
@@ -92,7 +92,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response apiProductsApiProductIdCommentsCommentIdPut(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId, @ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Comment object that needs to be updated " ,required=true) CommentDTO body, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+    public Response apiProductsApiProductIdCommentsCommentIdPut(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") Integer commentId, @ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Comment object that needs to be updated " ,required=true) CommentDTO body, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.apiProductsApiProductIdCommentsCommentIdPut(commentId, apiProductId, body, ifMatch, securityContext);
     }
 
