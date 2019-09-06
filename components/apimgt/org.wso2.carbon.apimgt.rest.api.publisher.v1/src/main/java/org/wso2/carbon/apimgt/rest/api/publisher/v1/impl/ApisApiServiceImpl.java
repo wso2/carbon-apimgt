@@ -1269,10 +1269,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             return Response.ok().entity(monetizationInfoDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Failed to retrieve monetized plans for API : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, log);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (MonetizationException e) {
             String errorMessage = "Failed to fetch monetized plans of API : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, log);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return Response.serverError().build();
     }
@@ -1571,10 +1571,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             return Response.ok().entity(apiRevenueDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Failed to retrieve revenue data for API ID : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, log);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (MonetizationException e) {
             String errorMessage = "Failed to get current revenue data for API ID : " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, log);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
