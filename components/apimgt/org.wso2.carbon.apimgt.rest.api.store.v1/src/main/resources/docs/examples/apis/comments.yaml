@@ -19,7 +19,7 @@ post:
       Content-Type: application/json
     body:
       {
-        "id": "5",
+        "id": "c15901c7-407a-43ca-9cf9-d1f0c17f689d",
         "content": "This is a comment",
         "createdTime": "2019-09-03 14:27:47.02",
         "createdBy": "john"
@@ -44,13 +44,13 @@ get:
         "count": 2,
         "list": [
         {
-          "id": "1",
+          "id": "ca149e48-64df-45a1-b188-7ba01adefa22",
           "content": "This is a normal comment",
           "createdTime": "2019-09-03 12:31:19.785",
           "createdBy": "admin"
         },
         {
-          "id": "2",
+          "id": "5d7d8962-7f1e-4377-a35e-2560fed26de1",
           "content": "This is a sample comment",
           "createdTime": "2019-09-03 13:12:17.077",
           "createdBy": "admin"

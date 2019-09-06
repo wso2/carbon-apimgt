@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>oidc-authenticator</artifactId>
-        <version>6.5.75-SNAPSHOT</version>
+        <version>6.5.84-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -94,6 +94,8 @@
                         </Export-Package>
                         <Import-Package>
                             com.nimbusds.*; version="${imp.pkg.version.com.nimbus}",
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>

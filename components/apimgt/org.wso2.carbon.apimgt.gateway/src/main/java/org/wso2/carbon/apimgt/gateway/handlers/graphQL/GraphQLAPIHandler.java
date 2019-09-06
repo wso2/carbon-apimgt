@@ -26,6 +26,7 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -258,6 +259,10 @@ public class GraphQLAPIHandler extends AbstractHandler {
     private void handleFailure(MessageContext messageContext, String errorMessage) {
         OMElement payload = getFaultPayload(errorMessage);
         Utils.setFaultPayload(messageContext, payload);
+        Mediator sequence = messageContext.getSequence(APISecurityConstants.GRAPHQL_API_FAILURE_HANDLER);
+        if (sequence != null && !sequence.mediate(messageContext)){
+            return;
+        }
         Utils.sendFault(messageContext, HttpStatus.SC_UNPROCESSABLE_ENTITY);
     }
 
@@ -289,4 +294,5 @@ public class GraphQLAPIHandler extends AbstractHandler {
         return true;
     }
 }
+
 

@@ -1631,7 +1631,7 @@ paths:
         required: false
       - $ref: '#/parameters/If-Match'
       tags:
-      - API (Collection)
+      - APIs
       responses:
         201:
           description: |
@@ -1805,7 +1805,7 @@ paths:
         type: file
         required: true
       tags:
-      - API (Collection)
+      - Validation
       responses:
         200:
           description: |
@@ -1913,8 +1913,10 @@ paths:
         type: string
         required: true
       - $ref: '#/parameters/If-Match'
+      consumes:
+      - multipart/form-data
       tags:
-      - GraphQL Schema (Individual)
+      - GraphQL Schema
       responses:
         200:
           description: |
@@ -3456,6 +3458,115 @@ paths:
           description: |
             Not Acceptable.
             The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The "ExternalStore Collection" resource APIs
+######################################################
+  /apis/{apiId}/external-stores:
+
+#-------------------------------------------------------------
+# Retrieve the published external stores list of a certain API
+#-------------------------------------------------------------
+    get:
+      operationId: getAllPublishedExternalStoresByAPI
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      x-examples:
+        $ref: docs/examples/external-stores/external_stores.yaml#/getPublishedExternalStoresByAPI
+      summary: Get the list of external stores which an API is published to
+      description: |
+        This operation can be used to retrieve a list of external stores which an API is published to by providing the id of the API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/If-None-Match'
+      tags:
+        - External Stores
+      responses:
+        200:
+          description: |
+            OK.
+            External Store list is returned.
+          schema:
+            $ref: '#/definitions/ExternalStoreList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        500:
+          description: Internal server error while getting external stores of the API.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The "Publish to External Stores" resource APIs
+######################################################
+  /apis/{apiId}/publish-to-external-stores:
+
+#-----------------------------------------------------
+# Publish an API to external stores
+#-----------------------------------------------------
+    post:
+      operationId: publishAPIToExternalStores
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+      x-examples:
+        $ref: docs/examples/external-stores/external_stores.yaml#/publishToExternalStore
+      summary: Publish an API to external stores
+      description: |
+        This operation can be used to publish an API to a list of external stores.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - name: externalStoreId
+          description: External Store Ids of stores which the API needs to be published or updated.
+          type: array
+          items:
+            type: string
+          in: query
+          required: true
+        - $ref: '#/parameters/If-Match'
+      tags:
+        - External Stores
+      responses:
+        200:
+          description: |
+            OK.
+            API was successfully published to all the selected external stores.
+          schema:
+            $ref: '#/definitions/ExternalStoreList'
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the blocked subscription.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the subscription has been blocked.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        500:
+          description: Internal server error while publishing to external stores
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Request API resource or external store Ids not found.
           schema:
             $ref: '#/definitions/Error'
 
@@ -5791,6 +5902,37 @@ paths:
             Requested user does not have the role.
 
 ######################################################
+# The External Store list to publish an API
+######################################################
+  /external-stores:
+    #-----------------------------------------------------
+    # Retrieve configured external store list
+    #-----------------------------------------------------
+    get:
+      operationId: getAllExternalStores
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      x-examples:
+        $ref: docs/examples/external-stores/external_stores.yaml#/getAllExternalStores
+      summary: Retrieve external store list to publish an API
+      tags:
+        - External Stores
+      description: |
+        Retrieve external stores list configured to publish an API
+      responses:
+        200:
+          description: |
+            OK.
+            External Stores list returned
+          schema:
+            $ref: '#/definitions/ExternalStore'
+        500:
+          description: Error retrieving external stores
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # The Publisher settings List
 ######################################################
   /settings:
@@ -7594,6 +7736,43 @@ definitions:
               type: string
               example: "Scope for Api view"
 
+#-----------------------------------------------------
+# The External-Store resource
+#-----------------------------------------------------
+  ExternalStore:
+    title: External Store
+    properties:
+      id:
+        type: string
+        description: |
+          The external store identifier, which is a unique value.
+        example: Store123#
+      displayName:
+        type: string
+        description: |
+          The name of the external API Store that is displayed in the Publisher UI.
+        example: UKStore
+      type:
+        type: string
+        description: |
+          The type of the Store. This can be a WSO2-specific API Store or an external one.
+        example: wso2
+
+#-----------------------------------------------------
+# The External-Store List resource
+#-----------------------------------------------------
+  ExternalStoreList:
+    title: External Store List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of external stores returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ExternalStore'
 
   #-----------------------------------------------------
   # Certificates list resource
@@ -7930,7 +8109,6 @@ definitions:
         description: |
           This attribute declares the validation error message
         type: string
-        meesage: String
       graphQLInfo:
         description:
           Summary of the GraphQL including the basic information
@@ -7940,7 +8118,6 @@ definitions:
             items:
               $ref: '#/definitions/APIOperations'
           graphQLSchema:
-            items:
             $ref: '#/definitions/GraphQLSchema'
 
 #-----------------------------------------------------
