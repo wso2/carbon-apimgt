@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
@@ -24,12 +24,19 @@ import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 import Input from '@material-ui/core/Input';
-import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
 import AuthManager from 'AppData/AuthManager';
+import ChipInput from 'material-ui-chip-input';
+import APIValidation from 'AppData/APIValidation';
+import base64url from 'base64url';
+import Error from '@material-ui/icons/Error';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import Chip from '@material-ui/core/Chip';
+import { red } from '@material-ui/core/colors/';
+import Alert from 'AppComponents/Shared/Alert';
 
 /**
  *
@@ -39,9 +46,82 @@ import AuthManager from 'AppData/AuthManager';
  * @returns
  */
 export default function AccessControl(props) {
+    const [roleValidity, setRoleValidity] = useState(true);
+    const [userRoleValidity, setUserRoleValidity] = useState(true);
     const { api, configDispatcher } = props;
     const isRestricted = api.accessControl === 'RESTRICTED';
     const isNotCreator = AuthManager.isNotCreator();
+
+    const [invalidRoles, setInvalidRoles] = useState([]);
+    useEffect(() => {
+        if (invalidRoles.length === 0) {
+            setRoleValidity(true);
+            setUserRoleValidity(true);
+        }
+    }, [invalidRoles]);
+    const handleRoleAddition = (role) => {
+        const systemRolePromise = APIValidation.role.validate(base64url.encode(role));
+        const userRolePromise = APIValidation.userRole.validate(base64url.encode(role));
+        systemRolePromise.then((isValidSystemRole) => {
+            if (isValidSystemRole) {
+                setRoleValidity(true);
+                userRolePromise.then((isValidUserRole) => {
+                    if (isValidUserRole) {
+                        setUserRoleValidity(true);
+                        configDispatcher({
+                            action: 'accessControlRoles',
+                            value: [...api.accessControlRoles, role],
+                        });
+                    } else {
+                        setUserRoleValidity(false);
+                        setInvalidRoles([...invalidRoles, role]);
+                    }
+                }).catch((error) => {
+                    Alert.error('Error when validating role: ' + role);
+                    console.error('Error when validating user roles ' + error);
+                });
+            } else {
+                setRoleValidity(false);
+                setInvalidRoles([...invalidRoles, role]);
+            }
+        }).catch((error) => {
+            Alert.error('Error when validating role: ' + role);
+            console.error('Error when validating roles ' + error);
+        });
+    };
+
+    const handleRoleDeletion = (role) => {
+        setInvalidRoles(invalidRoles.filter(existingRole => existingRole !== role));
+        configDispatcher({
+            action: 'accessControlRoles',
+            value: api.accessControlRoles.filter(existingRole => existingRole !== role),
+        });
+    };
+
+    const handleRoleValidationFailure = () => {
+        if (!roleValidity) {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Scopes.Roles.Invalid'
+                    defaultMessage='Role is invalid'
+                />
+            );
+        } else if (!userRoleValidity) {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Scopes.Roles.User.Invalid'
+                    defaultMessage='Role must be associated with API creator'
+                />
+            );
+        } else {
+            return (
+                <FormattedMessage
+                    id='Apis.Details.Scopes.CreateScope.roles.help'
+                    defaultMessage='Enter valid role and press enter'
+                />
+            );
+        }
+    };
 
     return (
         <Grid container spacing={0} alignItems='flex-start'>
@@ -123,15 +203,35 @@ export default function AccessControl(props) {
             </Grid>
             {isRestricted && (
                 <Grid item>
-                    <TextField
-                        label='Role(s)'
-                        margin='dense'
-                        variant='outlined'
-                        value={api.accessControlRoles.join(',')}
-                        onChange={({ target: { value } }) => configDispatcher({ action: 'accessControlRoles', value })}
-                        helperText={'Enter role name(s). If there are multiple roles, '
-                        + 'separate them using comma (i:e role1,role2,...)'}
-                        style={{ marginTop: 20 }}
+                    <ChipInput
+                        value={api.accessControlRoles.concat(invalidRoles)}
+                        alwaysShowPlaceholder={false}
+                        placeholder='Enter roles and press Enter'
+                        blurBehavior='clear'
+                        InputProps={{
+                            endAdornment: (!roleValidity || !userRoleValidity) && (
+                                <InputAdornment position='end'>
+                                    <Error color='error' />
+                                </InputAdornment>
+                            ),
+                        }}
+                        onAdd={handleRoleAddition}
+                        error={!roleValidity || !userRoleValidity}
+                        helperText={handleRoleValidationFailure()}
+                        chipRenderer={({ value }, key) => (
+                            <Chip
+                                key={key}
+                                label={value}
+                                onDelete={() => {
+                                    handleRoleDeletion(value);
+                                }}
+                                style={{
+                                    backgroundColor: invalidRoles.includes(value) ? red[300] : null,
+                                    margin: '8px 8px 8px 0',
+                                    float: 'left',
+                                }}
+                            />
+                        )}
                     />
                 </Grid>
             )}

@@ -41,7 +41,7 @@ public class MeApiServiceImpl implements MeApiService {
      * @param roleId Base64 URL encoded form of role name -Base64URLEncode{user-store-name/role-name}
      * @return 200 if logged-in user has given role
      */
-    public Response meRolesRoleIdHead(String roleId, MessageContext messageContext) {
+    public Response validateUserRole(String roleId, MessageContext messageContext) {
 
         String userName = RestApiUtil.getLoggedInUsername();
         boolean isUserInRole = false;

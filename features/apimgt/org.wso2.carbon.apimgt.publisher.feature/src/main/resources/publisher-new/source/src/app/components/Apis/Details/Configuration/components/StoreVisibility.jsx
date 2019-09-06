@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
@@ -24,11 +24,18 @@ import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 import Input from '@material-ui/core/Input';
-import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
+import ChipInput from 'material-ui-chip-input';
+import APIValidation from 'AppData/APIValidation';
+import base64url from 'base64url';
+import Error from '@material-ui/icons/Error';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import Chip from '@material-ui/core/Chip';
+import { red } from '@material-ui/core/colors/';
+import Alert from 'AppComponents/Shared/Alert';
 import AuthManager from 'AppData/AuthManager';
 
 /**
@@ -39,10 +46,46 @@ import AuthManager from 'AppData/AuthManager';
  * @returns
  */
 export default function StoreVisibility(props) {
+    const [roleValidity, setRoleValidity] = useState(true);
     const { api, configDispatcher } = props;
+    const [invalidRoles, setInvalidRoles] = useState([]);
     const isPublic = api.visibility === 'PUBLIC';
     const isNotCreator = AuthManager.isNotCreator();
     const isNotPublisher = AuthManager.isNotPublisher();
+    useEffect(() => {
+        if (invalidRoles.length === 0) {
+            setRoleValidity(true);
+        }
+    }, [invalidRoles]);
+    const handleRoleAddition = (role) => {
+        const promise = APIValidation.role.validate(base64url.encode(role));
+        promise.then((isValid) => {
+            if (isValid) {
+                setRoleValidity(true);
+                configDispatcher({
+                    action: 'visibleRoles',
+                    value: [...api.visibleRoles, role],
+                });
+            } else {
+                setRoleValidity(false);
+                setInvalidRoles([...invalidRoles, role]);
+            }
+        }).catch((error) => {
+            Alert.error('Error when validating role: ' + role);
+            console.error('Error when validating roles ' + error);
+        });
+    };
+
+    const handleRoleDeletion = (role) => {
+        if (invalidRoles.includes(role)) {
+            setInvalidRoles(invalidRoles.filter(existingRole => existingRole !== role));
+        }
+        configDispatcher({
+            action: 'visibleRoles',
+            value: api.visibleRoles.filter(existingRole => existingRole !== role),
+        });
+    };
+
     return (
         <Grid container spacing={0} alignItems='flex-start'>
             <Grid item xs={11}>
@@ -127,18 +170,48 @@ export default function StoreVisibility(props) {
             </Grid>
             {!isPublic && (
                 <Grid item>
-                    <TextField
+                    <ChipInput
                         disabled={isNotCreator && isNotPublisher}
-                        label='Role(s)'
-                        margin='dense'
-                        variant='outlined'
-                        value={api.visibleRoles.join(',')}
-                        onChange={({ target: { value } }) => configDispatcher({ action: 'visibleRoles', value })}
+                        value={api.visibleRoles.concat(invalidRoles)}
+                        alwaysShowPlaceholder={false}
+                        placeholder='Enter roles and press Enter'
+                        blurBehavior='clear'
+                        InputProps={{
+                            endAdornment: !roleValidity && (
+                                <InputAdornment position='end'>
+                                    <Error color='error' />
+                                </InputAdornment>
+                            ),
+                        }}
+                        onAdd={handleRoleAddition}
+                        error={!roleValidity}
                         helperText={
-                            'Enter role name(s). If there are multiple roles,' +
-                            ' separate them using comma (i:e role1,role2,...)'
+                            roleValidity ? (
+                                <FormattedMessage
+                                    id='Apis.Details.Scopes.CreateScope.roles.help'
+                                    defaultMessage='Enter valid role and press enter'
+                                />
+                            ) : (
+                                <FormattedMessage
+                                    id='Apis.Details.Scopes.Roles.Invalid'
+                                    defaultMessage='Role is invalid'
+                                />
+                            )
                         }
-                        style={{ marginTop: 20 }}
+                        chipRenderer={({ value }, key) => (
+                            <Chip
+                                key={key}
+                                label={value}
+                                onDelete={() => {
+                                    handleRoleDeletion(value);
+                                }}
+                                style={{
+                                    backgroundColor: invalidRoles.includes(value) ? red[300] : null,
+                                    margin: '8px 8px 8px 0',
+                                    float: 'left',
+                                }}
+                            />
+                        )}
                     />
                 </Grid>
             )}
