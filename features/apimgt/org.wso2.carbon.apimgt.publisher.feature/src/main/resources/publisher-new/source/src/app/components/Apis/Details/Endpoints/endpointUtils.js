@@ -15,6 +15,14 @@
  */
 
 import cloneDeep from 'lodash.clonedeep';
+import { createIntl, createIntlCache } from 'react-intl';
+
+const cache = createIntlCache();
+
+const intl = createIntl({
+    locale: 'en-US',
+    messages: {},
+}, cache);
 
 /**
  * Utility method to get the endpoint property name based on the given endpoint type and category.
@@ -205,6 +213,72 @@ function createEndpointConfig(endpointType) {
     return tmpEndpointConfig;
 }
 
+/**
+ * Validate the provided endpoint config object.
+ *
+ * @param {any} endpointConfig The provided endpoint config for validation.
+ * @param {string} implementationType The api implementation type (INLINE/ ENDPOINT)
+ * @return {{isValid: boolean, message: string}} The endpoint validity information.
+ * */
+function validate(endpointConfig, implementationType) {
+    if (endpointConfig === null) {
+        return { isValid: false, message: '' };
+    }
+    const endpointType = endpointConfig.endpoint_type;
+    switch (endpointType) {
+        case 'awslambda':
+            if (endpointConfig.accessKey === '' || endpointConfig.secretKey === '') {
+                return {
+                    isValid: false,
+                    message: intl.formatMessage({
+                        id: 'Apis.Details.Endpoints.endpointUtils.missing.accessKey.secretKey.error',
+                        defaultMessage: 'Access Key and/ or Secret Key should not be empty',
+                    }),
+                };
+            }
+            break;
+        case 'prototyped':
+            if (implementationType === 'ENDPOINT') {
+                if (endpointConfig.production_endpoints.url === '') {
+                    return {
+                        isValid: false,
+                        message: intl.formatMessage({
+                            id: 'Apis.Details.Endpoints.endpointUtils.missing.prototype.url',
+                            defaultMessage: 'Prototype Endpoint URL should not be empty',
+                        }),
+                    };
+                }
+            }
+            break;
+        case 'load_balance':
+            if (endpointConfig.production_endpoints[0].url === '' && endpointConfig.sandbox_endpoints[0].url === '') {
+                return {
+                    isValid: false,
+                    message: intl.formatMessage({
+                        id: 'Apis.Details.Endpoints.endpointUtils.missing.endpoint.loadbalance',
+                        defaultMessage: 'Production or Sandbox Endpoints should not be empty',
+                    }),
+                };
+            }
+            break;
+        default:
+            if (endpointConfig.production_endpoints.url === '' && endpointConfig.sandbox_endpoints.url === '') {
+                return {
+                    isValid: false,
+                    message: intl.formatMessage({
+                        id: 'Apis.Details.Endpoints.endpointUtils.missing.endpoint.error',
+                        defaultMessage: 'Either one of Production or Sandbox Endpoints should be added.',
+                    }),
+                };
+            }
+            break;
+    }
+    return {
+        isValid: true,
+        message: '',
+    };
+}
+
 export {
     getEndpointTypeProperty,
     mergeEndpoints,
@@ -212,4 +286,5 @@ export {
     endpointsToList,
     getEndpointConfigByImpl,
     createEndpointConfig,
+    validate,
 };

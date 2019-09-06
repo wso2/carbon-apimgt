@@ -70,8 +70,12 @@ const styles = theme => ({
     },
 });
 
-const endpointTypes = [{ key: 'http', value: 'HTTP/REST Endpoint' },
-    { key: 'address', value: 'HTTP/SOAP Endpoint' }, { key: 'default', value: 'Dynamic Endpoints' }];
+const endpointTypes = [
+    { key: 'http', value: 'HTTP/REST Endpoint' },
+    { key: 'address', value: 'HTTP/SOAP Endpoint' },
+    { key: 'default', value: 'Dynamic Endpoints' },
+    { key: 'awslambda', value: 'AWS Lambda Endpoint' },
+];
 
 /**
  * The component which holds the general configurations of the endpoints.
@@ -137,6 +141,10 @@ function GeneralConfiguration(props) {
 
         if (endpointTypeKey === 'default') {
             return 'Dynamic Endpoints';
+        }
+
+        if (endpointTypeKey === 'awslambda') {
+            return 'AWS Lambda Endpoint';
         }
 
         switch (epType) {
@@ -211,7 +219,7 @@ function GeneralConfiguration(props) {
             setEndpointCertificates([]);
         });
     }, []);
-    console.log(apiType !== 'HTTP' || endpointType.key === 'default');
+
     return (
         <React.Fragment>
             <ExpansionPanel
@@ -240,11 +248,13 @@ function GeneralConfiguration(props) {
                             /> : {epTypeSubHeading}
                             {' | '}
                         </Typography> }
-                    {apiType !== 'HTTP' ?
+                    {apiType !== 'HTTP' || endpointType.key === 'awslambda' ?
                         <div /> :
                         <Typography
                             className={classes.secondaryHeading}
-                            hidden={apiType !== 'HTTP' || endpointType.key === 'default'}
+                            hidden={
+                                apiType !== 'HTTP' || endpointType.key === 'default' || endpointType.key === 'awslambda'
+                            }
                         >
                             <FormattedMessage
                                 id='Apis.Details.Endpoints.GeneralConfiguration.endpoint.security.sub.heading'
@@ -252,11 +262,13 @@ function GeneralConfiguration(props) {
                             />: {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'None'}
                             {' | '}
                         </Typography> }
-                    {apiType !== 'HTTP' || endpointType.key === 'default' ?
+                    {apiType !== 'HTTP' || endpointType.key === 'default' || endpointType.key === 'awslambda' ?
                         <div /> :
                         <Typography
                             className={classes.secondaryHeading}
-                            hidden={apiType !== 'HTTP' || endpointType.key === 'default'}
+                            hidden={
+                                apiType !== 'HTTP' || endpointType.key === 'default' || endpointType.key === 'awslambda'
+                            }
                         >
                             <FormattedMessage
                                 id='Apis.Details.Endpoints.GeneralConfiguration.certificates.sub.heading'
@@ -298,6 +310,7 @@ function GeneralConfiguration(props) {
                                         item
                                         xs
                                         className={classes.endpointConfigSection}
+                                        hidden={endpointType.key === 'awslambda'}
                                     >
                                         <FormControlLabel
                                             value='start'
@@ -323,7 +336,12 @@ function GeneralConfiguration(props) {
                                 }
                             </Grid>
                         }
-                        <Grid item xs className={classes.endpointConfigSection} hidden={endpointType.key === 'default'}>
+                        <Grid
+                            item
+                            xs
+                            className={classes.endpointConfigSection}
+                            hidden={endpointType.key === 'default' || endpointType.key === 'awslambda'}
+                        >
                             <Certificates
                                 certificates={endpointCertificates}
                                 uploadCertificate={saveCertificate}

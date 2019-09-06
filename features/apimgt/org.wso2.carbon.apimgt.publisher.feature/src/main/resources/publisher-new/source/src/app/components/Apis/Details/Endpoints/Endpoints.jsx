@@ -28,7 +28,7 @@ import cloneDeep from 'lodash.clonedeep';
 import AuthManager from 'AppData/AuthManager';
 import EndpointOverview from './EndpointOverview';
 import PrototypeEndpoints from './Prototype/PrototypeEndpoints';
-import { getEndpointConfigByImpl, createEndpointConfig } from './endpointUtils';
+import { getEndpointConfigByImpl, createEndpointConfig, validate } from './endpointUtils';
 
 const styles = theme => ({
     endpointTypesWrapper: {
@@ -52,6 +52,12 @@ const styles = theme => ({
         flexDirection: 'row',
         marginLeft: theme.spacing(2),
     },
+    endpointValidityMessage: {
+        color: theme.palette.error.main,
+    },
+    errorMessageContainer: {
+        marginTop: theme.spacing(),
+    },
 });
 
 const endpointImplType = ['managed', 'PROTOTYPED'];
@@ -69,6 +75,7 @@ function Endpoints(props) {
     const [endpointImplementation, setEndpointImplementation] = useState('');
     const [swagger, setSwagger] = useState(defaultSwagger);
     const isNotCreator = AuthManager.isNotCreator();
+    const [endpointValidity, setAPIEndpointsValid] = useState({ isValid: true, message: '' });
 
     /**
      * Method to update the api.
@@ -99,6 +106,10 @@ function Endpoints(props) {
                 endpointImplType[1] : endpointImplType[0];
         });
     }, []);
+
+    useEffect(() => {
+        setAPIEndpointsValid(validate(apiObject.endpointConfig, apiObject.endpointImplementationType));
+    }, [apiObject]);
 
     /**
      * Get the swagger definition if the endpoint implementation type is 'prototyped'
@@ -173,7 +184,7 @@ function Endpoints(props) {
                                 />
                             </Typography>
                         </Grid>
-                        {apiObject.type === 'HTTP' ?
+                        {apiObject.type === 'HTTP' && apiObject.endpointConfig.type !== 'awslambda' ?
                             <Grid item>
                                 <RadioGroup
                                     aria-label='endpointImpl'
@@ -217,6 +228,15 @@ function Endpoints(props) {
                                 }
                             </Grid>
                         </Grid>
+                        {
+                            endpointValidity.isValid ?
+                                <div /> :
+                                <Grid item className={classes.errorMessageContainer}>
+                                    <Typography className={classes.endpointValidityMessage}>
+                                        {endpointValidity.message}
+                                    </Typography>
+                                </Grid>
+                        }
                         <Grid
                             container
                             direction='row'
@@ -226,10 +246,10 @@ function Endpoints(props) {
                         >
                             <Grid item>
                                 <Button
+                                    disabled={!endpointValidity.isValid || isNotCreator}
                                     type='submit'
                                     variant='contained'
                                     color='primary'
-                                    disabled={isNotCreator}
                                     onClick={() => saveAPI()}
                                 >
                                     <FormattedMessage
