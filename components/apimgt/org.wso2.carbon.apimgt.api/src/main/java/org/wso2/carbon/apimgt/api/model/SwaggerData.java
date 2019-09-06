@@ -88,7 +88,6 @@ public class SwaggerData {
     private Set<Resource> resources = new HashSet<>();
     private Set<Scope> scopes = new HashSet<>();
 
-
     public SwaggerData(API api) {
         title = api.getId().getName();
         description = api.getDescription();
