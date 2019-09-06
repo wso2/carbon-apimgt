@@ -1782,7 +1782,7 @@
         <apache.felix.scr.ds.annotations.version>1.2.4</apache.felix.scr.ds.annotations.version>
         <maven.scr.plugin.version>1.26.0</maven.scr.plugin.version>
         <org.json.version.range>[3.0.0,4.0.0)</org.json.version.range>
-        <pax.logging.api.version>1.11.0</pax.logging.api.version>
+        <pax.logging.api.version>1.11.2</pax.logging.api.version>
         <import.package.version.commons.logging>[1.2.0,2.0.0)</import.package.version.commons.logging>
     </properties>
 </project>
