@@ -33,6 +33,7 @@ import {
 import PropTypes from 'prop-types';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import AuthManager from 'AppData/AuthManager';
 import EndpointSecurity from './GeneralConfiguration/EndpointSecurity';
 import Certificates from './GeneralConfiguration/Certificates';
 import API from '../../../../data/api'; // TODO: Use webpack aliases instead of relative paths ~tmkb
@@ -93,6 +94,7 @@ function GeneralConfiguration(props) {
     const [isConfigExpanded, setConfigExpand] = useState(true);
     const [endpointCertificates, setEndpointCertificates] = useState([]);
     const [epTypeSubHeading, setEpTypeSubHeading] = useState('Single HTTP/ REST');
+    const isNotCreator = AuthManager.isNotCreator();
 
     /**
      * Method to upload the certificate content by calling the rest api.
@@ -276,6 +278,7 @@ function GeneralConfiguration(props) {
                                             />
                                         </InputLabel>
                                         <Select
+                                            disabled={isNotCreator}
                                             value={endpointType.key}
                                             onChange={handleEndpointTypeSelect}
                                             inputProps={{
@@ -299,12 +302,14 @@ function GeneralConfiguration(props) {
                                         <FormControlLabel
                                             value='start'
                                             checked={endpointSecurityInfo !== null}
-                                            control={<Switch color='primary' />}
-                                            label={<FormattedMessage
-                                                id={'Apis.Details.Endpoints.EndpointOverview.' +
-                                                'endpoint.security.enable.switch'}
-                                                defaultMessage='Endpoint Security'
-                                            />}
+                                            control={<Switch color='primary' disabled={isNotCreator} />}
+                                            label={(
+                                                <FormattedMessage
+                                                    id={'Apis.Details.Endpoints.EndpointOverview.'
+                                                + 'endpoint.security.enable.switch'}
+                                                    defaultMessage='Endpoint Security'
+                                                />
+                                            )}
                                             labelPlacement='start'
                                             onChange={handleToggleEndpointSecurity}
                                         />

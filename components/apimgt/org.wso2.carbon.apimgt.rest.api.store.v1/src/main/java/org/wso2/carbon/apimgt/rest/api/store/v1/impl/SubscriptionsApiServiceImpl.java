@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +26,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -32,12 +34,14 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApiService;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO.TypeEnum;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
@@ -52,6 +56,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.core.Response;
@@ -353,6 +358,35 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             return Response.ok().entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while getting subscription with id " + subscriptionId, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response subscriptionsSubscriptionIdUsageGet(String subscriptionId, MessageContext messageContext) {
+
+        if (StringUtils.isBlank(subscriptionId)) {
+            String errorMessage = "Subscription ID cannot be empty or null when getting monetization usage.";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+        }
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            Monetization monetizationImplementation = apiConsumer.getMonetizationImplClass();
+            Map<String, String> billingEngineUsageData = monetizationImplementation.
+                    getCurrentUsageForSubscription(subscriptionId, RestApiUtil.getLoggedInUserProvider());
+            if (MapUtils.isEmpty(billingEngineUsageData)) {
+                String errorMessage = "Billing engine usage data was not found for subscription ID : " + subscriptionId;
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+            APIMonetizationUsageDTO apiMonetizationUsageDTO = new APIMonetizationUsageDTO();
+            apiMonetizationUsageDTO.setProperties(billingEngineUsageData);
+            return Response.ok().entity(apiMonetizationUsageDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Failed to retrieve billing engine usage data for subscription ID : " + subscriptionId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (MonetizationException e) {
+            String errorMessage = "Failed to get current usage for subscription ID : " + subscriptionId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

@@ -162,7 +162,7 @@ public interface APIManager {
      * @return swagger string
      * @throws APIManagementException
      */
-    String getOpenAPIDefinition(APIIdentifier apiId) throws APIManagementException;
+    String getOpenAPIDefinition(Identifier apiId) throws APIManagementException;
 
     /**
      * Checks whether the given document already exists for the given api/product

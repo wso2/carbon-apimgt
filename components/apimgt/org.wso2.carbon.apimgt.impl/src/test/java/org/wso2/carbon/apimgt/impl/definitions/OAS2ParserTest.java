@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.util.LinkedHashSet;
@@ -107,7 +108,8 @@ public class OAS2ParserTest {
         uriTemplates.add(getUriTemplate("DELETE", "Any", "/*"));
         uriTemplates.add(getUriTemplate("GET", "Application & Application User", "/abc"));
         API api = new API(new APIIdentifier("admin", "PhoneVerification", "1.0.0"));
-        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPI20.getURITemplates(api, swagger);
+        SwaggerData swaggerData = new SwaggerData(api);
+        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPI20.getURITemplates(swaggerData, swagger);
         Assert.assertEquals(uriTemplateSet, uriTemplates);
     }
 

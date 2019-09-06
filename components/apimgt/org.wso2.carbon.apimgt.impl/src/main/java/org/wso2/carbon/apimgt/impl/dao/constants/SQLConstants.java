@@ -2222,8 +2222,8 @@ public class SQLConstants {
             "   AND ICA.ID = IAT.CONSUMER_KEY_ID";
 
     public static final String ADD_COMMENT_SQL =
-            " INSERT INTO AM_API_COMMENTS (COMMENT_TEXT,COMMENTED_USER,DATE_COMMENTED,API_ID)" +
-            " VALUES (?,?,?,?)";
+            " INSERT INTO AM_API_COMMENTS (COMMENT_ID,COMMENT_TEXT,COMMENTED_USER,DATE_COMMENTED,API_ID)" +
+            " VALUES (?,?,?,?,?)";
 
     public static final String GET_COMMENT_SQL =
             " SELECT AM_API_COMMENTS.COMMENT_ID AS COMMENT_ID," +

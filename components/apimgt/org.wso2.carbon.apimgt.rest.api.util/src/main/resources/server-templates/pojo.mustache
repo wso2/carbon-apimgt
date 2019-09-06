@@ -2,18 +2,23 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 {{#description}}@ApiModel(description = "{{{description}}}"){{/description}}
 
+{{#vendorExtensions.x-scopes}}
+@Scope(name = "{{.}}", description="", value ="")
+{{/vendorExtensions.x-scopes}}
 public class {{classname}} {{#parent}}extends {{{parent}}}{{/parent}} {{#serializableModel}}implements Serializable{{/serializableModel}} {
   {{#vars}}{{#isEnum}}
 
 {{>enumClass}}{{/isEnum}}{{#items.isEnum}}{{#items}}
 
 {{>enumClass}}{{/items}}{{/items.isEnum}}
-  {{#vendorExtensions.x-allowUpdatesFor}}//@Scope({{{scope}}}, {{{state}}})
-  {{/vendorExtensions.x-allowUpdatesFor}}
-  private {{{datatypeWithEnum}}} {{name}} = {{{defaultValue}}};{{/vars}}
+{{#vendorExtensions.x-otherScopes}}
+    @Scope(name = "{{.}}", description="", value ="")
+{{/vendorExtensions.x-otherScopes}}
+    private {{{datatypeWithEnum}}} {{name}} = {{{defaultValue}}};{{/vars}}
 
   {{#vars}}
   /**

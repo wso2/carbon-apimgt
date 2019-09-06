@@ -2,7 +2,7 @@ get:
 - id: getAPIComment
   request:
     method: GET
-    url: https://localhost:9443/api/am/store/v1.0/apis/924d8493-e06d-4dcb-9e24-0d2b08460864/comments/5
+    url: https://localhost:9443/api/am/store/v1.0/apis/924d8493-e06d-4dcb-9e24-0d2b08460864/comments/c15901c7-407a-43ca-9cf9-d1f0c17f689d
     headers: |
       Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       X-WSO2-Tenant: test.com
@@ -14,7 +14,7 @@ get:
       Content-Type: application/json
     body:
       {
-        "id": "5",
+        "id": "c15901c7-407a-43ca-9cf9-d1f0c17f689d",
         "content": "This is a comment",
         "createdTime": "2019-09-03 14:27:47.02",
         "createdBy": "john"
@@ -24,7 +24,7 @@ delete:
 - id: deleteAPIComment
   request:
     method: DELETE
-    url: https://localhost:9443/api/am/store/v1.0/apis/22b914d1-410c-4dfa-8f7e-afb9cb8aca3f/comments/3
+    url: https://localhost:9443/api/am/store/v1.0/apis/22b914d1-410c-4dfa-8f7e-afb9cb8aca3f/comments/c15901c7-407a-43ca-9cf9-d1f0c17f689d
     headers: |
       Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
   response:

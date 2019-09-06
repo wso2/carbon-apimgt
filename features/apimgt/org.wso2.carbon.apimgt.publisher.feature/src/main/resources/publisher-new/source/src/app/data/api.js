@@ -654,7 +654,7 @@ class API extends Resource {
                 schemaDefinition: graphQLSchema,
                 'Content-Type': 'multipart/form-data',
             };
-            return client.apis['GraphQL Schema (Individual)'].put_apis__apiId__graphql_schema(
+            return client.apis['GraphQL Schema'].put_apis__apiId__graphql_schema(
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -1139,7 +1139,7 @@ class API extends Resource {
         };
 
         promise_create = this.client.then(client => {
-            return client.apis['API (Collection)'].post_apis_import_graphql_schema(
+            return client.apis['APIs'].post_apis_import_graphql_schema(
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -1156,7 +1156,7 @@ class API extends Resource {
     static validateGraphQLFile(file) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         const promised_validationResponse = apiClient.then(client => {
-            return client.apis['API (Collection)'].post_apis_validate_graphql_schema(
+            return client.apis['Validation'].post_apis_validate_graphql_schema(
                 {
                     type: 'GraphQL',
                     file,
@@ -1298,6 +1298,28 @@ class API extends Resource {
         });
 
         return promised_getAPIThumbnail;
+    }
+
+    validateSystemRole(role) {
+        const promise = this.client.then((client) => {
+            return client.apis.Roles.validateSystemRole({ roleId: role }).then((resp) => {
+                return resp.ok;
+            }).catch(() => {
+                    return false;
+            });
+        });
+        return promise;
+    }
+
+    validateUSerRole(role) {
+        const promise = this.client.then((client) => {
+            return client.apis.Roles.validateUserRole({ roleId: role }).then((resp) => {
+                return resp.ok;
+            }).catch(() => {
+                return false;
+            });
+        });
+        return promise;
     }
 
     /**

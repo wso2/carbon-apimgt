@@ -67,7 +67,8 @@
         "swagger-editor": "^3.6.30",
         "swagger-parser": "^7.0.1",
         "typeface-roboto": "0.0.35",
-        "url-loader": "^0.5.9"
+        "url-loader": "^0.5.9",
+        "base64url": "3.0.1"
     },
     "devDependencies": {
         "@babel/core": "^7.4.4",

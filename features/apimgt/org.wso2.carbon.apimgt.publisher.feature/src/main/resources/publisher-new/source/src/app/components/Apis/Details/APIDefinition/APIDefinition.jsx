@@ -44,7 +44,7 @@ import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import Dropzone from 'react-dropzone';
 import json2yaml from 'json2yaml';
 import SwaggerParser from 'swagger-parser';
-
+import AuthManager from 'AppData/AuthManager';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 
 const EditorDialog = React.lazy(() => import('./SwaggerEditorDrawer'));
@@ -110,6 +110,7 @@ class APIDefinition extends React.Component {
         this.validateAndUpdateApiDefinition = this.validateAndUpdateApiDefinition.bind(this);
         this.validateAndImportSchema = this.validateAndImportSchema.bind(this);
         this.updateGraphQLAPIDefinition = this.updateGraphQLAPIDefinition.bind(this);
+        this.isNotCreator = AuthManager.isNotCreator();
     }
 
     /**
@@ -442,7 +443,12 @@ class APIDefinition extends React.Component {
                             )}
                         </Typography>
                         {!graphQL && (
-                            <Button size='small' className={classes.button} onClick={this.openEditor}>
+                            <Button
+                                size='small'
+                                className={classes.button}
+                                onClick={this.openEditor}
+                                disabled={this.isNotCreator}
+                            >
                                 <EditRounded className={classes.buttonIcon} />
                                 <FormattedMessage
                                     id='Apis.Details.APIDefinition.APIDefinition.edit'
@@ -460,7 +466,11 @@ class APIDefinition extends React.Component {
                             {({ getRootProps, getInputProps }) => (
                                 <div {...getRootProps()}>
                                     <input {...getInputProps()} />
-                                    <Button size='small' className={classes.button}>
+                                    <Button
+                                        size='small'
+                                        className={classes.button}
+                                        disabled={this.isNotCreator}
+                                    >
                                         <CloudUploadRounded className={classes.buttonIcon} />
                                         <FormattedMessage
                                             id='Apis.Details.APIDefinition.APIDefinition.import.definition'
@@ -480,6 +490,17 @@ class APIDefinition extends React.Component {
                                 />
                             </Button>
                         </a>
+                        {this.isNotCreator
+                            && (
+                                <Typography variant='body2' color='primary'>
+                                    <FormattedMessage
+                                        id='Apis.Details.APIDefinition.APIDefinition.update.not.allowed'
+                                        defaultMessage='*You are not authorized to update API Definition due to
+                                    insufficient permissions'
+                                    />
+                                </Typography>
+                            )
+                        }
                     </div>
                     {isGraphQL === 0 && (
                         <div className={classes.converterWrapper}>
@@ -508,12 +529,12 @@ class APIDefinition extends React.Component {
                             className={classes.button}
                             color='inherit'
                             onClick={this.closeEditor}
-                            aria-label={
+                            aria-label={(
                                 <FormattedMessage
                                     id='Apis.Details.APIDefinition.APIDefinition.btn.close'
                                     defaultMessage='Close'
                                 />
-                            }
+                            )}
                         >
                             <Icon>close</Icon>
                         </IconButton>
@@ -531,7 +552,7 @@ class APIDefinition extends React.Component {
                         </Button>
                     </Paper>
                     <Suspense
-                        fallback={
+                        fallback={(
                             <div>
                                 (
                                 <FormattedMessage
@@ -540,7 +561,7 @@ class APIDefinition extends React.Component {
                                 />
                                 )
                             </div>
-                        }
+                        )}
                     >
                         <EditorDialog />
                     </Suspense>
@@ -564,8 +585,8 @@ class APIDefinition extends React.Component {
                             <FormattedMessage
                                 id='Apis.Details.APIDefinition.APIDefinition.api.definition.save.confirmation'
                                 defaultMessage={
-                                    'Do you want to save the API Definition? This will affect the' +
-                                    ' existing resources.'
+                                    'Do you want to save the API Definition? This will affect the'
+                                    + ' existing resources.'
                                 }
                             />
                         </DialogContentText>

@@ -1631,7 +1631,7 @@ paths:
         required: false
       - $ref: '#/parameters/If-Match'
       tags:
-      - API (Collection)
+      - APIs
       responses:
         201:
           description: |
@@ -1805,7 +1805,7 @@ paths:
         type: file
         required: true
       tags:
-      - API (Collection)
+      - Validation
       responses:
         200:
           description: |
@@ -3384,6 +3384,115 @@ paths:
           description: |
             Not Acceptable.
             The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The "ExternalStore Collection" resource APIs
+######################################################
+  /apis/{apiId}/external-stores:
+
+#-------------------------------------------------------------
+# Retrieve the published external stores list of a certain API
+#-------------------------------------------------------------
+    get:
+      operationId: getAllPublishedExternalStoresByAPI
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      x-examples:
+        $ref: docs/examples/external-stores/external_stores.yaml#/getPublishedExternalStoresByAPI
+      summary: Get the list of external stores which an API is published to
+      description: |
+        This operation can be used to retrieve a list of external stores which an API is published to by providing the id of the API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/If-None-Match'
+      tags:
+        - External Stores
+      responses:
+        200:
+          description: |
+            OK.
+            External Store list is returned.
+          schema:
+            $ref: '#/definitions/ExternalStoreList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        500:
+          description: Internal server error while getting external stores of the API.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The "Publish to External Stores" resource APIs
+######################################################
+  /apis/{apiId}/publish-to-external-stores:
+
+#-----------------------------------------------------
+# Publish an API to external stores
+#-----------------------------------------------------
+    post:
+      operationId: publishAPIToExternalStores
+      security:
+        - OAuth2Security:
+            - apim:api_publish
+      x-examples:
+        $ref: docs/examples/external-stores/external_stores.yaml#/publishToExternalStore
+      summary: Publish an API to external stores
+      description: |
+        This operation can be used to publish an API to a list of external stores.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - name: externalStoreId
+          description: External Store Ids of stores which the API needs to be published or updated.
+          type: array
+          items:
+            type: string
+          in: query
+          required: true
+        - $ref: '#/parameters/If-Match'
+      tags:
+        - External Stores
+      responses:
+        200:
+          description: |
+            OK.
+            API was successfully published to all the selected external stores.
+          schema:
+            $ref: '#/definitions/ExternalStoreList'
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the blocked subscription.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the subscription has been blocked.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        500:
+          description: Internal server error while publishing to external stores
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Request API resource or external store Ids not found.
           schema:
             $ref: '#/definitions/Error'
 
@@ -5621,6 +5730,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+      operationId: validateSystemRole
       summary:
         Check given role name is already exist
       description: |
@@ -5650,6 +5760,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_create
+      operationId: validateUserRole
       summary:
         Validate whether the logged-in user has the given role
       description: |
@@ -5657,7 +5768,7 @@ paths:
       parameters:
         - $ref : '#/parameters/roleId'
       tags:
-        - roles
+        - Roles
       responses:
         200:
           description:
@@ -5667,6 +5778,37 @@ paths:
           description:
             Not Found.
             Requested user does not have the role.
+
+######################################################
+# The External Store list to publish an API
+######################################################
+  /external-stores:
+    #-----------------------------------------------------
+    # Retrieve configured external store list
+    #-----------------------------------------------------
+    get:
+      operationId: getAllExternalStores
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      x-examples:
+        $ref: docs/examples/external-stores/external_stores.yaml#/getAllExternalStores
+      summary: Retrieve external store list to publish an API
+      tags:
+        - External Stores
+      description: |
+        Retrieve external stores list configured to publish an API
+      responses:
+        200:
+          description: |
+            OK.
+            External Stores list returned
+          schema:
+            $ref: '#/definitions/ExternalStore'
+        500:
+          description: Error retrieving external stores
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # The Publisher settings List
@@ -6120,6 +6262,8 @@ definitions:
       - name
       - context
       - version
+    x-scopes:
+      - apim:api_create
     properties:
       id:
         type: string
@@ -6191,15 +6335,21 @@ definitions:
         items:
           type: string
         example: ["substract","add"]
+        x-otherScopes:
+          - apim:api_publish
       policies:
         type: array
         items:
           type: string
         example: ["Unlimited"]
+        x-otherScopes:
+          - apim:api_publish
       apiThrottlingPolicy:
         description: The API level throttling policy selected for the particular API
         type: string
         example: "Unlimited"
+        x-otherScopes:
+          - apim:api_publish
       authorizationHeader:
         type: string
         description: |
@@ -6223,12 +6373,16 @@ definitions:
           - RESTRICTED
         example: PUBLIC
         default: PUBLIC
+        x-otherScopes:
+          - apim:api_publish
       visibleRoles:
         type: array
         description: The user roles that are able to access the API in Store
         items:
           type: string
         example: []
+        x-otherScopes:
+          - apim:api_publish
       visibleTenants:
         type: array
         items:
@@ -6242,6 +6396,8 @@ definitions:
         items:
           type: string
         example: ["Production and Sandbox"]
+        x-otherScopes:
+          - apim:api_publish
       labels:
         description: |
           Labels of micro-gateway environments attached to the API.
@@ -6267,6 +6423,8 @@ definitions:
           - specific_tenants
         example: current_tenant
         default: all_tenants
+        x-otherScopes:
+          - apim:api_publish
       subscriptionAvailableTenants:
         type: array
         items:
@@ -6277,6 +6435,8 @@ definitions:
         additionalProperties:
           type: string
         description : Map of custom properties of API
+        x-otherScopes:
+          - apim:api_publish
       monetization:
         $ref: '#/definitions/APIMonetizationInfo'
       accessControl:
@@ -6297,7 +6457,10 @@ definitions:
           type: string
         example: [admin]
       businessInformation:
-        $ref: '#/definitions/APIBusinessInformation'
+        allOf:
+          - $ref: '#/definitions/APIBusinessInformation'
+        x-otherScopes:
+          - apim:api_publish
       corsConfiguration:
         $ref: '#/definitions/APICorsConfiguration'
       workflowStatus:
@@ -6609,6 +6772,8 @@ definitions:
         items:
           type: string
         example: ["tenant1", "tenant2"]
+        x-otherScopes:
+          - apim:api_publish
       additionalProperties:
         type: object
         additionalProperties:
@@ -7480,6 +7645,43 @@ definitions:
               type: string
               example: "Scope for Api view"
 
+#-----------------------------------------------------
+# The External-Store resource
+#-----------------------------------------------------
+  ExternalStore:
+    title: External Store
+    properties:
+      id:
+        type: string
+        description: |
+          The external store identifier, which is a unique value.
+        example: Store123#
+      displayName:
+        type: string
+        description: |
+          The name of the external API Store that is displayed in the Publisher UI.
+        example: UKStore
+      type:
+        type: string
+        description: |
+          The type of the Store. This can be a WSO2-specific API Store or an external one.
+        example: wso2
+
+#-----------------------------------------------------
+# The External-Store List resource
+#-----------------------------------------------------
+  ExternalStoreList:
+    title: External Store List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of external stores returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ExternalStore'
 
   #-----------------------------------------------------
   # Certificates list resource
@@ -7825,8 +8027,7 @@ definitions:
             items:
               $ref: '#/definitions/APIOperations'
           graphQLSchema:
-            items:
-              $ref: '#/definitions/GraphQLSchema'
+            $ref: '#/definitions/GraphQLSchema'
 
 #-----------------------------------------------------
 # The Threat Protection Policy List Resource

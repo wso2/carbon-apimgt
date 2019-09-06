@@ -18,6 +18,7 @@ import React, { useEffect, useState } from 'react';
 import { TextField, MenuItem, Grid, Button, withStyles } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import AuthManager from 'AppData/AuthManager';
 
 const algorithms = [
     {
@@ -65,6 +66,7 @@ function LoadBalanceConfig(props) {
     } = props;
     const [lbConfig, setLbConfigObject] = useState(defaultTemplateObj);
     const [algoClassNameError, setAlgoClassNameError] = useState(false);
+    const isNotCreator = AuthManager.isNotCreator();
 
     useEffect(() => {
         setLbConfigObject(() => {
@@ -188,7 +190,7 @@ function LoadBalanceConfig(props) {
                     color='primary'
                     autoFocus
                     onClick={submitConfiguration}
-                    disabled={lbConfig.algoClassName === ''}
+                    disabled={lbConfig.algoClassName === '' || isNotCreator}
                 >
                     <FormattedMessage
                         id='Apis.Details.Endpoints.EndpointOverview.loadbalance.config.save.button'
