@@ -498,13 +498,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) {
         APIDTO updatedApiDTO;
-        Object tokenInfo =
-                PhaseInterceptorChain.getCurrentMessage().getExchange().get(RestApiConstants.MESSAGE_EXCHANGE_TOKEN_INFO);
-        // Validate if the MESSAGE_EXCHANGE_TOKEN_INFO is not set in WebAppAuthenticator when scopes are validated
-        if (tokenInfo == null) {
-            RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange().get(RestApiConstants.USER_REST_API_SCOPES);
+        // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
+        if (tokenScopes == null) {
+            RestApiUtil.handleInternalServerError("Error occurred while updating the  API " + apiId +
+                    " as the token information hasn't been correctly set internally", log);
+            return null;
         }
-        String tokenScopes[] = ((AccessTokenInfo) tokenInfo).getScopes();
         try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();

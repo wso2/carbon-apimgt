@@ -68,7 +68,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
             //If access token is valid then we will perform scope check for given resource.
             if (validateScopes(message, tokenInfo)) {
                 //Add the user scopes list extracted from token to the cxf message
-                message.put(RestApiConstants.USER_REST_API_SCOPES, tokenInfo.getScopes());
+                message.getExchange().put(RestApiConstants.USER_REST_API_SCOPES, tokenInfo.getScopes());
                 //If scope validation successful then set tenant name and user name to current context
                 String tenantDomain = MultitenantUtils.getTenantDomain(tokenInfo.getEndUserName());
                 int tenantId;
@@ -115,8 +115,6 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
         String verb = (String) message.get(Message.HTTP_REQUEST_METHOD);
         String resource = path.substring(basePath.length() - 1);
         String[] scopes = tokenInfo.getScopes();
-        // Set the token info into the message context
-        message.getExchange().put(RestApiConstants.MESSAGE_EXCHANGE_TOKEN_INFO, tokenInfo);
         //get all the URI templates of the REST API from the base path
         Set<URITemplate> uriTemplates = RestApiUtil.getURITemplatesForBasePath(basePath);
         if (uriTemplates.isEmpty()) {

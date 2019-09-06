@@ -105,31 +105,6 @@ class APIClient {
     }
 
     /**
-     * Get the scopes allowed for updating the given API field. These scopes are defined in publisher-api REST API
-     * definition, under the API resource definition as scope(s) applicable for all the API fields, i.e.
-     *    API:
-     *      x-scopes:
-     *           - apim:api_create
-     * or as scope(s) separately applicable for particular fields, under API resource. i.e.
-     *      businessInformation:
-     *           x-otherScopes:
-     *                - apim:api_publish
-     * @param field
-     * @returns {*}
-     */
-    static geAPIUpdateAllowedFieldScopes(field) {
-        if (!APIClient.spec) {
-            SwaggerClient.http.withCredentials = true;
-            APIClient.spec = SwaggerClient.resolve({ url: Utils.getSwaggerURL() });
-        }
-
-        return APIClient.spec.then((resolved) => {
-            return (resolved.spec.definitions.API.properties[field]['x-otherScopes'])
-                .concat(resolved.spec.definitions.API['x-scopes']);
-        });
-    }
-
-    /**
      * Temporary method to fix the hostname attribute Till following issues get fixed ~tmkb
      * https://github.com/swagger-api/swagger-js/issues/1081
      * https://github.com/swagger-api/swagger-js/issues/1045
