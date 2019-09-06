@@ -1130,76 +1130,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Update a particular Comment
-#-----------------------------------------------------
-    put:
-      summary: Update an API comment
-      security:
-        - OAuth2Security:
-          - apim:subscribe
-      x-scope: apim:subscribe
-      description: |
-        Update a certain Comment
-      parameters:
-        - $ref: '#/parameters/commentId'
-        - $ref: '#/parameters/apiId'
-        - in: body
-          name: body
-          description: |
-            Comment object that needs to be updated
-          required: true
-          schema:
-            $ref: '#/definitions/Comment'
-        - $ref: '#/parameters/If-Match'
-      tags:
-        - Comments
-      responses:
-        200:
-          description: |
-            OK.
-            Comment updated.
-          schema:
-            $ref: '#/definitions/Comment'
-          headers:
-            Location:
-              description: |
-                The URL of the newly created resource.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional request.
-              type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional reuquests.
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
-        401:
-          description: |
-            Unauthorized.
-            The user is not authorized to update the comment.
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
 ######################################################
 # The "API Throttling Policy" resource APIs
 ######################################################
@@ -4082,7 +4012,7 @@ parameters:
     description: |
       Comment Id
     required: true
-    type: integer
+    type: string
 
 # Rating Identifier
 # Specified as part of the path expression

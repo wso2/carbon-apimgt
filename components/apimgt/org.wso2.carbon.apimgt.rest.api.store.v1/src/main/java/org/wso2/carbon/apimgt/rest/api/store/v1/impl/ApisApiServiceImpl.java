@@ -177,7 +177,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
 
             Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);
-            int createdCommentId = apiConsumer.addComment(apiIdentifier, comment, username);
+            String createdCommentId = apiConsumer.addComment(apiIdentifier, comment, username);
             Comment createdComment = apiConsumer.getComment(apiIdentifier, createdCommentId);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 
@@ -196,11 +196,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
-    }
-
-    @Override
-    public Response apisApiIdCommentsCommentIdPut(Integer commentId, String apiId, CommentDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException {
-        return Response.ok().entity("magic!").build();
     }
 
     @Override
@@ -233,7 +228,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getCommentOfAPI(Integer commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) {
+    public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
@@ -268,7 +263,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response deleteComment(Integer commentId, String apiId, String ifMatch, MessageContext messageContext) {
+    public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException {
         String requestedTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
