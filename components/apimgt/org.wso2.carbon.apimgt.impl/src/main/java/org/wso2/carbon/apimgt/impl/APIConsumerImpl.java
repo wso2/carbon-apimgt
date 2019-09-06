@@ -3111,13 +3111,18 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiMgtDAO.updateSubscriptions(identifier, api.getContext(), applicationId, userId);
     }
 
+    /**
+     * @deprecated
+     * This method needs to be removed once the Jaggery web apps are removed.
+     *
+     */
     @Override
     public void addComment(APIIdentifier identifier, String commentText, String user) throws APIManagementException {
         apiMgtDAO.addComment(identifier, commentText, user);
     }
 
     @Override
-    public int addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException {
+    public String addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException {
         return apiMgtDAO.addComment(identifier, comment, user);
     }
 
@@ -3128,12 +3133,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Comment getComment(APIIdentifier identifier, int commentId) throws APIManagementException {
+    public Comment getComment(APIIdentifier identifier, String commentId) throws APIManagementException {
         return apiMgtDAO.getComment(identifier, commentId);
     }
 
     @Override
-    public void deleteComment(APIIdentifier identifier, int commentId) throws APIManagementException {
+    public void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException {
         apiMgtDAO.deleteComment(identifier, commentId);
     }
 
