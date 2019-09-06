@@ -95,7 +95,7 @@ function NewEndpointCreate(props) {
                 {
                     type: 'prototyped',
                     name: intl.formatMessage({
-                        id: 'Apis.Details.Endpoints.NewEndpointCreate.mock.endpoints',
+                        id: 'Apis.Details.Endpoints.NewEndpointCreate.default.prototype.endpoints',
                         defaultMessage: 'Prototype Endpoint',
                     }),
                 },

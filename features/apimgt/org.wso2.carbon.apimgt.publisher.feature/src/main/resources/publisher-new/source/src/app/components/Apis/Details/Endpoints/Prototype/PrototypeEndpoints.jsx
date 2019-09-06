@@ -128,8 +128,8 @@ function PrototypeEndpoints(props) {
                                     value={endpointImplementationTypes[0].key}
                                     control={<Radio />}
                                     label={<FormattedMessage
-                                        id='Apis.Details.Endpoints.Prototype.PrototypeEndpoints.inline'
-                                        defaultMessage='Inline'
+                                        id='Apis.Details.Endpoints.Prototype.PrototypeEndpoints.mock'
+                                        defaultMessage='Mock'
                                     />}
                                 />
                                 <FormControlLabel
