@@ -19,7 +19,7 @@
 import SwaggerClient from 'swagger-client';
 import { Mutex } from 'async-mutex';
 import Configurations from 'Config';
-import AuthManager from './AuthManager';
+import AuthManager from 'AppData/AuthManager';
 import Utils from './Utils';
 
 /**
@@ -97,9 +97,9 @@ class APIClient {
         }
         return APIClient.spec.then((resolved) => {
             return (
-                resolved.spec.paths[resourcePath] &&
-                resolved.spec.paths[resourcePath][resourceMethod] &&
-                resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0]
+                resolved.spec.paths[resourcePath]
+                && resolved.spec.paths[resourcePath][resourceMethod]
+                && resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0]
             );
         });
     }
@@ -189,8 +189,8 @@ class APIClient {
                 });
             });
 
-            if (APIClient.getETag(request.url) &&
-                (request.method === 'PUT' || request.method === 'DELETE' || request.method === 'POST')) {
+            if (APIClient.getETag(request.url)
+                && (request.method === 'PUT' || request.method === 'DELETE' || request.method === 'POST')) {
                 request.headers['If-Match'] = APIClient.getETag(request.url);
             }
             return promise;

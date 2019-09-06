@@ -29,6 +29,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  *
@@ -40,10 +41,12 @@ import Select from '@material-ui/core/Select';
 export default function AccessControl(props) {
     const { api, configDispatcher } = props;
     const isRestricted = api.accessControl === 'RESTRICTED';
+    const isNotCreator = AuthManager.isNotCreator();
+
     return (
         <Grid container spacing={0} alignItems='flex-start'>
             <Grid item xs={11}>
-                <FormControl style={{ display: 'flex' }} >
+                <FormControl style={{ display: 'flex' }}>
                     <InputLabel htmlFor='accessControl-selector'>
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.AccessControl.head.topic'
@@ -51,6 +54,7 @@ export default function AccessControl(props) {
                         />
                     </InputLabel>
                     <Select
+                        disabled={isNotCreator}
                         value={api.accessControl}
                         onChange={({ target: { value } }) => configDispatcher({ action: 'accessControl', value })}
                         input={<Input name='accessControl' id='accessControl-selector' />}
@@ -78,7 +82,7 @@ export default function AccessControl(props) {
             </Grid>
             <Grid item xs={1}>
                 <Tooltip
-                    title={
+                    title={(
                         <React.Fragment>
                             <p>
                                 <strong>
@@ -109,7 +113,7 @@ export default function AccessControl(props) {
                                 />
                             </p>
                         </React.Fragment>
-                    }
+                    )}
                     aria-label='Access control'
                     placement='right-end'
                     interactive
@@ -125,8 +129,8 @@ export default function AccessControl(props) {
                         variant='outlined'
                         value={api.accessControlRoles.join(',')}
                         onChange={({ target: { value } }) => configDispatcher({ action: 'accessControlRoles', value })}
-                        helperText={'Enter role name(s). If there are multiple roles, ' +
-                        'separate them using comma (i:e role1,role2,...)'}
+                        helperText={'Enter role name(s). If there are multiple roles, '
+                        + 'separate them using comma (i:e role1,role2,...)'}
                         style={{ marginTop: 20 }}
                     />
                 </Grid>

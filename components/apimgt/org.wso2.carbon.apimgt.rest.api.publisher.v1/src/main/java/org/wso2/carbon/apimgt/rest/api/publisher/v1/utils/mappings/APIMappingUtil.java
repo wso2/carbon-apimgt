@@ -230,7 +230,10 @@ public class APIMappingUtil {
                 model.addProperty(entry.getKey(), entry.getValue());
             }
         }
-        APIBusinessInformationDTO apiBusinessInformationDTO = dto.getBusinessInformation();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        APIBusinessInformationDTO apiBusinessInformationDTO = objectMapper.convertValue(dto.getBusinessInformation(),
+                APIBusinessInformationDTO.class);
         if (apiBusinessInformationDTO != null) {
             model.setBusinessOwner(apiBusinessInformationDTO.getBusinessOwner());
             model.setBusinessOwnerEmail(apiBusinessInformationDTO.getBusinessOwnerEmail());

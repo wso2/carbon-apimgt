@@ -33,6 +33,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  *
@@ -51,6 +52,7 @@ export default class SchemaValidation extends React.Component {
         super(props);
         this.state = { isOpen: false };
         this.setIsOpen = this.setIsOpen.bind(this);
+        this.isNotCreator = AuthManager.isNotCreator();
     }
 
     /**
@@ -105,6 +107,7 @@ export default class SchemaValidation extends React.Component {
                         <FormControlLabel
                             control={
                                 <Switch
+                                    disabled={this.isNotCreator}
                                     checked={
                                         api.enableSchemaValidation === undefined ? false : api.enableSchemaValidation
                                     }

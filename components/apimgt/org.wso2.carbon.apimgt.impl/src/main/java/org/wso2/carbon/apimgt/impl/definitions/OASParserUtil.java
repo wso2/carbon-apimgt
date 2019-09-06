@@ -49,6 +49,8 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
@@ -61,6 +63,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -364,5 +367,23 @@ public class OASParserUtil {
                             + apiIdentifier.getVersion() + " in " + resourcePath, e);
         }
         return apiDocContent;
+    }
+
+    /**
+     * Sets the scopes to the URL template object using the given list of scopes
+     *
+     * @param template URL template
+     * @param scopes   list of scopes
+     * @return URL template after setting the scopes
+     */
+    public static URITemplate setScopesToTemplate(URITemplate template, List<String> scopes) {
+        for (String scope : scopes) {
+            Scope scopeObj = new Scope();
+            scopeObj.setKey(scope);
+            scopeObj.setName(scope);
+
+            template.setScopes(scopeObj);
+        }
+        return template;
     }
 }
