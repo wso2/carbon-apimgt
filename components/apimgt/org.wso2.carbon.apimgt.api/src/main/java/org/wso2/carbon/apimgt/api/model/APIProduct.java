@@ -46,6 +46,7 @@ public class APIProduct {
     private String definition;
     private JSONObject additionalProperties = new JSONObject();
     private Set<String> environments;
+    private List<Label> gatewayLabels;
 
     private Set<Scope> scopes;
 
@@ -371,5 +372,13 @@ public class APIProduct {
                 + ", accessControl=" + accessControl + ", accessControlRoles=" + accessControlRoles + ", state=" + state
                 + ", businessOwner=" + businessOwner + ", businessOwnerEmail=" + businessOwnerEmail + ", tenantDomain="
                 + tenantDomain + ", productResources=" + productResources + "]";
+    }
+
+    public List<Label> getGatewayLabels() {
+        return gatewayLabels;
+    }
+
+    public void setGatewayLabels(List<Label> gatewayLabels) {
+        this.gatewayLabels = gatewayLabels;
     }
 }

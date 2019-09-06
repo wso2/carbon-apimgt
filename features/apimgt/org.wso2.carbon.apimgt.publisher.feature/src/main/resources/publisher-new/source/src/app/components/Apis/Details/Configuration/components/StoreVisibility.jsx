@@ -36,6 +36,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import Chip from '@material-ui/core/Chip';
 import { red } from '@material-ui/core/colors/';
 import Alert from 'AppComponents/Shared/Alert';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  *
@@ -49,6 +50,8 @@ export default function StoreVisibility(props) {
     const { api, configDispatcher } = props;
     const [invalidRoles, setInvalidRoles] = useState([]);
     const isPublic = api.visibility === 'PUBLIC';
+    const isNotCreator = AuthManager.isNotCreator();
+    const isNotPublisher = AuthManager.isNotPublisher();
     useEffect(() => {
         if (invalidRoles.length === 0) {
             setRoleValidity(true);
@@ -94,6 +97,7 @@ export default function StoreVisibility(props) {
                         />
                     </InputLabel>
                     <Select
+                        disabled={isNotCreator && isNotPublisher}
                         value={api.visibility}
                         onChange={({ target: { value } }) => configDispatcher({ action: 'visibility', value })}
                         input={<Input name='storeVisibility' id='storeVisibility-selector' />}
@@ -121,7 +125,7 @@ export default function StoreVisibility(props) {
             </Grid>
             <Grid item xs={1}>
                 <Tooltip
-                    title={
+                    title={(
                         <React.Fragment>
                             <p>
                                 <strong>
@@ -156,7 +160,7 @@ export default function StoreVisibility(props) {
                                 />
                             </p>
                         </React.Fragment>
-                    }
+                    )}
                     aria-label='Store Visibility'
                     placement='right-end'
                     interactive
@@ -167,6 +171,7 @@ export default function StoreVisibility(props) {
             {!isPublic && (
                 <Grid item>
                     <ChipInput
+                        disabled={isNotCreator && isNotPublisher}
                         value={api.visibleRoles.concat(invalidRoles)}
                         alwaysShowPlaceholder={false}
                         placeholder='Enter roles and press Enter'

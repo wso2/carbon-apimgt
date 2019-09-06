@@ -28,6 +28,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
+import AuthManager from 'AppData/AuthManager';
 import ChipInput from 'material-ui-chip-input';
 import APIValidation from 'AppData/APIValidation';
 import base64url from 'base64url';
@@ -49,6 +50,8 @@ export default function AccessControl(props) {
     const [userRoleValidity, setUserRoleValidity] = useState(true);
     const { api, configDispatcher } = props;
     const isRestricted = api.accessControl === 'RESTRICTED';
+    const isNotCreator = AuthManager.isNotCreator();
+
     const [invalidRoles, setInvalidRoles] = useState([]);
     useEffect(() => {
         if (invalidRoles.length === 0) {
@@ -123,7 +126,7 @@ export default function AccessControl(props) {
     return (
         <Grid container spacing={0} alignItems='flex-start'>
             <Grid item xs={11}>
-                <FormControl style={{ display: 'flex' }} >
+                <FormControl style={{ display: 'flex' }}>
                     <InputLabel htmlFor='accessControl-selector'>
                         <FormattedMessage
                             id='Apis.Details.Configuration.components.AccessControl.head.topic'
@@ -131,6 +134,7 @@ export default function AccessControl(props) {
                         />
                     </InputLabel>
                     <Select
+                        disabled={isNotCreator}
                         value={api.accessControl}
                         onChange={({ target: { value } }) => configDispatcher({ action: 'accessControl', value })}
                         input={<Input name='accessControl' id='accessControl-selector' />}
@@ -158,7 +162,7 @@ export default function AccessControl(props) {
             </Grid>
             <Grid item xs={1}>
                 <Tooltip
-                    title={
+                    title={(
                         <React.Fragment>
                             <p>
                                 <strong>
@@ -189,7 +193,7 @@ export default function AccessControl(props) {
                                 />
                             </p>
                         </React.Fragment>
-                    }
+                    )}
                     aria-label='Access control'
                     placement='right-end'
                     interactive

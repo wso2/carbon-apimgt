@@ -29,6 +29,7 @@ import Typography from '@material-ui/core/Typography';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import Switch from '@material-ui/core/Switch';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  *
@@ -46,6 +47,8 @@ export default function CORSConfiguration(props) {
     const isAllowAllOrigins =
         corsConfiguration.accessControlAllowOrigins[0] === '*' &&
         corsConfiguration.accessControlAllowOrigins.length === 1;
+    const isNotCreator = AuthManager.isNotCreator();
+
     return (
         <React.Fragment>
             <Grid container>
@@ -58,29 +61,29 @@ export default function CORSConfiguration(props) {
                             />
                         </FormLabel>
                         <FormControlLabel
-                            control={
+                            control={(
                                 <Switch
+                                    disabled={isNotCreator}
                                     checked={corsConfiguration.corsConfigurationEnabled}
-                                    onChange={({ target: { checked } }) =>
-                                        configDispatcher({
-                                            action: 'corsConfigurationEnabled',
-                                            value: checked,
-                                        })
+                                    onChange={({ target: { checked } }) => configDispatcher({
+                                        action: 'corsConfigurationEnabled',
+                                        value: checked,
+                                    })
                                     }
                                     color='primary'
                                 />
-                            }
+                            )}
                         />
                     </FormControl>
                 </Grid>
                 <Grid item>
                     <Tooltip
-                        title={
+                        title={(
                             <FormattedMessage
                                 id='Apis.Details.Configuration.components.CORSConfiguration.tooltip'
                                 defaultMessage='If enabled, the CORS configuration for the API will be enabled.'
                             />
-                        }
+                        )}
                         aria-label='Response cache'
                         placement='right-end'
                         interactive
@@ -104,18 +107,18 @@ export default function CORSConfiguration(props) {
                                     <Grid container>
                                         <Grid item md={12}>
                                             <FormControlLabel
-                                                control={
+                                                control={(
                                                     <Checkbox
+                                                        disabled={isNotCreator}
                                                         checked={isAllowAllOrigins}
-                                                        onChange={({ target: { checked, value } }) =>
-                                                            configDispatcher({
-                                                                action: 'accessControlAllowOrigins',
-                                                                event: { checked, value },
-                                                            })
+                                                        onChange={({ target: { checked, value } }) => configDispatcher({
+                                                            action: 'accessControlAllowOrigins',
+                                                            event: { checked, value },
+                                                        })
                                                         }
                                                         value='*'
                                                     />
-                                                }
+                                                )}
                                                 label='Allow All Origins'
                                             />
                                         </Grid>
@@ -124,18 +127,18 @@ export default function CORSConfiguration(props) {
                                                 <ChipInput
                                                     style={{ marginBottom: 40 }}
                                                     value={corsConfiguration.accessControlAllowOrigins}
-                                                    helperText={
+                                                    helperText={(
                                                         <FormattedMessage
                                                             id={
-                                                                'Apis.Details.Configuration.components' +
-                                                                '.CORSConfigurations.origin.helper'
+                                                                'Apis.Details.Configuration.components'
+                                                                + '.CORSConfigurations.origin.helper'
                                                             }
                                                             defaultMessage={
-                                                                'Press `enter` after typing the origin name,' +
-                                                                'To add a new origin'
+                                                                'Press `enter` after typing the origin name,'
+                                                                + 'To add a new origin'
                                                             }
                                                         />
-                                                    }
+                                                    )}
                                                     onAdd={(accessControlAllowOrigin) => {
                                                         configDispatcher({
                                                             action: 'accessControlAllowOrigins',
@@ -152,8 +155,8 @@ export default function CORSConfiguration(props) {
                                                             action: 'accessControlAllowOrigins',
                                                             event: {
                                                                 value: corsConfiguration.accessControlAllowOrigins
-                                                                    .filter(oldOrigin =>
-                                                                        oldOrigin !== accessControlAllowOrigin),
+                                                                    .filter(oldOrigin => oldOrigin !==
+                                                                        accessControlAllowOrigin),
                                                             },
                                                         });
                                                     }}
@@ -174,18 +177,19 @@ export default function CORSConfiguration(props) {
                                     <ChipInput
                                         style={{ marginBottom: 40 }}
                                         value={corsConfiguration.accessControlAllowHeaders}
-                                        helperText={
+                                        disabled={isNotCreator}
+                                        helperText={(
                                             <FormattedMessage
                                                 id={
-                                                    'Apis.Details.Configuration.components.' +
-                                                    'CORSConfigurations.header.helper'
+                                                    'Apis.Details.Configuration.components.'
+                                                    + 'CORSConfigurations.header.helper'
                                                 }
                                                 defaultMessage={
-                                                    'Press `enter` after typing the header name, ' +
-                                                    'To add a new header'
+                                                    'Press `enter` after typing the header name, '
+                                                    + 'To add a new header'
                                                 }
                                             />
-                                        }
+                                        )}
                                         onAdd={(accessControlAllowHeader) => {
                                             configDispatcher({
                                                 action: 'accessControlAllowHeaders',
@@ -216,18 +220,19 @@ export default function CORSConfiguration(props) {
                                     <ChipInput
                                         style={{ marginBottom: 40 }}
                                         value={corsConfiguration.accessControlAllowMethods}
-                                        helperText={
+                                        disabled={isNotCreator}
+                                        helperText={(
                                             <FormattedMessage
                                                 id={
-                                                    'Apis.Details.Configuration.components' +
-                                                    '.CORSConfigurations.method.helper'
+                                                    'Apis.Details.Configuration.components'
+                                                    + '.CORSConfigurations.method.helper'
                                                 }
                                                 defaultMessage={
-                                                    'Press `enter` after typing the method name,' +
-                                                    ' To add a new method'
+                                                    'Press `enter` after typing the method name,'
+                                                    + ' To add a new method'
                                                 }
                                             />
-                                        }
+                                        )}
                                         onAdd={(accessControlAllowMethod) => {
                                             configDispatcher({
                                                 action: 'accessControlAllowMethods',
@@ -248,26 +253,26 @@ export default function CORSConfiguration(props) {
                                 </Grid>
                                 <Grid item>
                                     <FormControlLabel
-                                        control={
+                                        control={(
                                             <Checkbox
+                                                disabled={isNotCreator}
                                                 checked={corsConfiguration.accessControlAllowCredentials}
-                                                onChange={({ target: { checked } }) =>
-                                                    configDispatcher({
-                                                        action: 'accessControlAllowCredentials',
-                                                        value: checked,
-                                                    })
+                                                onChange={({ target: { checked } }) => configDispatcher({
+                                                    action: 'accessControlAllowCredentials',
+                                                    value: checked,
+                                                })
                                                 }
                                             />
-                                        }
-                                        label={
+                                        )}
+                                        label={(
                                             <FormattedMessage
                                                 id={
-                                                    'Apis.Details.Configuration.components' +
-                                                    '.CORSConfiguration.allow.credentials'
+                                                    'Apis.Details.Configuration.components'
+                                                    + '.CORSConfiguration.allow.credentials'
                                                 }
                                                 defaultMessage='Access Control Allow Credentials'
                                             />
-                                        }
+                                        )}
                                     />
                                 </Grid>
                             </Grid>

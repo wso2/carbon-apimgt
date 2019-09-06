@@ -160,10 +160,18 @@ function TopMenu(props) {
                 )}
             </div>
             <div className={classes.buttonRight}>
-                <IconButton className={classes.button} onClick={() => setListType('list')}>
+                <IconButton
+                    className={classes.button}
+                    disabled={data.length === 0}
+                    onClick={() => setListType('list')}
+                >
                     <List color={listType === 'list' ? 'primary' : 'default'} />
                 </IconButton>
-                <IconButton className={classes.button} onClick={() => setListType('grid')}>
+                <IconButton
+                    className={classes.button}
+                    disabled={data.length === 0}
+                    onClick={() => setListType('grid')}
+                >
                     <GridOn color={listType === 'grid' ? 'primary' : 'default'} />
                 </IconButton>
             </div>

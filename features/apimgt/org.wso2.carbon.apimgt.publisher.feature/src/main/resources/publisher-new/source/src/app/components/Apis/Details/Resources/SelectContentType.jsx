@@ -26,13 +26,16 @@ import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import Chip from '@material-ui/core/Chip';
 import mimeTypes from './MimeTypes';
+import AuthManager from 'AppData/AuthManager';
 const suggestions = mimeTypes;
 
 function renderInput(inputProps) {
     const { InputProps, classes, ref, ...other } = inputProps;
+    const isNotCreator = AuthManager.isNotCreator();
 
     return (
         <TextField
+            disabled={isNotCreator}
             InputProps={{
                 inputRef: ref,
                 classes: {
@@ -90,12 +93,18 @@ function getSuggestions(value) {
           });
 }
 
+
 class SelectContentType extends React.Component {
+    constructor(props) {
+        super(props);
+        debugger;
+        this.isNotCreator = AuthManager.isNotCreator();
+    }
+
     state = {
         inputValue: '',
         selectedItem: [],
     };
-
     handleKeyDown = event => {
         const { inputValue, selectedItem } = this.state;
         if (selectedItem.length && !inputValue.length && event.keyCode === 8) {
@@ -164,7 +173,7 @@ class SelectContentType extends React.Component {
                                         tabIndex={-1}
                                         label={item}
                                         className={classes.chip}
-                                        onDelete={this.handleDelete(item)}
+                                        clickable={this.isNotCreator}
                                     />
                                 )),
                                 onChange: this.handleInputChange,

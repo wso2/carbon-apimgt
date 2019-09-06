@@ -2312,7 +2312,7 @@ public final class APIUtil {
                             //Set store login username
                         } else {
                             log.error("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> " +
-                                    "config of api-manager.xml.");
+                                    "config of external-api-stores.xml.");
                         }
                     }
                     externalAPIStores.add(store);
