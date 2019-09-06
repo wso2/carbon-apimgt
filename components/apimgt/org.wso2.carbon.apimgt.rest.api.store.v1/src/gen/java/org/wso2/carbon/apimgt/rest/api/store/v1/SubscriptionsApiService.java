@@ -9,6 +9,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
@@ -29,4 +30,5 @@ public interface SubscriptionsApiService {
       public Response subscriptionsPost(SubscriptionDTO body, MessageContext messageContext) throws APIManagementException;
       public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsSubscriptionIdUsageGet(String subscriptionId, MessageContext messageContext) throws APIManagementException;
 }
