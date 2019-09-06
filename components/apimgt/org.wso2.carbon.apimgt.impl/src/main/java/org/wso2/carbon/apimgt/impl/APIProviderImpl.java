@@ -869,7 +869,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      * @throws RegistryException
      */
-    private void updateWsdl(API api) throws APIManagementException {
+    public void updateWsdlFromUrl(API api) throws APIManagementException {
 
         boolean transactionCommitted = false;
         try {
@@ -913,7 +913,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private void updateWsdlArchive(API api) throws APIManagementException {
+    public void updateWsdlFromResourceFile(API api) throws APIManagementException {
 
         boolean transactionCommitted = false;
         try {
@@ -928,8 +928,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
             GenericArtifact apiArtifact = APIUtil.createAPIArtifactContent(artifact, api);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, apiArtifact.getId());
-            if (api.getWsdlArchivePath() != null && api.getWsdlArchive() != null) {
-                String path = APIUtil.saveWSDLArchive(registry, api);
+            if (api.getWsdlResource() != null) {
+                String path = APIUtil.saveWSDLResource(registry, api);
                 registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
                 apiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl()); //reset the wsdl path
                 artifactManager.updateGenericArtifact(apiArtifact); //update the  artifact
@@ -1035,12 +1035,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             //Update WSDL in the registry
-            if (api.getWsdlUrl() != null && StringUtils.isBlank(api.getWsdlArchivePath())) {
-                updateWsdl(api);
+            if (api.getWsdlUrl() != null && api.getWsdlResource() == null) {
+                updateWsdlFromUrl(api);
             }
 
-            if (StringUtils.isNotBlank(api.getWsdlArchivePath())) {
-                updateWsdlArchive(api);
+            if (api.getWsdlResource() != null) {
+                updateWsdlFromResourceFile(api);
             }
 
             boolean updatePermissions = false;
@@ -2072,7 +2072,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (!StringUtils.isBlank(api.getAuthorizationHeader())) {
             authorizationHeader = api.getAuthorizationHeader();
         } else {
-            //Retrieves the auth configuration from tenant registry or api-manager.xml if not available 
+            //Retrieves the auth configuration from tenant registry or api-manager.xml if not available
             // in tenant registry
             authorizationHeader = APIUtil.getOAuthConfiguration(tenantId, APIConstants.AUTHORIZATION_HEADER);
         }
@@ -3057,8 +3057,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
-            if (api.getWsdlArchive() != null) {
-                APIUtil.saveWSDLArchive(registry, api);
+            if (api.getWsdlResource() != null) {
+                APIUtil.saveWSDLResource(registry, api);
             }
 
             //attaching micro-gateway labels to the API
@@ -3222,7 +3222,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             int apiId = apiMgtDAO.getAPIID(identifier, null);
             long subsCount = apiMgtDAO.getAPISubscriptionCountByAPI(identifier);
             if (subsCount > 0) {
-                //Logging as a WARN since this isn't an error scenario. 
+                //Logging as a WARN since this isn't an error scenario.
                 String message = "Cannot remove the API as active subscriptions exist.";
                 log.warn(message);
                 throw new APIManagementException(message);
@@ -3273,7 +3273,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (registry.resourceExists(wsdlArchivePath)) {
                 registry.delete(wsdlArchivePath);
             }
-            
+
             /*Remove API Definition Resource - swagger*/
             String apiDefinitionFilePath = APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
                     identifier.getApiName() + '-' + identifier.getVersion() + '-' + identifier.getProviderName();
@@ -3384,7 +3384,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             /*
             WorkflowExecutor apiStateChangeWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
-  
+
             WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
                     WorkflowConstants.WF_TYPE_AM_API_STATE);
             if(wfDTO != null && WorkflowStatus.CREATED == wfDTO.getStatus()){
@@ -4609,7 +4609,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
                 // only change the lifecycle if approved
-                // apiWFState is null when simple wf executor is used because wf state is not stored in the db. 
+                // apiWFState is null when simple wf executor is used because wf state is not stored in the db.
                 if (WorkflowStatus.APPROVED.equals(apiWFState) || apiWFState == null) {
                     targetStatus = "";
                     apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
@@ -6461,7 +6461,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         List<APIProductResource> resources = product.getProductResources();
-        
+
         // list to hold resouces which are actually in an existing api. If user has created an API product with invalid
         // API or invalid resource of a valid API, that content will be removed .validResources array will have only
         // legitimate apis
@@ -6470,7 +6470,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             API api = null;
             try {
                 api = super.getAPIbyUUID(apiProductResource.getApiId(), tenantDomain);
-                // if API does not exist, getLightweightAPIByUUID() method throws exception. 
+                // if API does not exist, getLightweightAPIByUUID() method throws exception.
             } catch (APIMgtResourceNotFoundException e) {
                 //If there is no API , this exception is thrown. We create the product without this invalid api.
                 log.warn("API does not exist for the given apiId: " + apiProductResource.getApiId());

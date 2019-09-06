@@ -36,6 +36,7 @@ import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDL11SOAPOperationExtractor;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDL11ProcessorImpl;
@@ -268,6 +269,38 @@ public class APIMWSDLReader {
     }
 
     /**
+     * Validates the input URL string and creates URL object
+     *
+     * @param url url as a String
+     * @return URL object
+     * @throws APIManagementException when error occurred while converting String url to URL object
+     */
+    public static URL getURL(String url) throws APIManagementException {
+        URL wsdlUrl;
+        try {
+            wsdlUrl = new URL(url);
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Invalid/Malformed WSDL URL : " + url, e,
+                    ExceptionCodes.INVALID_WSDL_URL_EXCEPTION);
+        }
+        return wsdlUrl;
+    }
+
+    /**
+     * Returns a WSDL11SOAPOperationExtractor for the url {@code url}. Only WSDL 1.1 is supported.
+     *
+     * @param url WSDL url
+     * @return WSDL11SOAPOperationExtractor for the provided URL
+     * @throws APIManagementException If an error occurs while determining the processor
+     */
+    public static WSDL11SOAPOperationExtractor getWSDLSOAPOperationExtractorForUrl(URL url)
+            throws APIManagementException {
+        WSDL11SOAPOperationExtractor processor = new WSDL11SOAPOperationExtractor();
+        processor.init(url);
+        return processor;
+    }
+
+    /**
 	 * Read the wsdl and clean the actual service endpoint instead of that set
 	 * the gateway endpoint.
 	 *
@@ -275,6 +308,7 @@ public class APIMWSDLReader {
 	 * @throws APIManagementException
 	 *
 	 */
+    @Deprecated
 	public OMElement readAndCleanWsdl(API api) throws APIManagementException {
 
 		try {
@@ -298,9 +332,9 @@ public class APIMWSDLReader {
 			log.error(msg);
 			throw new APIManagementException(msg, e);
 		}
-
 	}
 
+	@Deprecated
     public OMElement readAndCleanWsdl2(API api) throws APIManagementException {
 
         try {
@@ -325,6 +359,7 @@ public class APIMWSDLReader {
      * @return converted WSDL definition as byte array
      * @throws APIManagementException
      */
+    @Deprecated
     public byte[] getWSDL() throws APIManagementException {
         try {
             Definition wsdlDefinition = readWSDLFile();

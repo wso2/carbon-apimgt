@@ -32,7 +32,7 @@ public final class RestApiConstants {
     public static final String APPLICATION_ZIP = "application/zip";
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
-    
+
     public static final String REQUEST_AUTHENTICATION_SCHEME = "request_authentication_scheme";
     public static final String OAUTH2_AUTHENTICATION = "oauth2";
     public static final String BASIC_AUTHENTICATION = "basic_auth";
@@ -40,7 +40,7 @@ public final class RestApiConstants {
     public static final String USER_REST_API_SCOPES = "user_rest_api_scopes";
 
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
-    
+
     public static final String RESOURCE = "resource";
     public static final String RESOURCE_API = "API";
     public static final String RESOURCE_API_PRODUCT = "API Product";
@@ -85,7 +85,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_THROTTLING = "/throttling";
     public static final String RESOURCE_PATH_LABEL = "/labels";
     public static final String RESOURCE_PATH_THROTTLING_POLICIES = RESOURCE_PATH_THROTTLING + "/policies";
-    public static final String RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS = RESOURCE_PATH_THROTTLING 
+    public static final String RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS = RESOURCE_PATH_THROTTLING
             + "/blacklist";
     public static final String RESOURCE_PATH_THROTTLING_POLICIES_ADVANCED = RESOURCE_PATH_THROTTLING_POLICIES
             + "/advanced";
@@ -190,7 +190,7 @@ public final class RestApiConstants {
     public static final String SORT_BY_NAME = "name";
     public static final String SORT_BY_THROTTLING_TIER = "throttlingTier";
     public static final String SORT_BY_STATUS = "status";
-    
+
     //default error messages
     public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "Forbidden";
     public static final String STATUS_NOT_FOUND_MESSAGE_DEFAULT = "Not Found";
@@ -200,7 +200,7 @@ public final class RestApiConstants {
     public static final String STATUS_CONFLICT_MESSAGE_RESOURCE_ALREADY_EXISTS = "Resource Already Exists";
     public static final String STATUS_CONFLICT_MESSAGE_DEFAULT = "Conflict";
 
-    public static final String STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT = "The server encountered " 
+    public static final String STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT = "The server encountered "
             + "an internal error. Please contact administrator.";
 
     // common attributes
@@ -229,8 +229,6 @@ public final class RestApiConstants {
     public static final String SEQUENCE_CONTENT = "content";
     public static final String SEQUENCE_ARTIFACT_ID = "id";
     public static final String HTTP_METHOD = "method";
-    
-    public static final String[] SUPPORTED_METHODS = {"get", "put", "post", "delete", "patch"};
 
     public static final String RETURN_MODEL = "model";
     public static final String RETURN_MODEL_BEFORE_ADDED = "model_before_added";

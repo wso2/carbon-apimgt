@@ -88,7 +88,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
-import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -1004,7 +1003,7 @@ public class APIProviderHostObject extends ScriptableObject {
                         }
                         ResourceFile wsdlResource = new ResourceFile(wsdlFile.getInputStream(),
                                 wsdlFile.getJavaScriptFile().getContentType());
-                        api.setWsdlArchive(wsdlResource);
+                        api.setWsdlResource(wsdlResource);
                         APIFileUtil.deleteDirectory(archiveInfo.getLocation());
                     }
                 } else if (wsdlFile.getName().endsWith(APIConstants.WSDL_FILE_EXTENSION)) {

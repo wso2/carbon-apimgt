@@ -22,6 +22,7 @@ import org.apache.woden.WSDLException;
 import org.apache.woden.WSDLFactory;
 import org.apache.woden.WSDLReader;
 import org.apache.woden.WSDLSource;
+import org.apache.woden.WSDLWriter;
 import org.apache.woden.wsdl20.Description;
 import org.apache.woden.wsdl20.Endpoint;
 import org.apache.woden.wsdl20.Service;
@@ -32,11 +33,13 @@ import org.w3c.dom.Element;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.net.URL;
 import java.util.Collection;
@@ -181,6 +184,25 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
         wsdlInfo.setEndpoints(endpointsMap);
         wsdlInfo.setVersion(WSDL_VERSION_20);
         return wsdlInfo;
+    }
+
+    @Override
+    public byte[] getWSDL() throws APIMgtWSDLException {
+        WSDLWriter writer;
+        try {
+            writer = getWsdlFactoryInstance().newWSDLWriter();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            writer.writeWSDL(wsdlDescription.toElement(), byteArrayOutputStream);
+            return byteArrayOutputStream.toByteArray();
+        } catch (WSDLException e) {
+            throw new APIMgtWSDLException("Error while stringifying WSDL definition", e,
+                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
+        }
+    }
+
+    @Override
+    public byte[] updateEndpoints(API api, String environmentName, String environmentType) throws APIMgtWSDLException {
+        return new byte[0];
     }
 
     @Override

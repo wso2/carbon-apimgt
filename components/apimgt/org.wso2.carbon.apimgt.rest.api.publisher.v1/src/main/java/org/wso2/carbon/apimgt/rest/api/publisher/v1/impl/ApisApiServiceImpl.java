@@ -98,7 +98,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.Map;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
@@ -128,24 +127,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.Documentation
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.registry.api.RegistryException;
+import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLConnection;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -231,8 +217,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO createdApiDTO;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String username = RestApiUtil.getLoggedInUsername();
-            boolean isGraphQL = APIDTO.TypeEnum.GRAPHQL == body.getType();
             boolean isWSAPI = APIDTO.TypeEnum.WS == body.getType();
             boolean isSoapToRestConvertedApi = APIDTO.TypeEnum.SOAPTOREST == body.getType();
 
@@ -249,7 +233,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (StringUtils.isNotBlank(apiToAdd.getWsdlUrl())) {
                     String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(body.getWsdlUri());
                     apiProvider.saveSwaggerDefinition(apiToAdd, swaggerStr);
-                    SequenceGenerator.generateSequencesFromSwagger(swaggerStr, new Gson().toJson(body));
+                    SequenceGenerator.generateSequencesFromSwagger(swaggerStr, apiToAdd.getId());
                 } else {
                     String errorMessage =
                             "Error while generating the swagger since the wsdl url is null for: " + body.getProvider()
@@ -1665,12 +1649,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving thumbnail location of API: " + apiId;
+        } catch (URISyntaxException | FaultGatewaysException e) {
+            String errorMessage = "Error while updating thumbnail of API: " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        } catch (FaultGatewaysException e) {
-            //This is logged and process is continued because icon is optional for an API
-            log.error("Failed to update API after adding icon. ", e);
         } finally {
             IOUtils.closeQuietly(fileInputStream);
         }
@@ -1720,7 +1701,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         try {
-            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, returnContent);
+            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, returnContent);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
         }
@@ -1746,7 +1727,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         try {
-            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, true);
+            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, true);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
         }
@@ -1830,7 +1811,25 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response validateWSDLDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
                                            MessageContext messageContext) throws APIManagementException {
-        handleInvalidParams(fileInputStream, url);
+        Map validationResponseMap = validateWSDL(url, fileInputStream, fileDetail);
+
+        WSDLValidationResponseDTO validationResponseDTO =
+                (WSDLValidationResponseDTO)validationResponseMap.get(RestApiConstants.RETURN_DTO);
+        return Response.ok().entity(validationResponseDTO).build();
+    }
+
+    /**
+     * Validate the provided input parameters and returns the validation response DTO (for REST API)
+     *  and the intermediate model as a Map
+     *
+     * @param url WSDL url
+     * @param fileInputStream file data stream
+     * @param fileDetail file details
+     * @return the validation response DTO (for REST API) and the intermediate model as a Map
+     * @throws APIManagementException if error occurred during validation of the WSDL
+     */
+    private Map validateWSDL(String url, InputStream fileInputStream, Attachment fileDetail) throws APIManagementException {
+        handleInvalidParams(fileInputStream, fileDetail, url);
         WSDLValidationResponseDTO responseDTO;
         WSDLValidationResponse validationResponse = new WSDLValidationResponse();
 
@@ -1860,13 +1859,39 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         responseDTO =
                 APIMappingUtil.fromWSDLValidationResponseToDTO(validationResponse);
-        return Response.ok().entity(responseDTO).build();
+
+        Map response = new HashMap();
+        response.put(RestApiConstants.RETURN_MODEL, validationResponse);
+        response.put(RestApiConstants.RETURN_DTO, responseDTO);
+
+        return response;
     }
 
+    /**
+     * Import a WSDL file/url or an archive and create an API. The API can be a SOAP or REST depending on the
+     * provided implementationType.
+     *
+     * @param fileInputStream file input stream
+     * @param fileDetail file details
+     * @param url WSDL url
+     * @param additionalProperties API object (json) including additional properties like name, version, context
+     * @param implementationType SOAP or SOAPTOREST
+     * @return Created API's payload
+     * @throws APIManagementException when error occurred during the operation
+     */
     @Override
     public Response importWSDLDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
-                                         String additionalProperties, String implementationType, MessageContext messageContext) {
+            String additionalProperties, String implementationType, MessageContext messageContext)
+            throws APIManagementException {
         try {
+            validateWSDLAndReset(fileInputStream, fileDetail, url);
+
+            if (StringUtils.isEmpty(implementationType)) {
+                implementationType = APIDTO.TypeEnum.SOAP.toString();
+            }
+
+            boolean isSoapToRestConvertedAPI = APIDTO.TypeEnum.SOAPTOREST.toString().equals(implementationType);
+            boolean isSoapAPI = APIDTO.TypeEnum.SOAP.toString().equals(implementationType);
 
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             APIDTO additionalPropertiesAPI = null;
@@ -1876,24 +1901,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             // Minimum requirement name, version, context and endpointConfig.
             additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
             additionalPropertiesAPI.setProvider(RestApiUtil.getLoggedInUsername());
-            additionalPropertiesAPI.setType(APIDTO.TypeEnum.SOAPTOREST);
+            additionalPropertiesAPI.setType(APIDTO.TypeEnum.fromValue(implementationType));
             API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
-            //adding the api
-            apiProvider.addAPI(apiToAdd);
 
-            boolean isSoapToRestConvertedApi = APIDTO.TypeEnum.SOAPTOREST.equals(implementationType);
-            // TODO: First-cut only support URL SOAPToREST remove this todo if it's not
-            if (isSoapToRestConvertedApi && StringUtils.isNotBlank(url)) {
-                if (StringUtils.isNotBlank(url)) {
-                    String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(url);
-                    apiProvider.saveSwagger20Definition(apiToAdd.getId(), swaggerStr);
-                    SequenceGenerator.generateSequencesFromSwagger(swaggerStr, new Gson().toJson(additionalPropertiesAPI));
-                } else {
-                    String errorMessage =
-                            "Error while generating the swagger since the wsdl url is null for: " + apiProvider;
-                    RestApiUtil.handleInternalServerError(errorMessage, log);
-                }
+            if (isSoapAPI) {
+                importSOAPAPI(fileInputStream, fileDetail, url, apiToAdd);
+            } else if (isSoapToRestConvertedAPI) {
+                importSOAPToRESTAPI(fileInputStream, fileDetail, url, apiToAdd);
             }
+
             APIIdentifier createdApiId = apiToAdd.getId();
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPI(createdApiId);
@@ -1901,22 +1917,168 @@ public class ApisApiServiceImpl implements ApisApiService {
             //This URI used to set the location header of the POST response
             createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
             return Response.created(createdApiUri).entity(createdApiDTO).build();
-        } catch (APIManagementException | IOException | URISyntaxException e) {
-            return Response.serverError().entity(e.getMessage()).build();
+        } catch (IOException | URISyntaxException e) {
+            RestApiUtil.handleInternalServerError("Error occurred while importing WSDL", e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Validates the provided WSDL and reset the streams as required
+     *
+     * @param fileInputStream file input stream
+     * @param fileDetail file details
+     * @param url WSDL url
+     * @throws APIManagementException when error occurred during the operation
+     */
+    private void validateWSDLAndReset(InputStream fileInputStream, Attachment fileDetail, String url)
+            throws APIManagementException {
+        if (!fileInputStream.markSupported()) {
+            log.warn("Marking is not supported in 'fileInputStream' InputStream type: "
+                    + fileInputStream.getClass() + ". Skipping validating WSDL to avoid re-reading from the " +
+                    "input stream.");
+        } else {
+            Map validationResponseMap = validateWSDL(url, fileInputStream, fileDetail);
+            WSDLValidationResponse validationResponse =
+                    (WSDLValidationResponse)validationResponseMap.get(RestApiConstants.RETURN_MODEL);
+
+            if (validationResponse.getWsdlInfo() == null) {
+                // Validation failure
+                RestApiUtil.handleBadRequest(validationResponse.getError(), log);
+            }
+
+            // For uploading the WSDL below will require re-reading from the input stream hence resetting
+            try {
+                fileInputStream.reset();
+            } catch (IOException e) {
+                throw new APIManagementException("Error occurred while trying to reset the content stream of the " +
+                        "WSDL", e);
+            }
         }
     }
 
-    @Override
-    public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+    /**
+     * Import an API from WSDL as a SOAP API
+     *
+     * @param fileInputStream file data as input stream
+     * @param fileDetail file details
+     * @param url URL of the WSDL
+     * @param apiToAdd API object to be added to the system (which is not added yet)
+     */
+    private void importSOAPAPI(InputStream fileInputStream, Attachment fileDetail, String url, API apiToAdd) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+
+            if (StringUtils.isNotBlank(url)) {
+                apiToAdd.setWsdlUrl(url);
+            } else if (fileDetail != null && fileInputStream != null) {
+                ResourceFile wsdlResource = new ResourceFile(fileInputStream,
+                        fileDetail.getContentType().toString());
+                apiToAdd.setWsdlResource(wsdlResource);
+            }
+
+            //adding the api
+            apiProvider.addAPI(apiToAdd);
+
+            //add the generated swagger definition to SOAP
+            APIDefinition oasParser = new OAS3Parser();
+            String apiDefinition = oasParser.generateAPIDefinition(apiToAdd);
+            apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while importing WSDL to create a SOAP API", e, log);
+        }
     }
 
+    /**
+     * Import an API from WSDL as a SOAP-to-REST API
+     *
+     * @param fileInputStream file data as input stream
+     * @param fileDetail file details
+     * @param url URL of the WSDL
+     * @param apiToAdd API object to be added to the system (which is not added yet)
+     */
+    private void importSOAPToRESTAPI(InputStream fileInputStream, Attachment fileDetail, String url, API apiToAdd) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            //adding the api
+            apiProvider.addAPI(apiToAdd);
+            String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(url);
+            apiProvider.saveSwagger20Definition(apiToAdd.getId(), swaggerStr);
+            SequenceGenerator.generateSequencesFromSwagger(swaggerStr, apiToAdd.getId());
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while importing WSDL to create a SOAP-to-REST API",
+                    e, log);
+        }
+    }
+
+    /**
+     * Retrieve the WSDL of an API
+     *
+     * @param apiId UUID of the API
+     * @param ifNoneMatch If-None-Match header value
+     * @return the WSDL of the API (can be a file or zip archive)
+     * @throws APIManagementException when error occurred while trying to retrieve the WSDL
+     */
     @Override
-    public Response apisApiIdWsdlPut(String apiId, InputStream fileInputStream, Attachment fileDetail,
-            String ifMatch, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+    public Response getWSDLOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext)
+            throws APIManagementException {
+        String errorMessageCommon = "Error while retrieving wsdl of API: " + apiId;
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            Resource getWSDLResponse = apiProvider.getWsdl(apiIdentifier);
+            return Response.ok(getWSDLResponse.getContentStream(), getWSDLResponse.getMediaType()).build();
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
+            // to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while retrieving wsdl of API: "
+                                        + apiId, e, log);
+            } else {
+                throw e;
+            }
+        } catch (RegistryException e) {
+            RestApiUtil.handleInternalServerError(errorMessageCommon, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Update the WSDL of an API
+     *
+     * @param apiId UUID of the API
+     * @param fileInputStream file data as input stream
+     * @param fileDetail file details
+     * @param url URL of the WSDL
+     * @return 200 OK response if the operation is successful. 400 if the provided inputs are invalid. 500 if a server
+     *  error occurred.
+     * @throws APIManagementException when error occurred while trying to retrieve the WSDL
+     */
+    @Override
+    public Response updateWSDLOfAPI(String apiId, InputStream fileInputStream, Attachment fileDetail, String url,
+           String ifMatch, MessageContext messageContext) throws APIManagementException {
+
+        validateWSDLAndReset(fileInputStream, fileDetail, url);
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        if (StringUtils.isNotBlank(url)) {
+            api.setWsdlUrl(url);
+            api.setWsdlResource(null);
+            apiProvider.updateWsdlFromUrl(api);
+        } else {
+            ResourceFile wsdlResource = new ResourceFile(fileInputStream,
+                    fileDetail.getContentType().toString());
+            api.setWsdlResource(wsdlResource);
+            api.setWsdlUrl(null);
+            apiProvider.updateWsdlFromResourceFile(api);
+        }
+        return Response.ok().build();
     }
 
     @Override
@@ -2228,7 +2390,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     * Validate the provided OpenAPI definition (via file or url) and return the validation response DTO
+     * Validate the provided OpenAPI definition (via file or url) and return a Map with the validation response
+     * information.
      *
      * @param url OpenAPI definition url
      * @param fileInputStream file as input stream
@@ -2237,9 +2400,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      *  of type OpenAPIDefinitionValidationResponseDTO for the REST API. A value with key 'model' will have the
      *  validation response of type APIDefinitionValidationResponse coming from the impl level.
      */
-    private Map validateOpenAPIDefinition(String url, InputStream fileInputStream, Boolean returnContent)
-            throws APIManagementException {
-        handleInvalidParams(fileInputStream, url);
+    private Map validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
+           Boolean returnContent) throws APIManagementException {
+        handleInvalidParams(fileInputStream, fileDetail, url);
         OpenAPIDefinitionValidationResponseDTO responseDTO;
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         if (url != null) {
@@ -2267,14 +2430,16 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param fileInputStream file content stream
      * @param url             URL of the definition
      */
-    private void handleInvalidParams(InputStream fileInputStream, String url) {
+    private void handleInvalidParams(InputStream fileInputStream, Attachment fileDetail, String url) {
 
         String msg = "";
-        if (url == null && fileInputStream == null) {
+        boolean isFileSpecified = fileInputStream != null && fileDetail != null &&
+                fileDetail.getContentDisposition() != null && fileDetail.getContentDisposition().getFilename() != null;
+        if (url == null && !isFileSpecified) {
             msg = "Either 'file' or 'url' should be specified";
         }
 
-        if (fileInputStream != null && url != null) {
+        if (isFileSpecified && url != null) {
             msg = "Only one of 'file' and 'url' should be specified";
         }
 

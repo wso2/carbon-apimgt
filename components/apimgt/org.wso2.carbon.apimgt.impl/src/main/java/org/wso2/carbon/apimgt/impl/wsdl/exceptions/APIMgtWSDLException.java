@@ -36,6 +36,10 @@ public class APIMgtWSDLException extends APIManagementException {
         super(msg, errorHandler);
     }
 
+    public APIMgtWSDLException(String msg, Throwable e, ErrorHandler errorHandler) {
+        super(msg, e, errorHandler);
+    }
+
     public APIMgtWSDLException(Throwable throwable) {
         super(throwable);
     }

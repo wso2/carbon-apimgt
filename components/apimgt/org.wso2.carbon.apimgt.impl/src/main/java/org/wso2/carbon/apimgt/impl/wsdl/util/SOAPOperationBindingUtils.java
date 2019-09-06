@@ -38,6 +38,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDL11ProcessorImpl;
@@ -58,6 +59,8 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -82,10 +85,8 @@ public class SOAPOperationBindingUtils {
      * @throws APIManagementException if an error occurs when getting soap operations from the wsdl
      */
     public static String getSoapOperationMapping(String url) throws APIManagementException {
-        APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
-        byte[] wsdlContent = wsdlReader.getWSDL();
-        WSDL11SOAPOperationExtractor processor = new WSDL11SOAPOperationExtractor(wsdlReader);
-        processor.init(wsdlContent);
+        URL wsdlUrl = APIMWSDLReader.getURL(url);
+        WSDL11SOAPOperationExtractor processor = APIMWSDLReader.getWSDLSOAPOperationExtractorForUrl(wsdlUrl);
 
         Set<WSDLSOAPOperation> operations;
         Map<String, ModelImpl> paramModelMap;

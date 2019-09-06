@@ -1546,9 +1546,9 @@ paths:
           name: implementationType
           type: string
           enum:
-            - soap
-            - httpBinding
-          default: soap
+            - SOAPTOREST
+            - SOAP
+          default: SOAP
           description: |
             If 'SOAP' is specified, the API will be created with only one resource 'POST /*' which is to be used for SOAP
             operations.
@@ -1670,7 +1670,7 @@ paths:
   # The "Validate API Definition" utility API
   ######################################################
 
-  '/apis/validate-openapi':
+  /apis/validate-openapi:
     post:
       consumes:
         - multipart/form-data
@@ -1788,7 +1788,7 @@ paths:
 # The "Validate GRAPH_QL API Definition" utility API
 ######################################################
 
-  '/apis/validate-graphql-schema':
+  /apis/validate-graphql-schema:
     post:
       consumes:
       - multipart/form-data
@@ -2898,10 +2898,12 @@ paths:
 #-----------------------------------------------------
     get:
       produces:
+        - application/json
         - application/octet-stream
       security:
         - OAuth2Security:
           - apim:api_view
+      operationId: getWSDLOfAPI
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl"
       x-wso2-request: |
         GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl
@@ -2956,6 +2958,7 @@ paths:
       security:
         - OAuth2Security:
           - apim:api_create
+      operationId: updateWSDLOfAPI
       x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F inlineContent=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/wsdl\""
       x-wso2-request: |
        PUT https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/wsdl
@@ -2979,6 +2982,11 @@ paths:
           description: WSDL file or archive to upload
           type: file
           required: true
+        - in: formData
+          name: url
+          description: WSDL Definition url
+          type: string
+          required: false
         - $ref: '#/parameters/If-Match'
       tags:
         - APIs
@@ -6174,6 +6182,7 @@ definitions:
           - HTTP
           - WS
           - SOAPTOREST
+          - SOAP
           - GRAPHQL
         example: HTTP
         default: HTTP

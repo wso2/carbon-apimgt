@@ -313,7 +313,7 @@ public interface APIManager {
     Application getApplicationByUUID(String uuid) throws APIManagementException;
 
     /**
-     * Returns the corresponding application given the uuid. The returned application will not contain key information 
+     * Returns the corresponding application given the uuid. The returned application will not contain key information
      *
      * @param uuid uuid of the Application
      * @return it will return Application corresponds to the uuid provided.
@@ -485,7 +485,7 @@ public interface APIManager {
      * @return API result
      * @throws APIManagementException if search is failed
      */
-    Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain,int start,int end, 
+    Map<String,Object> searchPaginatedAPIs(String searchQuery, String tenantDomain,int start,int end,
                                            boolean limitAttributes) throws APIManagementException;
 
 
@@ -506,7 +506,7 @@ public interface APIManager {
      * @throws APIManagementException
      */
     String getThumbnailLastUpdatedTime(APIIdentifier apiIdentifier) throws APIManagementException;
-    
+
     /**
      * Returns list of global mediation policies
      *
@@ -622,6 +622,7 @@ public interface APIManager {
      * @return list of wsdl objects or null
      * @throws APIManagementException If unable to return satisfied wsdl object list
      */
+    @Deprecated
     List<Wsdl> getAllWsdls() throws APIManagementException;
 
     /**
@@ -631,6 +632,7 @@ public interface APIManager {
      * @return A Wsdl object related to the given identifier or null
      * @throws APIManagementException If failed to get specified wsdl
      */
+    @Deprecated
     Wsdl getWsdlById(String wsdlId) throws APIManagementException;
 
     /**
@@ -640,6 +642,7 @@ public interface APIManager {
      * @return Registry resource matches given identifier or null
      * @throws APIManagementException If fails to get the resource matching given identifier
      */
+    @Deprecated
     Resource getWsdlResourceFromUuid(String wsdlId) throws APIManagementException;
 
     /**
@@ -649,15 +652,8 @@ public interface APIManager {
      * @return true if deleted successfully
      * @throws APIManagementException If failed to delete wsdl
      */
+    @Deprecated
     boolean deleteWsdl(String wsdlId) throws APIManagementException;
-
-    /**
-     * Returns the wsdl content in registry specified by the wsdl name
-     *
-     * @param apiId api identifier of the API
-     * @return wsdl content matching name if exist else null
-     */
-    String getWsdl(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * Create a wsdl in the path specified.
@@ -665,6 +661,8 @@ public interface APIManager {
      * @param resourcePath   Registry path of the resource
      * @param wsdlDefinition wsdl content
      */
+    @Deprecated
+    // Only used in old CXF REST APIS. Remove this once old CXF REST APIs are removed.
     void uploadWsdl(String resourcePath, String wsdlDefinition) throws APIManagementException;
 
     /**
@@ -673,7 +671,17 @@ public interface APIManager {
      * @param resourcePath   Registry path of the resource
      * @param wsdlDefinition wsdl content
      */
+    @Deprecated
     void updateWsdl(String resourcePath, String wsdlDefinition) throws APIManagementException;
+
+    /**
+     * Returns the wsdl content in registry specified by the wsdl name. If it is a single WSDL, the content will be
+     * returned as String or if it is an archive, an InputStream pointed to the content will be returned.
+     *
+     * @param apiId api identifier of the API
+     * @return wsdl content matching name if exist else throws an APIManagementException
+     */
+    Resource getWsdl(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * Returns the graphql schema content in registry specified by the schema name
@@ -771,11 +779,11 @@ public interface APIManager {
      * @throws APIManagementException if failed to get Documentation
      */
     Documentation getProductDocumentation(String docId, String requestedTenantDomain) throws APIManagementException;
-    
+
     /**
      * Get open api definition for the product
      * @param APIProduct product
-     * @return openapidoc 
+     * @return openapidoc
      * @throws APIManagementException
      */
     String getAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;

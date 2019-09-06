@@ -68,6 +68,7 @@ import javax.wsdl.extensions.soap.SOAPOperation;
 import javax.wsdl.extensions.soap12.SOAP12Binding;
 import javax.wsdl.xml.WSDLReader;
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -84,7 +85,7 @@ import static org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants.SIMPLE_T
 /**
  * Class that reads wsdl soap operations and maps with the types.
  */
-public class WSDL11SOAPOperationExtractor {
+public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
     private static final Logger log = LoggerFactory.getLogger(WSDL11SOAPOperationExtractor.class);
 
     private String[] primitiveTypes = { "string", "byte", "short", "int", "long", "float", "double", "boolean" };
@@ -106,8 +107,6 @@ public class WSDL11SOAPOperationExtractor {
     private List<Node> schemaNodeList = new ArrayList<>();
     private List<WSDLParamDefinition> wsdlParamDefinitions = new ArrayList<>();
     private Map<String, ModelImpl> parameterModelMap = new HashMap<>();
-
-    private static volatile APIMWSDLReader wsdlReader;
     private Property currentProperty;
 
     protected Map<String, Definition> pathToDefinitionMap;
@@ -116,92 +115,89 @@ public class WSDL11SOAPOperationExtractor {
     }
 
     public WSDL11SOAPOperationExtractor(APIMWSDLReader wsdlReader) {
-        WSDL11SOAPOperationExtractor.wsdlReader = wsdlReader;
+        //WSDL11SOAPOperationExtractor.wsdlReader = wsdlReader;
     }
 
-    public boolean init(byte[] wsdlContent) throws APIMgtWSDLException {
-        boolean canProcess;
-        try {
-            wsdlDefinition = wsdlReader.getWSDLDefinitionFromByteContent(wsdlContent, true);
-            canProcess = true;
-            targetNamespace = wsdlDefinition.getTargetNamespace();
-            Types types = wsdlDefinition.getTypes();
-            if (types != null) {
-                typeList = types.getExtensibilityElements();
-            }
-            if (typeList != null) {
-                for (Object ext : typeList) {
-                    if (ext instanceof Schema) {
-                        Schema schema = (Schema) ext;
-                        Map importedSchemas = schema.getImports();
-                        Element schemaElement = schema.getElement();
-                        NodeList schemaNodes = schemaElement.getChildNodes();
-                        schemaNodeList.addAll(SOAPOperationBindingUtils.list(schemaNodes));
-                        //gets types from imported schemas from the parent wsdl. Nested schemas will not be imported.
-                        if (importedSchemas != null) {
-                            for (Object importedSchemaObj : importedSchemas.keySet()) {
-                                String schemaUrl = (String) importedSchemaObj;
-                                if (importedSchemas.get(schemaUrl) != null) {
-                                    Vector vector = (Vector) importedSchemas.get(schemaUrl);
-                                    for (Object schemaVector : vector) {
-                                        if (schemaVector instanceof SchemaImport) {
-                                            Schema referencedSchema = ((SchemaImport) schemaVector)
-                                                    .getReferencedSchema();
-                                            if (referencedSchema != null && referencedSchema.getElement() != null) {
-                                                if (referencedSchema.getElement().hasChildNodes()) {
-                                                    schemaNodeList.addAll(SOAPOperationBindingUtils
-                                                            .list(referencedSchema.getElement().getChildNodes()));
-                                                } else {
-                                                    log.warn("The referenced schema : " + schemaUrl
-                                                            + " doesn't have any defined types");
-                                                }
+    @Override
+    public boolean init(URL url) throws APIMgtWSDLException {
+        super.init(url);
+
+        wsdlDefinition = getWSDLDefinition();
+        boolean canProcess = true;
+        targetNamespace = wsdlDefinition.getTargetNamespace();
+        Types types = wsdlDefinition.getTypes();
+        if (types != null) {
+            typeList = types.getExtensibilityElements();
+        }
+        if (typeList != null) {
+            for (Object ext : typeList) {
+                if (ext instanceof Schema) {
+                    Schema schema = (Schema) ext;
+                    Map importedSchemas = schema.getImports();
+                    Element schemaElement = schema.getElement();
+                    NodeList schemaNodes = schemaElement.getChildNodes();
+                    schemaNodeList.addAll(SOAPOperationBindingUtils.list(schemaNodes));
+                    //gets types from imported schemas from the parent wsdl. Nested schemas will not be imported.
+                    if (importedSchemas != null) {
+                        for (Object importedSchemaObj : importedSchemas.keySet()) {
+                            String schemaUrl = (String) importedSchemaObj;
+                            if (importedSchemas.get(schemaUrl) != null) {
+                                Vector vector = (Vector) importedSchemas.get(schemaUrl);
+                                for (Object schemaVector : vector) {
+                                    if (schemaVector instanceof SchemaImport) {
+                                        Schema referencedSchema = ((SchemaImport) schemaVector)
+                                                .getReferencedSchema();
+                                        if (referencedSchema != null && referencedSchema.getElement() != null) {
+                                            if (referencedSchema.getElement().hasChildNodes()) {
+                                                schemaNodeList.addAll(SOAPOperationBindingUtils
+                                                        .list(referencedSchema.getElement().getChildNodes()));
                                             } else {
-                                                log.warn("Cannot access referenced schema for the schema defined at: "
-                                                        + schemaUrl);
+                                                log.warn("The referenced schema : " + schemaUrl
+                                                        + " doesn't have any defined types");
                                             }
+                                        } else {
+                                            log.warn("Cannot access referenced schema for the schema defined at: "
+                                                    + schemaUrl);
                                         }
                                     }
                                 }
                             }
-                        } else {
-                            log.info("No any imported schemas found in the given wsdl.");
                         }
+                    } else {
+                        log.info("No any imported schemas found in the given wsdl.");
+                    }
 
-                        if (log.isDebugEnabled()) {
-                            Gson gson = new GsonBuilder().setExclusionStrategies(new SwaggerFieldsExcludeStrategy())
-                                    .create();
-                            log.debug("swagger definition model map from the wsdl: " + gson.toJson(parameterModelMap));
-                        }
-                        if (schemaNodeList == null) {
-                            log.warn("No schemas found in the type element for target namespace:" + schema
-                                    .getDocumentBaseURI());
-                        }
+                    if (log.isDebugEnabled()) {
+                        Gson gson = new GsonBuilder().setExclusionStrategies(new SwaggerFieldsExcludeStrategy())
+                                .create();
+                        log.debug("swagger definition model map from the wsdl: " + gson.toJson(parameterModelMap));
+                    }
+                    if (schemaNodeList == null) {
+                        log.warn("No schemas found in the type element for target namespace:" + schema
+                                .getDocumentBaseURI());
                     }
                 }
-                if (schemaNodeList != null) {
-                    for (Node node : schemaNodeList) {
-                        WSDLParamDefinition wsdlParamDefinition = new WSDLParamDefinition();
-                        ModelImpl model = new ModelImpl();
-                        Property currentProperty = null;
-                        traverseTypeElement(node, null, model, currentProperty);
-                        if (StringUtils.isNotBlank(model.getName())) {
-                            parameterModelMap.put(model.getName(), model);
-                        }
-                        if (wsdlParamDefinition.getDefinitionName() != null) {
-                            wsdlParamDefinitions.add(wsdlParamDefinition);
-                        }
+            }
+            if (schemaNodeList != null) {
+                for (Node node : schemaNodeList) {
+                    WSDLParamDefinition wsdlParamDefinition = new WSDLParamDefinition();
+                    ModelImpl model = new ModelImpl();
+                    Property currentProperty = null;
+                    traverseTypeElement(node, null, model, currentProperty);
+                    if (StringUtils.isNotBlank(model.getName())) {
+                        parameterModelMap.put(model.getName(), model);
                     }
-                } else {
-                    log.info("No schema is defined in the wsdl document");
+                    if (wsdlParamDefinition.getDefinitionName() != null) {
+                        wsdlParamDefinitions.add(wsdlParamDefinition);
+                    }
                 }
+            } else {
+                log.info("No schema is defined in the wsdl document");
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Successfully initialized an instance of " + this.getClass().getSimpleName()
-                        + " with a single WSDL.");
-            }
-        } catch (APIManagementException e) {
-            log.error("Cannot process the WSDL by " + this.getClass().getName(), e);
-            canProcess = false;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully initialized an instance of " + this.getClass().getSimpleName()
+                    + " with a single WSDL.");
         }
         return canProcess;
     }

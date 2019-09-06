@@ -5121,7 +5121,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     private byte[] getUpdatedWSDLByEnvironment(String wsdlResourcePath, byte[] wsdlContent, String environmentName,
-            String environmentType, String apiName, String apiVersion, String apiProvider) throws APIManagementException {
+            String environmentType, String apiName, String apiVersion, String apiProvider)
+            throws APIManagementException {
         APIMWSDLReader apimwsdlReader = new APIMWSDLReader(wsdlResourcePath);
         Definition definition = apimwsdlReader.getWSDLDefinitionFromByteContent(wsdlContent, false);
 

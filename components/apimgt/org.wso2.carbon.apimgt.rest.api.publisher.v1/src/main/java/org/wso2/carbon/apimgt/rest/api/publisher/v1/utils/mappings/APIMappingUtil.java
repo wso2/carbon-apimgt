@@ -1517,15 +1517,17 @@ public class APIMappingUtil {
     private static List<APIOperationsDTO> getDefaultOperationsList(String apiType) {
 
         List<APIOperationsDTO> operationsDTOs = new ArrayList<>();
-        String[] suportMethods = null;
+        String[] supportedMethods = null;
 
         if (apiType.equals(APIConstants.GRAPHQL_API)) {
-            suportMethods = APIConstants.GRAPHQL_SUPPORTED_METHODS;
+            supportedMethods = APIConstants.GRAPHQL_SUPPORTED_METHODS;
+        } else if (apiType.equals(APIConstants.API_TYPE_SOAP)) {
+            supportedMethods = APIConstants.SOAP_DEFAULT_METHODS;
         } else {
-            suportMethods = RestApiConstants.SUPPORTED_METHODS;
+            supportedMethods = APIConstants.HTTP_DEFAULT_METHODS;
         }
 
-        for (String verb : suportMethods) {
+        for (String verb : supportedMethods) {
             APIOperationsDTO operationsDTO = new APIOperationsDTO();
             operationsDTO.setTarget("/*");
             operationsDTO.setVerb(verb);

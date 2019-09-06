@@ -89,7 +89,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String getWsdl(APIIdentifier apiId) throws APIManagementException {
+    public Resource getWsdl(APIIdentifier apiId) throws APIManagementException {
         checkAccessControlPermission(apiId);
         return super.getWsdl(apiId);
     }
@@ -258,7 +258,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         checkAccessControlPermission(apiId);
         super.updateDocumentation(apiId, documentation);
     }
-   
+
     @Override
     public void addDocumentationContent(API api, String documentationName,
                                         String text) throws APIManagementException {
@@ -297,7 +297,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public void checkCreatePermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_CREATE);
     }
-    
+
     public void checkManageTiersPermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.MANAGE_TIERS);
     }
