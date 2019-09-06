@@ -280,12 +280,16 @@ public class UserAwareAPIProviderTest {
     /**
      * This method checks the behaviour of getWsdl method when there is no wsdl for the relevant API.
      *
-     * @throws APIManagementException API Management Exception.
      */
     @Test
-    public void testGetWsdl() throws APIManagementException {
-        Assert.assertNull("Non-existing WSDL file was retrieved successfully",
-                userAwareAPIProvider.getWsdl(apiIdentifier));
+    public void testGetWsdl() {
+        try {
+            userAwareAPIProvider.getWsdl(apiIdentifier);
+            Assert.fail("Non-existing WSDL file was retrieved successfully");
+        } catch (APIManagementException e) {
+            Assert.assertTrue("Required error message is not present in exception error log",
+                    e.getMessage().contains("No WSDL found"));
+        }
     }
 
     /**

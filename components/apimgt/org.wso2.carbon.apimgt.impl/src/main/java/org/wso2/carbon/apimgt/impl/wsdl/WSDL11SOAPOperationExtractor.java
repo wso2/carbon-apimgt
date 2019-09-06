@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLOperation;
@@ -46,7 +45,6 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLParamDefinition;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLSOAPOperation;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SwaggerFieldsExcludeStrategy;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import javax.wsdl.extensions.schema.SchemaImport;
@@ -61,17 +59,13 @@ import javax.wsdl.Operation;
 import javax.wsdl.Output;
 import javax.wsdl.Part;
 import javax.wsdl.Types;
-import javax.wsdl.WSDLException;
 import javax.wsdl.extensions.schema.Schema;
 import javax.wsdl.extensions.soap.SOAPBinding;
 import javax.wsdl.extensions.soap.SOAPOperation;
 import javax.wsdl.extensions.soap12.SOAP12Binding;
-import javax.wsdl.xml.WSDLReader;
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -121,7 +115,21 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
     @Override
     public boolean init(URL url) throws APIMgtWSDLException {
         super.init(url);
+        return initModels();
+    }
 
+    @Override
+    public boolean init(byte[] wsdlContent) throws APIMgtWSDLException {
+        super.init(wsdlContent);
+        return initModels();
+    }
+
+    /**
+     * Initiallize SOAP to REST Operations
+     *
+     * @return true if extracting operations was successful
+     */
+    private boolean initModels() {
         wsdlDefinition = getWSDLDefinition();
         boolean canProcess = true;
         targetNamespace = wsdlDefinition.getTargetNamespace();

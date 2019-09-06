@@ -667,16 +667,8 @@ public class AbstractAPIManagerTestCase {
         resource.setContent(wsdlContent);
         InputStream inputStream = new ArrayInputStream();
         Mockito.when(resourceMock.getContentStream()).thenReturn(inputStream);
-        Assert.assertTrue(abstractAPIManager.getWsdl(identifier).contains(wsdlContent));
+        Assert.assertTrue(((String)abstractAPIManager.getWsdl(identifier).getContent()).contains(wsdlContent));
         PowerMockito.mockStatic(IOUtils.class);
-        PowerMockito.when(IOUtils.toString((InputStream) Mockito.any(), Mockito.anyString()))
-                .thenThrow(IOException.class);
-        try {
-            abstractAPIManager.getWsdl(identifier).contains(wsdlContent);
-            Assert.fail("Exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Error occurred while getting the content of wsdl"));
-        }
     }
 
     @Test
@@ -1598,7 +1590,7 @@ public class AbstractAPIManagerTestCase {
             Object[] args = invocation.getArguments();
             return (String) args[0];
         });
-        
+
         try {
             abstractAPIManager.searchPaginatedAPIs("search", API_PROVIDER, 0, 5, false);
             Assert.fail("Exception not thrown for error scenario");
