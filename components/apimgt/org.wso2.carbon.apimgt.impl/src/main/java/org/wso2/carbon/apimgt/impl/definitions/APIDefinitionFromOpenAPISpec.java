@@ -18,10 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.parser.SwaggerParser;
-import io.swagger.parser.util.SwaggerDeserializationResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
@@ -33,10 +29,8 @@ import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -46,15 +40,10 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 
-import java.io.DataInput;
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -71,13 +60,13 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
     /**
      * This method returns URI templates according to the given swagger file
      *
-     * @param api                 API
+     * @param swaggerData                 API
      * @param resourceConfigsJSON swaggerJSON
      * @return URI Templates
      * @throws APIManagementException
      */
     @Override
-    public Set<URITemplate> getURITemplates(API api, String resourceConfigsJSON) throws APIManagementException {
+    public Set<URITemplate> getURITemplates(SwaggerData swaggerData, String resourceConfigsJSON) throws APIManagementException {
         JSONParser parser = new JSONParser();
         JSONObject swagger;
         Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
@@ -97,7 +86,7 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                     // See field types supported by "Path Item Object" in swagger spec.
                     if (path.containsKey("$ref")) {
                         log.info("Reference " + uriTempVal + " path object was ignored when generating URL template " +
-                                "for api \"" + api.getId().getApiName() + '\"');
+                                "for api \"" + swaggerData.getTitle() + '\"');
                         continue;
                     }
 
@@ -216,158 +205,48 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         return scopeList;
     }
 
-    /**
-     * This method saves api definition json in the registry
-     *
-     * @param api               API to be saved
-     * @param apiDefinitionJSON API definition as JSON string
-     * @param registry          user registry
-     * @throws APIManagementException
-     */
-    public void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry) throws APIManagementException {
-        String apiName = api.getId().getApiName();
-        String apiVersion = api.getId().getVersion();
-        String apiProviderName = api.getId().getProviderName();
-
-        try {
-            String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiName, apiVersion, apiProviderName);
-            resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
-            Resource resource;
-            if (!registry.resourceExists(resourcePath)) {
-                resource = registry.newResource();
-            } else {
-                resource = registry.get(resourcePath);
-            }
-            resource.setContent(apiDefinitionJSON);
-            resource.setMediaType("application/json");
-            registry.put(resourcePath, resource);
-
-            String[] visibleRoles = null;
-            if (api.getVisibleRoles() != null) {
-                visibleRoles = api.getVisibleRoles().split(",");
-            }
-
-            //Need to set anonymous if the visibility is public
-            APIUtil.clearResourcePermissions(resourcePath, api.getId(), ((UserRegistry) registry).getTenantId());
-            APIUtil.setResourcePermissions(apiProviderName, api.getVisibility(), visibleRoles, resourcePath);
-
-        } catch (RegistryException e) {
-            handleException("Error while adding Swagger Definition for " + apiName + '-' + apiVersion, e);
-        }
-    }
-
-    @Override
-    public void saveAPIDefinition(APIProduct apiProduct, String apiDefinitionJSON, Registry registry) throws APIManagementException {
-        String apiName = apiProduct.getId().getName();
-        String apiVersion = apiProduct.getId().getVersion();
-        String apiProviderName = apiProduct.getId().getProviderName();
-
-        try {
-            String resourcePath = APIUtil.getAPIProductOpenAPIDefinitionFilePath(apiName, apiVersion, apiProviderName);
-            resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
-            Resource resource;
-            if (!registry.resourceExists(resourcePath)) {
-                resource = registry.newResource();
-            } else {
-                resource = registry.get(resourcePath);
-            }
-            resource.setContent(apiDefinitionJSON);
-            resource.setMediaType("application/json");
-            registry.put(resourcePath, resource);
-
-            String[] visibleRoles = null;
-            if (apiProduct.getVisibleRoles() != null) {
-                visibleRoles = apiProduct.getVisibleRoles().split(",");
-            }
-
-            //Need to set anonymous if the visibility is public
-            APIUtil.clearResourcePermissions(resourcePath, apiProduct.getId(), ((UserRegistry) registry).getTenantId());
-            APIUtil.setResourcePermissions(apiProviderName, apiProduct.getVisibility(), visibleRoles, resourcePath);
-
-        } catch (RegistryException e) {
-            handleException("Error while adding Swagger Definition for " + apiName + '-' + apiVersion, e);
-        }
-    }
-
-
-    /**
-     * This method returns api definition json for given api
-     *
-     * @param apiIdentifier api identifier
-     * @param registry      user registry
-     * @return api definition json as json string
-     * @throws APIManagementException
-     */
-    public String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException {
-        String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getApiName(),
-                apiIdentifier.getVersion(), apiIdentifier.getProviderName());
-
-        JSONParser parser = new JSONParser();
-        String apiDocContent = null;
-        try {
-            if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
-                Resource apiDocResource = registry.get(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
-                apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
-                parser.parse(apiDocContent);
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Resource " + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME + " not found at " + resourcePath);
-                }
-            }
-        } catch (RegistryException e) {
-            handleException(
-                    "Error while retrieving OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getApiName() + '-'
-                            + apiIdentifier.getVersion(), e);
-        } catch (ParseException e) {
-            handleException(
-                    "Error while parsing OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getApiName() + '-'
-                            + apiIdentifier.getVersion() + " in " + resourcePath, e);
-        }
-        return apiDocContent;
-    }
 
     /**
      * This method generates swagger 2.0 definition to the given api
      *
-     * @param api api
+     * @param swaggerData api
      * @return swagger v2.0 doc as string
      * @throws APIManagementException
      */
     @Override
     @SuppressWarnings("unchecked")
-    public String generateAPIDefinition(API api) throws APIManagementException {
-        APIIdentifier identifier = api.getId();
+    public String generateAPIDefinition(SwaggerData swaggerData) throws APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
         Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
         String endpoints = environment.getApiGatewayEndpoint();
         String[] endpointsSet = endpoints.split(",");
-        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        Set<SwaggerData.Resource> resources = swaggerData.getResources();
 
         if (endpointsSet.length < 1) {
             throw new APIManagementException(
-                    "Error in creating JSON representation of the API" + identifier.getApiName());
+                    "Error in creating JSON representation of the API" + swaggerData.getTitle());
         }
 
         JSONObject swaggerObject = new JSONObject();
 
         //Create info object
         JSONObject infoObject = new JSONObject();
-        infoObject.put(APIConstants.SWAGGER_TITLE, identifier.getApiName());
-        if (api.getDescription() != null) {
-            infoObject.put(APIConstants.SWAGGER_DESCRIPTION, api.getDescription());
+        infoObject.put(APIConstants.SWAGGER_TITLE, swaggerData.getTitle());
+        if (swaggerData.getDescription() != null) {
+            infoObject.put(APIConstants.SWAGGER_DESCRIPTION, swaggerData.getDescription());
         }
 
         //Create contact object and map business owner info
         JSONObject contactObject = new JSONObject();
-        if (api.getBusinessOwner() != null) {
-            contactObject.put(APIConstants.SWAGGER_NAME, api.getBusinessOwner());
+        if (swaggerData.getContactName() != null) {
+            contactObject.put(APIConstants.SWAGGER_NAME, swaggerData.getContactName());
         }
-        if (api.getBusinessOwnerEmail() != null) {
-            contactObject.put(APIConstants.SWAGGER_EMAIL, api.getBusinessOwnerEmail());
+        if (swaggerData.getContactEmail() != null) {
+            contactObject.put(APIConstants.SWAGGER_EMAIL, swaggerData.getContactEmail());
         }
-        if (api.getBusinessOwner() != null || api.getBusinessOwnerEmail() != null) {
+        if (swaggerData.getContactName() != null || swaggerData.getContactEmail() != null) {
             //put contact object to info object
             infoObject.put(APIConstants.SWAGGER_CONTACT, contactObject);
         }
@@ -376,126 +255,59 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         //JSONObject licenceObject = new JSONObject();
         //infoObject.put("license", licenceObject);
 
-        infoObject.put(APIConstants.SWAGGER_VER, identifier.getVersion());
+        infoObject.put(APIConstants.SWAGGER_VER, swaggerData.getVersion());
 
         //add info object to swaggerObject
         swaggerObject.put(APIConstants.SWAGGER_INFO, infoObject);
 
         JSONObject pathsObject = new JSONObject();
 
-        if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+        if (APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
             List<String> verbList = new ArrayList<>();
             verbList.add("GET");
             verbList.add("POST");
-            URITemplate swaggerTemplate = new URITemplate();
+            SwaggerData.Resource resource = new SwaggerData.Resource();
             for (String verb : verbList) {
-                swaggerTemplate.setAuthType("Any");
-                swaggerTemplate.setHTTPVerb(verb);
-                swaggerTemplate.setHttpVerbs(verb);
-                swaggerTemplate.setUriTemplate("/*");
-                addOrUpdatePathsFromURITemplate(pathsObject, swaggerTemplate);
+                resource.setAuthType("Any");
+                resource.setVerb(verb);
+                resource.setPath("/*");
+                addOrUpdatePathsFromURITemplate(pathsObject, resource);
             }
             GraphQLSchemaDefinition schemaDefinition = new GraphQLSchemaDefinition();
             schemaDefinition.addQueryParams(pathsObject);
         } else {
-            for (URITemplate uriTemplate : uriTemplates) {
-                addOrUpdatePathsFromURITemplate(pathsObject, uriTemplate);
+            for (SwaggerData.Resource resource : resources) {
+                addOrUpdatePathsFromURITemplate(pathsObject, resource);
             }
         }
 
         swaggerObject.put(APIConstants.SWAGGER_PATHS, pathsObject);
         swaggerObject.put(APIConstants.SWAGGER, APIConstants.SWAGGER_V2);
-        populateSwaggerScopeInfo(swaggerObject, api.getScopes());
+        populateSwaggerScopeInfo(swaggerObject, swaggerData.getScopes());
         return swaggerObject.toJSONString();
     }
 
     @Override
-    public String generateAPIDefinition(APIProduct apiProduct) throws APIManagementException {
-        APIProductIdentifier identifier = apiProduct.getId();
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-
-        Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
-        String endpoints = environment.getApiGatewayEndpoint();
-        String[] endpointsSet = endpoints.split(",");
-
-        List<APIProductResource> productResources = apiProduct.getProductResources();
-
-        Set<URITemplate> uriTemplates = new HashSet<>();
-
-        for (APIProductResource productResource : productResources) {
-            uriTemplates.add(productResource.getUriTemplate());
-        }
-
-        if (endpointsSet.length < 1) {
-            throw new APIManagementException(
-                    "Error in creating JSON representation of the API" + identifier.getName());
-        }
-
-        JSONObject swaggerObject = new JSONObject();
-
-        //Create info object
-        JSONObject infoObject = new JSONObject();
-        infoObject.put(APIConstants.SWAGGER_TITLE, identifier.getName());
-        if (apiProduct.getDescription() != null) {
-            infoObject.put(APIConstants.SWAGGER_DESCRIPTION, apiProduct.getDescription());
-        }
-
-        //Create contact object and map business owner info
-        JSONObject contactObject = new JSONObject();
-        if (apiProduct.getBusinessOwner() != null) {
-            contactObject.put(APIConstants.SWAGGER_NAME, apiProduct.getBusinessOwner());
-        }
-        if (apiProduct.getBusinessOwnerEmail() != null) {
-            contactObject.put(APIConstants.SWAGGER_EMAIL, apiProduct.getBusinessOwnerEmail());
-        }
-        if (apiProduct.getBusinessOwner() != null || apiProduct.getBusinessOwnerEmail() != null) {
-            //put contact object to info object
-            infoObject.put(APIConstants.SWAGGER_CONTACT, contactObject);
-        }
-
-        //Create licence object # no need for this since this is not mandatory
-        //JSONObject licenceObject = new JSONObject();
-        //infoObject.put("license", licenceObject);
-
-        infoObject.put(APIConstants.SWAGGER_VER, identifier.getVersion());
-
-        //add info object to swaggerObject
-        swaggerObject.put(APIConstants.SWAGGER_INFO, infoObject);
-
-        JSONObject pathsObject = new JSONObject();
-
-        for (URITemplate uriTemplate : uriTemplates) {
-            addOrUpdatePathsFromURITemplate(pathsObject, uriTemplate);
-        }
-
-        swaggerObject.put(APIConstants.SWAGGER_PATHS, pathsObject);
-        swaggerObject.put(APIConstants.SWAGGER, APIConstants.SWAGGER_V2);
-        populateSwaggerScopeInfo(swaggerObject, apiProduct.getScopes());
-        return swaggerObject.toJSONString();
-    }
-
-    @Override
-    public String generateAPIDefinition(API api, String swagger, boolean syncOperations) 
+    public String generateAPIDefinition(SwaggerData swaggerData, String swagger, boolean syncOperations)
 throws APIManagementException {
         JSONParser parser = new JSONParser();
         try {
             JSONObject swaggerObj = (JSONObject) parser.parse(swagger);
 
-            if (!(APIConstants.GRAPHQL_API).equals(api.getType())) {
+            if (!(APIConstants.GRAPHQL_API).equals(swaggerData.getTransportType())) {
                 //Generates below model using the API's URI template
                 // path -> [verb1 -> template1, verb2 -> template2, ..]
-                Map<String, Map<String, URITemplate>> uriTemplateMap = getURITemplateMap(api);
+                Map<String, Map<String, SwaggerData.Resource>> resourceMap = getResourceMap(swaggerData);
 
                 if (syncOperations) {
-                    syncAPIDefinitionWithURITemplates(swaggerObj, uriTemplateMap);
+                    syncAPIDefinitionWithURITemplates(swaggerObj, resourceMap);
                 } else {
-                    setDefaultManagedInfoToAPIDefinition(api, swaggerObj);
+                    setDefaultManagedInfoToAPIDefinition(swaggerData, swaggerObj);
                 }
             }
 
             // add scope in the API object to swagger
-            populateSwaggerScopeInfo(swaggerObj, api.getScopes());
+            populateSwaggerScopeInfo(swaggerObj, swaggerData.getScopes());
             return swaggerObj.toJSONString();
         } catch (ParseException e) {
             throw new APIManagementException("Error while parsing swagger definition", e);
@@ -604,17 +416,17 @@ throws APIManagementException {
      * adds the respective operation to the existing path
      *
      * @param pathsObject swagger paths json object
-     * @param uriTemplate URI template
+     * @param resource API resource data
      */
-    private void addOrUpdatePathsFromURITemplate(JSONObject pathsObject, URITemplate uriTemplate) {
-        String pathName = uriTemplate.getUriTemplate();
+    private void addOrUpdatePathsFromURITemplate(JSONObject pathsObject, SwaggerData.Resource resource) {
+        String pathName = resource.getPath();
         if (pathsObject.get(pathName) == null) {
             pathsObject.put(pathName, new JSONObject());
         }
 
         JSONObject pathItemObject = (JSONObject)pathsObject.get(pathName);
-        String httpVerb = uriTemplate.getHTTPVerb();
-        JSONObject operationObject = createOperationFromTemplate(uriTemplate);
+        String httpVerb = resource.getVerb();
+        JSONObject operationObject = createOperationFromTemplate(resource);
 
         pathItemObject.put(httpVerb.toLowerCase(), operationObject);
         pathsObject.put(pathName, pathItemObject);
@@ -623,13 +435,13 @@ throws APIManagementException {
     /**
      * Creates a new operation object using the URI template object
      *
-     * @param uriTemplate URI template
+     * @param resource API resource data
      * @return a new operation object using the URI template object
      */
-    private JSONObject createOperationFromTemplate(URITemplate uriTemplate) {
+    private JSONObject createOperationFromTemplate(SwaggerData.Resource resource) {
         JSONObject operationObject = new JSONObject();
-        String pathName = uriTemplate.getUriTemplate();
-        updateOperationManagedInfo(uriTemplate, operationObject);
+        String pathName = resource.getPath();
+        updateOperationManagedInfo(resource, operationObject);
 
         JSONObject responseObject = new JSONObject();
         //add default response
@@ -659,11 +471,11 @@ throws APIManagementException {
     /**
      *  Updates managed info of a provided operation such as auth type and throttling
      *
-     * @param uriTemplate URI template
+     * @param resource API resource data
      * @param operationObject swagger operation json object
      */
-    private void updateOperationManagedInfo(URITemplate uriTemplate, JSONObject operationObject) {
-        String authType = uriTemplate.getAuthType();
+    private void updateOperationManagedInfo(SwaggerData.Resource resource, JSONObject operationObject) {
+        String authType = resource.getAuthType();
         if (APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.equals(authType)) {
             authType = "Application & Application User";
         }
@@ -674,9 +486,9 @@ throws APIManagementException {
             authType = "Application";
         }
         operationObject.put(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
-        operationObject.put(APIConstants.SWAGGER_X_THROTTLING_TIER, uriTemplate.getThrottlingTier());
-        if (uriTemplate.getScope() != null) {
-            operationObject.put(APIConstants.SWAGGER_X_SCOPE, uriTemplate.getScope().getKey());
+        operationObject.put(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
+        if (resource.getScope() != null) {
+            operationObject.put(APIConstants.SWAGGER_X_SCOPE, resource.getScope().getKey());
         } else {
             if (operationObject.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
                 operationObject.remove(APIConstants.SWAGGER_X_SCOPE);
@@ -687,11 +499,11 @@ throws APIManagementException {
     /**
      * Set default managed info to API Definitions path objects
      *
-     * @param api API object
+     * @param swaggerData API object
      * @param swaggerObj Swagger (API Definition) object
      */
-    private void setDefaultManagedInfoToAPIDefinition(API api, JSONObject swaggerObj) {
-        if ("oauth2".contains(api.getApiSecurity())) {
+    private void setDefaultManagedInfoToAPIDefinition(SwaggerData swaggerData, JSONObject swaggerObj) {
+        if ("oauth2".contains(swaggerData.getSecurity())) {
             JSONObject pathsJsonObj = (JSONObject) swaggerObj.get(APIConstants.SWAGGER_PATHS);
             for (Object pathObj : pathsJsonObj.entrySet()) {
                 Map.Entry pathEntry = (Map.Entry) pathObj;
@@ -701,7 +513,7 @@ throws APIManagementException {
                     String key = (String)operationEntry.getKey();
                     if (APIConstants.SUPPORTED_METHODS.contains(key)) {
                         JSONObject operationJsonObj = (JSONObject) operationEntry.getValue();
-                        setOperationDefaultManagedInfo(api, operationJsonObj);
+                        setOperationDefaultManagedInfo(swaggerData, operationJsonObj);
                     }
                 }
             }
@@ -712,10 +524,10 @@ throws APIManagementException {
      * Sync API Definition with API's operations (URI Templates)
      *
      * @param swaggerObj API Definition object
-     * @param uriTemplateMap URL Templates
+     * @param resourceMap API resource data
      */
-    private void syncAPIDefinitionWithURITemplates(JSONObject swaggerObj, Map<String, Map<String, URITemplate>>
-            uriTemplateMap) {
+    private void syncAPIDefinitionWithURITemplates(JSONObject swaggerObj, Map<String, Map<String, SwaggerData.Resource>>
+            resourceMap) {
         JSONObject pathsJsonObj = (JSONObject) swaggerObj.get(APIConstants.SWAGGER_PATHS);
         Iterator pathEntriesIterator = pathsJsonObj.entrySet().iterator();
         while (pathEntriesIterator.hasNext()) {
@@ -724,8 +536,8 @@ throws APIManagementException {
             String pathName = (String) pathEntry.getKey();
             JSONObject pathJsonObj = (JSONObject) pathEntry.getValue();
 
-            Map<String, URITemplate> uriTemplatesForPath = uriTemplateMap.get(pathName);
-            if (uriTemplatesForPath == null) {
+            Map<String, SwaggerData.Resource> resourcesForPath = resourceMap.get(pathName);
+            if (resourcesForPath == null) {
                 //remove paths that are not in URI Templates
                 pathEntriesIterator.remove();
             } else {
@@ -737,26 +549,26 @@ throws APIManagementException {
                     if (APIConstants.SUPPORTED_METHODS.contains(verb)) {
                         JSONObject operationJsonObj = (JSONObject) operationEntry.getValue();
 
-                        URITemplate template = uriTemplatesForPath.get(verb.toUpperCase());
-                        if (template == null) {
+                        SwaggerData.Resource resource = resourcesForPath.get(verb.toUpperCase());
+                        if (resource == null) {
                             // if particular operation is not available in URI templates, then remove it from swagger
                             operationEntriesIterator.remove();
                         } else {
                             // if operation is available in URI templates, update swagger operation
                             // with auth type, scope etc
-                            updateOperationManagedInfo(template, operationJsonObj);
+                            updateOperationManagedInfo(resource, operationJsonObj);
                         }
                     }
                 }
 
                 // if there are any verbs (operations) exists in uri template not defined in current path item
                 // (pathJsonObj) in swagger then add them
-                for (Map.Entry<String, URITemplate> uriTemplatesForPathEntry : uriTemplatesForPath.entrySet()) {
-                    String verb = uriTemplatesForPathEntry.getKey();
-                    URITemplate uriTemplate = uriTemplatesForPathEntry.getValue();
+                for (Map.Entry<String, SwaggerData.Resource> resourcesForPathEntry : resourcesForPath.entrySet()) {
+                    String verb = resourcesForPathEntry.getKey();
+                    SwaggerData.Resource resource = resourcesForPathEntry.getValue();
                     JSONObject operationJsonObj = (JSONObject) pathJsonObj.get(verb.toLowerCase());
                     if (operationJsonObj == null) {
-                        operationJsonObj = createOperationFromTemplate(uriTemplate);
+                        operationJsonObj = createOperationFromTemplate(resource);
                         pathJsonObj.put(verb.toLowerCase(), operationJsonObj);
                     }
                 }
@@ -764,13 +576,13 @@ throws APIManagementException {
         }
 
         // add to swagger if there are any new path templates
-        for (Map.Entry<String, Map<String, URITemplate>> uriTemplateMapEntry : uriTemplateMap.entrySet()) {
-            String path = uriTemplateMapEntry.getKey();
-            Map<String, URITemplate> verbMap = uriTemplateMapEntry.getValue();
+        for (Map.Entry<String, Map<String, SwaggerData.Resource>> resourceMapEntry : resourceMap.entrySet()) {
+            String path = resourceMapEntry.getKey();
+            Map<String, SwaggerData.Resource> verbMap = resourceMapEntry.getValue();
             if (pathsJsonObj.get(path) == null) {
-                for (Map.Entry<String, URITemplate> verbMapEntry : verbMap.entrySet()) {
-                    URITemplate uriTemplate = verbMapEntry.getValue();
-                    addOrUpdatePathsFromURITemplate(pathsJsonObj, uriTemplate);
+                for (Map.Entry<String, SwaggerData.Resource> verbMapEntry : verbMap.entrySet()) {
+                    SwaggerData.Resource resource = verbMapEntry.getValue();
+                    addOrUpdatePathsFromURITemplate(pathsJsonObj, resource);
                 }
             }
         }
@@ -779,17 +591,17 @@ throws APIManagementException {
     /**
      *  Updates managed info of a provided operation such as auth type and throttling with default values
      *
-     * @param api API object
+     * @param swaggerData Swagger related data
      * @param operationObject swagger operation json object
      */
-    private void setOperationDefaultManagedInfo(API api, JSONObject operationObject) {
+    private void setOperationDefaultManagedInfo(SwaggerData swaggerData, JSONObject operationObject) {
         if (operationObject.get(APIConstants.SWAGGER_X_AUTH_TYPE) == null) {
             operationObject.put(APIConstants.SWAGGER_X_AUTH_TYPE, "Application & Application User");
         }
 
         if (operationObject.get(APIConstants.SWAGGER_X_THROTTLING_TIER) == null) {
-            operationObject.put(APIConstants.SWAGGER_X_THROTTLING_TIER, api.getApiLevelPolicy() == null ?
-                    APIConstants.UNLIMITED_TIER : api.getApiLevelPolicy());
+            operationObject.put(APIConstants.SWAGGER_X_THROTTLING_TIER, swaggerData.getApiLevelPolicy() == null ?
+                    APIConstants.UNLIMITED_TIER : swaggerData.getApiLevelPolicy());
         }
     }
 
@@ -843,12 +655,12 @@ throws APIManagementException {
      * Populate definition with wso2 APIM specific information
      *
      * @param oasDefinition OAS definition
-     * @param api           API
+     * @param swaggerData           API
      * @return Generated OAS definition
      * @throws APIManagementException If an error occurred
      */
     @Override
-    public String populateCustomManagementInfo(String oasDefinition, API api) throws APIManagementException {
+    public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData) throws APIManagementException {
         return oasDefinition;
     }
 }

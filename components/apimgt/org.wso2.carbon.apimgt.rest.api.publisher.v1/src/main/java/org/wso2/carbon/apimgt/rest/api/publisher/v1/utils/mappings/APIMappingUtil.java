@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -1464,11 +1465,8 @@ public class APIMappingUtil {
             throws APIManagementException {
         Optional<APIDefinition> apiDefinitionOptional = OASParserUtil.getOASParser(swaggerDefinition);
         APIDefinition apiDefinition = apiDefinitionOptional.get();
-        Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(api, swaggerDefinition);
-
-        if (!APIConstants.GRAPHQL_API.equals(api.getType())) {
-            uriTemplates = apiDefinition.getURITemplates(api, swaggerDefinition);
-        }
+        SwaggerData swaggerData = new SwaggerData(api);
+        Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerData, swaggerDefinition);
 
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         if (!StringUtils.isEmpty(swaggerDefinition)) {
