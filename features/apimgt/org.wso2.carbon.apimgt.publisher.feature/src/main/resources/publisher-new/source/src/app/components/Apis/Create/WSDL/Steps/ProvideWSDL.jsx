@@ -115,12 +115,18 @@ export default function ProvideWSDL(props) {
                             <FormControlLabel
                                 value='PASS'
                                 control={<Radio />}
-                                label={<FormattedMessage id='Apis.Create.WSDL.Steps.ProvideWSDL.passthrough.label' defaultMessage='Pass Through' />}
+                                label={<FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.passthrough.label'
+                                    defaultMessage='Pass Through'
+                                />}
                             />
                             <FormControlLabel
                                 value='SOAPtoREST'
                                 control={<Radio />}
-                                label={<FormattedMessage id='Apis.Create.WSDL.Steps.ProvideWSDL.SOAPtoREST.label' defaultMessage='Generate REST APIs' />}
+                                label={<FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.SOAPtoREST.label'
+                                    defaultMessage='Generate REST APIs'
+                                />}
                             />
                         </RadioGroup>
                         <FormHelperText>
@@ -148,18 +154,27 @@ export default function ProvideWSDL(props) {
                             <FormControlLabel
                                 value='url'
                                 control={<Radio />}
-                                label={<FormattedMessage id='Apis.Create.WSDL.Steps.ProvideWSDL.url.label' defaultMessage='WSDL URL' />}
+                                label={<FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.url.label'
+                                    defaultMessage='WSDL URL'
+                                />}
                             />
                             <FormControlLabel
                                 value='file'
                                 control={<Radio />}
-                                label={<FormattedMessage id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label' defaultMessage='WSDL File' />}
+                                label={<FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label'
+                                    defaultMessage='WSDL File'
+                                />}
                             />
                             <FormControlLabel
                                 disabled={isGenerateRESTAPI}
                                 value='archive'
                                 control={<Radio />}
-                                label={<FormattedMessage id='Apis.Create.WSDL.Steps.ProvideWSDL.archive.label' defaultMessage='WSDL Archive' />}
+                                label={<FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.archive.label'
+                                    defaultMessage='WSDL Archive'
+                                />}
                             />
                         </RadioGroup>
                     </FormControl>
