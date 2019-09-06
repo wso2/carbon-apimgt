@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
@@ -35,6 +35,7 @@ import Error from '@material-ui/icons/Error';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Chip from '@material-ui/core/Chip';
 import { red } from '@material-ui/core/colors/';
+import Alert from 'AppComponents/Shared/Alert';
 
 /**
  *
@@ -49,22 +50,31 @@ export default function AccessControl(props) {
     const { api, configDispatcher } = props;
     const isRestricted = api.accessControl === 'RESTRICTED';
     const [invalidRoles, setInvalidRoles] = useState([]);
-    const handleRoleAddition = (systemValidation, userValidation, role) => {
-        systemValidation.then((resp) => {
-            if (resp) {
+    useEffect(() => {
+        if (invalidRoles.length === 0) {
+            setRoleValidity(true);
+            setUserRoleValidity(true);
+        }
+    }, [invalidRoles]);
+    const handleRoleAddition = (role) => {
+        const systemRolePromise = APIValidation.role.validate(base64url.encode(role));
+        const userRolePromise = APIValidation.userRole.validate(base64url.encode(role));
+        systemRolePromise.then((isValidSystemRole) => {
+            if (isValidSystemRole) {
                 setRoleValidity(true);
-                userValidation.then((response) => {
-                    if (response) {
+                userRolePromise.then((isValidUserRole) => {
+                    if (isValidUserRole) {
                         setUserRoleValidity(true);
                         configDispatcher({
                             action: 'accessControlRoles',
-                            value: api.accessControlRoles.length === 0 ? role : (api.accessControlRoles + ',' + role),
+                            value: [...api.accessControlRoles, role],
                         });
                     } else {
                         setUserRoleValidity(false);
                         setInvalidRoles([...invalidRoles, role]);
                     }
                 }).catch((error) => {
+                    Alert.error('Error when validating role: ' + role);
                     console.error('Error when validating user roles ' + error);
                 });
             } else {
@@ -72,24 +82,17 @@ export default function AccessControl(props) {
                 setInvalidRoles([...invalidRoles, role]);
             }
         }).catch((error) => {
+            Alert.error('Error when validating role: ' + role);
             console.error('Error when validating roles ' + error);
         });
     };
 
     const handleRoleDeletion = (role) => {
-        const validRoles = api.accessControlRoles;
-        const index = validRoles.indexOf(role);
-        if (index > -1) {
-            validRoles.splice(index, 1);
-        } else {
-            invalidRoles.splice(invalidRoles.indexOf(role), 1);
-            setInvalidRoles(invalidRoles);
-            if (invalidRoles.length === 0) {
-                setRoleValidity(true);
-                setUserRoleValidity(true);
-            }
-        }
-        configDispatcher({ action: 'accessControlRoles', value: validRoles.length === 0 ? '' : validRoles.join(',') });
+        setInvalidRoles(invalidRoles.filter(existingRole => existingRole !== role));
+        configDispatcher({
+            action: 'accessControlRoles',
+            value: api.accessControlRoles.filter(existingRole => existingRole !== role),
+        });
     };
 
     const handleRoleValidationFailure = () => {
@@ -197,8 +200,7 @@ export default function AccessControl(props) {
             {isRestricted && (
                 <Grid item>
                     <ChipInput
-                        value={api.accessControlRoles.length === 0 ? invalidRoles :
-                            api.accessControlRoles.concat(invalidRoles)}
+                        value={api.accessControlRoles.concat(invalidRoles)}
                         alwaysShowPlaceholder={false}
                         placeholder='Enter roles and press Enter'
                         blurBehavior='clear'
@@ -209,13 +211,7 @@ export default function AccessControl(props) {
                                 </InputAdornment>
                             ),
                         }}
-                        onAdd={(role) => {
-                            handleRoleAddition(
-                                APIValidation.role.validate(base64url.encode(role)),
-                                APIValidation.userRole.validate(base64url.encode(role)),
-                                role,
-                            );
-                        }}
+                        onAdd={handleRoleAddition}
                         error={!roleValidity || !userRoleValidity}
                         helperText={handleRoleValidationFailure()}
                         chipRenderer={({ value }, key) => (

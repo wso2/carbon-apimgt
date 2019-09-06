@@ -17,7 +17,7 @@
  */
 
 import Joi from '@hapi/joi';
-import API from '../data/api';
+import API from 'AppData/api';
 
 /*
 * eslint validation rule for no-unused-vars has been disabled in this component.

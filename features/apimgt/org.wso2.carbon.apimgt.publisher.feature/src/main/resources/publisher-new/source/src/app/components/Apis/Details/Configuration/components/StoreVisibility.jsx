@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
@@ -35,6 +35,7 @@ import Error from '@material-ui/icons/Error';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Chip from '@material-ui/core/Chip';
 import { red } from '@material-ui/core/colors/';
+import Alert from 'AppComponents/Shared/Alert';
 
 /**
  *
@@ -48,37 +49,38 @@ export default function StoreVisibility(props) {
     const { api, configDispatcher } = props;
     const [invalidRoles, setInvalidRoles] = useState([]);
     const isPublic = api.visibility === 'PUBLIC';
-    const handleRoleAddition = (value, role) => {
-        value.then((resp) => {
-            if (resp) {
+    useEffect(() => {
+        if (invalidRoles.length === 0) {
+            setRoleValidity(true);
+        }
+    }, [invalidRoles]);
+    const handleRoleAddition = (role) => {
+        const promise = APIValidation.role.validate(base64url.encode(role));
+        promise.then((isValid) => {
+            if (isValid) {
                 setRoleValidity(true);
                 configDispatcher({
                     action: 'visibleRoles',
-                    value: api.visibleRoles.length === 0 ? role : (api.visibleRoles + ',' + role),
+                    value: [...api.visibleRoles, role],
                 });
             } else {
                 setRoleValidity(false);
                 setInvalidRoles([...invalidRoles, role]);
             }
         }).catch((error) => {
+            Alert.error('Error when validating role: ' + role);
             console.error('Error when validating roles ' + error);
         });
     };
 
     const handleRoleDeletion = (role) => {
-        let index = invalidRoles.indexOf(role);
-        const validRoles = [...api.visibleRoles];
-        if (index > -1) {
-            invalidRoles.splice(index, 1);
-            setInvalidRoles(invalidRoles);
-            if (invalidRoles.length === 0) {
-                setRoleValidity(true);
-            }
-        } else {
-            index = validRoles.indexOf(role);
-            validRoles.splice(index, 1);
+        if (invalidRoles.includes(role)) {
+            setInvalidRoles(invalidRoles.filter(existingRole => existingRole !== role));
         }
-        configDispatcher({ action: 'visibleRoles', value: validRoles.length === 0 ? '' : validRoles.join(',') });
+        configDispatcher({
+            action: 'visibleRoles',
+            value: api.visibleRoles.filter(existingRole => existingRole !== role),
+        });
     };
 
     return (
@@ -165,7 +167,7 @@ export default function StoreVisibility(props) {
             {!isPublic && (
                 <Grid item>
                     <ChipInput
-                        value={api.visibleRoles.length === 0 ? invalidRoles : api.visibleRoles.concat(invalidRoles)}
+                        value={api.visibleRoles.concat(invalidRoles)}
                         alwaysShowPlaceholder={false}
                         placeholder='Enter roles and press Enter'
                         blurBehavior='clear'
@@ -176,9 +178,7 @@ export default function StoreVisibility(props) {
                                 </InputAdornment>
                             ),
                         }}
-                        onAdd={(role) => {
-                            handleRoleAddition(APIValidation.role.validate(base64url.encode(role)), role);
-                        }}
+                        onAdd={handleRoleAddition}
                         error={!roleValidity}
                         helperText={
                             roleValidity ? (

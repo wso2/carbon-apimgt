@@ -213,10 +213,11 @@ class CreateScope extends React.Component {
         });
     }
 
-    handleRoleAddition(value, role) {
+    handleRoleAddition(role) {
         const { validRoles, invalidRoles } = this.state;
-        value.then((resp) => {
-            if (resp) {
+        const promise = APIValidation.role.validate(base64url.encode(role));
+        promise.then((isValid) => {
+            if (isValid) {
                 this.setState({
                     roleValidity: true,
                     validRoles: [...validRoles, role],
@@ -228,29 +229,21 @@ class CreateScope extends React.Component {
                 });
             }
         }).catch((error) => {
-            console.error('Error when validating roles ' + error);
+            Alert.error('Error when validating role: ' + role);
+            console.error('Error when validating role ' + error);
         });
     }
 
     handleRoleDeletion = (role) => {
         const { validRoles, invalidRoles } = this.state;
-        let index = invalidRoles.indexOf(role);
-        if (index > -1) {
-            invalidRoles.splice(index, 1);
-            this.setState({
-                invalidRoles,
-            });
-            if (invalidRoles.length === 0) {
-                this.setState({
-                    roleValidity: true,
-                });
+        if (invalidRoles.includes(role)) {
+            const invalidRolesArray = invalidRoles.filter(existingRole => existingRole !== role);
+            this.setState({ invalidRoles: invalidRolesArray });
+            if (invalidRolesArray.length === 0) {
+                this.setState({ roleValidity: true });
             }
         } else {
-            index = validRoles.indexOf(role);
-            validRoles.splice(index, 1);
-            this.setState({
-                validRoles,
-            });
+            this.setState({ validRoles: validRoles.filter(existingRole => existingRole !== role) });
         }
     };
 
@@ -342,9 +335,7 @@ class CreateScope extends React.Component {
                                     </InputAdornment>
                                 ),
                             }}
-                            onAdd={(role) => {
-                                this.handleRoleAddition(APIValidation.role.validate(base64url.encode(role)), role);
-                            }}
+                            onAdd={this.handleRoleAddition}
                             error={!roleValidity}
                             helperText={
                                 !roleValidity ? (
