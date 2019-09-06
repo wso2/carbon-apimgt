@@ -50,6 +50,8 @@ const useStyles = makeStyles(theme => ({
 export default function ProvideWSDL(props) {
     const { apiInputs, inputsDispatcher, onValidate } = props;
     const isFileInput = apiInputs.inputType === 'file';
+    const isArchiveInput = apiInputs.inputType === 'archive';
+    const isGenerateRESTAPI = apiInputs.type === 'SOAPtoREST';
     const classes = useStyles();
     const [isError, setValidity] = useState(); // If valid value is `null` else an error object will be there
     const [isValidating, setIsValidating] = useState(false);
@@ -100,6 +102,45 @@ export default function ProvideWSDL(props) {
                             <React.Fragment>
                                 <sup className={classes.mandatoryStar}>*</sup>{' '}
                                 <FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.implementation.type'
+                                    defaultMessage='Implementation type'
+                                />
+                            </React.Fragment>
+                        </FormLabel>
+                        <RadioGroup
+                            aria-label='Implementation type'
+                            value={apiInputs.type}
+                            onChange={event => inputsDispatcher({ action: 'type', value: event.target.value })}
+                        >
+                            <FormControlLabel
+                                value='PASS'
+                                control={<Radio />}
+                                label={<FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.passthrough.label'
+                                    defaultMessage='Pass Through'
+                                />}
+                            />
+                            <FormControlLabel
+                                value='SOAPtoREST'
+                                control={<Radio />}
+                                label={<FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.SOAPtoREST.label'
+                                    defaultMessage='Generate REST APIs'
+                                />}
+                            />
+                        </RadioGroup>
+                        <FormHelperText>
+                            <sup>*</sup>
+                            <b>Generate REST APIs</b> option is only available for WSDL URL input type
+                        </FormHelperText>
+                    </FormControl>
+                </Grid>
+                <Grid item md={12}>
+                    <FormControl component='fieldset'>
+                        <FormLabel component='legend'>
+                            <React.Fragment>
+                                <sup className={classes.mandatoryStar}>*</sup>{' '}
+                                <FormattedMessage
                                     id='Apis.Create.WSDL.Steps.ProvideWSDL.Input.type'
                                     defaultMessage='Input type'
                                 />
@@ -110,13 +151,36 @@ export default function ProvideWSDL(props) {
                             value={apiInputs.inputType}
                             onChange={event => inputsDispatcher({ action: 'inputType', value: event.target.value })}
                         >
-                            <FormControlLabel value='url' control={<Radio />} label='WSDL URL' />
-                            <FormControlLabel value='file' control={<Radio />} label='WSDL Archive/File' />
+                            <FormControlLabel
+                                value='url'
+                                control={<Radio />}
+                                label={<FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.url.label'
+                                    defaultMessage='WSDL URL'
+                                />}
+                            />
+                            <FormControlLabel
+                                value='file'
+                                control={<Radio />}
+                                label={<FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.file.label'
+                                    defaultMessage='WSDL File'
+                                />}
+                            />
+                            <FormControlLabel
+                                disabled={isGenerateRESTAPI}
+                                value='archive'
+                                control={<Radio />}
+                                label={<FormattedMessage
+                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.archive.label'
+                                    defaultMessage='WSDL Archive'
+                                />}
+                            />
                         </RadioGroup>
                     </FormControl>
                 </Grid>
                 <Grid item md={7}>
-                    {isFileInput ? (
+                    {(isFileInput || isArchiveInput) ? (
                         // TODO: Pass message saying accepting only one file ~tmkb
                         <DropZoneLocal onDrop={onDrop} files={apiInputs.inputValue} />
                     ) : (
@@ -150,43 +214,13 @@ export default function ProvideWSDL(props) {
                         />
                     )}
                 </Grid>
-                <Grid item md={12}>
-                    <FormControl component='fieldset'>
-                        <FormLabel component='legend'>
-                            <React.Fragment>
-                                <sup className={classes.mandatoryStar}>*</sup>{' '}
-                                <FormattedMessage
-                                    id='Apis.Create.WSDL.Steps.ProvideWSDL.implementation.type'
-                                    defaultMessage='Implementation type'
-                                />
-                            </React.Fragment>
-                        </FormLabel>
-                        <RadioGroup
-                            aria-label='Implementation type'
-                            value={isFileInput ? 'PASS' : apiInputs.type}
-                            onChange={event => inputsDispatcher({ action: 'type', value: event.target.value })}
-                        >
-                            <FormControlLabel value='PASS' control={<Radio />} label='Pass Through' />
-                            <FormControlLabel
-                                disabled={isFileInput}
-                                value='SOAPtoREST'
-                                control={<Radio />}
-                                label='Generate REST APIs'
-                            />
-                        </RadioGroup>
-                        <FormHelperText>
-                            <sup>*</sup>
-                            <b>Generate REST APIs</b> option is only available for WSDL URL input type
-                        </FormHelperText>
-                    </FormControl>
-                </Grid>
             </Grid>
         </React.Fragment>
     );
 }
 
 ProvideWSDL.defaultProps = {
-    onValidate: () => {},
+    onValidate: () => { },
 };
 ProvideWSDL.propTypes = {
     apiInputs: PropTypes.shape({
