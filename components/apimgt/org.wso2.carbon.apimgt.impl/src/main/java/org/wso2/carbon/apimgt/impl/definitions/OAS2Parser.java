@@ -100,14 +100,17 @@ public class OAS2Parser extends APIDefinition {
                 template.setHttpVerbs(entry.getKey().name().toUpperCase());
                 template.setUriTemplate(pathString);
                 List<String> opScopes = getScopeOfOperations(oauth2SchemeKey, operation);
-                if(!opScopes.isEmpty()) {
-                    String firstScope = opScopes.get(0);
-                    Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
-                    if (scope == null) {
-                        throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                if (!opScopes.isEmpty()) {
+                    if (opScopes.size() == 1) {
+                        String firstScope = opScopes.get(0);
+                        Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
+                        if (scope == null) {
+                            throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                        }
+                        template.setScope(scope);
+                    } else {
+                        template = OASParserUtil.setScopesToTemplate(template, opScopes);
                     }
-                    template.setScope(scope);
-                    template.setScopes(scope);
                 }
                 Map<String, Object> extensions = operation.getVendorExtensions();
                 if (extensions != null) {

@@ -37,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -51,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -85,6 +87,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -494,6 +498,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) {
         APIDTO updatedApiDTO;
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange().get(RestApiConstants.USER_REST_API_SCOPES);
+        // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
+        if (tokenScopes == null) {
+            RestApiUtil.handleInternalServerError("Error occurred while updating the  API " + apiId +
+                    " as the token information hasn't been correctly set internally", log);
+            return null;
+        }
         try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -503,6 +515,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             boolean isWSAPI = originalAPI.getType() != null && APIConstants.APITransportType.WS == APIConstants.APITransportType
                     .valueOf(originalAPI.getType());
 
+            org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] apiDtoClassAnnotatedScopes =
+                    APIDTO.class.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
+            boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
+
+            if (!hasClassLevelScope) {
+                // Validate per-field scopes
+                body = getFieldOverriddenAPIDTO(body, originalAPI, tokenScopes);
+            }
             //Overriding some properties:
             body.setName(apiIdentifier.getApiName());
             body.setVersion(apiIdentifier.getVersion());
@@ -547,7 +567,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //attach micro-geteway labels
             assignLabelsToDTO(body, apiToUpdate);
-            apiProvider.updateAPI(apiToUpdate);
+            apiProvider.manageAPI(apiToUpdate);
 
             if (!isWSAPI) {
                 String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
@@ -580,6 +600,86 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    /**
+     * Check whether the token has APIDTO class level Scope annotation
+     * @return true if the token has APIDTO class level Scope annotation
+     */
+    private boolean checkClassScopeAnnotation(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] apiDtoClassAnnotatedScopes, String[] tokenScopes) {
+
+        for (org.wso2.carbon.apimgt.rest.api.util.annotations.Scope classAnnotation : apiDtoClassAnnotatedScopes) {
+            for (String tokenScope : tokenScopes) {
+                if (classAnnotation.name().equals(tokenScope)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get the API DTO object in which the API field values are overridden with the user passed new values
+     * @throws APIManagementException
+     */
+    private APIDTO getFieldOverriddenAPIDTO(APIDTO apidto, API originalAPI,
+                                            String[] tokenScopes) throws APIManagementException {
+
+        APIDTO originalApiDTO;
+        APIDTO updatedAPIDTO;
+
+        try {
+            originalApiDTO = APIMappingUtil.fromAPItoDTO(originalAPI);
+
+            Field[] fields = APIDTO.class.getDeclaredFields();
+            ObjectMapper mapper = new ObjectMapper();
+            String newApiDtoJsonString = mapper.writeValueAsString(apidto);
+            JSONParser parser = new JSONParser();
+            JSONObject newApiDtoJson = (JSONObject) parser.parse(newApiDtoJsonString);
+
+            String originalApiDtoJsonString = mapper.writeValueAsString(originalApiDTO);
+            JSONObject originalApiDtoJson = (JSONObject) parser.parse(originalApiDtoJsonString);
+
+            for (Field field : fields) {
+                org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] fieldAnnotatedScopes =
+                        field.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
+                String originalElementValue = mapper.writeValueAsString(originalApiDtoJson.get(field.getName()));
+                String newElementValue = mapper.writeValueAsString(newApiDtoJson.get(field.getName()));
+
+                if (!StringUtils.equals(originalElementValue, newElementValue)) {
+                    originalApiDtoJson = overrideDTOValues(originalApiDtoJson, newApiDtoJson, field, tokenScopes,
+                            fieldAnnotatedScopes);
+                }
+            }
+
+            updatedAPIDTO = mapper.readValue(originalApiDtoJson.toJSONString(), APIDTO.class);
+
+        } catch (IOException | ParseException e) {
+            String msg = "Error while processing API DTO json strings";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return updatedAPIDTO;
+    }
+
+    /**
+     * Override the API DTO field values with the user passed new values considering the field-wise scopes defined as
+     * allowed to update in REST API definition yaml
+     */
+    private JSONObject overrideDTOValues(JSONObject originalApiDtoJson, JSONObject newApiDtoJson, Field field, String[]
+            tokenScopes, org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] fieldAnnotatedScopes) throws
+            APIManagementException {
+        for (String tokenScope : tokenScopes) {
+            for (org.wso2.carbon.apimgt.rest.api.util.annotations.Scope scopeAnt : fieldAnnotatedScopes) {
+                if (scopeAnt.name().equals(tokenScope)) {
+                    // do the overriding
+                    originalApiDtoJson.put(field.getName(), newApiDtoJson.get(field.getName()));
+                    return originalApiDtoJson;
+                }
+            }
+        }
+        throw new APIManagementException("User is not authorized to update one or more API fields. None of the " +
+                "required scopes found in user token to update the field. So the request will be failed.");
     }
 
     /**

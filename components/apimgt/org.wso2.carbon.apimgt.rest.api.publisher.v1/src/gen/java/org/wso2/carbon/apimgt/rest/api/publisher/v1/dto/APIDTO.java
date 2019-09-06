@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
@@ -23,9 +22,11 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
+@Scope(name = "apim:api_create", description="", value ="")
 public class APIDTO   {
   
     private String id = null;
@@ -77,8 +78,11 @@ public enum TypeEnum {
 
     private TypeEnum type = TypeEnum.HTTP;
     private List<String> transport = new ArrayList<>();
+    @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> tags = new ArrayList<>();
+    @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> policies = new ArrayList<>();
+    @Scope(name = "apim:api_publish", description="", value ="")
     private String apiThrottlingPolicy = null;
     private String authorizationHeader = null;
     private List<String> securityScheme = new ArrayList<>();
@@ -116,10 +120,13 @@ public enum VisibilityEnum {
     }
 }
 
+    @Scope(name = "apim:api_publish", description="", value ="")
     private VisibilityEnum visibility = VisibilityEnum.PUBLIC;
+    @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> visibleRoles = new ArrayList<>();
     private List<String> visibleTenants = new ArrayList<>();
     private APIEndpointSecurityDTO endpointSecurity = null;
+    @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> gatewayEnvironments = new ArrayList<>();
     private List<LabelDTO> labels = new ArrayList<>();
     private List<MediationPolicyDTO> mediationPolicies = new ArrayList<>();
@@ -156,8 +163,10 @@ public enum SubscriptionAvailabilityEnum {
     }
 }
 
+    @Scope(name = "apim:api_publish", description="", value ="")
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.ALL_TENANTS;
     private List<String> subscriptionAvailableTenants = new ArrayList<>();
+    @Scope(name = "apim:api_publish", description="", value ="")
     private Map<String, String> additionalProperties = new HashMap<>();
     private APIMonetizationInfoDTO monetization = null;
 
@@ -195,7 +204,8 @@ public enum AccessControlEnum {
 
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<>();
-    private APIBusinessInformationDTO businessInformation = null;
+    @Scope(name = "apim:api_publish", description="", value ="")
+    private Object businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String workflowStatus = null;
     private String createdTime = null;
@@ -855,7 +865,7 @@ public enum EndpointImplementationTypeEnum {
 
   /**
    **/
-  public APIDTO businessInformation(APIBusinessInformationDTO businessInformation) {
+  public APIDTO businessInformation(Object businessInformation) {
     this.businessInformation = businessInformation;
     return this;
   }
@@ -863,10 +873,10 @@ public enum EndpointImplementationTypeEnum {
   
   @ApiModelProperty(value = "")
   @JsonProperty("businessInformation")
-  public APIBusinessInformationDTO getBusinessInformation() {
+  public Object getBusinessInformation() {
     return businessInformation;
   }
-  public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
+  public void setBusinessInformation(Object businessInformation) {
     this.businessInformation = businessInformation;
   }
 
