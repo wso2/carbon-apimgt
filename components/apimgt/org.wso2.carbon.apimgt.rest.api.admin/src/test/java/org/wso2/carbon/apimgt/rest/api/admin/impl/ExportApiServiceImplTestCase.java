@@ -65,7 +65,7 @@ public class ExportApiServiceImplTestCase {
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiConsumer);
-        Response response = exportApiService.exportApplicationsGet(null, null);
+        Response response = exportApiService.exportApplicationsGet(null, null, false);
         Assert.assertEquals(response.getStatus(), 404);
     }
 
@@ -86,7 +86,7 @@ public class ExportApiServiceImplTestCase {
         Mockito.when(apiConsumer.getSubscriber("admin@hr.lk")).thenReturn(subscriber);
         Mockito.when(APIUtil.getApplicationId("sampleApp", "admin@hr.lk")).thenReturn(1);
         Mockito.when(apiConsumer.getApplicationById(1)).thenReturn(testApp);
-        Response response = exportApiService.exportApplicationsGet("sampleApp", "admin@hr.lk");
+        Response response = exportApiService.exportApplicationsGet("sampleApp", "admin@hr.lk", false);
         Assert.assertEquals(response.getStatus(), 403);
     }
 
@@ -109,7 +109,7 @@ public class ExportApiServiceImplTestCase {
         when(APIUtil.getApplicationId("sampleApp", "admin@hr.lk")).thenReturn(1);
         when(apiConsumer.getApplicationById(1)).thenReturn(testApp);
         doNothing().when(RestApiUtil.class, "handleMigrationSpecificPermissionViolations", "hr.lk", "admin");
-        Response response = exportApiService.exportApplicationsGet("sampleApp", "admin@hr.lk");
+        Response response = exportApiService.exportApplicationsGet("sampleApp", "admin@hr.lk", false);
         Assert.assertEquals(response.getStatus(), 200);
         System.clearProperty(RestApiConstants.MIGRATION_MODE);
     }
@@ -140,7 +140,7 @@ public class ExportApiServiceImplTestCase {
         Mockito.when(apiConsumer.getSubscriber("admin")).thenReturn(subscriber);
         Mockito.when(APIUtil.getApplicationId("sampleApp", "admin")).thenReturn(1);
         Mockito.when(apiConsumer.getApplicationById(1)).thenReturn(testApp);
-        Response response = exportApiService.exportApplicationsGet("sampleApp", "admin");
+        Response response = exportApiService.exportApplicationsGet("sampleApp", "admin", false);
         Assert.assertEquals(response.getStatus(), 200);
     }
 }

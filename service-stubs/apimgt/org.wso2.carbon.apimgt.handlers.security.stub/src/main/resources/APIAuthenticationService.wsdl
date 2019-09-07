@@ -45,6 +45,20 @@
                </xs:sequence>
             </xs:complexType>
          </xs:element>
+         <xs:element name="invalidateCachedUsername">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="username" nillable="true" type="xs:string"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="invalidateCachedUsernames">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element maxOccurs="unbounded" minOccurs="0" name="username_list" nillable="true" type="xs:string"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
          <xs:element name="invalidateCachedTokens">
             <xs:complexType>
                <xs:sequence>
@@ -66,12 +80,24 @@
    <wsdl:message name="invalidateKeysRequest">
       <wsdl:part name="parameters" element="ns:invalidateKeys"/>
    </wsdl:message>
+   <wsdl:message name="invalidateCachedUsernameRequest">
+      <wsdl:part name="parameters" element="ns:invalidateCachedUsername"/>
+   </wsdl:message>
+   <wsdl:message name="invalidateCachedUsernamesRequest">
+      <wsdl:part name="parameters" element="ns:invalidateCachedUsernames"/>
+   </wsdl:message>
    <wsdl:message name="invalidateOAuthKeysRequest">
       <wsdl:part name="parameters" element="ns:invalidateOAuthKeys"/>
    </wsdl:message>
    <wsdl:portType name="APIAuthenticationServicePortType">
       <wsdl:operation name="invalidateKey">
          <wsdl:input message="ns:invalidateKeyRequest" wsaw:Action="urn:invalidateKey"/>
+      </wsdl:operation>
+      <wsdl:operation name="invalidateCachedUsername">
+         <wsdl:input message="ns:invalidateCachedUsernameRequest" wsaw:Action="urn:invalidateCachedUsername"/>
+      </wsdl:operation>
+      <wsdl:operation name="invalidateCachedUsernames">
+         <wsdl:input message="ns:invalidateCachedUsernamesRequest" wsaw:Action="urn:invalidateCachedUsernames"/>
       </wsdl:operation>
       <wsdl:operation name="invalidateResourceCache">
          <wsdl:input message="ns:invalidateResourceCacheRequest" wsaw:Action="urn:invalidateResourceCache"/>
@@ -90,6 +116,18 @@
       <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
       <wsdl:operation name="invalidateKey">
          <soap:operation soapAction="urn:invalidateKey" style="document"/>
+         <wsdl:input>
+            <soap:body use="literal"/>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="invalidateCachedUsername">
+         <soap:operation soapAction="urn:invalidateCachedUsername" style="document"/>
+         <wsdl:input>
+            <soap:body use="literal"/>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="invalidateCachedUsernames">
+         <soap:operation soapAction="urn:invalidateCachedUsernames" style="document"/>
          <wsdl:input>
             <soap:body use="literal"/>
          </wsdl:input>
@@ -133,6 +171,18 @@
             <soap12:body use="literal"/>
          </wsdl:input>
       </wsdl:operation>
+      <wsdl:operation name="invalidateCachedUsername">
+         <soap12:operation soapAction="urn:invalidateCachedUsername" style="document"/>
+         <wsdl:input>
+            <soap12:body use="literal"/>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="invalidateCachedUsernames">
+         <soap12:operation soapAction="urn:invalidateCachedUsernames" style="document"/>
+         <wsdl:input>
+            <soap12:body use="literal"/>
+         </wsdl:input>
+      </wsdl:operation>
       <wsdl:operation name="invalidateCachedTokens">
          <soap12:operation soapAction="urn:invalidateCachedTokens" style="document"/>
          <wsdl:input>
@@ -156,6 +206,18 @@
       <http:binding verb="POST"/>
       <wsdl:operation name="invalidateKey">
          <http:operation location="invalidateKey"/>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"/>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="invalidateCachedUsername">
+         <http:operation location="invalidateCachedUsername"/>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"/>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="invalidateCachedUsernames">
+         <http:operation location="invalidateCachedUsernames"/>
          <wsdl:input>
             <mime:content type="text/xml" part="parameters"/>
          </wsdl:input>

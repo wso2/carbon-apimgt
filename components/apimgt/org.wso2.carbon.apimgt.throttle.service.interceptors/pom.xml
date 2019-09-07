@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.4.179-SNAPSHOT</version>
+        <version>6.5.85-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -40,8 +40,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -98,14 +98,7 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
+
 
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -118,7 +111,7 @@
                             ${project.artifactId}
                         </Bundle-SymbolicName>
                         <Import-Package>
-                            org.apache.commons.logging.*; version="${commons.logging.imp.pkg.version}",
+                            org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
                             *;resolution:=optional
                         </Import-Package>
                         <Export-Package>

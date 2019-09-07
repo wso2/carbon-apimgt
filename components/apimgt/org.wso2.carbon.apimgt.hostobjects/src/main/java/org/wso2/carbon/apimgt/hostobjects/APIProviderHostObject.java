@@ -18,11 +18,6 @@
 
 package org.wso2.carbon.apimgt.hostobjects;
 
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.Swagger;
-import io.swagger.models.auth.SecuritySchemeDefinition;
-import io.swagger.parser.SwaggerParser;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -33,7 +28,6 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -81,20 +75,22 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.WSDLArchiveInfo;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.hostobjects.util.Json;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -110,7 +106,6 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
-import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -156,6 +151,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static final String ALIAS = "alias";
     private static final String END_POINT = "endpoint";
     private static final String TIER = "tier";
+    private static final String validation = "schemaValidation";
 
     private APIProvider apiProvider;
 
@@ -427,6 +423,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String responseCache = (String) apiData.get("responseCache", apiData);
         String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        String swagger =  (String) apiData.get("swagger", apiData);
         JSONObject properties = null;
         if (!StringUtils.isEmpty(additionalProperties)) {
             JSONParser parser = new JSONParser();
@@ -552,9 +549,10 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (!apiData.get("swagger", apiData).equals("null")) {
 
+            SwaggerData swaggerData = new SwaggerData(api);
             //Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates =
-                    definitionFromOpenAPISpec.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
+                    definitionFromOpenAPISpec.getURITemplates(swaggerData, String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
 
             //scopes
@@ -575,11 +573,8 @@ public class APIProviderHostObject extends ScriptableObject {
             } catch (UserStoreException e) {
                 handleException("Error while reading tenant information ", e);
             }
-
-
             //Save swagger in the registry
             apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get(APIConstants.SWAGGER, apiData));
-            apiProvider.addSwaggerToLocalEntry(api, (String) apiData.get(APIConstants.SWAGGER, apiData));
         }
 
         //get new key manager instance for  resource registration.
@@ -706,9 +701,9 @@ public class APIProviderHostObject extends ScriptableObject {
             //Read swagger from the registry todo: check why was this done
             //String swaggerFromRegistry = apiProvider.getOpenAPIDefinition(api.getId());
 
-
+            SwaggerData swaggerData = new SwaggerData(api);
             //Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(api,
+            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(swaggerData,
                     (String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
 
@@ -902,6 +897,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String techOwnerEmail = (String) apiData.get("techOwnerEmail", apiData);
         String bizOwner = (String) apiData.get("bizOwner", apiData);
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
+        String schemaValidation = (String) apiData.get(validation, apiData);
 //        String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
 //        String providerDomain = MultitenantUtils.getTenantDomain(provider);
 
@@ -993,13 +989,15 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setLastUpdated(new Date());
         api.setAccessControl(publisherAccessControl);
         api.setAccessControlRoles(publisherAccessControlRoles);
+        api.setEnableSchemaValidation(validation.equals(schemaValidation));
 
         FileHostObject wsdlFile;
         if (apiData.containsKey(APIConstants.WSDL_FILE)) {
             wsdlFile = (FileHostObject) apiData.get(APIConstants.WSDL_FILE, apiData);
             if (wsdlFile != null) {
                 if (wsdlFile.getName().endsWith(APIConstants.ZIP_FILE_EXTENSION)) {
-                    WSDLArchiveInfo archiveInfo = APIUtil.extractAndValidateWSDLArchive(wsdlFile.getInputStream());
+                    WSDLArchiveInfo archiveInfo = APIMWSDLReader
+                            .extractAndValidateWSDLArchive(wsdlFile.getInputStream()).getWsdlArchiveInfo();
                     if (archiveInfo != null) {
                         api.setWsdlArchivePath(archiveInfo.getAbsoluteFilePath());
                         if (log.isDebugEnabled()) {
@@ -1026,8 +1024,9 @@ public class APIProviderHostObject extends ScriptableObject {
 
 
         if (apiData.get("swagger", apiData) != null) {
+            SwaggerData swaggerData = new SwaggerData(api);
             // Read URI Templates from swagger resource and set it to api object
-            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(api,
+            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(swaggerData,
                     (String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
             apiProvider.validateResourceThrottlingTiers(api, tenantDomain);
@@ -1153,7 +1152,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
 
-                apiJSON = definitionFromOpenAPISpec.getAPIDefinition(apiId, registry); //apiProvider.getSwagger12Definition(apiId);
+                apiJSON = OASParserUtil.getAPIDefinition(apiId, registry); //apiProvider.getSwagger12Definition(apiId);
             } catch (RegistryException e) {
                 handleException("Error when create registry instance ", e);
             } catch (UserStoreException e) {
@@ -1258,6 +1257,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String publisherAccessControl = (String) apiData.get(APIConstants.ACCESS_CONTROL_PARAMETER, apiData);
         String publisherAccessControlRoles = "";
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        String schemaValidation = (String) apiData.get(validation, apiData);
         JSONObject properties = null;
         if (!StringUtils.isEmpty(additionalProperties)) {
             JSONParser parser = new JSONParser();
@@ -1569,6 +1569,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
         api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
+        api.setEnableSchemaValidation(validation.equals(schemaValidation));
 
         if (!"none".equals(inSequence)) {
             api.setInSequence(inSequence);
@@ -1726,9 +1727,10 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         if (apiData.get("swagger", apiData) != null) {
+            SwaggerData swaggerData = new SwaggerData(api);
             // Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates =
-                    definitionFromOpenAPISpec.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
+                    definitionFromOpenAPISpec.getURITemplates(swaggerData, String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
 
             // scopes
@@ -1755,7 +1757,8 @@ public class APIProviderHostObject extends ScriptableObject {
             apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
             saveAPI(apiProvider, api, null, false);
         } else {
-            String apiDefinitionJSON = definitionFromOpenAPISpec.generateAPIDefinition(api);
+            SwaggerData swaggerData = new SwaggerData(api);
+            String apiDefinitionJSON = definitionFromOpenAPISpec.generateAPIDefinition(swaggerData);
             apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
         }
         return success;
@@ -1844,6 +1847,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
         String visibleRoles = "";
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        String schemaValidation = (String) apiData.get(validation, apiData);
         JSONObject properties = null;
         String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
         Object apiSecurityObject = apiData.get("apiSecurity", apiData);
@@ -2178,6 +2182,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
         api.setAsDefaultVersion("default_version".equals(defaultVersion));
+        api.setEnableSchemaValidation(validation.equals(schemaValidation));
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
             api.setEndpointSecured(true);
@@ -2228,8 +2233,9 @@ public class APIProviderHostObject extends ScriptableObject {
             }
 
             if (apiData.get("swagger", apiData) != null) {
+                SwaggerData swaggerData = new SwaggerData(api);
                 // Read URI Templates from swagger resource and set to api object
-                Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(api,
+                Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(swaggerData,
                         String.valueOf(apiData.get("swagger", apiData)));
                 api.setUriTemplates(uriTemplates);
 
@@ -2256,7 +2262,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
                 saveAPI(apiProvider, api, null, false);
             } else {
-                String apiDefinitionJSON = definitionFromOpenAPISpec.generateAPIDefinition(api);
+                SwaggerData swaggerData = new SwaggerData(api);
+                String apiDefinitionJSON = definitionFromOpenAPISpec.generateAPIDefinition(swaggerData);
                 apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
                 apiProvider.updateAPI(api);
             }
@@ -2938,6 +2945,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 }
                 myn.put(58, myn, checkValue("oauth2", api.getApiSecurity()));
                 myn.put(59, myn, checkValue("mutualssl", api.getApiSecurity()));
+                myn.put(60, myn, checkValue("basic_auth", api.getApiSecurity()));
+                myn.put(61, myn, checkValue("mutualssl_mandatory", api.getApiSecurity()));
+                myn.put(62, myn, checkValue("oauth_basic_auth_mandatory", api.getApiSecurity()));
+                myn.put(63, myn, checkValue(Boolean.toString(api.isEnabledSchemaValidation())));
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                         "-" + version);
@@ -4878,6 +4889,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
+            String username = ((APIProviderHostObject) thisObj).getUsername();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
 
             APIProvider apiProvider = getAPIProvider(thisObj);
 
@@ -5634,90 +5647,6 @@ public class APIProviderHostObject extends ScriptableObject {
         return result;
     }
 
-    private static String addSecurityDef(String spec, Set<Scope> scopes) {
-
-        List<String> scopeNames = new ArrayList<String>();
-        Swagger swagger = new SwaggerParser().parse(spec);
-        Map<String, Path> paths = swagger.getPaths();
-        Operation operation;
-        APIManagerConfiguration config = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String revokeUrl = config.getFirstProperty(APIConstants.REVOKE_API_URL);
-        String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;
-        tokenUrl = tokenUrl != null ? tokenUrl.replace("'", "") : null;
-
-        OAuthAdminService oAuthAdminService = new OAuthAdminService();
-        String[] allowedGrantTypesArr = oAuthAdminService.getAllowedGrantTypes();
-        String allowedGrantTypes = StringUtils.join(allowedGrantTypesArr, ",");
-
-        APISecuritySchemeDefinition apiSecuritySchemeDefinition = new APISecuritySchemeDefinition();
-        apiSecuritySchemeDefinition.setType("oauth2");
-        apiSecuritySchemeDefinition.setAuthorizationUrl(tokenUrl);
-
-        apiSecuritySchemeDefinition.setFlow(allowedGrantTypes);
-
-        for (Scope s : scopes) {
-            scopeNames.add(s.getName());
-            apiSecuritySchemeDefinition.setScopes(s.getName(), s.getDescription());
-        }
-
-        String securityName = swagger.getInfo().getTitle().toLowerCase() + "_oauth";
-
-        for (Map.Entry<String, Path> entry : paths.entrySet()) {
-            operation = paths.get(entry.getKey()).getGet();
-            if (operation != null) {
-                paths.get(entry.getKey()).getGet().setSecurity(null);
-                paths.get(entry.getKey()).getGet().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getPatch();
-            if (operation != null) {
-                paths.get(entry.getKey()).getPatch().setSecurity(null);
-                paths.get(entry.getKey()).getPatch().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getDelete();
-            if (operation != null) {
-                paths.get(entry.getKey()).getDelete().setSecurity(null);
-                paths.get(entry.getKey()).getDelete().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getHead();
-            if (operation != null) {
-                paths.get(entry.getKey()).getHead().setSecurity(null);
-                paths.get(entry.getKey()).getHead().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getPost();
-            if (operation != null) {
-                paths.get(entry.getKey()).getPost().setSecurity(null);
-                paths.get(entry.getKey()).getPost().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getPut();
-            if (operation != null) {
-                paths.get(entry.getKey()).getPut().setSecurity(null);
-                paths.get(entry.getKey()).getPut().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getOptions();
-            if (operation != null) {
-                paths.get(entry.getKey()).getOptions().setSecurity(null);
-                paths.get(entry.getKey()).getOptions().addSecurity(securityName, scopeNames);
-            }
-
-        }
-
-        Map<String, SecuritySchemeDefinition> securityDefMap = new HashMap<String, SecuritySchemeDefinition>();
-
-        securityDefMap.put(securityName, apiSecuritySchemeDefinition);
-
-        swagger.setSecurityDefinitions(securityDefMap);
-
-        swagger.setPaths(paths);
-        return Json.pretty(swagger);
-    }
-    
     /**
      * Download microgateway usage report
      *

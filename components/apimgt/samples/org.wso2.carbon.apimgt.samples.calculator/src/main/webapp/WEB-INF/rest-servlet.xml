@@ -30,8 +30,8 @@
     <import resource="classpath:META-INF/cxf/cxf.xml"/>
     <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
 
-    <bean id="calcService" class="org.wso2.carbon.apimgt.sample.api.CalculatorService"></bean>
-    <bean id="jsonProvider" class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+    <bean id="calcService" class="org.wso2.carbon.apimgt.sample.api.CalculatorService" />
+    <bean id="jsonProvider" class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
 
     <jaxrs:server id="calculatorRs" address="/">
         <jaxrs:serviceBeans>

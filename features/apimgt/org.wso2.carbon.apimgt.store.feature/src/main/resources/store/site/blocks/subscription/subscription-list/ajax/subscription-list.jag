@@ -200,6 +200,9 @@ include("/jagg/jagg.jag");
         var groupId = session.get("groupId");
         if (jagg.isMultiGroupEnabled()) {
             groupId = request.getParameter("groupId");
+            if (!groupId) {
+                groupId = "";
+            }
         }
 
         result = mod.getAPISubscriptionsForApplication(username, appname, groupId);

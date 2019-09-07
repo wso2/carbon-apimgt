@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "0.13.0",
+        "version": "0.14.0",
         "title": "WSO2 API Manager - Publisher API",
         "description": "This specifies a **RESTful API** for WSO2 **API Manager** - Publisher.\n\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.1.66/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
         "contact": {
@@ -722,7 +722,7 @@
                 ],
                 "x-scope": "apim:api_create",
                 "x-wso2-curl": "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F apiDefinition=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/resource-policies/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\"",
-                "x-wso2-request": "PUT https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/resource-policies/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\nAuthorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\nContent-Length: 477\nContent-Type: application/json; boundary=------------------------4f51e636c0003d99\n\n--------------------------4f51e636c0003d99\n\n{ \"content\": \"<header description=\\\"SOAPAction\\\" name=\\\"SOAPAction\\\" scope=\\\"transport\\\" value=\\\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\\\"/>\"}\n--------------------------4f51e636c0003d99--\n",
+                "x-wso2-request": "PUT https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/resource-policies/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\nAuthorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\nContent-Length: 477\nContent-Type: application/json; boundary=------------------------4f51e636c0003d99\n--------------------------4f51e636c0003d99\n{ \"content\": \"<header description=\\\"SOAPAction\\\" name=\\\"SOAPAction\\\" scope=\\\"transport\\\" value=\\\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\\\"/>\"}\n--------------------------4f51e636c0003d99--\n",
                 "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n            \"id\": \"6c735e1d-8041-4f1e-b246-d28edaa650b0\",\r\n            \"httpVerb\": \"post\",\r\n            \"resourcePath\": \"checkPhoneNumbers\",\r\n            \"content\": \"<header description=\\\"SOAPAction\\\" name=\\\"SOAPAction\\\" scope=\\\"transport\\\" value=\\\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\\\"/>\"\r\n}",
                 "summary": "Update the resource policy(inflow/outflow) definition for the given resource identifier",
                 "description": "This operation can be used to update the resource policy(inflow/outflow) definition for the given resource identifier of an existing API. resource policy definition to be updated is passed as a body parameter `content`.\n",
@@ -4035,10 +4035,7 @@
                         "apiLevelPolicy": {
                             "description": "The policy selected for the particular API",
                             "type": "string",
-                            "example": [
-                                "http",
-                                "https"
-                            ]
+                            "example": "Unlimited"
                         },
                         "authorizationHeader": {
                             "type": "string",

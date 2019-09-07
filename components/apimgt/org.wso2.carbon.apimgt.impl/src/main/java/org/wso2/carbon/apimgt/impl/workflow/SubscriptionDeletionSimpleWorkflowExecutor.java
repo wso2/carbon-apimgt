@@ -20,14 +20,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -56,6 +55,19 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
         return new GeneralWorkflowResponse();
     }
 
+    /**
+     * This method is responsible for deleting the monetized subscription and returns the execute method.
+     *
+     * @param workflowDTO The WorkflowDTO which contains workflow contextual information related to the workflow
+     * @return workflow response to the caller by returning the execute() method
+     * @throws WorkflowException
+     */
+    @Override
+    public WorkflowResponse deleteMonetizedSubscription(WorkflowDTO workflowDTO, API api) throws WorkflowException {
+        // implemetation is not provided in this version
+        return execute(workflowDTO);
+    }
+
     @Override
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
@@ -63,9 +75,13 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
         String errorMsg = null;
 
         try {
-            APIIdentifier identifier = new APIIdentifier(subWorkflowDTO.getApiProvider(),
-                    subWorkflowDTO.getApiName(), subWorkflowDTO.getApiVersion());
-
+            Identifier identifier;
+            if (subWorkflowDTO.getProductIdentifier() != null) {
+                identifier = subWorkflowDTO.getProductIdentifier();
+            } else {
+               identifier = new APIIdentifier(subWorkflowDTO.getApiProvider(),
+                        subWorkflowDTO.getApiName(), subWorkflowDTO.getApiVersion());
+            }
             apiMgtDAO.removeSubscription(identifier, ((SubscriptionWorkflowDTO) workflowDTO).getApplicationId());
         } catch (APIManagementException e) {
             errorMsg = "Could not complete subscription deletion workflow for api: " + subWorkflowDTO.getApiName();

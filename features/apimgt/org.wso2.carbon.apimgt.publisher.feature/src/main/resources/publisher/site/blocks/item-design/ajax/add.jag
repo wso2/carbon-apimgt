@@ -255,7 +255,7 @@ if(jagg.isCSRFTokenValid())
                 var resp;
                 try {
                     if(rest) {
-                        var soapToRestUtil = Packages.org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
+                        var soapToRestUtil = Packages.org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
                         resp = new Packages.java.lang.String(soapToRestUtil.getSoapOperationMapping(url));
                         if(resp) {
                             mappingJson = JSON.parse(resp);
@@ -393,9 +393,12 @@ if(jagg.isCSRFTokenValid())
             apiData.accessControl = request.getParameter("accessControl");
             apiData.accessControlRoles = request.getParameter("accessControlRoles", "UTF-8");
             apiData.additionalProperties = request.getParameter("additionalProperties", "UTF-8");
-
             apiData.swagger = request.getParameter("swagger", "UTF-8");
-
+            if (request.getParameter("schemaValidation") == null) {
+               apiData.schemaValidation = null;
+            } else if (request.getParameter("schemaValidation") != null) {
+               apiData.schemaValidation = request.getParameter("schemaValidation");
+            }
             result = mod.updateAPIDesign(apiData);
             if(apiData.wsdl) {
                 var swag = parse(apiData.swagger);
@@ -404,7 +407,7 @@ if(jagg.isCSRFTokenValid())
                     isSoapToRestApi = false;
                 }
                 if (isSoapToRestApi) {
-                    var sequenceGenerator = Packages.org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
+                    var sequenceGenerator = Packages.org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
                     sequenceGenerator.generateSequencesFromSwagger(apiData.swagger, stringify(apiData));
                 }
             }
@@ -511,12 +514,16 @@ if(jagg.isCSRFTokenValid())
             apiData.inSeqFile = request.getFile("inSeqFile");
             apiData.outSeqFile = request.getFile("outSeqFile");
             apiData.corsConfiguration=request.getParameter("corsConfiguration","UTF-8");
-
+            if (request.getParameter("schemaValidation") == null) {
+               apiData.schemaValidation = null;
+            } else if (request.getParameter("schemaValidation") != null) {
+               apiData.schemaValidation = request.getParameter("schemaValidation");
+            }
             var soapToRestInsequences = request.getParameter("sequenceMapping");
             var soapToRestOutsequences = request.getParameter("sequenceOutMapping");
 
             if(soapToRestInsequences && soapToRestOutsequences) {
-                var sequenceUtils = Packages.org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
+                var sequenceUtils = Packages.org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
                 sequenceUtils.updateRestToSoapConvertedSequences(apiData.apiName, apiData.version, apiData.provider, "in", soapToRestInsequences);
                 sequenceUtils.updateRestToSoapConvertedSequences(apiData.apiName, apiData.version, apiData.provider, "out", soapToRestOutsequences);
             }
@@ -588,16 +595,40 @@ if(jagg.isCSRFTokenValid())
 
             var mutualSSLAPISecurity = request.getParameter("apisecurity_mutualssl");
             var oauth2APISecurity =  request.getParameter("apisecurity_oauth2");
+            var basicAuthAPISecurity =  request.getParameter("apisecurity_basic_auth");
 
-            if (mutualSSLAPISecurity != null && oauth2APISecurity != null) {
+            if (mutualSSLAPISecurity != null && oauth2APISecurity != null && basicAuthAPISecurity != null) {
+                apiData.apiSecurity = oauth2APISecurity + "," + mutualSSLAPISecurity + "," + basicAuthAPISecurity;
+            } else if (mutualSSLAPISecurity != null && oauth2APISecurity != null) {
                 apiData.apiSecurity = oauth2APISecurity + "," + mutualSSLAPISecurity;
+            } else if (mutualSSLAPISecurity != null && basicAuthAPISecurity != null) {
+                apiData.apiSecurity = basicAuthAPISecurity + "," + mutualSSLAPISecurity;
+            } else if (oauth2APISecurity != null && basicAuthAPISecurity != null) {
+                apiData.apiSecurity = basicAuthAPISecurity + "," + oauth2APISecurity;
             } else {
                 if (mutualSSLAPISecurity != null) {
                     apiData.apiSecurity = mutualSSLAPISecurity;
                 } else if (oauth2APISecurity != null) {
                     apiData.apiSecurity = oauth2APISecurity;
+                } else if (basicAuthAPISecurity != null) {
+                    apiData.apiSecurity = basicAuthAPISecurity;
                 }
             }
+
+            if (mutualSSLAPISecurity != null) {
+                var mutualssl_mandatory = request.getParameter("mutualssl_state_mandatory");
+                if (mutualssl_mandatory != null) {
+                    apiData.apiSecurity = apiData.apiSecurity + "," + mutualssl_mandatory;
+                }
+            }
+
+            if (oauth2APISecurity != null || basicAuthAPISecurity != null) {
+                var oauth_basic_auth_mandatory = request.getParameter("oauth_basic_auth_state_mandatory");
+                if (oauth_basic_auth_mandatory != null) {
+                    apiData.apiSecurity = apiData.apiSecurity + "," + oauth_basic_auth_mandatory;
+                }
+            }
+
             apiData.gatewayLabels = request.getParameter("gatewayLabels", "UTF-8");
             var errorMsg = null;
             if(apiData.productionTps != null && apiData.productionTps != ""  && !isPositiveInteger(apiData.productionTps)){

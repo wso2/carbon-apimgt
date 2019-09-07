@@ -74,7 +74,6 @@ import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.fail;
-import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_VALIDATOR_THRIFT_CLIENT;
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_VALIDATOR_WS_CLIENT;
 
 /**
@@ -208,7 +207,7 @@ public class WebsocketInboundHandlerTestCase {
             fail("Expected APISecurityException is not thrown (Invalid Credentials)");
         } catch (Exception e) {
             if (e instanceof APISecurityException) {
-                Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
+                Assert.assertTrue(e.getMessage().startsWith("Invalid OAuth Credentials"));
             } else {
                 e.printStackTrace();
                 fail(e.getMessage());
@@ -264,7 +263,7 @@ public class WebsocketInboundHandlerTestCase {
 
         } catch (Exception e) {
             if (e instanceof APISecurityException) {
-                Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
+                Assert.assertTrue(e.getMessage().startsWith("Invalid OAuth Credentials"));
             } else {
                 e.printStackTrace();
                 fail(e.getMessage());
@@ -332,7 +331,7 @@ public class WebsocketInboundHandlerTestCase {
             websocketInboundHandler1.channelRead(channelHandlerContext, fullHttpRequest);
             fail("Expected APISecurityException is not thrown (Invalid Credentials)");
         } catch (APISecurityException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
+            Assert.assertTrue(e.getMessage().startsWith("Invalid OAuth Credentials"));
         }
 
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL)).
@@ -379,15 +378,10 @@ public class WebsocketInboundHandlerTestCase {
             fail("Expected APISecurityException is not thrown (Invalid Credentials) when KeyValidatorClientType is provided.");
 
         } catch (APISecurityException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
+            Assert.assertTrue(e.getMessage().startsWith("Invalid OAuth Credentials"));
         }
         WebsocketInboundHandler websocketInboundHandler2 = new WebsocketInboundHandler() {
             APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
-
-            @Override
-            protected APIKeyValidationInfoDTO getApiKeyDataForThriftClient(String apiKey) throws APISecurityException {
-                return info;
-            }
 
             @Override
             protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey) throws APISecurityException {
@@ -403,18 +397,11 @@ public class WebsocketInboundHandlerTestCase {
             websocketInboundHandler2.channelRead(channelHandlerContext, fullHttpRequest);
             fail("Expected APISecurityException is not thrown (Invalid Credentials)");
         } catch (APISecurityException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
+            Assert.assertTrue(e.getMessage().startsWith("Invalid OAuth Credentials"));
         }
 
         WebsocketInboundHandler websocketInboundHandler3 = new WebsocketInboundHandler() {
             APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
-
-            @Override
-            protected APIKeyValidationInfoDTO getApiKeyDataForThriftClient(String apiKey) throws APISecurityException {
-                info.setAuthorized(true);
-                info.setType(APIConstants.API_KEY_TYPE_SANDBOX);
-                return info;
-            }
 
             @Override
             protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey) throws APISecurityException {
@@ -448,11 +435,7 @@ public class WebsocketInboundHandlerTestCase {
         PowerMockito.whenNew(APIMgtGoogleAnalyticsUtils.class).withAnyArguments().thenReturn(apiMgtGoogleAnalyticsUtils);
 
         websocketInboundHandler3.channelRead(channelHandlerContext, fullHttpRequest);
-
-        // keyValidatorClientType = thrift client
-        PowerMockito.when(APISecurityUtils.getKeyValidatorClientType()).thenReturn(API_KEY_VALIDATOR_THRIFT_CLIENT);
         PowerMockito.when(WebsocketUtil.isGatewayTokenCacheEnabled()).thenReturn(false);
-
         websocketInboundHandler3.channelRead(channelHandlerContext, fullHttpRequest);
 
         //When gateway token cache is enabled
@@ -466,7 +449,7 @@ public class WebsocketInboundHandlerTestCase {
         try {
             websocketInboundHandler3.channelRead(channelHandlerContext, fullHttpRequest);
         } catch (APISecurityException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
+            Assert.assertTrue(e.getMessage().startsWith("Invalid OAuth Credentials"));
         }
 
     }

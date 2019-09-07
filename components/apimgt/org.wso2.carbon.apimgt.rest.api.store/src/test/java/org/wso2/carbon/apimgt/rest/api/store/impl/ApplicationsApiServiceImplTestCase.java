@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ScopeListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
@@ -41,8 +41,10 @@ import java.util.List;
 
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor({"org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil",
-        "org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils"})
-@PrepareForTest({RestApiUtil.class, RestAPIStoreUtils.class})
+        "org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils", 
+        "org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils"})
+@PrepareForTest({ RestApiUtil.class, RestAPIStoreUtils.class,
+        org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils.class })
 public class ApplicationsApiServiceImplTestCase {
     private final String ADMIN_USERNAME = "admin";
     private ApplicationsApiService applicationsApiService;
@@ -98,6 +100,7 @@ public class ApplicationsApiServiceImplTestCase {
         Application application = new Application(1);
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.mockStatic(RestAPIStoreUtils.class);
+        PowerMockito.mockStatic(org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils.class);
         PowerMockito.doReturn(ADMIN_USERNAME).when(RestApiUtil.class, "getLoggedInUsername");
         PowerMockito.doReturn(apiConsumer).when(RestApiUtil.class, "getConsumer", ADMIN_USERNAME);
         Mockito.doReturn(application).when(apiConsumer).getApplicationByUUID(NON_EXISTING_APPLICATION);
@@ -110,7 +113,7 @@ public class ApplicationsApiServiceImplTestCase {
         applicationScopeDTOList.add(applicationScopeDTO);
         scopeListDTO.setList(applicationScopeDTOList);
         PowerMockito.doReturn(scopeListDTO)
-                .when(RestAPIStoreUtils.class, "getScopesForApplication", Mockito.anyString(),
+                .when(org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils.class, "getScopesForApplication", Mockito.anyString(),
                         Mockito.any(Application.class), Mockito.anyBoolean());
         Response response = applicationsApiService
                 .applicationsScopesApplicationIdGet(NON_EXISTING_APPLICATION, false, null, null);

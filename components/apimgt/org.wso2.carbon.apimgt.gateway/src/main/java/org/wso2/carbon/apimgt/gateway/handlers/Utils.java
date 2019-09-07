@@ -19,7 +19,16 @@ package org.wso2.carbon.apimgt.gateway.handlers;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMDocument;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.soap.*;
+import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axiom.soap.SOAPFault;
+import org.apache.axiom.soap.SOAPFaultCode;
+import org.apache.axiom.soap.SOAPFaultDetail;
+import org.apache.axiom.soap.SOAPFaultReason;
+import org.apache.axiom.soap.SOAPFaultText;
+import org.apache.axiom.soap.SOAPFaultValue;
+import org.apache.axiom.soap.SOAPHeader;
+import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.addressing.RelatesTo;
@@ -37,10 +46,18 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import javax.xml.namespace.QName;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import java.util.*;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import javax.cache.Caching;
+import javax.xml.namespace.QName;
 
 public class Utils {
     
@@ -241,5 +258,92 @@ public class Utils {
         messageContext.setTo(null);
         axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
         Axis2Sender.sendBack(messageContext);
+    }
+
+    /**
+     * Removes the access token that was cached in the tenant's cache space.
+     *
+     * @param accessToken        - Token to be removed from the cache.
+     * @param cachedTenantDomain - Tenant domain from which the token should be removed.
+     */
+    public static void removeTokenFromTenantTokenCache(String accessToken, String cachedTenantDomain) {
+        //If the token is cached in the tenant cache
+        if (cachedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(cachedTenantDomain)) {
+
+            if (log.isDebugEnabled()) {
+                log.debug("Removing cache entry " + accessToken + " from " + cachedTenantDomain + " domain");
+            }
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(cachedTenantDomain, true);
+                //Remove the tenant cache entry.
+                removeCacheEntryFromGatewayCache(accessToken);
+                if (log.isDebugEnabled()) {
+                    log.debug("Removed cache entry " + accessToken + " from " + cachedTenantDomain + " domain");
+                }
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
+    /**
+     * Put the access token that was cached in the tenant's cache space into invalid token cache
+     *
+     * @param accessToken        - Invalid token that should be added to the invalid token cache
+     * @param cachedTenantDomain - Tenant domain of the cached token
+     */
+    public static void putInvalidTokenIntoTenantInvalidTokenCache(String accessToken, String cachedTenantDomain) {
+        //If the token was cached in the tenant cache
+        if (cachedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(cachedTenantDomain)) {
+
+            if (log.isDebugEnabled()) {
+                log.debug("Putting the cache entry " + accessToken + " of " + cachedTenantDomain + " domain " +
+                        "to the invalid token cache...");
+            }
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(cachedTenantDomain, true);
+                putInvalidTokenEntryIntoInvalidTokenCache(accessToken, cachedTenantDomain);
+                if (log.isDebugEnabled()) {
+                    log.debug(" Token " + accessToken + " of " + cachedTenantDomain + " domain was put to the " +
+                            "invalid token cache.");
+                }
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
+    /**
+     * Remove a token from gateway token cache
+     *
+     * @param key Access token which should be removed from the cache
+     */
+    public static void removeCacheEntryFromGatewayCache(String key) {
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME)
+                .remove(key);
+    }
+
+    /**
+     * Add a token to the invalid token cache of the given tenant domain
+     *
+     * @param cachedToken   Access token to be added to the invalid token cache
+     * @param tenantDomain  Tenant domain of the token
+     */
+    public static void putInvalidTokenEntryIntoInvalidTokenCache(String cachedToken, String tenantDomain) {
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants
+                .GATEWAY_INVALID_TOKEN_CACHE_NAME).put(cachedToken, tenantDomain);
+    }
+
+    /**
+     * Get the tenant domain of a cached token
+     *
+     * @param token Cached access token
+     * @return Tenant domain
+     */
+    public static String getCachedTenantDomain(String token) {
+        return (String) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                .getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).get(token);
     }
 }

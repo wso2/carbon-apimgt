@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.EndpointAdminException;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
+import org.wso2.carbon.apimgt.keymgt.client.internal.ServiceReferenceHolder;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
@@ -45,12 +47,13 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     private Environment environment;
     private static Log log = LogFactory.getLog(APIGatewayAdminClient.class);
 
-    public APIGatewayAdminClient(APIIdentifier apiId, Environment environment) throws AxisFault {
+    public APIGatewayAdminClient(Environment environment) throws AxisFault {
         //String qualifiedName = apiId.getProviderName() + "--" + apiId.getApiName() + ":v" + apiId.getVersion();
         //String qualifiedDefaultApiName = apiId.getProviderName() + "--" + apiId.getApiName();
         //String providerDomain = apiId.getProviderName();
         //providerDomain = APIUtil.replaceEmailDomainBack(providerDomain);
-        apiGatewayAdminStub = new APIGatewayAdminStub(null, environment.getServerURL() + "APIGatewayAdmin");
+        ConfigurationContext ctx = ServiceReferenceHolder.getInstance().getAxis2ConfigurationContext();
+        apiGatewayAdminStub = new APIGatewayAdminStub(ctx, environment.getServerURL() + "APIGatewayAdmin");
         setup(apiGatewayAdminStub, environment);
         this.environment = environment;
 
@@ -385,9 +388,11 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      */
     public ArrayList<String> getEndpointType(API api) throws ParseException {
         ArrayList<String> arrayList = new ArrayList<>();
-        if (APIUtil.isProductionEndpointsExists(api) && !APIUtil.isSandboxEndpointsExists(api)) {
+        if (APIUtil.isProductionEndpointsExists(api.getEndpointConfig()) &&
+                !APIUtil.isSandboxEndpointsExists(api.getEndpointConfig())) {
             arrayList.add(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
-        } else if (APIUtil.isSandboxEndpointsExists(api) && !APIUtil.isProductionEndpointsExists(api)) {
+        } else if (APIUtil.isSandboxEndpointsExists(api.getEndpointConfig()) &&
+                !APIUtil.isProductionEndpointsExists(api.getEndpointConfig())) {
             arrayList.add(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
         } else {
             arrayList.add(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);

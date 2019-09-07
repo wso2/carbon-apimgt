@@ -64,7 +64,8 @@ public class XmlConfigurator {
                         .newDocumentBuilder().parse(new InputSource(filePath));
                 replaceValues(doc, entry.getValue(), gatewayProperties);
                 Transformer transformer = TransformerFactory.newInstance().newTransformer();
-                transformer.transform(new DOMSource(doc), new StreamResult(new File(filePath)));
+                StreamResult streamResult = new StreamResult(filePath);
+                transformer.transform(new DOMSource(doc), streamResult);
             } catch (SAXException | ParserConfigurationException | IOException
                     | TransformerException | XPathExpressionException e) {
                 log.error("Error occurred while replacing the configs in : " + filePath, e);

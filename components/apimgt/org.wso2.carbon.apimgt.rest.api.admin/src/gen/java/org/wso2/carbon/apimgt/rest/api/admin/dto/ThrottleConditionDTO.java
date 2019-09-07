@@ -48,9 +48,9 @@ public class ThrottleConditionDTO  {
 
   
   /**
-   * Specifies whether inversion of the condition to be matched against the request
+   * Specifies whether inversion of the condition to be matched against the request.\n\n**Note:** When you add conditional groups for advanced throttling policies, this paramater should have the same value (`true` or `false`)\nfor the same type of conditional group.\n
    **/
-  @ApiModelProperty(value = "Specifies whether inversion of the condition to be matched against the request")
+  @ApiModelProperty(value = "Specifies whether inversion of the condition to be matched against the request.\n\n**Note:** When you add conditional groups for advanced throttling policies, this paramater should have the same value (`true` or `false`)\nfor the same type of conditional group.\n")
   @JsonProperty("invertCondition")
   public Boolean getInvertCondition() {
     return invertCondition;

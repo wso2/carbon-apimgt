@@ -25,7 +25,6 @@ import org.apache.axis2.client.Stub;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.util.URL;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.localentry.stub.APILocalEntryAdminStub;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
@@ -42,8 +41,10 @@ import java.rmi.RemoteException;
  */
 public class LocalEntryAdminClient {
     private APILocalEntryAdminStub localEntryAdminServiceStub;
+    private String tenantDomain;
 
-    public LocalEntryAdminClient(APIIdentifier apiIdentifier, Environment environment) throws AxisFault {
+    public LocalEntryAdminClient(Environment environment, String tenantDomain) throws AxisFault {
+        this.tenantDomain = tenantDomain;
         localEntryAdminServiceStub = new APILocalEntryAdminStub(null,
                 environment.getServerURL() + "APILocalEntryAdmin");
         setup(localEntryAdminServiceStub, environment);
@@ -98,7 +99,7 @@ public class LocalEntryAdminClient {
      */
     public void addLocalEntry(String content) throws AxisFault {
         try {
-            localEntryAdminServiceStub.addLocalEntry(content);
+            localEntryAdminServiceStub.addLocalEntry(content, tenantDomain);
         } catch (RemoteException e) {
             throw new AxisFault("Error occurred while adding the Local Entry: ", e.getMessage(), e);
         }
@@ -111,10 +112,10 @@ public class LocalEntryAdminClient {
      * @return LocalEntry
      * @throws AxisFault If error occurs when retrieving Local Entry.
      */
-    public Boolean getEntry(String key) throws AxisFault {
+    public Boolean localEntryExists(String key) throws AxisFault {
         try {
-            Object object = localEntryAdminServiceStub.getEntry(key);
-            return object != null;
+            Object localEntryObject = localEntryAdminServiceStub.getEntry(key, tenantDomain);
+            return localEntryObject != null;
         } catch (RemoteException e) {
             throw new AxisFault("Error occurred while getting the Local Entry: ", e.getMessage(), e);
         }
@@ -129,7 +130,7 @@ public class LocalEntryAdminClient {
      */
     public boolean deleteEntry(String key) throws AxisFault {
         try {
-            return localEntryAdminServiceStub.deleteLocalEntry(key);
+            return localEntryAdminServiceStub.deleteLocalEntry(key, tenantDomain);
         } catch (RemoteException e) {
             throw new AxisFault("Error occurred while deleting the Local Entry: ", e.getMessage(), e);
         }

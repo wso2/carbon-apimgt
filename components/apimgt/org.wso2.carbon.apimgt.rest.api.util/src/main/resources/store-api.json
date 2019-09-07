@@ -2327,6 +2327,10 @@
           "type": "string",
           "example": ""
         },
+        "owner": {
+          "type": "string",
+          "example": ""
+        },
         "keys": {
           "type": "array",
           "items": {
@@ -2374,6 +2378,10 @@
         "attributes": {
           "type": "object",
           "example": "External Reference ID, Billing Tier"
+        },
+        "owner": {
+          "type": "string",
+          "example": ""
         }
       }
     },

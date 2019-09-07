@@ -43,9 +43,6 @@ public class APISecurityUtils {
     public static void setAuthenticationContext(MessageContext synCtx,
                                                 AuthenticationContext authContext,
                                                 String contextHeader) {
-        if (synCtx.getProperty(API_AUTH_CONTEXT) != null) {
-            throw new IllegalStateException("Attempting to override existing AuthenticationContext");
-        }
         synCtx.setProperty(API_AUTH_CONTEXT, authContext);
         synCtx.setProperty(APIConstants.API_KEY_TYPE, authContext.getKeyType());
         if (contextHeader != null && authContext.getCallerToken() != null) {

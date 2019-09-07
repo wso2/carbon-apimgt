@@ -87,13 +87,20 @@ x-wso2-security:
         key: apim:app_import_export
       - description: ""
         roles: admin
+        name: apim:api_import_export
+        key: apim:api_import_export
+      - description: ""
+        roles: admin
         name: apim:label_manage
         key: apim:label_manage
       - description: ""
         roles: admin
         name: apim:label_read
         key: apim:label_read
-
+      - description: ""
+        roles: admin
+        name: apim:monetization_usage_publish
+        key: apim:monetization_usage_publish
 
 ######################################################
 # The "API Collection" resource APIs
@@ -1903,6 +1910,12 @@ paths:
             Owner of the Application
           required: true
           type: string
+        - name: withKeys
+          in: query
+          description: |
+            Export application keys
+          required: false
+          type: boolean
       tags:
         - Application (Individual)
       responses:
@@ -1977,6 +1990,18 @@ paths:
           description: |
             Expected Owner of the Application in the Import Environment
           type: string
+        - name: skipApplicationKeys
+          in: query
+          description: |
+            Skip importing Keys of the Application
+          required: false
+          type: boolean
+        - name: update
+          in: query
+          description: |
+            Update if application exists
+          required: false
+          type: boolean
       tags:
         - Application (Individual)
       responses:
@@ -2007,6 +2032,152 @@ paths:
           description: |
             Not Acceptable.
             The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# Import Resource API
+######################################################
+  /import/api:
+
+    post:
+      x-scope: apim:api_import_export
+      consumes:
+        - multipart/form-data
+      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v0.14/import/api?preserveProvider=false&overwrite=false"
+      x-wso2-request: |
+        POST https://localhost:9443/api/am/admin/v0.14/import/apis
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nAPI imported successfully."
+      summary: Import an API
+      description: |
+        This operation can be used to import an API.
+      parameters:
+        - name: file
+          in: formData
+          description: |
+            Zip archive consisting on exported api configuration
+          required: true
+          type: file
+        - name: preserveProvider
+          in: query
+          description: |
+            Preserve Original Provider of the API. This is the user choice to keep or replace the API provider.
+          required: false
+          type: boolean
+        - name: overwrite
+          in: query
+          description: |
+            Whether to update the API or not. This is used when updating already existing APIs.
+          required: false
+          type: boolean
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: |
+            Created.
+            API Imported Successfully.
+        403:
+          description: |
+            Forbidden
+            Not Authorized to import.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested API to update not found.
+          schema:
+            $ref: '#/definitions/Error'
+        409:
+          description: |
+            Conflict.
+            API to import already exists.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error.
+            Error in importing API.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# Export Resource API
+######################################################
+  /export/api:
+
+    get:
+      x-scope: apim:api_import_export
+      produces:
+        - application/zip
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET https://localhost:9443/api/am/admin/v0.14/export/api?name=PizzaShackAPI&version=1.0.0&providerName=admin > exportAPI.zip"
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/admin/v0.14/export/api?name=SampleAPI&version=1.0.0&providerName=admin
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-api.zip\"\n  Content-Type: application/zip"
+      summary: Export an API
+      description: |
+        This operation can be used to export the details of a particular API as a zip file.
+      parameters:
+        - name: name
+          in: query
+          description: |
+            API Name
+          required: true
+          type: string
+        - name: version
+          in: query
+          description: |
+            Version of the API
+          required: true
+          type: string
+        - name: providerName
+          in: query
+          description: |
+            Provider name of the API
+          required: true
+          type: string
+        - name: format
+          in: query
+          description: |
+            Format of output documents. Can be YAML or JSON.
+          type: string
+          enum:
+            - JSON
+            - YAML
+          required: true
+        - name: preserveStatus
+          in: query
+          description: |
+            Preserve API Status on export
+          required: false
+          type: boolean
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Export Successful.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            type: file
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error.
+            Error in exporting API.
           schema:
             $ref: '#/definitions/Error'
 
@@ -2146,6 +2317,71 @@ paths:
             Label to be deleted does not exist.
           schema:
             $ref: '#/definitions/Error'
+
+
+  ######################################################
+  # The "Monetization" resource APIs
+  ######################################################
+
+  /monetization/publish-usage:
+
+    #-----------------------------------------------------
+    # Publish monetization related usage records
+    #-----------------------------------------------------
+    post:
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93\" -X POST -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.14/monetization/publish-usage"
+      x-wso2-request: "POST https://localhost:9443/api/am/admin/v0.14/monetization/publish-usage\r\nAuthorization: Bearer 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93\r\nContent-Type: application/json"
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n\"status\":\"successfull\",\r\n\"message\":\"Records published successfully\"\r\n}"
+      x-scope: apim:monetization_usage_publish
+      summary: Publish Usage Records
+      description: |
+        Publish Usage Records of Monetized APIs
+      tags:
+        - Monetization (Collection)
+      responses:
+        200:
+          description: Usage records successfully published.
+          schema:
+            $ref: '#/definitions/PublishStatus'
+        202:
+          description: Request is sucessfully accepted for processing.
+          schema:
+            $ref: '#/definitions/PublishStatus'
+        404:
+          description: |
+            Not Found.
+          schema:
+            $ref: '#/definitions/PublishStatus'
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/PublishStatus'
+
+
+  /monetization/publish-usage/status:
+
+    #-----------------------------------------------------
+    # Retrieve the status monetization usage publsih job
+    #-----------------------------------------------------
+    get:
+      x-scope: apim:monetization_usage_publish
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/admin/v0.14/monetization/publish-usage/status
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/admin/v0.14/monetization/publish-usage/status\""
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"state\": \"RUNNING\",\r\n ,\"status\":\"SUCCESSFULL\",\r\n, \"started time\":\"12345678056L\",\r\n, \"last published time\":\"12345678056L\",\r\n}"
+      summary: Get the status of Monetization usage publisher
+      description: |
+        Get the status of Monetization usage publisher
+      tags:
+        - Monetization (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            Status returned
+          schema:
+            $ref: '#/definitions/MonetizationUsagePublishInfo'
 
 
 ######################################################
@@ -2471,6 +2707,8 @@ definitions:
       - properties:
           defaultLimit:
             $ref: '#/definitions/ThrottleLimit'
+          monetization:
+            $ref: '#/definitions/MonetizationInfo'
           rateLimitCount:
             type: integer
             default: 0
@@ -2734,6 +2972,28 @@ definitions:
         default: 0
         description: Time limit that the throttling limit applies.
         example: 10
+
+#-----------------------------------------------------
+# The Monetization Info resource
+#-----------------------------------------------------
+  MonetizationInfo:
+    title: API monetization details object
+    required:
+      - monetizationPlan
+      - properties
+    properties:
+      monetizationPlan:
+        type: string
+        description: Flag to indicate the monetization plan
+        enum:
+          - FixedRate
+          - DynamicRate
+        example: FixedRate
+      properties:
+        type: object
+        description: Map of custom properties related to each monetization plan
+        additionalProperties:
+          type: string
 
 #-----------------------------------------------------
 # The Throttling Bandwidth Limit resource
@@ -3032,6 +3292,38 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Label'
+
+  #-----------------------------------------------------
+  # The publish status resource
+  #-----------------------------------------------------
+  PublishStatus:
+    title: Usage publish status
+    properties:
+      status:
+        type: string
+        description: Status of the usage publish request
+      message:
+        type: string
+        description: detailed message of the status
+
+  #-----------------------------------------------------
+  # The publish status resource
+  #-----------------------------------------------------
+  MonetizationUsagePublishInfo:
+   title: Usage publish status
+   properties:
+     state:
+       type: string
+       description: State of usage publish job
+     status:
+       type: string
+       description: Status of usage publish job
+     startedTime:
+       type: string
+       description: Timestamp of the started time of the Job
+     lastPublsihedTime:
+       type: string
+       description: Timestamp of the last published time
 
 #-----------------------------------------------------
 # END-OF-FILE

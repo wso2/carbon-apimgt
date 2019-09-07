@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -266,7 +267,7 @@ public class APIMappingUtil {
             dto.setType(APIDetailedDTO.TypeEnum.valueOf(model.getType()));
         }
 
-        if (!APIConstants.APIType.WS.equals(model.getType())) {
+        if (!APIConstants.APITransportType.WS.equals(model.getType())) {
             dto.setTransport(Arrays.asList(model.getTransports().split(",")));
         }
         dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
@@ -470,8 +471,9 @@ public class APIMappingUtil {
 
         if (dto.getApiDefinition() != null) {
             String apiSwaggerDefinition = dto.getApiDefinition();
+            SwaggerData swaggerData = new SwaggerData(model);
             //URI Templates
-            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(model, apiSwaggerDefinition);
+            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(swaggerData, apiSwaggerDefinition);
             model.setUriTemplates(uriTemplates);
 
             // scopes
@@ -842,7 +844,7 @@ public class APIMappingUtil {
                 return null; // how to handle this?
         }
     }
-
+    
     private static APIDetailedDTO.VisibilityEnum mapVisibilityFromAPItoDTO(String visibility) {
         switch (visibility) { //public, private,controlled, restricted
             case APIConstants.API_GLOBAL_VISIBILITY :
@@ -888,7 +890,7 @@ public class APIMappingUtil {
         }
 
     }
-
+    
     private static String updateContextWithVersion(String version, String contextVal, String context) {
         // This condition should not be true for any occasion but we keep it so that there are no loopholes in
         // the flow.
@@ -917,4 +919,5 @@ public class APIMappingUtil {
     private static String getThumbnailUri (String uuid) {
         return RestApiConstants.RESOURCE_PATH_THUMBNAIL.replace(RestApiConstants.APIID_PARAM, uuid);
     }
+
 }

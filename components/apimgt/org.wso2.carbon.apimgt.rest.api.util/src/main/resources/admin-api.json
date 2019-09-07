@@ -79,6 +79,12 @@
         {
           "description": "",
           "roles": "admin",
+          "name": "apim:api_import_export",
+          "key": "apim:api_import_export"
+        },
+        {
+          "description": "",
+          "roles": "admin",
           "name": "apim:label_manage",
           "key": "apim:label_manage"
         },
@@ -87,6 +93,12 @@
           "roles": "admin",
           "name": "apim:label_read",
           "key": "apim:label_read"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:monetization_usage_publish",
+          "key": "apim:monetization_usage_publish"
         }
       ]
     }
@@ -1926,6 +1938,13 @@
             "description": "Owner of the Application\n",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "withKeys",
+            "in": "query",
+            "description": "Export application keys\n",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [
@@ -2003,6 +2022,20 @@
             "in": "query",
             "description": "Expected Owner of the Application in the Import Environment\n",
             "type": "string"
+          },
+          {
+            "name": "skipApplicationKeys",
+            "in": "query",
+            "description": "Skip importing Keys of the Application\n",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "update",
+            "in": "query",
+            "description": "Update if application exists\n",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [
@@ -2042,11 +2075,162 @@
         }
       }
     },
+    "/import/api": {
+      "post": {
+        "x-scope": "apim:api_import_export",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v0.14/import/api?preserveProvider=false&overwrite=false",
+        "x-wso2-request": "POST https://localhost:9443/api/am/admin/v0.14/import/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\nAPI imported successfully.",
+        "summary": "Import an API",
+        "description": "This operation can be used to import an API.\n",
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "Zip archive consisting on exported api configuration\n",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "preserveProvider",
+            "in": "query",
+            "description": "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider.\n",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "overwrite",
+            "in": "query",
+            "description": "Whether to update the API or not. This is used when updating already existing APIs.\n",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "API (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "Created.\nAPI Imported Successfully.\n"
+          },
+          "403": {
+            "description": "Forbidden\nNot Authorized to import.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested API to update not found.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Conflict.\nAPI to import already exists.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.\nError in importing API.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/export/api": {
+      "get": {
+        "x-scope": "apim:api_import_export",
+        "produces": [
+          "application/zip"
+        ],
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET https://localhost:9443/api/am/admin/v0.14/export/api?name=PizzaShackAPI&version=1.0.0&providerName=admin > exportAPI.zip",
+        "x-wso2-request": "GET https://localhost:9443/api/am/admin/v0.14/export/api?name=SampleAPI&version=1.0.0&providerName=admin\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-api.zip\"\n  Content-Type: application/zip",
+        "summary": "Export an API",
+        "description": "This operation can be used to export the details of a particular API as a zip file.\n",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "API Name\n",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "Version of the API\n",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "providerName",
+            "in": "query",
+            "description": "Provider name of the API\n",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Format of output documents. Can be YAML or JSON.\n",
+            "type": "string",
+            "enum": [
+              "JSON",
+              "YAML"
+            ],
+            "required": true
+          },
+          {
+            "name": "preserveStatus",
+            "in": "query",
+            "description": "Preserve API Status on export\n",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "API (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nExport Successful.\n",
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "type": "file"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.\nError in exporting API.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/labels": {
       "get": {
         "x-scope": "apim:label_read",
-        "x-wso2-request": "GET https://localhost:9443/api/am/admin/v0.13/labels\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/admin/v0.13/labels\"",
+        "x-wso2-request": "GET https://localhost:9443/api/am/admin/v0.14/labels\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/admin/v0.14/labels\"",
         "x-wso2-response": "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"count\": 1,\r\n  \"list\": [\r\n  {\r\n  \"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n  \"name\":\"internal\",\r\n  \"description\":\"label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}",
         "summary": "Get all registered Labels",
         "description": "Get all registered Labels\n",
@@ -2064,8 +2248,8 @@
       },
       "post": {
         "x-scope": "apim:label_manage",
-        "x-wso2-curl": "curl -k -X POST -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://apis.wso2.com/api/am/admin/v0.13/labels -d @data.json",
-        "x-wso2-request": "POST https://localhost:9443/api/am/admin/v0.13/labels\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"internal\",\r\n  \"description\":\"label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n     }",
+        "x-wso2-curl": "curl -k -X POST -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://apis.wso2.com/api/am/admin/v0.14/labels -d @data.json",
+        "x-wso2-request": "POST https://localhost:9443/api/am/admin/v0.14/labels\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"internal\",\r\n  \"description\":\"label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n     }",
         "x-wso2-response": "HTTP/1.1 201 Created\r\nContent-Type: application/json\r\n\r\n{\r\n  \"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n  \"name\":\"internal\",\r\n  \"description\":\"label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}",
         "summary": "Add a Label",
         "description": "Add a new gateway Label\n",
@@ -2102,7 +2286,9 @@
     "/labels/{labelId}": {
       "put": {
         "x-scope": "apim:label_manage",
-        "x-wso2-response": "HTTP/1.1 200 OK",
+        "x-wso2-curl": "curl -k -X PUT -H \"Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\" -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.14/labels/d7cf8523-9180-4255-84fa-6cb171c1f779 -d @data.json",
+        "x-wso2-request": "PUT https://localhost:9443/api/am/admin/v0.14/labels/d7cf8523-9180-4255-84fa-6cb171c1f779\r\nAuthorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122\r\nContent-Type: application/json\r\n\r\n   {\r\n       \"name\":\"update_internal\",\r\n  \"description\":\"Updated label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n     }",
+        "x-wso2-response": "HTTP/1.1 200 Ok\r\nContent-Type: application/json\r\n\r\n{\r\n  \"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n  \"name\":\"updated_internal\",\r\n  \"description\":\"Updated label used for internal purpose\",\r\n  \"accessUrls\":[\r\n    \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}",
         "summary": "Update a Label",
         "description": "Update a Label by label Id\n",
         "parameters": [
@@ -2170,6 +2356,66 @@
             "description": "Not Found.\nLabel to be deleted does not exist.\n",
             "schema": {
               "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/monetization/publish-usage": {
+      "post": {
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93\" -X POST -H \"Content-Type: application/json\" https://localhost:9443/api/am/admin/v0.14/monetization/publish-usage",
+        "x-wso2-request": "POST https://localhost:9443/api/am/admin/v0.14/monetization/publish-usage\r\nAuthorization: Bearer 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93\r\nContent-Type: application/json",
+        "x-wso2-response": "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n\"status\":\"successfull\",\r\n\"message\":\"Records published successfully\"\r\n}",
+        "x-scope": "apim:monetization_usage_publish",
+        "summary": "Publish Usage Records",
+        "description": "Publish Usage Records of Monetized APIs\n",
+        "tags": [
+          "Monetization (Collection)"
+        ],
+        "responses": {
+          "200": {
+            "description": "Usage records successfully published.",
+            "schema": {
+              "$ref": "#/definitions/PublishStatus"
+            }
+          },
+          "202": {
+            "description": "Request is sucessfully accepted for processing.",
+            "schema": {
+              "$ref": "#/definitions/PublishStatus"
+            }
+          },
+          "404": {
+            "description": "Not Found.\n",
+            "schema": {
+              "$ref": "#/definitions/PublishStatus"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/PublishStatus"
+            }
+          }
+        }
+      }
+    },
+    "/monetization/publish-usage/status": {
+      "get": {
+        "x-scope": "apim:monetization_usage_publish",
+        "x-wso2-request": "GET https://localhost:9443/api/am/admin/v0.14/monetization/publish-usage/status\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/admin/v0.14/monetization/publish-usage/status\"",
+        "x-wso2-response": "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"state\": \"RUNNING\",\r\n ,\"status\":\"SUCCESSFULL\",\r\n, \"started time\":\"12345678056L\",\r\n, \"last published time\":\"12345678056L\",\r\n}",
+        "summary": "Get the status of Monetization usage publisher",
+        "description": "Get the status of Monetization usage publisher\n",
+        "tags": [
+          "Monetization (Collection)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nStatus returned\n",
+            "schema": {
+              "$ref": "#/definitions/MonetizationUsagePublishInfo"
             }
           }
         }
@@ -2469,6 +2715,9 @@
             "defaultLimit": {
               "$ref": "#/definitions/ThrottleLimit"
             },
+            "monetization": {
+              "$ref": "#/definitions/MonetizationInfo"
+            },
             "rateLimitCount": {
               "type": "integer",
               "default": 0,
@@ -2754,6 +3003,31 @@
           "default": 0,
           "description": "Time limit that the throttling limit applies.",
           "example": 10
+        }
+      }
+    },
+    "MonetizationInfo": {
+      "title": "API monetization details object",
+      "required": [
+        "monetizationPlan",
+        "properties"
+      ],
+      "properties": {
+        "monetizationPlan": {
+          "type": "string",
+          "description": "Flag to indicate the monetization plan",
+          "enum": [
+            "FixedRate",
+            "DynamicRate"
+          ],
+          "example": "FixedRate"
+        },
+        "properties": {
+          "type": "object",
+          "description": "Map of custom properties related to each monetization plan",
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       }
     },
@@ -3074,6 +3348,40 @@
           "items": {
             "$ref": "#/definitions/Label"
           }
+        }
+      }
+    },
+    "PublishStatus": {
+      "title": "Usage publish status",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Status of the usage publish request"
+        },
+        "message": {
+          "type": "string",
+          "description": "detailed message of the status"
+        }
+      }
+    },
+    "MonetizationUsagePublishInfo": {
+      "title": "Usage publish status",
+      "properties": {
+        "state": {
+          "type": "string",
+          "description": "State of usage publish job"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of usage publish job"
+        },
+        "startedTime": {
+          "type": "string",
+          "description": "Timestamp of the started time of the Job"
+        },
+        "lastPublsihedTime": {
+          "type": "string",
+          "description": "Timestamp of the last published time"
         }
       }
     }

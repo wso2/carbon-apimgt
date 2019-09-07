@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.throttling;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -30,7 +31,9 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyListD
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class is responsible for mapping Subscription Level Throttling model and its sub components into REST API DTOs
@@ -130,6 +133,20 @@ public class SubscriptionThrottlePolicyMappingUtil {
                 customAttrJsonArray.add(attrJsonObj);
             }
             subscriptionPolicy.setCustomAttributes(customAttrJsonArray.toJSONString().getBytes());
+        }
+        if (StringUtils.isNotBlank(dto.getMonetization().getMonetizationPlan().name())) {
+            String tierMonetizationPlan = dto.getMonetization().getMonetizationPlan().toString();
+            subscriptionPolicy.setMonetizationPlan(tierMonetizationPlan);
+            if (dto.getMonetization().getProperties() != null) {
+                Map<String, String> tierMonetizationProperties = new HashMap<>();
+                Map<String, String> props = dto.getMonetization().getProperties();
+                for (Map.Entry<String, String> entry : props.entrySet()) {
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    tierMonetizationProperties.put(key, value);
+                }
+                subscriptionPolicy.setMonetizationPlanProperties(tierMonetizationProperties);
+            }
         }
         if (dto.getDefaultLimit() != null) {
             subscriptionPolicy

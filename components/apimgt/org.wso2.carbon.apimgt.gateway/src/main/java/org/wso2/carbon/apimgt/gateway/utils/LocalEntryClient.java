@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.gateway.utils;
 import org.apache.axis2.AxisFault;
 import org.wso2.carbon.localentry.stub.types.LocalEntryAdminException;
 import org.wso2.carbon.localentry.stub.types.LocalEntryAdminServiceStub;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.rmi.RemoteException;
 
@@ -32,10 +33,11 @@ public class LocalEntryClient {
     private LocalEntryAdminServiceStub localEntryAdminServiceStub;
 
     static final String backendURLl = "local:///services/";
+    private String tenantDomain;
 
-    public LocalEntryClient() throws AxisFault {
-        localEntryAdminServiceStub = new LocalEntryAdminServiceStub(null,
-                backendURLl + "LocalEntryAdmin");
+    public LocalEntryClient(String tenantDomain) throws AxisFault {
+        this.tenantDomain = tenantDomain;
+        localEntryAdminServiceStub = new LocalEntryAdminServiceStub(backendURLl + "LocalEntryAdmin");
     }
 
     /**
@@ -48,7 +50,11 @@ public class LocalEntryClient {
     public Boolean addLocalEntry(String content) throws AxisFault {
         Boolean value;
         try {
-            value = localEntryAdminServiceStub.addEntry(content);
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                value = localEntryAdminServiceStub.addEntry(content);
+            } else {
+                value = localEntryAdminServiceStub.addEntryForTenant(content, tenantDomain);
+            }
         } catch (RemoteException e) {
             throw new AxisFault("Error occurred while generating the response ", e);
         } catch (LocalEntryAdminException e) {
@@ -65,15 +71,19 @@ public class LocalEntryClient {
      * @throws AxisFault
      */
     public Object getEntry(String key) throws AxisFault {
-        Object object;
+        Object localEntryObject;
         try {
-            object = localEntryAdminServiceStub.getEntry(key);
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                localEntryObject = localEntryAdminServiceStub.getEntry(key);
+            } else {
+                localEntryObject = localEntryAdminServiceStub.getEntryForTenant(key, tenantDomain);
+            }
         } catch (RemoteException e) {
             throw new AxisFault("Error occurred while retrieving the local entry", e);
         } catch (LocalEntryAdminException e) {
             throw new AxisFault("Error occurred while create the admin client", e);
         }
-        return object;
+        return localEntryObject;
     }
 
     /**
@@ -85,7 +95,11 @@ public class LocalEntryClient {
      */
     public boolean deleteEntry(String key) throws AxisFault {
         try {
-            return localEntryAdminServiceStub.deleteEntry(key);
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                return localEntryAdminServiceStub.deleteEntry(key);
+            } else {
+                return localEntryAdminServiceStub.deleteEntryForTenant(key, tenantDomain);
+            }
         } catch (RemoteException e) {
             throw new AxisFault("Error occurred while create the admin client", e);
         } catch (LocalEntryAdminException e) {

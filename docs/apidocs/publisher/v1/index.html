@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/github.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    <script src="assets/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+    <script src="assets/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="assets/js/highlight.pack.js" type="text/javascript"></script>
+    <script src="assets/js/main.js" type="text/javascript"></script>
+    <script src="assets/js/marked.min.js" type="text/javascript"></script>
+
+    <title>WSO2 API Manager - Publisher API : vv1.0</title>
+
+
+    <!-- Custom CSS -->
+    <link href="css/simple-sidebar.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+<nav class="navbar navbar-fixed-top">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="https://docs.wso2.com/api-manager">
+            <img src="assets/images/logo.png" alt="WSO2 Api manager" title="WSO2 Api Manager Documentation">
+        </a>
+    </div>
+    <div id="navbar" class="collapse navbar-collapse pull-right">
+        <ul class="nav navbar-nav">
+            <li>
+                <a href="#menu-toggle" id="menu-toggle" class="button-primary"><span
+                        class="glyphicon glyphicon-list"></span> Navigation</a>
+            </li>
+        </ul>
+    </div><!--/.nav-collapse -->
+</nav>
+<div id="wrapper">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <nav class="bs-docs-sidebar" id="navbar">
+            <h3>Overview</h3>
+            <ul class="nav nav-stacked fixed">
+                <li class="section-box">
+                    <ul class="nav nav-stacked">
+                        <li id="ov-index"><a href="index.html">Introduction</a></li>
+                        <li id="ov-guide"><a href="#guide">Getting Started</a></li>
+                        <li id="ov-configuring-rest-api"><a href="#configuring-rest-api">Configuring the REST API</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <h3>Resources</h3>
+            <ul class="nav nav-stacked fixed">
+                        <hr/>
+                        <span class="class-name">API Documents</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdDocumentsDocumentIdContentGet"><a href="#!/operations#APIDocuments#apisApiIdDocumentsDocumentIdContentGet">Get the content of an API document</a></li>
+                                        <li id="op-apisApiIdDocumentsDocumentIdContentPost"><a href="#!/operations#APIDocuments#apisApiIdDocumentsDocumentIdContentPost">Upload the content of an API document</a></li>
+                                        <li id="op-apisApiIdDocumentsDocumentIdDelete"><a href="#!/operations#APIDocuments#apisApiIdDocumentsDocumentIdDelete">Delete a document of an API</a></li>
+                                        <li id="op-apisApiIdDocumentsDocumentIdGet"><a href="#!/operations#APIDocuments#apisApiIdDocumentsDocumentIdGet">Get a document of an API</a></li>
+                                        <li id="op-apisApiIdDocumentsDocumentIdPut"><a href="#!/operations#APIDocuments#apisApiIdDocumentsDocumentIdPut">Update a document of an API</a></li>
+                                        <li id="op-apisApiIdDocumentsGet"><a href="#!/operations#APIDocuments#apisApiIdDocumentsGet">Get a list of documents of an API</a></li>
+                                        <li id="op-apisApiIdDocumentsPost"><a href="#!/operations#APIDocuments#apisApiIdDocumentsPost">Add a new document to an API</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">API Lifecycle</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdLifecycleHistoryGet"><a href="#!/operations#APILifecycle#apisApiIdLifecycleHistoryGet">Get Lifecycle state change history of the API.</a></li>
+                                        <li id="op-apisApiIdLifecycleStateGet"><a href="#!/operations#APILifecycle#apisApiIdLifecycleStateGet">Get Lifecycle state data of the API.</a></li>
+                                        <li id="op-apisApiIdLifecycleStatePendingTasksDelete"><a href="#!/operations#APILifecycle#apisApiIdLifecycleStatePendingTasksDelete">Delete pending lifecycle state change tasks.</a></li>
+                                        <li id="op-apisChangeLifecyclePost"><a href="#!/operations#APILifecycle#apisChangeLifecyclePost">Change API Status</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">API Monetization</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdMonetizationGet"><a href="#!/operations#APIMonetization#apisApiIdMonetizationGet">Get monetization status for each tier in a given API</a></li>
+                                        <li id="op-apisApiIdMonetizePost"><a href="#!/operations#APIMonetization#apisApiIdMonetizePost">Configure monetization for a given API</a></li>
+                                        <li id="op-apisApiIdRevenueGet"><a href="#!/operations#APIMonetization#apisApiIdRevenueGet">Get total revenue details of a given monetized API with meterd billing.</a></li>
+                                        <li id="op-subscriptionsSubscriptionIdUsageGet"><a href="#!/operations#APIMonetization#subscriptionsSubscriptionIdUsageGet">Get details of a pending invoice for a monetized subscription with meterd billing.</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">API Product Documents</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apiProductsApiProductIdDocumentsDocumentIdContentGet"><a href="#!/operations#APIProductDocuments#apiProductsApiProductIdDocumentsDocumentIdContentGet">Get the content of an API Product document</a></li>
+                                        <li id="op-apiProductsApiProductIdDocumentsDocumentIdContentPost"><a href="#!/operations#APIProductDocuments#apiProductsApiProductIdDocumentsDocumentIdContentPost">Upload the content of an API Product document</a></li>
+                                        <li id="op-apiProductsApiProductIdDocumentsDocumentIdDelete"><a href="#!/operations#APIProductDocuments#apiProductsApiProductIdDocumentsDocumentIdDelete">Delete a document of an API Product</a></li>
+                                        <li id="op-apiProductsApiProductIdDocumentsDocumentIdGet"><a href="#!/operations#APIProductDocuments#apiProductsApiProductIdDocumentsDocumentIdGet">Get a document of an API</a></li>
+                                        <li id="op-apiProductsApiProductIdDocumentsDocumentIdPut"><a href="#!/operations#APIProductDocuments#apiProductsApiProductIdDocumentsDocumentIdPut">Update a document of an API Product</a></li>
+                                        <li id="op-apiProductsApiProductIdDocumentsGet"><a href="#!/operations#APIProductDocuments#apiProductsApiProductIdDocumentsGet">Get a list of documents of an API Product</a></li>
+                                        <li id="op-apiProductsApiProductIdDocumentsPost"><a href="#!/operations#APIProductDocuments#apiProductsApiProductIdDocumentsPost">Add a new document to an API Product</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">API Products</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apiProductsApiProductIdDelete"><a href="#!/operations#APIProducts#apiProductsApiProductIdDelete">Delete an API Product</a></li>
+                                        <li id="op-apiProductsApiProductIdGet"><a href="#!/operations#APIProducts#apiProductsApiProductIdGet">Get details of an API Product</a></li>
+                                        <li id="op-apiProductsApiProductIdPut"><a href="#!/operations#APIProducts#apiProductsApiProductIdPut">Update an API product</a></li>
+                                        <li id="op-apiProductsApiProductIdSwaggerGet"><a href="#!/operations#APIProducts#apiProductsApiProductIdSwaggerGet">Get swagger definition</a></li>
+                                        <li id="op-apiProductsApiProductIdSwaggerPut"><a href="#!/operations#APIProducts#apiProductsApiProductIdSwaggerPut">upload swagger definition</a></li>
+                                        <li id="op-apiProductsApiProductIdThumbnailGet"><a href="#!/operations#APIProducts#apiProductsApiProductIdThumbnailGet">Get thumbnail image</a></li>
+                                        <li id="op-apiProductsApiProductIdThumbnailPut"><a href="#!/operations#APIProducts#apiProductsApiProductIdThumbnailPut">Upload a thumbnail image</a></li>
+                                        <li id="op-apiProductsGet"><a href="#!/operations#APIProducts#apiProductsGet">Retrieve/Search API Products
+</a></li>
+                                        <li id="op-apiProductsPost"><a href="#!/operations#APIProducts#apiProductsPost">Create a new API Product</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">API Resource Policies</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdResourcePoliciesGet"><a href="#!/operations#APIResourcePolicies#apisApiIdResourcePoliciesGet">Get the resource policy (inflow/outflow) definitions</a></li>
+                                        <li id="op-apisApiIdResourcePoliciesResourcePolicyIdGet"><a href="#!/operations#APIResourcePolicies#apisApiIdResourcePoliciesResourcePolicyIdGet">Get the resource policy (inflow/outflow) definition for a given resource identifier.</a></li>
+                                        <li id="op-apisApiIdResourcePoliciesResourcePolicyIdPut"><a href="#!/operations#APIResourcePolicies#apisApiIdResourcePoliciesResourcePolicyIdPut">Update the resource policy(inflow/outflow) definition for the given resource identifier</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">API Scopes</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdScopesGet"><a href="#!/operations#APIScopes#apisApiIdScopesGet">Get a list of scopes of an API</a></li>
+                                        <li id="op-apisApiIdScopesNameDelete"><a href="#!/operations#APIScopes#apisApiIdScopesNameDelete">Delete a scope of an API</a></li>
+                                        <li id="op-apisApiIdScopesNameGet"><a href="#!/operations#APIScopes#apisApiIdScopesNameGet">Get a scope of an API</a></li>
+                                        <li id="op-apisApiIdScopesNamePut"><a href="#!/operations#APIScopes#apisApiIdScopesNamePut">Update a Scope of an API</a></li>
+                                        <li id="op-apisApiIdScopesPost"><a href="#!/operations#APIScopes#apisApiIdScopesPost">Add a new scope to an API</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">APIs</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdDelete"><a href="#!/operations#APIs#apisApiIdDelete">Delete an API</a></li>
+                                        <li id="op-apisApiIdGet"><a href="#!/operations#APIs#apisApiIdGet">Get details of an API</a></li>
+                                        <li id="op-apisApiIdPut"><a href="#!/operations#APIs#apisApiIdPut">Update an API</a></li>
+                                        <li id="op-apisApiIdResourcePathsGet"><a href="#!/operations#APIs#apisApiIdResourcePathsGet">Get Resource Paths of an API</a></li>
+                                        <li id="op-apisApiIdSubscriptionPoliciesGet"><a href="#!/operations#APIs#apisApiIdSubscriptionPoliciesGet">Get details of the subscription throttling policies of an API
+</a></li>
+                                        <li id="op-apisApiIdSwaggerGet"><a href="#!/operations#APIs#apisApiIdSwaggerGet">Get swagger definition</a></li>
+                                        <li id="op-apisApiIdSwaggerPut"><a href="#!/operations#APIs#apisApiIdSwaggerPut">Update swagger definition</a></li>
+                                        <li id="op-apisApiIdThumbnailGet"><a href="#!/operations#APIs#apisApiIdThumbnailGet">Get thumbnail image</a></li>
+                                        <li id="op-apisApiIdWsdlGet"><a href="#!/operations#APIs#apisApiIdWsdlGet">Get WSDL definition</a></li>
+                                        <li id="op-apisApiIdWsdlPut"><a href="#!/operations#APIs#apisApiIdWsdlPut">Update WSDL definition</a></li>
+                                        <li id="op-apisCopyApiPost"><a href="#!/operations#APIs#apisCopyApiPost">Create a new API version</a></li>
+                                        <li id="op-apisGet"><a href="#!/operations#APIs#apisGet">Retrieve/Search APIs
+</a></li>
+                                        <li id="op-apisHead"><a href="#!/operations#APIs#apisHead">Check given API attibute name is already exist
+</a></li>
+                                        <li id="op-apisImportGraphqlSchemaPost"><a href="#!/operations#APIs#apisImportGraphqlSchemaPost">Import API Definition</a></li>
+                                        <li id="op-apisPost"><a href="#!/operations#APIs#apisPost">Create a new API</a></li>
+                                        <li id="op-importOpenAPIDefinition"><a href="#!/operations#APIs#importOpenAPIDefinition">Import an OpenAPI Definition</a></li>
+                                        <li id="op-importWSDLDefinition"><a href="#!/operations#APIs#importWSDLDefinition">Import a WSDL Definition</a></li>
+                                        <li id="op-updateAPIThumbnail"><a href="#!/operations#APIs#updateAPIThumbnail">Upload a thumbnail image</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Client Certificates</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-clientCertificatesAliasContentGet"><a href="#!/operations#ClientCertificates#clientCertificatesAliasContentGet">Download a certificate.</a></li>
+                                        <li id="op-clientCertificatesAliasDelete"><a href="#!/operations#ClientCertificates#clientCertificatesAliasDelete">Delete a certificate.</a></li>
+                                        <li id="op-clientCertificatesAliasGet"><a href="#!/operations#ClientCertificates#clientCertificatesAliasGet">Get the certificate information.</a></li>
+                                        <li id="op-clientCertificatesAliasPut"><a href="#!/operations#ClientCertificates#clientCertificatesAliasPut">Update a certificate.</a></li>
+                                        <li id="op-clientCertificatesGet"><a href="#!/operations#ClientCertificates#clientCertificatesGet">Retrieve/ Search uploaded Client Certificates.</a></li>
+                                        <li id="op-clientCertificatesPost"><a href="#!/operations#ClientCertificates#clientCertificatesPost">Upload a new certificate.</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Endpoint Certificates</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-endpointCertificatesAliasContentGet"><a href="#!/operations#EndpointCertificates#endpointCertificatesAliasContentGet">Download a certificate.</a></li>
+                                        <li id="op-endpointCertificatesAliasDelete"><a href="#!/operations#EndpointCertificates#endpointCertificatesAliasDelete">Delete a certificate.</a></li>
+                                        <li id="op-endpointCertificatesAliasGet"><a href="#!/operations#EndpointCertificates#endpointCertificatesAliasGet">Get the certificate information.</a></li>
+                                        <li id="op-endpointCertificatesAliasPut"><a href="#!/operations#EndpointCertificates#endpointCertificatesAliasPut">Update a certificate.</a></li>
+                                        <li id="op-endpointCertificatesGet"><a href="#!/operations#EndpointCertificates#endpointCertificatesGet">Retrieve/Search uploaded certificates.</a></li>
+                                        <li id="op-endpointCertificatesPost"><a href="#!/operations#EndpointCertificates#endpointCertificatesPost">Upload a new Certificate.</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">External Stores</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-getAllExternalStores"><a href="#!/operations#ExternalStores#getAllExternalStores">Retrieve external store list to publish an API</a></li>
+                                        <li id="op-getAllPublishedExternalStoresByAPI"><a href="#!/operations#ExternalStores#getAllPublishedExternalStoresByAPI">Get the list of external stores which an API is published to</a></li>
+                                        <li id="op-publishAPIToExternalStores"><a href="#!/operations#ExternalStores#publishAPIToExternalStores">Publish an API to external stores</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">GraphQL Schema</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdGraphqlSchemaPut"><a href="#!/operations#GraphQLSchema#apisApiIdGraphqlSchemaPut">Add a Schema to a GraphQL API</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">GraphQL Schema (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdGraphqlSchemaGet"><a href="#!/operations#GraphQLSchemaIndividual#apisApiIdGraphqlSchemaGet">Get the Schema of a GraphQL API</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Mediation Policies</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdMediationPoliciesGet"><a href="#!/operations#MediationPolicies#apisApiIdMediationPoliciesGet">Get all mediation policies of an API
+</a></li>
+                                        <li id="op-apisApiIdMediationPoliciesMediationPolicyIdDelete"><a href="#!/operations#MediationPolicies#apisApiIdMediationPoliciesMediationPolicyIdDelete">Delete an API specific mediation policy</a></li>
+                                        <li id="op-apisApiIdMediationPoliciesMediationPolicyIdGet"><a href="#!/operations#MediationPolicies#apisApiIdMediationPoliciesMediationPolicyIdGet">Get an API specific mediation policy</a></li>
+                                        <li id="op-apisApiIdMediationPoliciesMediationPolicyIdPut"><a href="#!/operations#MediationPolicies#apisApiIdMediationPoliciesMediationPolicyIdPut">Update an API specific mediation policy</a></li>
+                                        <li id="op-apisApiIdMediationPoliciesPost"><a href="#!/operations#MediationPolicies#apisApiIdMediationPoliciesPost">Add an API specific mediation policy</a></li>
+                                        <li id="op-mediationPoliciesGet"><a href="#!/operations#MediationPolicies#mediationPoliciesGet">Get all global level mediation policies
+</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Roles</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-validateSystemRole"><a href="#!/operations#Roles#validateSystemRole">Check given role name is already exist</a></li>
+                                        <li id="op-validateUserRole"><a href="#!/operations#Roles#validateUserRole">Validate whether the logged-in user has the given role</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Settings</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-settingsGatewayEnvironmentsGet"><a href="#!/operations#Settings#settingsGatewayEnvironmentsGet">Get all gateway environments</a></li>
+                                        <li id="op-settingsGet"><a href="#!/operations#Settings#settingsGet">Retreive publisher settings</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Subscriptions</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-subscriptionsBlockSubscriptionPost"><a href="#!/operations#Subscriptions#subscriptionsBlockSubscriptionPost">Block a subscription</a></li>
+                                        <li id="op-subscriptionsGet"><a href="#!/operations#Subscriptions#subscriptionsGet">Get all Subscriptions</a></li>
+                                        <li id="op-subscriptionsUnblockSubscriptionPost"><a href="#!/operations#Subscriptions#subscriptionsUnblockSubscriptionPost">Unblock a Subscription</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Throttling Policies</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-getAllThrottlingPolicies"><a href="#!/operations#ThrottlingPolicies#getAllThrottlingPolicies">Get all throttling policies for the given type</a></li>
+                                        <li id="op-getThrottlingPolicyByName"><a href="#!/operations#ThrottlingPolicies#getThrottlingPolicyByName">Get details of a policy</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Unified Search</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-searchGet"><a href="#!/operations#UnifiedSearch#searchGet">Retrieve/Search APIs and API Documents by content
+</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Validation</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisValidateGraphqlSchemaPost"><a href="#!/operations#Validation#apisValidateGraphqlSchemaPost">Validate GraphQL API definition and retrieve a summary</a></li>
+                                        <li id="op-validateOpenAPIDefinition"><a href="#!/operations#Validation#validateOpenAPIDefinition">Validate an OpenAPI Definition</a></li>
+                                        <li id="op-validateWSDLDefinition"><a href="#!/operations#Validation#validateWSDLDefinition">Validate a WSDL Definition</a></li>
+                            </ul>
+                        </li>
+            </ul>
+            <h3>Definitions</h3>
+            <ul class="nav nav-stacked fixed">
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-API"><a href="#!/models#API">API</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIBusinessInformation"><a href="#!/models#APIBusinessInformation">APIBusinessInformation</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APICorsConfiguration"><a href="#!/models#APICorsConfiguration">APICorsConfiguration</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIEndpointSecurity"><a href="#!/models#APIEndpointSecurity">APIEndpointSecurity</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIInfo"><a href="#!/models#APIInfo">APIInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIList"><a href="#!/models#APIList">APIList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIMaxTps"><a href="#!/models#APIMaxTps">APIMaxTps</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIMonetizationInfo"><a href="#!/models#APIMonetizationInfo">APIMonetizationInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIMonetizationUsage"><a href="#!/models#APIMonetizationUsage">APIMonetizationUsage</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIOperations"><a href="#!/models#APIOperations">APIOperations</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIProduct"><a href="#!/models#APIProduct">APIProduct</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIProductBusinessInformation"><a href="#!/models#APIProductBusinessInformation">APIProductBusinessInformation</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIProductInfo"><a href="#!/models#APIProductInfo">APIProductInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIProductList"><a href="#!/models#APIProductList">APIProductList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIRevenue"><a href="#!/models#APIRevenue">APIRevenue</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-API_threatProtectionPolicies"><a href="#!/models#API_threatProtectionPolicies">API_threatProtectionPolicies</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-API_threatProtectionPolicies_list"><a href="#!/models#API_threatProtectionPolicies_list">API_threatProtectionPolicies_list</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Application"><a href="#!/models#Application">Application</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ApplicationInfo"><a href="#!/models#ApplicationInfo">ApplicationInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-CertMetadata"><a href="#!/models#CertMetadata">CertMetadata</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-CertificateInfo"><a href="#!/models#CertificateInfo">CertificateInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-CertificateValidity"><a href="#!/models#CertificateValidity">CertificateValidity</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Certificates"><a href="#!/models#Certificates">Certificates</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ClientCertMetadata"><a href="#!/models#ClientCertMetadata">ClientCertMetadata</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ClientCertificates"><a href="#!/models#ClientCertificates">ClientCertificates</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Document"><a href="#!/models#Document">Document</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-DocumentList"><a href="#!/models#DocumentList">DocumentList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Endpoint"><a href="#!/models#Endpoint">Endpoint</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-EndpointConfig"><a href="#!/models#EndpointConfig">EndpointConfig</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-EndpointConfig_attributes"><a href="#!/models#EndpointConfig_attributes">EndpointConfig_attributes</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-EndpointList"><a href="#!/models#EndpointList">EndpointList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Endpoint_endpointConfig"><a href="#!/models#Endpoint_endpointConfig">Endpoint_endpointConfig</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Endpoint_endpointSecurity"><a href="#!/models#Endpoint_endpointSecurity">Endpoint_endpointSecurity</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Environment"><a href="#!/models#Environment">Environment</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-EnvironmentEndpoints"><a href="#!/models#EnvironmentEndpoints">EnvironmentEndpoints</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-EnvironmentList"><a href="#!/models#EnvironmentList">EnvironmentList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Error"><a href="#!/models#Error">Error</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ErrorListItem"><a href="#!/models#ErrorListItem">ErrorListItem</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ExternalStore"><a href="#!/models#ExternalStore">ExternalStore</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ExternalStoreList"><a href="#!/models#ExternalStoreList">ExternalStoreList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-FileInfo"><a href="#!/models#FileInfo">FileInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-GraphQLSchema"><a href="#!/models#GraphQLSchema">GraphQLSchema</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-GraphQLValidationResponse"><a href="#!/models#GraphQLValidationResponse">GraphQLValidationResponse</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-GraphQLValidationResponse_graphQLInfo"><a href="#!/models#GraphQLValidationResponse_graphQLInfo">GraphQLValidationResponse_graphQLInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Label"><a href="#!/models#Label">Label</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-LabelList"><a href="#!/models#LabelList">LabelList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-LifecycleHistory"><a href="#!/models#LifecycleHistory">LifecycleHistory</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-LifecycleHistoryItem"><a href="#!/models#LifecycleHistoryItem">LifecycleHistoryItem</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-LifecycleState"><a href="#!/models#LifecycleState">LifecycleState</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-LifecycleState_availableTransitions"><a href="#!/models#LifecycleState_availableTransitions">LifecycleState_availableTransitions</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-LifecycleState_checkItems"><a href="#!/models#LifecycleState_checkItems">LifecycleState_checkItems</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Mediation"><a href="#!/models#Mediation">Mediation</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-MediationInfo"><a href="#!/models#MediationInfo">MediationInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-MediationList"><a href="#!/models#MediationList">MediationList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-MediationPolicy"><a href="#!/models#MediationPolicy">MediationPolicy</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-MonetizationAttribute"><a href="#!/models#MonetizationAttribute">MonetizationAttribute</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-OpenAPIDefinitionValidationResponse"><a href="#!/models#OpenAPIDefinitionValidationResponse">OpenAPIDefinitionValidationResponse</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-OpenAPIDefinitionValidationResponse_info"><a href="#!/models#OpenAPIDefinitionValidationResponse_info">OpenAPIDefinitionValidationResponse_info</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Pagination"><a href="#!/models#Pagination">Pagination</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ProductAPI"><a href="#!/models#ProductAPI">ProductAPI</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ResourcePath"><a href="#!/models#ResourcePath">ResourcePath</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ResourcePathList"><a href="#!/models#ResourcePathList">ResourcePathList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ResourcePolicyInfo"><a href="#!/models#ResourcePolicyInfo">ResourcePolicyInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ResourcePolicyList"><a href="#!/models#ResourcePolicyList">ResourcePolicyList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Scope"><a href="#!/models#Scope">Scope</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ScopeList"><a href="#!/models#ScopeList">ScopeList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ScopeList_list"><a href="#!/models#ScopeList_list">ScopeList_list</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Scope_bindings"><a href="#!/models#Scope_bindings">Scope_bindings</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-SearchResult"><a href="#!/models#SearchResult">SearchResult</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-SearchResultList"><a href="#!/models#SearchResultList">SearchResultList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Settings"><a href="#!/models#Settings">Settings</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Subscription"><a href="#!/models#Subscription">Subscription</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-SubscriptionList"><a href="#!/models#SubscriptionList">SubscriptionList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ThreatProtectionPolicy"><a href="#!/models#ThreatProtectionPolicy">ThreatProtectionPolicy</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ThreatProtectionPolicyList"><a href="#!/models#ThreatProtectionPolicyList">ThreatProtectionPolicyList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ThrottlingPolicy"><a href="#!/models#ThrottlingPolicy">ThrottlingPolicy</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ThrottlingPolicyList"><a href="#!/models#ThrottlingPolicyList">ThrottlingPolicyList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-WSDLValidationResponse"><a href="#!/models#WSDLValidationResponse">WSDLValidationResponse</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-WSDLValidationResponse_wsdlInfo"><a href="#!/models#WSDLValidationResponse_wsdlInfo">WSDLValidationResponse_wsdlInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-WSDLValidationResponse_wsdlInfo_endpoints"><a href="#!/models#WSDLValidationResponse_wsdlInfo_endpoints">WSDLValidationResponse_wsdlInfo_endpoints</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-WorkflowResponse"><a href="#!/models#WorkflowResponse">WorkflowResponse</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APISearchResult"><a href="#!/models#APISearchResult">APISearchResult</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-DocumentSearchResult"><a href="#!/models#DocumentSearchResult">DocumentSearchResult</a></li>
+                            </ul>
+                        </li>
+            </ul>
+        </nav>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid main-content">
+            <div class="row" class="">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="non-sidebar">
+                        <div class="main-content">
+                            <h2>Introduction</h2>
+
+                            <p class="marked">This specifies a **RESTful API** for WSO2 **API Manager** - Publisher.
+
+Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.0.4/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
+</p>
+
+                            <div class="sect2">
+                                    <h3>Version information</h3>
+
+                                    <div class="paragraph">
+                                        <p class="marked">v1.0</p>
+                                    </div>
+
+                                        <h3>Contact information</h3>
+
+                                        <div class="paragraph">
+                                            <p class="marked">Contact: <a href="http://wso2.com/products/api-manager/">WSO2</a></p>
+
+                                            <p>Email: architecture@wso2.com</p>
+                                        </div>
+
+                                        <h3>License information</h3>
+
+                                        <div class="paragraph">
+                                            <p class="marked">License: Apache 2.0</p>
+
+                                            <p class="marked">URL: http://www.apache.org/licenses/LICENSE-2.0.html</p>
+                                        </div>
+
+                                    <h3>URI Scheme</h3>
+
+                                    <div class="paragraph">
+                                        <p class="marked">Host: apis.wso2.com</p>
+
+                                        <p class="marked">BasePath: /api/am/publisher/v1.0</p>
+                                        <code>Scheme: [HTTPS, HTTP]</code>
+                                    </div>
+                                    <h3>Consumes</h3>
+
+                                    <div class="paragraph">
+                                        <code>[application/json]</code>
+                                    </div>
+                                    <h3>Produces</h3>
+
+                                    <div class="paragraph">
+                                        <code>[application/json]</code>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+
+    </div>
+</div>
+<!-- /#wrapper -->
+</body>
+
+</html>

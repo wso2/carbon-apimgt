@@ -17,14 +17,18 @@
 */
 package org.wso2.carbon.apimgt.api;
 
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.registry.api.Registry;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * APIDefinition is responsible for providing uri templates, scopes and
@@ -34,12 +38,16 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public abstract class APIDefinition {
 
+
+    private static final Pattern CURLY_BRACES_PATTERN = Pattern.compile("(?<=\\{)(?!\\s*\\{)[^{}]+");
+    private static final String KEEP_LEGACY_EXTENSION_PROP = "preserveLegacyExtensions";
+
     /**
      * This method extracts the URI templates from the API definition
      *
      * @return URI templates
      */
-    public abstract Set<URITemplate> getURITemplates(API api, String resourceConfigsJSON) throws APIManagementException;
+    public abstract Set<URITemplate> getURITemplates(SwaggerData swaggerData, String resourceConfigsJSON) throws APIManagementException;
 
     /**
      * This method extracts the scopes from the API definition
@@ -50,38 +58,98 @@ public abstract class APIDefinition {
     public abstract Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
 
     /**
-     * This method saves the API definition
-     *
-     * @param api               API to be saved
-     * @param apiDefinitionJSON API definition as JSON string
-     * @param registry          user registry
-     */
-    public abstract void saveAPIDefinition(API api, String apiDefinitionJSON, Registry registry) throws APIManagementException;
-
-    /**
-     * This method reads the API definition from registry
-     *
-     * @param apiIdentifier api identifier
-     * @param registry      user registry
-     * @return API definition
-     */
-    public abstract String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException;
-
-    /**
      * This method generates API definition to the given api
      *
-     * @param api api
+     * @param swaggerData api
      * @return API definition in string format
      * @throws APIManagementException
      */
-    public abstract String generateAPIDefinition(API api) throws APIManagementException;
+    public abstract String generateAPIDefinition(SwaggerData swaggerData) throws APIManagementException;
 
     /**
-     * This method returns the timestamps for a given API
-     * @param apiIdentifier
-     * @param registry
-     * @return
-     * @throws APIManagementException
+     * This method generates API definition using the given api's URI templates and the swagger.
+     * It will alter the provided swagger definition based on the URI templates. For example: if there is a new
+     * URI template which is not included in the swagger, it will be added to the swagger as a basic resource. Any
+     * additional resources inside the swagger will be removed from the swagger. Changes to scopes, throtting policies,
+     * on the resource will be updated on the swagger
+     *
+     * @param swaggerData api
+     * @param swagger swagger definition
+     * @param syncOperations whether to sync operations between API and swagger. If true, the operations of the swagger
+     *                       will be synced from the API's operations. Additional operations of the swagger will be
+     *                       removed and new operations of API will be added. If false, all the operations will be
+     *                       taken from swagger.
+     * @return API definition in string format
+     * @throws APIManagementException if error occurred when generating API Definition
      */
-    public abstract Map<String ,String> getAPIOpenAPIDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException;
+    public abstract String generateAPIDefinition(SwaggerData swaggerData, String swagger, boolean syncOperations)
+            throws APIManagementException;
+
+    /**
+     * Extract and return path parameters in the given URI template
+     *
+     * @param uriTemplate URI Template value
+     * @return path parameters in the given URI template
+     */
+    public List<String> getPathParamNames(String uriTemplate) {
+        List<String> params = new ArrayList<>();
+
+        Matcher bracesMatcher = CURLY_BRACES_PATTERN.matcher(uriTemplate);
+        while (bracesMatcher.find()) {
+            params.add(bracesMatcher.group());
+        }
+        return params;
+    }
+
+    /**
+     * Creates a helper resource path map using provided swagger data.
+     * Creates map in below format:
+     *      /order      -> [post -> resource1]
+     *      /order/{id} -> [get -> resource2, put -> resource3, ..]
+     *
+     * @param swaggerData Swagger Data object
+     * @return a structured uri template map using provided Swagger Data Resource Paths
+     */
+    public Map<String, Map<String, SwaggerData.Resource>> getResourceMap(SwaggerData swaggerData) {
+        Map<String, Map<String, SwaggerData.Resource>> uriTemplateMap = new HashMap<>();
+        for (SwaggerData.Resource resource : swaggerData.getResources()) {
+            Map<String, SwaggerData.Resource> resources = uriTemplateMap.get(resource.getPath());
+            if (resources == null) {
+                resources = new HashMap<>();
+                uriTemplateMap.put(resource.getPath(), resources);
+            }
+            resources.put(resource.getVerb().toUpperCase(), resource);
+        }
+        return uriTemplateMap;
+    }
+
+    /**
+     * This method validates the given OpenAPI definition by content
+     *
+     * @param apiDefinition OpenAPI Definition content
+     * @param returnJsonContent whether to return the converted json form of the OpenAPI definition
+     * @return APIDefinitionValidationResponse object with validation information
+     */
+    public abstract APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition,
+            boolean returnJsonContent) throws APIManagementException;
+
+    /**
+     * Populate definition with wso2 APIM specific information
+     *
+     * @param oasDefinition OAS definition
+     * @param swaggerData           API
+     * @return Generated OAS definition
+     * @throws APIManagementException If an error occurred
+     */
+    public abstract String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData) throws APIManagementException;
+
+    /**
+     * Check extension migration is disabled
+     *
+     * @return boolean
+     */
+    protected boolean isLegacyExtensionsPreserved() {
+        String keepLegacyExtension = System.getProperty(KEEP_LEGACY_EXTENSION_PROP);
+        return Boolean.parseBoolean(keepLegacyExtension);
+    }
 }

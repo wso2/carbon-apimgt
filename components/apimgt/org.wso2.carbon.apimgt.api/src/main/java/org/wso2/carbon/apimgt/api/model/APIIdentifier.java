@@ -27,7 +27,7 @@ import java.io.Serializable;
  * This class represents this unique identifier.
  */
 @SuppressWarnings("unused")
-public class APIIdentifier implements Serializable{
+public class APIIdentifier implements Serializable, Identifier {
 
     private static final long serialVersionUID = 1L;
 
@@ -36,6 +36,7 @@ public class APIIdentifier implements Serializable{
     private final String version;
     private String tier;
     private String applicationId;
+    private String uuid;
 
     public String getApplicationId() {
         return applicationId;
@@ -104,6 +105,16 @@ public class APIIdentifier implements Serializable{
     
     @Override
     public String toString() {
-    	return this.getProviderName() + '-' + this.getApiName() + '-' + this.getVersion();
+    	return this.getProviderName() + '-' + this.getName() + '-' + this.getVersion();
+    }
+
+    @Override
+    public String getName() {
+        return apiName;
+    }
+
+    @Override
+    public String getUUID() {
+        return uuid;
     }
 }

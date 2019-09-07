@@ -20,10 +20,13 @@ package org.wso2.carbon.apimgt.rest.api.util.utils;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
@@ -34,26 +37,24 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ApplicationNameWhiteSpaceValidationException;
 import org.wso2.carbon.apimgt.api.ApplicationNameWithInvalidCharactersException;
-import org.wso2.carbon.apimgt.api.LoginPostExecutor;
-import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
-import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
@@ -67,10 +68,6 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.UserStoreManager;
-import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
@@ -82,18 +79,23 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.validation.ConstraintViolation;
+import javax.ws.rs.core.Response;
 
 public class RestApiUtil {
 
@@ -144,7 +146,7 @@ public class RestApiUtil {
 
     /**
      * Returns a generic errorDTO
-     * 
+     *
      * @param message specifies the error message
      * @return A generic errorDTO with the specified details
      */
@@ -158,8 +160,49 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns a generic errorDTO from an Error Handler
+     *
+     * @param errorHandler ErrorHandler object containing the error information
+     * @return A generic errorDTO with the specified details
+     */
+    public static ErrorDTO getErrorDTO(ErrorHandler errorHandler){
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setCode(errorHandler.getErrorCode());
+        errorDTO.setMoreInfo("");
+        errorDTO.setMessage(errorHandler.getErrorMessage());
+        errorDTO.setDescription(errorHandler.getErrorDescription());
+        return errorDTO;
+    }
+
+    /**
+     * Returns a generic errorDTO from a list of Error Handlers
+     *
+     * @param errorHandlers A List of error handler objects containing the error information
+     * @return A generic errorDTO with the specified details
+     */
+    public static ErrorDTO getErrorDTO(List<ErrorHandler> errorHandlers) {
+        ErrorDTO errorDTO = new ErrorDTO();
+        for (int i = 0; i < errorHandlers.size(); i++) {
+            if (i == 0) {
+                ErrorHandler elementAt0 = errorHandlers.get(0);
+                errorDTO.setCode(elementAt0.getErrorCode());
+                errorDTO.setMoreInfo("");
+                errorDTO.setMessage(elementAt0.getErrorMessage());
+                errorDTO.setDescription(elementAt0.getErrorDescription());
+            } else {
+                ErrorListItemDTO errorListItemDTO = new ErrorListItemDTO();
+                errorListItemDTO.setCode(errorHandlers.get(i).getErrorCode() + "");
+                errorListItemDTO.setMessage(errorHandlers.get(i).getErrorMessage());
+                errorListItemDTO.setDescription(errorHandlers.get(i).getErrorDescription());
+                errorDTO.getError().add(errorListItemDTO);
+            }
+        }
+        return errorDTO;
+    }
+
+    /**
      * Check whether the specified apiId is of type UUID
-     * 
+     *
      * @param apiId api identifier
      * @return true if apiId is of type UUID, false otherwise
      */
@@ -197,7 +240,7 @@ public class RestApiUtil {
     }
 
     /** Returns an APIConsumer which is corresponding to the current logged in user taken from the carbon context
-     * 
+     *
      * @return an APIConsumer which is corresponding to the current logged in user
      * @throws APIManagementException
      */
@@ -257,9 +300,9 @@ public class RestApiUtil {
     }
 
     /**
-     * Check if the user's tenant and the API's tenant is equal. If it is not this will throw an 
+     * Check if the user's tenant and the API's tenant is equal. If it is not this will throw an
      * APIMgtAuthorizationFailedException
-     * 
+     *
      * @param apiIdentifier API Identifier
      * @throws APIMgtAuthorizationFailedException
      */
@@ -278,7 +321,7 @@ public class RestApiUtil {
 
     /**
      * Returns the requested tenant according to the input x-tenant-header
-     * 
+     *
      * @return requested tenant domain
      */
     public static String getRequestedTenantDomain(String xTenantHeader) {
@@ -318,6 +361,19 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns date in RFC3339 format.
+     * Example: 2008-11-13T12:23:30-08:00
+     *
+     * @param date Date object
+     * @return date string in RFC3339 format.
+     */
+    public static String getRFC3339Date(Date date) {
+        DateTimeFormatter jodaDateTimeFormatter = ISODateTimeFormat.dateTime();
+        DateTime dateTime = new DateTime(date);
+        return jodaDateTimeFormatter.print(dateTime);
+    }
+
+    /**
      * Returns a new InternalServerErrorException
      *
      * @return a new InternalServerErrorException with default details as a response DTO
@@ -342,7 +398,7 @@ public class RestApiUtil {
 
     /**
      * Returns a new NotFoundException
-     * 
+     *
      * @param resource Resource type
      * @param id identifier of the resource
      * @return a new NotFoundException with the specified details as a response DTO
@@ -390,7 +446,7 @@ public class RestApiUtil {
 
     /**
      * Returns a new ForbiddenException
-     * 
+     *
      * @param resource Resource type
      * @param id identifier of the resource
      * @return a new ForbiddenException with the specified details as a response DTO
@@ -419,7 +475,7 @@ public class RestApiUtil {
 
     /**
      * Returns a new BadRequestException
-     * 
+     *
      * @param description description of the exception
      * @return a new BadRequestException with the specified details as a response DTO
      */
@@ -429,8 +485,53 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns a new BadRequestException
+     *
+     * @param description description of the exception
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException buildBadRequestException(String description, Throwable e) {
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400l, description);
+        return new BadRequestException(description, e, errorDTO);
+    }
+
+    /**
+     * Returns a new BadRequestException
+     *
+     * @param errorDTO ErrorDTO object containing the error information
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException buildBadRequestException(ErrorDTO errorDTO) {
+        return new BadRequestException(errorDTO);
+    }
+
+
+    /**
+     * Returns a new BadRequestException
+     *
+     * @param errorHandler ErrorHandler object containing the error information
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException buildBadRequestException(ErrorHandler errorHandler) {
+        ErrorDTO errorDTO = getErrorDTO(errorHandler.getErrorMessage(), errorHandler.getErrorCode(),
+                errorHandler.getErrorDescription());
+        return new BadRequestException(errorDTO);
+    }
+
+    /**
+     * Returns a new BadRequestException from a list of Error Handlers
+     *
+     * @param errorHandlers A List of ErrorHandler object containing the error information
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException buildBadRequestException(List<ErrorHandler> errorHandlers) {
+        ErrorDTO errorDTO = getErrorDTO(errorHandlers);
+        return new BadRequestException(errorDTO);
+    }
+
+    /**
      * Returns a new MethodNotAllowedException
-     * 
+     *
      * @param method http method
      * @param resource resource which the method is not allowed
      * @return a new MethodNotAllowedException consists of the error message
@@ -443,7 +544,7 @@ public class RestApiUtil {
 
     /**
      * Returns a new ConflictException
-     * 
+     *
      * @param message summary of the error
      * @param description description of the exception
      * @return a new ConflictException with the specified details as a response DTO
@@ -479,7 +580,7 @@ public class RestApiUtil {
     /**
      * Check if the specified throwable e is happened as the updated/new resource conflicting with an already existing
      * resource
-     * 
+     *
      * @param e throwable to check
      * @return true if the specified throwable e is happened as the updated/new resource conflicting with an already
      *   existing resource, false otherwise
@@ -519,7 +620,7 @@ public class RestApiUtil {
 
     /**
      * Check if the message of the root cause message of 'e' matches with the specified message
-     * 
+     *
      * @param e throwable to check
      * @param message error message
      * @return true if the message of the root cause of 'e' matches with 'message'
@@ -532,7 +633,7 @@ public class RestApiUtil {
 
     /**
      * Attempts to find the actual cause of the throwable 'e'
-     * 
+     *
      * @param e throwable
      * @return the root cause of 'e' if the root cause exists, otherwise returns 'e' itself
      */
@@ -544,7 +645,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a BadRequestException with specified details and throws it
-     * 
+     *
      * @param msg error message
      * @param log Log instance
      * @throws BadRequestException
@@ -556,8 +657,62 @@ public class RestApiUtil {
     }
 
     /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     *
+     * @param msg error message
+     * @param e throwable to log
+     * @param log Log instance
+     * @throws BadRequestException
+     */
+    public static void handleBadRequest(String msg, Throwable e, Log log) throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(msg);
+        log.error(msg, e);
+        throw badRequestException;
+    }
+
+    /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     *
+     * @param errorHandler ErrorHandler object containing the error information
+     * @param log Log instance
+     * @throws BadRequestException
+     */
+    public static void handleBadRequest(ErrorHandler errorHandler, Log log) throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(errorHandler);
+        log.error(errorHandler.getErrorMessage());
+        throw badRequestException;
+    }
+
+    /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     *
+     * @param errorHandlers A List of error handler objects containing the error information
+     * @param log Log instance
+     * @throws BadRequestException
+     */
+    public static void handleBadRequest(List<ErrorHandler> errorHandlers, Log log) throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(errorHandlers);
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = 0; i < errorHandlers.size(); i++) {
+            ErrorHandler handler = errorHandlers.get(i);
+            builder.append(handler.getErrorMessage());
+            if (StringUtils.isNotBlank(handler.getErrorDescription())) {
+                builder.append(":");
+                builder.append(handler.getErrorDescription());
+            }
+
+            if (i < errorHandlers.size() - 1) {
+                builder.append(", ");
+            }
+        }
+        log.error(builder.toString());
+        throw badRequestException;
+    }
+
+    /**
      * Logs the error, builds a ForbiddenException with specified details and throws it
-     * 
+     *
      * @param resource Resource type
      * @param id id of resource
      * @param t Throwable
@@ -573,7 +728,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a ForbiddenException with specified details and throws it
-     * 
+     *
      * @param resource requested resource
      * @param id id of resource
      * @param log Log instance
@@ -588,7 +743,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a ForbiddenException with specified details and throws it
-     * 
+     *
      * @param description description of the error
      * @param t Throwable instance
      * @param log Log instance
@@ -619,7 +774,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a NotFoundException with specified details and throws it
-     * 
+     *
      * @param resource requested resource
      * @param id id of resource
      * @param t Throwable instance
@@ -635,7 +790,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a NotFoundException with specified details and throws it
-     * 
+     *
      * @param resource requested resource
      * @param id id of resource
      * @param log Log instance
@@ -679,7 +834,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a ConflictException with specified details and throws it
-     * 
+     *
      * @param description description of the error
      * @param log Log instance
      * @throws ConflictException
@@ -709,7 +864,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a ConflictException with specified details and throws it
-     * 
+     *
      * @param description description of the error
      * @param t Throwable instance
      * @param log Log instance
@@ -725,7 +880,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a MethodNotAllowedException with specified details and throws it
-     * 
+     *
      * @param method http method
      * @param resource requested resource
      * @param log Log instance
@@ -740,7 +895,7 @@ public class RestApiUtil {
 
     /**
      * Logs the error, builds a internalServerErrorException with specified details and throws it
-     * 
+     *
      * @param msg error message
      * @param t Throwable instance
      * @param log Log instance
@@ -769,7 +924,7 @@ public class RestApiUtil {
 
     /**
      * Checks whether the specified tenant domain is available
-     * 
+     *
      * @param tenantDomain tenant domain
      * @return true if tenant domain available
      * @throws UserStoreException
@@ -878,7 +1033,7 @@ public class RestApiUtil {
     }
 
     /** Returns the paginated url for subscriptions for a particular API identifier
-     * 
+     *
      * @param offset starting index
      * @param limit max number of objects returned
      * @param apiId API Identifier
@@ -897,7 +1052,7 @@ public class RestApiUtil {
     }
 
     /** Returns the paginated url for subscriptions for a particular application
-     * 
+     *
      * @param offset starting index
      * @param limit max number of objects returned
      * @param applicationId application id
@@ -920,6 +1075,20 @@ public class RestApiUtil {
      */
     public static String getDocumentationPaginatedURL(Integer offset, Integer limit, String apiId) {
         String paginatedURL = RestApiConstants.DOCUMENTS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
+        return paginatedURL;
+    }
+
+    /** Returns the paginated url for API ratings
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getRatingPaginatedURL(Integer offset, Integer limit, String apiId) {
+        String paginatedURL = RestApiConstants.RATINGS_GET_PAGINATION_URL;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
@@ -954,9 +1123,51 @@ public class RestApiUtil {
         return paginatedURL;
     }
 
+    /** Returns the paginated url for tags
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getResourcePathPaginatedURL(Integer offset, Integer limit) {
+        String paginatedURL = RestApiConstants.RESOURCE_PATH_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        return paginatedURL;
+    }
+
+    /** Returns the paginated url for APIProducts API
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @param query search query value
+     * @return constructed paginated url
+     */
+    public static String getAPIProductPaginatedURL(Integer offset, Integer limit, String query) {
+        String paginatedURL = RestApiConstants.APIS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
+        return paginatedURL;
+    }
+
+    /** Returns the paginated url for product documentations
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getProductDocumentationPaginatedURL(Integer offset, Integer limit, String apiId) {
+        String paginatedURL = RestApiConstants.PRODUCT_DOCUMENTS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
+        return paginatedURL;
+    }
+
     /**
      * Checks whether the list of tiers are valid given the all valid tiers
-     * 
+     *
      * @param allTiers All defined tiers
      * @param currentTiers tiers to check if they are a subset of defined tiers
      * @return null if there are no invalid tiers or returns the set of invalid tiers if there are any
@@ -1004,10 +1215,25 @@ public class RestApiUtil {
      */
     public static boolean registerResource(API api, String swagger) {
 
-        APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+        APIDefinition oasParser;
+        try {
+            Optional<APIDefinition> optional = OASParserUtil.getOASParser(swagger);
+            if (optional.isPresent()) {
+                oasParser = optional.get();
+            } else {
+                log.error("Error occurred while parsing swagger definition");
+                return false;
+            }
+        } catch (APIManagementException e) {
+            log.error("Error occurred while parsing swagger definition");
+            return false;
+        }
+
+
         Set<URITemplate> uriTemplates = null;
         try {
-            uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(api, swagger);
+            SwaggerData swaggerData = new SwaggerData(api);
+            uriTemplates = oasParser.getURITemplates(swaggerData, swagger);
         } catch (APIManagementException e) {
             log.error("Error while parsing swagger content to get URI Templates", e);
         }
@@ -1074,21 +1300,35 @@ public class RestApiUtil {
      *
      * @return URITemplate set associated with API Manager Store REST API
      */
-    public static Set<URITemplate> getStoreAppResourceMapping() {
+    public static Set<URITemplate> getStoreAppResourceMapping(String version) {
 
         API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER,
-                RestApiConstants.REST_API_PUBLISHER_CONTEXT,
-                RestApiConstants.REST_API_PUBLISHER_VERSION));
+                RestApiConstants.REST_API_STORE_CONTEXT,
+                RestApiConstants.REST_API_STORE_VERSION_0));
 
         if (storeResourceMappings != null) {
             return storeResourceMappings;
         } else {
-
             try {
-                String definition = IOUtils.toString(RestApiUtil.class.getResourceAsStream("/store-api.json"), "UTF-8");
-                APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-                //Get URL templates from swagger content we created
-                storeResourceMappings = apiDefinitionFromOpenAPISpec.getURITemplates(api, definition);
+                String definition;
+                if (RestApiConstants.REST_API_STORE_VERSION_0.equals(version)) {
+                    definition = IOUtils
+                            .toString(RestApiUtil.class.getResourceAsStream("/store-api.json"), "UTF-8");
+                } else {
+                    definition = IOUtils
+                            .toString(RestApiUtil.class.getResourceAsStream("/store-api.yaml"), "UTF-8");
+                }
+                Optional<APIDefinition> optional = OASParserUtil.getOASParser(definition);
+                APIDefinition oasParser;
+                if(optional.isPresent()){
+                    oasParser = optional.get();
+                } else {
+                    log.error("Error occurred while parsing swagger definition");
+                    return Collections.EMPTY_SET;
+                }
+                SwaggerData swaggerData = new SwaggerData(api);
+                //Get URL templates from swagger content w created
+                storeResourceMappings = oasParser.getURITemplates(swaggerData, definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
@@ -1106,22 +1346,33 @@ public class RestApiUtil {
      *
      * @return URITemplate set associated with API Manager publisher REST API
      */
-    public static Set<URITemplate> getPublisherAppResourceMapping() {
-
+    public static Set<URITemplate> getPublisherAppResourceMapping(String version) {
         API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER, RestApiConstants.REST_API_STORE_CONTEXT,
-                RestApiConstants.REST_API_STORE_VERSION));
+                RestApiConstants.REST_API_STORE_VERSION_0));
 
         if (publisherResourceMappings != null) {
             return publisherResourceMappings;
         } else {
-            //if(basePath.contains("/api/am/store/")){
-            //this is store API and pick resources accordingly
             try {
-                String definition = IOUtils
-                        .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.json"), "UTF-8");
-                APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+                String definition;
+                if (RestApiConstants.REST_API_PUBLISHER_VERSION_0.equals(version)) {
+                    definition = IOUtils
+                            .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.json"), "UTF-8");
+                } else {
+                    definition = IOUtils
+                            .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.yaml"), "UTF-8");
+                }
+                Optional<APIDefinition> optional = OASParserUtil.getOASParser(definition);
+                APIDefinition oasParser;
+                if(optional.isPresent()){
+                    oasParser = optional.get();
+                } else {
+                    log.error("Error occurred while parsing swagger definition");
+                    return Collections.EMPTY_SET;
+                }
+                SwaggerData swaggerData = new SwaggerData(api);
                 //Get URL templates from swagger content we created
-                publisherResourceMappings = apiDefinitionFromOpenAPISpec.getURITemplates(api, definition);
+                publisherResourceMappings = oasParser.getURITemplates(swaggerData, definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
@@ -1149,9 +1400,17 @@ public class RestApiUtil {
             try {
                 String definition = IOUtils
                         .toString(RestApiUtil.class.getResourceAsStream("/admin-api.json"), "UTF-8");
-                APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+                Optional<APIDefinition> optional = OASParserUtil.getOASParser(definition);
+                APIDefinition oasParser;
+                if(optional.isPresent()){
+                    oasParser = optional.get();
+                } else {
+                    log.error("Error occurred while parsing swagger definition");
+                    return Collections.EMPTY_SET;
+                }
+                SwaggerData swaggerData = new SwaggerData(api);
                 //Get URL templates from swagger content we created
-                adminAPIResourceMappings = apiDefinitionFromOpenAPISpec.getURITemplates(api, definition);
+                adminAPIResourceMappings = oasParser.getURITemplates(swaggerData, definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
@@ -1203,8 +1462,8 @@ public class RestApiUtil {
     }
 
     /**
-     * Returns the white-listed URIs and associated HTTP methods for REST API. If not already read before, reads 
-     * api-manager.xml configuration, store the results in a static reference and returns the results. 
+     * Returns the white-listed URIs and associated HTTP methods for REST API. If not already read before, reads
+     * api-manager.xml configuration, store the results in a static reference and returns the results.
      * Otherwise returns previously stored the static reference object.
      *
      * @return A Dictionary with the white-listed URIs and the associated HTTP methods
@@ -1349,7 +1608,7 @@ public class RestApiUtil {
         //check whether the user has super tenant admin role
         boolean isSuperAdminRoleNameExist = false;
         try {
-            isSuperAdminRoleNameExist = isUserInRole(username, superAdminRole);
+            isSuperAdminRoleNameExist = APIUtil.isUserInRole(username, superAdminRole);
         } catch (UserStoreException | APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error in checking whether the user has admin role", e, log);
         }
@@ -1365,22 +1624,36 @@ public class RestApiUtil {
     }
 
     /**
-     * Check whether the user has the given role
+     * Check if user calls an anonymous REST API.
      *
-     * @throws UserStoreException
-     * @throws APIManagementException
+     * @param inMessage cxf message
+     * @return true if user calls anonymous API, false otherwise.
      */
-    public static boolean isUserInRole(String user, String role) throws UserStoreException, APIManagementException {
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(user));
-        UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
-        user = SelfSignUpUtil.getDomainSpecificUserName(user, signupConfig);
-        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(user);
-        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .getTenantId(tenantDomain);
-        UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
-        UserStoreManager manager = realm.getUserStoreManager();
-        AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
-        return abstractManager.isUserInRole(tenantAwareUserName, role);
+    public static boolean checkIfAnonymousAPI(Message inMessage) {
+        return (inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED) != null &&
+                !((Boolean) inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED)));
+    }
+
+    /**
+     * This method is used to get the URI template set for the relevant REST API using the given base path.
+     *
+     * @param basePath Base path of the REST API
+     * @return Set of URI templates for the REST API
+     */
+    public static Set<URITemplate> getURITemplatesForBasePath(String basePath) {
+        Set<URITemplate> uriTemplates = new HashSet<>();
+        //get URI templates using the base path in the request
+        if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_0)) {
+            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_0);
+        } else if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT_FULL_1)) {
+            uriTemplates = RestApiUtil.getPublisherAppResourceMapping(RestApiConstants.REST_API_PUBLISHER_VERSION_1);
+        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_0)) {
+            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_0);
+        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT_FULL_1)) {
+            uriTemplates = RestApiUtil.getStoreAppResourceMapping(RestApiConstants.REST_API_STORE_VERSION_1);
+        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
+            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping();
+        }
+        return uriTemplates;
     }
 }

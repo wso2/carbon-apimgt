@@ -39,9 +39,11 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClientConstants;
@@ -207,7 +209,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<FaultCountDTO> getPerAppAPIFaultCount(String subscriberName, String groupId, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
-        List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
+        List<String> subscriberApps = getAppsWithIdBySubscriber(subscriberName, groupId);
+        if (log.isDebugEnabled()) {
+            if (subscriberApps.isEmpty()) {
+                log.debug("List of Subscriber Applications is empty");
+            }
+        }
         return getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULTY_INVOCATION_AGG,
                 subscriberApps, fromDate, toDate, limit);
     }
@@ -227,7 +234,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<AppUsageDTO> getTopAppUsers(String subscriberName, String groupId, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
-        List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
+        List<String> subscriberApps = getAppsWithIdBySubscriber(subscriberName, groupId);
+        if (log.isDebugEnabled()) {
+            if (subscriberApps.isEmpty()) {
+                log.debug("List of Subscriber Applications is empty");
+            }
+        }
         return getTopAppUsageData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG,
                 subscriberApps, fromDate, toDate, limit);
     }
@@ -250,12 +262,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(startDate, endDate);
+                LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+                DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+                LocalDateTime fromLocalDateTime = LocalDateTime.parse(startDate, formatter);//GMT time
 
-                if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                    granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                } else if ((durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) ||
+                        (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0)) {
                     granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 }
                 StringBuilder idListQuery = new StringBuilder();
@@ -379,31 +393,31 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
-            if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+            LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+            DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+            LocalDateTime fromLocalDateTime = LocalDateTime.parse(fromDate, formatter);//GMT time
+
+            if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+            } else if ((durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) ||
+                    (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0)) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
 
             topApiUserQuery = new StringBuilder(
-                    "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + " on");
+                    "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + " on("
+                            + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
+                            + "' AND " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName);
 
             if (!APIUsageStatisticsClientConstants.FOR_ALL_API_VERSIONS.equals(version)) {
-                topApiUserQuery.append("(" + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "' AND "
-                        + APIUsageStatisticsClientConstants.API_VERSION + "=='" + version + "') ");
-            } else {
-                topApiUserQuery.append(" " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "' ");
+                topApiUserQuery.append("' AND " + APIUsageStatisticsClientConstants.API_VERSION + "=='" + version);
             }
-
-            topApiUserQuery
-                    .append("within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
-                            + "' select " + APIUsageStatisticsClientConstants.USERNAME + ", "
-                            + APIUsageStatisticsClientConstants.API_CREATOR + ", sum("
-                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT
-                            + ") as net_total_requests group by " + APIUsageStatisticsClientConstants.USERNAME + ", "
-                            + APIUsageStatisticsClientConstants.API_CREATOR + " order by net_total_requests DESC;");
+            topApiUserQuery.append("') within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '"
+                    + granularity + "' select " + APIUsageStatisticsClientConstants.USERNAME + ", "
+                    + APIUsageStatisticsClientConstants.API_CREATOR + ", sum("
+                    + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as net_total_requests group by "
+                    + APIUsageStatisticsClientConstants.USERNAME + ", " + APIUsageStatisticsClientConstants.API_CREATOR
+                    + " order by net_total_requests DESC;");
 
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
@@ -462,10 +476,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 String startDate = fromDate + ":00";
                 String endDate = toDate + ":00";
                 String granularity = APIUsageStatisticsClientConstants.MINUTES_GRANULARITY;//default granularity
-
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(startDate, endDate);
+                LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+                DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+                LocalDateTime fromLocalDateTime = LocalDateTime.parse(startDate, formatter);//GMT time
 
-                if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+                if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0
                         || durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_WEEKS) > 0) {
@@ -473,6 +489,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;
                 }
+
                 StringBuilder idListQuery = new StringBuilder();
                 for (int i = 0; i < idList.size(); i++) {
                     if (i > 0) {
@@ -549,7 +566,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<AppCallTypeDTO> getAppApiCallType(String subscriberName, String groupId, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
-        List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
+        List<String> subscriberApps = getAppsWithIdBySubscriber(subscriberName, groupId);
+        if (log.isDebugEnabled()) {
+            if (subscriberApps.isEmpty()) {
+                log.debug("List of Subscriber Applications is empty");
+            }
+        }
         return getAPICallTypeUsageData(APIUsageStatisticsClientConstants.API_RESOURCE_PATH_PER_APP_AGG,
                 subscriberApps, fromDate, toDate, limit);
     }
@@ -572,11 +594,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(startDate, endDate);
+                LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+                DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+                LocalDateTime fromLocalDateTime = LocalDateTime.parse(startDate, formatter);//GMT time
 
-                if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                    granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 }
@@ -592,13 +617,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         "from " + tableName + " on " + idListQuery.toString() + " within " + getTimestamp(startDate)
                                 + "L, " + getTimestamp(endDate) + "L per '" + granularity + "' select "
                                 + APIUsageStatisticsClientConstants.API_NAME + ", "
+                                + APIUsageStatisticsClientConstants.API_VERSION + ", "
                                 + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                                 + APIUsageStatisticsClientConstants.API_METHOD + ", "
                                 + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
                                 + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ", "
-                                + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + " group by "
+                                + "sum(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT
+                                + ") as total_request_count group by "
                                 + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
                                 + APIUsageStatisticsClientConstants.API_NAME + ", "
+                                + APIUsageStatisticsClientConstants.API_VERSION + ", "
                                 + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                                 + APIUsageStatisticsClientConstants.API_METHOD + ", "
                                 + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ";";
@@ -606,6 +634,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                                 query);
                 String apiName;
+                String apiVersion;
                 String apiCreator;
                 String callType;
                 String applicationId;
@@ -615,23 +644,24 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
                     for (Object record : jArray) {
                         JSONArray recordArray = (JSONArray) record;
-                        if (recordArray.size() == 6) {
+                        if (recordArray.size() == 7) {
                             apiName = (String) recordArray.get(0);
-                            apiCreator = (String) recordArray.get(1);
+                            apiVersion = (String) recordArray.get(1);
+                            apiCreator = (String) recordArray.get(2);
                             apiName = apiName + " (" + apiCreator + ")";
-                            callType = (String) recordArray.get(2);
-                            applicationId = (String) recordArray.get(3);
-                            apiResourceTemplate = (String) recordArray.get(4);
+                            callType = (String) recordArray.get(3);
+                            applicationId = (String) recordArray.get(4);
+                            apiResourceTemplate = (String) recordArray.get(5);
                             List<String> callTypeList = new ArrayList<String>();
                             callTypeList.add(apiResourceTemplate + " (" + callType + ")");
                             List<Integer> hitCountList = new ArrayList<Integer>();
-                            long hitCount = (Long) recordArray.get(5);
+                            long hitCount = (Long) recordArray.get(6);
                             hitCountList.add((int) hitCount);
                             String appName = subscriberAppsMap.get(applicationId);
                             boolean found = false;
                             for (AppCallTypeDTO dto : appApiCallTypeList) {
                                 if (dto.getAppName().equals(appName)) {
-                                    dto.addToApiCallTypeArray(apiName, callTypeList, hitCountList);
+                                    dto.addToApiCallTypeArray(apiName, apiVersion, callTypeList, hitCountList);
                                     found = true;
                                     break;
                                 }
@@ -639,7 +669,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                             if (!found) {
                                 appCallTypeDTO = new AppCallTypeDTO();
                                 appCallTypeDTO.setAppName(appName);
-                                appCallTypeDTO.addToApiCallTypeArray(apiName, callTypeList, hitCountList);
+                                appCallTypeDTO.addToApiCallTypeArray(apiName, apiVersion, callTypeList, hitCountList);
                                 appApiCallTypeList.add(appCallTypeDTO);
                             }
                         }
@@ -667,7 +697,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<PerAppApiCountDTO> perAppPerAPIUsage(String subscriberName, String groupId, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
-        List<String> subscriberApps = getAppsAndIdsBySubscriber(subscriberName, groupId);
+        List<String> subscriberApps = getAppsWithIdBySubscriber(subscriberName, groupId);
+        if (log.isDebugEnabled()) {
+            if (subscriberApps.isEmpty()) {
+                log.debug("List of Subscriber Applications is empty");
+            }
+        }
         return getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, subscriberApps, fromDate,
                 toDate, limit);
     }
@@ -689,11 +724,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 String endDate = toDate + ":00";
                 String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(startDate, endDate);
+                LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+                DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+                LocalDateTime fromLocalDateTime = LocalDateTime.parse(startDate, formatter);//GMT time
 
-                if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                    granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 }
@@ -775,8 +813,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<APIUsageDTO> getProviderAPIUsage(String providerName, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
+        String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        if (providerName.contains(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+            providerName = APIUsageStatisticsClientConstants.ALL_PROVIDERS;
+        }
         Collection<APIUsage> usageData = getAPIUsageData(APIUsageStatisticsClientConstants.API_VERSION_PER_APP_AGG,
-                fromDate, toDate);
+                tenantDomain, fromDate, toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIUsageDTO> usageByAPIs = new TreeMap<String, APIUsageDTO>();
         for (APIUsage usage : usageData) {
@@ -810,10 +852,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method gets the usage data for a given API across all versions
      *
      * @param tableName name of the table in the database
+     * @param tenantDomain Tenant Domain
+     * @param fromDate From date
+     * @param toDate To date
      * @return a collection containing the API usage data
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private Collection<APIUsage> getAPIUsageData(String tableName, String fromDate, String toDate)
+    private Collection<APIUsage> getAPIUsageData(String tableName, String tenantDomain, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIUsage> usageDataList = new ArrayList<APIUsage>();
@@ -821,21 +866,26 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
+            LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+            DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+            LocalDateTime fromLocalDateTime = LocalDateTime.parse(fromDate, formatter);//GMT time
 
-            if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+            if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+            } else if ((durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) ||
+                    (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0)) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
-            String query = "from " + tableName + " within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate)
-                    + "L per '" + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
-                    + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
-                    + APIUsageStatisticsClientConstants.API_VERSION + ", sum("
-                    + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as aggregateSum group by "
-                    + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CONTEXT
-                    + ", " + APIUsageStatisticsClientConstants.API_VERSION + ";";
+            String query =
+                    "from " + tableName + " on(" + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='"
+                            + tenantDomain + "') within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate)
+                            + "L per '" + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                            + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
+                            + APIUsageStatisticsClientConstants.API_VERSION + ", sum("
+                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as aggregateSum group by "
+                            + APIUsageStatisticsClientConstants.API_NAME + ", "
+                            + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
+                            + APIUsageStatisticsClientConstants.API_VERSION + ";";
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
@@ -878,10 +928,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName, String apiName, String fromDate,
             String toDate) throws APIMgtUsageQueryServiceClientException {
-
+        String tenantDomain = null;
+        if (providerName != null) {
+            tenantDomain = MultitenantUtils.getTenantDomain(providerName);
+            if (providerName.contains(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                providerName = APIUsageStatisticsClientConstants.ALL_PROVIDERS;
+            }
+        }
         List<APIUsage> usageData = this
-                .getUsageByAPIVersionsData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, fromDate, toDate,
-                        apiName);
+                .getUsageByAPIVersionsData(APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG, tenantDomain,
+                        fromDate, toDate, apiName);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIVersionUsageDTO> usageByVersions = new TreeMap<String, APIVersionUsageDTO>();
         for (APIUsage usage : usageData) {
@@ -914,7 +970,10 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         Collection<APIUsageByResourcePath> usageData = this
                 .getAPIUsageByResourcePathData(APIUsageStatisticsClientConstants.API_RESOURCE_PATH_PER_APP_AGG,
-                        fromDate, toDate);
+                        providerName, fromDate, toDate);
+        if (providerName.contains(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+            providerName = APIUsageStatisticsClientConstants.ALL_PROVIDERS;
+        }
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIResourcePathUsageDTO> usageByResourcePath = new ArrayList<APIResourcePathUsageDTO>();
         for (APIUsageByResourcePath usage : usageData) {
@@ -951,8 +1010,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         List<APIUsageByDestination> usageData = this
-                .getAPIUsageByDestinationData(APIUsageStatisticsClientConstants.API_PER_DESTINATION_AGG, fromDate,
-                        toDate);
+                .getAPIUsageByDestinationData(APIUsageStatisticsClientConstants.API_PER_DESTINATION_AGG, providerName,
+                        fromDate, toDate);
+        if (providerName.contains(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+            providerName = APIUsageStatisticsClientConstants.ALL_PROVIDERS;
+        }
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIDestinationUsageDTO> usageByDestination = new ArrayList<APIDestinationUsageDTO>();
 
@@ -1145,8 +1207,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, int limit)
             throws APIMgtUsageQueryServiceClientException {
-
-        Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, null);
+        String tenantDomain = null;
+        if (providerName != null) {
+            tenantDomain = MultitenantUtils.getTenantDomain(providerName);
+            if (providerName.contains(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                providerName = APIUsageStatisticsClientConstants.ALL_PROVIDERS;
+            }
+        }
+        Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, null, tenantDomain);
         Map<String, PerUserAPIUsageDTO> usageByUsername = new TreeMap<String, PerUserAPIUsageDTO>();
         List<API> apiList = getAPIsByProvider(providerName);
         for (APIUsageByUser usageEntry : usageData) {
@@ -1180,10 +1248,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
-
+        String tenantAwareProviderName = providerName;
+        String tenantDomain = MultitenantUtils.getTenantDomain(tenantAwareProviderName);
+        if (providerName.contains(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+            providerName = APIUsageStatisticsClientConstants.ALL_PROVIDERS;
+        }
         List<APIResponseFaultCount> faultyData = this
-                .getAPIResponseFaultCountData(APIUsageStatisticsClientConstants.API_FAULTY_INVOCATION_AGG, fromDate,
-                        toDate);
+                .getAPIResponseFaultCountData(APIUsageStatisticsClientConstants.API_FAULTY_INVOCATION_AGG, tenantDomain,
+                        fromDate, toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIResponseFaultCountDTO> faultyCount = new ArrayList<APIResponseFaultCountDTO>();
         List<APIVersionUsageDTO> apiVersionUsageList;
@@ -1198,7 +1270,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     faultyDTO.setVersion(fault.getApiVersion());
                     faultyDTO.setContext(fault.getContext());
                     faultyDTO.setCount(fault.getFaultCount());
-                    apiVersionUsageList = getUsageByAPIVersions(providerName, fault.getApiName(), fromDate, toDate);
+                    apiVersionUsageList = getUsageByAPIVersions(tenantAwareProviderName, fault.getApiName(), fromDate,
+                            toDate);
                     for (APIVersionUsageDTO apiVersionUsageDTO : apiVersionUsageList) {
                         if (apiVersionUsageDTO.getVersion().equals(fault.getApiVersion())) {
                             long requestCount = apiVersionUsageDTO.getCount();
@@ -1241,8 +1314,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, String apiVersion,
             int limit) throws APIMgtUsageQueryServiceClientException {
-
-        Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, apiVersion);
+        String tenantDomain = null;
+        if (providerName != null) {
+            tenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        }
+        Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, apiVersion, tenantDomain);
         Map<String, PerUserAPIUsageDTO> usageByUsername = new TreeMap<String, PerUserAPIUsageDTO>();
         List<API> apiList = getAPIsByProvider(providerName);
         for (APIUsageByUser usageEntry : usageData) {
@@ -1363,29 +1439,33 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method find the API fault count data
      *
      * @param tableName Name of the table data exist
+     * @param tenantDomain Tenant Domain
      * @param fromDate  starting data
      * @param toDate    ending date
      * @return list of APIResponseFaultCount
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
      */
-    private List<APIResponseFaultCount> getAPIResponseFaultCountData(String tableName, String fromDate, String toDate)
-            throws APIMgtUsageQueryServiceClientException {
+    private List<APIResponseFaultCount> getAPIResponseFaultCountData(String tableName, String tenantDomain,
+            String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
         List<APIResponseFaultCount> faultUsage = new ArrayList<APIResponseFaultCount>();
         try {
             String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
+            LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+            DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+            LocalDateTime fromLocalDateTime = LocalDateTime.parse(fromDate, formatter);//GMT time
 
-            if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+            if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+            } else if ((durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) ||
+                    (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0)) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
             String query =
-                    "from " + tableName + " within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '"
-                            + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                    "from " + tableName + " on(" + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='"
+                            + tenantDomain + "') within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate)
+                            + "L per '" + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
                             + APIUsageStatisticsClientConstants.API_VERSION + ", "
                             + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                             + APIUsageStatisticsClientConstants.API_CONTEXT + ", sum("
@@ -1393,7 +1473,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                             + APIUsageStatisticsClientConstants.API_NAME + ", "
                             + APIUsageStatisticsClientConstants.API_VERSION + ", "
                             + APIUsageStatisticsClientConstants.API_CREATOR + ", "
-                            + APIUsageStatisticsClientConstants.API_CONTEXT + "  order by " 
+                            + APIUsageStatisticsClientConstants.API_CONTEXT + "  order by "
                             + APIUsageStatisticsClientConstants.API_NAME + " ASC ;";
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_FAULT_SUMMARY_SIDDHI_APP,
@@ -1428,38 +1508,49 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method finds the Resource path usage of APIs
      *
      * @param tableName Name of the aggregation where the data exist
+     * @param providerName Name of the provider
      * @param fromDate  starting date
      * @param toDate    ending date
      * @return list of APIUsageByResourcePath
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
      */
-    private List<APIUsageByResourcePath> getAPIUsageByResourcePathData(String tableName, String fromDate, String toDate)
-            throws APIMgtUsageQueryServiceClientException {
+    private List<APIUsageByResourcePath> getAPIUsageByResourcePathData(String tableName, String providerName,
+            String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
         List<APIUsageByResourcePath> usage = new ArrayList<APIUsageByResourcePath>();
+        String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
         try {
             String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
+            LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+            DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+            LocalDateTime fromLocalDateTime = LocalDateTime.parse(fromDate, formatter);//GMT time
 
-            if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+            if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+            } else if ((durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) ||
+                    (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0)) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
 
             String query =
-                    "from " + tableName + " within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '"
-                            + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                    "from " + tableName + " on(" + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='"
+                            + tenantDomain + "') within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate)
+                            + "L per '" + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
                             + APIUsageStatisticsClientConstants.API_VERSION + ", "
                             + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                             + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
                             + APIUsageStatisticsClientConstants.API_METHOD + ", "
-                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ", "
+                            + "sum(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT
+                            + ") as total_request_count, "
                             + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ", "
-                            + APIUsageStatisticsClientConstants.TIME_STAMP + ";";
-
+                            + APIUsageStatisticsClientConstants.TIME_STAMP + " group by "
+                            + APIUsageStatisticsClientConstants.API_NAME + ", "
+                            + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                            + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                            + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
+                            + APIUsageStatisticsClientConstants.API_METHOD + ", "
+                            + APIUsageStatisticsClientConstants.API_RESOURCE_TEMPLATE + ";";
             JSONObject jsonObj = APIUtil
                     .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
                             query);
@@ -1471,8 +1562,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String resourcePaths;
             Long time;
             APIUsageByResourcePath apiUsageByResourcePath;
-            DateTimeFormatter formatter = DateTimeFormat
-                    .forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
             if (jsonObj != null) {
                 JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
                 for (Object record : jArray) {
@@ -1503,31 +1592,36 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method finds the API Destination usage of APIs
      *
      * @param tableName Name of the table where the data exist
+     * @param providerName Name of the provider
      * @param fromDate  starting date
      * @param toDate    ending date
      * @return list of APIUsageByDestination
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
      */
-    private List<APIUsageByDestination> getAPIUsageByDestinationData(String tableName, String fromDate, String toDate)
-            throws APIMgtUsageQueryServiceClientException {
+    private List<APIUsageByDestination> getAPIUsageByDestinationData(String tableName, String providerName,
+            String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
 
         List<APIUsageByDestination> usageByDestination = new ArrayList<APIUsageByDestination>();
+        String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
         try {
             String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
+            LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+            DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+            LocalDateTime fromLocalDateTime = LocalDateTime.parse(fromDate, formatter);//GMT time
 
-            if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+            if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-            } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+            } else if ((durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) ||
+                    (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0)) {
                 granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
             }
 
             String query =
-                    "from " + tableName + " within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '"
-                            + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                    "from " + tableName + " on(" + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='"
+                            + tenantDomain + "') within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate)
+                            + "L per '" + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
                             + APIUsageStatisticsClientConstants.API_VERSION + ", "
                             + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                             + APIUsageStatisticsClientConstants.API_CONTEXT + ", "
@@ -1585,7 +1679,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private long getTotalRequestCountOfAPIVersion(String tableName, String apiName, String tenantDomain,
             String apiVersion, String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
-        List<APIUsage> apiUsages = getUsageByAPIVersionsData(tableName, fromDate, toDate, apiName);
+        List<APIUsage> apiUsages = getUsageByAPIVersionsData(tableName, tenantDomain, fromDate, toDate, apiName);
         long totalRequestCount = 0;
         Pattern tenantContextPattern;
         boolean match;
@@ -1620,8 +1714,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return list of APIUsage
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
      */
-    private List<APIUsage> getUsageByAPIVersionsData(String tableName, String fromDate, String toDate, String apiName)
-            throws APIMgtUsageQueryServiceClientException {
+    private List<APIUsage> getUsageByAPIVersionsData(String tableName, String tenantDomain, String fromDate,
+            String toDate, String apiName) throws APIMgtUsageQueryServiceClientException {
 
         List<APIUsage> usageDataList = new ArrayList<APIUsage>();
         try {
@@ -1630,17 +1724,21 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
+                LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+                DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+                LocalDateTime fromLocalDateTime = LocalDateTime.parse(fromDate, formatter);//GMT time
 
-                if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                    granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
+                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                    granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 }
 
-                query = "from " + tableName + " on " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName
-                        + "' within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
+                query = "from " + tableName + " on(" + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN
+                        + "=='" + tenantDomain + "' AND " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName
+                        + "') within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
                         + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
                         + APIUsageStatisticsClientConstants.API_VERSION + ", "
                         + APIUsageStatisticsClientConstants.API_CREATOR + ", "
@@ -1651,8 +1749,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         + APIUsageStatisticsClientConstants.API_CREATOR + ", "
                         + APIUsageStatisticsClientConstants.API_CONTEXT + ";";
             } else {
-                query = "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + " on "
-                        + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "'" + " within " + 0 + "L, "
+                query = "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + " on("
+                        + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain + "' AND "
+                        + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "') within " + 0 + "L, "
                         + new Date().getTime() + "L per 'months' select " + APIUsageStatisticsClientConstants.API_NAME
                         + ", " + APIUsageStatisticsClientConstants.API_VERSION + ", "
                         + APIUsageStatisticsClientConstants.API_CREATOR + ", "
@@ -1717,14 +1816,17 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
+                LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+                DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+                LocalDateTime fromLocalDateTime = LocalDateTime.parse(fromDate, formatter);//GMT time
 
-                if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                    granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                } else if ((durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) ||
+                        (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0)) {
                     granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 }
+
                 query = "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + " on " + filter + " within "
                         + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity + "' select "
                         + APIUsageStatisticsClientConstants.API_NAME + ", "
@@ -1910,18 +2012,18 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return list of APIUsageByUser
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred
      */
-    private Collection<APIUsageByUser> getUsageOfAPI(String apiName, String apiVersion)
+    private Collection<APIUsageByUser> getUsageOfAPI(String apiName, String apiVersion, String tenantDomain)
             throws APIMgtUsageQueryServiceClientException {
         Collection<APIUsageByUser> usageData = new ArrayList<APIUsageByUser>();
         try {
-            StringBuilder query = new StringBuilder("from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG);
+            StringBuilder query = new StringBuilder(
+                    "from " + APIUsageStatisticsClientConstants.API_USER_PER_APP_AGG + " on("
+                            + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
+                            + "' AND " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName);
             if (apiVersion != null) {
-                query.append(" on (" + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "' " + " AND "
-                        + APIUsageStatisticsClientConstants.API_VERSION + "=='" + apiVersion + "') ");
-            } else {
-                query.append(" on " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "' ");
+                query.append("' AND " + APIUsageStatisticsClientConstants.API_VERSION + "=='" + apiVersion);
             }
-            query.append("within " + 0 + "L, " + new Date().getTime() + "L per 'months' select "
+            query.append("') within " + 0 + "L, " + new Date().getTime() + "L per 'months' select "
                     + APIUsageStatisticsClientConstants.API_CONTEXT + ", " + APIUsageStatisticsClientConstants.USERNAME
                     + ", " + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ", "
                     + APIUsageStatisticsClientConstants.API_VERSION + ";");
@@ -1976,8 +2078,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String granularity = APIUsageStatisticsClientConstants.MINUTES_GRANULARITY;//default granularity
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
+            LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+            DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+            LocalDateTime fromLocalDateTime = LocalDateTime.parse(fromDate, formatter);//GMT time
 
-            if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+            if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0
                     || durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_WEEKS) > 0) {
@@ -1996,9 +2101,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 query.append(" AND " + APIUsageStatisticsClientConstants.APPLICATION_NAME + "=='" + appName + "'");
             }
             query.append(") within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
-                    + "' select " + APIUsageStatisticsClientConstants.TIME_STAMP + ", sum(coalesce("
-                    + APIUsageStatisticsClientConstants.SUCCESS_COUNT + ",0L)) as success_request_count, sum(coalesce("
-                    + APIUsageStatisticsClientConstants.THROTTLE_COUNT + ",0L)) as throttled_out_count group by "
+                    + "' select " + APIUsageStatisticsClientConstants.TIME_STAMP + ", sum("
+                    + APIUsageStatisticsClientConstants.SUCCESS_COUNT + ") as success_request_count, sum("
+                    + APIUsageStatisticsClientConstants.THROTTLE_COUNT + ") as throttled_out_count group by "
                     + APIUsageStatisticsClientConstants.TIME_STAMP + " order by "
                     + APIUsageStatisticsClientConstants.TIME_STAMP + " ASC;");
             JSONObject jsonObj = APIUtil.executeQueryOnStreamProcessor(
@@ -2007,8 +2112,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String time;
             long successRequestCount;
             long throttledOutCount;
-            DateTimeFormatter formatter = DateTimeFormat
-                    .forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
             if (jsonObj != null) {
                 JSONArray jArray = (JSONArray) jsonObj.get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
                 for (Object record : jArray) {
@@ -2052,7 +2155,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
             Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
 
-            if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+            LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+            DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+            LocalDateTime fromLocalDateTime = LocalDateTime.parse(fromDate, formatter);//GMT time
+
+            if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                 granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
             } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0
                     || durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_WEEKS) > 0) {
@@ -2070,9 +2177,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
             query.append(") within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '" + granularity
                     + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
-                    + APIUsageStatisticsClientConstants.API_CREATOR + ", sum(coalesce("
-                    + APIUsageStatisticsClientConstants.SUCCESS_COUNT + ",0L)) as success_request_count, sum(coalesce("
-                    + APIUsageStatisticsClientConstants.THROTTLE_COUNT + ",0L)) as throttleout_count group by "
+                    + APIUsageStatisticsClientConstants.API_CREATOR + ", sum("
+                    + APIUsageStatisticsClientConstants.SUCCESS_COUNT + ") as success_request_count, sum("
+                    + APIUsageStatisticsClientConstants.THROTTLE_COUNT + ") as throttleout_count group by "
                     + APIUsageStatisticsClientConstants.API_NAME + ", " + APIUsageStatisticsClientConstants.API_CREATOR
                     + " order by " + APIUsageStatisticsClientConstants.API_NAME + " ASC;");
             JSONObject jsonObj = APIUtil.executeQueryOnStreamProcessor(
@@ -2240,8 +2347,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 String granularity = APIUsageStatisticsClientConstants.SECONDS_GRANULARITY;
 
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
+                LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+                DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+                LocalDateTime fromLocalDateTime = LocalDateTime.parse(fromDate, formatter);//GMT time
 
-                if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+                if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0
                         || durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_WEEKS) > 0) {
@@ -2341,12 +2451,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
+                LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+                DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+                LocalDateTime fromLocalDateTime = LocalDateTime.parse(fromDate, formatter);//GMT time
 
-                if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                    granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                } else if ((durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) ||
+                        (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0)) {
                     granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 }
                 query.append(
@@ -2424,12 +2536,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 String granularity = APIUsageStatisticsClientConstants.HOURS_GRANULARITY;//default granularity
 
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
+                LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+                DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+                LocalDateTime fromLocalDateTime = LocalDateTime.parse(fromDate, formatter);//GMT time
 
-                if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
-                    granularity = APIUsageStatisticsClientConstants.YEARS_GRANULARITY;
-                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) {
+                if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
-                } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0) {
+                } else if ((durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0) ||
+                        (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_DAYS) > 0)) {
                     granularity = APIUsageStatisticsClientConstants.DAYS_GRANULARITY;
                 }
                 query.append(
@@ -2478,26 +2592,31 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     @Override
     public List<Result<APIUsageByApplication>> getAPIUsageByApplications(String apiName, String apiVersion,
-           String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
-
-        List<Result<APIUsageByApplication>> apiUsageByApplicationsResultList =
-                new ArrayList<Result<APIUsageByApplication>>();
+            String fromDate, String toDate, String providerName) throws APIMgtUsageQueryServiceClientException {
+        String tenantDomain = null;
+        if (providerName != null) {
+            tenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        }
+        List<Result<APIUsageByApplication>> apiUsageByApplicationsResultList = new ArrayList<Result<APIUsageByApplication>>();
         try {
             // Build the query.
-            StringBuilder apiUsageByAppQuery = new StringBuilder("from " +
-                    APIUsageStatisticsClientConstants.API_VERSION_PER_APP_AGG + " on ");
+            StringBuilder apiUsageByAppQuery = new StringBuilder(
+                    "from " + APIUsageStatisticsClientConstants.API_VERSION_PER_APP_AGG + " on("
+                            + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + "=='" + tenantDomain
+                            + "' AND " + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName);
 
             if (!APIUsageStatisticsClientConstants.FOR_ALL_API_VERSIONS.equals(apiVersion)) {
-                apiUsageByAppQuery.append("(" + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "' AND "
-                        + APIUsageStatisticsClientConstants.API_VERSION + "=='" + apiVersion + "') ");
-            } else {
-                apiUsageByAppQuery.append("(" + APIUsageStatisticsClientConstants.API_NAME + "=='" + apiName + "') ");
+                apiUsageByAppQuery
+                        .append("' AND " + APIUsageStatisticsClientConstants.API_VERSION + "=='" + apiVersion);
             }
-
             if (fromDate != null && toDate != null) {
                 String granularity = APIUsageStatisticsClientConstants.SECONDS_GRANULARITY;
                 Map<String, Integer> durationBreakdown = this.getDurationBreakdown(fromDate, toDate);
-                if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_YEARS) > 0) {
+                LocalDateTime currentDate = LocalDateTime.now(DateTimeZone.UTC);
+                DateTimeFormatter formatter = DateTimeFormat.forPattern(APIUsageStatisticsClientConstants.TIMESTAMP_PATTERN);
+                LocalDateTime fromLocalDateTime = LocalDateTime.parse(fromDate, formatter);//GMT time
+
+                if (fromLocalDateTime.isBefore(currentDate.minusYears(1))) {
                     granularity = APIUsageStatisticsClientConstants.MONTHS_GRANULARITY;
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_MONTHS) > 0
                         || durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_WEEKS) > 0) {
@@ -2507,19 +2626,20 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 } else if (durationBreakdown.get(APIUsageStatisticsClientConstants.DURATION_HOURS) > 0) {
                     granularity = APIUsageStatisticsClientConstants.MINUTES_GRANULARITY;
                 }
-                apiUsageByAppQuery.append("within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate)
-                        + "L per '" + granularity + "' select "
-                        + APIUsageStatisticsClientConstants.API_NAME + ", "
-                        + APIUsageStatisticsClientConstants.API_VERSION + ", "
-                        + APIUsageStatisticsClientConstants.APPLICATION_NAME + ", sum("
-                        + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as total_request_count group by "
-                        + APIUsageStatisticsClientConstants.API_NAME + ", "
-                        + APIUsageStatisticsClientConstants.API_VERSION + ", "
-                        + APIUsageStatisticsClientConstants.APPLICATION_NAME + ";");
+                apiUsageByAppQuery
+                        .append("') within " + getTimestamp(fromDate) + "L, " + getTimestamp(toDate) + "L per '"
+                                + granularity + "' select " + APIUsageStatisticsClientConstants.API_NAME + ", "
+                                + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                                + APIUsageStatisticsClientConstants.APPLICATION_NAME + ", sum("
+                                + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT
+                                + ") as total_request_count group by " + APIUsageStatisticsClientConstants.API_NAME
+                                + ", " + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                                + APIUsageStatisticsClientConstants.APPLICATION_NAME + ";");
             }
             // Invoke the rest api and get the results.
-            JSONObject apiUsageByAppResult = APIUtil.executeQueryOnStreamProcessor(
-                    APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP, apiUsageByAppQuery.toString());
+            JSONObject apiUsageByAppResult = APIUtil
+                    .executeQueryOnStreamProcessor(APIUsageStatisticsClientConstants.APIM_ACCESS_SUMMARY_SIDDHI_APP,
+                            apiUsageByAppQuery.toString());
 
             // Create the api usage object and return.
             long requestCount;
@@ -2527,8 +2647,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String version;
             String appName;
             if (apiUsageByAppResult != null) {
-                JSONArray jArray = (JSONArray) apiUsageByAppResult.get(
-                        APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
+                JSONArray jArray = (JSONArray) apiUsageByAppResult
+                        .get(APIUsageStatisticsClientConstants.RECORDS_DELIMITER);
                 for (Object record : jArray) {
                     JSONArray recordArray = (JSONArray) record;
                     if (recordArray.size() == 4) {
@@ -2556,6 +2676,55 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             handleException("Error occurred while querying from Stream Processor.", e);
         }
         return new ArrayList<Result<APIUsageByApplication>>();
+    }
+
+    /**
+     * Implemented to get the API usage count for monetization.
+     *
+     * @param from : the start timestamp of the query.
+     * @param to   : the end timestamp of the query.
+     * @return JSON Object.
+     */
+    public JSONObject getUsageCountForMonetization(long from, long to)
+            throws APIMgtUsageQueryServiceClientException {
+
+        JSONObject jsonObject = null;
+        String granularity = null;
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        granularity = configuration.getFirstProperty(
+                APIConstants.Monetization.USAGE_PUBLISHER_GRANULARITY);
+        if (StringUtils.isEmpty(granularity)) {
+            //set the default granularity to days, if it is not set in configuration
+            granularity = APIConstants.Monetization.USAGE_PUBLISH_DEFAULT_GRANULARITY;
+        }
+        StringBuilder query = new StringBuilder(
+                "from " + APIUsageStatisticsClientConstants.MONETIZATION_USAGE_RECORD_AGG
+                        + " within " + from
+                        + "L, " + to + "L per '" + granularity
+                        + "' select "
+                        + APIUsageStatisticsClientConstants.API_NAME + ", "
+                        + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                        + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                        + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + ", "
+                        + APIUsageStatisticsClientConstants.APPLICATION_ID + ", "
+                        + "sum (requestCount) as requestCount "
+                        + "group by "
+                        + APIUsageStatisticsClientConstants.API_NAME + ", "
+                        + APIUsageStatisticsClientConstants.API_VERSION + ", "
+                        + APIUsageStatisticsClientConstants.API_CREATOR + ", "
+                        + APIUsageStatisticsClientConstants.API_CREATOR_TENANT_DOMAIN + ", "
+                        + APIUsageStatisticsClientConstants.APPLICATION_ID
+        );
+        try {
+            jsonObject = APIUtil.executeQueryOnStreamProcessor(
+                    APIUsageStatisticsClientConstants.MONETIZATION_USAGE_RECORD_APP,
+                    query.toString());
+        } catch (APIManagementException ex) {
+            String msg = "Unable to Retrieve monetization usage records";
+            handleException(msg, ex);
+        }
+        return jsonObject;
     }
 
     /**

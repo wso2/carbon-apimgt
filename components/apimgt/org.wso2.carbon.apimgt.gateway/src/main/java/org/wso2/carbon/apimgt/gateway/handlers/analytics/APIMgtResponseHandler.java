@@ -24,6 +24,7 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -143,6 +144,10 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             }
             String keyType = (String) mc.getProperty(APIConstants.API_KEY_TYPE);
             String correlationID = GatewayUtils.getAndSetCorrelationID(mc);
+            JSONObject obj = new JSONObject();
+            obj.put("keyType", keyType);
+            obj.put("correlationID", correlationID);
+            String metaClientType = obj.toJSONString();
             String fullRequestPath = (String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
             String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(fullRequestPath);
             String apiVersion = (String) mc.getProperty(RESTConstants.SYNAPSE_REST_API);
@@ -208,9 +213,9 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             stream.setApplicationName(applicationName);
             stream.setApplicationOwner(applicationOwner);
             stream.setBackendTime(backendTime);
-            stream.setDestination((String) mc.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS));
+            stream.setDestination(GatewayUtils.extractAddressBasePath(mc));
             stream.setExecutionTime(GatewayUtils.getExecutionTime(mc));
-            stream.setMetaClientType(keyType); // check meta type
+            stream.setMetaClientType(metaClientType); // check meta type
             stream.setProtocol(protocol);
             stream.setRequestTimestamp(
                     Long.parseLong((String) mc.getProperty(APIMgtGatewayConstants.REQUEST_START_TIME)));

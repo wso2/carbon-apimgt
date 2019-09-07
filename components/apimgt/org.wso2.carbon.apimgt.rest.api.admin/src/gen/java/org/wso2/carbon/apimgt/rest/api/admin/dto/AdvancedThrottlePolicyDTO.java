@@ -39,8 +39,9 @@ public class AdvancedThrottlePolicyDTO extends ThrottlePolicyDTO {
 
   
   /**
+   * Group of conditions which allow adding different parameter conditions to the throttling limit.\n
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Group of conditions which allow adding different parameter conditions to the throttling limit.\n")
   @JsonProperty("conditionalGroups")
   public List<ConditionalGroupDTO> getConditionalGroups() {
     return conditionalGroups;

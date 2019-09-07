@@ -241,8 +241,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
                 if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
                     info = getApiKeyDataForWSClient(apiKey);
-                } else if (APIConstants.API_KEY_VALIDATOR_THRIFT_CLIENT.equals(keyValidatorClientType)) {
-                    info = getApiKeyDataForThriftClient(apiKey);
                 } else {
                     return false;
                 }
@@ -273,10 +271,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
-    }
-
-    protected APIKeyValidationInfoDTO getApiKeyDataForThriftClient(String apiKey) throws APISecurityException {
-        return new WebsocketThriftClient().getAPIKeyData(apiContextUri, version, apiKey);
     }
 
     protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String apiKey) throws APISecurityException {

@@ -27,6 +27,26 @@ public class ExportApi  {
    private final ExportApiService delegate = ExportApiServiceFactory.getExportApi();
 
     @GET
+    @Path("/api")
+    @Consumes({ "application/json" })
+    @Produces({ "application/zip" })
+    @io.swagger.annotations.ApiOperation(value = "Export an API", notes = "This operation can be used to export the details of a particular API as a zip file.\n", response = File.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nExport Successful.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested API does not exist.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error.\nError in exporting API.\n") })
+
+    public Response exportApiGet(@ApiParam(value = "API Name\n",required=true) @QueryParam("name")  String name,
+    @ApiParam(value = "Version of the API\n",required=true) @QueryParam("version")  String version,
+    @ApiParam(value = "Provider name of the API\n",required=true) @QueryParam("providerName")  String providerName,
+    @ApiParam(value = "Format of output documents. Can be YAML or JSON.\n",required=true, allowableValues="{values=[JSON, YAML]}") @QueryParam("format")  String format,
+    @ApiParam(value = "Preserve API Status on export\n") @QueryParam("preserveStatus")  Boolean preserveStatus)
+    {
+    return delegate.exportApiGet(name,version,providerName,format,preserveStatus);
+    }
+    @GET
     @Path("/applications")
     @Consumes({ "application/json" })
     @Produces({ "application/json", "application/zip" })
@@ -41,14 +61,10 @@ public class ExportApi  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
 
     public Response exportApplicationsGet(@ApiParam(value = "Application Name\n",required=true) @QueryParam("appName")  String appName,
-    @ApiParam(value = "Owner of the Application\n",required=true) @QueryParam("appOwner")  String appOwner)
+    @ApiParam(value = "Owner of the Application\n",required=true) @QueryParam("appOwner")  String appOwner,
+    @ApiParam(value = "Export application keys\n") @QueryParam("withKeys")  Boolean withKeys)
     {
-    return delegate.exportApplicationsGet(appName,appOwner);
-    }
-
-    public String exportApplicationsGetGetLastUpdatedTime(String appName,String appOwner)
-    {
-        return delegate.exportApplicationsGetGetLastUpdatedTime(appName,appOwner);
+    return delegate.exportApplicationsGet(appName,appOwner,withKeys);
     }
 }
 

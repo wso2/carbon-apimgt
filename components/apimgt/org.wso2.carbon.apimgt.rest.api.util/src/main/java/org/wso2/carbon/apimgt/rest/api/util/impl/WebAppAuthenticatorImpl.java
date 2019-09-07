@@ -22,14 +22,13 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.WebAppAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -37,8 +36,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This web app authenticator class specifically implemented for API Manager store and publisher rest APIs
@@ -47,8 +44,6 @@ import java.util.regex.Pattern;
 public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
 
     private static final Log log = LogFactory.getLog(WebAppAuthenticatorImpl.class);
-    private static final String REGEX_BEARER_PATTERN = "Bearer\\s";
-    private static final Pattern PATTERN = Pattern.compile(REGEX_BEARER_PATTERN);
     private static final String SUPER_TENANT_SUFFIX =
             APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
@@ -58,11 +53,11 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
      * @throws APIManagementException when error in authentication process
      */
     public boolean authenticate(Message message) throws APIManagementException {
-        String accessToken = RestApiUtil.extractOAuthAccessTokenFromMessage(message, PATTERN,
-                RestApiConstants.AUTH_HEADER_NAME);
+        String accessToken = RestApiUtil.extractOAuthAccessTokenFromMessage(message,
+                RestApiConstants.REGEX_BEARER_PATTERN, RestApiConstants.AUTH_HEADER_NAME);
         AccessTokenInfo tokenInfo = null;
         try {
-            tokenInfo = KeyManagerHolder.getKeyManagerInstance().getTokenMetaData(accessToken);
+            tokenInfo = new AMDefaultKeyManagerImpl().getTokenMetaData(accessToken);
         } catch (APIManagementException e) {
             log.error("Error while retrieving token information for token: " + accessToken, e);
         }
@@ -72,6 +67,8 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
             //carbon context. Scope validation should come here.
             //If access token is valid then we will perform scope check for given resource.
             if (validateScopes(message, tokenInfo)) {
+                //Add the user scopes list extracted from token to the cxf message
+                message.getExchange().put(RestApiConstants.USER_REST_API_SCOPES, tokenInfo.getScopes());
                 //If scope validation successful then set tenant name and user name to current context
                 String tenantDomain = MultitenantUtils.getTenantDomain(tokenInfo.getEndUserName());
                 int tenantId;
@@ -99,41 +96,40 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                 log.error("You cannot access API as scope validation failed");
             }
         } else {
-            log.error(String.format("Authentication failed. Please check your username/password"));
+            log.error("Authentication failed. Please check your username/password");
         }
         return false;
     }
-
 
     /**
      * @param message   CXF message to be validate
      * @param tokenInfo Token information associated with incoming request
      * @return return true if we found matching scope in resource and token information
-     *         else false(means scope validation failed).
+     * else false(means scope validation failed).
      */
     private boolean validateScopes(Message message, AccessTokenInfo tokenInfo) {
-        boolean authorized = false;
         String basePath = (String) message.get(Message.BASE_PATH);
-        String path = (String) message.get(Message.PATH_INFO);
+        // path is obtained from Message.REQUEST_URI instead of Message.PATH_INFO, as Message.PATH_INFO contains
+        // decoded values of request parameters
+        String path = (String) message.get(Message.REQUEST_URI);
         String verb = (String) message.get(Message.HTTP_REQUEST_METHOD);
         String resource = path.substring(basePath.length() - 1);
         String[] scopes = tokenInfo.getScopes();
-        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
-        if (basePath.contains(RestApiConstants.REST_API_PUBLISHER_CONTEXT)) {
-            //this is publisher API so pick that API
-            uriTemplates = RestApiUtil.getPublisherAppResourceMapping();
-        } else if (basePath.contains(RestApiConstants.REST_API_STORE_CONTEXT)) {
-            uriTemplates = RestApiUtil.getStoreAppResourceMapping();
-        } else if (basePath.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
-            uriTemplates = RestApiUtil.getAdminAPIAppResourceMapping();
-        } else {
-            log.error("No matching scope validation logic found for app request with path: " + basePath);
+        //get all the URI templates of the REST API from the base path
+        Set<URITemplate> uriTemplates = RestApiUtil.getURITemplatesForBasePath(basePath);
+        if (uriTemplates.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("No matching scopes found for request with path: " + basePath
+                        + ". Skipping scope validation.");
+            }
+            return true;
         }
+
         for (Object template : uriTemplates.toArray()) {
             org.wso2.uri.template.URITemplate templateToValidate = null;
             Map<String, String> var = new HashMap<String, String>();
             //check scopes with what we have
-            String templateString = ((URITemplate) template).getUriTemplate().toString();
+            String templateString = ((URITemplate) template).getUriTemplate();
             try {
                 templateToValidate = new org.wso2.uri.template.URITemplate(templateString);
             } catch (URITemplateException e) {
@@ -141,11 +137,11 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                         templateString, e);
             }
             if (templateToValidate != null && templateToValidate.matches(resource, var) && scopes != null
-                    && verb != null && verb.equalsIgnoreCase(((URITemplate)template).getHTTPVerb())) {
-                for (int i = 0; i < scopes.length; i++) {
+                    && verb != null && verb.equalsIgnoreCase(((URITemplate) template).getHTTPVerb())) {
+                for (String scope : scopes) {
                     Scope scp = ((URITemplate) template).getScope();
                     if (scp != null) {
-                        if (scopes[i].equalsIgnoreCase(scp.getKey())) {
+                        if (scope.equalsIgnoreCase(scp.getKey())) {
                             //we found scopes matches
                             if (log.isDebugEnabled()) {
                                 log.debug("Scope validation successful for access token: " +
@@ -153,6 +149,19 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                                         " for resource path: " + path + " and verb " + verb);
                             }
                             return true;
+                        }
+                    } else if (!((URITemplate) template).retrieveAllScopes().isEmpty()) {
+                        List<Scope> scopesList = ((URITemplate) template).retrieveAllScopes();
+                        for (Scope scpObj : scopesList) {
+                            if (scope.equalsIgnoreCase(scpObj.getKey())) {
+                                //we found scopes matches
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Scope validation successful for access token: " +
+                                            tokenInfo.getAccessToken() + " with scope: " + scpObj.getKey() +
+                                            " for resource path: " + path + " and verb " + verb);
+                                }
+                                return true;
+                            }
                         }
                     } else {
                         if (log.isDebugEnabled()) {
@@ -164,7 +173,6 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                 }
             }
         }
-        return authorized;
+        return false;
     }
 }
-

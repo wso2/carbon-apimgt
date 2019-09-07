@@ -65,6 +65,16 @@ public interface APIKeyDataStore {
      */
     ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion) throws APISecurityException;
 
+    /**
+     * Get API Product Resource URI Templates
+     *
+     * @param context Context of an API Product
+     * @param apiVersion A valid version of the API Product
+     * @return an APIKeyValidationInfoDTO instance containing key validation data
+     * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
+     */
+    ArrayList<URITemplate> getAPIProductURITemplates(String context, String apiVersion) throws APISecurityException;
+
 
     /**
      * Clean up any resources allocated to this API key data store instance.

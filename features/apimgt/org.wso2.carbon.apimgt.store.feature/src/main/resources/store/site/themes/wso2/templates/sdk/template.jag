@@ -4,14 +4,6 @@
             <% var supportedLangs = jagg.module("sdk").getSupportedLanguages();
                 var langsArray = supportedLangs.langs.split(",");
                 var user = jagg.getUser();
-                if (inputs.api.isOpenAPI3APIDefinition) {
-                    %>
-                   <div class="message message-info">
-                            <h4><i class="icon fw fw-info"></i><%=i18n.localize("Info!")%></h4>
-                            <p><%=i18n.localize("Client side SDK generation feature is currently not available for this API since the API definition is in OpenAPI 3.0 specification")%></p>
-		           </div>
-                    <%
-                } else {
                 if (supportedLangs.langs != null && langsArray.length > 0) { %>
                     <div class="row">
                         <div class="col-md-12">
@@ -34,5 +26,5 @@
                     <br>
                 <% }%>
         </div>
-    <% } }%>
+    <% } %>
 <% }); %>

@@ -34,45 +34,49 @@ public class APILocalEntryAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * Add Local Entry to the gateway.
      *
      * @param content
+     * @param tenantDomain Tenant Domain
      * @return Status of the operation
      * @throws AxisFault
      */
-    public boolean addLocalEntry(String content) throws AxisFault {
-        LocalEntryClient localEntryClient = getLocalEntryAdminClient();
+    public boolean addLocalEntry(String content, String tenantDomain) throws AxisFault {
+        LocalEntryClient localEntryClient = getLocalEntryAdminClient(tenantDomain);
         return localEntryClient.addLocalEntry(content);
     }
 
     /**
      * Get the Local entry client.
      *
+     * @param tenantDomain Tenant Domain
      * @return LocalEntryClient
      * @throws AxisFault
      */
-    protected LocalEntryClient getLocalEntryAdminClient() throws AxisFault {
-        return new LocalEntryClient();
+    protected LocalEntryClient getLocalEntryAdminClient(String tenantDomain) throws AxisFault {
+        return new LocalEntryClient(tenantDomain);
     }
 
     /**
      * Get the Local entry for given API.
      *
-     * @param key key of the existing local entry.
+     * @param key          key of the existing local entry.
+     * @param tenantDomain Tenant Domain
      * @return LocalEntry
      * @throws AxisFault
      */
-    public Object getEntry(String key) throws AxisFault {
-        LocalEntryClient localEntryAdminClient = getLocalEntryAdminClient();
+    public Object getEntry(String key, String tenantDomain) throws AxisFault {
+        LocalEntryClient localEntryAdminClient = getLocalEntryAdminClient(tenantDomain);
         return localEntryAdminClient.getEntry(key);
     }
 
     /**
      * Delete the local entry.
      *
-     * @param key Key of the local entry to be deleted.
+     * @param key          Key of the local entry to be deleted.
+     * @param tenantDomain Tenant Domain
      * @return Status of the operation
      * @throws AxisFault
      */
-    public Boolean deleteLocalEntry(String key) throws AxisFault {
-        LocalEntryClient localEntryAdminClient = getLocalEntryAdminClient();
+    public Boolean deleteLocalEntry(String key, String tenantDomain) throws AxisFault {
+        LocalEntryClient localEntryAdminClient = getLocalEntryAdminClient(tenantDomain);
         return localEntryAdminClient.deleteEntry(key);
     }
 }

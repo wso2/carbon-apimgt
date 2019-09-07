@@ -22,10 +22,15 @@ import org.junit.Test;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class APIDefinitionFromOpenAPISpecTest {
     @Test
@@ -106,7 +111,8 @@ public class APIDefinitionFromOpenAPISpecTest {
         uriTemplates.add(getUriTemplate("DELETE", "Any", "/*"));
         uriTemplates.add(getUriTemplate("GET", "Any", "/abc"));
         API api = new API(new APIIdentifier("admin", "PhoneVerification", "1.0.0"));
-        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPI20.getURITemplates(api, swagger);
+        SwaggerData swaggerData = new SwaggerData(api);
+        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPI20.getURITemplates(swaggerData, swagger);
         Assert.assertEquals(uriTemplateSet, uriTemplates);
     }
 
@@ -234,7 +240,8 @@ public class APIDefinitionFromOpenAPISpecTest {
         uriTemplates.add(getUriTemplate("DELETE", "Any", "/*"));
         uriTemplates.add(getUriTemplate("GET", "Any", "/abc"));
         API api = new API(new APIIdentifier("admin", "PhoneVerification", "1.0.0"));
-        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPI300.getURITemplates(api, openAPISpec300);
+        SwaggerData swaggerData = new SwaggerData(api);
+        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPI300.getURITemplates(swaggerData, openAPISpec300);
         Assert.assertEquals(uriTemplateSet, uriTemplates);
 
     }
@@ -272,7 +279,8 @@ public class APIDefinitionFromOpenAPISpecTest {
         Set<URITemplate> expectedTemplates = new LinkedHashSet<URITemplate>();
         expectedTemplates.add(getUriTemplate("GET", "Application", "/item"));
         API api = new API(new APIIdentifier("admin", "OAPI", "1.0.0"));
-        Set<URITemplate> actualTemplates = apiDef.getURITemplates(api, openApi);
+        SwaggerData swaggerData = new SwaggerData(api);
+        Set<URITemplate> actualTemplates = apiDef.getURITemplates(swaggerData, openApi);
         Assert.assertEquals(actualTemplates, expectedTemplates);
     }
 
@@ -286,7 +294,6 @@ public class APIDefinitionFromOpenAPISpecTest {
         uriTemplate.setThrottlingTier("Unlimited");
         uriTemplate.setThrottlingTiers("Unlimited");
         uriTemplate.setScope(null);
-        uriTemplate.setScopes(null);
         return uriTemplate;
     }
 

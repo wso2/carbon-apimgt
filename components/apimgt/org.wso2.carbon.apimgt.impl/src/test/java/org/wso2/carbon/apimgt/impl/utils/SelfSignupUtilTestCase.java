@@ -27,7 +27,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.PasswordResolver;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -50,7 +52,8 @@ import javax.xml.namespace.QName;
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({APIUtil.class, ServiceReferenceHolder.class, PrivilegedCarbonContext.class, AXIOMUtil.class})
+@PrepareForTest({APIUtil.class, ServiceReferenceHolder.class, PrivilegedCarbonContext.class, AXIOMUtil.class,
+                    PasswordResolverFactory.class})
 public class SelfSignupUtilTestCase {
 
     private  Registry registry = Mockito.mock(Registry.class);
@@ -154,6 +157,9 @@ public class SelfSignupUtilTestCase {
         PowerMockito.mockStatic(AXIOMUtil.class);
         Mockito.when(omElement.getChildrenWithLocalName(APIConstants.SELF_SIGN_UP_REG_ROLE_ELEM)).thenReturn(Mockito.mock(Iterator.class));
         PowerMockito.when(AXIOMUtil.stringToOM("wsdl")).thenReturn(omElement);
+        PowerMockito.mockStatic(PasswordResolverFactory.class);
+        PasswordResolver passwordResolver = Mockito.mock(PasswordResolver.class);
+        PowerMockito.when(PasswordResolverFactory.getInstance()).thenReturn(passwordResolver);
         UserRegistrationConfigDTO userRegistrationConfigDTO = SelfSignUpUtil.getSignupConfiguration("foo.com");
 
         Assert.assertNotNull(userRegistrationConfigDTO);
@@ -189,6 +195,9 @@ public class SelfSignupUtilTestCase {
         PowerMockito.mockStatic(AXIOMUtil.class);
         Mockito.when(omElement.getChildrenWithLocalName(APIConstants.SELF_SIGN_UP_REG_ROLE_ELEM)).thenReturn(Mockito.mock(Iterator.class));
         PowerMockito.when(AXIOMUtil.stringToOM("wsdl")).thenReturn(omElement);
+        PowerMockito.mockStatic(PasswordResolverFactory.class);
+        PasswordResolver passwordResolver = Mockito.mock(PasswordResolver.class);
+        PowerMockito.when(PasswordResolverFactory.getInstance()).thenReturn(passwordResolver);
         UserRegistrationConfigDTO userRegistrationConfigDTO = SelfSignUpUtil.getSignupConfiguration("bar.com");
         Assert.assertNotNull(userRegistrationConfigDTO);
         PowerMockito.verifyStatic(PrivilegedCarbonContext.class);

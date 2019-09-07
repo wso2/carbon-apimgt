@@ -195,8 +195,14 @@ $(document).ready(function(){
         $("#gatewaysecurity_error").addClass("hide");
         if(this.checked) {
             $("#manage-certificates").removeAttr("hidden");
+            if ($("#basic_auth_checkbox").is(":checked") || $("#oauth2_checkbox").is(":checked")) {
+                 $("#oauth_basic_auth_state_section").removeAttr("hidden");
+                 $("#mutualssl_state_section").removeAttr("hidden");
+            }
         } else {
             $("#manage-certificates").attr("hidden", "");
+            $("#mutualssl_state_section").attr("hidden", "");
+            $("#oauth_basic_auth_state_section").attr("hidden", "");
         }
     });
 
@@ -207,10 +213,39 @@ $(document).ready(function(){
             $("#authConfigs").removeAttr("hidden");
             $('#subscription-tiers input').removeAttr("disabled");
             $("#tier_warning").addClass("hide");
+            if ($("#mutualssl").is(":checked")) {
+                 $("#mutualssl_state_section").removeAttr("hidden");
+                 $("#oauth_basic_auth_state_section").removeAttr("hidden");
+            }
         } else {
-            $("#authConfigs").attr("hidden", "");
+            if (!$("#basic_auth_checkbox").is(":checked")) {
+                 $("#authConfigs").attr("hidden", "");
+                 $("#oauth_basic_auth_state_section").attr("hidden", "");
+                 $("#mutualssl_state_section").attr("hidden", "");
+            } else if (!$("#mutualssl").is(":checked")){
+                 $("#oauth_basic_auth_state_section").attr("hidden", "");
+            }
             $('#subscription-tiers input').attr('disabled', true).removeAttr("checked");
             $("#tier_warning").removeClass("hide");
+        }
+    });
+
+    $("#basic_auth_checkbox").change(function () {
+        $("#gatewaysecurity_error").addClass("hide");
+        if (this.checked) {
+            $("#authConfigs").removeAttr("hidden");
+            if ($("#mutualssl").is(":checked")) {
+                 $("#mutualssl_state_section").removeAttr("hidden");
+                 $("#oauth_basic_auth_state_section").removeAttr("hidden");
+            }
+        } else {
+            if (!$("#oauth2_checkbox").is(":checked")) {
+                $("#authConfigs").attr("hidden", "");
+                $("#oauth_basic_auth_state_section").attr("hidden", "");
+                $("#mutualssl_state_section").attr("hidden", "");
+            } else if (!$("#mutualssl").is(":checked")){
+                $("#oauth_basic_auth_state_section").attr("hidden", "");
+            }
         }
     });
 
@@ -248,6 +283,14 @@ $(document).ready(function(){
         }else{
             $('#default_version_checked').val("");
         }
+    });
+
+    $('.schema_validation_check').change(function() {
+            if ($(this).is(":checked")) {
+                $('#schema_validation_check').val($(this).val());
+            } else {
+                $('#schema_validation_check').val("");
+            }
     });
 
     validateAPITier();
@@ -395,8 +438,9 @@ function validate_APISecurity () {
     if (document.getElementById("oauth2_checkbox")) {
         var checkedOAuth2Security = $("#oauth2_checkbox").is(":checked");
         var checkedMutualSSlSecurity = $("#mutualssl").is(":checked");
+        var checkedBasicAuthSecurity = $("#basic_auth_checkbox").is(":checked");
 
-        if (checkedOAuth2Security || checkedMutualSSlSecurity) {
+        if (checkedOAuth2Security || checkedMutualSSlSecurity || checkedBasicAuthSecurity) {
             $("#gatewaysecurity_error").addClass("hide");
             return true;
         }

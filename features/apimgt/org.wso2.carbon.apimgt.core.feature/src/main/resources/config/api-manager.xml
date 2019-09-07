@@ -223,21 +223,7 @@
         <!-- Admin password for API key manager. -->
         <Password>${admin.password}</Password>
 
-        <!-- Configurations related to enable thrift support for key-management related communication.
-             If you want to switch back to Web Service Client, change the value of "KeyValidatorClientType" to "WSClient".
-             In a distributed environment;
-             -If you are at the Gateway node, you need to point "ThriftClientPort" value to the "ThriftServerPort" value given at KeyManager node.
-             -If you need to start two API Manager instances in the same machine, you need to give different ports to "ThriftServerPort" value in two nodes.
-             -ThriftServerHost - Allows to configure a hostname for the thrift server. It uses the carbon hostname by default.
-	         -The Gateway uses this parameter to connect to the key validation thrift service. -->
         <KeyValidatorClientType>WSClient</KeyValidatorClientType>
-        <ThriftClientConnectionTimeOut>10000</ThriftClientConnectionTimeOut>
-        <!--ThriftClientPort>10397</ThriftClientPort-->
-
-        <EnableThriftServer>false</EnableThriftServer>
-        <ThriftServerHost>localhost</ThriftServerHost>
-        <!--ThriftServerPort>10397</ThriftServerPort-->
-
         <!--ConnectionPool>
             <MaxIdle>100</MaxIdle>
             <InitIdleCapacity>50</InitIdleCapacity>
@@ -395,6 +381,8 @@
         <!-- Configure Access-Control-Allow-Headers -->
         <Access-Control-Allow-Headers>authorization,Access-Control-Allow-Origin,Content-Type,SOAPAction</Access-Control-Allow-Headers>
 
+        <!--<Access-Control-Expose-Headers>Cache-Control,Content-Language,Content-Type,Expires,Last-Modified,Pragma</Access-Control-Expose-Headers>-->
+
         <!-- Configure Access-Control-Allow-Credentials -->
         <!-- Specifying this header to true means that the server allows cookies (or other user credentials) to be included on cross-origin requests.
              It is false by default and if you set it to true then make sure that the Access-Control-Allow-Origin header does not contain the wildcard (*) -->
@@ -418,6 +406,18 @@
             </WhiteListedURI>
             <WhiteListedURI>
                 <URI>/api/am/admin/{version}/swagger.json</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/publisher/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/admin/{version}/swagger.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
             <WhiteListedURI>
@@ -463,6 +463,42 @@
             <WhiteListedURI>
                 <URI>/api/am/store/{version}/search</URI>
                 <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/settings</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/publisher/{version}/settings</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+                        <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/swagger</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/documents</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/documents/{documentId}</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/documents/{documentId}/content</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/thumbnail</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
         </WhiteListedURIs>
         <ETagSkipList>
@@ -669,6 +705,17 @@
             <SupportedLanguages>java,android</SupportedLanguages>
         </ClientGeneration>
     </SwaggerCodegen>
+
+    <!--Specify the implementation class of the monetization interface-->
+    <Monetization>
+        <MonetizationImpl>org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl</MonetizationImpl>
+        <UsagePublisher>
+            <Granularity>days</Granularity>
+            <!--Number of days to reduce from the current time to get the last publish time of monetization
+            usgae publish job, when there is no record of the last publish time.-->
+            <PublishTimeDurationInDays>1</PublishTimeDurationInDays>
+        </UsagePublisher>
+    </Monetization>
 
     <OpenTracer>
         <RemoteTracer>

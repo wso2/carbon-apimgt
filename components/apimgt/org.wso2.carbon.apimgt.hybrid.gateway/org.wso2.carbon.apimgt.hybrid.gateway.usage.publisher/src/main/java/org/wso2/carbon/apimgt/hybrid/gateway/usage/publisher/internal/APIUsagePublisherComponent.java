@@ -29,46 +29,36 @@ import org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.util.MicroGatewayAP
 import org.wso2.carbon.ntask.core.service.TaskService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.core.service.RealmService;
-
 import java.util.Timer;
 import java.util.TimerTask;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
-/**
- * @scr.component name="micro.api.gateway.usage.component" immediate="true"
- * @scr.reference name="api.manager.config.service"
- * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
- * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
- * @scr.reference name="user.realm.service"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
- * @scr.reference name="ntask.component"
- * interface="org.wso2.carbon.ntask.core.service.TaskService"
- * cardinality="1..1" policy="dynamic" bind="setTaskService" unbind="unsetTaskService"
- */
+@Component(
+         name = "micro.api.gateway.usage.component", 
+         immediate = true)
 public class APIUsagePublisherComponent {
 
     private static final Log log = LogFactory.getLog(APIUsagePublisherComponent.class);
 
+    @Activate
     protected void activate(ComponentContext ctx) {
-
-        //Scheduling a timer task for publishing uploaded on-premise gw's usage data if
-        //usage data publishing is enabled thorough a property.
+        // usage data publishing is enabled thorough a property.
         try {
             ConfigManager configManager = ConfigManager.getConfigManager();
-            String isUsageDataPublishingEnabled = configManager
-                    .getProperty(MicroGatewayAPIUsageConstants.IS_UPLOADED_USAGE_DATA_PUBLISH_ENABLED_PROPERTY);
+            String isUsageDataPublishingEnabled = configManager.getProperty(MicroGatewayAPIUsageConstants.IS_UPLOADED_USAGE_DATA_PUBLISH_ENABLED_PROPERTY);
             if (StringUtils.equals("true", isUsageDataPublishingEnabled)) {
                 int usagePublishFrequency = MicroGatewayAPIUsageConstants.DEFAULT_UPLOADED_USAGE_PUBLISH_FREQUENCY;
-                String usagePublishFrequencyProperty = configManager
-                        .getProperty(MicroGatewayAPIUsageConstants.UPLOADED_USAGE_PUBLISH_FREQUENCY_PROPERTY);
+                String usagePublishFrequencyProperty = configManager.getProperty(MicroGatewayAPIUsageConstants.UPLOADED_USAGE_PUBLISH_FREQUENCY_PROPERTY);
                 if (StringUtils.isNotBlank(usagePublishFrequencyProperty)) {
                     try {
                         usagePublishFrequency = Integer.parseInt(usagePublishFrequencyProperty);
                     } catch (NumberFormatException e) {
-                        log.error("Error while parsing the system property: "
-                                + MicroGatewayAPIUsageConstants.UPLOADED_USAGE_PUBLISH_FREQUENCY_PROPERTY
-                                + " to integer. Using default usage publish frequency configuration: "
-                                + MicroGatewayAPIUsageConstants.DEFAULT_UPLOADED_USAGE_PUBLISH_FREQUENCY, e);
+                        log.error("Error while parsing the system property: " + MicroGatewayAPIUsageConstants.UPLOADED_USAGE_PUBLISH_FREQUENCY_PROPERTY + " to integer. Using default usage publish frequency configuration: " + MicroGatewayAPIUsageConstants.DEFAULT_UPLOADED_USAGE_PUBLISH_FREQUENCY, e);
                     }
                 }
                 TimerTask usagePublisherTask = new UploadedUsagePublisherExecutorTask();
@@ -80,14 +70,14 @@ public class APIUsagePublisherComponent {
                 }
             }
         } catch (OnPremiseGatewayException e) {
-            log.error("Unexpected error occurred while reading properties from the config file. Micro GW API Usage "
-                    + "data publishing is disabled.", e);
+            log.error("Unexpected error occurred while reading properties from the config file. Micro GW API Usage " + "data publishing is disabled.", e);
         }
         if (log.isDebugEnabled()) {
             log.debug("Micro gateway API Usage Publisher bundle is activated.");
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext ctx) {
         if (log.isDebugEnabled()) {
             log.debug("Micro gateway API Usage Publisher bundle is de-activated ");
@@ -99,6 +89,12 @@ public class APIUsagePublisherComponent {
      *
      * @param service APIManager Configuration service
      */
+    @Reference(
+             name = "api.manager.config.service", 
+             service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService service) {
         log.debug("API manager configuration service bound to the API usage handler");
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(service);
@@ -119,6 +115,12 @@ public class APIUsagePublisherComponent {
      *
      * @param realmService Realm Service
      */
+    @Reference(
+             name = "user.realm.service", 
+             service = org.wso2.carbon.user.core.service.RealmService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (realmService != null && log.isDebugEnabled()) {
             log.debug("Realm service initialized");
@@ -141,6 +143,12 @@ public class APIUsagePublisherComponent {
      * @param taskService task service
      * @throws RegistryException
      */
+    @Reference(
+             name = "ntask.component", 
+             service = org.wso2.carbon.ntask.core.service.TaskService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetTaskService")
     protected void setTaskService(TaskService taskService) throws RegistryException {
         if (log.isDebugEnabled()) {
             log.debug("TaskService is acquired");
@@ -156,5 +164,5 @@ public class APIUsagePublisherComponent {
     protected void unsetTaskService(TaskService taskService) {
         ServiceReferenceHolder.getInstance().setTaskService(null);
     }
-
 }
+

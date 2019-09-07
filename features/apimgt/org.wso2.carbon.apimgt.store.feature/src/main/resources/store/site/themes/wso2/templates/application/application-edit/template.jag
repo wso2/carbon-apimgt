@@ -43,6 +43,16 @@ if(app.groupId != null ){
     }
     return flag;
  }
+
+ function isHiddenAttribute(key) {
+    var flag = false;
+    for (var i = 0; i < attributesFromConfig.length; i++) {
+        if (key == attributesFromConfig[i].Attribute && (attributesFromConfig[i].Hidden || attributesFromConfig[i].hidden)) {
+            flag = true;
+        }
+    }
+    return flag;
+ }
 if(app.tokenType != null ){
   tokenType = app.tokenType;
   if(tokenType == "JWT"){
@@ -147,32 +157,35 @@ if(jagg.isMultiGroupEnabled()){
     if (applicationAttributes != null) {
         var count = 0;
         for (var attributeKey in applicationAttributes) {%>
-            <div class="form-group">
-            <label class="col-md-3 col-lg-3 control-label" for="attribute_<%=count%>">
-            <%=encode.forHtml(i18n.localize(attributeKey,attributeKey))%>
-            <% // Check whether the attribute is mandatory
-            if (isRequiredAttribute(attributeKey)) { %>
-                <span class="requiredAstrix">*</span>
-                </label>
-                <div class="col-md-8 col-lg-6">
-                    <input type="hidden" id="attributeKey_<%=count.toString()%>" value="<%=encode.forHtml(attributeKey)%>"/>
-                    <input type="text" class="form-control required" name="attribute_<%=count.toString()%>"
-                    id="attribute_<%=count.toString()%>"
-                    value="<%=encode.forHtml(applicationAttributes[attributeKey])%>" />
+        <% // Don't allow attribute definition for hidden attributes
+            if (!isHiddenAttribute(attributeKey)) { %>
+                <div class="form-group">
+                <label class="col-md-3 col-lg-3 control-label" for="attribute_<%=count%>">
+                <%=encode.forHtml(i18n.localize(attributeKey,attributeKey))%>
+                <% // Check whether the attribute is mandatory
+                if (isRequiredAttribute(attributeKey)) { %>
+                    <span class="requiredAstrix">*</span>
+                    </label>
+                    <div class="col-md-8 col-lg-6">
+                        <input type="hidden" id="attributeKey_<%=count.toString()%>" value="<%=encode.forHtml(attributeKey)%>"/>
+                        <input type="text" class="form-control required" name="attribute_<%=count.toString()%>"
+                        id="attribute_<%=count.toString()%>"
+                        value="<%=encode.forHtml(applicationAttributes[attributeKey])%>" />
+                    </div>
+                <% } else { %>
+                    </label>
+                    <div class="col-md-8 col-lg-6">
+                        <input type="hidden" id="attributeKey_<%=count.toString()%>" value="<%=encode.forHtml(attributeKey)%>"/>
+                        <input type="text" class="form-control" id="attribute_<%=count.toString()%>"
+                        <% if (applicationAttributes[attributeKey]) { %>
+                                    value="<%=encode.forHtml(applicationAttributes[attributeKey])%>"
+                              <% } %>  />
+                   </div>
+                <% }
+                count += 1; %>
                 </div>
-            <% } else { %>
-                </label>
-                <div class="col-md-8 col-lg-6">
-                    <input type="hidden" id="attributeKey_<%=count.toString()%>" value="<%=encode.forHtml(attributeKey)%>"/>
-                    <input type="text" class="form-control" id="attribute_<%=count.toString()%>"
-                    <% if (applicationAttributes[attributeKey]) { %>
-                                value="<%=encode.forHtml(applicationAttributes[attributeKey])%>"
-                          <% } %>  />
-               </div>
-            <% }
-            count += 1; %>
-            </div>
-        <% } %>
+          <%}
+        }%>
         <input type="hidden" name="numberOfAttributes"  id="numberOfAttributes" value="<%= encode.forHtml(count)%>"/>
     <% } %>
 

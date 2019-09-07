@@ -25,45 +25,47 @@ import org.wso2.carbon.core.services.authentication.CarbonServerAuthenticator;
 import org.wso2.carbon.apimgt.authenticator.oidc.OIDCAuthenticator;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
-
 import java.util.Hashtable;
 import java.util.Map;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
-/**
- * @scr.component name="oidc.authenticator.dscomponent" immediate="true"
- * @scr.reference name="registry.service"
- *                interface="org.wso2.carbon.registry.core.service.RegistryService"
- *                cardinality="1..1" policy="dynamic" bind="setRegistryService"
- *                unbind="unsetRegistryService"
- * @scr.reference name="user.realmservice.default"
- *                interface="org.wso2.carbon.user.core.service.RealmService"
- *                cardinality="1..1" policy="dynamic" bind="setRealmService"
- *                unbind="unsetRealmService"
- */
+@Component(
+         name = "oidc.authenticator.dscomponent", 
+         immediate = true)
 public class OIDCAuthenticatorDSComponent {
 
     private static final Log log = LogFactory.getLog(OIDCAuthenticatorDSComponent.class);
 
+    @Activate
     protected void activate(ComponentContext ctxt) {
         OIDCAuthBEDataHolder.getInstance().setBundleContext(ctxt.getBundleContext());
         OIDCAuthenticator authenticator = new OIDCAuthenticator();
         Hashtable<String, String> props = new Hashtable<String, String>();
         props.put(CarbonConstants.AUTHENTICATOR_TYPE, authenticator.getAuthenticatorName());
         ctxt.getBundleContext().registerService(CarbonServerAuthenticator.class.getName(), authenticator, props);
-
-        // Check whether the IdPCertAlias is set for signature validations of Tenant 0.
-        //configureIdPCertAlias();
-
+        // configureIdPCertAlias();
         if (log.isDebugEnabled()) {
             log.debug("OIDC Authenticator BE Bundle activated successfuly.");
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext ctxt) {
         OIDCAuthBEDataHolder.getInstance().setBundleContext(null);
         log.debug("OIDC Authenticator BE Bundle is deactivated ");
     }
 
+    @Reference(
+             name = "registry.service", 
+             service = org.wso2.carbon.registry.core.service.RegistryService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
         OIDCAuthBEDataHolder.getInstance().setRegistryService(registryService);
     }
@@ -72,6 +74,12 @@ public class OIDCAuthenticatorDSComponent {
         OIDCAuthBEDataHolder.getInstance().setRegistryService(null);
     }
 
+    @Reference(
+             name = "user.realmservice.default", 
+             service = org.wso2.carbon.user.core.service.RealmService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         OIDCAuthBEDataHolder.getInstance().setRealmService(realmService);
     }
@@ -79,6 +87,5 @@ public class OIDCAuthenticatorDSComponent {
     protected void unsetRealmService(RealmService realmService) {
         OIDCAuthBEDataHolder.getInstance().setRealmService(null);
     }
-
-
 }
+

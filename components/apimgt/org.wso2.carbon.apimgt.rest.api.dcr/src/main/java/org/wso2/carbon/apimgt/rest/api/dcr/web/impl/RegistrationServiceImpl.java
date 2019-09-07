@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.RegistrationService;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.dto.FaultResponse;
@@ -51,6 +50,9 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
@@ -58,9 +60,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import static org.wso2.carbon.apimgt.api.model.ApplicationConstants.OAUTH_CLIENT_GRANT;
 import static org.wso2.carbon.apimgt.api.model.ApplicationConstants.OAUTH_CLIENT_NAME;
@@ -329,7 +328,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             serviceProvider.setApplicationName(applicationName);
             serviceProvider.setDescription("Service Provider for application " + appName);
             serviceProvider.setSaasApp(applicationInfo.getIsSaasApplication());
-            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[2];
+            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[3];
             ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
             serviceProviderProperty.setName(APP_DISPLAY_NAME);
             serviceProviderProperty.setValue(applicationName);
@@ -338,6 +337,11 @@ public class RegistrationServiceImpl implements RegistrationService {
             tokenTypeProviderProperty.setName(APIConstants.APP_TOKEN_TYPE);
             tokenTypeProviderProperty.setValue(applicationInfo.getTokenType());
             serviceProviderProperties[1] = tokenTypeProviderProperty;
+            ServiceProviderProperty consentProperty = new ServiceProviderProperty();
+            consentProperty.setDisplayName(APIConstants.APP_SKIP_CONSENT_DISPLAY);
+            consentProperty.setName(APIConstants.APP_SKIP_CONSENT_NAME);
+            consentProperty.setValue(APIConstants.APP_SKIP_CONSENT_VALUE);
+            serviceProviderProperties[2] = consentProperty;
             serviceProvider.setSpProperties(serviceProviderProperties);
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
             appMgtService.createApplication(serviceProvider, tenantDomain, userName);
@@ -381,6 +385,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
             //Setting the SaasApplication attribute to created service provider
             createdServiceProvider.setSaasApp(applicationInfo.getIsSaasApplication());
+            createdServiceProvider.setSpProperties(serviceProviderProperties);
 
             //Updating the service provider with Inbound Authentication Configs and SaasApplication
             appMgtService.updateApplication(createdServiceProvider, tenantDomain, userName);

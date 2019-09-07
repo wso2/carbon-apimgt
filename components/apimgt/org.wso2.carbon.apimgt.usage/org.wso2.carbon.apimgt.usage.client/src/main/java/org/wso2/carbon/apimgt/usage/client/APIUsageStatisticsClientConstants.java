@@ -192,4 +192,8 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String PRODUCTION_KEY_TYPE = "PRODUCTION";
     public static final String SANDBOX_KEY_TYPE = "SANDBOX";
+
+    public static final String MONETIZATION_USAGE_RECORD_APP = "APIM_MONETIZATION_SUMMARY";
+    public static final String MONETIZATION_USAGE_RECORD_AGG = "MonetizationAgg";
+
 }

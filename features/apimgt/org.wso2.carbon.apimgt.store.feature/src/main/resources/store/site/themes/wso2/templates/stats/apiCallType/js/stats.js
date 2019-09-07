@@ -113,19 +113,19 @@ var drawAppAPICallType = function(from,to){
                     $('#AppApiCallTypeTable_wrapper').removeClass('hide');
 
                     for (var i = 0; i < json.usage.length; i++) {
-                        $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' + json.usage[i].apiCallTypeArray[0].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[0].callType[0] + '</td>' + '<td>' + json.usage[i].apiCallTypeArray[0].hitCount[0] + '</td>' + '</tr>'));
+                        $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' + json.usage[i].apiCallTypeArray[0].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[0].apiVersion + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[0].callType[0] + '</td>' + '<td>' + json.usage[i].apiCallTypeArray[0].hitCount[0] + '</td>' + '</tr>'));
                         if(json.usage[i].apiCallTypeArray[0].callType.length > 1){
                             for(var k =1 ; k < json.usage[i].apiCallTypeArray[0].callType.length ; k++){
-                                 $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' +json.usage[i].apiCallTypeArray[0].apiName+ '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[0].callType[k] + '</td>' + '<td>' + json.usage[i].apiCallTypeArray[0].hitCount[k] + '</td>' + '</tr>'));
+                                 $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' +json.usage[i].apiCallTypeArray[0].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[0].apiVersion + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[0].callType[k] + '</td>' + '<td>' + json.usage[i].apiCallTypeArray[0].hitCount[k] + '</td>' + '</tr>'));
                             }
                         }
                         if(json.usage[i].apiCallTypeArray.length > 1){
 
                             for(var j = 1 ; j< json.usage[i].apiCallTypeArray.length ; j++){
-                                $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' +json.usage[i].apiCallTypeArray[j].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[j].callType[0] + '</td>' + '<td>' + json.usage[i].apiCallTypeArray[j].hitCount[0] + '</td>' + '</tr>'));
+                                $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' +json.usage[i].apiCallTypeArray[j].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[j].apiVersion + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[j].callType[0] + '</td>' + '<td>' + json.usage[i].apiCallTypeArray[j].hitCount[0] + '</td>' + '</tr>'));
                                 if(json.usage[i].apiCallTypeArray[j].callType.length > 1){
                                     for(var k =1 ; k < json.usage[i].apiCallTypeArray[j].callType.length ; k++){
-                                       $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' +json.usage[i].apiCallTypeArray[0].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[j].callType[k] + '</td>' + '<td>' + json.usage[i].apiCallTypeArray[j].hitCount[k] + '</td>' + '</tr>'));
+                                       $('#AppApiCallTypeTable').append($('<tr><td>' + json.usage[i].appName + '</td><td>' +json.usage[i].apiCallTypeArray[0].apiName + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[0].apiVersion + '</td><td class="tdNumberCell">' + json.usage[i].apiCallTypeArray[j].callType[k] + '</td>' + '<td>' + json.usage[i].apiCallTypeArray[j].hitCount[k] + '</td>' + '</tr>'));
                                     }
                                 }
                             }

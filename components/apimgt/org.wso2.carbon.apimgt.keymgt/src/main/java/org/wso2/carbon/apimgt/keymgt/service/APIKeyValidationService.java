@@ -317,6 +317,25 @@ public class APIKeyValidationService extends AbstractAdmin {
         return templates;
     }
 
+    public ArrayList<URITemplate> getAPIProductURITemplates(String context, String version)
+            throws APIManagementException {
+        Timer timer6 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_URI_TEMPLATE"));
+        Timer.Context timerContext6 = timer6.start();
+        if (log.isDebugEnabled()) {
+            log.debug("getAllURITemplates request from gateway to keymanager: requestTime="
+                    + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date())
+                    + " ,for:" + context);
+        }
+        ArrayList<URITemplate> templates = ApiMgtDAO.getInstance().getAPIProductURITemplates(context, version);
+        if (log.isDebugEnabled()) {
+            log.debug("getAllURITemplates response from keyManager to gateway for:" + context + " at "
+                    + new SimpleDateFormat("[yyyy.MM.dd HH:mm:ss,SSS zzz]").format(new Date()));
+        }
+        timerContext6.stop();
+        return templates;
+    }
+
     private void logMessageDetails(MessageContext messageContext, APIKeyValidationInfoDTO apiKeyValidationInfoDTO) {
         String applicationName = apiKeyValidationInfoDTO.getApplicationName();
         String endUserName = apiKeyValidationInfoDTO.getEndUserName();

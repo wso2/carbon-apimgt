@@ -107,4 +107,14 @@ public class ThrottlePolicyConstants {
     public static final String COLUMN_BILLING_PLAN = "BILLING_PLAN";
 
     public static final String COLUMN_CUSTOM_ATTRIB = "CUSTOM_ATTRIBUTES";
+
+    public static final String COLUMN_MONETIZATION_PLAN = "MONETIZATION_PLAN";
+
+    public static final String COLUMN_FIXED_RATE = "FIXED_RATE";
+
+    public static final String COLUMN_BILLING_CYCLE = "BILLING_CYCLE";
+
+    public static final String COLUMN_PRICE_PER_REQUEST = "PRICE_PER_REQUEST";
+
+    public static final String COLUMN_CURRENCY = "CURRENCY";
 }

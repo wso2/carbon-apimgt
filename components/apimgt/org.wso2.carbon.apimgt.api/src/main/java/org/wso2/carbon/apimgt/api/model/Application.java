@@ -48,6 +48,7 @@ public class Application {
     private String lastUpdatedTime;
     private String tokenType;
     private String keyType;
+    private int subscriptionCount;
 
     public String getCreatedTime() {
         return createdTime;
@@ -154,6 +155,10 @@ public class Application {
         oauthApps.put(keyType, oAuthApplication);
     }
 
+    public void clearOAuthApps() {
+        oauthApps.clear();
+    }
+
     public int getId() {
         return id;
     }
@@ -258,5 +263,13 @@ public class Application {
 
     public void setKeyType(String keyType) {
         this.keyType = keyType;
+    }
+
+    public void setSubscriptionCount(int subscriptionCount) {
+        this.subscriptionCount = subscriptionCount;
+    }
+
+    public int getSubscriptionCount() {
+        return subscriptionCount;
     }
 }
