@@ -34,6 +34,7 @@ import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -75,17 +76,13 @@ public class RegularExpressionProtector extends AbstractMediator {
         if (messageProperty != null) {
             enabledCheckBody = Boolean.valueOf(messageProperty.toString());
         }
-        if (isContentAware()) {
-            if (isPayloadSizeExceeded(messageContext)) {
-                return true;
-            }
+        if (isContentAware() && isPayloadSizeExceeded(messageContext)) {
+            return true;
         }
 
         messageProperty = messageContext.getProperty(APIMgtGatewayConstants.REGEX_PATTERN);
-        if (messageProperty != null) {
-            if (pattern == null) {
-                pattern = Pattern.compile(messageProperty.toString(), Pattern.CASE_INSENSITIVE);
-            }
+        if (messageProperty != null && pattern == null) {
+            pattern = Pattern.compile(messageProperty.toString(), Pattern.CASE_INSENSITIVE);
         } else {
             GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
                     "Threat detection key words are missing");
@@ -103,10 +100,6 @@ public class RegularExpressionProtector extends AbstractMediator {
         messageProperty = messageContext.getProperty(APIMgtGatewayConstants.THREAT_TYPE);
         if (messageProperty != null) {
             threatType = String.valueOf(messageProperty);
-        }
-        if (isRequestBodyVulnerable(messageContext) || isRequestHeadersVulnerable(messageContext) ||
-                isRequestPathVulnerable(messageContext)) {
-            return true;
         }
         return true;
     }
@@ -131,16 +124,15 @@ public class RegularExpressionProtector extends AbstractMediator {
         String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(RESTUtils.getFullRequestPath
                 (messageContext));
         if (StringUtils.isEmpty(tenantDomain)) {
-            tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         if (!allowedTenantsList.contains(tenantDomain) &&
-                !(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME).equals(tenantDomain)) {
+                !(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME).equals(tenantDomain)) {
             GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
                     "This tenant is not allowed to use Regular Expression Threat Protector mediator");
             return false;
-        } else {
-            return true;
         }
+        return true;
     }
     /**
      * This method returns true if the request payload size exceeds the system property
@@ -179,9 +171,8 @@ public class RegularExpressionProtector extends AbstractMediator {
                     "size limit allowed to be used with the enabledCheckBody option of Regular Expression Threat " +
                     "Protector mediator");
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
