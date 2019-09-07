@@ -73,7 +73,7 @@ include("/jagg/jagg.jag");
         var applicationTierList = APIUtil.getTiers(applicationTierType, tenantDomain);
 
         if (!applicationTierList.isEmpty() && applicationTierList.containsKey(tier)) {
-            result = mod.addApplication(username, application, tier, callbackUrl, description, groupId,tokenType,applicationAttributes);
+            result = mod.addApplication(username, application, tier, callbackUrl, description, groupId, tokenType, applicationAttributes);
             if (result.error) {
                 obj = {
                     error: true,

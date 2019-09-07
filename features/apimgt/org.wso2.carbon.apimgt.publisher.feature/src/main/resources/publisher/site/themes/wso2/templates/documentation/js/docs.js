@@ -16,6 +16,13 @@ $(document).ready(function() {
         }
     });
 
+    $('input[name=optionsRadios1]:radio:checked').change(function() {
+        if (getRadioValue($('input[name=optionsRadios1]:radio:checked')) == "markdown") {
+            $('#docUrl').removeClass('error');
+            $('#docUrl').next().hide();
+        }
+    });
+
     var docId = $("#docName");
     docId.change(function () {
         var apiName = $("#docAPIName").val();
@@ -157,6 +164,10 @@ var updateDocumentation = function (rowId, docName, docType, summary, sourceType
             $('#optionsRadios6').attr('checked', true);
             $('#sourceUrlDoc').hide('slow');
             $('#docUrl').val('');
+        } else if (sourceType == "MARKDOWN") {
+            $('#optionsRadios9').attr('checked', true);
+            $('#sourceUrlDoc').hide('slow');
+            $('#docUrl').val('');
         } else if(sourceType == "URL"){
             if (docUrl != "{}") {
                 $('#newDoc #docUrl').val(docUrl);
@@ -193,6 +204,15 @@ var editInlineContent = function (provider, apiName, version, docName, mode,tena
         window.open("site/pages/inline-editor.jag?docName=" + docName + "&apiName=" + apiName + "&version=" + version + "&provider=" + provider + "&mode=" + mode+tenantDomain);
     }
 
+};
+
+var editMarkdownContent = function (provider, apiName, version, docName, mode,tenantDomain) {
+    var current = window.location.pathname;
+    if (current.indexOf("item-info.jag") >= 0) {
+        window.open("markdown-editor.jag?docName=" + docName + "&apiName=" + apiName + "&version=" + version + "&provider=" + provider + "&mode=" + mode+tenantDomain);
+    } else {
+        window.open("site/pages/markdown-editor.jag?docName=" + docName + "&apiName=" + apiName + "&version=" + version + "&provider=" + provider + "&mode=" + mode+tenantDomain);
+    }
 };
 
 var clearDocs = function () {
@@ -351,11 +371,13 @@ var getRadioValue = function (radioButton) {
 var disableInline = function(type) {
     if (type == 'forum') {
         document.getElementById("optionsRadios6").disabled = true;
+        document.getElementById("optionsRadios9").disabled = true;
         document.getElementById("optionsRadios7").checked = true;
         $('#sourceUrlDoc').show('slow');
         $('#sourceFile').hide('slow');
     } else {
         document.getElementById("optionsRadios6").disabled = false;
+        document.getElementById("optionsRadios9").disabled = false;
         document.getElementById("optionsRadios6").checked = true;
         $('#sourceUrlDoc').hide('slow');
         $('#sourceFile').hide('slow');

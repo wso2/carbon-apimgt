@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.hostobjects;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -26,8 +28,8 @@ import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
@@ -74,7 +76,6 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.apimgt.impl.workflow.UserSignUpWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -89,12 +90,12 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.identity.claim.metadata.mgt.stub.ClaimMetadataManagementServiceClaimMetadataException;
+import org.wso2.carbon.identity.claim.metadata.mgt.stub.ClaimMetadataManagementServiceStub;
 import org.wso2.carbon.identity.claim.metadata.mgt.stub.dto.ClaimPropertyDTO;
 import org.wso2.carbon.identity.claim.metadata.mgt.stub.dto.LocalClaimDTO;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceException;
-import org.wso2.carbon.identity.claim.metadata.mgt.stub.ClaimMetadataManagementServiceStub;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserDTO;
 import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -110,9 +111,8 @@ import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
 import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -132,7 +132,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
-import java.io.IOException;
 
 
 public class APIStoreHostObject extends ScriptableObject {
@@ -970,16 +969,15 @@ public class APIStoreHostObject extends ScriptableObject {
         return apiArray;
     }
 
-
     public static NativeObject jsFunction_searchPaginatedAPIs(Context cx, Scriptable thisObj, Object[] args,
-                                                              Function funObj) throws ScriptException,
-                                                                              APIManagementException {
+            Function funObj) throws ScriptException, APIManagementException {
 
         if (args == null || args.length < 4) {
             handleException("Invalid number of parameters.");
         }
 
         NativeArray apiArray = new NativeArray(0);
+        NativeArray docArray = new NativeArray(0);
         NativeObject resultObj = new NativeObject();
         Map<String, Object> result = new HashMap<String, Object>();
         Set<API> apiSet = null;
@@ -1003,23 +1001,25 @@ public class APIStoreHostObject extends ScriptableObject {
         inputSearchQuery = inputSearchQuery.trim();
         // sub context and doc content doesn't support AND search
         if (inputSearchQuery != null && inputSearchQuery.contains(" ") && !inputSearchQuery
-                .contains(APIConstants.TAG_SEARCH_TYPE_PREFIX4)) {
+                .contains(APIConstants.TAG_COLON_SEARCH_TYPE_PREFIX) && !inputSearchQuery
+                .contains(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
             if (inputSearchQuery.split(" ").length > 1) {
                 String[] searchCriterias = inputSearchQuery.split(" ");
                 for (int i = 0; i < searchCriterias.length; i++) {
                     if (searchCriterias[i].contains(":") && searchCriterias[i].split(":").length > 1) {
-                        if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchCriterias[i].split(":")[0]) ||
-                            APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchCriterias[i].split(":")[0])) {
+                        if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX
+                                .equalsIgnoreCase(searchCriterias[i].split(":")[0])
+                                || APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX
+                                .equalsIgnoreCase(searchCriterias[i].split(":")[0])) {
                             throw new APIManagementException("Invalid query. AND based search is not supported for "
-                                                             + "doc and subcontext prefixes");
+                                    + "doc and subcontext prefixes");
                         }
                     }
                     if (i == 0) {
                         newSearchQuery = APIUtil.getSingleSearchCriteria(searchCriterias[i]);
                     } else {
-                        newSearchQuery =
-                                         newSearchQuery + APIConstants.SEARCH_AND_TAG +
-                                                 APIUtil.getSingleSearchCriteria(searchCriterias[i]);
+                        newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + APIUtil
+                                .getSingleSearchCriteria(searchCriterias[i]);
                     }
                 }
             }
@@ -1029,27 +1029,32 @@ public class APIStoreHostObject extends ScriptableObject {
 
         // Append LC state query criteria if the search is not doc or subcontext
         // based
-        if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(newSearchQuery) &&
-            !APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.startsWith(newSearchQuery)) {
+        if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(newSearchQuery)
+                && !APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.startsWith(newSearchQuery)) {
             boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
 
-            String [] statusList = {APIConstants.PUBLISHED, APIConstants.PROTOTYPED};
+            String[] statusList = { APIConstants.PUBLISHED, APIConstants.PROTOTYPED };
             if (displayAPIsWithMultipleStatus) {
-                statusList = new String[]{APIConstants.PUBLISHED, APIConstants.PROTOTYPED, APIConstants.DEPRECATED};
+                statusList = new String[] { APIConstants.PUBLISHED, APIConstants.PROTOTYPED, APIConstants.DEPRECATED };
             }
 
             // The following condition is used to support API category in store
-            if(null != state){
-                if(state == APIConstants.PUBLISHED && displayAPIsWithMultipleStatus) {
+            if (null != state) {
+                if (APIConstants.PUBLISHED.equals(state) && displayAPIsWithMultipleStatus) {
                     statusList = new String[]{APIConstants.PUBLISHED, APIConstants.DEPRECATED};
-                }else if(state == APIConstants.PUBLISHED ){
+                } else if (APIConstants.PUBLISHED.equals(state)) {
                     statusList = new String[]{APIConstants.PUBLISHED};
-                }else if(state == APIConstants.PROTOTYPED){
+                } else if (APIConstants.PROTOTYPED.equals(state)) {
                     statusList = new String[]{APIConstants.PROTOTYPED};
                 }
             }
 
             String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
+            if  (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                for (int i = 0; i<statusList.length; i++) {
+                    statusList[i] = statusList[i].toLowerCase();
+                }
+            }
             lcCriteria = lcCriteria + APIUtil.getORBasedSearchCriteria(statusList);
 
             newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
@@ -1070,7 +1075,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
                         currentApi.put("name", currentApi, apiIdentifier.getApiName());
                         currentApi.put("provider", currentApi,
-                                       APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                                APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                         currentApi.put("version", currentApi, apiIdentifier.getVersion());
                         currentApi.put("description", currentApi, api.getDescription());
                         currentApi.put("status", currentApi, api.getStatus());
@@ -1081,7 +1086,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             currentApi.put("thumbnailurl", currentApi, "images/api-default.png");
                         } else {
                             currentApi.put("thumbnailurl", currentApi,
-                                           APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                                    APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
                         }
                         currentApi.put("visibility", currentApi, api.getVisibility());
                         currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
@@ -1098,6 +1103,86 @@ public class APIStoreHostObject extends ScriptableObject {
                     resultObj.put("apis", resultObj, apiArray);
                     resultObj.put("totalLength", resultObj, result.get("length"));
                 }
+            } else if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                ArrayList<Object> compoundResult = (result.get("apis") != null) ?
+                        (ArrayList<Object>) result.get("apis") : null;
+
+                if (compoundResult != null && compoundResult.size() > 0) {
+                    Iterator it = compoundResult.iterator();
+                    int i = 0;
+                    while (it.hasNext()) {
+                        Object apiObject = it.next();
+                        if (apiObject instanceof API) {
+                            NativeObject currentApi = new NativeObject();
+                            API api = (API) apiObject;
+                            APIIdentifier apiIdentifier = api.getId();
+                            currentApi.put("name", currentApi, apiIdentifier.getApiName());
+                            currentApi.put("provider", currentApi,
+                                    APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                            currentApi.put("version", currentApi, apiIdentifier.getVersion());
+                            currentApi.put("description", currentApi, api.getDescription());
+                            currentApi.put("status", currentApi, api.getStatus());
+                            currentApi.put("rates", currentApi, api.getRating());
+                            currentApi.put("description", currentApi, api.getDescription());
+                            currentApi.put("endpoint", currentApi, api.getUrl());
+                            if (api.getThumbnailUrl() == null) {
+                                currentApi.put("thumbnailurl", currentApi, "images/api-default.png");
+                            } else {
+                                currentApi.put("thumbnailurl", currentApi,
+                                        APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                            }
+                            currentApi.put("visibility", currentApi, api.getVisibility());
+                            currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
+                            currentApi.put("description", currentApi, api.getDescription());
+                            currentApi.put("isAdvertiseOnly", currentApi, api.isAdvertiseOnly());
+                            currentApi.put("apiOwner", currentApi, api.getApiOwner());
+                            currentApi.put("monetizationCategory", currentApi, api.getMonetizationCategory());
+                            currentApi.put("resultType", currentApi, "API");
+
+                            apiArray.put(i, apiArray, currentApi);
+                            i++;
+                        } else if (apiObject instanceof Map.Entry) {
+                            NativeObject currentApi = new NativeObject();
+                            Map.Entry<Documentation, API> docEntry = (Map.Entry<Documentation, API>) apiObject;
+
+                            Documentation doc = docEntry.getKey();
+                            API api = docEntry.getValue();
+                            APIIdentifier apiIdentifier = api.getId();
+
+                            currentApi.put("name", currentApi, apiIdentifier.getApiName());
+                            currentApi.put("provider", currentApi,
+                                    APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                            currentApi.put("version", currentApi, apiIdentifier.getVersion());
+                            currentApi.put("description", currentApi, api.getDescription());
+                            currentApi.put("status", currentApi, api.getStatus());
+                            currentApi.put("rates", currentApi, api.getRating());
+                            currentApi.put("description", currentApi, api.getDescription());
+                            currentApi.put("endpoint", currentApi, api.getUrl());
+                            if (api.getThumbnailUrl() == null) {
+                                currentApi.put("thumbnailurl", currentApi, "images/api-default.png");
+                            } else {
+                                currentApi.put("thumbnailurl", currentApi,
+                                        APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                            }
+                            currentApi.put("visibility", currentApi, api.getVisibility());
+                            currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
+                            currentApi.put("description", currentApi, api.getDescription());
+                            currentApi.put("docName", currentApi, doc.getName());
+                            currentApi.put("docSummary", currentApi, doc.getSummary());
+                            currentApi.put("docSourceURL", currentApi, doc.getSourceUrl());
+                            currentApi.put("docSourceType", currentApi, doc.getSourceType().name());
+                            currentApi.put("docFilePath", currentApi, doc.getFilePath());
+                            currentApi.put("monetizationCategory", currentApi, api.getMonetizationCategory());
+                            currentApi.put("resultType", currentApi, "Document");
+
+                            docArray.put(i, apiArray, currentApi);
+                            i++;
+                        }
+                    }
+                }
+                resultObj.put("apis", resultObj, apiArray);
+                resultObj.put("totalLength", resultObj, result.get("length"));
+                resultObj.put("isMore", resultObj, result.get("isMore"));
             } else {
                 apiSet = (Set<API>) result.get("apis");
                 if (apiSet != null) {
@@ -1674,12 +1759,12 @@ public class APIStoreHostObject extends ScriptableObject {
         }
 
         // The following condition is used to support API category in store
-        if(null != state){
-            if(state == APIConstants.PUBLISHED && displayAPIsWithMultipleStatus) {
+        if (null != state) {
+            if (APIConstants.PUBLISHED.equals(state) && displayAPIsWithMultipleStatus) {
                 statusList = new String[]{APIConstants.PUBLISHED, APIConstants.DEPRECATED};
-            }else if(state == APIConstants.PUBLISHED ){
+            } else if (APIConstants.PUBLISHED.equals(state)) {
                 statusList = new String[]{APIConstants.PUBLISHED};
-            }else if(state == APIConstants.PROTOTYPED){
+            } else if (APIConstants.PROTOTYPED.equals(state)) {
                 statusList = new String[]{APIConstants.PROTOTYPED};
             }
         }
@@ -1735,6 +1820,154 @@ public class APIStoreHostObject extends ScriptableObject {
         return getPaginatedAPIsByStatus(apiConsumer, tenantDomain, start, end, statusList, returnAPItags);
 
 
+    }
+
+    /**
+     * This method helps to get all published APIs in paginated form  .
+     *
+     * @param cx      will be used to store information about the executing of the script.
+     *                This is a object of org.mozilla.javascript.Context package.
+     * @param thisObj Object of Scriptable interface provides for the management of
+     *                properties and for performing conversions.
+     * @param args    this will contain parameter list from jag files.
+     * @param funObj  this object  provides for calling functions and constructors.
+     * @return this will return a method which gets list of APIs by status.
+     * @throws ScriptException
+     * @throws APIManagementException
+     */
+    public static NativeObject jsFunction_getAllPaginatedPublishedLightWeightAPIs(Context cx, Scriptable thisObj,
+                                                                                  Object[] args, Function funObj)
+            throws ScriptException, APIManagementException {
+
+        APIConsumer apiConsumer = getAPIConsumer(thisObj);
+        String tenantDomain;
+        boolean returnAPItags = false;
+        boolean lightWeight = false;
+        String [] statusList = {APIConstants.PUBLISHED};
+        if (args[0] != null) {
+            tenantDomain = (String) args[0];
+        } else {
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
+        int start = Integer.parseInt((String) args[1]);
+        int end = Integer.parseInt((String) args[2]);
+
+        if (args.length > 3 && args[3] != null) {
+            returnAPItags = Boolean.parseBoolean((String) args[3]);
+        }
+        return getPaginatedLightWeightAPIsByStatus(apiConsumer, tenantDomain, start, end, statusList, returnAPItags);
+    }
+
+    /**
+     * This method helps to get all paginated APIs by status.
+     * @param apiConsumer   ApiConsumer object to provide helper funcionality
+     * @param tenantDomain  Domain name of the tenant.
+     * @param start         The number to start the API Listing
+     * @param end           The number of end the API Listing
+     * @param status[]      Status of the API
+     * @param returnAPItags Optional parameter ,returns the tags of the API from registry if it is set to true
+     * @return this will return list of APIs by status.
+     */
+    private static NativeObject getPaginatedLightWeightAPIsByStatus(APIConsumer apiConsumer, String tenantDomain,
+                                                                    int start, int end, String[] status,
+                                                                    boolean returnAPItags) {
+        Set<API> apiSet;
+        Map<String, Object> resultMap;
+        NativeArray myn = new NativeArray(0);
+        NativeObject result = new NativeObject();
+
+        try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
+                        (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            }
+            resultMap = apiConsumer.getAllPaginatedLightWeightAPIsByStatus(tenantDomain, start, end, status,
+                    returnAPItags);
+
+        } catch (APIManagementException e) {
+            log.error("Error from Registry API while getting API Information", e);
+            return result;
+        } catch (Exception e) {
+            log.error("Error while getting API Information", e);
+            return result;
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+        if (resultMap != null) {
+            apiSet = (Set<API>) resultMap.get("apis");
+            if (apiSet != null) {
+                Iterator it = apiSet.iterator();
+                int i = 0;
+                while (it.hasNext()) {
+                    NativeObject row = new NativeObject();
+                    Object apiObject = it.next();
+                    API api = (API) apiObject;
+                    APIIdentifier apiIdentifier = api.getId();
+                    row.put("name", row, apiIdentifier.getApiName());
+                    row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                    row.put("version", row, apiIdentifier.getVersion());
+                    row.put("context", row, api.getContext());
+                    row.put("status", row, api.getStatus());
+                    if (api.getThumbnailUrl() == null) {
+                        row.put("thumbnailurl", row, "images/api-default.png");
+                    } else {
+                        row.put("thumbnailurl", row, APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                    }
+                    row.put("visibility", row, api.getVisibility());
+                    row.put("visibleRoles", row, api.getVisibleRoles());
+                    row.put("description", row, api.getDescription());
+                    String apiOwner = APIUtil.replaceEmailDomainBack(api.getApiOwner());
+                    if (apiOwner == null) {
+                        apiOwner = APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName());
+                    }
+                    row.put("apiOwner", row, apiOwner);
+                    row.put("isAdvertiseOnly", row, api.isAdvertiseOnly());
+                    row.put("apiBusinessOwner", row, api.getBusinessOwner());
+                    row.put("rates", row, api.getRating());
+
+                    NativeArray tierArr = new NativeArray(0);
+                    Set<Tier> tierSet = api.getAvailableTiers();
+                    if (tierSet != null) {
+                        Iterator tierIt = tierSet.iterator();
+                        int j = 0;
+                        while (tierIt.hasNext()) {
+                            Object tierObject = tierIt.next();
+                            Tier tier = (Tier) tierObject;
+                            tierArr.put(j, tierArr, tier.getName());
+                            j++;
+                        }
+                    }
+                    row.put("tiers", row, tierArr);
+                    row.put("monetizationCategory", row, api.getMonetizationCategory());
+
+                    if (returnAPItags) {
+                        StringBuilder tagsSet = new StringBuilder("");
+                        for (int k = 0; k < api.getTags().toArray().length; k++) {
+                            tagsSet.append(api.getTags().toArray()[k].toString());
+                            if (k != api.getTags().toArray().length - 1) {
+                                tagsSet.append(",");
+                            }
+                        }
+                        row.put("tags", row, tagsSet.toString());
+                    }
+
+                    NativeArray envArr = api.getEnvironmentList() != null ?
+                            new NativeArray(api.getEnvironmentList().toArray()) : new NativeArray(0);
+                    row.put("environmentList", row, envArr);
+                    myn.put(i, myn, row);
+                    i++;
+                }
+                result.put("apis", result, myn);
+                result.put("totalLength", result, resultMap.get("totalLength"));
+                result.put("isMore", result, resultMap.get("isMore"));
+            }
+        }
+        return result;
     }
 
     private static NativeObject getPaginatedAPIsByStatus(APIConsumer apiConsumer, String tenantDomain, int start,
@@ -1965,7 +2198,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         row.put("name", row, apiIdentifier.getApiName());
                         row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                         row.put("version", row, apiIdentifier.getVersion());
-                        row.put("description", row, StringEscapeUtils.unescapeHtml(api.getDescription()));
+                        row.put("description", row, StringEscapeUtils.unescapeHtml4(api.getDescription()));
                         row.put("rates", row, api.getRating());
                         row.put("endpoint", row, api.getUrl());
                         row.put("wsdl", row, api.getWsdlUrl());
@@ -2200,40 +2433,52 @@ public class APIStoreHostObject extends ScriptableObject {
         Map<String, Environment> environments = config.getApiGatewayEnvironments();
         JSONObject json = new JSONObject();
 
+        String productionUrl = "";
+        String sandboxUrl = "";
+        String hybridUrl = "";
+
+        // Set URL for a given default env
         for (Environment environment : environments.values()) {
-            if (APIConstants.GATEWAY_ENV_TYPE_HYBRID.equals(environment.getType())) {
-                json.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION,
-                        APIStoreHostObject.getHttpsEnvironmentUrl(environment));
-                json.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX,
-                        APIStoreHostObject.getHttpsEnvironmentUrl(environment));
-                return json;
+            String environmentUrl = APIStoreHostObject.getHttpsEnvironmentUrl(environment);
+            String environmentType = environment.getType();
+            boolean isDefault = environment.isDefault();
+
+            if (APIConstants.GATEWAY_ENV_TYPE_HYBRID.equals(environmentType)) {
+                if (isDefault) {
+                    json.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, environmentUrl);
+                } else {
+                    hybridUrl = environmentUrl;
+                }
+            } else if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environmentType)) {
+                if (isDefault) {
+                    json.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, environmentUrl);
+                } else {
+                    productionUrl = environmentUrl;
+                }
+            } else if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environmentType)) {
+                if (isDefault) {
+                    json.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, environmentUrl);
+                } else {
+                    sandboxUrl = environmentUrl;
+                }
             } else {
-                String environmentType = APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())
-                        ? APIConstants.GATEWAY_ENV_TYPE_PRODUCTION : APIConstants.GATEWAY_ENV_TYPE_SANDBOX;
-                if (environment.isDefault()) {
-                    json.put(environmentType,
-                            APIStoreHostObject.getHttpsEnvironmentUrl(environment));
-                }
+                log.warn("Invalid gateway environment type : " + environmentType +
+                        " has been configured in api-manager.xml");
             }
         }
 
-        if (json.get(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION) == null) {
-            for (Environment environment : environments.values()) {
-                if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
-                    json.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION,
-                            APIStoreHostObject.getHttpsEnvironmentUrl(environment));
-                    break;
-                }
+        // If no default envs are specified, set URL from each of the configured env types at random
+        if (json.isEmpty()) {
+            if (!productionUrl.isEmpty()) {
+                json.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionUrl);
             }
-        }
 
-        if (json.get(APIConstants.GATEWAY_ENV_TYPE_SANDBOX) == null) {
-            for (Environment environment : environments.values()) {
-                if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())) {
-                    json.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX,
-                            APIStoreHostObject.getHttpsEnvironmentUrl(environment));
-                    break;
-                }
+            if (!sandboxUrl.isEmpty()) {
+                json.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxUrl);
+            }
+
+            if (!hybridUrl.isEmpty()) {
+                json.put(APIConstants.GATEWAY_ENV_TYPE_HYBRID, hybridUrl);
             }
         }
 
@@ -2318,7 +2563,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("sourceType", row, strSourceType);
                     row.put("summary", row, documentation.getSummary());
                     String content;
-                    if (strSourceType.equals("INLINE")) {
+                    if (strSourceType.equals("INLINE") || strSourceType.equals("MARKDOWN")) {
                         content = apiConsumer.getDocumentationContent(apiIdentifier, documentation.getName());
                         row.put("content", row, content);
                     }
@@ -2799,6 +3044,59 @@ public class APIStoreHostObject extends ScriptableObject {
                     for (APIKey key : keys) {
                         row.put(key.getType() + "_KEY", row, key.getAccessToken());
                     }
+                    myn.put(i++, myn, row);
+                }
+            }
+        }
+        return myn;
+    }
+
+    public static NativeArray jsFunction_getLightWeightAPISubscriptions(Context cx, Scriptable thisObj,
+            Object[] args, Function funObj) throws ScriptException, APIManagementException {
+        NativeArray myn = new NativeArray(0);
+        if (args != null && 5 <= args.length) {
+            String providerName = (String) args[0];
+            String apiName = (String) args[1];
+            String version = (String) args[2];
+            String user = (String) args[3];
+            String groupingId = (String) args[4];
+
+            APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
+            Subscriber subscriber = new Subscriber(user);
+            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+            Set<SubscribedAPI> apis = apiConsumer.getLightWeightSubscribedIdentifiers(subscriber, apiIdentifier,
+                                                                                      groupingId);
+            int i = 0;
+            if (apis != null) {
+                for (SubscribedAPI api : apis) {
+                    NativeObject row = new NativeObject();
+                    row.put("application", row, api.getApplication().getName());
+                    row.put("applicationId", row, api.getApplication().getId());
+
+                    if (APIUtil.isMultiGroupAppSharingEnabled())  {
+                        row.put("owner", row, api.getApplication().getOwner());
+                    }
+
+                    myn.put(i++, myn, row);
+                }
+            }
+        }
+        return myn;
+    }
+
+    public static NativeArray jsFunction_getApplicationKeysOfApplication(Context cx, Scriptable thisObj,
+            Object[] args, Function funObj) throws APIManagementException {
+        NativeArray myn = new NativeArray(0);
+        if (args != null && 1 <= args.length) {
+            String appId = (String) args[0];
+            if (!StringUtils.isEmpty(appId)) {
+                int applicationId = Integer.parseInt(appId);
+                APIConsumer apiConsumer = getAPIConsumer(thisObj);
+                Set<APIKey> keys = apiConsumer.getApplicationKeysOfApplication(applicationId);
+                int i = 0;
+                for (APIKey key : keys) {
+                    NativeObject row = new NativeObject();
+                    row.put(key.getType() + APIConstants.KEY_SUFFIX, row, key.getAccessToken());
                     myn.put(i++, myn, row);
                 }
             }
@@ -3681,6 +3979,43 @@ public class APIStoreHostObject extends ScriptableObject {
                     } catch (JsonProcessingException e) {
                         log.error("Error in retrieving application attributes of " + application.getName(), e);
                     }
+                    myn.put(i++, myn, row);
+                }
+            }
+        }
+        return myn;
+    }
+
+    public static NativeArray jsFunction_getLightWeightApplications(Context cx, Scriptable thisObj, Object[] args,
+            Function funObj) throws ScriptException, APIManagementException {
+        NativeArray myn = new NativeArray(0);
+        if (args != null && isStringArray(args)) {
+            String username = args[0].toString();
+            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+            Application[] applications;
+            String groupId = "";
+            if (args.length > 1 && args[1] != null) {
+                groupId = args[1].toString();
+            }
+            applications = apiConsumer.getLightWeightApplications(new Subscriber(username), groupId);
+            Subscriber subscriber = new Subscriber(username);
+
+            if (applications != null) {
+                int i = 0;
+                for (Application application : applications) {
+                    int subscriptionCount = apiConsumer.getSubscriptionCount(subscriber, application.getName(),
+                                                                             groupId);
+                    NativeObject row = new NativeObject();
+                    row.put("name", row, application.getName());
+                    row.put("tier", row, application.getTier());
+                    row.put("id", row, application.getId());
+                    row.put("callbackUrl", row, application.getCallbackUrl());
+                    row.put("status", row, application.getStatus());
+                    row.put("description", row, application.getDescription());
+                    row.put("apiCount", row, subscriptionCount);
+                    row.put("groupId", row, application.getGroupId());
+                    row.put("isBlacklisted", row, application.getIsBlackListed());
+                    row.put("owner", row, application.getOwner());
                     myn.put(i++, myn, row);
                 }
             }
@@ -5138,7 +5473,7 @@ public class APIStoreHostObject extends ScriptableObject {
             option.setManageSession(true);
             option.setProperty(HTTPConstants.COOKIE_STRING, sessionCookie);
 
-            org.wso2.carbon.identity.claim.metadata.mgt.stub.dto.LocalClaimDTO[] localClaimDTOS = null;
+            LocalClaimDTO[] localClaimDTOS = null;
             ArrayList<UserFieldDTO> userFieldDTOS = new ArrayList<UserFieldDTO>();
             localClaimDTOS = stub.getLocalClaims();
 

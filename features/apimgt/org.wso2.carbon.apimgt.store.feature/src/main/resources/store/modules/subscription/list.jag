@@ -68,6 +68,28 @@ var getAllSubscriptionsOfApplicationById = function (username, selectedAppId, st
     }
 };
 
+var getAllScopesOfApplicationSubscription = function (username, selectedAppId)  {
+    var result,
+    log = new Log(),
+    store = jagg.module("manager"). getAPIConsumerObj();
+    try {
+	    result = store.getScopesForApplicationSubscription(username , selectedAppId);
+        if (log.isDebugEnabled()) {
+            log.debug("getAllScopesOfApplicationSubscription : " + stringify(result));
+        }
+        return {
+            error:false,
+            result:result
+        };
+    } catch (e) {
+        log.error(e);
+        return {
+            error:true,
+            result:e
+        };
+    }
+};
+
 var getAPISubscriptions = function (api, username) {
     var subscriptions,
             log = new Log(),
@@ -90,6 +112,52 @@ var getAPISubscriptions = function (api, username) {
             subscriptions:null
         };
     }
+};
+var getLightWeightAPISubscriptions = function (api, username) {
+	var subscriptions,
+		log = new Log(),
+		store = jagg.module("manager").getAPIStoreObj();
+
+	try {
+		var groupingId = session.get("groupId");
+		subscriptions = store.getLightWeightAPISubscriptions(api.provider, api.name, api.version, username, groupingId);
+		if (log.isDebugEnabled()) {
+			log.debug("getSubscriptions : " + stringify(subscriptions));
+		}
+		return {
+			error:false,
+			subscriptions:subscriptions
+		};
+	} catch (e) {
+		log.error(e.message);
+		return {
+			error:e,
+			subscriptions:null
+		};
+	}
+};
+
+var getApplicationKeysOfApplication = function (applicationId) {
+	var apikeys,
+		log = new Log(),
+		store = jagg.module("manager").getAPIStoreObj();
+
+	try {
+		apikeys = store.getApplicationKeysOfApplication(applicationId);
+		if (log.isDebugEnabled()) {
+			log.debug("getAPIKeys : " + stringify(apikeys));
+		}
+		return {
+			error:false,
+			apikeys:apikeys
+		};
+	} catch (e) {
+		log.error(e.message, e);
+		return {
+			error:e,
+			apikeys:null
+		};
+	}
 };
 
 var getAPISubscriptionsForApplication = function (username, appName, groupingId) {

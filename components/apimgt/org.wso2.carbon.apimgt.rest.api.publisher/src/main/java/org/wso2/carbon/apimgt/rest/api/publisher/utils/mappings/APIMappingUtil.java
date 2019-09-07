@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -47,6 +48,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ResourcePolicyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -264,7 +267,7 @@ public class APIMappingUtil {
             dto.setType(APIDetailedDTO.TypeEnum.valueOf(model.getType()));
         }
 
-        if (!APIConstants.APIType.WS.equals(model.getType())) {
+        if (!APIConstants.APITransportType.WS.equals(model.getType())) {
             dto.setTransport(Arrays.asList(model.getTransports().split(",")));
         }
         dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
@@ -468,8 +471,9 @@ public class APIMappingUtil {
 
         if (dto.getApiDefinition() != null) {
             String apiSwaggerDefinition = dto.getApiDefinition();
+            SwaggerData swaggerData = new SwaggerData(model);
             //URI Templates
-            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(model, apiSwaggerDefinition);
+            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(swaggerData, apiSwaggerDefinition);
             model.setUriTemplates(uriTemplates);
 
             // scopes
@@ -664,6 +668,66 @@ public class APIMappingUtil {
         return apiInfoDTO;
     }
 
+    /**
+     * Creates  a list of conversion policies into a DTO
+     *
+     * @param conversionPolicyStr conversion policies
+     * @return ConversionPolicyListDTO object containing ConversionPolicyInfoDTOs
+     * @throws APIManagementException
+     */
+    public static ResourcePolicyListDTO fromResourcePolicyStrToDTO(String conversionPolicyStr)
+            throws APIManagementException {
+        ResourcePolicyListDTO policyListDTO = new ResourcePolicyListDTO();
+        List<ResourcePolicyInfoDTO> policyInfoDTOs = policyListDTO.getList();
+        if (StringUtils.isNotEmpty(conversionPolicyStr)) {
+            try {
+                JSONObject conversionPolicyObj = (JSONObject) new JSONParser().parse(conversionPolicyStr);
+                for (Object key : conversionPolicyObj.keySet()) {
+                    JSONObject policyInfo = (JSONObject) conversionPolicyObj.get(key);
+                    String keyStr = ((String) key);
+                    ResourcePolicyInfoDTO policyInfoDTO = new ResourcePolicyInfoDTO();
+                    policyInfoDTO.setId(policyInfo.get(RestApiConstants.SEQUENCE_ARTIFACT_ID).toString());
+                    policyInfoDTO.setHttpVerb(policyInfo.get(RestApiConstants.HTTP_METHOD).toString());
+                    policyInfoDTO.setResourcePath(keyStr.substring(0, keyStr.lastIndexOf("_")));
+                    policyInfoDTO.setContent(policyInfo.get(RestApiConstants.SEQUENCE_CONTENT).toString());
+                    policyInfoDTOs.add(policyInfoDTO);
+                }
+            } catch (ParseException e) {
+                throw new APIManagementException("Couldn't parse the conversion policy string.", e);
+            }
+        }
+        policyListDTO.setCount(policyInfoDTOs.size());
+        return policyListDTO;
+    }
+
+    /**
+     * Creates a DTO consisting a single conversion policy
+     *
+     * @param conversionPolicyStr conversion policy string
+     * @return ConversionPolicyInfoDTO consisting given conversion policy string
+     * @throws APIManagementException
+     */
+    public static ResourcePolicyInfoDTO fromResourcePolicyStrToInfoDTO(String conversionPolicyStr)
+            throws APIManagementException {
+        ResourcePolicyInfoDTO policyInfoDTO = new ResourcePolicyInfoDTO();
+        if (StringUtils.isNotEmpty(conversionPolicyStr)) {
+            try {
+                JSONObject conversionPolicyObj = (JSONObject) new JSONParser().parse(conversionPolicyStr);
+                for (Object key : conversionPolicyObj.keySet()) {
+                    JSONObject policyInfo = (JSONObject) conversionPolicyObj.get(key);
+                    String keyStr = ((String) key);
+                    policyInfoDTO.setId(policyInfo.get(RestApiConstants.SEQUENCE_ARTIFACT_ID).toString());
+                    policyInfoDTO.setHttpVerb(policyInfo.get(RestApiConstants.HTTP_METHOD).toString());
+                    policyInfoDTO.setResourcePath(keyStr.substring(0, keyStr.lastIndexOf("_")));
+                    policyInfoDTO.setContent(policyInfo.get(RestApiConstants.SEQUENCE_CONTENT).toString());
+                }
+            } catch (ParseException e) {
+                throw new APIManagementException("Couldn't parse the conversion policy string.", e);
+            }
+        }
+        return policyInfoDTO;
+    }
+
     private static void setEndpointSecurityFromApiDTOToModel (APIDetailedDTO dto, API api) {
         APIEndpointSecurityDTO securityDTO = dto.getEndpointSecurity();
         if (dto.getEndpointSecurity() != null && securityDTO.getType() != null) {
@@ -719,19 +783,16 @@ public class APIMappingUtil {
                 }
             }
         } catch (UserStoreException e) {
-            String msg = "UserStoreException thrown when getting API tenant config from registry while reading " +
-                    "ExposeEndpointPassword config";
-            log.error(msg, e);
+            String msg = "UserStoreException thrown when getting API tenant config from registry while reading "
+                    + "ExposeEndpointPassword config";
             throw new APIManagementException(msg, e);
         } catch (RegistryException e) {
-            String msg = "RegistryException thrown when getting API tenant config from registry while reading " +
-                    "ExposeEndpointPassword config";
-            log.error(msg, e);
+            String msg = "RegistryException thrown when getting API tenant config from registry while reading "
+                    + "ExposeEndpointPassword config";
             throw new APIManagementException(msg, e);
         } catch (ParseException e) {
-            String msg = "ParseException thrown when parsing API tenant config from registry while reading " +
-                    "ExposeEndpointPassword config";
-            log.error(msg, e);
+            String msg = "ParseException thrown when parsing API tenant config from registry while reading "
+                    + "ExposeEndpointPassword config";
             throw new APIManagementException(msg, e);
         }
         return false;
@@ -783,7 +844,7 @@ public class APIMappingUtil {
                 return null; // how to handle this?
         }
     }
-
+    
     private static APIDetailedDTO.VisibilityEnum mapVisibilityFromAPItoDTO(String visibility) {
         switch (visibility) { //public, private,controlled, restricted
             case APIConstants.API_GLOBAL_VISIBILITY :
@@ -829,7 +890,7 @@ public class APIMappingUtil {
         }
 
     }
-
+    
     private static String updateContextWithVersion(String version, String contextVal, String context) {
         // This condition should not be true for any occasion but we keep it so that there are no loopholes in
         // the flow.
@@ -858,4 +919,5 @@ public class APIMappingUtil {
     private static String getThumbnailUri (String uuid) {
         return RestApiConstants.RESOURCE_PATH_THUMBNAIL.replace(RestApiConstants.APIID_PARAM, uuid);
     }
+
 }

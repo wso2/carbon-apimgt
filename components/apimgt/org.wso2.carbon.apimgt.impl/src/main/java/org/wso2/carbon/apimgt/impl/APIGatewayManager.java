@@ -19,14 +19,20 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.stub.ResourceData;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
@@ -37,12 +43,18 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +74,9 @@ public class APIGatewayManager {
     private final String ENDPOINT_PRODUCTION = "_PRODUCTION_";
 
     private final String ENDPOINT_SANDBOX = "_SANDBOX_";
+
+    private static final String PRODUCT_PREFIX = "prod";
+    private static final String PRODUCT_VERSION = "1.0.0";
 
 	private APIGatewayManager() {
 		APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
@@ -92,101 +107,101 @@ public class APIGatewayManager {
         if (api.getEnvironments() == null) {
             return failedEnvironmentsMap;
         }
+        long startTime;
+        long endTime;
+        if (debugEnabled) {
+            log.debug("API to be published: " + api.getId());
+            log.debug("Number of environments to be published to: " + api.getEnvironments().size());
+        }
         for (String environmentName : api.getEnvironments()) {
+            long startTimePublishToGateway = System.currentTimeMillis();
             Environment environment = environments.get(environmentName);
             //If the environment is removed from the configuration, continue without publishing
             if (environment == null) {
                 continue;
             }
             APIGatewayAdminClient client;
+            LocalEntryAdminClient localEntryAdminClient;
+
             try {
-                client = new APIGatewayAdminClient(api.getId(), environment);
-			String operation;
-			// If the API exists in the Gateway
-			if (client.getApi(tenantDomain, api.getId()) != null) {
-
-				// If the Gateway type is 'production' and the production url
-				// has been removed
-				// Or if the Gateway type is 'sandbox' and the sandbox url has
-				// been removed.
-				if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) && !APIUtil.isProductionEndpointsExists(api)) ||
-				    (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) && !APIUtil.isSandboxEndpointsExists(api))) {
-					if (debugEnabled) {
-						log.debug("Removing API " + api.getId().getApiName() +
-						          " from Environment " + environment.getName() +
-						          " since its relevant URL has been removed.");
-					}
-					client.deleteApi(tenantDomain, api.getId());
-                    if(api.isPublishedDefaultVersion()){
-                        if(client.getDefaultApi(tenantDomain, api.getId())!=null){
-                            client.deleteDefaultApi(tenantDomain, api.getId());
+                String definition;
+                String operation;
+                client = new APIGatewayAdminClient(environment);
+                long apiGetStartTime = System.currentTimeMillis();
+                APIData apiData = client.getApi(tenantDomain, api.getId());
+                endTime = System.currentTimeMillis();
+                if (debugEnabled) {
+                    log.debug("Time taken to fetch API Data: " + (endTime - apiGetStartTime) / 1000 + "  seconds");
+                }
+                localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
+                if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
+                    //Build schema with scopes and roles
+                    GraphQLSchemaDefinition schemaDefinition = new GraphQLSchemaDefinition();
+                    definition = schemaDefinition.buildSchemaWithScopesAndRoles(api);
+                    localEntryAdminClient.deleteEntry(api.getUUID() + "_graphQL");
+                    localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "_graphQL" + "\">" +
+                            definition + "</localEntry>");
+                    Set<URITemplate> uriTemplates = new HashSet<>();
+                    URITemplate template = new URITemplate();
+                    template.setAuthType("Any");
+                    template.setHTTPVerb("POST");
+                    template.setHttpVerbs("POST");
+                    template.setHttpVerbs("GET");
+                    template.setUriTemplate("/*");
+                    uriTemplates.add(template);
+                    api.setUriTemplates(uriTemplates);
+                } else if (api.getType() != null && APIConstants.APITransportType.HTTP.toString().equals(api.getType())) {
+                    definition = api.getSwaggerDefinition();
+                    localEntryAdminClient.deleteEntry(api.getUUID());
+                    localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "\">" +
+                            definition.replaceAll("&(?!amp;)", "&amp;").
+                                    replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                            + "</localEntry>");
+                }
+                // If the API exists in the Gateway
+                if (apiData != null) {
+                    startTime = System.currentTimeMillis();
+                    // If the Gateway type is 'production' and the production url
+                    // has been removed
+                    // Or if the Gateway type is 'sandbox' and the sandbox url has
+                    // been removed.
+                    if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) &&
+                            !APIUtil.isProductionEndpointsExists(api.getEndpointConfig())) ||
+                            (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) &&
+                                    !APIUtil.isSandboxEndpointsExists(api.getEndpointConfig()))) {
+                        if (debugEnabled) {
+                            log.debug("Removing API " + api.getId().getApiName() +
+                                    " from Environment " + environment.getName() +
+                                    " since its relevant URL has been removed.");
                         }
-                    }
-					setSecureVaultProperty(client, api, tenantDomain, environment);
-					undeployCustomSequences(client, api,tenantDomain, environment);
-					unDeployClientCertificates(client, api, tenantDomain);
-				} else {
-					if (debugEnabled) {
-						log.debug("API exists, updating existing API " + api.getId().getApiName() +
-						          " in environment " + environment.getName());
-					}
-                    //Deploy the fault sequence first since it has to be available by the time the API is deployed.
-                    deployAPIFaultSequence(client, api, tenantDomain, environment);
-
-                    operation ="update";
-
-                    //Update the API
-                    if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
-                        client.updateApiForInlineScript(builder, tenantDomain, api.getId());
-                    }else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
-                        client.updateApi(builder, tenantDomain, api.getId());
-                        client.saveEndpoint(api, builder, tenantDomain);
-                    }
-
-                    if(api.isDefaultVersion() || api.isPublishedDefaultVersion()){//api.isPublishedDefaultVersion() check is used to detect and update when context etc. is changed in the api which is not the default version but has a published default api
-                        if(client.getDefaultApi(tenantDomain, api.getId())!=null){
-                            client.updateDefaultApi(builder, tenantDomain, api.getId().getVersion(), api.getId());
-                        }else{
-                            client.addDefaultAPI(builder, tenantDomain, api.getId().getVersion(), api.getId());
+                        client.deleteApi(tenantDomain, api.getId());
+                        if (api.isPublishedDefaultVersion()) {
+                            if (client.getDefaultApi(tenantDomain, api.getId()) != null) {
+                                client.deleteDefaultApi(tenantDomain, api.getId());
+                            }
                         }
-                    }
-					setSecureVaultProperty(client, api, tenantDomain, environment);
+                        setSecureVaultProperty(client, api, tenantDomain, environment);
+                        undeployCustomSequences(client, api, tenantDomain, environment);
+                        unDeployClientCertificates(client, api, tenantDomain);
+                    } else {
+                        if (debugEnabled) {
+                            log.debug("API exists, updating existing API " + api.getId().getApiName() +
+                                    " in environment " + environment.getName());
+                        }
+                        //Deploy the fault sequence first since it has to be available by the time the API is deployed.
+                        deployAPIFaultSequence(client, api, tenantDomain, environment);
 
-                    //Update the custom sequences of the API
-					updateCustomSequences(client, api, tenantDomain, environment);
-                    updateClientCertificates(client, api, tenantDomain);
-				}
-			} else {
-				// If the Gateway type is 'production' and a production url has
-				// not been specified
-				// Or if the Gateway type is 'sandbox' and a sandbox url has not
-				// been specified
-				if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) && !APIUtil.isProductionEndpointsExists(api)) ||
-				    (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) && !APIUtil.isSandboxEndpointsExists(api))) {
+                        operation = "update";
 
-					if (debugEnabled) {
-						log.debug("Not adding API to environment " + environment.getName() +
-						          " since its endpoint URL " + "cannot be found");
-					}
-				} else {
-					if (debugEnabled) {
-						log.debug("API does not exist, adding new API " + api.getId().getApiName() +
-						          " in environment " + environment.getName());
-					}
-                    //Deploy the fault sequence first since it has to be available by the time the API is deployed.
-                    deployAPIFaultSequence(client, api, tenantDomain, environment);
-                    deployClientCertificates(client, api, tenantDomain);
-                    if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
-                        //Add the API
-                        if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
-                            client.addPrototypeApiScriptImpl(builder, tenantDomain, api.getId());
-                        } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
-                                .equalsIgnoreCase(api.getImplementation())) {
-                            client.addApi(builder, tenantDomain, api.getId());
-                            client.addEndpoint(api, builder, tenantDomain);
+                        //Update the API
+                        if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)) {
+                            client.updateApiForInlineScript(builder, tenantDomain, api.getId());
+                        } else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)) {
+                            client.updateApi(builder, tenantDomain, api.getId());
+                            client.saveEndpoint(api, builder, tenantDomain);
                         }
 
-                        if (api.isDefaultVersion()) {
+                        if (api.isDefaultVersion() || api.isPublishedDefaultVersion()) {//api.isPublishedDefaultVersion() check is used to detect and update when context etc. is changed in the api which is not the default version but has a published default api
                             if (client.getDefaultApi(tenantDomain, api.getId()) != null) {
                                 client.updateDefaultApi(builder, tenantDomain, api.getId().getVersion(), api.getId());
                             } else {
@@ -195,14 +210,76 @@ public class APIGatewayManager {
                         }
                         setSecureVaultProperty(client, api, tenantDomain, environment);
 
-                        //Deploy the custom sequences of the API.
-                        deployCustomSequences(client, api, tenantDomain, environment);
-                    } else {
-                        deployWebsocketAPI(api,client);
+                        long customSeqStartTime = System.currentTimeMillis();
+                        //Update the custom sequences of the API
+                        updateCustomSequences(client, api, tenantDomain, environment);
+                        endTime = System.currentTimeMillis();
+                        if (debugEnabled) {
+                            log.debug("Time taken to deploy custom Sequences: " +
+                                    (endTime - customSeqStartTime) / 1000 + "  seconds");
+                        }
+                        updateClientCertificates(client, api, tenantDomain);
                     }
+                    endTime = System.currentTimeMillis();
+                    if (debugEnabled) {
+                        log.debug("Publishing API (if the API exists in the Gateway) took " +
+                                (endTime - startTime) / 1000 + "  seconds");
+                    }
+                } else {
+                    // If the Gateway type is 'production' and a production url has
+                    // not been specified
+                    // Or if the Gateway type is 'sandbox' and a sandbox url has not
+                    // been specified
+                    startTime = System.currentTimeMillis();
+                    if ((APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType()) &&
+                            !APIUtil.isProductionEndpointsExists(api.getEndpointConfig())) ||
+                            (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType()) &&
+                                    !APIUtil.isSandboxEndpointsExists(api.getEndpointConfig()))) {
 
-				}
-			}
+                        if (debugEnabled) {
+                            log.debug("Not adding API to environment " + environment.getName() +
+                                    " since its endpoint URL " + "cannot be found");
+                        }
+                    } else {
+                        if (debugEnabled) {
+                            log.debug("API does not exist, adding new API " + api.getId().getApiName() +
+                                    " in environment " + environment.getName());
+                        }
+                        //Deploy the fault sequence first since it has to be available by the time the API is deployed.
+                        deployAPIFaultSequence(client, api, tenantDomain, environment);
+                        deployClientCertificates(client, api, tenantDomain);
+                        if (!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
+                            //Add the API
+                            if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
+                                client.addPrototypeApiScriptImpl(builder, tenantDomain, api.getId());
+                            } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
+                                    .equalsIgnoreCase(api.getImplementation())) {
+                                client.addApi(builder, tenantDomain, api.getId());
+                                client.addEndpoint(api, builder, tenantDomain);
+                            }
+
+                            if (api.isDefaultVersion()) {
+                                if (client.getDefaultApi(tenantDomain, api.getId()) != null) {
+                                    client.updateDefaultApi(builder, tenantDomain, api.getId().getVersion(), api.getId());
+                                } else {
+                                    client.addDefaultAPI(builder, tenantDomain, api.getId().getVersion(), api.getId());
+                                }
+                            }
+                            setSecureVaultProperty(client, api, tenantDomain, environment);
+
+                            //Deploy the custom sequences of the API.
+                            deployCustomSequences(client, api, tenantDomain, environment);
+                        } else {
+                            deployWebsocketAPI(api, client);
+                        }
+
+                    }
+                    endTime = System.currentTimeMillis();
+                    if (debugEnabled) {
+                        log.debug("Publishing API (if the API does not exist in the Gateway) took " +
+                                (endTime - startTime) / 1000 + "  seconds");
+                    }
+                }
             } catch (AxisFault axisFault) {
                 /*
                 didn't throw this exception to handle multiple gateway publishing
@@ -234,11 +311,129 @@ public class APIGatewayManager {
                 log.error("Error occurred while adding/updating client certificate in " + environmentName, ex);
                 failedEnvironmentsMap.put(environmentName, ex.getMessage());
             }
+            long endTimePublishToGateway = System.currentTimeMillis();
+            if (debugEnabled) {
+                log.debug("Publishing to gateway : " + environmentName + " total time taken : " +
+                        (endTimePublishToGateway - startTimePublishToGateway) / 1000 + "  seconds");
+            }
         }
         updateRemovedClientCertificates(api, tenantDomain);
         return failedEnvironmentsMap;
     }
 
+    /**
+     * Publishes an API Product to all configured Gateways.
+     *
+     * @param apiProduct
+     *            - The API Product to be published
+     * @param builder
+     *            - The template builder
+     * @param tenantDomain
+     *            - Tenant Domain of the publisher
+     */
+    public Map<String, String> publishToGateway(APIProduct apiProduct, APITemplateBuilder builder, String tenantDomain) {
+        Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
+
+        if (apiProduct.getEnvironments() == null) {
+            return failedEnvironmentsMap;
+        }
+        long startTime = 0;
+        long startTimePublishToGateway = 0;
+        long apiGetStartTime = 0;
+
+        APIProductIdentifier apiProductId = apiProduct.getId();
+
+        APIIdentifier id = new APIIdentifier(PRODUCT_PREFIX, apiProductId.getName(), PRODUCT_VERSION);
+
+        if (debugEnabled) {
+            log.debug("API to be published: " + id);
+            log.debug("Number of environments to be published to: " + apiProduct.getEnvironments().size());
+        }
+
+        for (String environmentName : apiProduct.getEnvironments()) {
+            if (debugEnabled) {
+                startTimePublishToGateway = System.currentTimeMillis();
+            }
+            Environment environment = environments.get(environmentName);
+            //If the environment is removed from the configuration, continue without publishing
+            if (environment == null) {
+                continue;
+            }
+            APIGatewayAdminClient client;
+            try {
+                client = new APIGatewayAdminClient(environment);
+                if (debugEnabled) {
+                    apiGetStartTime = System.currentTimeMillis();
+                }
+
+                APIData apiData = client.getApi(tenantDomain, id);
+
+                if (debugEnabled) {
+                    long endTime = System.currentTimeMillis();
+                    log.debug("Time taken to fetch API Data: " + (endTime - apiGetStartTime) / 1000 + "  seconds");
+                }
+
+                // If the API exists in the Gateway
+                if (apiData != null) {
+                    if (debugEnabled) {
+                        startTime = System.currentTimeMillis();
+                    }
+
+                    if (debugEnabled) {
+                        log.debug("API exists, updating existing API " + id.getApiName() +
+                                " in environment " + environment.getName());
+                    }
+
+                    //Update the API
+                    client.updateApi(builder, tenantDomain, id);
+
+                    if (debugEnabled) {
+                        long endTime = System.currentTimeMillis();
+                        log.debug("Publishing API (if the API exists in the Gateway) took " +
+                                (endTime - startTime) / 1000 + "  seconds");
+                    }
+                } else {
+                    // If the Gateway type is 'production' and a production url has
+                    // not been specified
+                    // Or if the Gateway type is 'sandbox' and a sandbox url has not
+                    // been specified
+                    if (debugEnabled) {
+                        startTime = System.currentTimeMillis();
+                    }
+
+                    if (debugEnabled) {
+                        log.debug("API does not exist, adding new API " + id.getApiName() +
+                                " in environment " + environment.getName());
+                    }
+
+                    //Add the API
+                    client.addApi(builder, tenantDomain, id);
+
+                    if (debugEnabled) {
+                        long endTime = System.currentTimeMillis();
+                        log.debug("Publishing API (if the API does not exist in the Gateway) took " +
+                                (endTime - startTime) / 1000 + "  seconds");
+                    }
+                }
+            } catch (AxisFault axisFault) {
+                /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway publishing if one gateway unreachable
+                 */
+                failedEnvironmentsMap.put(environmentName, axisFault.getMessage());
+                log.error("Error occurred when publish to gateway " + environmentName, axisFault);
+            }
+
+            if (debugEnabled) {
+                long endTimePublishToGateway = System.currentTimeMillis();
+                log.debug("Publishing to gateway : " + environmentName + " total time taken : " +
+                        (endTimePublishToGateway - startTimePublishToGateway) / 1000 + "  seconds");
+            }
+        }
+
+        return failedEnvironmentsMap;
+    }
 	/**
 	 * Removed an API from the configured Gateways
 	 * 
@@ -258,15 +453,16 @@ public class APIGatewayManager {
                         continue;
                     }
 
-                    APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
+                    APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
                     unDeployClientCertificates(client, api, tenantDomain);
-                    if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
-                        if (client.getApi(tenantDomain, api.getId()) != null) {
+                    if(!APIConstants.APITransportType.WS.toString().equals(api.getType())) {
+                        APIIdentifier id = api.getId();
+                        if (client.getApi(tenantDomain, id) != null) {
                             if (debugEnabled) {
                                 log.debug("Removing API " + api.getId().getApiName() + " From environment " +
                                         environment.getName());
                             }
-                            if ("INLINE".equals(api.getImplementation())) {
+                            if ("INLINE".equals(api.getImplementation()) || "MARKDOWN".equals(api.getImplementation())) {
                                 client.deleteApi(tenantDomain, api.getId());
                                 undeployCustomSequences(client, api, tenantDomain, environment);
                             } else {
@@ -289,7 +485,8 @@ public class APIGatewayManager {
                     }
 
                     if (api.isPublishedDefaultVersion()) {
-                        if (client.getDefaultApi(tenantDomain, api.getId()) != null) {
+                        APIIdentifier id = api.getId();
+                        if (client.getDefaultApi(tenantDomain, id) != null) {
                             client.deleteDefaultApi(tenantDomain, api.getId());
                         }
                     }
@@ -383,7 +580,7 @@ public class APIGatewayManager {
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             for (String environmentName : environments) {
                 Environment environment = this.environments.get(environmentName);
-                client = new APIGatewayAdminClient(api.getId(), environment);
+                client = new APIGatewayAdminClient(environment);
                 try {
                     gatewayManager.deployWebsocketAPI(api, client);
                 } catch (JSONException ex) {
@@ -416,10 +613,25 @@ public class APIGatewayManager {
      * @param url
      * @return
      */
-    public String createSeqString(API api, String url, String urltype) {
+    public String createSeqString(API api, String url, String urltype) throws JSONException  {
 
         String context = api.getContext();
         context = urltype + context;
+        String[] endpointConfig = websocketEndpointConfig(api, urltype);
+        String timeout = endpointConfig[0];
+        String suspendOnFailure = endpointConfig[1];
+        String markForSuspension = endpointConfig[2];
+        String endpointConf = "<default>\n" +
+                "\t<timeout>\n" +
+                timeout +
+                "\t</timeout>\n" +
+                "\t<suspendOnFailure>\n" +
+                suspendOnFailure + "\n" +
+                "\t</suspendOnFailure>\n" +
+                "\t<markForSuspension>\n" +
+                markForSuspension +
+                "\t</markForSuspension>\n" +
+                "</default>";
         String seq = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"" +
                 context.replace('/', '-') + "\">\n" +
@@ -447,7 +659,7 @@ public class APIGatewayManager {
                 "           expression=\"$ctx:fullUrl\"/>\n" +
                 "   <send>\n" +
                 "      <endpoint>\n" +
-                "         <default/>\n" +
+                endpointConf + "\n" +
                 "      </endpoint>\n" +
                 "   </send>\n" +
                 "</sequence>";
@@ -462,8 +674,9 @@ public class APIGatewayManager {
             for (String environmentName : api.getEnvironments()) {
                 try {
                     Environment environment = environments.get(environmentName);
-                    APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
-                    if (client.getDefaultApi(tenantDomain, api.getId()) != null) {
+                    APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
+                    APIIdentifier id = api.getId();
+                    if (client.getDefaultApi(tenantDomain, id) != null) {
                         if (debugEnabled) {
                             log.debug("Removing Default API " + api.getId().getApiName() + " From environment " +
                                       environment.getName());
@@ -497,10 +710,11 @@ public class APIGatewayManager {
     public boolean isAPIPublished(API api, String tenantDomain)throws APIManagementException {
         for (Environment environment : environments.values()) {
             try {
-                APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
+                APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
                 // If the API exists in at least one environment, consider as
                 // published and return true.
-                if (client.getApi(tenantDomain, api.getId()) != null) {
+                APIIdentifier id = api.getId();
+                if (client.getApi(tenantDomain, id) != null) {
                     return true;
                 }
             } catch (AxisFault axisFault) {
@@ -526,9 +740,10 @@ public class APIGatewayManager {
     public String getAPIEndpointSecurityType(API api, String tenantDomain) throws APIManagementException {
         for (Environment environment : environments.values()) {
             try {
-                APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
-                if (client.getApi(tenantDomain, api.getId()) != null) {
-                    APIData apiData = client.getApi(tenantDomain, api.getId());
+                APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
+                APIIdentifier id = api.getId();
+                APIData apiData = client.getApi(tenantDomain, id);
+                if (apiData != null) {
                     ResourceData[] resourceData = apiData.getResources();
                     for (ResourceData resource : resourceData) {
                         if (resource != null && resource.getInSeqXml() != null 
@@ -547,6 +762,39 @@ public class APIGatewayManager {
             }
         }
         return APIConstants.APIEndpointSecurityConstants.BASIC_AUTH;
+    }
+
+    public void setProductResourceSequences(APIProviderImpl apiProvider, APIProduct apiProduct, String tenantDomain)
+            throws APIManagementException {
+        for (APIProductResource resource : apiProduct.getProductResources()) {
+            APIIdentifier apiIdentifier = resource.getApiIdentifier();
+            API api = apiProvider.getAPI(apiIdentifier);
+
+            for (String environmentName : api.getEnvironments()) {
+                Environment environment = environments.get(environmentName);
+                try {
+                    APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
+
+                    String inSequenceKey = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
+                    if (client.isExistingSequence(inSequenceKey, tenantDomain)) {
+                        resource.setInSequenceName(inSequenceKey);
+                    }
+
+                    String outSequenceKey = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
+                    if (client.isExistingSequence(outSequenceKey, tenantDomain)) {
+                        resource.setOutSequenceName(outSequenceKey);
+                    }
+
+                    String faultSequenceKey = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+                    if (client.isExistingSequence(faultSequenceKey, tenantDomain)) {
+                        resource.setFaultSequenceName(faultSequenceKey);
+                    }
+                } catch (AxisFault axisFault) {
+                    throw new APIManagementException("Error occurred while checking if product resources " +
+                            "have custom sequences", axisFault);
+                }
+            }
+        }
     }
 
     /**
@@ -912,7 +1160,6 @@ public class APIGatewayManager {
      * @param api
      * @param tenantDomain
      * @param environment
-     * @param operation -add,delete,update operations for an API
      * @throws APIManagementException
      */
 	private void setSecureVaultProperty(APIGatewayAdminClient securityAdminClient, API api, String tenantDomain, Environment
@@ -930,4 +1177,86 @@ public class APIGatewayManager {
 			}
 		}
 	}
+    /**
+     * Construct the timeout, suspendOnFailure, markForSuspension to add suspend
+     * configuration to the websocket endpoint (Simply assign config values according to the endpoint-template)
+     *
+     * @param api
+     *
+     * @param urlType
+     *            - Whether production or sandbox
+     * @return timeout, suspendOnFailure, markForSuspension which will use to construct the endpoint configuration
+     *
+     */
+    private String[] websocketEndpointConfig(API api, String urlType) throws JSONException {
+        JSONObject obj = new JSONObject(api.getEndpointConfig());
+        JSONObject endpointObj = null;
+        if (ENDPOINT_PRODUCTION.equalsIgnoreCase(urlType)) {
+            if (obj.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).get("config") instanceof JSONObject) {
+                //if config is not a JSONObject(happens when save the api without changing enpoint config at very first time)
+                endpointObj = obj.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getJSONObject("config");
+            } else {
+                return new String[]{"", "", ""};
+            }
+        } else if (ENDPOINT_SANDBOX.equalsIgnoreCase(urlType)) {
+            if (obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).get("config") instanceof JSONObject) {
+                //if config is not a JSONObject(happens when save the api without changing enpoint config at very first time)
+                endpointObj = obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getJSONObject("config");
+            } else {
+                return new String[]{"", "", ""};
+            }
+        }
+        String duration = endpointObj.has("actionDuration") ? "\t\t<duration>" + endpointObj.get("actionDuration") + "</duration>\n" : "";
+        String responseAction = endpointObj.has("actionSelect") ? "\t\t<responseAction>" + endpointObj.get("actionSelect") + "</responseAction>\n" : "";
+        String timeout = duration + "\n" + responseAction;
+        String retryErrorCode;
+        String suspendErrorCode ;
+        if (endpointObj.has("suspendDuration")) {
+            //Avoid suspending the endpoint when suspend duration is zero
+            if (Integer.parseInt(endpointObj.get("suspendDuration").toString()) == 0) {
+                String suspendOnFailure = "\t\t<errorCodes>-1</errorCodes>\n" +
+                        "\t\t<initialDuration>0</initialDuration>\n" +
+                        "\t\t<progressionFactor>1.0</progressionFactor>\n" +
+                        "\t\t<maximumDuration>0</maximumDuration>";
+                String markForSuspension = "\t\t<errorCodes>-1</errorCodes>";
+                return new String[]{timeout, suspendOnFailure, markForSuspension};
+            }
+        }
+        if (endpointObj.has("suspendErrorCode")) {
+            //When there are/is multiple/single suspend error codes
+            if (endpointObj.get("suspendErrorCode") instanceof JSONArray) {
+                String suspendCodeList = "";
+                for (int i = 0; i < endpointObj.getJSONArray("suspendErrorCode").length(); i++) {
+                    suspendCodeList = suspendCodeList + endpointObj.getJSONArray("suspendErrorCode").get(i).toString() + ",";
+                }
+                suspendErrorCode = "\t\t<errorCodes>" + suspendCodeList.substring(0, suspendCodeList.length() - 1) + "</errorCodes>";
+            } else {
+                suspendErrorCode = "\t\t<errorCodes>" + endpointObj.get("suspendErrorCode") + "</errorCodes>";
+            }
+        } else {
+            suspendErrorCode = "";
+        }
+        String suspendDuration = endpointObj.has("suspendDuration") ? "\t\t<initialDuration>" + endpointObj.get("suspendDuration").toString() + "</initialDuration>" : "";
+        String suspendMaxDuration = endpointObj.has("suspendMaxDuration") ? "\t\t<maximumDuration>" + endpointObj.get("suspendMaxDuration") + "</maximumDuration>" : "";
+        String factor = endpointObj.has("factor") ? "\t\t<progressionFactor>" + endpointObj.get("factor") + "</progressionFactor>" : "";
+        String suspendOnFailure = suspendErrorCode + "\n" + suspendDuration + "\n" + suspendMaxDuration + "\n" + factor;
+        if (endpointObj.has("retryErroCode")) {
+            //When there are/is multiple/single retry error codes
+            if (endpointObj.get("retryErroCode") instanceof JSONArray) {
+                String retryCodeList = "";
+                for (int i = 0; i < endpointObj.getJSONArray("retryErroCode").length(); i++) {
+                    retryCodeList = retryCodeList + endpointObj.getJSONArray("retryErroCode").get(i).toString() + ",";
+                }
+                retryErrorCode = "\t\t<errorCodes>" + retryCodeList.substring(0, retryCodeList.length() - 1) + "</errorCodes>";
+            } else {
+                retryErrorCode = "\t\t<errorCodes>" + endpointObj.get("retryErroCode") + "</errorCodes>";
+            }
+        } else {
+            retryErrorCode = "";
+        }
+        String retryTimeOut = endpointObj.has("retryTimeOut") ? "\t\t<retriesBeforeSuspension>" + endpointObj.get("retryTimeOut") + "</retriesBeforeSuspension>" : "";
+        String retryDelay = endpointObj.has("retryDelay") ? "\t\t<retryDelay>" + endpointObj.get("retryDelay") + "</retryDelay>" : "";
+        String markForSuspension = retryErrorCode + "\n" + retryTimeOut + "\n" + retryDelay;
+        return new String[]{timeout, suspendOnFailure, markForSuspension};
+    }
 }

@@ -4,14 +4,6 @@
             <% var supportedLangs = jagg.module("sdk").getSupportedLanguages();
                 var langsArray = supportedLangs.langs.split(",");
                 var user = jagg.getUser();
-                if (inputs.api.isOpenAPI3APIDefinition) {
-                    %>
-                   <div class="message message-info">
-                            <h4><i class="icon fw fw-info"></i><%=i18n.localize("Info!")%></h4>
-                            <p><%=i18n.localize("Client side SDK generation feature is currently not available for this API since the API definition is in OpenAPI 3.0 specification")%></p>
-		           </div>
-                    <%
-                } else {
                 if (supportedLangs.langs != null && langsArray.length > 0) { %>
                     <div class="row">
                         <div class="col-md-12">
@@ -20,7 +12,7 @@
                         <br><br>
                         <div class="col-md-12">
                             <% for (var i = 0; i < langsArray.length; i++) { %>
-                                <a href="<%=jagg.urlTenanted("/site/blocks/sdk/ajax/sdk-create.jag?action=generateSDK")%>&apiName=<%=inputs.api.name%>&apiVersion=<%=inputs.api.version%>&apiProvider=<%=inputs.api.provider%>&language=<%=langsArray[i]%>"
+                                <a href="<%=jagg.urlTenanted("/site/blocks/sdk/ajax/sdk-create.jag?action=generateSDK")%>&apiName=<%=inputs.api.name%>&apiVersion=<%=inputs.api.version%>&language=<%=langsArray[i]%>"
                                     class="btn btn-primary <% if(!user) { %>need-login<% } %>" type="button" title="sdk generation">
                                     <%=i18n.localize(langsArray[i], langsArray[i])%>&nbsp;<span class="glyphicon glyphicon-download-alt"></span>
                                 </a>
@@ -34,5 +26,5 @@
                     <br>
                 <% }%>
         </div>
-    <% } }%>
+    <% } %>
 <% }); %>

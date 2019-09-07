@@ -11,6 +11,7 @@
         var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
         var _description = encode.forHtml(api.description);
         var _tags = encode.forHtml(api.tags);
+        var _json_schema = api.enableSchemaValidation;
     }
     else{
         var apiUrlId = "";
@@ -59,9 +60,11 @@
         implement_w_link = '#';
     }
 
+    // When only mutual ssl or basic auth is selected tiers need not be selected.
     var manage_wlabel = "";
-    if (api && ((api.apisecurity_oauth2 == "" && api.apisecurity_mutualssl != "") || api.availableTiers != "" || api
-        .availableSubscriptionPolicy != "")) {
+    if (api && ((api.apisecurity_oauth2 == "" && api.apisecurity_mutualssl != "") ||
+        (api.apisecurity_oauth2 == "" && api.apisecurity_basic_auth != "") || api.availableTiers != ""
+        || api.availableSubscriptionPolicy != "")) {
         manage_wlabel = "completed";
     } else {
         var manage_w_link = '#';
@@ -347,6 +350,30 @@
 																<p class="help-block" id="rolesHelp"><%=i18n.localize("Type a Tag and Enter")%></p>
 															</div>
 														</div>
+														<div class="form-group">
+                                                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 col-sm-offset-3 col-md-offset-3 col-lg-offset-3">
+                                                        		<a href="#" class="more-advanced-options but" ref="more-advanced-options-endpoints"" title="<%=i18n.localize("Show Advanced Options")%>" ><%=i18n.localize("Show Advanced Options")%></a>
+                                                        	</div>
+                                                        </div>
+                                                        	<div id="more-advanced-options-endpoints"  style="display:none">
+                                                        		<div class="form-group">
+                                                        		    <label class = "col-sm-3 control-label"><%=i18n.localize("Schema Validation:")%>
+                                                        		    <a class="help_popup" help_data="schema_validaton_help" title="schema_validaton_help" data-trigger="hover" data-placement="bottom">
+                                                        			    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                        			       <i class="fw fw-circle fw-stack-2x"></i>
+                                                                           <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                                        			    </span>
+                                                        		    </a>
+                                                        		        <p id="schema_validaton_help" class="hide"><%=i18n.localize("Marking an API to be validated from the schema")%></p>
+                                                        		    </label>
+                                                        	        <div class="controls col-sm-8">
+                                                                        <label class="checkbox">
+                                                                        <input type="checkbox" id="schemaValidation" name= "schemaValidation"  value="schemaValidation" <%if(_json_schema =="true"){%>checked<%}%>>
+                                                                        <span class="helper"></span>
+                                                                    </label>
+                                                                </div>
+                                                        	</div>
+                                                        </div>
 										  </div><!-- left -->
 
 										  <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
@@ -395,6 +422,7 @@
 
 										<% if(session.get("wsdl") || ( api && api.wsdl )) {
 											var wsdl = session.get("wsdl");
+                                            var wsdlFile = session.get("wsdl-file");
 											if(api && api.wsdl){
 												wsdl = api.wsdl;
 											}
@@ -416,10 +444,24 @@
 												</label>
 												<div class="col-sm-6">
 													<div class="input-append">
-														<input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= encode.forHtmlAttribute(wsdl) %>" />
-														<div class="btn-group">
-															<button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("Test URI")%></button>
-														</div>
+                                                        <div id="wsdlurlInputSection">
+                                                            <input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= encode.forHtmlAttribute(wsdl) %>" />
+                                                            <div class="btn-group" id="test-uri-section">
+                                                                 <button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("Test URI")%></button>
+                                                             </div>
+                                                        </div>
+
+                                                        <div class="input-group input-wrap file-upload-control" id="fileUploadSection" style="display:none">
+                                                                    <input type="text" class="form-control validInput" id="wsdl-file-url" name="wsdl-file-url"  value="<%= encode.forHtmlAttribute(wsdl) %>" />
+                                                                            <input id="wsdl-file" name="wsdl-file" type="file" title="wsdl-file" class="form-control" multiple>
+                                                                            <label for="wsdl-file" class="error swaggerFileError" style="display:none"><%=i18n.localize("Please use a valid wsdl file")%></label>
+                                                                            <div class="input-group-btn" id="wsdlFileBrowseBtn">
+                                                                                <button class="btn btn-primary browse" type="button" title="Browse File">
+                                                                                    <i class="fw fw-file-browse" aria-hidden="true"></i> <span
+                                                                                        class="hidden-xs"><%=i18n.localize("Browse")%></span>
+                                                                                </button>
+                                                                            </div>
+                                                        </div>
 													</div>
 												</div>
 											</div>
@@ -447,9 +489,6 @@
 										</div>
 										<% } %>
 										</div>
-										 <div class="message message-info" id="openAPISpec3Warning" style="display: none">
-                                            <p><%=i18n.localize("Client side SDK generation feature is currently not available for APIs in OpenAPI 3.0 specification")%></p>
-		                                </div>
 										<hr/>
 										<%if(api!=null){%>
 											<input type = "hidden" name = "bizOwner" value = "<%=encode.forHtmlAttribute(api.bizOwner)%>" />
@@ -843,7 +882,7 @@
                 <td class="resource-method-td resource_expand" data-path="$.paths.['{{ path }}'].{{ @key }}">
                     <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
                 </td>
-                <td class="resource_expand"><a class="resource-path" title="resource-path">{{ path }}</a></td>
+                <td class="resource_expand"><a class="resource-path" title="resource-path">{{ displayPath }}</a></td>
                 <td><span class="operation-summary change_summary" data-path="$.paths.['{{ path }}'].{{@key}}" data-attr="summary" >{{ summary }}</span></td>
                 <td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ path }}" data-path="$.paths.['{{ path }}'].{{@key}}" data-index="{{ @index }}">
             <span class="fw-stack" style="font-size:10px">

@@ -8,7 +8,11 @@ jagg.module("application", {
     getApplications:function () {
         return jagg.require(jagg.getModulesDir() + "application/list.jag").getApplications.apply(this, arguments);
     },
-    getApplicationsWithPagination:function () {
+	getLightWeightApplications:function () {
+		return jagg.require(jagg.getModulesDir() + "application/list.jag").getLightWeightApplications.apply(this, arguments);
+	},
+
+	getApplicationsWithPagination:function () {
         return jagg.require(jagg.getModulesDir() + "application/list.jag").getApplicationsWithPagination.apply(this, arguments);
     },
     getApplicationByName: function () {

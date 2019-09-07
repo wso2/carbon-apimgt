@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 import org.apache.axis2.Constants;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.http.util.RESTUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -42,7 +43,6 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
-import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftAPIDataStore;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -151,15 +151,16 @@ public class APIKeyValidatorTestCase {
                 thenReturn("true");
 
         try {
+            List<VerbInfoDTO> verbList = apiKeyValidator.findMatchingVerb(synCtx);
+            int length = verbList.toArray().length;
             //Test for ResourceNotFoundexception
-            assertNotNull(apiKeyValidator.findMatchingVerb(synCtx));
+            assertNotNull(verbList.get(0));
 //        todo    Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION_STRATEGY)).thenReturn("url");
 
         } catch (ResourceNotFoundException e) {
             assert true;
         } catch (APISecurityException e) {
             fail("APISecurityException is thrown " + e);
-
         }
         APIKeyValidator apiKeyValidator1 = createAPIKeyValidator(false,
                 getDefaultURITemplates("/menu", "GET"), verbInfoDTO);
@@ -172,8 +173,10 @@ public class APIKeyValidatorTestCase {
         Mockito.when(synapseConfiguration.getAPI("abc")).thenReturn((api));
 
         try {
+            List<VerbInfoDTO> verbInfoList = new ArrayList<>();
+            verbInfoList.add(verbInfoDTO);
             //Test for matching verb is found path
-            assertEquals("", verbInfoDTO, apiKeyValidator1.findMatchingVerb(synCtx));
+            assertEquals("", verbInfoList, apiKeyValidator1.findMatchingVerb(synCtx));
         } catch (ResourceNotFoundException e) {
             fail("ResourceNotFoundException exception is thrown " + e);
         } catch (APISecurityException e) {
@@ -282,7 +285,9 @@ public class APIKeyValidatorTestCase {
 
         try {
             //Test for matching verb is found path
-            assertEquals("", verbInfoDTO, apiKeyValidator1.findMatchingVerb(synCtx));
+            List<VerbInfoDTO> verbInfoList = new ArrayList<>();
+            verbInfoList.add(verbInfoDTO);
+            assertEquals("", verbInfoList, apiKeyValidator1.findMatchingVerb(synCtx));
         } catch (ResourceNotFoundException e) {
             fail("ResourceNotFoundException exception is thrown " + e);
         } catch (APISecurityException e) {
@@ -379,6 +384,7 @@ public class APIKeyValidatorTestCase {
         Resource resource = Mockito.mock(Resource.class);
         API api = new API("abc", "/");
         Mockito.when(synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/menu");
+        Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
 
         api.addResource(resource);
         Mockito.when(synapseConfiguration.getAPI("abc")).thenReturn((api));
@@ -389,9 +395,7 @@ public class APIKeyValidatorTestCase {
         } catch (APISecurityException e) {
             e.printStackTrace();
         }
-        Assert.assertEquals("None", result1);
-
-
+        Assert.assertEquals(StringUtils.capitalize(APIConstants.AUTH_TYPE_NONE.toLowerCase()), result1);
     }
 
     /*
@@ -401,10 +405,12 @@ public class APIKeyValidatorTestCase {
                                                   final ArrayList<URITemplate> urlTemplates,
                                                   final VerbInfoDTO verbInfoDTO) {
         AxisConfiguration axisConfig = Mockito.mock(AxisConfiguration.class);
+        List<VerbInfoDTO> verbInfoDTOList = new ArrayList<>();
+        verbInfoDTOList.add(verbInfoDTO);
         return new APIKeyValidator(axisConfig) {
             @Override
             protected String getKeyValidatorClientType() {
-                return "thriftClient";
+                return "WSClient";
             }
 
             @Override
@@ -435,7 +441,7 @@ public class APIKeyValidatorTestCase {
                 } else {
                     Cache cache = Mockito.mock(Cache.class);
                     if (cacheName.equals("resourceCache")) {
-                        Mockito.when(cache.get("abc")).thenReturn(verbInfoDTO);
+                        Mockito.when(cache.get("abc")).thenReturn(verbInfoDTOList);
                     } else if (cacheName.equals("GATEWAY_TOKEN_CACHE")) {
                         Mockito.when(cache.get("abc")).thenReturn("token");
                     }
@@ -494,7 +500,7 @@ public class APIKeyValidatorTestCase {
 
             @Override
             protected String getKeyValidatorClientType() {
-                return "thriftClient";
+                return "WSClient";
             }
 
             @Override
@@ -574,9 +580,7 @@ public class APIKeyValidatorTestCase {
 
         AxisConfiguration axisConfig = Mockito.mock(AxisConfiguration.class);
         WSAPIKeyDataStore wsDataStore = Mockito.mock(WSAPIKeyDataStore.class);
-        ThriftAPIDataStore thriftDataStore = Mockito.mock(ThriftAPIDataStore.class);
         PowerMockito.whenNew(WSAPIKeyDataStore.class).withNoArguments().thenReturn(wsDataStore);
-        PowerMockito.whenNew(ThriftAPIDataStore.class).withNoArguments().thenReturn(thriftDataStore);
 
 
         APIKeyValidator wsKeyValidator = new APIKeyValidator(axisConfig) {
@@ -586,21 +590,10 @@ public class APIKeyValidatorTestCase {
             }
         };
 
-        APIKeyValidator thriftKeyValidator = new APIKeyValidator(axisConfig) {
-            @Override
-            protected String getKeyValidatorClientType() {
-                return "ThriftClient";
-            }
-        };
 
         // test cleanup for WSClient
         wsKeyValidator.cleanup();
         Mockito.verify(wsDataStore, Mockito.times(1)).cleanup();
-        Mockito.verify(thriftDataStore, Mockito.times(0)).cleanup();
-
-        //test cleanup for ThriftClient
-        thriftKeyValidator.cleanup();
-        Mockito.verify(thriftDataStore, Mockito.times(1)).cleanup();
     }
 
     private ArrayList<URITemplate> getDefaultURITemplates(String uriTemplate, String verb) {

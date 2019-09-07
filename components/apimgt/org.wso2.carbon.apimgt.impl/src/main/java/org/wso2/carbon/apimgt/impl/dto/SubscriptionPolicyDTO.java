@@ -22,15 +22,17 @@ import java.io.Serializable;
 
 public class SubscriptionPolicyDTO implements Serializable {
 
-    String spikeArrestLimit;
+    private static final long serialVersionUID = 1L;
+
+    int spikeArrestLimit;
     String spikeArrestUnit;
     boolean stopOnQuotaReach;
 
-    public String getSpikeArrestLimit() {
+    public int getSpikeArrestLimit() {
         return spikeArrestLimit;
     }
 
-    public void setSpikeArrestLimit(String spikeArrestLimit) {
+    public void setSpikeArrestLimit(int spikeArrestLimit) {
         this.spikeArrestLimit = spikeArrestLimit;
     }
 

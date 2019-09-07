@@ -28,6 +28,9 @@ import org.wso2.carbon.databridge.agent.exception.DataEndpointConfigurationExcep
 import org.wso2.carbon.databridge.agent.exception.DataEndpointException;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublisher{
 
     private static final Log log   = LogFactory.getLog(APIMgtUsageDataBridgeDataPublisher.class);
@@ -35,49 +38,61 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
     protected DataPublisher dataPublisher;
     private static DataPublisher dataPublisherStatics;
 
-    public void init(){
+    public void init() {
+
         try {
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Initializing APIMgtUsageDataBridgeDataPublisher");
             }
 
             this.dataPublisher = getDataPublisher();
 
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Error initializing APIMgtUsageDataBridgeDataPublisher", e);
         }
     }
 
     public void publishEvent(FaultPublisherDTO faultPublisherDTO) {
         DataBridgeFaultPublisherDTO dataBridgeFaultPublisherDTO = new DataBridgeFaultPublisherDTO(faultPublisherDTO);
-        try {
+        List<String> missingMandatoryValues = dataBridgeFaultPublisherDTO.getMissingMandatoryValues();
+        if (missingMandatoryValues.isEmpty()) {
+            try {
+                String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamName() + ":"
+                        + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamVersion();
+                //Publish Fault Data
+                dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
+                        (Object[]) dataBridgeFaultPublisherDTO.createMetaData(), null,
+                        (Object[]) dataBridgeFaultPublisherDTO.createPayload());
 
-            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamName() + ":"
-                              + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamVersion();
-            //Publish Fault Data
-            dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
-                    (Object[]) dataBridgeFaultPublisherDTO.createMetaData(), null,
-                    (Object[]) dataBridgeFaultPublisherDTO.createPayload());
+            } catch (Exception e) {
+                log.error("Error while publishing Fault event", e);
+            }
 
-        } catch (Exception e) {
-            log.error("Error while publishing Fault event", e);
+        } else {
+            log.error("Faulty invocation event dropped due to missing mandatory data: "
+                    + missingMandatoryValues.toString() + " in event: " + dataBridgeFaultPublisherDTO.toString());
         }
     }
 
     public void publishEvent(ThrottlePublisherDTO throttPublisherDTO) {
         DataBridgeThrottlePublisherDTO dataBridgeThrottlePublisherDTO = new
                 DataBridgeThrottlePublisherDTO(throttPublisherDTO);
+        List<String> missingMandatoryValues = dataBridgeThrottlePublisherDTO.getMissingMandatoryValues();
+        if (missingMandatoryValues.isEmpty()) {
+            try {
+                String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamName() + ":" +
+                        DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamVersion();
+                //Publish Throttle data
+                dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
+                        (Object[]) dataBridgeThrottlePublisherDTO.createMetaData(), null,
+                        (Object[]) dataBridgeThrottlePublisherDTO.createPayload());
 
-        try {
-            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamName() + ":" +
-                              DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamVersion();
-            //Publish Throttle data
-            dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
-                    (Object[]) dataBridgeThrottlePublisherDTO.createMetaData(), null,
-                    (Object[]) dataBridgeThrottlePublisherDTO.createPayload());
-
-        } catch (Exception e) {
-            log.error("Error while publishing Throttle exceed event", e);
+            } catch (Exception e) {
+                log.error("Error while publishing Throttle exceed event", e);
+            }
+        } else {
+            log.error("Throttling event dropped due to missing mandatory data: "
+                    + missingMandatoryValues.toString() + " in event: " + dataBridgeThrottlePublisherDTO.toString());
         }
     }
 
@@ -144,18 +159,22 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
     @Override
     public void publishEvent(RequestResponseStreamDTO requestStream) {
         DataBridgeRequestResponseStreamPublisherDTO dataBridgeRequestStreamPublisherDTO = new DataBridgeRequestResponseStreamPublisherDTO(requestStream);
-        try {
-
-            String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName() + ":"
-                    + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion();
-            //Publish Request Data
-            dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
-                    (Object[]) dataBridgeRequestStreamPublisherDTO.createMetaData(), null,
-                    (Object[]) dataBridgeRequestStreamPublisherDTO.createPayload());
-        } catch(Exception e){
-            log.error("Error while publishing Request event", e);
+        List<String> missingMandatoryValues = dataBridgeRequestStreamPublisherDTO.getMissingMandatoryValues();
+        if (missingMandatoryValues.isEmpty()) {
+            try {
+                String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName() + ":"
+                        + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion();
+                //Publish Request Data
+                dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
+                        (Object[]) dataBridgeRequestStreamPublisherDTO.createMetaData(), null,
+                        (Object[]) dataBridgeRequestStreamPublisherDTO.createPayload());
+            } catch(Exception e){
+                log.error("Error while publishing Request event", e);
+            }
+        } else {
+            log.error("RequestResponse event dropped due to unavailability of mandatory data: "
+            + missingMandatoryValues.toString() + " in event: " + dataBridgeRequestStreamPublisherDTO.toString());
         }
-        
     }
 
 }

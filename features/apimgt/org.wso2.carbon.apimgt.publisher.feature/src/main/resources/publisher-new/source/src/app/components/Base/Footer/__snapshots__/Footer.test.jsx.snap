@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Test scenarios for <Footer/> component should match with the existing snapshot 1`] = `
+<footer
+  className="Footer-footer-1"
+>
+  <p
+    className="MuiTypography-root MuiTypography-body1 MuiTypography-noWrap"
+  >
+    WSO2 APIM v3.0.0 | © 2019 WSO2 Inc
+  </p>
+</footer>
+`;

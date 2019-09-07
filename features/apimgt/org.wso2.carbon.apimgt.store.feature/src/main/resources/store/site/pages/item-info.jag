@@ -12,8 +12,20 @@ i18n.init(request,localeResourcesBasePath);
             name = request.getParameter("name"),
             version = request.getParameter("version"),
             provider = request.getParameter("provider"),
+            tenant = jagg.getTenantDomain(),
             user = jagg.getUser();
-   var username=null;
+
+    if (!provider) {
+        if (tenant === null) {
+            //If no tenant name provided in the query params, We assume that user is in super tenant
+            tenant = org.wso2.carbon.apimgt.impl.APIConstants.SUPER_TENANT_DOMAIN;
+        }
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        // If can't find the provider , "null" String will be returned
+        provider = String(APIUtil.getAPIProviderFromAPINameVersionTenant(name, version, tenant));
+    }
+
+    var username=null;
     result = jagg.module("api").getAPIDescription({
         name:name,
         version:version,

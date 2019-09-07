@@ -2,7 +2,7 @@
 <% var api = outputs.api, user = outputs.user, log = new Log(); %>
 <%
     var thumbURL = "";
-    var link = jagg.getAbsoluteUrl("/apis/info?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider)
+    var link = jagg.getAbsoluteUrl("/apis/info?name=" + api.name + "&version=" + api.version);
     if(api!=null){
         thumbURL = api.thumbnailurl;
         if(thumbURL && thumbURL.indexOf("images/") == 0) {

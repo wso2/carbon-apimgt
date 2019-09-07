@@ -1,0 +1,77 @@
+<%
+include("/jagg/jagg.jag");
+
+(function () {
+    response.contentType = "application/json; charset=UTF-8";
+    var mod, applications, obj, permissionResult, username,
+            action = request.getParameter("action"),
+            site = require("/site/conf/site.json"),
+            msg = require("/site/conf/ui-messages.jag");
+            user =jagg.getUser();
+    if (user == null) {
+        print({
+            error: true,
+            message: 'timeout'
+        });
+    } else if ( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
+        print({
+            error:true,
+            message: msg.error.csrfError
+        });
+    } else if (request.getMethod() == 'POST') {
+        if (action == "getApplicationsByTenantIdWithPagination") {
+        var dir = "asc";
+        var searchOwner = request.getParameter("search[value]");
+        var searchApplication = request.getParameter("search[value]");
+        var start = request.getParameter("start");
+        var draw = request.getParameter("draw");
+        var offset = request.getParameter("length");
+        var columnId = request.getParameter("order[0][column]");
+        var sortOrder = request.getParameter("order[0][dir]");
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
+        var apiAdmin = new APIAdminImpl();
+        if (sortOrder.toLowerCase() != "asc" && sortOrder.toLowerCase() != "desc" ) {
+        print({
+            error:true,
+            message:msg.error.forbidAction(action)
+            });
+            return;
+        }
+        var sortColumn = null;
+        if (columnId == 0) {
+            sortColumn = "NAME";
+        } else if (columnId == 1) {
+            sortColumn = "CREATED_BY";
+        } else {
+            sortColumn = "NAME";
+        }
+        if (sortOrder.equals("desc")) {
+            sortOrder = "desc";
+        } else {
+            sortOrder = "asc";
+        }
+        username = user.username;
+        var tenantId = APIUtil.getTenantId(username);
+        mod = jagg.module("application-owner");
+        var applicationCount = apiAdmin.getApplicationsCount(tenantId, searchOwner, searchApplication);
+        var updateCondition = mod.getApplicationsByTenantIdWithPagination( start, offset, searchOwner, searchApplication, sortColumn, sortOrder);
+        if (updateCondition.error) {
+            obj = {
+                error: true,
+                    message: updateCondition.message
+                };
+        } else {
+            obj = {
+                error: false,
+                response: updateCondition.applications,
+                draw:draw,
+                iTotalRecords:applicationCount,
+                iTotalDisplayRecords:applicationCount
+            }
+        }
+        print(obj);
+        }
+    }
+}());
+%>

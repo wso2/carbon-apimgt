@@ -32,7 +32,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
-import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataServiceImpl;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
@@ -49,7 +48,7 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  * Test class for APIHandlerServiceComponent
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({APIKeyValidatorClientPool.class, ThriftKeyValidatorClientPool.class, ServiceReferenceHolder.class,
+@PrepareForTest({APIKeyValidatorClientPool.class, ServiceReferenceHolder.class,
         APIManagerConfiguration.class, APIHandlerServiceComponent.class})
 public class APIHandlerServiceComponentTestCase {
     private APIHandlerServiceComponent apiHandlerServiceComponent;
@@ -84,12 +83,9 @@ public class APIHandlerServiceComponentTestCase {
         Mockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         configurationContextService = Mockito.mock(ConfigurationContextService.class);
 
-        PowerMockito.mockStatic(ThriftKeyValidatorClientPool.class);
         PowerMockito.mockStatic(APIKeyValidatorClientPool.class);
         apiKeyValidatorClientPool = Mockito.mock(APIKeyValidatorClientPool.class);
-        ThriftKeyValidatorClientPool thriftKeyValidatorClientPool = Mockito.mock(ThriftKeyValidatorClientPool.class);
         PowerMockito.when(APIKeyValidatorClientPool.getInstance()).thenReturn(apiKeyValidatorClientPool);
-        PowerMockito.when(ThriftKeyValidatorClientPool.getInstance()).thenReturn(thriftKeyValidatorClientPool);
 
         Mockito.when(bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(),
                 tenantServiceCreator, null)).thenReturn(null);

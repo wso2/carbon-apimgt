@@ -48,7 +48,8 @@
     if( page === "apis-time" || page === "api-usage-user" || page === "api-top-users" ||
         page === "api-last-access-times" || page === "api-usage-resource-path" || page === "api-usage-destination" ||
         page === "api-usage" || page === "api-throttledcounts" || page === "faulty-invocations" ||
-        page === "api-latencytime" || page === "api-geolocation-usage" || page === "api-user-agent-usage"
+        page === "api-latencytime" || page === "api-geolocation-usage" || page === "api-user-agent-usage" ||
+        page === "api-usage-by-applications"
     ){
         showAPI = true;
     }
@@ -136,6 +137,10 @@
                         href="<%=allStatsMappedUrl%>?page=api-user-agent-usage&stat=stat<%=urlPrefix%>"
                         onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-user-agent-usage&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
                         <%=i18n.localize("API Usage Across Usage Agent")%></a></li>
+                     <li><a class="substats" title="<%=i18n.localize("API Usage By Applications")%>"
+                        href="<%=allStatsMappedUrl%>?page=api-usage-by-applications&stat=stat<%=urlPrefix%>"
+                        onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?page=api-usage-by-applications&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                        <%=i18n.localize("API Usage By Applications")%></a></li>
                 </ul>
             </li>
 

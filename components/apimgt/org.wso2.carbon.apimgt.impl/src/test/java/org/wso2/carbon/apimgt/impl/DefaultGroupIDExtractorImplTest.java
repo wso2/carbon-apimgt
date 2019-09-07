@@ -43,9 +43,17 @@ public class DefaultGroupIDExtractorImplTest {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         RealmService realmService = Mockito.mock(RealmService.class);
         UserRealm userRealm = Mockito.mock(UserRealm.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService
+                .class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         TenantManager tenantManager = Mockito.mock(TenantManager.class);
         UserStoreManager userStoreManager = Mockito.mock(UserStoreManager.class);
         Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
+                (apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_GROUP_EXTRACTOR_CLAIM_URI))
+                .thenReturn("http://wso2.org/claims/organization");
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
 
@@ -68,6 +76,9 @@ public class DefaultGroupIDExtractorImplTest {
     public void getGroupingIdentifierListTestCase() throws UserStoreException {
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService
+                .class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         RealmService realmService = Mockito.mock(RealmService.class);
         UserRealm userRealm = Mockito.mock(UserRealm.class);
         TenantManager tenantManager = Mockito.mock(TenantManager.class);
@@ -81,6 +92,11 @@ public class DefaultGroupIDExtractorImplTest {
         Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
         Mockito.when(userStoreManager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername("user"),
                 "http://wso2.org/claims/organization", null)).thenReturn("org1,org2,org3");
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
+                (apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_GROUP_EXTRACTOR_CLAIM_URI))
+                .thenReturn("http://wso2.org/claims/organization");
 
         DefaultGroupIDExtractorImpl defaultGroupIDExtractor = new DefaultGroupIDExtractorImpl();
 

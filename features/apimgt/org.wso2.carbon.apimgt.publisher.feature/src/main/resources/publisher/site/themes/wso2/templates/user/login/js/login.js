@@ -17,9 +17,9 @@ var login = function () {
                         if(currentHref.indexOf("tenant")>-1){queryParam=currentHref;}
                         else{queryParam='';}
                         if (current.indexOf(".jag") >= 0) {
-                            location.href = "index.jag"+queryParam;
+                            location.href = "index.jag"+ encodeURIComponent(queryParam);
                         } else {
-                            location.href = 'site/pages/index.jag'+queryParam;
+                            location.href = 'site/pages/index.jag'+ encodeURIComponent(queryParam);
                         }
                       }
 

@@ -20,10 +20,14 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -149,6 +153,7 @@ public interface APIManager {
      */
     Set<String> getAPIVersions(String providerName, String apiName) throws APIManagementException;
 
+    String getGraphqlSchemaDefinition(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * Returns the swagger v2.0 definition as a string
@@ -157,26 +162,26 @@ public interface APIManager {
      * @return swagger string
      * @throws APIManagementException
      */
-    String getOpenAPIDefinition(APIIdentifier apiId) throws APIManagementException;
+    String getOpenAPIDefinition(Identifier apiId) throws APIManagementException;
 
     /**
-     * Checks whether the given document already exists for the given api
+     * Checks whether the given document already exists for the given api/product
      *
-     * @param identifier API Identifier
+     * @param identifier API/Product Identifier
      * @param docName    Name of the document
-     * @return true if document already exists for the given api
+     * @return true if document already exists for the given api/product
      * @throws APIManagementException if failed to check existence of the documentation
      */
-    boolean isDocumentationExist(APIIdentifier identifier, String docName) throws APIManagementException;
+    boolean isDocumentationExist(Identifier identifier, String docName) throws APIManagementException;
 
     /**
-     * Returns a list of documentation attached to a particular API
+     * Returns a list of documentation attached to a particular API/API Product
      *
-     * @param apiId APIIdentifier
+     * @param id Identifier
      * @return List<Documentation>
      * @throws APIManagementException if failed to get Documentations
      */
-    List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException;
+    List<Documentation> getAllDocumentation(Identifier id) throws APIManagementException;
 
     /**
      * Returns a list of documentation attached to a particular API
@@ -212,12 +217,12 @@ public interface APIManager {
     /**
      * This method used to get the content of a documentation
      *
-     * @param identifier,        API identifier
+     * @param identifier,        API/Product identifier
      * @param documentationName, name of the inline documentation
      * @return if failed to get doc content
      * @throws APIManagementException if the asking documentation content is unavailable
      */
-    String getDocumentationContent(APIIdentifier identifier, String documentationName) throws APIManagementException;
+    String getDocumentationContent(Identifier identifier, String documentationName) throws APIManagementException;
 
     /**
      * Retrieves the subscriber from the given access token
@@ -300,13 +305,22 @@ public interface APIManager {
     void cleanup() throws APIManagementException;
 
     /**
-     * Returns the corresponding application given the uuid
+     * Returns the corresponding application given the uuid. It will also contain keys of the application
      *
      * @param uuid uuid of the Application
      * @return it will return Application corresponds to the uuid provided.
      * @throws APIManagementException
      */
     Application getApplicationByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Returns the corresponding application given the uuid. The returned application will not contain key information 
+     *
+     * @param uuid uuid of the Application
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    Application getLightweightApplicationByUUID(String uuid) throws APIManagementException;
 
     /**
      * Check whether an application access token is already persist in database.
@@ -661,4 +675,101 @@ public interface APIManager {
      * @param wsdlDefinition wsdl content
      */
     void updateWsdl(String resourcePath, String wsdlDefinition) throws APIManagementException;
+
+    /**
+     * Returns the graphql schema content in registry specified by the schema name
+     *
+     * @param apiId api identifier of the API
+     * @return schema content matching name if exist else null
+     */
+    String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException;
+    
+    /**
+     * Returns the corresponding application given the subscriberId and application name
+     *
+     * @param subscriberId subscriberId of the Application
+     * @param applicationName name of the Application
+     * @return it will return Application corresponds to the subscriberId and name provided.
+     * @throws APIManagementException
+     */
+    Application getApplicationBySubscriberIdAndName(int subscriberId, String applicationName) throws APIManagementException;
+
+    /**
+     * Returns details of an APIProduct
+     *
+     * @param uuid                  UUID of the API Product's registry artifact
+     * @param requestedTenantDomain tenantDomain for the registry
+     * @return An API Product object related to the given artifact id or null
+     * @throws APIManagementException if failed get APIProduct from UUID
+     */
+    APIProduct getAPIProductbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
+
+    /**
+     * Returns details of an APIProduct
+     *
+     * @param identifier APIProductIdentifier
+     * @return An APIProduct object related to the given identifier or null
+     * @throws APIManagementException if failed get APIProduct from APIProductIdentifier
+     */
+    APIProduct getAPIProduct(APIProductIdentifier identifier) throws APIManagementException;
+
+    /**
+     * Returns APIProduct Search result based on the provided query.
+     *
+     * @param searchQuery     search query. Ex: provider=*admin*
+     * @param tenantDomain    tenant domain
+     * @param start           starting number
+     * @param end             ending number
+     * @return APIProduct result
+     * @throws APIManagementException if search is failed
+     */
+    Map<String,Object> searchPaginatedAPIProducts(String searchQuery, String tenantDomain,int start,int end) throws
+            APIManagementException;
+
+    /**
+     * Returns resource list of the api product
+     *
+     * @param productIdentifier
+     * @return
+     * @throws APIManagementException
+     */
+    List<APIProductResource> getResourcesOfAPIProduct(APIProductIdentifier productIdentifier)
+            throws APIManagementException;
+
+    /**
+     * Retrieves the icon image associated with a particular API Product as a stream.
+     *
+     * @param identifier ID representing the API Product
+     * @return an Icon containing image content and content type information
+     * @throws APIManagementException if an error occurs while retrieving the image
+     */
+    ResourceFile getProductIcon(APIProductIdentifier identifier) throws APIManagementException;
+
+    /**
+     * Associates the given product resource with the specified path.
+     *
+     * @param resourcePath a String representing the relative path of a resource.
+     * @param resourceFile to be saved
+     * @return a String URL pointing to the image that was added
+     * @throws APIManagementException if an error occurs while adding the icon image
+     */
+    String addProductResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException;
+
+    /**
+     * Get an api product documentation by artifact Id
+     *
+     * @param docId   DocumentID
+     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
+     * @return Documentation
+     * @throws APIManagementException if failed to get Documentation
+     */
+    Documentation getProductDocumentation(String docId, String requestedTenantDomain) throws APIManagementException;
+    
+    /**
+     * Get open api definition for the product
+     * @param APIProduct product
+     * @return openapidoc 
+     * @throws APIManagementException
+     */
+    String getAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;
 }

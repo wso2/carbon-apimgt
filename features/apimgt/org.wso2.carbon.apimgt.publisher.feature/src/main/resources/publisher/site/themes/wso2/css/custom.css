@@ -183,6 +183,49 @@ input.ep-field{
     margin-bottom: 30px;
 }
 
+.document-match-icon {
+    position:center;
+    opacity:1;
+}
+
+.square-element .document-match-icon{
+    display:block;
+    background:rgba(0, 0, 0, 0.3);
+    width:100%;
+    height:100%;
+    position:absolute;
+}
+
+.square-element .document-match-icon i{
+    padding:2px;
+    font-size:6vw;
+    position:absolute;
+    top:30%;
+    left:30%;
+    width:40%;
+    height:40%;
+}
+
+.thumbnail .square-element{
+    background-color:white;
+}
+
+.app-data #document-match{
+    margin-bottom: 0px
+}
+
+.app-data #doc-name a{
+    color:#ce8c2f;
+}
+
+.app-data #document-type-label{
+    text-transform: capitalize;
+}
+
+.app-data #document-type-label{
+    text-transform: capitalize;
+}
+
 /* Styles for sequence download button. */
 .btn-sequenceDownload:hover {
     color: white; !important;

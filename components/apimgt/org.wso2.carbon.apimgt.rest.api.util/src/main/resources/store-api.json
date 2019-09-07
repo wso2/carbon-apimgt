@@ -632,7 +632,7 @@
       "post": {
         "x-scope": "apim:subscribe",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/store/v0.14/applications\"",
-        "x-wso2-request": "POST https://localhost:9443/api/am/store/v0.14/applications\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n    \"throttlingTier\": \"Unlimited\",\n    \"description\": \"sample app description\",\n    \"name\": \"sampleapp\",\n    \"callbackUrl\": \"http://my.server.com/callback\"\n}",
+        "x-wso2-request": "POST https://localhost:9443/api/am/store/v0.14/applications\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n    \"throttlingTier\": \"Unlimited\",\n    \"description\": \"sample app description\",\n    \"name\": \"sampleapp\",\n    \"callbackUrl\": \"http://my.server.com/callback\"\n \"groupId\": \"org1\"\n}",
         "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/store/v0.14/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"http://my.server.com/callback\",\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Unlimited\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"description\": \"sample app description\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\",\n   \"keys\": []\n}",
         "summary": "Create a new application\n",
         "description": "This operation can be used to create a new application specifying the details of the application in the payload.\n",
@@ -761,7 +761,7 @@
       "put": {
         "x-scope": "apim:subscribe",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://localhost:9443/api/am/store/v0.14/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\"",
-        "x-wso2-request": "PUT https://localhost:9443/api/am/store/v0.14/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n   \"callbackUrl\": \"\",\n   \"throttlingTier\": \"Bronze\",\n   \"description\": \"sample app description updated\",\n   \"name\": \"sampleapp\"\n}",
+        "x-wso2-request": "PUT https://localhost:9443/api/am/store/v0.14/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n   \"callbackUrl\": \"\",\n   \"throttlingTier\": \"Bronze\",\n   \"description\": \"sample app description updated\",\n   \"name\": \"sampleapp\",\n    \"groupId\": \"org1\"\n}",
         "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"\",\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Bronze\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"description\": \"sample app description updated\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\",\n   \"keys\": []\n}",
         "summary": "Update an application\n",
         "description": "This operation can be used to update an application. Upon succesfull you will retrieve the updated application as the response.\n",
@@ -1740,6 +1740,71 @@
           }
         }
       }
+    },
+    "/search": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/store/v0.13/search?query=sample",
+        "x-wso2-request": "GET https://localhost:9443/api/am/store/v0.13/search\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This sample API provides Account Status Validation\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\",\n         \"status\": \"PUBLISHED\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"name\": \"api1\",\n         \"context\": \"/api1\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\",\n         \"status\": \"PUBLISHED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}",
+        "summary": "Retrieve/Search APIs and API Documents by content\n",
+        "description": "This operation provides you a list of available APIs and API Documents qualifying the given keyword match.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/requestedTenant"
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "description": "**Search**.\n\nYou can search by using providing the search term in the query parameters.\n",
+            "type": "string"
+          },
+          {
+            "$ref": "#/parameters/Accept"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          }
+        ],
+        "tags": [
+          "API (Collection)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nList of qualifying APIs and docs is returned.\n",
+            "schema": {
+              "$ref": "#/definitions/SearchResultList"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "parameters": {
@@ -2262,6 +2327,10 @@
           "type": "string",
           "example": ""
         },
+        "owner": {
+          "type": "string",
+          "example": ""
+        },
         "keys": {
           "type": "array",
           "items": {
@@ -2309,6 +2378,10 @@
         "attributes": {
           "type": "object",
           "example": "External Reference ID, Billing Tier"
+        },
+        "owner": {
+          "type": "string",
+          "example": ""
         }
       }
     },
@@ -2375,6 +2448,7 @@
           "type": "string",
           "enum": [
             "INLINE",
+            "MARKDOWN",
             "URL",
             "FILE"
           ],
@@ -2894,6 +2968,179 @@
           }
         }
       }
+    },
+    "SearchResultList": {
+      "title": "Search Result List",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of results returned.\n",
+          "example": 1
+        },
+        "next": {
+          "type": "string",
+          "description": "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n",
+          "example": "/apis?limit=1&offset=2&search="
+        },
+        "previous": {
+          "type": "string",
+          "description": "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n",
+          "example": "/apis?limit=1&offset=0&search="
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SearchResult"
+          }
+        },
+        "pagination": {
+          "properties": {
+            "offset": {
+              "type": "integer",
+              "example": 12
+            },
+            "limit": {
+              "type": "integer",
+              "example": 25
+            },
+            "total": {
+              "type": "integer",
+              "example": 1290
+            }
+          }
+        }
+      }
+    },
+    "SearchResult": {
+      "title": "Search Result",
+      "properties": {
+        "id": {
+          "type": "string",
+          "example": "01234567-0123-0123-0123-012345678901"
+        },
+        "name": {
+          "type": "string",
+          "example": "TestAPI"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "DOC",
+            "API"
+          ],
+          "example": "API"
+        }
+      }
+    },
+    "APISearchResult": {
+      "title": "API Result",
+      "allOf": [
+        {
+          "$ref": "#/definitions/SearchResult"
+        },
+        {
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "A brief description about the API",
+              "example": "A calculator API that supports basic operations"
+            },
+            "context": {
+              "type": "string",
+              "description": "A string that represents the context of the user's request",
+              "example": "CalculatorAPI"
+            },
+            "version": {
+              "type": "string",
+              "description": "The version of the API",
+              "example": "1.0.0"
+            },
+            "provider": {
+              "description": "If the provider value is not given, the user invoking the API will be used as the provider.\n",
+              "type": "string",
+              "example": "admin"
+            },
+            "status": {
+              "type": "string",
+              "description": "This describes in which status of the lifecycle the API is",
+              "example": "CREATED"
+            },
+            "thumbnailUri": {
+              "type": "string",
+              "example": "/apis/01234567-0123-0123-0123-012345678901/thumbnail"
+            }
+          }
+        }
+      ]
+    },
+    "DocumentSearchResult": {
+      "title": "Document Result",
+      "allOf": [
+        {
+          "$ref": "#/definitions/SearchResult"
+        },
+        {
+          "properties": {
+            "docType": {
+              "type": "string",
+              "enum": [
+                "HOWTO",
+                "SAMPLES",
+                "PUBLIC_FORUM",
+                "SUPPORT_FORUM",
+                "API_MESSAGE_FORMAT",
+                "SWAGGER_DOC",
+                "OTHER"
+              ],
+              "example": "HOWTO"
+            },
+            "summary": {
+              "type": "string",
+              "example": "Summary of Calculator Documentation"
+            },
+            "sourceType": {
+              "type": "string",
+              "enum": [
+                "INLINE",
+                "URL",
+                "FILE"
+              ],
+              "example": "INLINE"
+            },
+            "sourceUrl": {
+              "type": "string",
+              "example": ""
+            },
+            "otherTypeName": {
+              "type": "string",
+              "example": ""
+            },
+            "visibility": {
+              "type": "string",
+              "enum": [
+                "OWNER_ONLY",
+                "PRIVATE",
+                "API_LEVEL"
+              ],
+              "example": "API_LEVEL"
+            },
+            "apiName": {
+              "type": "string",
+              "description": "The name of the associated API",
+              "example": "TestAPI"
+            },
+            "apiVersion": {
+              "type": "string",
+              "description": "The version of the associated API",
+              "example": "1.0.0"
+            },
+            "apiProvider": {
+              "type": "string",
+              "example": "admin"
+            }
+          }
+        }
+      ]
     }
   }
 }

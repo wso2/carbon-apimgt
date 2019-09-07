@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.gateway.handlers.ext;
 
 import java.util.Map;
 
+import org.apache.axis2.addressing.EndpointReference;
+import org.apache.axis2.client.Options;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.SynapseConfiguration;
@@ -44,12 +46,17 @@ public class APIManagerExtensionHandlerTest {
 		SynapseConfiguration synapseConfig = Mockito.mock(SynapseConfiguration.class);
 		org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito
 				.mock(org.apache.axis2.context.MessageContext.class);
+		Options options = Mockito.mock(Options.class);
+		EndpointReference endPoint = Mockito.mock(EndpointReference.class);
 
 		Map localRegistry = Mockito.mock(Map.class);
 
 		Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 		Mockito.when(((Axis2MessageContext) messageContext).getConfiguration()).thenReturn(synapseConfig);
 		Mockito.when(synapseConfig.getLocalRegistry()).thenReturn(localRegistry);
+		Mockito.when(axis2MsgCntxt.getOptions()).thenReturn(options);
+		Mockito.when(options.getTo()).thenReturn(endPoint);
+		Mockito.when(endPoint.getAddress()).thenReturn("http://localhost:9443/test");
 
 		Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn(API_NAME);
 
@@ -72,12 +79,17 @@ public class APIManagerExtensionHandlerTest {
 		SynapseConfiguration synapseConfig = Mockito.mock(SynapseConfiguration.class);
 		org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito
 				.mock(org.apache.axis2.context.MessageContext.class);
+		Options options = Mockito.mock(Options.class);
+		EndpointReference endPoint = Mockito.mock(EndpointReference.class);
 
 		Map localRegistry = Mockito.mock(Map.class);
 
 		Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 		Mockito.when(((Axis2MessageContext) messageContext).getConfiguration()).thenReturn(synapseConfig);
 		Mockito.when(synapseConfig.getLocalRegistry()).thenReturn(localRegistry);
+		Mockito.when(axis2MsgCntxt.getOptions()).thenReturn(options);
+		Mockito.when(options.getTo()).thenReturn(endPoint);
+		Mockito.when(endPoint.getAddress()).thenReturn("http://localhost:9443/test");
 
 		Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn(API_NAME);
 
@@ -101,11 +113,16 @@ public class APIManagerExtensionHandlerTest {
 		SynapseConfiguration synapseConfig = Mockito.mock(SynapseConfiguration.class);
 		org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito
 				.mock(org.apache.axis2.context.MessageContext.class);
+		Options options = Mockito.mock(Options.class);
+		EndpointReference endPoint = Mockito.mock(EndpointReference.class);
 
 		Map localRegistry = Mockito.mock(Map.class);
 
 		Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 		Mockito.when(((Axis2MessageContext) messageContext).getConfiguration()).thenReturn(synapseConfig);
+		Mockito.when(axis2MsgCntxt.getOptions()).thenReturn(options);
+		Mockito.when(options.getTo()).thenReturn(endPoint);
+		Mockito.when(endPoint.getAddress()).thenReturn("http://localhost:9443/test");
 		Mockito.when(synapseConfig.getLocalRegistry()).thenReturn(localRegistry);
 
 		Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn(API_NAME);
@@ -135,12 +152,17 @@ public class APIManagerExtensionHandlerTest {
 		SynapseConfiguration synapseConfig = Mockito.mock(SynapseConfiguration.class);
 		org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito
 				.mock(org.apache.axis2.context.MessageContext.class);
+		Options options = Mockito.mock(Options.class);
+		EndpointReference endPoint = Mockito.mock(EndpointReference.class);
 
 		Map localRegistry = Mockito.mock(Map.class);
 
 		Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 		Mockito.when(((Axis2MessageContext) messageContext).getConfiguration()).thenReturn(synapseConfig);
 		Mockito.when(synapseConfig.getLocalRegistry()).thenReturn(localRegistry);
+		Mockito.when(axis2MsgCntxt.getOptions()).thenReturn(options);
+		Mockito.when(options.getTo()).thenReturn(endPoint);
+		Mockito.when(endPoint.getAddress()).thenReturn("http://localhost:9443/test");
 
 		Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn(API_NAME);
 		Mockito.when(localRegistry.get(API_NAME + "--" + DIRECTION_OUT)).thenReturn(null);
@@ -159,12 +181,17 @@ public class APIManagerExtensionHandlerTest {
 		SynapseConfiguration synapseConfig = Mockito.mock(SynapseConfiguration.class);
 		org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito
 				.mock(org.apache.axis2.context.MessageContext.class);
+		Options options = Mockito.mock(Options.class);
+		EndpointReference endPoint = Mockito.mock(EndpointReference.class);
 
 		Map localRegistry = Mockito.mock(Map.class);
 
 		Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 		Mockito.when(((Axis2MessageContext) messageContext).getConfiguration()).thenReturn(synapseConfig);
 		Mockito.when(synapseConfig.getLocalRegistry()).thenReturn(localRegistry);
+		Mockito.when(axis2MsgCntxt.getOptions()).thenReturn(options);
+		Mockito.when(options.getTo()).thenReturn(endPoint);
+		Mockito.when(endPoint.getAddress()).thenReturn("http://localhost:9443/test");
 
 		Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn(API_NAME);
 
@@ -187,12 +214,17 @@ public class APIManagerExtensionHandlerTest {
 		SynapseConfiguration synapseConfig = Mockito.mock(SynapseConfiguration.class);
 		org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito
 				.mock(org.apache.axis2.context.MessageContext.class);
+		Options options = Mockito.mock(Options.class);
+		EndpointReference endPoint = Mockito.mock(EndpointReference.class);
 
 		Map localRegistry = Mockito.mock(Map.class);
 
 		Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 		Mockito.when(((Axis2MessageContext) messageContext).getConfiguration()).thenReturn(synapseConfig);
 		Mockito.when(synapseConfig.getLocalRegistry()).thenReturn(localRegistry);
+		Mockito.when(axis2MsgCntxt.getOptions()).thenReturn(options);
+		Mockito.when(options.getTo()).thenReturn(endPoint);
+		Mockito.when(endPoint.getAddress()).thenReturn("http://localhost:9443/test");
 
 		Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn(API_NAME);
 
@@ -217,12 +249,17 @@ public class APIManagerExtensionHandlerTest {
 		SynapseConfiguration synapseConfig = Mockito.mock(SynapseConfiguration.class);
 		org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito
 				.mock(org.apache.axis2.context.MessageContext.class);
+		Options options = Mockito.mock(Options.class);
+		EndpointReference endPoint = Mockito.mock(EndpointReference.class);
 
 		Map localRegistry = Mockito.mock(Map.class);
 
 		Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 		Mockito.when(((Axis2MessageContext) messageContext).getConfiguration()).thenReturn(synapseConfig);
 		Mockito.when(synapseConfig.getLocalRegistry()).thenReturn(localRegistry);
+		Mockito.when(axis2MsgCntxt.getOptions()).thenReturn(options);
+		Mockito.when(options.getTo()).thenReturn(endPoint);
+		Mockito.when(endPoint.getAddress()).thenReturn("http://localhost:9443/test");
 
 		Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn(API_NAME);
 
@@ -253,12 +290,17 @@ public class APIManagerExtensionHandlerTest {
 		SynapseConfiguration synapseConfig = Mockito.mock(SynapseConfiguration.class);
 		org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito
 				.mock(org.apache.axis2.context.MessageContext.class);
+		Options options = Mockito.mock(Options.class);
+		EndpointReference endPoint = Mockito.mock(EndpointReference.class);
 
 		Map localRegistry = Mockito.mock(Map.class);
 
 		Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 		Mockito.when(((Axis2MessageContext) messageContext).getConfiguration()).thenReturn(synapseConfig);
 		Mockito.when(synapseConfig.getLocalRegistry()).thenReturn(localRegistry);
+		Mockito.when(axis2MsgCntxt.getOptions()).thenReturn(options);
+		Mockito.when(options.getTo()).thenReturn(endPoint);
+		Mockito.when(endPoint.getAddress()).thenReturn("http://localhost:9443/test");
 
 		Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn(API_NAME);
 		
@@ -292,12 +334,17 @@ public class APIManagerExtensionHandlerTest {
 		SynapseConfiguration synapseConfig = Mockito.mock(SynapseConfiguration.class);
 		org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito
 				.mock(org.apache.axis2.context.MessageContext.class);
+		Options options = Mockito.mock(Options.class);
+		EndpointReference endPoint = Mockito.mock(EndpointReference.class);
 
 		Map localRegistry = Mockito.mock(Map.class);
 
 		Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 		Mockito.when(((Axis2MessageContext) messageContext).getConfiguration()).thenReturn(synapseConfig);
 		Mockito.when(synapseConfig.getLocalRegistry()).thenReturn(localRegistry);
+		Mockito.when(axis2MsgCntxt.getOptions()).thenReturn(options);
+		Mockito.when(options.getTo()).thenReturn(endPoint);
+		Mockito.when(endPoint.getAddress()).thenReturn("http://localhost:9443/test");
 
 		Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn(API_NAME);
 		
@@ -370,12 +417,17 @@ public class APIManagerExtensionHandlerTest {
 		SynapseConfiguration synapseConfig = Mockito.mock(SynapseConfiguration.class);
 		org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito
 				.mock(org.apache.axis2.context.MessageContext.class);
+		Options options = Mockito.mock(Options.class);
+		EndpointReference endPoint = Mockito.mock(EndpointReference.class);
 
 		Map localRegistry = Mockito.mock(Map.class);
 
 		Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 		Mockito.when(((Axis2MessageContext) messageContext).getConfiguration()).thenReturn(synapseConfig);
 		Mockito.when(synapseConfig.getLocalRegistry()).thenReturn(localRegistry);
+		Mockito.when(axis2MsgCntxt.getOptions()).thenReturn(options);
+		Mockito.when(options.getTo()).thenReturn(endPoint);
+		Mockito.when(endPoint.getAddress()).thenReturn("http://localhost:9443/test");
 
 		Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn(API_NAME);
 		

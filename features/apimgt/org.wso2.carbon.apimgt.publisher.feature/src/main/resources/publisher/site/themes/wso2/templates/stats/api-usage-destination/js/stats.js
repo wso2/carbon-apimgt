@@ -141,7 +141,6 @@ var drawAPIUsageByDestination = function(from,to){
                              $('#destinationBasedUsageTable_paginate').show();
                      },
                     });
-                    $('select').css('width','60px');
                 }
 
             } else {

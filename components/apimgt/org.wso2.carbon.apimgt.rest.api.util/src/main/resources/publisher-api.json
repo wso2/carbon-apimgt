@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "0.13.0",
+        "version": "0.14.0",
         "title": "WSO2 API Manager - Publisher API",
         "description": "This specifies a **RESTful API** for WSO2 **API Manager** - Publisher.\n\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.1.66/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
         "contact": {
@@ -123,7 +123,7 @@
                     {
                         "name": "tenantDomain",
                         "in": "query",
-                        "description": "Tenant domain, whose APIs should be retrieved. If not specified, the logged in user's tenant domain will be considered for this.\n",
+                        "description": "Tenant domain, whose APIs should be retrieved. If not specified, the logged in user's tenant domain will\nbe considered for this.\n",
                         "required": false,
                         "type": "string"
                     }
@@ -513,6 +513,254 @@
                 "responses": {
                     "200": {
                         "description": "OK.\nSuccessful response with updated Swagger definition\n",
+                        "headers": {
+                            "Location": {
+                                "description": "The URL of the newly created resource.\n",
+                                "type": "string"
+                            },
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            },
+                            "ETag": {
+                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                                "type": "string"
+                            },
+                            "Last-Modified": {
+                                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nInvalid request or validation error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden.\nThe request must be conditional but no condition has been specified.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found.\nThe resource to be updated does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "412": {
+                        "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/apis/{apiId}/resource-policies": {
+            "get": {
+                "x-scope": "apim:api_view",
+                "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/resource-policies",
+                "x-wso2-request": "GET https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/resource-policies\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+                "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n    \"list\": [\r\n        {\r\n            \"id\": \"1990b54c-6685-4058-a08c-8fd5353056a6\",\r\n            \"httpVerb\": \"get\",\r\n            \"resourcePath\": \"checkPhoneNumbers\",\r\n            \"content\": \"<header description=\\\"SOAPAction\\\" name=\\\"SOAPAction\\\" scope=\\\"transport\\\" value=\\\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\\\"/>\"\r\n        }\r\n    ],\r\n    \"count\": 1\r\n}",
+                "summary": "Get the resource policy (inflow/outflow) definitions",
+                "description": "This operation can be used to retrieve conversion policy resource definitions of an API.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/apiId"
+                    },
+                    {
+                        "in": "query",
+                        "name": "resourcePath",
+                        "description": "Resource path of the resource policy definition",
+                        "type": "string",
+                        "required": false
+                    },
+                    {
+                        "in": "query",
+                        "name": "verb",
+                        "description": "HTTP verb of the resource path of the resource policy definition",
+                        "type": "string",
+                        "required": false
+                    },
+                    {
+                        "in": "query",
+                        "name": "sequenceType",
+                        "description": "sequence type of the resource policy resource definition",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "$ref": "#/parameters/Accept"
+                    },
+                    {
+                        "$ref": "#/parameters/If-None-Match"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Modified-Since"
+                    }
+                ],
+                "tags": [
+                    "API (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nList of resource policy definitions of the API is returned\n",
+                        "schema": {
+                            "$ref": "#/definitions/ResourcePolicyList"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            },
+                            "ETag": {
+                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                                "type": "string"
+                            },
+                            "Last-Modified": {
+                                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+                    },
+                    "404": {
+                        "description": "Not Found.\nRequested API does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "406": {
+                        "description": "Not Acceptable.\nThe requested media type is not supported\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/apis/{apiId}/resource-policies/{resourceId}": {
+            "get": {
+                "x-scope": "apim:api_view",
+                "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/resource-policies/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5",
+                "x-wso2-request": "GET https://localhost:9443/api/am/publisher/v0.14/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/resource-policies/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+                "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n            \"id\": \"6c735e1d-8041-4f1e-b246-d28edaa650b0\",\r\n            \"httpVerb\": \"post\",\r\n            \"resourcePath\": \"checkPhoneNumbers\",\r\n            \"content\": \"<header description=\\\"SOAPAction\\\" name=\\\"SOAPAction\\\" scope=\\\"transport\\\" value=\\\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\\\"/>\"\r\n}",
+                "summary": "Get the resource policy (inflow/outflow) definition for a given resource identifier.",
+                "description": "This operation can be used to retrieve conversion policy resource definitions of an API given the resource identifier.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/apiId"
+                    },
+                    {
+                        "$ref": "#/parameters/resourceId"
+                    },
+                    {
+                        "$ref": "#/parameters/Accept"
+                    },
+                    {
+                        "$ref": "#/parameters/If-None-Match"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Modified-Since"
+                    }
+                ],
+                "tags": [
+                    "API (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nRequested resource policy definition of the API is returned for the given resource identifier.\n",
+                        "schema": {
+                            "$ref": "#/definitions/ResourcePolicyInfo"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            },
+                            "ETag": {
+                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                                "type": "string"
+                            },
+                            "Last-Modified": {
+                                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+                    },
+                    "400": {
+                        "description": "Bad Request.\nInvalid request or validation error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found.\nRequested API does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "406": {
+                        "description": "Not Acceptable.\nThe requested media type is not supported\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "x-scope": "apim:api_create",
+                "x-wso2-curl": "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F apiDefinition=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-tier\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/resource-policies/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\"",
+                "x-wso2-request": "PUT https://localhost:9443/api/am/publisher/v0.14/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/resource-policies/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\nAuthorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\nContent-Length: 477\nContent-Type: application/json; boundary=------------------------4f51e636c0003d99\n--------------------------4f51e636c0003d99\n{ \"content\": \"<header description=\\\"SOAPAction\\\" name=\\\"SOAPAction\\\" scope=\\\"transport\\\" value=\\\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\\\"/>\"}\n--------------------------4f51e636c0003d99--\n",
+                "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n            \"id\": \"6c735e1d-8041-4f1e-b246-d28edaa650b0\",\r\n            \"httpVerb\": \"post\",\r\n            \"resourcePath\": \"checkPhoneNumbers\",\r\n            \"content\": \"<header description=\\\"SOAPAction\\\" name=\\\"SOAPAction\\\" scope=\\\"transport\\\" value=\\\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\\\"/>\"\r\n}",
+                "summary": "Update the resource policy(inflow/outflow) definition for the given resource identifier",
+                "description": "This operation can be used to update the resource policy(inflow/outflow) definition for the given resource identifier of an existing API. resource policy definition to be updated is passed as a body parameter `content`.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/apiId"
+                    },
+                    {
+                        "$ref": "#/parameters/resourceId"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Content of the resource policy definition that needs to be updated",
+                        "schema": {
+                            "$ref": "#/definitions/ResourcePolicyInfo"
+                        },
+                        "required": true
+                    },
+                    {
+                        "$ref": "#/parameters/Content-Type"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Match"
+                    },
+                    {
+                        "$ref": "#/parameters/If-Unmodified-Since"
+                    }
+                ],
+                "tags": [
+                    "API (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nSuccessful response with updated the resource policy definition\n",
+                        "schema": {
+                            "$ref": "#/definitions/ResourcePolicyInfo"
+                        },
                         "headers": {
                             "Location": {
                                 "description": "The URL of the newly created resource.\n",
@@ -3362,6 +3610,69 @@
                     }
                 }
             }
+        },
+        "/search": {
+            "get": {
+                "x-scope": "apim:api_view",
+                "produces": [
+                    "application/json"
+                ],
+                "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v0.13/search=query?sample",
+                "x-wso2-request": "GET https://localhost:9443/api/am/publisher/v0.13/search\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+                "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This sample API provides Account Status Validation\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\",\n         \"status\": \"PUBLISHED\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"name\": \"api1\",\n         \"context\": \"/api1\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\",\n         \"status\": \"PUBLISHED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}",
+                "summary": "Retrieve/Search APIs and API Documents by content\n",
+                "description": "This operation provides you a list of available APIs and API Documents qualifying the given keyword match.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/limit"
+                    },
+                    {
+                        "$ref": "#/parameters/offset"
+                    },
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "description": "**Search**.\n\nYou can search by proving a keyword.\n",
+                        "type": "string"
+                    },
+                    {
+                        "$ref": "#/parameters/Accept"
+                    },
+                    {
+                        "$ref": "#/parameters/If-None-Match"
+                    }
+                ],
+                "tags": [
+                    "API (Collection)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nList of qualifying APIs and API documents is returned.\n",
+                        "schema": {
+                            "$ref": "#/definitions/SearchResultList"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.",
+                                "type": "string"
+                            },
+                            "ETag": {
+                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+                    },
+                    "406": {
+                        "description": "Not Acceptable.\nThe requested media type is not supported\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
         }
     },
     "parameters": {
@@ -3406,6 +3717,13 @@
             "name": "mediationPolicyId",
             "in": "path",
             "description": "Mediation policy Id\n",
+            "required": true,
+            "type": "string"
+        },
+        "resourceId": {
+            "name": "resourceId",
+            "in": "path",
+            "description": "registry resource Id\n",
             "required": true,
             "type": "string"
         },
@@ -3673,10 +3991,11 @@
                         },
                         "type": {
                             "type": "string",
-                            "description": "The transport to be set. Accepted values are HTTP, WS",
+                            "description": "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST",
                             "enum": [
                                 "HTTP",
-                                "WS"
+                                "WS",
+                                "SOAPTOREST"
                             ],
                             "example": "HTTP",
                             "default": "HTTP"
@@ -3932,6 +4251,7 @@
                     "type": "string",
                     "enum": [
                         "INLINE",
+                        "MARKDOWN",
                         "URL",
                         "FILE"
                     ],
@@ -4677,6 +4997,220 @@
                 "tier": {
                     "type": "string",
                     "example": "Gold"
+                }
+            }
+        },
+        "SearchResultList": {
+            "title": "Unified Search Result List",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "description": "Number of results returned.\n",
+                    "example": 1
+                },
+                "next": {
+                    "type": "string",
+                    "description": "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n",
+                    "example": "/apis?limit=1&offset=2&query="
+                },
+                "previous": {
+                    "type": "string",
+                    "description": "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n",
+                    "example": "/apis?limit=1&offset=0&query="
+                },
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SearchResult"
+                    }
+                },
+                "pagination": {
+                    "properties": {
+                        "offset": {
+                            "type": "integer",
+                            "example": 12
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "example": 25
+                        },
+                        "total": {
+                            "type": "integer",
+                            "example": 1290
+                        }
+                    }
+                }
+            }
+        },
+        "SearchResult": {
+            "title": "Search Result",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "01234567-0123-0123-0123-012345678901"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "TestAPI"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "DOC",
+                        "API"
+                    ],
+                    "example": "API"
+                }
+            }
+        },
+        "APISearchResult": {
+            "title": "API Result",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/SearchResult"
+                },
+                {
+                    "properties": {
+                        "description": {
+                            "type": "string",
+                            "description": "A brief description about the API",
+                            "example": "A calculator API that supports basic operations"
+                        },
+                        "context": {
+                            "type": "string",
+                            "description": "A string that represents the context of the user's request",
+                            "example": "CalculatorAPI"
+                        },
+                        "version": {
+                            "type": "string",
+                            "description": "The version of the API",
+                            "example": "1.0.0"
+                        },
+                        "provider": {
+                            "description": "If the provider value is not given, the user invoking the API will be used as the provider.\n",
+                            "type": "string",
+                            "example": "admin"
+                        },
+                        "status": {
+                            "type": "string",
+                            "description": "This describes in which status of the lifecycle the API is",
+                            "example": "CREATED"
+                        },
+                        "thumbnailUri": {
+                            "type": "string",
+                            "example": "/apis/01234567-0123-0123-0123-012345678901/thumbnail"
+                        }
+                    }
+                }
+            ]
+        },
+        "DocumentSearchResult": {
+            "title": "Document Result",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/SearchResult"
+                },
+                {
+                    "properties": {
+                        "docType": {
+                            "type": "string",
+                            "enum": [
+                                "HOWTO",
+                                "SAMPLES",
+                                "PUBLIC_FORUM",
+                                "SUPPORT_FORUM",
+                                "API_MESSAGE_FORMAT",
+                                "SWAGGER_DOC",
+                                "OTHER"
+                            ],
+                            "example": "HOWTO"
+                        },
+                        "summary": {
+                            "type": "string",
+                            "example": "Summary of Calculator Documentation"
+                        },
+                        "sourceType": {
+                            "type": "string",
+                            "enum": [
+                                "INLINE",
+                                "URL",
+                                "FILE"
+                            ],
+                            "example": "INLINE"
+                        },
+                        "sourceUrl": {
+                            "type": "string",
+                            "example": ""
+                        },
+                        "otherTypeName": {
+                            "type": "string",
+                            "example": ""
+                        },
+                        "visibility": {
+                            "type": "string",
+                            "enum": [
+                                "OWNER_ONLY",
+                                "PRIVATE",
+                                "API_LEVEL"
+                            ],
+                            "example": "API_LEVEL"
+                        },
+                        "apiName": {
+                            "type": "string",
+                            "description": "The name of the associated API",
+                            "example": "TestAPI"
+                        },
+                        "apiVersion": {
+                            "type": "string",
+                            "description": "The version of the associated API",
+                            "example": "1.0.0"
+                        },
+                        "apiProvider": {
+                            "type": "string",
+                            "example": "admin"
+                        }
+                    }
+                }
+            ]
+        },
+        "ResourcePolicyList": {
+            "title": "Resource policy List",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ResourcePolicyInfo"
+                    }
+                },
+                "count": {
+                    "type": "integer",
+                    "description": "Number of policy resources returned.\n",
+                    "example": 1
+                }
+            }
+        },
+        "ResourcePolicyInfo": {
+            "title": "Resource policy Info object with conversion policy resource details.",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "UUID of the resource policy registry artifact\n",
+                    "example": "01234567-0123-0123-0123-012345678901"
+                },
+                "httpVerb": {
+                    "type": "string",
+                    "description": "HTTP verb used for the resource path",
+                    "example": "get"
+                },
+                "resourcePath": {
+                    "type": "string",
+                    "description": "A string that represents the resource path of the api for the related resource policy",
+                    "example": "CalculatorAPI"
+                },
+                "content": {
+                    "type": "string",
+                    "description": "The resource policy content",
+                    "example": "<header description=\"SOAPAction\" name=\"SOAPAction\" scope=\"transport\" value=\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\"/>"
                 }
             }
         }

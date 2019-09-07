@@ -17,6 +17,10 @@ jagg.module("subscription", {
         return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getAllSubscriptions.apply(this, arguments);
     },
 
+    getAllScopesOfApplicationSubscription:function () {
+        return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getAllScopesOfApplicationSubscription.apply(this, arguments);
+    },
+
     getAllSubscriptionsOfApplication:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getAllSubscriptionsOfApplication.apply(this, arguments);
     },
@@ -33,7 +37,11 @@ jagg.module("subscription", {
         return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getAPISubscriptions.apply(this, arguments);
     },
 
-    getAPISubscriptionsForApplication:function () {
+	getLightWeightAPISubscriptions:function () {
+		return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getLightWeightAPISubscriptions.apply(this, arguments);
+	},
+
+	getAPISubscriptionsForApplication:function () {
         return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getAPISubscriptionsForApplication.apply(this, arguments);
     },
     getAPISubscriptionsForApplicationById:function () {
@@ -68,6 +76,9 @@ jagg.module("subscription", {
     },
     updateAccessAllowDomains :function () {
         return jagg.require(jagg.getModulesDir() + "subscription/key.jag").updateAccessAllowDomains .apply(this, arguments);
+    },
+    getApplicationKeysOfApplication :function () {
+        return jagg.require(jagg.getModulesDir() + "subscription/list.jag").getApplicationKeysOfApplication.apply(this, arguments);
     }
 });
 %>

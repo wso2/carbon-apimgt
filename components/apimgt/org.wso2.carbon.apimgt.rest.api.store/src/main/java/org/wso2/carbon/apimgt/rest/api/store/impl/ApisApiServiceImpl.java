@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
@@ -35,11 +35,11 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListPaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.core.MediaType;
@@ -93,6 +93,12 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
             String newSearchQuery = APIUtil.constructNewSearchQuery(query);
+
+            //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
+            if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
+                newSearchQuery = newSearchQuery
+                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=", APIConstants.NAME_TYPE_PREFIX + "=");
+            }
             // Append LC state query criteria if the search is not doc or subcontext
             // based
             if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(newSearchQuery) &&
@@ -279,7 +285,8 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
-            if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(apiId, requestedTenantDomain)) {
+            if (!org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils
+                    .isUserAccessAllowedForAPI(apiId, requestedTenantDomain)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }
 
@@ -348,7 +355,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, contentType)
                         .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
                         .build();
-            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)) {
+            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) || documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
                 String content = apiConsumer.getDocumentationContent(apiIdentifier, documentation.getName());
                 return Response.ok(content)
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE)
@@ -402,7 +409,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
 
             String apiSwagger = apiConsumer.getOpenAPIDefinition(apiIdentifier);
-            apiSwagger = RestAPIStoreUtils.removeXMediationScriptsFromSwagger(apiSwagger);
+            apiSwagger = APIUtil.removeXMediationScriptsFromSwagger(apiSwagger);
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -548,8 +555,10 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return Content of the document/ either inline/file or source url as a redirection
      */
     @Override
-    public String apisApiIdDocumentsDocumentIdContentGetGetLastUpdatedTime(String apiId, String documentId, String xWSO2Tenant, String accept, String ifNoneMatch, String ifModifiedSince) {
-        return RestAPIStoreUtils.apisApiIdDocumentIdGetLastUpdated(documentId, xWSO2Tenant);
+    public String apisApiIdDocumentsDocumentIdContentGetGetLastUpdatedTime(String apiId, String documentId,
+            String xWSO2Tenant, String accept, String ifNoneMatch, String ifModifiedSince) {
+        return org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils
+                .apisApiIdDocumentIdGetLastUpdated(documentId, xWSO2Tenant);
     }
 
     /**
@@ -564,8 +573,10 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return returns the matched document
      */
     @Override
-    public String apisApiIdDocumentsDocumentIdGetGetLastUpdatedTime(String apiId, String documentId, String xWSO2Tenant, String accept, String ifNoneMatch, String ifModifiedSince) {
-        return RestAPIStoreUtils.apisApiIdDocumentIdGetLastUpdated(documentId, xWSO2Tenant);
+    public String apisApiIdDocumentsDocumentIdGetGetLastUpdatedTime(String apiId, String documentId, String xWSO2Tenant,
+            String accept, String ifNoneMatch, String ifModifiedSince) {
+        return org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils
+                .apisApiIdDocumentIdGetLastUpdated(documentId, xWSO2Tenant);
     }
 
     /**
@@ -593,8 +604,10 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return API of the given ID
      */
     @Override
-    public String apisApiIdGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String xWSO2Tenant) {
-        return RestAPIStoreUtils.apisApiIdGetLastUpdated(apiId, xWSO2Tenant);
+    public String apisApiIdGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch,
+            String ifModifiedSince, String xWSO2Tenant) {
+        return org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils
+                .apisApiIdGetLastUpdated(apiId, xWSO2Tenant);
     }
 
     /**
@@ -608,8 +621,10 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return Swagger document of the API
      */
     @Override
-    public String apisApiIdSwaggerGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch, String ifModifiedSince, String xWSO2Tenant) {
-        return RestAPIStoreUtils.apisApiIdSwaggerGetLastUpdated(xWSO2Tenant, apiId);
+    public String apisApiIdSwaggerGetGetLastUpdatedTime(String apiId, String accept, String ifNoneMatch,
+            String ifModifiedSince, String xWSO2Tenant) {
+        return org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils
+                .apisApiIdSwaggerGetLastUpdated(xWSO2Tenant, apiId);
     }
 
     /**
@@ -624,7 +639,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public String apisApiIdThumbnailGetGetLastUpdatedTime(String apiId, String xWSO2Tenant, String accept,
             String ifNoneMatch, String ifModifiedSince) {
-        return RestAPIStoreUtils.apisApiIdThumbnailGetLastUpdated(apiId);
+        return org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils.apisApiIdThumbnailGetLastUpdated(apiId);
     }
 
     /**

@@ -39,7 +39,6 @@ public class APIKeyMgtDataHolder {
     private static RealmService realmService;
     private static APIManagerConfigurationService amConfigService;
     private static Boolean isKeyCacheEnabledKeyMgt = true;
-    private static Boolean isThriftServerEnabled = true;
     private static TokenGenerator tokenGenerator;
     private static boolean jwtGenerationEnabled = false;
     private static Map<String, AbstractScopesIssuer> scopesIssuers = new HashMap<String, AbstractScopesIssuer>();
@@ -81,20 +80,9 @@ public class APIKeyMgtDataHolder {
         APIKeyMgtDataHolder.realmService = realmService;
     }
 
-    public static Boolean getThriftServerEnabled() {
-        return isThriftServerEnabled;
-    }
-
-    public static void setThriftServerEnabled(Boolean thriftServerEnabled) {
-        isThriftServerEnabled = thriftServerEnabled;
-    }
-
-
-
     public static void initData() {
         try {
             APIKeyMgtDataHolder.isKeyCacheEnabledKeyMgt = getInitValues(APIConstants.KEY_MANAGER_TOKEN_CACHE);
-            APIKeyMgtDataHolder.isThriftServerEnabled = getInitValues(APIConstants.API_KEY_VALIDATOR_ENABLE_THRIFT_SERVER);
 
             APIManagerConfiguration configuration = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
                     .getAPIManagerConfigurationService().getAPIManagerConfiguration();

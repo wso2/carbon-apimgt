@@ -39,9 +39,9 @@ public class PoliciesApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
 
-    public Response policiesMediationGet(@ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit") Integer limit,
-    @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset") Integer offset,
-    @ApiParam(value = "-Not supported yet-") @QueryParam("query") String query,
+    public Response policiesMediationGet(@ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit")  Integer limit,
+    @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset")  Integer offset,
+    @ApiParam(value = "-Not supported yet-") @QueryParam("query")  String query,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource (Will be supported in future).\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
@@ -61,7 +61,7 @@ public class PoliciesApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response policiesMediationMediationPolicyIdDelete(@ApiParam(value = "Mediation policy Id\n",required=true ) @PathParam("mediationPolicyId") String mediationPolicyId,
+    public Response policiesMediationMediationPolicyIdDelete(@ApiParam(value = "Mediation policy Id\n",required=true ) @PathParam("mediationPolicyId")  String mediationPolicyId,
     @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future).\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
@@ -81,7 +81,7 @@ public class PoliciesApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
 
-    public Response policiesMediationMediationPolicyIdGet(@ApiParam(value = "Mediation policy Id\n",required=true ) @PathParam("mediationPolicyId") String mediationPolicyId,
+    public Response policiesMediationMediationPolicyIdGet(@ApiParam(value = "Mediation policy Id\n",required=true ) @PathParam("mediationPolicyId")  String mediationPolicyId,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource (Will be supported in future).\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
@@ -104,7 +104,7 @@ public class PoliciesApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response policiesMediationMediationPolicyIdPut(@ApiParam(value = "Mediation policy Id\n",required=true ) @PathParam("mediationPolicyId") String mediationPolicyId,
+    public Response policiesMediationMediationPolicyIdPut(@ApiParam(value = "Mediation policy Id\n",required=true ) @PathParam("mediationPolicyId")  String mediationPolicyId,
     @ApiParam(value = "Mediation policy object that needs to be added\n" ,required=true ) MediationDTO body,
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future).\n"  )@HeaderParam("If-Match") String ifMatch,

@@ -21,8 +21,8 @@ import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -32,6 +32,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -45,6 +46,7 @@ import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -52,9 +54,12 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
+import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
@@ -66,14 +71,14 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ResourcePolicyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WsdlDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.MediationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
@@ -97,8 +102,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-
-import static org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil.getErrorDTO;
 
 /**
  * This is the service implementation class for Publisher API related operations
@@ -132,6 +135,13 @@ public class ApisApiServiceImpl extends ApisApiService {
         expand = (expand != null && expand) ? true : false;
         try {
             String newSearchQuery = APIUtil.constructNewSearchQuery(query);
+
+            //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
+            if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
+                newSearchQuery = newSearchQuery
+                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=", APIConstants.NAME_TYPE_PREFIX + "=");
+            }
+
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
             //We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
@@ -235,7 +245,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             if (body.getContext() == null) {
                 RestApiUtil.handleBadRequest("Parameter: \"context\" cannot be null", log);
-            } else if (StringUtils.endsWith(body.getContext(), "/")) {
+            } else if (body.getContext().endsWith("/")) {
                 RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
             }
             if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
@@ -243,8 +253,38 @@ public class ApisApiServiceImpl extends ApisApiService {
                         + " already exists.", log);
             }
 
+            //Check if the user has admin permission before applying a different provider than the current user
+            String provider = body.getProvider();
+            if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
+                if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("User " + username + " does not have admin permission ("
+                                + APIConstants.Permissions.APIM_ADMIN + ") hence provider (" +
+                                provider + ") overridden with current user (" + username + ")");
+                    }
+                    provider = username;
+                } else {
+                    if (!MultitenantUtils.getTenantDomain(username).equals(MultitenantUtils
+                            .getTenantDomain(provider))) {
+                        String errorMessage = "Error while adding new API : " + body.getProvider() + "-" +
+                                body.getName() + "-" + body.getVersion() + ". The tenant " +
+                                "domain '" + MultitenantUtils.getTenantDomain(provider) + "' of provider '" + provider
+                                + "' is not compatible with admin's('" + username + "') tenant domain '" +
+                                MultitenantUtils.getTenantDomain(username) + "'";
+                        RestApiUtil.handleBadRequest(errorMessage, log);
+                    } else {
+                        //When tenant domain contains upper case characters, this will convert those to lowercase
+                        provider = MultitenantUtils.getTenantAwareUsername(provider) + "@" +
+                                MultitenantUtils.getTenantDomain(provider);
+                    }
+                }
+            } else {
+                //Set username in case provider is null or empty
+                provider = username;
+            }
+
             //Get all existing versions of  api been adding
-            List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
+            List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), provider);
             if (apiVersions.size() > 0) {
                 //If any previous version exists
                 for (String version : apiVersions) {
@@ -267,22 +307,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                     RestApiUtil.handleBadRequest("Error occurred while adding the API. A duplicate API context " +
                                     "already exists for " + body.getContext(), log);
                 }
-            }
-
-            //Check if the user has admin permission before applying a different provider than the current user
-            String provider = body.getProvider();
-            if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
-                if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("User " + username + " does not have admin permission ("
-                                + APIConstants.Permissions.APIM_ADMIN + ") hence provider (" +
-                                provider + ") overridden with current user (" + username + ")");
-                    }
-                    provider = username;
-                }
-            } else {
-                //Set username in case provider is null or empty
-                provider = username;
             }
 
             List<String> tiersFromDTO = body.getTiers();
@@ -563,10 +587,21 @@ public class ApisApiServiceImpl extends ApisApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
                     tenantDomain);
+            API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
             //Getting the api base path out apiResourcePath
             apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
+            //Getting specified mediation policy
+            Mediation mediation = apiProvider.getApiSpecificMediationPolicy(apiResourcePath,
+                    mediationPolicyId);
+            if (mediation != null) {
+                if (isAPIModified(api, mediation)) {
+                    apiProvider.updateAPI(api);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
+            }
             boolean deletionStatus = apiProvider.deleteApiSpecificMediationPolicy(apiResourcePath,
                     mediationPolicyId);
             if (deletionStatus) {
@@ -587,6 +622,9 @@ public class ApisApiServiceImpl extends ApisApiService {
                         mediationPolicyId + "of API " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -841,7 +879,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             API apiInfo = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = apiInfo.getId();
-            boolean isWSAPI = APIConstants.APIType.WS == APIConstants.APIType.valueOf(apiInfo.getType());
+            boolean isWSAPI = APIConstants.APITransportType.WS == APIConstants.APITransportType.valueOf(apiInfo.getType());
 
             //Overriding some properties:
             body.setName(apiIdentifier.getApiName());
@@ -919,6 +957,165 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    /**
+     * Get the resource policies(inflow/outflow).
+     *
+     * @param apiId           API ID
+     * @param sequenceType    sequence type('in' or 'out')
+     * @param resourcePath    api resource path
+     * @param verb            http verb
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return json response of the resource policies according to the resource path
+     */
+    @Override
+    public Response apisApiIdResourcePoliciesGet(String apiId, String sequenceType, String resourcePath,
+            String verb, String accept, String ifNoneMatch, String ifModifiedSince) {
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            boolean isSoapToRESTApi = SOAPOperationBindingUtils
+                    .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
+                            apiIdentifier.getProviderName());
+            if (isSoapToRESTApi) {
+                if (StringUtils.isEmpty(sequenceType) || !(RestApiConstants.IN_SEQUENCE.equals(sequenceType)
+                        || RestApiConstants.OUT_SEQUENCE.equals(sequenceType))) {
+                    String errorMessage = "Sequence type should be either of the values from 'in' or 'out'";
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+                String resourcePolicy = SequenceUtils
+                        .getRestToSoapConvertedSequence(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
+                                apiIdentifier.getProviderName(), sequenceType);
+                if (StringUtils.isEmpty(resourcePath) && StringUtils.isEmpty(verb)) {
+                    ResourcePolicyListDTO resourcePolicyListDTO = APIMappingUtil
+                            .fromResourcePolicyStrToDTO(resourcePolicy);
+                    return Response.ok().entity(resourcePolicyListDTO).build();
+                }
+                if (StringUtils.isNotEmpty(resourcePath) && StringUtils.isNotEmpty(verb)) {
+                    JSONObject sequenceObj = (JSONObject) new JSONParser().parse(resourcePolicy);
+                    JSONObject resultJson = new JSONObject();
+                    String key = resourcePath + "_" + verb;
+                    JSONObject sequenceContent = (JSONObject) sequenceObj.get(key);
+                    if (sequenceContent == null) {
+                        String errorMessage = "Cannot find any resource policy for Resource path : " + resourcePath +
+                                " with type: " + verb;
+                        RestApiUtil.handleResourceNotFoundError(errorMessage, log);
+                    }
+                    resultJson.put(key, sequenceObj.get(key));
+                    ResourcePolicyListDTO resourcePolicyListDTO = APIMappingUtil
+                            .fromResourcePolicyStrToDTO(resultJson.toJSONString());
+                    return Response.ok().entity(resourcePolicyListDTO).build();
+                } else if (StringUtils.isEmpty(resourcePath)) {
+                    String errorMessage = "Resource path cannot be empty for the defined verb: " + verb;
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                } else if (StringUtils.isEmpty(verb)) {
+                    String errorMessage = "HTTP verb cannot be empty for the defined resource path: " + resourcePath;
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            } else {
+                String errorMessage = "The provided api with id: " + apiId + " is not a soap to rest converted api.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving the API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (ParseException e) {
+            String errorMessage = "Error while retrieving the resource policies for the API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Get the resource policy given the resource id.
+     *
+     * @param apiId           API ID
+     * @param resourceId      resource id
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return json response of the resource policy for the resource id given
+     */
+    @Override
+    public Response apisApiIdResourcePoliciesResourceIdGet(String apiId, String resourceId, String accept,
+            String ifNoneMatch, String ifModifiedSince) {
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            boolean isSoapToRESTApi = SOAPOperationBindingUtils
+                    .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
+                            apiIdentifier.getProviderName());
+            if (isSoapToRESTApi) {
+                if (StringUtils.isEmpty(resourceId)) {
+                    String errorMessage = "Resource id should not be empty to update a resource policy.";
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+                String policyContent = SequenceUtils
+                        .getResourcePolicyFromRegistryResourceId(apiIdentifier, resourceId);
+                ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
+                        .fromResourcePolicyStrToInfoDTO(policyContent);
+                return Response.ok().entity(resourcePolicyInfoDTO).build();
+            } else {
+                String errorMessage = "The provided api with id: " + apiId + " is not a soap to rest converted api.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving the API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Update the resource policies(inflow/outflow) given the resource id.
+     *
+     * @param apiId  API ID
+     * @param resourceId resource id
+     * @param body resource policy content
+     * @param contentType Request content type
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return json response of the updated sequence content
+     */
+    @Override
+    public Response apisApiIdResourcePoliciesResourceIdPut(String apiId, String resourceId,
+            ResourcePolicyInfoDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            boolean isSoapToRESTApi = SOAPOperationBindingUtils
+                    .isSOAPToRESTApi(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
+                            apiIdentifier.getProviderName());
+            if (isSoapToRESTApi) {
+                if (StringUtils.isEmpty(resourceId)) {
+                    String errorMessage = "Resource id should not be empty to update a resource policy.";
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+                boolean isValidSchema = RestApiPublisherUtils.validateXMLSchema(body.getContent());
+                if (isValidSchema) {
+                    SequenceUtils
+                            .updateResourcePolicyFromRegistryResourceId(apiIdentifier, resourceId, body.getContent());
+                    String updatedPolicyContent = SequenceUtils
+                            .getResourcePolicyFromRegistryResourceId(apiIdentifier, resourceId);
+                    ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
+                            .fromResourcePolicyStrToInfoDTO(updatedPolicyContent);
+                    return Response.ok().entity(resourcePolicyInfoDTO).build();
+                } else {
+                    String errorMessage =
+                            "Error while validating the resource policy xml content for the API : " + apiId;
+                    RestApiUtil.handleInternalServerError(errorMessage, log);
+                }
+            } else {
+                String errorMessage = "The provided api with id: " + apiId + " is not a soap to rest converted api.";
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving the API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
 
     /**
      * This method is used to assign micro gateway labels to the DTO
@@ -1271,7 +1468,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, contentType)
                         .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
                         .build();
-            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)) {
+            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) || documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
                 String content = apiProvider.getDocumentationContent(apiIdentifier, documentation.getName());
                 return Response.ok(content)
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE)
@@ -1340,6 +1537,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             } else if (inlineContent != null) {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)) {
                     RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not INLINE", log);
+                }
+                apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
+            } else if (inlineContent != null) {
+                if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
+                    RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not MARKDOWN", log);
                 }
                 apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
             } else {
@@ -1485,7 +1687,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(api.getId());
             if (!StringUtils.isEmpty(apiSwaggerDefinition)) {
                 APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-                Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(api, apiSwaggerDefinition);
+                SwaggerData swaggerData = new SwaggerData(api);
+                Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(swaggerData, apiSwaggerDefinition);
                 api.setUriTemplates(uriTemplates);
 
                 // scopes
@@ -1569,13 +1772,13 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     * 
+     *
      * @param apiId API Id
      * @param body WSDL DTO
      * @param contentType content type of the payload
      * @param ifMatch If-match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @return added wsdl 
+     * @return added wsdl
      */
     @Override
     public Response apisApiIdWsdlPost(String apiId, WsdlDTO body, String contentType, String ifMatch,
@@ -1630,12 +1833,18 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String contentType, String ifMatch,
                                         String ifUnmodifiedSince) {
         try {
-            APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+            APIDefinitionValidationResponse response = new APIDefinitionUsingOASParser()
+                    .validateAPIDefinition(apiDefinition, false);
+            if (!response.isValid()) {
+                RestApiUtil.handleBadRequest(response.getErrorItems(), log);
+            }
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             API existingAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
-            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(existingAPI, apiDefinition);
+            APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+            SwaggerData swaggerData = new SwaggerData(existingAPI);
+            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(swaggerData, apiDefinition);
             Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiDefinition);
             existingAPI.setUriTemplates(uriTemplates);
             existingAPI.setScopes(scopes);
@@ -1698,5 +1907,42 @@ public class ApisApiServiceImpl extends ApisApiService {
     private boolean isAuthorizationFailure(Exception e) {
         String errorMessage = e.getMessage();
         return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
+    }
+
+    /***
+     * To check if the API is modified or not when the given sequence is in API.
+     *
+     * @param api
+     * @param mediation
+     * @return if the API is modified or not
+     */
+    private boolean isAPIModified(API api, Mediation mediation) {
+        if (mediation != null) {
+            String sequenceName;
+            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equalsIgnoreCase(mediation.getType())) {
+                sequenceName = api.getInSequence();
+                if (isSequenceExistsInAPI(sequenceName, mediation)) {
+                    api.setInSequence(null);
+                    return true;
+                }
+            } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equalsIgnoreCase(mediation.getType())) {
+                sequenceName = api.getOutSequence();
+                if (isSequenceExistsInAPI(sequenceName, mediation)) {
+                    api.setOutSequence(null);
+                    return true;
+                }
+            } else {
+                sequenceName = api.getFaultSequence();
+                if (isSequenceExistsInAPI(sequenceName, mediation)) {
+                    api.setFaultSequence(null);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isSequenceExistsInAPI(String sequenceName, Mediation mediation) {
+        return StringUtils.isNotEmpty(sequenceName) && mediation.getName().equals(sequenceName);
     }
 }

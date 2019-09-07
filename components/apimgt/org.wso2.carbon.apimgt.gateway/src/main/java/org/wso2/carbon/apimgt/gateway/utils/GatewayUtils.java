@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.gateway.utils;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.context.MessageContext;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Mediator;
@@ -428,5 +428,26 @@ public class GatewayUtils {
             hostname = (String) messageContext.getProperty(APIMgtGatewayConstants.HOST_NAME);
         }
         return hostname;
+    }
+
+    public static String getQualifiedApiName(String apiProviderName, String apiName, String version) {
+        return apiProviderName + "--" + apiName + ":v" + version;
+    }
+
+    public static String getQualifiedDefaultApiName(String apiProviderName, String apiName) {
+        return apiProviderName + "--" + apiName;
+    }
+
+    /**
+     * This method extracts the endpoint address base path if query parameters are contained in endpoint
+     * @param mc The message context
+     * @return The endpoint address base path
+     */
+    public static String extractAddressBasePath(org.apache.synapse.MessageContext mc) {
+        String endpointAddress = (String) mc.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
+        if (endpointAddress.contains("?")) {
+            endpointAddress = endpointAddress.substring(0, endpointAddress.indexOf("?"));
+        }
+        return endpointAddress;
     }
 }

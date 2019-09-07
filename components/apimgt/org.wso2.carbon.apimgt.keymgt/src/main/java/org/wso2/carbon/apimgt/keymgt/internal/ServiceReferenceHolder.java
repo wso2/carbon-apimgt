@@ -17,12 +17,14 @@
 package org.wso2.carbon.apimgt.keymgt.internal;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 
 public class ServiceReferenceHolder {
 
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
 
     private APIManagerConfigurationService amConfigurationService;
+    private OutputEventAdapterService outputEventAdapterService;
 
     private ServiceReferenceHolder() {
 
@@ -38,5 +40,13 @@ public class ServiceReferenceHolder {
 
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigurationService) {
         this.amConfigurationService = amConfigurationService;
+    }
+
+    public OutputEventAdapterService getOutputEventAdapterService() {
+        return outputEventAdapterService;
+    }
+
+    public void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
+        this.outputEventAdapterService = outputEventAdapterService;
     }
 }

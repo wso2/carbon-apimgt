@@ -96,11 +96,36 @@
 				<div class="panel-body">
 					<form class="form-horizontal" id="startFromExistingSOAPEndpoint-form" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
 						<div class="form-group">
-	                               <div class="col-sm-12">
+						    <div class="col-sm-12">
+								<label class="radio">
+                                    <input type="radio" checked="checked" name="wsdl-options-select" value="url">
+                                    <span class="helper"><%=i18n.localize("WSDL Url")%></span>
+								</label>
+								<label class="radio">
+                                     <input type="radio" name="wsdl-options-select" value="archive">
+                                     <span class="helper"><%=i18n.localize("WSDL Archive/File")%></span>
+								 </label>
+							</div>
+						</div>
+						<div class="form-group">
+	                               <div  id="wsdl-url-section" class="col-sm-12">
 	                                   <input id="wsdl-url" name="wsdl-url" class="form-control input-small is_url_valid" type="text" placeholder="http://appserver/services/echo?wsdl"/>
 	                                   <label for="wsdl-url" class="error wsdlError" style="display:none"><%=i18n.localize("Please use a valid WSDL endpoint")%></label>
 	                               </div>
 	                    </div>
+	                    <div id="wsdl-file-section" style="display:none" class="controls col-sm-12">
+								        <div class="input-group input-wrap file-upload-control">
+									        <input type="text" class="form-control" placeholder="Click Browse to add a wsdl archive(.zip) or file   " readonly>
+                                            <input id="wsdl-file" name="wsdl-file" type="file" title="wsdl-file" class="form-control" multiple>
+                                            <label for="wsdl-file" class="error swaggerFileError" style="display:none"><%=i18n.localize("Please use a valid wsdl file")%></label>
+                                            <div class="input-group-btn">
+                                                <button class="btn btn-primary browse" type="button" title="Browse File">
+                                                    <i class="fw fw-file-browse" aria-hidden="true"></i> <span
+                                                        class="hidden-xs"><%=i18n.localize("Browse")%></span>
+                                                </button>
+                                            </div>
+								        </div>
+					    </div>
 	                    <div class="form-group">
 						    <div class="col-sm-12 toggleRadios">
 								<label class="radio sub-labels urlSelect-label">

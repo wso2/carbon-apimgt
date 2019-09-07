@@ -41,6 +41,8 @@ import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
+import org.wso2.carbon.apimgt.localentry.stub.APILocalEntryAdminStub;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -71,6 +73,7 @@ public class APIGatewayManagerTest {
     private APIData defaultAPIdata;
     private APIIdentifier apiIdentifier;
     private String apiName = "weatherAPI";
+    private String apiUUId = "123455";
     private String provider = "admin";
     private String version = "v1";
     private String apiContext = "/weather";
@@ -80,6 +83,7 @@ public class APIGatewayManagerTest {
     private String inSequenceName = "in-sequence";
     private String outSequenceName = "out-sequence";
     private String faultSequenceName = "fault-sequence";
+    private String swaggerDefinition = "swagger definition";
     private int tenantID = -1234;
     private String testSequenceDefinition =
             "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"test-sequence\">\n"
@@ -91,6 +95,11 @@ public class APIGatewayManagerTest {
     private String sandBoxEndpointConfig = "{\n" + "   \"sandbox_endpoints\":{\n"
             + "      \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\n" + "      \"config\":null\n"
             + "   }\n" + "}";
+
+    private String localEntry = "<localEntry key=\"" + apiUUId + "\">" +
+            swaggerDefinition.replaceAll("&(?!amp;)", "&amp;").
+                    replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+            + "</localEntry>";
 
     @Before
     public void init() throws Exception {
@@ -113,7 +122,7 @@ public class APIGatewayManagerTest {
         PowerMockito.mockStatic(CertificateMgtDAO.class);
         CertificateMgtDAO certificateMgtDAO = Mockito.mock(CertificateMgtDAO.class);
         PowerMockito.when(CertificateMgtDAO.getInstance()).thenReturn(certificateMgtDAO);
-        PowerMockito.when(APIUtil.isSandboxEndpointsExists((API) Mockito.anyObject())).thenCallRealMethod();
+        PowerMockito.when(APIUtil.isSandboxEndpointsExists(Mockito.anyString())).thenCallRealMethod();
         PowerMockito.when(APIUtil.getSequenceExtensionName((API) Mockito.anyObject())).thenCallRealMethod();
         PowerMockito.when(APIUtil.extractEnvironmentsForAPI(Mockito.anyString())).thenCallRealMethod();
 
@@ -145,6 +154,15 @@ public class APIGatewayManagerTest {
         apiIdentifier = new APIIdentifier(provider, apiName, version);
         TestUtils.initConfigurationContextService(false);
         gatewayManager = APIGatewayManager.getInstance();
+
+        Map<String, Environment> environmentList = config.getApiGatewayEnvironments();
+        Environment environment = environmentList.get(prodEnvironmentName);
+        LocalEntryAdminClient localEntryAdminClient = Mockito.mock(LocalEntryAdminClient.class);
+        APILocalEntryAdminStub localEntryAdminServiceStub = Mockito.mock(APILocalEntryAdminStub.class);
+        PowerMockito.whenNew(LocalEntryAdminClient.class).withArguments(environment,tenantDomain).
+                thenReturn(localEntryAdminClient);
+        Mockito.doCallRealMethod().when(localEntryAdminClient).deleteEntry(localEntry);
+        Mockito.when(localEntryAdminServiceStub.addLocalEntry(localEntry, tenantDomain)).thenReturn(true);
     }
 
     @Test public void testRemovingRESTAPIWithInSequenceFromGateway() throws AxisFault {
@@ -170,6 +188,8 @@ public class APIGatewayManagerTest {
         api.setType("HTTP");
         api.setOutSequence(outSequenceName);
         api.setAsPublishedDefaultVersion(true);
+        api.setSwaggerDefinition(swaggerDefinition);
+        api.setUUID(apiUUId);
         Set<String> environments = new HashSet<String>();
         environments.add(prodEnvironmentName);
         environments.add(null);
@@ -188,6 +208,8 @@ public class APIGatewayManagerTest {
         api.setFaultSequence(faultSequenceName);
         api.setInSequence(inSequenceName);
         api.setAsPublishedDefaultVersion(true);
+        api.setSwaggerDefinition(swaggerDefinition);
+        api.setUUID(apiUUId);
         Set<String> environments = new HashSet<String>();
         environments.add(prodEnvironmentName);
         environments.add(null);
@@ -209,6 +231,8 @@ public class APIGatewayManagerTest {
         api.setInSequence(inSequenceName);
         api.setOutSequence(outSequenceName);
         api.setFaultSequence(faultSequenceName);
+        api.setSwaggerDefinition(swaggerDefinition);
+        api.setUUID(apiUUId);
         Set<String> environments = new HashSet<String>();
         environments.add(prodEnvironmentName);
         environments.add(null);
@@ -389,7 +413,7 @@ public class APIGatewayManagerTest {
     }
 
     @Test public void testPublishingNewAPIToGateway()
-            throws AxisFault, APIManagementException, XMLStreamException, RegistryException {
+            throws Exception {
 
         API api = new API(apiIdentifier);
         api.setType("HTTP");
@@ -406,9 +430,13 @@ public class APIGatewayManagerTest {
         //Test when environments are not defined for API
         Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
 
-        //Test when API's environment endpoint configuration is not available
+        //Test adding LocalEntry
         api.setEnvironments(environments);
         api.setEndpointConfig(sandBoxEndpointConfig);
+        api.setSwaggerDefinition(swaggerDefinition);
+        api.setUUID(apiUUId);
+
+        //Test when API's environment endpoint configuration is not available
         Assert.assertEquals(gatewayManager.publishToGateway(api, apiTemplateBuilder, tenantDomain).size(), 0);
 
         //Test deploying 'INLINE' type REST API to gateway
@@ -444,6 +472,8 @@ public class APIGatewayManagerTest {
         api.setEndpointConfig(prodEndpointConfig);
         api.setFaultSequence(faultSequenceName);
         api.setAsDefaultVersion(true);
+        api.setSwaggerDefinition(swaggerDefinition);
+        api.setUUID(apiUUId);
         APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
         Set<String> environments = new HashSet<String>();
         environments.add(prodEnvironmentName);
@@ -481,6 +511,8 @@ public class APIGatewayManagerTest {
         api.setEndpointConfig(prodEndpointConfig);
         api.setInSequence(inSequenceName);
         api.setAsDefaultVersion(true);
+        api.setSwaggerDefinition(swaggerDefinition);
+        api.setUUID(apiUUId);
         APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
         Set<String> environments = new HashSet<String>();
         environments.add(prodEnvironmentName);
@@ -503,6 +535,8 @@ public class APIGatewayManagerTest {
         api.setEndpointConfig(prodEndpointConfig);
         api.setOutSequence(outSequenceName);
         api.setAsDefaultVersion(true);
+        api.setSwaggerDefinition(swaggerDefinition);
+        api.setUUID(apiUUId);
         APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
         Set<String> environments = new HashSet<String>();
         environments.add(prodEnvironmentName);
@@ -523,6 +557,8 @@ public class APIGatewayManagerTest {
         api.setType("HTTP");
         api.setAsPublishedDefaultVersion(true);
         api.setAsDefaultVersion(true);
+        api.setSwaggerDefinition(swaggerDefinition);
+        api.setUUID(apiUUId);
         APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
         Set<String> environments = new HashSet<String>();
         environments.add(prodEnvironmentName);
@@ -566,6 +602,8 @@ public class APIGatewayManagerTest {
         api.setEndpointConfig(prodEndpointConfig);
         api.setInSequence(inSequenceName);
         api.setAsDefaultVersion(true);
+        api.setSwaggerDefinition(swaggerDefinition);
+        api.setUUID(apiUUId);
         APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
         Set<String> environments = new HashSet<String>();
         environments.add(prodEnvironmentName);
@@ -588,6 +626,8 @@ public class APIGatewayManagerTest {
         api.setEndpointConfig(prodEndpointConfig);
         api.setOutSequence(outSequenceName);
         api.setAsDefaultVersion(true);
+        api.setSwaggerDefinition(swaggerDefinition);
+        api.setUUID(apiUUId);
         APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
         Set<String> environments = new HashSet<String>();
         environments.add(prodEnvironmentName);
@@ -609,6 +649,8 @@ public class APIGatewayManagerTest {
         api.setEndpointConfig(prodEndpointConfig);
         api.setInSequence(inSequenceName);
         api.setAsDefaultVersion(true);
+        api.setSwaggerDefinition(swaggerDefinition);
+        api.setUUID(apiUUId);
         APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
         Set<String> environments = new HashSet<String>();
         environments.add(prodEnvironmentName);
@@ -621,7 +663,7 @@ public class APIGatewayManagerTest {
                 .thenReturn(true);
         PowerMockito.when(APIUtil.getCustomSequence(inSequenceName, tenantID, "in", api.getId()))
                 .thenReturn(inSequence);
-        PowerMockito.when(APIUtil.isProductionEndpointsExists((API) Mockito.anyObject())).thenReturn(true);
+        PowerMockito.when(APIUtil.isProductionEndpointsExists(Mockito.anyString())).thenReturn(true);
         PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
 
         //Test failure to deploy API when custom in/out sequence deployment failed
@@ -671,6 +713,8 @@ public class APIGatewayManagerTest {
         api.setEndpointConfig(prodEndpointConfig);
         api.setInSequence(inSequenceName);
         api.setAsDefaultVersion(true);
+        api.setSwaggerDefinition(swaggerDefinition);
+        api.setUUID(apiUUId);
         APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
         Set<String> environments = new HashSet<String>();
         environments.add(prodEnvironmentName);
@@ -682,7 +726,7 @@ public class APIGatewayManagerTest {
                 .thenReturn(true);
         PowerMockito.when(APIUtil.getCustomSequence(inSequenceName, tenantID, "in", api.getId()))
                 .thenReturn(inSequence);
-        PowerMockito.when(APIUtil.isProductionEndpointsExists((API) Mockito.anyObject())).thenReturn(true);
+        PowerMockito.when(APIUtil.isProductionEndpointsExists(Mockito.anyString())).thenReturn(true);
         PowerMockito.when(APIUtil.isSequenceDefined(Mockito.anyString())).thenReturn(true);
         //Test API deployment failure when custom sequence update failed
         Mockito.doThrow(new AxisFault("Error occurred while deploying sequence")).when(apiGatewayAdminClient)

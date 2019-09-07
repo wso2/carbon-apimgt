@@ -28,6 +28,8 @@ import java.io.Serializable;
  */
 public class ConditionGroupDTO implements Serializable{
 
+    private static final long serialVersionUID = 1L;
+
     private String conditionGroupId;
     private ConditionDTO [] conditions;
 

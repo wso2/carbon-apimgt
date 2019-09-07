@@ -11,6 +11,15 @@ if(object == null){
     response.contentType = "application/force-download";
     response.addHeader("Content-Disposition","attachment; filename=\""+object.name+"\"");
 
-    print(object.Data);
+    if (resourceUrl.indexOf(".wsdl") != -1) {
+        print(object.Data);
+    } else {
+        var file = new File("file:///" + object.Data);
+        file.open("r");
+        print(file.getStream());
+        file.close();
+        var FileUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
+        FileUtil.deleteParentDirectory(object.Data);
+    }
 }
 %>

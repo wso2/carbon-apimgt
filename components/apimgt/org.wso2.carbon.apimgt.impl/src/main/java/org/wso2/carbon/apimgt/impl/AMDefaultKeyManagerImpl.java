@@ -208,6 +208,34 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         return null;
     }
 
+    @Override
+    public OAuthApplicationInfo  updateApplicationOwner(OAuthAppRequest appInfoDTO, String owner)
+            throws APIManagementException {
+        OAuthApplicationInfo oAuthApplicationInfo = appInfoDTO.getOAuthApplicationInfo();
+        String userId = oAuthApplicationInfo.getAppOwner();
+
+        try {
+            String applicationName = oAuthApplicationInfo.getClientName();
+            String[] grantTypes = null;
+            if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT) != null) {
+                grantTypes = ((String)oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT))
+                        .split(",");
+            }
+            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationInfo = updateOAuthApplicationOwner(
+                    userId, owner, applicationName,
+                    oAuthApplicationInfo.getCallBackURL(),oAuthApplicationInfo.getClientId(), grantTypes);
+            OAuthApplicationInfo newAppInfo = new OAuthApplicationInfo();
+            newAppInfo.setAppOwner(applicationInfo.getAppOwner());
+            newAppInfo.setClientId(applicationInfo.getClientId());
+            newAppInfo.setCallBackURL(applicationInfo.getCallBackURL());
+            newAppInfo.setClientSecret(applicationInfo.getClientSecret());
+            newAppInfo.setJsonString(applicationInfo.getJsonString());
+            return newAppInfo;
+        } catch (Exception e) {
+            handleException("Error occurred while updating OAuth application owner to " + userId, e);
+        }
+        return null;
+    }
 
     @Override
     public void deleteApplication(String consumerKey) throws APIManagementException {
@@ -408,15 +436,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         token.setTokenType("bearer");
         requestDTO.setAccessToken(token);
 
-        //TODO: If these values are not set, validation will fail giving an NPE. Need to see why that happens
-        OAuth2TokenValidationRequestDTO.TokenValidationContextParam contextParam = requestDTO.new
-                TokenValidationContextParam();
-        contextParam.setKey("dummy");
-        contextParam.setValue("dummy");
-
         OAuth2TokenValidationRequestDTO.TokenValidationContextParam[] contextParams =
                 new OAuth2TokenValidationRequestDTO.TokenValidationContextParam[1];
-        contextParams[0] = contextParam;
         requestDTO.setContext(contextParams);
 
         OAuth2ClientApplicationDTO clientApplicationDTO = findOAuthConsumerIfTokenIsValid(requestDTO);
@@ -708,6 +729,19 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
         }
 
+    }
+
+    protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo updateOAuthApplicationOwner(
+            String userId, String owner, String applicationName, String callBackURL, String clientId,
+            String[] grantTypes) throws Exception {
+        SubscriberKeyMgtClient keyMgtClient = null;
+        try {
+            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
+            return keyMgtClient
+                    .updateOAuthApplicationOwner(userId, owner, applicationName, callBackURL, clientId, grantTypes);
+        } finally {
+            SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
+        }
     }
     
     protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo getOAuthApplication(String consumerKey)

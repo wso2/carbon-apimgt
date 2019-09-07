@@ -3,19 +3,18 @@
 <%
           var apps = outputs.applications;
           var user = jagg.getUser();
-          var tenant=request_tenant;          
+          var tenant=request_tenant;
           var urlPrefix = jagg.getTenantURLPrefix("&");
 if (outputs.error) { %>
           <div class="message message-info">
             <strong><%=encode.forHtml(outputs.message)%></strong>
           </div>
 <% }else {
-
-          var i, api, path, thumbURL, apis = outputs.apis,totalLength=outputs.totalLength, isRatingActivated=outputs.isRatingActivated ;
-          var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+          var i, api, path, docPath, thumbTooltip, thumbURL, apis = outputs.apis, totalLength=outputs.totalLength, isRatingActivated=outputs.isRatingActivated ;
+	      var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
                         if(apis!=null) {
 	                        length = totalLength;
-	
+
 	                        var itemsPerPage; //reduce this number to preview the pagination
                                if (APIUtil.getApisPerPageInStore() == 0) {
                                     itemsPerPage = 12;
@@ -77,7 +76,7 @@ else {
     var isEnabledTutorialForThisTenant = false;
 }
  %>
- 
+
  <!-- Recently Added APIs -->
  <% if (request.getParameter('tag') == null && request.getParameter('query') == null && totalLength > 10 && request.getParameter('page') == null) { %>
 	<%jagg.includeBlock("api/recently-added",null);%>
@@ -108,12 +107,12 @@ if (<%=isEnabledTutorialForThisTenant%>) {
         }
     }
   }
- 
+
   function launchInteractiveTutorial() {
       localStorage.setItem("isNewUserInteractiveTutorialStarted", true);
       runEnjoyHintScript(enjoyHintApplicationMenuInstance, api_store_select_one_api);
   }
-</script> 
+</script>
 
 <div class="page-header">
      <%
@@ -166,19 +165,28 @@ if (<%=isEnabledTutorialForThisTenant%>) {
                              var uname=    encode.forUriComponent(request.getParameter('uname'));
                                        var name=     encode.forUriComponent(api.name);
                                        var version=  encode.forUriComponent(api.version);
-                                       var provider= encode.forUriComponent(api.provider);
 
                                        if(uname == 'null')uname = null;
                                        if(name == 'null')name = null;
                                        if(version == 'null')version = null;
-                                       if(provider == 'null')provider = null;
                             thumbURL = api.thumbnailurl;
                             if(thumbURL && thumbURL.indexOf("images/") == 0) {
                                 thumbURL = null;
                             }else{
                                 thumbURL = jagg.getRegistryPath(thumbURL);
                             }
-                            path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + name+ "&version=" + version + "&provider=" +provider+ urlPrefix;
+                            path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + name+ "&version=" + version + urlPrefix;
+                            if (api.docSourceType == "FILE") {
+                                var tenant = request.getParameter("tenant");
+                                if (tenant == null) {
+                                    tenant = "carbon.super";
+                                }
+                                docPath = jagg.url("/site/themes/wso2/templates/api/documentation/download.jag?tenant=" + tenant + "&resourceUrl=" + api.docFilePath);
+                                thumbTooltip = "Download Document";
+                            } else {
+                                docPath = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + "?docName=" + api.docName + "&name=" + name+ "&version=" + version + urlPrefix;
+                                thumbTooltip = "View Document";
+                            }
                             if(tag != null){
                                 path+="&tag="+encode.forUriComponent(tag);
                             }
@@ -197,10 +205,10 @@ if (<%=isEnabledTutorialForThisTenant%>) {
                                     <%} else if(api.docFilePath && api.docFilePath!="") { %>
                                     	<p><a href="<%=api.docFilePath%>" target="_blank" title="<%=i18n.localize("Download")%>"><%=i18n.localize("Download")%></a></p>
                                     <% } else { %>
-                                    	<% var docUrl = "docName=" + encode.forUriComponent(api.docName) + "&name=" + encode.forUriComponent(api.name) + "&version=" + encode.forUriComponent(api.version) + "&provider=" + encode.forUriComponent(api.provider) + urlPrefix; %>
+                                    	<% var docUrl = "docName=" + encode.forUriComponent(api.docName) + "&name=" + encode.forUriComponent(api.name) + "&version=" + encode.forUriComponent(api.version) + urlPrefix; %>
                                     	<p><a href="<%=docViewMappedUrl%>?<%=docUrl%>" target="_blank" title="<%=i18n.localize("View Content")%>"><%=i18n.localize("View Content")%></a></p>
                                     <% } %>
-               					
+
                				</div>
                			</div>
                			<div class="col-sm-4">
@@ -216,7 +224,7 @@ if (<%=isEnabledTutorialForThisTenant%>) {
 															<div style="display: none">
 																<a href="" class="api-name" title="<%=i18n.localize("API Name")%>"><%=api.name%></a>
 															</div>
-														</div> 
+														</div>
 				                                    <% } else { %>
 				                                    	<div class="square-element">
 				                                    		<img class="" src="<%=thumbURL%>" alt="<%=i18n.localize("API Thumbnail")%>">
@@ -226,11 +234,11 @@ if (<%=isEnabledTutorialForThisTenant%>) {
 				                                    	</div>
 				                                    <% } %>
 				                                     <a href="<%=path%>" title="<%=i18n.localize("Browse APIs")%>">
-					                                    <div class="after">                                       
+					                                    <div class="after">
 					                                    <span class="fw-stack fw-lg">
 					                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
 					                                    <i class="fw fw-view fw-stack-1x"></i>
-					                                    </span>          
+					                                    </span>
 					                                    </div>
 					                                   </a>
 				                                </div>
@@ -254,10 +262,16 @@ if (<%=isEnabledTutorialForThisTenant%>) {
                		</div>
 
                 <%} else {%>
-                
+                    <script>
+                    query = "<%=query%>";
+                    if (query != null && query != "null" && (query.indexOf(":") == -1)) {
+                        $(".page-header h2").html("Search Results");
+                    }
+                    </script>
+
                 	<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
                             <div class="white-wrapper add-margin-bottom-4x">
-                            	<%if(outputs.isMonetizationEnabled) {%>
+                            	<%if(outputs.isMonetizationEnabled && (api.resultType == null && api.resultType == "API")) {%>
 				                    <div class="ribbon-wrapper">
 				                    <%if (api.monetizationCategory.equalsIgnoreCase("Freemium")) { %>
 				                        <div class="ribbon-yellow">FREEMIUM</div>
@@ -271,56 +285,75 @@ if (<%=isEnabledTutorialForThisTenant%>) {
                                 <div class="thumbnail icon">
                                 	<% if(thumbURL == null) { %>
                                 		<div class="square-element setbgcolor">
-                                		    <% if ( api.status == "PROTOTYPED" || api.status == "prototyped") { %>
+                                		    <%if(api.resultType != null && api.resultType == "Document"){%>
+                                                <span class="document-match-icon"%>"><i class="fw fw-document"></i></span>
+                                            <%} else if ( api.status == "PROTOTYPED" || api.status == "prototyped") { %>
                                                 <span class="api-prototype-icon" title="<%=i18n.localize("Prototyped")%>"><i class="fw fw-prototype fw-lg"></i></span>
                                             <% } %>
 											<div class="api-name-icon"></div>
 											<div style="display: none">
 												<a href="" class="api-name" title="<%=i18n.localize("API Name")%>"><%=api.name%></a>
 											</div>
-										</div> 
+										</div>
                                     <% } else { %>
                                     	<div class="square-element">
                                     		<img class="" src="<%=thumbURL%>" alt="<%=i18n.localize("API Thumbnail")%>">
-                                    		<% if ( api.status == "PROTOTYPED" || api.status == "prototyped") { %>
-                                                <span class="api-prototype-icon" title="<%=i18n.localize("Prototyped")%>"><i class="fw fw-prototype fw-lg"></i></span>
+                                    		<%if(api.resultType != null && api.resultType == "Document"){%>
+                                                <span class="document-match-icon"%>"><i class="fw fw-document"></i></span>
+                                            <%} else if ( api.status == "PROTOTYPED" || api.status == "prototyped") { %>
+                                                <span class="api-prototype-icon" title="<%=i18n.localize("Prototyped")%>"><i class="fw fw-prototype"></i></span>
                                             <% } %>
                                     	</div>
                                     <% } %>
-                                     <a href="<%=path%>" title="<%=i18n.localize("Browse APIs")%>">
-	                                    <div class="after">                                       
+                                     <%if(api.resultType != null && api.resultType == "Document"){%>
+                                        <a href="<%=docPath%>" title="<%=i18n.localize(thumbTooltip)%>">
+                                     <%} else {%>
+                                        <a href="<%=path%>" title="<%=i18n.localize("Browse APIs")%>">
+                                     <%}%>
+	                                    <div class="after">
 	                                    <span class="fw-stack fw-lg">
 	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
 	                                    <i class="fw fw-view fw-stack-1x"></i>
-	                                    </span>          
+	                                    </span>
 	                                    </div>
 	                                   </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4 class="truncate"><a href="<%=path%>" title="<%=i18n.localize("API Name")%>: <%=encode.forHtml(api.name)%>"><%=encode.forHtml(api.name)%></a></h4>
-                                    <h5><a href="<%=path%>" title="<%=i18n.localize("Version")%>"><%=api.version%></a></h5>
-                                    <%if(api.isAdvertiseOnly) {%>
-                                    	<p class="truncate"><%=encode.forHtml(api.apiOwner)%></p>
-                                    <%} else if(api.apiBusinessOwner != null && api.apiBusinessOwner.trim() != "") {%>
-                                    	<p class="truncate"><%=encode.forHtml(api.apiBusinessOwner)%></p>
-                                    <%} else { %>
-                                    	<p class="truncate"><%=encode.forHtml(api.provider)%></p>
-                                    <% } %>
-                                    <% if(isRatingActivated){ %>
-                                        <input type="hidden" class="rating" disabled="disabled" value="<%=encode.forHtmlAttribute(api.rates)%>" />
-                                    <% } %>
+                                    <%if(api.resultType == null || api.resultType == "API"){%>
+                                        <h4 class="truncate"><a href="<%=path%>" title="<%=i18n.localize("API Name")%>: <%=encode.forHtml(api.name)%>"><%=encode.forHtml(api.name)%></a></h4>
+                                        <h5><a href="<%=path%>" title="<%=i18n.localize("Version")%>"><%=api.version%></a></h5>
+                                        <%if(api.isAdvertiseOnly) {%>
+                                            <p class="truncate"><%=encode.forHtml(api.apiOwner)%></p>
+                                        <%} else if(api.apiBusinessOwner != null && api.apiBusinessOwner.trim() != "") {%>
+                                            <p class="truncate"><%=encode.forHtml(api.apiBusinessOwner)%></p>
+                                        <%} else { %>
+                                            <p class="truncate"><%=encode.forHtml(api.provider)%></p>
+                                        <% } %>
+                                        <% if(isRatingActivated){ %>
+                                            <input type="hidden" class="rating" disabled="disabled" value="<%=encode.forHtmlAttribute(api.rates)%>" />
+                                        <% } %>
+                                        <%if (api.resultType != null && api.resultType == "API") {%>
+                                            <p class="no-bottom-margin empty-line">&nbsp<p>
+                                        <%}%>
+                                    <%}else if(api.resultType != null && api.resultType == "Document"){%>
+                                        <h4 id="doc-name" class="truncate"><a href="<%=docPath%>" title="<%=i18n.localize("Document Name")%>: <%=encode.forHtml(api.docName)%>"><%=encode.forHtml(api.docName)%></a></h4>
+                                        <h5 id="document-type-label"><%=api.docSourceType.toLowerCase()%> <%=i18n.localize("Document")%></h5>
+                                        <p class="no-bottom-margin empty-line">&nbsp<p>
+                                        <p class="truncate"><a href="<%=path%>" title="<%=i18n.localize("API Name")%>: <%=encode.forHtml(api.name)%>"><%=encode.forHtml(api.name)%></a></p>
+                                        <p class="no-bottom-margin"><a href="<%=path%>" title="<%=i18n.localize("Version")%>"><%=api.version%></a></p>
+                                    <%}%>
                                 </div>
                             </div>
                         </div>
                 <%}%>
                 <% } %>
 
-            
-            
+
+
             <!-- Pagination Start -->
-            
+
             <%  if(numberOfPages > 1) { %>
-                <div class="col-sm-12">
+                <div class="row paginationFix">
                 <ul class="pagination ">
                     <li <% if(page == 1) { %> class="disabled" <% } %>>
                         <a title="pagination"
@@ -440,7 +473,7 @@ if (<%=isEnabledTutorialForThisTenant%>) {
         </div>
     </div>
 <style>
-	
+
     .api-count-display{
         color:#747474;
         font-size:15px;
@@ -455,7 +488,7 @@ if (<%=isEnabledTutorialForThisTenant%>) {
 
 <script>
 $(window).load(function(){
-	
+
     $(".setbgcolor").generateBgcolor({
         definite:true
     });
@@ -473,7 +506,7 @@ function catchTheFirstAPINameForTutorial() {
       var apiName = $('.page-content').parent().find('.white-wrapper').children().find('.truncate')[0].textContent;
       if (apiName == 'undefined') {
           apiName = $('.page-content').parent().find('.white-wrapper').children().find('.apiNameWrap')[0].textContent;
-          
+
       }
       localStorage.setItem("selectedAPIName", apiName);
     }

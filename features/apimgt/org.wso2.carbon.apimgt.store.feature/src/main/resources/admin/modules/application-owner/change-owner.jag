@@ -1,0 +1,39 @@
+<%
+var log = new Log();
+var changeOwner = function (action, newApplicationOwner, oldApplicationOwner, applicationUuid, applicationName) {
+    try {
+        var provider = jagg.getUser().username;
+        var password = jagg.getUser().password;
+        var gson = com.google.gson.Gson();
+        var APIManagerFactoryPackage = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
+        var APIManagerFactory = APIManagerFactoryPackage.getInstance();
+        var apiConsumer = APIManagerFactory.getAPIConsumer(provider);
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        var subscriber = apiConsumer.getSubscriber(oldApplicationOwner);
+        var subscriberDetails = JSON.parse(gson.toJson(subscriber));
+        var subscriberId = subscriberDetails.id;
+        var application = apiConsumer.getApplicationBySubscriberIdAndName(subscriberId, applicationName );
+        if (application) {
+            var changeOwner = apiConsumer.updateApplicationOwner(newApplicationOwner, application);
+            return {
+                error: false,
+                result: changeOwner
+            };
+        } else {
+            var errorMsg = "Application not found";
+            return {
+                error: true,
+                message: errorMsg
+            };
+        }
+    } catch (ex) {
+        var errorMessage = ex.message.split(":")[1];
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }        
+};
+%>

@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.usage.client;
 
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.collections.map.HashedMap;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.usage.client.bean.APIUsageByApplication;
 import org.wso2.carbon.apimgt.usage.client.bean.ExecutionTimeOfAPIValues;
 import org.wso2.carbon.apimgt.usage.client.bean.PerGeoLocationUsageCount;
 import org.wso2.carbon.apimgt.usage.client.bean.RequestSearchCountBean;
@@ -432,86 +433,28 @@ public abstract class APIUsageStatisticsClient {
         }
     }
 
-    /**
-     * get the list if application of subscribers with Ids
-     *
-     * @param subscriberName subscriber name
-     * @param groupId        group of the subscriber
-     * @return list of string contain the application name
-     * @throws APIMgtUsageQueryServiceClientException
-     */
-    protected List<String> getAppsAndIdsBySubscriber(String subscriberName, String groupId)
+
+    protected List<String> getAppsWithIdBySubscriber(String subscriberName, String groupId)
             throws APIMgtUsageQueryServiceClientException {
 
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet rs = null;
+        apiMgtDAO = ApiMgtDAO.getInstance();
         try {
-            //get the connection
-            connection = APIMgtDBUtil.getConnection();
-
-            //make query
-            String query = "SELECT AM_APPLICATION.APPLICATION_ID, NAME FROM AM_APPLICATION_KEY_MAPPING INNER JOIN AM_APPLICATION ON " +
-                    "AM_APPLICATION_KEY_MAPPING.APPLICATION_ID=AM_APPLICATION.APPLICATION_ID INNER JOIN " +
-                    "AM_SUBSCRIBER" +
-                    " ON AM_APPLICATION.SUBSCRIBER_ID = AM_SUBSCRIBER.SUBSCRIBER_ID WHERE ";
-
-            //check is it shared application
-            boolean sharedApp;
-            if (!StringUtils.isEmpty(groupId)) {
-                query = query + "AM_APPLICATION.GROUP_ID = ? ";
-                sharedApp = true;
-            } else {
-                query = query + "AM_SUBSCRIBER.USER_ID = ? ";
-                sharedApp = false;
+            Application[] applications = apiMgtDAO.getApplications(new Subscriber(subscriberName), groupId);
+            List<String> appIdList = new ArrayList<String>();
+            // iterate over the applications
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving applications for subscriber " + subscriberName);
             }
-
-            statement = connection.prepareStatement(query);
-
-            if (!sharedApp) {
-                statement.setString(1, subscriberName);
-            } else {
-                statement.setString(1, groupId);
+            for (Application application : applications) {
+                subscriberAppsMap.put(Integer.toString(application.getId()), application.getName());
+                appIdList.add(Integer.toString(application.getId()));
+                if (log.isDebugEnabled()) {
+                    log.debug("Application " + application.getName() + " added to list.");
+                }
             }
-
-            //execute
-            rs = statement.executeQuery();
-
-            List<String> applicationIds = new ArrayList<String>();
-
-            //iterate over the results
-            while (rs.next()) {
-                String applicationId = rs.getString("APPLICATION_ID");
-                String appName = rs.getString("NAME");
-                applicationIds.add(applicationId);
-                subscriberAppsMap.put(applicationId, appName);
-            }
-            return applicationIds;
-
-        } catch (Exception e) {
+            return appIdList;
+        } catch (APIManagementException e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                }
-            }
         }
     }
 
@@ -958,4 +901,16 @@ public abstract class APIUsageStatisticsClient {
     }
 
 
+    /**
+     * Method to get the api usage by application information.
+     *
+     * @param apiName : Name of the api.
+     * @param apiVersion : Version of the api.
+     * @param fromDate : Start date of the time span.
+     * @param toDate : End date of the time span.
+     * @param providerName API provider name.
+     * @return List of ApiUsageByApplication objects.
+     */
+    public abstract List<Result<APIUsageByApplication>> getAPIUsageByApplications(String apiName, String apiVersion,
+                    String fromDate, String toDate, String providerName) throws APIMgtUsageQueryServiceClientException;
 }

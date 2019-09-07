@@ -3,7 +3,7 @@ package org.wso2.carbon.apimgt.gateway.throttling.publisher;
 
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.databridge.agent.DataPublisher;
@@ -211,6 +212,16 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 }
             }
             jsonObMap.put(APIThrottleConstants.MESSAGE_SIZE, messageSizeInBytes);
+            if (!StringUtils.isEmpty(authenticationContext.getApplicationName())) {
+                jsonObMap.put(APIThrottleConstants.APPLICATION_NAME, authenticationContext.getApplicationName());
+            }
+            if (!StringUtils.isEmpty(authenticationContext.getProductName()) && !StringUtils
+                    .isEmpty(authenticationContext.getProductProvider())) {
+                jsonObMap.put(APIThrottleConstants.SUBSCRIPTION_TYPE, APIConstants.API_PRODUCT_SUBSCRIPTION_TYPE);
+            } else {
+                jsonObMap.put(APIThrottleConstants.SUBSCRIPTION_TYPE, APIConstants.API_SUBSCRIPTION_TYPE);
+            }
+
         }
 
         Object[] objects = new Object[]{messageContext.getMessageID(),

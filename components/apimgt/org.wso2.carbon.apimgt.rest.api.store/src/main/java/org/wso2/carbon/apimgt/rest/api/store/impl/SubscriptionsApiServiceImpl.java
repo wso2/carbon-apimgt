@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
@@ -33,11 +33,11 @@ import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.SubscriptionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -180,8 +180,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
                 //check whether user is permitted to access the API. If the API does not exist,
                 // this will throw a APIMgtResourceNotFoundException
-                if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(subscriptionDTO.getApiIdentifier(), tenantDomain)) {
-                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, subscriptionDTO.getApiIdentifier(), log);
+                if (!org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils
+                        .isUserAccessAllowedForAPI(subscriptionDTO.getApiIdentifier(), tenantDomain)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API,
+                            subscriptionDTO.getApiIdentifier(), log);
                 }
                 APIIdentifier apiIdentifier = APIMappingUtil
                         .getAPIIdentifierFromApiIdOrUUID(subscriptionDTO.getApiIdentifier(), tenantDomain);
@@ -253,7 +255,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
             //check whether user is permitted to access the API. If the API does not exist, 
             // this will throw a APIMgtResourceNotFoundException
-            if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(body.getApiIdentifier(), tenantDomain)) {
+            if (!org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils
+                    .isUserAccessAllowedForAPI(body.getApiIdentifier(), tenantDomain)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, body.getApiIdentifier(), log);
             }
             APIIdentifier apiIdentifier = APIMappingUtil
@@ -415,8 +418,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @return LastUpdated time for the resource in UNIX time as a {@link String}
      */
     @Override
-    public String subscriptionsSubscriptionIdDeleteGetLastUpdatedTime(String subscriptionId, String ifMatch, String ifUnmodifiedSince) {
-        return RestAPIStoreUtils.getLastUpdatedTimeBySubscriptionId(subscriptionId);
+    public String subscriptionsSubscriptionIdDeleteGetLastUpdatedTime(String subscriptionId, String ifMatch,
+            String ifUnmodifiedSince) {
+        return org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils
+                .getLastUpdatedTimeBySubscriptionId(subscriptionId);
     }
 
     /**
@@ -429,8 +434,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @return LastUpdated time for the resource in UNIX time as a {@link String}
      */
     @Override
-    public String subscriptionsSubscriptionIdGetGetLastUpdatedTime(String subscriptionId, String accept, String ifNoneMatch, String ifModifiedSince) {
-        return RestAPIStoreUtils.getLastUpdatedTimeBySubscriptionId(subscriptionId);
+    public String subscriptionsSubscriptionIdGetGetLastUpdatedTime(String subscriptionId, String accept,
+            String ifNoneMatch, String ifModifiedSince) {
+        return org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils
+                .getLastUpdatedTimeBySubscriptionId(subscriptionId);
     }
 
 }

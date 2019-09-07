@@ -66,6 +66,20 @@ public class APIMWSDLReaderTest {
     }
 
     @Test
+    public void endpointReferenceElementTest() throws Exception {
+        doMockStatics();
+        APIMWSDLReader wsdlReader = new APIMWSDLReader(
+                Thread.currentThread().getContextClassLoader()
+                        .getResource("wsdls/wsdl-with-EndpointReference.wsdl").toExternalForm());
+        wsdlReader.validateBaseURI();
+        OMElement element = wsdlReader.readAndCleanWsdl(getAPIForTesting());
+        Assert.assertFalse("Endpoints are not properly replaced",
+                element.toString().contains("location=\"http://www.webservicex.net/stockquote.asmx\""));
+        Assert.assertTrue("Endpoints does not include GW endpoint",
+                element.toString().contains("https://localhost:8243/abc"));
+    }
+
+    @Test
     public void testReadAndCleanWsdl2() throws Exception {
         doMockStatics();
         
@@ -132,6 +146,26 @@ public class APIMWSDLReaderTest {
         APIMWSDLReader wsdlReader = new APIMWSDLReader("");
         byte[] content = IOUtils.toByteArray(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("wsdls/stockQuote.wsdl"));
+        Definition definition = wsdlReader.getWSDLDefinitionFromByteContent(content, false);
+        try {
+            wsdlReader.setServiceDefinition(definition, api, environmentName, environmentType);
+            wsdlReader.getWSDL(definition);
+            Assert.assertNotNull(definition.getServices());
+        } catch (APIManagementException e) {
+            Assert.fail("Unexpected exception occurred while updating service endpoint address");
+        }
+    }
+
+    @Test
+    public void testSetServiceDefinitionWithInvalidAPIGatewayEndpoints() throws Exception {
+        PowerMockito.mockStatic(APIUtil.class);
+        API api = getAPIForTesting();
+        String environmentName = "Production and Sandbox";
+        String environmentType = "hybrid";
+
+        APIMWSDLReader wsdlReader = new APIMWSDLReader("");
+        byte[] content = IOUtils.toByteArray(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("wsdls/invalidEndpointURL.wsdl"));
         Definition definition = wsdlReader.getWSDLDefinitionFromByteContent(content, false);
         try {
             wsdlReader.setServiceDefinition(definition, api, environmentName, environmentType);

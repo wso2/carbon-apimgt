@@ -26,20 +26,30 @@ var log = new Log();
 
         var uriMatcher = new URIMatcher(callPath);
         var providerVal,apiNameVal,apiVersionVal;
-        providerVal = apiNameVal = apiVersionVal = "";
+        var tenantVal,providerVal,apiNameVal,apiVersionVal;
+        tenantVal = apiNameVal = apiVersionVal = "";
 
-        if (uriMatcher.match("/{providerVal}/{apiNameVal}/{apiVersionVal}")) {
-            providerVal = uriMatcher.elements().providerVal;
+        if (uriMatcher.match("/{tenantVal}/{apiNameVal}/{apiVersionVal}")) {
+            tenantVal = uriMatcher.elements().tenantVal;
             apiNameVal = uriMatcher.elements().apiNameVal;
             apiVersionVal = uriMatcher.elements().apiVersionVal;
-        }else if(request.getParameter("provider") != null) {
-            providerVal =request.getParameter("provider");
+        } else if(request.getParameter("tenant") != null) {
+            tenantVal =request.getParameter("tenant");
             apiNameVal = request.getParameter("name");
             apiVersionVal = request.getParameter("version");
             }else{
             //Invalid URL
             action = "exit";
         }
+
+        if (tenantVal === null) {
+            //If no tenant name provided in the query params, We assume that user is in super tenant
+            tenant = org.wso2.carbon.apimgt.impl.APIConstants.SUPER_TENANT_DOMAIN;
+        }
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        // If can't find the provider , "null" String will be returned
+        providerVal = String(APIUtil.getAPIProviderFromAPINameVersionTenant(apiNameVal, apiVersionVal, tenantVal));
+
 
         if (action == "exit"){
             response.sendError(404);
@@ -60,7 +70,7 @@ var log = new Log();
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
         var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
         if(providerVal.indexOf("@") > -1){
-            providerVal = APIUtil.replaceEmailDomain(providerVal);
+            providerVal = String(APIUtil.replaceEmailDomain(providerVal));
         }
            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerVal));
             if(tenantDomain){
@@ -140,7 +150,7 @@ var log = new Log();
                     var accessURLs = labels[i].accessURLs.split(",");
                     var accessURL = "";
                     for(var j = 0 ; j < accessURLs.length ; j++){
-                        if(accessURLs[j].indexOf("https://") == 0){
+                        if (accessURLs[j].trim().indexOf("https://") == 0) {
                             urlArr[count] = accessURLs[j];
                             break;
                         }
@@ -176,7 +186,7 @@ var log = new Log();
                 var re = /\/$/g
                 host = domains[key].replace(re, "");
                 //remove tenant context
-                basePath = jsonObj.basePath.replace("/t/"+String(tenantDomain),"");
+                basePath = basePath.replace("/t/"+String(tenantDomain),"");
             }
         }
     	else if (urlArr.length > 0 ) { //assign default value to host with first environment address
@@ -185,10 +195,15 @@ var log = new Log();
 
         //handle schems IMPORTANT: order of https and http is important to make sure https is targeted first.
         var schemes = []
-        if(api.transports.search("https") != -1){
+        if (api.transports === "https") {
             schemes.push("https");
         }
-        if(api.transports.search("http") != -1){
+        if (api.transports === "http") {
+            schemes.push("http");
+        }
+
+        if (api.transports === "http,https") {
+            schemes.push("https");
             schemes.push("http");
         }
 

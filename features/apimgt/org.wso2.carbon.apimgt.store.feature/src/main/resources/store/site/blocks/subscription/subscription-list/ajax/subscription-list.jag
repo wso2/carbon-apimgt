@@ -92,7 +92,7 @@ include("/jagg/jagg.jag");
                 response.contentType = "application/json";
             } else {
                 obj = {
-                    error:result.error,
+                    error: true,
                     message:msg.error.authError(action, username)
                 };
             }
@@ -170,7 +170,7 @@ include("/jagg/jagg.jag");
                 response.contentType = "application/json";
             } else {
                 obj = {
-                    error:result.error,
+                    error: true,
                     message:msg.error.authError(action, username)
                 };
             }
@@ -200,6 +200,9 @@ include("/jagg/jagg.jag");
         var groupId = session.get("groupId");
         if (jagg.isMultiGroupEnabled()) {
             groupId = request.getParameter("groupId");
+            if (!groupId) {
+                groupId = "";
+            }
         }
 
         result = mod.getAPISubscriptionsForApplication(username, appname, groupId);
@@ -216,7 +219,7 @@ include("/jagg/jagg.jag");
                 response.contentType = "application/json";
             } else {
                 obj = {
-                    error:result.error,
+                    error: true,
                     message:result.message
                 };
             }
@@ -262,7 +265,7 @@ include("/jagg/jagg.jag");
                 response.contentType = "application/json";
             } else {
                 obj = {
-                    error:result.error,
+                    error: true,
                     message:result.message
                 };
             }
@@ -304,7 +307,7 @@ include("/jagg/jagg.jag");
 
             if (result.error) {
                 obj = {
-                    error:result.error,
+                    error: true,
                     message:msg.error.authError(action, username)
                 };
             } else {
@@ -315,13 +318,42 @@ include("/jagg/jagg.jag");
             }
         } else {
             obj = {
-                error:result.error,
+                error: true,
                 message:msg.error.invalidInput(action, username)
             };
         }
         print(obj);
 
-    } else {
+    } else if(action == "getApplicationKeysByAppId") {
+          if (!user) {
+              if(!ssoEnabled){
+                  print({
+                      error:true,
+                      message:msg.error.loginRequired(action)
+                  });
+              }
+              return;
+          }
+
+          var applicationId = request.getParameter("applicationId");
+          mod = jagg.module("subscription");
+          if (applicationId != null) {
+              result = mod.getApplicationKeysOfApplication(applicationId);
+              if (result.error) {
+                  obj = {
+                      error: true,
+                      message:result.message
+                  };
+              } else {
+                  obj = {
+                      error:false,
+                      apikeys:result.apikeys
+                  }
+              }
+          }
+          print(obj);
+    }
+    else {
         print({
             error:true,
             message:msg.error.invalidAction(action)

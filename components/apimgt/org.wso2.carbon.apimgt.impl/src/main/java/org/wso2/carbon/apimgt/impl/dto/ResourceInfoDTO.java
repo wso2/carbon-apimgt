@@ -20,6 +20,8 @@ import java.util.Set;
 
 public class ResourceInfoDTO implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private String urlPattern;
 
     private Set<VerbInfoDTO> httpVerbs;

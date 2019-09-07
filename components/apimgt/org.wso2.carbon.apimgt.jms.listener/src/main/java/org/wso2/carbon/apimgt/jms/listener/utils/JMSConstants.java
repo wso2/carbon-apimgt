@@ -319,4 +319,8 @@ public class JMSConstants {
     public static final String CONNECTION_STRING_QUEUE = "connectionfactory.QueueConnectionFactory";
     
     public static final String CONNECTION_STRING_TOPIC = "connectionfactory.TopicConnectionFactory";
+
+    //APIM default topic names
+    public static final String TOPIC_THROTTLE_DATA = "throttleData";
+    public static final String TOPIC_TOKEN_REVOCATION = "tokenRevocation";
 }

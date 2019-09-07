@@ -1,0 +1,8 @@
+
+<%
+jagg.initializer("application-owner/get-applications", {
+    preInitialize:function () {
+        jagg.addHeaderJS("application-owner/get-applications", "jagg", "templates/application-owner/get-applications/js/get-applications.js");
+    }
+});
+%>

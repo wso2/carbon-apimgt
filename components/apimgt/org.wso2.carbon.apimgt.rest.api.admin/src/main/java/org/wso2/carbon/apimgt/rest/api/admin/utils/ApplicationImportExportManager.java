@@ -19,21 +19,22 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.utils;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -116,7 +117,7 @@ public class ApplicationImportExportManager {
      * @return a list of APIIdentifiers of the skipped subscriptions
      * @throws APIManagementException if an error occurs while importing and adding subscriptions
      */
-    public List<APIIdentifier> importSubscriptions(Application appDetails, String userId, int appId)
+    public List<APIIdentifier> importSubscriptions(Application appDetails, String userId, int appId, Boolean update)
             throws APIManagementException, UserStoreException {
         List<APIIdentifier> skippedAPIList = new ArrayList<>();
         Set<SubscribedAPI> subscribedAPIs = appDetails.getSubscribedAPIs();
@@ -152,7 +153,14 @@ public class ApplicationImportExportManager {
                     if (isTierAvailable(tier, api) && api.getStatus() != null &&
                             APIConstants.PUBLISHED.equals(api.getStatus())) {
                         apiId.setTier(tier.getName());
-                        apiConsumer.addSubscription(apiId, userId, appId);
+                        // add subscription if update flag is not specified
+                        // it will throw an error if subscriber already exists
+                        if (!update) {
+                            apiConsumer.addSubscription(apiId, userId, appId);
+                        } else if (!apiConsumer.isSubscribed(subscribedAPI.getApiId(), userId)) {
+                            // on update skip subscriptions that already exists
+                            apiConsumer.addSubscription(apiId, userId, appId);
+                        }
                     } else {
                         log.error("Failed to import Subscription as API " + name + "-" + version +
                                 " as one or more tiers may be unavailable or the API may not have been published ");
@@ -187,6 +195,40 @@ public class ApplicationImportExportManager {
                     apiId.getVersion());
             return false;
         }
+    }
+
+    /**
+     * Adds a key to a given Application
+     *
+     * @param username    User for import application
+     * @param application Application used to add key
+     * @param apiKey      API key for adding to application
+     * @throws APIManagementException
+     */
+    public void addApplicationKey(String username, Application application, APIKey apiKey) throws APIManagementException {
+        String[] accessAllowDomainsArray = {"ALL"};
+        JSONObject jsonParamObj = new JSONObject();
+        jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
+        String grantTypes = apiKey.getGrantTypes();
+        if (!StringUtils.isEmpty(grantTypes)) {
+            jsonParamObj.put(APIConstants.JSON_GRANT_TYPES, grantTypes);
+        }
+        /* Read clientId & clientSecret from ApplicationKeyGenerateRequestDTO object.
+           User can provide clientId only or both clientId and clientSecret
+           User cannot provide clientSecret only
+         */
+        if (!StringUtils.isEmpty(apiKey.getConsumerKey())) {
+            jsonParamObj.put(APIConstants.JSON_CLIENT_ID, apiKey.getConsumerKey());
+            if (!StringUtils.isEmpty(apiKey.getConsumerSecret())) {
+                jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, apiKey.getConsumerSecret());
+            }
+        }
+        String jsonParams = jsonParamObj.toString();
+        String tokenScopes = apiKey.getTokenScope();
+        apiConsumer.requestApprovalForApplicationRegistration(
+                username, application.getName(), apiKey.getType(), apiKey.getCallbackUrl(),
+                accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()), tokenScopes, application.getGroupId(),
+                jsonParams);
     }
 }
 

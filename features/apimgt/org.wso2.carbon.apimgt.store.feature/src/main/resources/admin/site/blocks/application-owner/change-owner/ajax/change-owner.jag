@@ -1,0 +1,44 @@
+<%
+include("/jagg/jagg.jag");
+
+(function () {
+    response.contentType = "application/json; charset=UTF-8";
+    var mod, result, obj, permissionResult,
+            action = request.getParameter("action"),
+            site = require("/site/conf/site.json"),
+            msg = require("/site/conf/ui-messages.jag");
+    if (jagg.getUser() == null) {
+        print({
+            error: true,
+            message: 'timeout'
+        });
+    } else if ( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
+        print({
+            error:true,
+            message: msg.error.csrfError
+        });
+    } else if (request.getMethod() == 'POST') {
+        if (action == "changeOwner") {
+            var newApplicationOwner = request.getParameter("newOwner");
+            var oldApplicationOwner = request.getParameter("oldOwner");
+            var applicationUuid = request.getParameter("applicationUuid");
+            var applicationName = request.getParameter("applicationName", "UTF-8");
+            var action = request.getParameter("action");
+            mod = jagg.module("application-owner");
+            var updateCondition = mod.changeOwner(action, newApplicationOwner,oldApplicationOwner, applicationUuid, applicationName);
+            if (updateCondition.error) {
+                obj = {
+                    error: true,
+                    message: updateCondition.message
+                };
+            } else {
+                obj = {
+                    error: false,
+                    response: updateCondition.result
+                }
+            }
+            print(obj);
+        }
+    }
+}());
+%>

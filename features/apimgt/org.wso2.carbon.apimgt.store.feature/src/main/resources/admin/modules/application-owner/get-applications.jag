@@ -1,0 +1,26 @@
+<%
+var log = new Log();
+var getApplicationsByTenantIdWithPagination = function(start, offset, searchOwner, searchApplication, sortColumn, sortOrder) {
+    try {
+        var gson = com.google.gson.Gson();
+        var provider = jagg.getUser().username;
+        var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var tenantId = APIUtil.getTenantId(provider);
+        var apiAdmin = new APIAdminImpl();
+        var application = apiAdmin.getApplicationsByTenantIdWithPagination(tenantId, start, offset, searchOwner, searchApplication, sortColumn, sortOrder);
+        var getApplication = JSON.parse(gson.toJson(application));
+        return {
+            error:false,
+            applications:getApplication
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while retreiving applications of this tenantId ";
+        log.error(ex);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }        
+};
+%>

@@ -13,7 +13,7 @@ include("/jagg/jagg.jag");
         result = mod.getAllTags();
         if (result.error) {
             obj = {
-                error:result.error,
+                error:true,
                 message:msg.error.backendError(action)
             };
         } else {

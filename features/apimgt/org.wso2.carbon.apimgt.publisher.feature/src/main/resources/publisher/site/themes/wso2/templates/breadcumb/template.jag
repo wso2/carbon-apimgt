@@ -27,20 +27,23 @@
                 var statsMappedUrl = jagg.getMappedUrl("/site/pages/statistics.jag")+urlPrefix;
                 var allStatsUrl = jagg.getAbsoluteUrl("/site/pages/all-statistics.jag")+urlPrefix;
                 var allStatsMappedUrl = jagg.getMappedUrl("/site/pages/all-statistics.jag") + urlPrefix;
-	
+
                 var designUrl = jagg.getAbsoluteUrl("/site/pages/design.jag") + urlPrefix;
                 var designMappedUrl = jagg.getMappedUrl("/site/pages/design.jag") + urlPrefix;
                 var implementUrl = jagg.getAbsoluteUrl("/site/pages/implement.jag") + urlPrefix;
                 var implementMappedUrl = jagg.getMappedUrl("/site/pages/implement.jag") + urlPrefix;
                 var manageUrl = jagg.getAbsoluteUrl("/site/pages/manage.jag") + urlPrefix;
                 var manageMappedUrl = jagg.getMappedUrl("/site/pages/manage.jag") + urlPrefix;
-                
+
                 var versionUrl = jagg.getAbsoluteUrl("/site/pages/version.jag") + urlPrefix;
                 var versionMappedUrl = jagg.getMappedUrl("/site/pages/version.jag") + urlPrefix;
-                
+
                 var inlineEditorUrl = jagg.getAbsoluteUrl("/site/pages/inline-editor.jag") + urlPrefix;
                 var inlineEditorMappedUrl = jagg.getMappedUrl("/site/pages/inline-editor.jag") + urlPrefix;
-                
+
+                var markdownEditorUrl = jagg.getAbsoluteUrl("/site/pages/markdown-editor.jag") + urlPrefix;
+                var markdownEditorMappedUrl = jagg.getMappedUrl("/site/pages/markdown-editor.jag") + urlPrefix;
+
                 var docViewerUrl = jagg.getAbsoluteUrl("/site/pages/doc-viewer.jag") + urlPrefix;
                 var docViewerMappedUrl = jagg.getMappedUrl("/site/pages/doc-viewer.jag") + urlPrefix;
 
@@ -79,9 +82,9 @@
 	                    <a href="<%=addMappedUrl%>" title="<%=i18n.localize("Add New API")%>" onclick="jagg.sessionAwareJS({redirect:'<%=addMappedUrl%>',e:event})"><%=i18n.localize("Add New API")%></a>
 	                </li>
                 <% } %>
-                
+
                 <% if(reqUrl.indexOf(designUrl) >= 0 || reqUrl.indexOf(designMappedUrl) >= 0){%>
-                	<% if (request.getParameter("name")) { %>                		
+                	<% if (request.getParameter("name")) { %>
 		                 <%
 		                 	var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
 		                 	var apiUrl = infoMappedUrl + "?" + apiUrlId;
@@ -89,7 +92,7 @@
                 		 <li>
 		                    <a href="<%=listMappedUrl%>" title="<%=i18n.localize("API List")%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("APIs")%></a>
 		                </li>
-	
+
 		                <li>
 		                    <a href="<%=apiUrl%>" title="<%=i18n.localize("Browse API")%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiUrl%>',e:event})"><%= encode.forHtml(request.getParameter("name"))%>-<%= encode.forHtml(request.getParameter("version"))%></a>
 		                </li>
@@ -105,9 +108,9 @@
 		                    <a href="<%=designUrl%>" title="<%=i18n.localize("Design")%>" onclick="jagg.sessionAwareJS({redirect:'<%=designUrl%>',e:event})"><%=i18n.localize("Design")%></a>
 		                </li>
                 	<%} %>
-                
+
                 <%} %>
-                
+
                 <% if(reqUrl.indexOf(implementUrl) >= 0 || reqUrl.indexOf(implementMappedUrl) >= 0){%>
                 	<% if (request.getParameter("name")) { %>
                 		 <%
@@ -132,9 +135,9 @@
 		                    <a href="<%=implementMappedUrl%>" title="<%=i18n.localize("Implement")%>" onclick="jagg.sessionAwareJS({redirect:'<%=implementMappedUrl%>',e:event})"><%=i18n.localize("Implement")%></a>
 		                </li>
                 	<%} %>
-                
+
                 <%} %>
-                
+
                 <% if(reqUrl.indexOf(manageUrl) >= 0 || reqUrl.indexOf(manageMappedUrl) >= 0){%>
                 	<% if (request.getParameter("name")) { %>
                 		 <%
@@ -144,7 +147,7 @@
                 		 <li>
 		                    <a href="<%=listMappedUrl%>" title="<%=i18n.localize("API List")%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("APIs")%></a>
 		                </li>
-	
+
 		                <li>
 		                    <a href="<%=apiUrl%>" title="<%=i18n.localize("Browse API")%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiUrl%>',e:event})"><%= encode.forHtml(request.getParameter("name"))%>-<%= encode.forHtml(request.getParameter("version"))%></a>
 		                </li>
@@ -160,11 +163,11 @@
 		                    <a href="<%=manageMappedUrl%>" title="<%=i18n.localize("Manage")%>" onclick="jagg.sessionAwareJS({redirect:'<%=manageMappedUrl%>',e:event})"><%=i18n.localize("Manage")%></a>
 		                </li>
                 	<%} %>
-                
+
                 <%} %>
-                
+
                 <% if(reqUrl.indexOf(versionUrl) >= 0 || reqUrl.indexOf(versionMappedUrl) >= 0){%>
-                	<% if (request.getParameter("name")) { %>                		
+                	<% if (request.getParameter("name")) { %>
 		                 <%
 		                 	var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
 		                 	var apiUrl = infoMappedUrl + "?" + apiUrlId;
@@ -172,7 +175,7 @@
                 		 <li>
 		                    <a href="<%=listMappedUrl%>" title="<%=i18n.localize("API List")%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("APIs")%></a>
 		                </li>
-	
+
 		                <li>
 		                    <a href="<%=apiUrl%>" title="<%=i18n.localize("Browse API")%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiUrl%>',e:event})"><%= encode.forHtml(request.getParameter("name"))%>-<%= encode.forHtml(request.getParameter("version"))%></a>
 		                </li>
@@ -180,7 +183,7 @@
 		                    <a href="<%=versionMappedUrl%>?<%=apiUrlId%>" title="<%=i18n.localize("Create New Version")%>" onclick="jagg.sessionAwareJS({redirect:'<%=versionMappedUrl%>?<%=apiUrlId%>',e:event})"><%=i18n.localize("Create New Version")%></a>
 		                </li>
 		             <%} %>
-                
+
                 <%} %>
 
                 <% if(reqUrl.indexOf(allStatsUrl)>=0||reqUrl.indexOf(allStatsMappedUrl)>=0){%>
@@ -241,12 +244,12 @@
 	                    <a href="<%=userTmpUrl%>" title="<%=i18n.localize("User")%>" onclick="jagg.sessionAwareJS({redirect:'<%=userTmpUrl%>',e:event})"><%=i18n.localize("user", "User")%> - <%= encode.forHtml(request.getParameter("uname"))%></a>
 	                </li>
                 <% } %>
-           		<% if(reqUrl.indexOf(subsUrl)>=0||reqUrl.indexOf(subsMappedUrl)>=0){%>                
+           		<% if(reqUrl.indexOf(subsUrl)>=0||reqUrl.indexOf(subsMappedUrl)>=0){%>
 	                <li class="active">
 	                    <a href="<%=subsMappedUrl%>" title="<%=i18n.localize("Subscriptions")%>" onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>',e:event})"><%=i18n.localize("subscriptions", "Subscriptions")%></a>
 	                </li>
                 <% } %>
-                <% if(reqUrl.indexOf(inlineEditorUrl)>=0||reqUrl.indexOf(inlineEditorMappedUrl)>=0){%>
+                <% if(reqUrl.indexOf(inlineEditorUrl)>=0||reqUrl.indexOf(inlineEditorMappedUrl)>=0||reqUrl.indexOf(markdownEditorUrl)>=0||reqUrl.indexOf(markdownEditorMappedUrl)>=0){%>
 	                <li>
 	                    <a href="<%=listMappedUrl%>" title="<%=i18n.localize("API List")%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("APIs")%></a>
 	                </li>

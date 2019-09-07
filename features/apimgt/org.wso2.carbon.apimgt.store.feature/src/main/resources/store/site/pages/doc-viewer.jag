@@ -25,7 +25,6 @@ i18n.init(request,localeResourcesBasePath);
                         "left":null,
                         "middle":{
                             "name":"api/documentation/view"
-
                         },
                         "right":null
                     }

@@ -11,6 +11,10 @@ jagg.module("api", {
     getAllPaginatedPublishedAPIs:function () {
         return jagg.require(jagg.getModulesDir() + "api/published.jag").getAllPaginatedPublishedAPIs.apply(this, arguments);
     },
+    getAllPaginatedPublishedLightWeightAPIs:function () {
+         return jagg.require(jagg.getModulesDir() + "api/published.jag").getAllPaginatedPublishedLightWeightAPIs.apply(
+         this, arguments);
+    },
     getPublishedAPIsByProvider:function () {
         return jagg.require(jagg.getModulesDir() + "api/published-by-provider.jag").getPublishedAPIsByProvider.apply(this, arguments);
     },

@@ -9,7 +9,7 @@ var addDocumentation = function (api, doc) {
             log.debug("addNewDocumentation : " + doc.sourceType);
         }
         if (success) {
-            if (doc.sourceType.trim() == "inline") {
+            if (doc.sourceType.trim() == "inline" || doc.sourceType.trim() == "markdown") {
                 return addInlineContent(api, doc);
             }
             else {

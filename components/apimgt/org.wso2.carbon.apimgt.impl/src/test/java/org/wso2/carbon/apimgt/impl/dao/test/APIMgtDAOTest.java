@@ -460,6 +460,8 @@ public class APIMgtDAOTest {
     public void testUpdateSubscriptionPolicy() throws APIManagementException {
         String policyName = "TestUpdateSubPolicy";
         SubscriptionPolicy policy = (SubscriptionPolicy) getSubscriptionPolicy(policyName);
+        policy.setMonetizationPlan(APIConstants.Monetization.FIXED_RATE);
+        policy.setMonetizationPlanProperties(new HashMap<String, String>());
         apiMgtDAO.addSubscriptionPolicy(policy);
         policy = (SubscriptionPolicy) getSubscriptionPolicy(policyName);
         policy.setDescription("Updated subscription description");
@@ -606,6 +608,7 @@ public class APIMgtDAOTest {
         SubscriptionPolicy policy = (SubscriptionPolicy) getSubscriptionPolicy(policyName);
         policy.setRateLimitCount(20);
         policy.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+        policy.setMonetizationPlan(APIConstants.Monetization.FIXED_RATE);
         apiMgtDAO.addSubscriptionPolicy(policy);
 
         APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
@@ -809,6 +812,8 @@ public class APIMgtDAOTest {
         policy.setDescription("Subscription policy Description");
         policy.setTenantId(6);
         policy.setBillingPlan("FREE");
+        policy.setMonetizationPlan(APIConstants.Monetization.FIXED_RATE);
+        policy.setMonetizationPlanProperties(new HashMap<String, String>());
         RequestCountLimit defaultLimit = new RequestCountLimit();
         defaultLimit.setTimeUnit("min");
         defaultLimit.setUnitTime(50);
@@ -946,7 +951,9 @@ public class APIMgtDAOTest {
         subscriber.setSubscribedDate(new Date(System.currentTimeMillis()));
         apiMgtDAO.addSubscriber(subscriber, null);
         Policy applicationPolicy = getApplicationPolicy("testCreateApplicationRegistrationEntry");
-        Policy subscriptionPolicy = getSubscriptionPolicy("testCreateApplicationRegistrationEntry");
+        SubscriptionPolicy subscriptionPolicy = (SubscriptionPolicy) getSubscriptionPolicy
+                ("testCreateApplicationRegistrationEntry");
+        subscriptionPolicy.setMonetizationPlan(APIConstants.Monetization.FIXED_RATE);
         apiMgtDAO.addSubscriptionPolicy((SubscriptionPolicy) subscriptionPolicy);
         applicationPolicy.setTenantId(-1234);
         apiMgtDAO.addApplicationPolicy((ApplicationPolicy) applicationPolicy);
@@ -1050,6 +1057,8 @@ public class APIMgtDAOTest {
         String customAttributes = "{api:abc}";
         subscriptionPolicy.setTenantId(-1234);
         subscriptionPolicy.setCustomAttributes(customAttributes.getBytes());
+        subscriptionPolicy.setMonetizationPlan(APIConstants.Monetization.FIXED_RATE);
+        subscriptionPolicy.setMonetizationPlanProperties(new HashMap<String, String>());
         apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
         SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(subscriptionPolicy.getPolicyName(), -1234);
         SubscriptionPolicy retrievedPolicyFromUUID = apiMgtDAO.getSubscriptionPolicyByUUID(retrievedPolicy.getUUID());
@@ -1244,6 +1253,35 @@ public class APIMgtDAOTest {
         HashMap<String, String> result2 = apiMgtDAO.getURITemplatesPerAPIAsString(apiId);
         Assert.assertTrue(result2.containsKey("/abc::GET::Any::Unlimited::abcd defgh fff"));
    }
+
+    @Test
+    public void testGetProviderByNameVersionTenant() throws APIManagementException, SQLException {
+        final String apiProviderSuperTenant = "testUser1";
+        final String apiProviderWSO2Tenant = "testUser1@wso2.test";
+
+        final String apiName = "testAPI1";
+        final String apiVersion = "1.0.0";
+        try {
+            apiMgtDAO.getAPIProviderByNameAndVersion(apiName, apiVersion, "");
+            assertFalse("Should throw an exception when tenant value is blank string", true);
+        } catch (APIManagementException ex){
+            assertTrue(ex.getMessage().contains("cannot be null when fetching provider"));
+        }
+
+        try {
+            apiMgtDAO.getAPIProviderByNameAndVersion(apiName, apiVersion, null);
+            assertFalse("Should throw an exception when tenant value is null", true);
+        } catch (APIManagementException ex){
+            assertTrue(ex.getMessage().contains("cannot be null when fetching provider"));
+        }
+
+        String apiProviderSuperTenantResult = apiMgtDAO.getAPIProviderByNameAndVersion(apiName, apiVersion, APIConstants.SUPER_TENANT_DOMAIN);
+        Assert.assertEquals(apiProviderSuperTenant, apiProviderSuperTenantResult);
+
+        String apiProviderWSO2TenantResult = apiMgtDAO.getAPIProviderByNameAndVersion(apiName, apiVersion, "wso2.test");
+        Assert.assertEquals(apiProviderWSO2Tenant, apiProviderWSO2TenantResult);
+
+    }
 
     private void deleteSubscriber(int subscriberId) throws APIManagementException {
         Connection conn = null;

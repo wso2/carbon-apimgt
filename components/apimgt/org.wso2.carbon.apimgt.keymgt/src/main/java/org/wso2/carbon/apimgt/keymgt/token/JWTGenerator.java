@@ -26,13 +26,20 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.keymgt.MethodStats;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
+import org.wso2.carbon.identity.application.common.model.ClaimMapping;
+import org.wso2.carbon.identity.oauth.cache.AuthorizationGrantCache;
+import org.wso2.carbon.identity.oauth.cache.AuthorizationGrantCacheEntry;
+import org.wso2.carbon.identity.oauth.cache.AuthorizationGrantCacheKey;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.*;
+
+import static org.apache.commons.collections.MapUtils.isNotEmpty;
 
 @MethodStats
 public class JWTGenerator extends AbstractJWTGenerator {
@@ -45,7 +52,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
             throws APIManagementException {
 
         //generating expiring timestamp
-        long currentTime = System.currentTimeMillis() ;
+        long currentTime = System.currentTimeMillis();
         long expireIn = currentTime + getTTL() * 1000;
 
         String dialect;
@@ -65,8 +72,13 @@ public class JWTGenerator extends AbstractJWTGenerator {
         String userType = validationContext.getValidationInfoDTO().getUserType();
         String applicationTier = validationContext.getValidationInfoDTO().getApplicationTier();
         String enduserTenantId = String.valueOf(APIUtil.getTenantId(endUserName));
-        Map<String, String> appAttributes = getApplicationAttributes(Integer.parseInt(applicationId));
-
+        Application application = getApplicationbyId(Integer.parseInt(applicationId));
+        String uuid = null;
+        Map<String, String> appAttributes = null;
+        if (application != null) {
+            appAttributes = application.getApplicationAttributes();
+            uuid = application.getUUID();
+        }
         Map<String, String> claims = new LinkedHashMap<String, String>(20);
 
         claims.put("iss", API_GATEWAY_ID);
@@ -82,6 +94,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
         claims.put(dialect + "/usertype", userType);
         claims.put(dialect + "/enduser", APIUtil.getUserNameWithTenantSuffix(endUserName));
         claims.put(dialect + "/enduserTenantId", enduserTenantId);
+        claims.put(dialect + "/applicationUUId", uuid);
         try {
             if (appAttributes != null && !appAttributes.isEmpty()) {
                 String stringAppAttributes = new ObjectMapper().writeValueAsString(appAttributes);
@@ -100,32 +113,47 @@ public class JWTGenerator extends AbstractJWTGenerator {
             throws APIManagementException {
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
         if (claimsRetriever != null) {
-            String tenantAwareUserName = validationContext.getValidationInfoDTO().getEndUserName();
+            //fix for https://github.com/wso2/product-apim/issues/4112
+            String accessToken = validationContext.getAccessToken();
+            AuthorizationGrantCacheKey cacheKey = new AuthorizationGrantCacheKey(accessToken);
+
+            Map<String, String> customClaims = getClaimsFromCache(cacheKey);
+            if (isNotEmpty(customClaims)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("The custom claims are retrieved from AuthorizationGrantCache for user : " +
+                            validationContext.getValidationInfoDTO().getEndUserName());
+                }
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Custom claims are not available in the AuthorizationGrantCache. Hence will be " +
+                            "retrieved from the user store for user : " +
+                            validationContext.getValidationInfoDTO().getEndUserName());
+                }
+            }
+            // If claims are not found in AuthorizationGrantCache, they will be retrieved from the userstore.
+            String username = validationContext.getValidationInfoDTO().getEndUserName();
 
             try {
-                int tenantId = APIUtil.getTenantId(tenantAwareUserName);
+                int tenantId = APIUtil.getTenantId(username);
 
                 if (tenantId != -1) {
                     UserStoreManager manager = ServiceReferenceHolder.getInstance().
                             getRealmService().getTenantUserRealm(tenantId).getUserStoreManager();
 
-                    String tenantDomain = MultitenantUtils.getTenantDomain(tenantAwareUserName);
-                    String[] split = tenantAwareUserName.split(tenantDomain);
+                    String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(username);
 
-                    if (split.length != 1) {
-                        log.error("Could not extract username without tenant domain for: " + tenantAwareUserName);
-                        return null;
-                    }
-
-                    String username = split[0].substring(0, split[0].length() - 1);
-
-                    if (manager.isExistingUser(username)) {
-                        return claimsRetriever.getClaims(tenantAwareUserName);
+                    if (manager.isExistingUser(tenantAwareUserName)) {
+                        customClaims.putAll(claimsRetriever.getClaims(username));
+                        return customClaims;
                     } else {
-                        log.warn("User " + tenantAwareUserName + " cannot be found by user store manager");
+                        if (!customClaims.isEmpty()) {
+                            return customClaims;
+                        } else {
+                            log.warn("User " + tenantAwareUserName + " cannot be found by user store manager");
+                        }
                     }
                 } else {
-                    log.error("Tenant cannot be found for username: " + tenantAwareUserName);
+                    log.error("Tenant cannot be found for username: " + username);
                 }
             } catch (APIManagementException e) {
                 log.error("Error while retrieving claims ", e);
@@ -134,5 +162,18 @@ public class JWTGenerator extends AbstractJWTGenerator {
             }
         }
         return null;
+    }
+    protected Map<String, String> getClaimsFromCache(AuthorizationGrantCacheKey cacheKey) {
+
+        AuthorizationGrantCacheEntry cacheEntry = AuthorizationGrantCache.getInstance().getValueFromCacheByToken(cacheKey);
+        if (cacheEntry == null) {
+            return new HashMap<String, String>();
+        }
+        Map<ClaimMapping, String> userAttributes = cacheEntry.getUserAttributes();
+        Map<String, String> userClaims = new HashMap<String, String>();
+        for (Map.Entry<ClaimMapping, String> entry : userAttributes.entrySet()) {
+            userClaims.put(entry.getKey().getRemoteClaim().getClaimUri(), entry.getValue());
+        }
+        return userClaims;
     }
 }

@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 
 import java.util.List;
 
@@ -60,4 +62,72 @@ public interface APIAdmin  {
     Label updateLabel(Label label) throws APIManagementException;
 
     Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException;
+
+    /**
+     * Get the applications of the given tenantId with pagination.
+     *
+     * @param tenantId             tenant Id
+     * @param start                content to start
+     * @param offset               content to limit number of pages
+     * @param searchOwner          content to search applications based on owners
+     * @param searchApplication    content to search applications based on application
+     * @param sortColumn           content to sort column
+     * @param sortOrder            content to sort in a order
+     * @throws APIManagementException if failed to get applications
+     */
+    List<Application> getApplicationsByTenantIdWithPagination(int tenantId, int start , int offset, String searchOwner,
+                                                              String searchApplication, String sortColumn,
+                                                              String sortOrder)
+            throws APIManagementException;
+
+    /**
+     * Get count of the applications for the tenantId.
+     *
+     * @param tenantId             content to get application count based on tenant_id
+     * @param searchOwner          content to search applications based on owners
+     * @param searchApplication    content to search applications based on application
+     * @throws APIManagementException if failed to get application
+     */
+
+    public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication)
+            throws APIManagementException;
+
+    /**
+     * This methods loads the monetization implementation class
+     *
+     * @return monetization implementation class
+     * @throws APIManagementException if failed to load monetization implementation class
+     */
+    Monetization getMonetizationImplClass() throws APIManagementException;
+
+    /**
+     * Get the info about the monetization usage publish job
+     *
+     * @throws APIManagementException if failed to get monetization usage publish info
+     */
+    MonetizationUsagePublishInfo getMonetizationUsagePublishInfo() throws APIManagementException;
+
+    /**
+     * Add the info about the monetization usage publish job
+     *
+     * @throws APIManagementException if failed to update monetization usage publish info
+     */
+    void addMonetizationUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
+            throws APIManagementException;
+
+    /**
+     * Update the info about the monetization usage publish job
+     *
+     * @throws APIManagementException if failed to update monetization usage publish info
+     */
+    void updateMonetizationUsagePublishInfo(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
+            throws APIManagementException;
+
+    /**
+     * The method converts the date into timestamp
+     *
+     * @param date
+     * @return Timestamp in long format
+     */
+    long getTimestamp(String date);
 }

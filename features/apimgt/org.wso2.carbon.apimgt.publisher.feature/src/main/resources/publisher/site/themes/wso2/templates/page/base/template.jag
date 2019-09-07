@@ -56,6 +56,7 @@ var name = request.getParameter("apiName");
 var version = request.getParameter("version")
 var docName = request.getParameter("docName");
 var inlineUrl="inline";
+var markdownUrl="markdown";
 var jsonUrl="json";
 var addUrl="add";
 var editUrl="info";
@@ -63,7 +64,7 @@ var loginUrl = "login";
 var user = jagg.getUser();
 %>
 <body class="sticky-footer <%if(reqUrl.indexOf(loginUrl)>=0) { %>login-bg<%}%>" <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultSummernoteContent('<%= encode.forJavaScript(provider) %>','<%= encode.forJavaScript(name) %>','<%= encode.forJavaScript(version)%>','<%= encode.forJavaScript(docName)%>')"<%}%>
-<% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> <%}%>>
+<% if(reqUrl.indexOf(markdownUrl)>=0){%> onload="loadDefaultMarkdownContent('<%= encode.forJavaScript(provider) %>','<%= encode.forJavaScript(name) %>','<%= encode.forJavaScript(version)%>','<%= encode.forJavaScript(docName)%>')"<%}%><% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> <%}%> >
 
 <% if(user) { %>
 <!-- header -->
@@ -73,7 +74,7 @@ var user = jagg.getUser();
 			<a href="<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>" title="<%=i18n.localize("apiPublisherHomePage")%>"
 				onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/site/pages/index.jag")%><%=urlPrefix%>',e:event})" > <img
 				src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/theme-wso2_1.0/images/logo-inverse.svg"))%>"
-				alt="<%=i18n.localize("WSO2 API Publisher Home")%>" class="logo"><h1><%=i18n.localize("API Publisher")%></h1>
+				alt="<%=i18n.localize("WSO2 API Publisher Home")%>" class="logo"><h1 id="heading1"><%=i18n.localize("API Publisher")%></h1>
 			</a>
 		</div>
 		<%if(user) { %>

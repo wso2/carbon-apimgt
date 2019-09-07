@@ -27,6 +27,9 @@ import java.util.Date;
  */
 @SuppressWarnings("unused")
 public class Documentation implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private String id;
     private DocumentationType type;
     private String name;
@@ -130,7 +133,7 @@ public class Documentation implements Serializable {
     }
 
     public enum DocumentSourceType {
-        INLINE("In line"), URL("URL"), FILE("File");
+        INLINE("In line"), MARKDOWN("Markdown"), URL("URL"), FILE("File");
 
         private String type;
 

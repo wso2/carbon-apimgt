@@ -18,6 +18,11 @@
 
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
+import org.json.simple.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
 
     public DataBridgeThrottlePublisherDTO(ThrottlePublisherDTO throttlePublisherDTO) {
@@ -49,6 +54,61 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
     }
 
     public Object createMetaData() {
-        return new Object[] { getKeyType()};
+        JSONObject obj = new JSONObject();
+        obj.put("keyType", getKeyType());
+        obj.put("correlationID", getCorrelationID());
+        String metaClientType = obj.toJSONString();
+        return new Object[]{metaClientType};
+    }
+
+    /*
+     *  This method validates null for any mandatory field
+     *
+     *  @return Alist of mandatory values which are null
+     *
+     * */
+    public List<String> getMissingMandatoryValues() {
+
+        List<String> missingMandatoryValues = new ArrayList<String>();
+        if (getApiname() == null) {
+            missingMandatoryValues.add("API name");
+        }
+        if (getContext() == null) {
+            missingMandatoryValues.add("API context");
+        }
+        if (getVersion() == null) {
+            missingMandatoryValues.add("API version");
+        }
+        if (getApiCreator() == null) {
+            missingMandatoryValues.add("API creator");
+        }
+        if (getApiCreatorTenantDomain() == null) {
+            missingMandatoryValues.add("API creator tenant domain");
+        }
+        if (getApplicationName() == null) {
+            missingMandatoryValues.add("Application names");
+        }
+        if (getApplicationId() == null) {
+            missingMandatoryValues.add("Application ID");
+        }
+        if (getThrottledOutReason() == null) {
+            missingMandatoryValues.add("Throttle out reason");
+        }
+        if (getHostName() == null) {
+            missingMandatoryValues.add("API host name");
+        }
+        return missingMandatoryValues;
+    }
+
+    @Override
+    public String toString() {
+
+        return "Application name: " + getApplicationName() + ", Application ID: " + getApplicationId() +
+                ", API name: " + getApiname() + ", API version: " + getVersion() +
+                ", API context: " + getContext() + ", API creator: " + getApiCreator() +
+                ", API creator tenant domain: " + getApiCreatorTenantDomain() + ", Username: " + getUsername() +
+                ", Tenant domain: " + getTenantDomain() + ", Host name: " + getHostName() +
+                ", Subscriber: " + getSubscriber() + ", Gateway type: " + getGatewayType() +
+                ", Throttled out reason: " + getThrottledOutReason() + ", Throttled time: " + getThrottledTime();
     }
 }

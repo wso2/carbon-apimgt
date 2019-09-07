@@ -146,7 +146,7 @@ public class SQLConstantOracle extends SQLConstants{
                     "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID " +
                     " IN ($params) AND TENANT = ? ))" +
                     "           OR " +
-                    "    (SUB.USER_ID = ? )" +
+                    "    (LOWER (SUB.USER_ID) = LOWER(?))" +
                     "           OR " +
                     "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
@@ -216,6 +216,31 @@ public class SQLConstantOracle extends SQLConstants{
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) "+
                     " ORDER BY $1 $2 ";
 
+    public static final String GET_APPLICATIONS_BY_TENANT_ID =
+            "select distinct x.* from (" +
+                    "SELECT * FROM (" +
+                    "   SELECT " +
+                    "   rownum r," +
+                    "   APP.APPLICATION_ID as APPLICATION_ID, " +
+                    "   SUB.CREATED_BY AS CREATED_BY, " +
+                    "   APP.GROUP_ID AS GROUP_ID, " +
+                    "   SUB.TENANT_ID AS TENANT_ID, " +
+                    "   SUB.SUBSCRIBER_ID AS SUBSCRIBER_ID, " +
+                    "   APP.UUID AS UUID," +
+                    "   APP.NAME AS NAME" +
+                    " FROM" +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIBER SUB  " +
+                    " WHERE " +
+                    "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    " AND " +
+                    "    SUB.TENANT_ID = ? "+
+                    " And "+
+                    "    ( SUB.CREATED_BY like ?"+
+                    " OR APP.NAME like ?"+
+                    " )) a WHERE r BETWEEN ?+1 AND  r+?"+
+                    " )x "+
+                    " ORDER BY $1 $2 ";
 
 
 }

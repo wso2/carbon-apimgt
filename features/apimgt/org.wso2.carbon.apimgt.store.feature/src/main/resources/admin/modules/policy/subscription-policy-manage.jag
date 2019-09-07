@@ -65,7 +65,7 @@ var getThrottleTierPermissions = function () {
     } catch (e) {
         log.error(e.message);
         return {
-            error:e,
+            error: true,
             message:e.message.split(":")[1]
         };
     }

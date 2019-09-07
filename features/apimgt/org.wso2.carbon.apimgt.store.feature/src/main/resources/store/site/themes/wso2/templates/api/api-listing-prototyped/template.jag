@@ -67,7 +67,7 @@
                             }else{
                                 thumbURL = jagg.getRegistryPath(thumbURL);
                             }
-                            path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + name+ "&version=" + version + "&provider=" +provider+ urlPrefix;
+                            path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + name+ "&version=" + version + urlPrefix;
                             
                         %>
                         <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
@@ -120,7 +120,7 @@
 
             <%
                      if(numberOfPages > 1) { %>
-            <div class="col-sm-12">
+            <div class="row paginationFix">
                 <ul class="pagination ">
                     <li <% if(page == 1) { %> class="disabled" <% } %>>
                         <a title="pagination"

@@ -18,11 +18,12 @@
 
 package org.wso2.carbon.apimgt.keymgt.token;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.Charsets;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -38,6 +39,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.KeyStoreManager;
+import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -45,6 +47,7 @@ import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -67,7 +70,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     public static final String API_GATEWAY_ID = "wso2.org/products/am";
 
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
-
+    
     private static final String NONE = "NONE";
 
     private static volatile long ttl = -1L;
@@ -77,6 +80,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     private String dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
 
     private String signatureAlgorithm = SHA256_WITH_RSA;
+
 
     private static ConcurrentHashMap<Integer, Key> privateKeys = new ConcurrentHashMap<Integer, Key>();
     private static ConcurrentHashMap<Integer, Certificate> publicCerts = new ConcurrentHashMap<Integer, Certificate>();
@@ -132,7 +136,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     public abstract Map<String, String> populateCustomClaims(TokenValidationContext validationContext) throws APIManagementException;
 
     public String encode(byte[] stringToBeEncoded) throws APIManagementException {
-        return Base64Utils.encode(stringToBeEncoded);
+        return java.util.Base64.getUrlEncoder().encodeToString(stringToBeEncoded);
     }
 
     public String generateToken(TokenValidationContext validationContext) throws APIManagementException{
@@ -214,7 +218,18 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                     String claimURI = it.next();
                     String claimVal = standardClaims.get(claimURI);
                     List<String> claimList = new ArrayList<String>();
-                    if (userAttributeSeparator != null && claimVal != null && claimVal.contains(userAttributeSeparator)) {
+                    if (claimVal != null && claimVal.contains("{")) {
+                        ObjectMapper mapper = new ObjectMapper();
+                        try {
+                            Map<String, String> map = mapper.readValue(claimVal, Map.class);
+                            jwtClaimsSetBuilder.claim(claimURI, map);
+                        } catch (IOException e) {
+                            // Exception isn't thrown in order to generate jwt without claim, even if an error is
+                            // occurred during the retrieving claims.
+                            log.error("Error while reading claim values", e);
+                        }
+                    } else if (userAttributeSeparator != null && claimVal != null &&
+                            claimVal.contains(userAttributeSeparator)) {
                         StringTokenizer st = new StringTokenizer(claimVal, userAttributeSeparator);
                         while (st.hasMoreElements()) {
                             String attValue = st.nextElement().toString();
@@ -389,9 +404,9 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 digestValue.update(der);
                 byte[] digestInBytes = digestValue.digest();
                 String publicCertThumbprint = hexify(digestInBytes);
-                Base64  base64 = new Base64(true);
-                String base64UrlEncodedThumbPrint = base64.encodeToString(
-                        publicCertThumbprint.getBytes(Charsets.UTF_8)).trim();
+                String base64UrlEncodedThumbPrint;
+                base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
+                        .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
                 StringBuilder jwtHeader = new StringBuilder();
                 //Sample header
                 //{"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10"}
@@ -492,15 +507,12 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         return null;
     }
 
-    public Map<String, String> getApplicationAttributes(int applicationId) {
-
-        Map<String, String> applicationAttributes;
+    public Application getApplicationbyId(int applicationId) {
         try {
             Application application = dao.getApplicationById(applicationId);
-            applicationAttributes = application.getApplicationAttributes();
-            return applicationAttributes;
+            return application;
         } catch (APIManagementException e) {
-            log.error("Error in retrieving application attributes of application with id: " + applicationId);
+            log.error("Error in retrieving application with the id: " + applicationId);
             return null;
         }
     }

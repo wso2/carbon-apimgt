@@ -22,6 +22,8 @@ import java.util.Objects;
 
 public class Scope implements Serializable{
 
+    private static final long serialVersionUID = 1L;
+
     String key;
     String name;
     String roles;

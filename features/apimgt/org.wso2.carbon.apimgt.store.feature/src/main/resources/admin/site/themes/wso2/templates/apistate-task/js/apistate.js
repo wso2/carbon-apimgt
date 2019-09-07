@@ -20,6 +20,9 @@ $(document).ready(function(){
 
     $('.js_completeBtn').click(function(){
         var btn = $(this);
+        var currentPage = btn.attr('data-page');
+        var length = btn.attr('data-length');
+        var itemsPerPage = btn.attr('data-perPage');
         var taskId=btn.attr("data");
         var iteration=btn.attr("iteration");
         var description=$('#desc'+iteration).text();
@@ -31,7 +34,12 @@ $(document).ready(function(){
                     btn.next().show();
                     btn.next().next().html(json.msg);
                     btn.hide();
-                    window.location.reload();
+                    if (1 != length && 1 == (length % itemsPerPage)) {
+                        var previousPage = currentPage - 1;
+                        window.location = '/admin/site/pages/index.jag?page=' + previousPage + '&task=apistate';
+                    } else {
+                        window.location.reload();
+                    }
                 } else {
                     jagg.showLogin();
                 }

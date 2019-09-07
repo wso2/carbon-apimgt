@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.usage.publisher.dto;
 
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
 
     public DataBridgeFaultPublisherDTO(FaultPublisherDTO faultPublisherDTO){
@@ -54,5 +57,64 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
 
     public Object createMetaData() {
         return new Object[] { getMetaClientType() };
+    }
+
+    /*
+     *  This method validates null for any mandatory field
+     *
+     *  @return Alist of mandatory values which are null
+     *
+     * */
+    public List<String> getMissingMandatoryValues() {
+
+        List<String> missingMandatoryValues = new ArrayList<String>();
+        if (getApplicationConsumerKey() == null) {
+            missingMandatoryValues.add("Application consumer key");
+        }
+        if (getApiName() == null) {
+            missingMandatoryValues.add("API name");
+        }
+        if (getApiVersion() == null) {
+            missingMandatoryValues.add("API version");
+        }
+        if (getApiContext() == null) {
+            missingMandatoryValues.add("API context");
+        }
+        if (getApiResourcePath() == null) {
+            missingMandatoryValues.add("API resource path");
+        }
+        if (getApiMethod() == null) {
+            missingMandatoryValues.add("API method");
+        }
+        if (getApiCreator() == null) {
+            missingMandatoryValues.add("API creator");
+        }
+        if (getApiCreatorTenantDomain() == null) {
+            missingMandatoryValues.add("API creator tenant domain");
+        }
+        if (getApplicationName() == null) {
+            missingMandatoryValues.add("Application anme");
+        }
+        if (getApplicationId() == null) {
+            missingMandatoryValues.add("Application ID");
+        }
+        if (getHostname() == null) {
+            missingMandatoryValues.add("API hostname");
+        }
+        return missingMandatoryValues;
+    }
+
+    @Override
+    public String toString() {
+
+        return "Application consumer key: " + DataPublisherUtil.maskValue(getApplicationConsumerKey()) +
+                ", Application name: " + getApplicationName() + ", Application ID: " + getApplicationId() +
+                ", API name: " + getApiName() + ", API version: " + getApiVersion() +
+                ", API context: " + getApiContext() + ", API resource path: " + getApiResourcePath() +
+                ", API method: " + getApiMethod() + ", API creator: " + getApiCreator() +
+                ", API creator tenant domain: " + getApiCreatorTenantDomain() + ", Username: " + getUsername() +
+                ", User tenant domain: " + getUserTenantDomain() + ", Host name: " + getHostname() +
+                ", Protocol: " + getProtocol() + ", Error code: " + getErrorCode() +
+                ", Error message: " + getErrorMessage() + ", Request timestamp: " + getRequestTimestamp();
     }
 }

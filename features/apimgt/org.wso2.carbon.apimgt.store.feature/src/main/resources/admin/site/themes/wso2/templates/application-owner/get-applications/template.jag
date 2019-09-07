@@ -1,0 +1,34 @@
+<% jagg.template("application-owner/get-applications", function(inputs, outputs, jagg) {
+%>
+<div id="listing">
+    <div class="page-header">
+        <h2><%=i18n.localize("Applications")%></h2>
+       <h2></h2>
+    </div>
+    <div class="content-section shadow-up">
+    <div class="content-data">
+    <table class="table table-responsive table-striped" id="get-app">
+        <thead>
+            <tr>
+                <th class=""><%=i18n.localize("Application Name")%></th>
+                <th class=""><%=i18n.localize("Owner")%></th>
+                <th ></th>
+            </tr>
+        </thead>
+    </table>
+    </div>
+    </div>
+</div>
+<script id="application-actions" type="text/x-handlebars-template" >
+<div class="text-right">
+  <a title="Edit" href="<%=jagg.url("/site/pages/changeOwner.jag?name={{ name }}&owner={{ owner }}&uuid={{ uuid }}&action=changeOwner")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+      <span class="fw-stack">
+          <i class="fw fw-ring fw-stack-2x"></i>
+          <i class="fw fw-edit fw-stack-1x"></i>
+      </span>
+      <span class="hidden-xs"><%=i18n.localize("Edit")%></span>
+  </a>
+  </div>
+</script>
+
+<% }); %>

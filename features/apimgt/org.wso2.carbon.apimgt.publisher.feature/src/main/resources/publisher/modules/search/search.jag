@@ -1,9 +1,9 @@
 <%
-var searchAPIs = function (username,apiName, start, end) {
+var searchAPIs = function (username,query, start, end) {
     var i,api,apis,length, result, log = new Log(),
             provider = jagg.module("manager").getAPIProviderObj();
     try {
-    	result = provider.searchPaginatedAPIs(username, apiName, start, end);
+    	result = provider.searchPaginatedAPIs(username, query, start, end);
         if (log.isDebugEnabled()) {
 	        log.debug("searchAPI : " + stringify(apis));
        	}

@@ -223,21 +223,7 @@
         <!-- Admin password for API key manager. -->
         <Password>${admin.password}</Password>
 
-        <!-- Configurations related to enable thrift support for key-management related communication.
-             If you want to switch back to Web Service Client, change the value of "KeyValidatorClientType" to "WSClient".
-             In a distributed environment;
-             -If you are at the Gateway node, you need to point "ThriftClientPort" value to the "ThriftServerPort" value given at KeyManager node.
-             -If you need to start two API Manager instances in the same machine, you need to give different ports to "ThriftServerPort" value in two nodes.
-             -ThriftServerHost - Allows to configure a hostname for the thrift server. It uses the carbon hostname by default.
-	         -The Gateway uses this parameter to connect to the key validation thrift service. -->
-        <KeyValidatorClientType>ThriftClient</KeyValidatorClientType>
-        <ThriftClientConnectionTimeOut>10000</ThriftClientConnectionTimeOut>
-        <!--ThriftClientPort>10397</ThriftClientPort-->
-
-        <EnableThriftServer>true</EnableThriftServer>
-        <ThriftServerHost>localhost</ThriftServerHost>
-        <!--ThriftServerPort>10397</ThriftServerPort-->
-
+        <KeyValidatorClientType>WSClient</KeyValidatorClientType>
         <!--ConnectionPool>
             <MaxIdle>100</MaxIdle>
             <InitIdleCapacity>50</InitIdleCapacity>
@@ -292,6 +278,18 @@
         <EnableTokenHashMode>false</EnableTokenHashMode>
     </OAuthConfigurations>
 
+    <TokenRevocationNotifiers class="org.wso2.carbon.apimgt.keymgt.events.TokenRevocationNotifierImpl">
+        <RealtimeNotifier>
+            <Property name="ttl">5000</Property>
+        </RealtimeNotifier>
+        <PersistentNotifier>
+            <Property name="hostname">https://localhost:2379/v2/keys/jti/</Property>
+            <Property name="ttl">5000</Property>
+            <Property name="username">root</Property>
+            <Property name="password">root</Property>
+        </PersistentNotifier>
+    </TokenRevocationNotifiers>
+
     <!-- Settings related to managing API access tiers. -->
     <TierManagement>
         <!-- Enable the providers to expose their APIs over the special 'Unlimited' tier which
@@ -302,6 +300,8 @@
     <!-- API Store Related Configurations -->
     <APIStore>
         <!--GroupingExtractor>org.wso2.carbon.apimgt.impl.DefaultGroupIDExtractorImpl</GroupingExtractor-->
+        <!--This is used to define the group Id Extractor for REST API. Default value for this is DefaultGroupIDExtractorImpl-->
+        <!--RESTApiGroupingExtractor>org.wso2.carbon.apimgt.impl.DefaultGroupIDExtractorImpl</RESTApiGroupingExtractor-->
         <!--This property is used to indicate how we do user name comparision for token generation https://wso2.org/jira/browse/APIMANAGER-2225-->
         <CompareCaseInsensitively>true</CompareCaseInsensitively>
         <DisplayURL>false</DisplayURL>
@@ -381,6 +381,8 @@
         <!-- Configure Access-Control-Allow-Headers -->
         <Access-Control-Allow-Headers>authorization,Access-Control-Allow-Origin,Content-Type,SOAPAction</Access-Control-Allow-Headers>
 
+        <!--<Access-Control-Expose-Headers>Cache-Control,Content-Language,Content-Type,Expires,Last-Modified,Pragma</Access-Control-Expose-Headers>-->
+
         <!-- Configure Access-Control-Allow-Credentials -->
         <!-- Specifying this header to true means that the server allows cookies (or other user credentials) to be included on cross-origin requests.
              It is false by default and if you set it to true then make sure that the Access-Control-Allow-Origin header does not contain the wildcard (*) -->
@@ -404,6 +406,18 @@
             </WhiteListedURI>
             <WhiteListedURI>
                 <URI>/api/am/admin/{version}/swagger.json</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/publisher/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/admin/{version}/swagger.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
             <WhiteListedURI>
@@ -444,6 +458,46 @@
             </WhiteListedURI>
             <WhiteListedURI>
                 <URI>/api/am/store/{version}/tiers/{tierLevel}/{tierName}</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/search</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/settings</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/publisher/{version}/settings</URI>
+                <HTTPMethods>GET</HTTPMethods>
+            </WhiteListedURI>
+                        <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/swagger</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/documents</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/documents/{documentId}</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/documents/{documentId}/content</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/thumbnail</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
         </WhiteListedURIs>
@@ -586,6 +640,7 @@
             <Password>${admin.password}</Password>
         </PolicyDeployer>
         <BlockCondition>
+            <ServiceURL>http://${carbon.local.ip}:${mgt.transport.http.port}/throttle/data/v1</ServiceURL>
             <Enabled>true</Enabled>
             <!--InitDelay>300000</InitDelay>
             <Period>3600000</Period-->
@@ -650,6 +705,17 @@
             <SupportedLanguages>java,android</SupportedLanguages>
         </ClientGeneration>
     </SwaggerCodegen>
+
+    <!--Specify the implementation class of the monetization interface-->
+    <Monetization>
+        <MonetizationImpl>org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl</MonetizationImpl>
+        <UsagePublisher>
+            <Granularity>days</Granularity>
+            <!--Number of days to reduce from the current time to get the last publish time of monetization
+            usgae publish job, when there is no record of the last publish time.-->
+            <PublishTimeDurationInDays>1</PublishTimeDurationInDays>
+        </UsagePublisher>
+    </Monetization>
 
     <OpenTracer>
         <RemoteTracer>

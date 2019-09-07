@@ -16,6 +16,18 @@
 
 package org.wso2.carbon.apimgt.keymgt.token;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.MessageDigest;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import org.junit.Assert;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,10 +38,17 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
+import org.wso2.carbon.identity.oauth.cache.AuthorizationGrantCacheKey;
+
+import java.util.HashMap;
+import java.util.Map;
+import org.wso2.carbon.core.util.KeyStoreManager;
 //import org.wso2.carbon.apimgt.impl.utils.TokenGenUtil;
 
-
+@RunWith(PowerMockRunner.class)
+@PrepareForTest( {AbstractJWTGenerator.class,APIUtil.class,KeyStoreManager.class})
 public class TokenGenTest {
     private static final Log log = LogFactory.getLog(TokenGenTest.class);
 
@@ -44,7 +63,12 @@ public class TokenGenTest {
 
     @Test
     public void testAbstractJWTGenerator() throws Exception {
-        JWTGenerator jwtGen = new JWTGenerator();
+        JWTGenerator jwtGen = new JWTGenerator() {
+            @Override
+            protected Map<String, String> getClaimsFromCache(AuthorizationGrantCacheKey cacheKey) {
+                return new HashMap<String, String>();
+            }
+        };
         APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();
 
         TokenValidationContext validationContext = new TokenValidationContext();
@@ -100,7 +124,12 @@ public class TokenGenTest {
     //    TODO: Have to convert to work with new JWT generation and signing
     @Test
     public void testJWTGeneration() throws Exception {
-        JWTGenerator jwtGen = new JWTGenerator();
+        JWTGenerator jwtGen = new JWTGenerator() {
+            @Override
+            public Map<String, String> getClaimsFromCache(AuthorizationGrantCacheKey cacheKey) {
+                return new HashMap<String, String>();
+            }
+        };
         APIKeyValidationInfoDTO dto=new APIKeyValidationInfoDTO();
         dto.setSubscriber("sastry");
         dto.setApplicationName("hubapp");
@@ -171,5 +200,60 @@ public class TokenGenTest {
         //assertNotNull(decodedToken);
 
 
+    }
+
+    @Test
+    public void testJWTx5tEncoding() throws Exception {
+        //Preparing mocks
+        AbstractJWTGenerator jwtGenerator = new JWTGenerator();
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.mockStatic(KeyStoreManager.class);
+        PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
+        KeyStoreManager keyStoreManager = Mockito.mock(KeyStoreManager.class);
+        PowerMockito.when(keyStoreManager.getInstance(Mockito.anyInt())).thenReturn(keyStoreManager);
+        //Read public certificat
+        InputStream inputStream = new FileInputStream("src/test/resources/wso2carbon.jks");
+        KeyStore keystore = KeyStore.getInstance("JKS");
+        char[] pwd = "wso2carbon".toCharArray();
+        keystore.load(inputStream, pwd);
+        Certificate cert = keystore.getCertificate("wso2carbon");
+
+        Mockito.when(keyStoreManager.getDefaultPrimaryCertificate()).thenReturn((X509Certificate) cert);
+        //Generate JWT header using the above certificate
+        String header = jwtGenerator.addCertToHeader("admin@carbon.super");
+
+        //Get the public certificate's thumbprint and base64url encode it
+        byte[] der = cert.getEncoded();
+        MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
+        digestValue.update(der);
+        byte[] digestInBytes = digestValue.digest();
+        String publicCertThumbprint = hexify(digestInBytes);
+        String encodedThumbprint = java.util.Base64.getUrlEncoder()
+                .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
+        //Check if the encoded thumbprint get matched with JWT header's x5t
+        Assert.assertTrue(header.contains(encodedThumbprint));
+    }
+
+
+    /**
+     * Helper method to hexify a byte array.
+     * TODO:need to verify the logic
+     *
+     * @param bytes - The input byte array
+     * @return hexadecimal representation
+     */
+    private String hexify(byte bytes[]) {
+
+        char[] hexDigits = {'0', '1', '2', '3', '4', '5', '6', '7',
+                '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+        StringBuilder buf = new StringBuilder(bytes.length * 2);
+
+        for (byte aByte : bytes) {
+            buf.append(hexDigits[(aByte & 0xf0) >> 4]);
+            buf.append(hexDigits[aByte & 0x0f]);
+        }
+
+        return buf.toString();
     }
 }

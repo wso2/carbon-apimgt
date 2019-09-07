@@ -16,11 +16,13 @@
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
 import org.apache.axis2.Constants;
+import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import javax.ws.rs.core.MediaType;
 import java.util.Map;
 
 public class SynapsePropertiesHandler extends AbstractHandler{
@@ -47,8 +49,12 @@ public class SynapsePropertiesHandler extends AbstractHandler{
         }
         if (isContentTypeNotSet && (httpMethod.equals(Constants.Configuration.HTTP_METHOD_POST) ||
                 httpMethod.equals(Constants.Configuration.HTTP_METHOD_PUT))) {
+            // Need to set both the property and the header for this to work.
+            // Simply setting the header will not work. It'll make synapse assume the ContentType property
+            // to be default 'application/octet-stream'. Which causes a HTTP 415 response
             ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                     setProperty("ContentType", "application/x-www-form-urlencoded");
+            headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
         }
 
         return true;

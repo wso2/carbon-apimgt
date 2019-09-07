@@ -269,7 +269,7 @@ public class APIUtilTest {
 
         Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
 
-        Assert.assertTrue("Cannot find sandbox endpoint", APIUtil.isSandboxEndpointsExists(api));
+        Assert.assertTrue("Cannot find sandbox endpoint", APIUtil.isSandboxEndpointsExists(root.toJSONString()));
     }
 
     @Test
@@ -286,7 +286,7 @@ public class APIUtilTest {
 
         Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
 
-        Assert.assertFalse("Unexpected sandbox endpoint found", APIUtil.isSandboxEndpointsExists(api));
+        Assert.assertFalse("Unexpected sandbox endpoint found", APIUtil.isSandboxEndpointsExists(root.toJSONString()));
     }
 
     @Test
@@ -303,7 +303,7 @@ public class APIUtilTest {
 
         Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
 
-        Assert.assertTrue("Cannot find production endpoint", APIUtil.isProductionEndpointsExists(api));
+        Assert.assertTrue("Cannot find production endpoint", APIUtil.isProductionEndpointsExists(root.toJSONString()));
     }
 
     @Test
@@ -320,7 +320,7 @@ public class APIUtilTest {
 
         Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
 
-        Assert.assertFalse("Unexpected production endpoint found", APIUtil.isProductionEndpointsExists(api));
+        Assert.assertFalse("Unexpected production endpoint found", APIUtil.isProductionEndpointsExists(root.toJSONString()));
     }
 
     @Test
@@ -342,8 +342,8 @@ public class APIUtilTest {
 
         Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
 
-        Assert.assertTrue("Cannot find production endpoint", APIUtil.isProductionEndpointsExists(api));
-        Assert.assertTrue("Cannot find sandbox endpoint", APIUtil.isSandboxEndpointsExists(api));
+        Assert.assertTrue("Cannot find production endpoint", APIUtil.isProductionEndpointsExists(root.toJSONString()));
+        Assert.assertTrue("Cannot find sandbox endpoint", APIUtil.isSandboxEndpointsExists(root.toJSONString()));
     }
 
     @Test
@@ -356,7 +356,7 @@ public class APIUtilTest {
 
         Mockito.when(api.getEndpointConfig()).thenReturn("</SomeXML>");
 
-        Assert.assertFalse("Unexpected production endpoint found", APIUtil.isProductionEndpointsExists(api));
+        Assert.assertFalse("Unexpected production endpoint found", APIUtil.isProductionEndpointsExists("</SomeXML>"));
 
         JSONObject productionEndpoints = new JSONObject();
         productionEndpoints.put("url", "https:\\/\\/localhost:9443\\/am\\/sample\\/pizzashack\\/v1\\/api\\/");
@@ -366,7 +366,7 @@ public class APIUtilTest {
 
         Mockito.when(api.getEndpointConfig()).thenReturn(jsonArray.toJSONString());
 
-        Assert.assertFalse("Unexpected production endpoint found", APIUtil.isProductionEndpointsExists(api));
+        Assert.assertFalse("Unexpected production endpoint found", APIUtil.isProductionEndpointsExists(jsonArray.toJSONString()));
     }
 
     @Test
@@ -379,7 +379,7 @@ public class APIUtilTest {
 
         Mockito.when(api.getEndpointConfig()).thenReturn("</SomeXML>");
 
-        Assert.assertFalse("Unexpected sandbox endpoint found", APIUtil.isSandboxEndpointsExists(api));
+        Assert.assertFalse("Unexpected sandbox endpoint found", APIUtil.isSandboxEndpointsExists("</SomeXML>"));
 
         JSONObject sandboxEndpoints = new JSONObject();
         sandboxEndpoints.put("url", "https:\\/\\/localhost:9443\\/am\\/sample\\/pizzashack\\/v1\\/api\\/");
@@ -389,7 +389,7 @@ public class APIUtilTest {
 
         Mockito.when(api.getEndpointConfig()).thenReturn(jsonArray.toJSONString());
 
-        Assert.assertFalse("Unexpected sandbox endpoint found", APIUtil.isSandboxEndpointsExists(api));
+        Assert.assertFalse("Unexpected sandbox endpoint found", APIUtil.isSandboxEndpointsExists(jsonArray.toJSONString()));
     }
 
     @Test
@@ -1157,6 +1157,37 @@ public class APIUtilTest {
         APIUtil.getDocumentation(genericArtifact, "admin");
         APIUtil.getDocumentation(genericArtifact, "admin");
         APIUtil.getDocumentation(genericArtifact, "admin@wso2.com");
+    }
+
+    @Test
+    public void testVisibilityOfDoc() throws Exception {
+        PowerMockito.mockStatic(CarbonUtils.class);
+        ServerConfiguration serverConfiguration = Mockito.mock(ServerConfiguration.class);
+        Mockito.when(serverConfiguration.getFirstProperty("WebContextRoot")).thenReturn("/abc").thenReturn("/");
+        PowerMockito.when(CarbonUtils.getServerConfiguration()).thenReturn(serverConfiguration);
+        GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_TYPE)).thenReturn(DocumentationType.HOWTO.getType
+                ()).thenReturn(DocumentationType.PUBLIC_FORUM.getType()).thenReturn(DocumentationType.SUPPORT_FORUM
+                .getType()).thenReturn(DocumentationType.API_MESSAGE_FORMAT.getType()).thenReturn(DocumentationType
+                .SAMPLES.getType()).thenReturn(DocumentationType.OTHER.getType());
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_NAME)).thenReturn("Docname");
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_VISIBILITY)).thenReturn(null).thenReturn
+                (Documentation.DocumentVisibility.API_LEVEL.name()).thenReturn(Documentation.DocumentVisibility
+                .PRIVATE.name()).thenReturn(Documentation.DocumentVisibility.OWNER_ONLY.name());
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_TYPE)).thenReturn(Documentation
+                .DocumentSourceType.URL.name()).thenReturn(Documentation.DocumentSourceType.FILE.name());
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_URL)).thenReturn("https://localhost");
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("file://abc");
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_OTHER_TYPE_NAME)).thenReturn("abc");
+
+        Assert.assertEquals(APIUtil.getDocumentation(genericArtifact, "admin@wso2.com").getVisibility().name(),
+                Documentation.DocumentVisibility.API_LEVEL.name());
+        Assert.assertEquals(APIUtil.getDocumentation(genericArtifact, "admin@wso2.com").getVisibility().name(),
+                Documentation.DocumentVisibility.API_LEVEL.name());
+        Assert.assertEquals(APIUtil.getDocumentation(genericArtifact, "admin@wso2.com").getVisibility().name(),
+                Documentation.DocumentVisibility.PRIVATE.name());
+        Assert.assertEquals(APIUtil.getDocumentation(genericArtifact, "admin@wso2.com").getVisibility().name(),
+                Documentation.DocumentVisibility.OWNER_ONLY.name());
     }
 
     @Test
@@ -1996,5 +2027,21 @@ public class APIUtilTest {
         Assert.assertEquals("Test%26123", APIUtil.sanitizeUserRole("Test&123"));
         Assert.assertEquals("Test%26123%26test", APIUtil.sanitizeUserRole("Test&123&test"));
         Assert.assertEquals("Test123", APIUtil.sanitizeUserRole("Test123"));
+    }
+    
+    @Test
+    public void testIsRoleExistForUser() throws Exception {
+        /*
+        String userName = "user1";
+        String[] userRoleList = {"role1", "role2"};
+        PowerMockito.mockStatic(APIUtil.class);
+        Mockito.when(APIUtil.getListOfRoles(userName)).thenReturn(userRoleList);
+        Assert.assertFalse(APIUtil.isRoleExistForUser(userName, "roleA,roleB"));
+        Assert.assertTrue(APIUtil.isRoleExistForUser(userName, "role1,roleB"));
+        //Assert.assertTrue(APIUtil.isRoleExistForUser(userName, "role1,role2"));
+        Assert.assertFalse(APIUtil.isRoleExistForUser(userName, ""));
+        Assert.assertFalse(APIUtil.isRoleExistForUser(userName, null));
+        Assert.assertFalse(APIUtil.isRoleExistForUser(userName, "test"));
+        */
     }
 }

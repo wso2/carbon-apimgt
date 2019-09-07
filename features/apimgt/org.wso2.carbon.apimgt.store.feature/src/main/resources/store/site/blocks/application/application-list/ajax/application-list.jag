@@ -41,7 +41,7 @@ encode = new encode.Encode();
 
         if (result.error) {
             obj = {
-                error:result.error,
+                error: true,
                 message:msg.error.authError(action, username)
             };
         } else {
@@ -111,7 +111,7 @@ encode = new encode.Encode();
 
         if (result.error) {
             obj = {
-                error:result.error,
+                error: true,
                 message:msg.error.authError(action, username)
             };
         } else {
@@ -145,7 +145,7 @@ encode = new encode.Encode();
 
         if (result.error) {
             obj = {
-                error:result.error,
+                error: true,
                 message:msg.error.authError(action, username)
             };
         } else {
@@ -173,7 +173,7 @@ encode = new encode.Encode();
         result = mod.getApplicationById(username, applicationId, groupId);
         if (result.error) {
             obj = {
-                error:result.error,
+                error: true,
                 message:msg.error.authError(action, username)
             };
         } else {

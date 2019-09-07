@@ -17,12 +17,12 @@
     var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
     var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
 
-	var corsJson = JSON.parse(stringify(api.corsConfiguration));
-%>
-<script language="javascript">
-    var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];
-    var AUTH_TYPES = [
-      { "value": "<%=i18n.localize("None")%>", "text":"<%=i18n.localize("None")%>"} ,
+    var corsJson = JSON.parse(stringify(api.corsConfiguration));
+    %>
+    <script language="javascript">
+        var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];
+        var AUTH_TYPES = [
+          { "value": "<%=i18n.localize("None")%>", "text":"<%=i18n.localize("None")%>"} ,
       { "value": "<%=i18n.localize("Application")%>", "text":"<%=i18n.localize("Application")%>"},
       { "value": "<%=i18n.localize("Application User")%>", "text":"<%=i18n.localize("Application User")%>"},
       { "value": "<%=i18n.localize("Application & Application User")%>", "text":"<%=i18n.localize("Application & Application User")%>"}
@@ -45,9 +45,10 @@
     var manage_w_link = jagg.url('/manage?'+apiUrlId);
 
     var manage_wlabel = "";
-    // When only mutual ssl is selected tiers need not be selected.
-    if (api && ((api.apisecurity_oauth2 == "" && api.apisecurity_mutualssl != "") || api.availableTiers != "" || api
-        .availableSubscriptionPolicy != "")) {
+    // When only mutual ssl or basic auth is selected tiers need not be selected.
+    if (api && ((api.apisecurity_oauth2 == "" && api.apisecurity_mutualssl != "") ||
+        (api.apisecurity_oauth2 == "" && api.apisecurity_basic_auth != "") || api.availableTiers != ""
+        || api.availableSubscriptionPolicy != "")) {
         manage_wlabel = "completed";
     } else {
         var manage_w_link = '#';
@@ -199,12 +200,12 @@
 								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3">
 								                            </label>
 							                                <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
-																<label class="checkbox">
-																  <input type="checkbox" id="load_balance" name="load_balance" {{#if load_balance }}checked="checked"{{/if}}>
+																<label class="radio">
+																  <input type="radio" id="load_balance" name="load_balance" {{#if load_balance }}checked="checked"{{/if}}>
 																  <span class="helper">Load Balanced</span>
 																</label>
-							                                    <label class="checkbox">
-																  <input type="checkbox" id="failover" name="failover" {{#if failover }}checked="checked"{{/if}} {{#if failOver }}checked="checked"{{/if}}>
+							                                    <label class="radio">
+																  <input type="radio" id="failover" name="failover" {{#if failover }}checked="checked"{{/if}} {{#if failOver }}checked="checked"{{/if}}>
 																  <span class="helper"><%=i18n.localize("Failover")%></span>
 																</label>
 							                                </div>
@@ -730,10 +731,10 @@
                                                         apiData.apiName = api.name;
                                                         apiData.version = api.version;
                                                         apiData.provider = api.provider;
-                                                        var soapToRestUtils = Packages.org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
+                                                        var soapToRestUtils = Packages.org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
                                                         var isSoapToRestApi = soapToRestUtils.isSOAPToRESTApi(apiData.apiName, apiData.version, apiData.provider);
                                                         if(isSoapToRestApi) {
-                                                            var sequenceUtils = Packages.org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
+                                                            var sequenceUtils = Packages.org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
                                                             var sequenceObj = new Packages.java.lang.String(sequenceUtils.getRestToSoapConvertedSequence(api.name, api.version, api.provider, "in"));
                                                             var sequenceOutObj = new Packages.java.lang.String(sequenceUtils.getRestToSoapConvertedSequence(api.name, api.version, api.provider,"out"));
                                                             var jsonInSeq = JSON.parse(sequenceObj);
@@ -763,7 +764,7 @@
 							                    <div class="form-actions" id="saveButtons">
 							                        <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="saveBtn" ><%=i18n.localize("Save")%></button>
 							                        <input type="hidden" id="hiddenGoToManage" value=""/>
-							                        <button id="go_to_manage" class="btn btn-primary manageSaveButton has-spinner"><%=i18n.localize("Next: Manage")%></button>
+							                        <button type="button" id="go_to_manage" class="btn btn-primary manageSaveButton has-spinner"><%=i18n.localize("Next: Manage")%></button>
 							                    </div>
 							                    </form>
 							                </div>
@@ -791,7 +792,7 @@
 								                <div class="form-group">
 								                    <label class="control-label col-sm-3" for="context"><%=i18n.localize("Implementation Method")%></label>
 								                    <div class="col-sm-8">
-								                        <%if(api.implementation && api.implementation == "INLINE"){
+								                        <%if(api.implementation && (api.implementation == "INLINE")){
 								                                var inline_impl = "checked='checked'";
 								                                var hide_endpoint="hide";
 								                            }else{
@@ -1156,7 +1157,7 @@
                 <td class="resource-method-td resource_expand" data-path="$.paths.{{ path}}.{{ @key }}">
                     <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
                 </td>
-                <td class="resource_expand"><a class="resource-path" title="{{ path }}">{{ path }}</a></td>
+                <td class="resource_expand"><a class="resource-path" title="{{ path }}">{{ displayPath }}</a></td>
                 <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
             </tr>
             <tr><td colspan="3" class="resource_body " data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
@@ -1196,7 +1197,7 @@
         });
 
         $('#goToStore-btn').click(function(){
-            window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>&tenant=<%=tenantDomain%>', '_blank');
+            window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&tenant=<%=tenantDomain%>', '_blank');
             location.href = '<%= jagg.url("/info?"+ apiUrlId ) %>';
         });
 
@@ -1234,38 +1235,38 @@
 
 
 <script id="advance-endpoint-ui-template" type="text/x-handlebars-template">
-    {{#if address }}
-        <fieldset>
-            <legend><%=i18n.localize("Message Content")%></legend>
-            <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
-				<div class="form-group">
-					<label class="control-label col-sm-3" for="format">Format</label>
-					<div class="col-sm-4">
-						<select class="form-control selectpicker" id="format" name="format">
-							<option {{#contains "soap11" format}}selected{{/contains}} value="soap11">SOAP 1.1</option>
+{{#if address }}
+	        <fieldset>
+	            <legend><%=i18n.localize("Message Content")%></legend>
+	            <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+					<div class="form-group">
+						<label class="control-label col-sm-3" for="format">Format</label>
+						<div class="col-sm-4">
+							<select class="form-control selectpicker" id="format" name="format">
+                            <option {{#contains "soap11" format}}selected{{/contains}} value="soap11">SOAP 1.1</option>
 							<option {{#contains "soap12" format}}selected{{/contains}} value="soap12">SOAP 1.2</option>
 							<option {{#contains "POX" format}}selected{{/contains}} value="POX">Plain Old XML (POX)</option>
 							<option {{#contains "REST" format}}selected{{/contains}} value="REST">Representational State Transer (REST)</option>
 							<option {{#contains "GET" format}}selected{{/contains}} value="GET">GET</option>
-							<option value="leave-as-is"><%=i18n.localize("Leave As-Is")%></option>
-						</select>
-						<p class="help-block hide"><%=i18n.localize("Message format for the endpoint.")%></p>
+							<option {{#contains "leave-as-is" format}}selected{{/contains}} value="leave-as-is"><%=i18n.localize("Leave As-Is")%></option>
+							</select>
+							<p class="help-block hide"><%=i18n.localize("Message format for the endpoint.")%></p>
+						</div>
 					</div>
-				</div>
-				<div class="form-group ">
-					<label class="control-label col-sm-3" for="optimize"><%=i18n.localize("Optimize")%></label>
-					<div class="col-sm-4">
-						<select class="form-control selectpicker" id="optimize" name="optimize">
+					<div class="form-group ">
+						<label class="control-label col-sm-3" for="optimize"><%=i18n.localize("Optimize")%></label>
+						<div class="col-sm-4">
+							<select class="form-control selectpicker" id="optimize" name="optimize">
 							<option {{#contains "SWA" optimize}}selected{{/contains}} value="SWA">SWA</option>
 							<option {{#contains "MTOM" optimize}}selected{{/contains}} value="MTOM">MTOM</option>
-							<option value="leave-as-is"><%=i18n.localize("Leave As-Is")%></option>
-						</select>
-						<p class="help-block hide"><%=i18n.localize("Method to optimize the attachments.")%></p>
+							<option {{#contains "leave-as-is" optimize}}selected{{/contains}} value="leave-as-is"><%=i18n.localize("Leave As-Is")%></option>
+							</select>
+							<p class="help-block hide"><%=i18n.localize("Method to optimize the attachments.")%></p>
+						</div>
 					</div>
 				</div>
-			</div>
-        </fieldset>
-    {{/if}}
+	        </fieldset>
+	        {{/if}}
         <fieldset>
             <legend><%=i18n.localize("Endpoint Suspend State")%></legend>
 				<div class="form-group ">
@@ -1371,11 +1372,10 @@
                 <label class="control-label col-sm-3" for="actionSelect">Action</label>
                 <div class="col-sm-6">
                     <select class="form-control selectpicker" id="actionSelect" name="actionSelect">
-                        <option {{#ifCond actionSelect "==" "fault"}}selected{{/ifCond}} value="fault"><%=i18n.localize("Execute fault sequence")%></option>
-                        <option {{#ifCond actionSelect "==" "Never timeout"}}selected{{/ifCond}} value="Never timeout"><%=i18n.localize("Never timeout")%></option>
-                        <option {{#ifCond actionSelect "==" "discard"}}selected{{/ifCond}} value="discard"><%=i18n.localize("Discard message")%></option>
+                        <option {{#contains actionSelect "fault"}}selected{{/contains}} value="fault"><%=i18n.localize("Execute fault sequence")%></option>
+                        <option {{#contains actionSelect "discard"}}selected{{/contains}} value="discard"><%=i18n.localize("Discard message")%></option>
                     </select>
-                    <p class="help-block hide"><%=i18n.localize("The action to be made at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence")%></p>
+                    <p class="help-block hide"><%=i18n.localize("The action to be made at a timeout situation. You can select from: 1) Discard Message 2) Execute Fault Sequence")%></p>
 					<span class="help-block jsonform-errortext" style="display:none;"></span>
                 </div>
             </div>

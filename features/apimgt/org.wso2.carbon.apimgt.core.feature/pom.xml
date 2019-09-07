@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.4.92-SNAPSHOT</version>
+        <version>6.5.85-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -35,8 +35,8 @@
     </description>
     <dependencies>
         <dependency>
-            <groupId>com.h2database.wso2</groupId>
-            <artifactId>h2-database-engine</artifactId>
+            <groupId>org.wso2.orbit.com.h2database</groupId>
+            <artifactId>h2</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.velocity</groupId>
@@ -58,7 +58,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <delete file="src/main/resources/repository/database/WSO2AM_DB.h2.db" />
+                                <delete file="src/main/resources/repository/database/WSO2AM_DB.mv.db" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -121,11 +121,11 @@
                                 <artifactItem>
                                     <groupId>net.sf.saxon</groupId>
                                     <artifactId>Saxon-HE</artifactId>
-                                    <version>9.4</version>
+                                    <version>9.5.1-8</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/external/libs</outputDirectory>
-                                    <destFileName>Saxon-HE-9.4.jar</destFileName>
+                                    <destFileName>Saxon-HE-9.5.1-8.jar</destFileName>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}/external/libs</outputDirectory>
@@ -158,7 +158,9 @@
                                     </includes>
                                 </resource>
                                 <resource>
-                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/resources</directory>
+                                    <directory>
+                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/resources
+                                    </directory>
                                     <includes>
                                         <include>tenant/tenant-conf.json</include>
                                     </includes>

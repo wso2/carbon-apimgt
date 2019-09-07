@@ -1,0 +1,71 @@
+<% jagg.template("application-owner/change-owner", function(inputs, outputs, jagg) { %>
+
+<%
+    var applicationUuid = request.getParameter("uuid");
+    var applicationAction = request.getParameter("action");
+    var applicationName = request.getParameter("name");
+    var applicationOwner = request.getParameter("owner");
+    var nameFieldDisableStatus = "";
+
+    if (applicationUuid) {
+        nameFieldDisableStatus = "readonly";
+        pageTitle = "Change Application Owner";
+    }
+%>
+<div id='tier-add-container'>
+    <div class="page-header">
+        <h2 id="appTopic"><%=pageTitle%></h2>
+    </div>
+
+    <input type="hidden" id="applicationAction" name="applicationAction" value="<%=encode.forHtmlAttribute(String(applicationAction))%>" />
+    <input type="hidden" id="applicationUuid" name="applicationUuid" value="<%=encode.forHtmlAttribute(String(applicationUuid))%>" />
+    <input type="hidden" id="oldOwner" name="oldOwner" value="<%=encode.forHtmlAttribute(String(applicationOwner))%>" />
+    <input type='hidden' id='errorMsgRequired' name='errorMsgRequired' value='<%=i18n.localize("Required")%>'/>
+    <input type='hidden' id='errorMessageInvalid' name='errorMessageInvalid' value='<%=i18n.localize("Invalid")%>'/>
+    <input type='hidden' id='errorMessageIllegalChar' name='errorMessageIllegalChar' value="'<%=i18n.localize('Name contains one or more illegal characters')%>'+'( [ ~ ! & @ # ; % ^ * + = { } | <> \"  , ] ).'"/>
+    <input type='hidden' id='errorMessageSpaces' name='errorMessageSpaces' value='<%=i18n.localize("Name contains spaces")%>'/>
+
+    <form class="form-horizontal" method="POST" id="app_form" enctype="multipart/form-data" action="/admin/site/blocks/application-owner/change-owner/ajax/change-owner.jag">
+        <div class="form-group">
+            <label class="control-label col-sm-3"><%="Application Name"%>  <span class="requiredAstrix">*</span></label>
+             <div class="col-md-9">
+                <input class="form-control" type="text" id="applicationName" name="applicationName" value="<%=encode.forHtmlAttribute(String(applicationName))%>"  <%=encode.forHtml(String(nameFieldDisableStatus))%>/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-3"><%="Owner"%>  <span class="requiredAstrix">*</span></label>
+             <div class="col-md-9">
+                <input class="form-control" type="text" id="applicationOwner" name="applicationOwner" value="<%=encode.forHtmlAttribute(String(applicationOwner))%>" />
+            </div>
+        </div>
+    </form>
+
+    <div class="page-header">
+        <h2><br></h2>
+    </div>
+    <div class="form-group">
+        <button type="button" id="add-tier-btn"  onclick="changeOwner()" name="save-tier-btn" class="btn btn-primary has-spinner">
+            <span class="icon fw-stack">
+                <i class="fw fw-save fw-stack-1x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
+            </span>
+            <%=i18n.localize("Save")%>
+        </button>
+        <button type="button" id="cancel-tier-btn" class="btn btn-secondary">
+            <span class="icon fw-stack">
+                <i class="fw fw-cancel fw-stack-1x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
+            </span>
+            <%=i18n.localize("Cancel")%>
+        </button>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('#cancel-tier-btn').on('click',function(){          
+             location.href = "<%= jagg.url('/applicationOwner')%>";
+        });
+    });
+</script>
+<%});%>

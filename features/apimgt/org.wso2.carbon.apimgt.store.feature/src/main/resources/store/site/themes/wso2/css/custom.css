@@ -558,6 +558,49 @@ a.remove_rating:hover{
     opacity:1;
 }
 
+.document-match-icon {
+    position:center;
+    opacity:1;
+}
+
+.square-element .document-match-icon{
+    display:block;
+    background:rgba(0, 0, 0, 0.3);
+    width:100%;
+    height:100%;
+    position:absolute;
+}
+
+.square-element .document-match-icon i{
+    padding:2px;
+    font-size:6vw;
+    position:absolute;
+    top:30%;
+    left:30%;
+    width:40%;
+    height:40%;
+}
+
+.thumbnail .square-element{
+    background-color:white;
+}
+
+.app-data .no-bottom-margin{
+    margin-bottom: 0px;
+}
+
+.app-data .empty-line{
+    font-size:4px;
+}
+
+.app-data #doc-name a{
+    color:#ce8c2f;
+}
+
+.app-data #document-type-label{
+    text-transform: capitalize;
+}
+
 .square-element .api-prototype-icon{
     display:block;
     background:rgba(0, 0, 0, .3);
@@ -626,4 +669,15 @@ a.remove_rating:hover{
 
 .scope-selection-form div.btn-group.scope_select{
     height: auto;
+}
+
+/* fix for mobile browsers */
+header.header .dropdown-backdrop {
+  display: none;
+}
+
+/* Pagination fix for mobile browsers */
+.paginationFix {
+    clear: both;
+    padding-left: 30px;
 }

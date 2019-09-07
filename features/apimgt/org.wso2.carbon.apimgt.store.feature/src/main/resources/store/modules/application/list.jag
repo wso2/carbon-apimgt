@@ -61,6 +61,31 @@ var getApplicationsByOwner = function (username) {
     }
 };
 
+var getLightWeightApplications = function (username) {
+	var applications,
+		log = new Log(),
+		store = jagg.module("manager").getAPIStoreObj();
+
+	try {
+		var groupId = session.get("groupId");
+		applications = store.getLightWeightApplications(username, groupId);
+		if (log.isDebugEnabled()) {
+			log.debug("getApplications : " + stringify(applications));
+		}
+		return {
+			error: false,
+			applications: applications
+		};
+	} catch (e) {
+		log.error(e.message);
+		return {
+			error: e.message,
+			applications: null
+		};
+
+	}
+};
+
 var getApplicationsWithPagination = function (username,start,offset,search,sortColumn,sortOrder) {
     var applications,
             log = new Log(),

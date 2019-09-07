@@ -47,8 +47,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.PasswordResolver;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -150,9 +152,12 @@ public final class SelfSignUpUtil {
                 config.setAdminUserName(APIUtil.replaceSystemProperty(
                                                       element.getFirstChildWithName(new QName(
                                                                 APIConstants.SELF_SIGN_UP_REG_USERNAME)).getText()));
-                config.setAdminPassword(APIUtil.replaceSystemProperty(
-                                                      element.getFirstChildWithName(new QName(
-                                                                APIConstants.SELF_SIGN_UP_REG_PASSWORD)).getText()));
+
+                String encryptedPassword = element
+                        .getFirstChildWithName(new QName(APIConstants.SELF_SIGN_UP_REG_PASSWORD)).getText();
+                PasswordResolver passwordResolver = PasswordResolverFactory.getInstance();
+                String resovledPassword = passwordResolver.getPassword(encryptedPassword);
+                config.setAdminPassword(APIUtil.replaceSystemProperty(resovledPassword));
                 config.setSignUpEnabled(Boolean.parseBoolean(element.getFirstChildWithName(
                                                       new QName(APIConstants.SELF_SIGN_UP_REG_ENABLED)).getText()));
                 

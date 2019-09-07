@@ -21,7 +21,7 @@ include("/jagg/jagg.jag");
         result = mod.getProviderAPIVersionUsage(provider, apiName);
         if (result.error) {
             obj = {
-                error:result.error,
+                error:true,
                 message:msg.error.backendError(action)
             };
         } else {

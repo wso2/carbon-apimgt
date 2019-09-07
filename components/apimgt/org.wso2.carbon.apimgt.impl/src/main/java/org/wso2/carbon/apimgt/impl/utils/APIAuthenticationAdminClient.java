@@ -98,6 +98,40 @@ public class APIAuthenticationAdminClient {
     }
 
     /**
+     * Removes a given username that is cached on the API Gateway
+     *
+     * @param username - The username to be removed from the gateway cache.
+     * @throws AxisFault - If a communication error occurs.
+     */
+    public void invalidateCachedUsername(String username) throws AxisFault {
+        try {
+            stub.invalidateCachedUsername(username);
+        } catch (RemoteException e) {
+            log.error("RemoteException occurred when calling service method 'invalidateCachedUsername' of " +
+                    "APIAuthenticationService", e);
+            throw new AxisFault("RemoteException occurred when calling service method 'invalidateCachedUsername' of " +
+                    " APIAuthenticationService" , e);
+        }
+    }
+
+    /**
+     * Removes given usernames that is cached on the API Gateway
+     *
+     * @param username_list - The list of usernames to be removed from the gateway cache.
+     * @throws AxisFault - If a communication error occurs.
+     */
+    public void invalidateCachedUsernames(String[] username_list) throws AxisFault {
+        try {
+            stub.invalidateCachedUsernames(username_list);
+        } catch (RemoteException e) {
+            log.error("RemoteException occurred when calling service method 'invalidateCachedUsernames' of " +
+                    "APIAuthenticationService", e);
+            throw new AxisFault("RemoteException occurred when calling service method 'invalidateCachedUsernames' of " +
+                    " APIAuthenticationService" , e);
+        }
+    }
+
+    /**
      * Log into the API gateway or keyMgt as an admin, and initialize the specified client stub using
      * the established authentication session. This method will also set some timeout
      * values and enable session management on the stub so that it can be successfully used

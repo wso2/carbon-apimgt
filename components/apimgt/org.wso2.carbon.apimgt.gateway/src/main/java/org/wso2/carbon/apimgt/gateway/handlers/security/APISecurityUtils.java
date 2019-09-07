@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class APISecurityUtils {
 
-    private static final String API_AUTH_CONTEXT = "__API_AUTH_CONTEXT";
+    public static final String API_AUTH_CONTEXT = "__API_AUTH_CONTEXT";
 
     private static String keyValidatorClientType;
 
@@ -43,9 +43,6 @@ public class APISecurityUtils {
     public static void setAuthenticationContext(MessageContext synCtx,
                                                 AuthenticationContext authContext,
                                                 String contextHeader) {
-        if (synCtx.getProperty(API_AUTH_CONTEXT) != null) {
-            throw new IllegalStateException("Attempting to override existing AuthenticationContext");
-        }
         synCtx.setProperty(API_AUTH_CONTEXT, authContext);
         synCtx.setProperty(APIConstants.API_KEY_TYPE, authContext.getKeyType());
         if (contextHeader != null && authContext.getCallerToken() != null) {

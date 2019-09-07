@@ -55,7 +55,12 @@
         var rateLimitTimeUnit = subscriptionPolicy.getRateLimitTimeUnit() == null ? "sec" : subscriptionPolicy.getRateLimitTimeUnit();
         var stopOnQuotaReach = subscriptionPolicy.isStopOnQuotaReach();
         var tierPlan = subscriptionPolicy.getBillingPlan();
-        
+        var APIConstants = Packages.org.wso2.carbon.apimgt.impl.APIConstants;
+        var monetizationPlan = subscriptionPolicy.getMonetizationPlan();
+        var billingCycle = subscriptionPolicy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE);
+        var fixedPrice = subscriptionPolicy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE);
+        var pricePerRequest = subscriptionPolicy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST);
+        var currencyType = subscriptionPolicy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY);
         var isCustomAttributesExist = false;
         var customAttributes = subscriptionPolicy.getCustomAttributes();
    		var String = Packages.java.lang.String;
@@ -201,7 +206,83 @@
 				            <h2><br></h2>
 				            <p class="lead"><%=i18n.localize("Policy Flags")%></p>
 				        </div>
-				        
+
+				        <div class="form-group">
+                            <label class="col-sm-3 control-label"><%=i18n.localize("Billing Plan")%></label>
+                            <div class="col-sm-3">
+                                <select class="form-control select required" id="tierPlan" name="tierPlan" onchange="populateMonetizationParams()">
+                                    <option value="FREE" selected="true"><%=i18n.localize("Free")%></option>
+                                    <option value="COMMERCIAL"><%=i18n.localize("Commercial")%></option>
+                                </select>
+                            </div>
+                        </div>
+
+				        <div id="monetizationPlanData" class="form-group">
+                            <label class="col-sm-3 control-label"><%=i18n.localize("Monetization Plan")%>
+                                <a class="help_popup" help_data="monetization_plan_help" data-trigger="hover" data-placement="bottom" data-original-title="" title="">
+                                    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                        <i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
+                                        <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px" data-original-title="" title=""></i>
+                                    </span>
+                                </a>
+                                <p id="monetization_plan_help" class="hide"><%=i18n.localize("Monetization category type")%></p>
+                            </label>
+                            <div class="col-sm-3">
+                                <select class="form-control select required" id="monetizationPlan" name="monetizationPlan" onchange="populateMonetizationData()">
+                                    <option value="FixedRate"><%=i18n.localize("Fixed Rate")%></option>
+                                    <option value="DynamicRate"><%=i18n.localize("Dynamic Usage")%></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="fixedRatePlanData" class="form-group">
+                            <label class="col-sm-3 control-label"><%=i18n.localize("Fixed Rate")%>
+                                <a class="help_popup" help_data="fixed_rate_help" data-trigger="hover" data-placement="bottom" data-original-title="" title="">
+                                    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                        <i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
+                                        <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px" data-original-title="" title=""></i>
+                                    </span>
+                                </a>
+                                <p id="fixed_rate_help" class="hide"><%=i18n.localize("Fixed rate for the given billing cycle")%></p>
+                            </label>
+                            <div class="col-sm-3">
+                                <input class="form-control" type="number" min="0" step=".01" id="fixedRate" name="fixedRate"/>
+                            </div>
+                        </div>
+
+                        <div id="dynamicRatePlanData" class="form-group">
+                            <label class="col-sm-3 control-label"><%=i18n.localize("Price Per Request")%>
+                                <a class="help_popup" help_data="price_per_request_help" data-trigger="hover" data-placement="bottom" data-original-title="" title="">
+                                    <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                        <i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
+                                        <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px" data-original-title="" title=""></i>
+                                    </span>
+                                </a>
+                                <p id="price_per_request_help" class="hide"><%=i18n.localize("Price per request for the given billing cycle in the given currency")%></p>
+                            </label>
+                            <div class="col-sm-3">
+                                <input class="form-control" type="number" min="0" step=".01" id="pricePerRequest" name="pricePerRequest"/>
+                            </div>
+                        </div>
+
+                        <div id="currencyData" class="form-group">
+                            <label class="col-sm-3 control-label"><%=i18n.localize("Currency")%></label>
+                            <div class="col-sm-3">
+                                <input class="form-control" type="text" id="currencyType" name="currencyType"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="billingInterval">
+                            <label class="col-sm-3 control-label"><%=i18n.localize("Billing Cycle")%></label>
+                            <div class="col-sm-3">
+                                <select class="form-control select required" id="billingCycle" name="billingCycle">
+                                    <option value="week"><%=i18n.localize("Week")%></option>
+                                    <option value="month"><%=i18n.localize("Month")%></option>
+                                    <option value="year"><%=i18n.localize("Year")%></option>
+                                </select>
+                            </div>
+                        </div>
+
 				        <div class="form-group">
 				        	<label class="control-label col-sm-3"><%=i18n.localize("Stop On Quota Reach")%></label>
 				        	<div class="col-sm-6">
@@ -211,16 +292,7 @@
 	                    		</label>
 				        	</div>
 				        </div>
-				        
-				        <div class="form-group">
-                            <label class="col-sm-3 control-label"><%=i18n.localize("Billing Plan")%></label>
-                            <div class="col-sm-3">
-                                <select class="form-control select required" id="tierPlan" name="tierPlan">
-                                    <option value="FREE" selected="true"><%=i18n.localize("Free")%></option>
-                                    <option value="COMMERCIAL"><%=i18n.localize("Commercial")%></option>
-                                </select>
-                            </div>
-                        </div>
+
                         </div>
 						<div class="page-header">
 				            <h2><br></h2>
@@ -336,10 +408,36 @@
             populateCustomerAttributes(<%=customAttributeJSON%>);
         	}
           $('#tierPlan').val("<%=tierPlan%>");
+          if("<%=tierPlan%>" == "COMMERCIAL"){
+            $('#monetizationPlanData').show();
+            $('#billingInterval').show();
+            $('#billingCycle').val('<%=billingCycle%>');
+            if("<%=monetizationPlan%>" == "FixedRate"){
+                $('#fixedRatePlanData').show();
+                $('#currencyData').show();
+                $('#dynamicRatePlanData').hide();
+                $('#monetizationPlan').val('FixedRate');
+                $('#fixedRate').val("<%=fixedPrice%>");
+                $('#currencyType').val("<%=currencyType%>");
+            } else if("<%=monetizationPlan%>" == "DynamicRate") {
+                $('#dynamicRatePlanData').show();
+                $('#currencyData').show();
+                $('#fixedRatePlanData').hide();
+                $('#monetizationPlan').val('DynamicRate');
+                $('#pricePerRequest').val("<%=pricePerRequest%>");
+                $('#currencyType').val("<%=currencyType%>");
+            }
+          }
         } else {
              $('#stopOnQuotaReach').attr('checked', true);
              $('#description').val('');
         }
+        $('#monetizationPlanData').hide();
+        $('#fixedRatePlanData').hide();
+        $('#dynamicRatePlanData').hide();
+        $('#currencyData').hide();
+        $('#billingInterval').hide();
+        populateMonetizationParams();
         showHideDefaultQuotaPolicy();
 
     });

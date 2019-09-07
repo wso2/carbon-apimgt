@@ -17,10 +17,12 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -33,6 +35,8 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public class API implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private APIIdentifier id;
 
     // uuid of registry artifact
@@ -43,11 +47,15 @@ public class API implements Serializable {
     private String url;
     private String sandboxUrl;
     private String wsdlUrl;
+    private String wsdlArchivePath;
     private String wadlUrl;
+    private String swaggerDefinition;
+    private String graphQLSchema;
     private String type;
     private String context;
     private String contextTemplate;
     private String thumbnailUrl;
+    private ResourceFile wsdlArchive;
     private Set<String> tags = new LinkedHashSet<String>();
     private Set<Documentation> documents = new LinkedHashSet<Documentation>();
     private String httpVerb;
@@ -124,11 +132,31 @@ public class API implements Serializable {
      */
     private JSONObject additionalProperties;
 
+    /**
+     * Properties relevant to monetization of the particular API.
+     */
+    private JSONObject monetizationProperties = new JSONObject();
+
+    /**
+     * Property to indicate the monetization status of the particular API.
+     */
+    private boolean isMonetizationEnabled = false;
+
     // Used for endpoint environments configured with non empty URLs
     private Set<String> environmentList;
 
     // API security at the gateway level.
     private String apiSecurity = "oauth2";
+
+    private static final String NULL_VALUE = "NULL";
+
+    private List<APIEndpoint> endpoints = new ArrayList<APIEndpoint>();
+
+    /**
+     *  Property to hold the enable/disable status of the json schema validation.
+     */
+    private boolean enableSchemaValidation = false;
+
 
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
@@ -154,6 +182,52 @@ public class API implements Serializable {
      */
     public void setAdditionalProperties(JSONObject properties) {
         this.additionalProperties = properties;
+    }
+
+    /**
+     * This method is used to get the properties related to monetization
+     *
+     * @return properties related to monetization
+     */
+    public JSONObject getMonetizationProperties() {
+        return monetizationProperties;
+    }
+
+    /**
+     * This method is used to get the monetization status (true or false)
+     *
+     * @return flag to indicate the monetization status (true or false)
+     */
+    public boolean getMonetizationStatus() {
+        return isMonetizationEnabled;
+    }
+
+    /**
+     * This method is used to set the monetization status (true or false)
+     *
+     * @param monetizationStatus flag to indicate the monetization status (true or false)
+     */
+    public void setMonetizationStatus(boolean monetizationStatus) {
+        this.isMonetizationEnabled = monetizationStatus;
+    }
+
+    /**
+     * This method is used to set the monetization properties
+     *
+     * @param monetizationProperties properties related to monetization
+     */
+    public void setMonetizationProperties(JSONObject monetizationProperties) {
+        this.monetizationProperties = monetizationProperties;
+    }
+
+    /**
+     * This method is used to add monetization property
+     *
+     * @param key   key of the monetization property
+     * @param value applicable value of the monetization property
+     */
+    public void addMonetizationProperty(String key, String value) {
+        monetizationProperties.put(key, value);
     }
 
     /**
@@ -183,6 +257,14 @@ public class API implements Serializable {
      */
     private String accessControl;
     private String accessControlRoles;
+
+    public String getSwaggerDefinition() {return swaggerDefinition; }
+
+    public void setSwaggerDefinition(String swaggerDefinition) { this.swaggerDefinition = swaggerDefinition; }
+
+    public void setGraphQLSchema(String graphQLSchema) { this.graphQLSchema = graphQLSchema; }
+
+    public String getGraphQLSchema() {return graphQLSchema; }
 
     public Set<String> getEnvironments() {
         return environments;
@@ -662,6 +744,10 @@ public class API implements Serializable {
     }
 
     public String getEndpointConfig() {
+        // This is to support new Endpoint object
+        if ((endpointConfig == null || StringUtils.isAllEmpty(endpointConfig) && endpoints.size() > 0)) {
+            return getEndpointConfigString(endpoints);
+        }
         return endpointConfig;
     }
 
@@ -754,10 +840,10 @@ public class API implements Serializable {
     }
 
     public void setType(String type) {
-        if (type != null && type != "") {
-            this.type = type.toUpperCase();
-        } else {
+        if (StringUtils.isEmpty(type) || NULL_VALUE.equalsIgnoreCase(StringUtils.trim(type))) {
             this.type = "HTTP";
+        } else {
+            this.type = StringUtils.trim(type).toUpperCase();
         }
     }
 
@@ -794,6 +880,24 @@ public class API implements Serializable {
     }
 
     /**
+     * Check the status of the Json schema validation property.
+     *
+     * @return Status of the validator property.
+     */
+    public boolean isEnabledSchemaValidation() {
+        return enableSchemaValidation;
+    }
+
+    /**
+     * To set the JSON schema validation enable/disable.
+     *
+     * @param enableSchemaValidation Given Status.
+     */
+    public void setEnableSchemaValidation(boolean enableSchemaValidation) {
+        this.enableSchemaValidation = enableSchemaValidation;
+    }
+
+    /**
      * To set the gateway security for the relevant API.
      *
      * @param apiSecurity Relevant type of gateway security for the API.
@@ -811,5 +915,60 @@ public class API implements Serializable {
      */
     public String getApiSecurity() {
         return apiSecurity;
+    }
+
+    public String getWsdlArchivePath() {
+        return wsdlArchivePath;
+    }
+
+    public void setWsdlArchivePath(String wsdlArchivePath) {
+        this.wsdlArchivePath = wsdlArchivePath;
+    }
+
+    public ResourceFile getWsdlArchive() {
+        return wsdlArchive;
+    }
+
+    public void setWsdlArchive(ResourceFile wsdlArchive) {
+        this.wsdlArchive = wsdlArchive;
+    }
+
+    public List<APIEndpoint> getEndpoint() {
+
+        return endpoints;
+    }
+
+    public void setEndpoint(List<APIEndpoint> endpoint) {
+
+        this.endpoints = endpoint;
+    }
+
+    /**
+     * This method returns endpoints according to the given endpoint config
+     *
+     * @param endpoints list of endpoints given
+     * @return String endpoint config
+     */
+    public static String getEndpointConfigString(List<APIEndpoint> endpoints) {
+        //todo improve this logic to support multiple endpoints such as failorver and load balance
+        StringBuilder sb = new StringBuilder();
+        if (endpoints != null && endpoints.size() > 0) {
+            sb.append("{");
+            for (APIEndpoint endpoint : endpoints) {
+                sb.append("\"")
+                        .append(endpoint.getType())
+                        .append("\": {\"url\":\"")
+                        .append(endpoint.getInline().getEndpointConfig().getList().get(0).getUrl())
+                        .append("\",\"timeout\":\"")
+                        .append(endpoint.getInline().getEndpointConfig().getList().get(0).getTimeout())
+                        .append("\",\"key\":\"")
+                        .append(endpoint.getKey())
+                        .append("\"},");
+            }
+            sb.append("\"endpoint_type\" : \"")
+                    .append(endpoints.get(0).getInline().getType())//assuming all the endpoints are same type
+                    .append("\"}\n");
+        }
+        return sb.toString();
     }
 }

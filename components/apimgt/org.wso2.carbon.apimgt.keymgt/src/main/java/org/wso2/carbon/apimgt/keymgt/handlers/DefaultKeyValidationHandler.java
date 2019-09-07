@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -30,14 +32,21 @@ import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.oauth.common.exception.InvalidOAuthClientException;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
 import org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
+import org.wso2.carbon.identity.oauth.dao.OAuthAppDAO;
+import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
@@ -120,7 +129,6 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         if (validationContext.isCacheHit()) {
             return true;
         }
-
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validationContext.getValidationInfoDTO();
 
         if (apiKeyValidationInfoDTO == null) {
@@ -153,9 +161,20 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             user.setFederatedUser(true);
         }
 
-        AccessTokenDO accessTokenDO = new AccessTokenDO(apiKeyValidationInfoDTO.getConsumerKey(), user, scopes, null,
+        String clientId = apiKeyValidationInfoDTO.getConsumerKey();
+        AccessTokenDO accessTokenDO = new AccessTokenDO(clientId, user, scopes, null,
                 null, apiKeyValidationInfoDTO.getValidityPeriod(), apiKeyValidationInfoDTO.getValidityPeriod(),
                 apiKeyValidationInfoDTO.getType());
+
+        if (apiKeyValidationInfoDTO.getProductName() == null && apiKeyValidationInfoDTO.getProductProvider() == null) {
+            accessTokenDO.setTokenType(accessTokenDO.getTokenType() + ":" + APIConstants.API_SUBSCRIPTION_TYPE);
+        } else {
+            String productName = apiKeyValidationInfoDTO.getProductName();
+            String productProvider = apiKeyValidationInfoDTO.getProductProvider();
+            accessTokenDO.setTokenType(
+                    accessTokenDO.getTokenType() + ":" + APIConstants.API_PRODUCT_SUBSCRIPTION_TYPE + ":" + productName
+                            + ":" + productProvider);
+        }
 
         accessTokenDO.setAccessToken(validationContext.getAccessToken());
 
@@ -165,37 +184,69 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             //Remove the prefix from the version.
             actualVersion = actualVersion.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
         }
-        String resource = validationContext.getContext() + "/" + actualVersion + validationContext
-                .getMatchingResource()
-                + ":" +
-                validationContext.getHttpVerb();
 
-        boolean isValid = false;
+        String resourceList = validationContext.getMatchingResource();
+        List<String> resourceArray = new ArrayList<>(Arrays.asList(resourceList.split(",")));
+        Set<OAuth2ScopeValidator> oAuth2ScopeValidators = new HashSet<> (OAuthServerConfiguration.getInstance().
+                getOAuth2ScopeValidators());
+        //validate scope for filtered validators from db
+        String[] scopeValidators;
+        OAuthAppDO appInfo;
         try {
-            Set<OAuth2ScopeValidator> oAuth2ScopeValidators = OAuthServerConfiguration.getInstance()
-                    .getOAuth2ScopeValidators();
-            //validate scope from all the validators
-            for (OAuth2ScopeValidator validator : oAuth2ScopeValidators) {
-                if (validator != null) {
-                    if (validator.validateScope(accessTokenDO, resource)) {
-                        isValid = true;
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Scope validation failed from "+ validator);
+            OAuthAppDAO oAuthAppDAO = new OAuthAppDAO();
+            appInfo = oAuthAppDAO.getAppInformation(clientId);
+            scopeValidators = appInfo.getScopeValidators();     //get scope validators from the DB
+            boolean isValid = true;
+            List<String> appScopeValidators=  new ArrayList<>(Arrays.asList(scopeValidators));
+            for (String resourceString : resourceArray) {
+                String resource = validationContext.getContext() + "/" + actualVersion + resourceString
+                        + ":" + validationContext.getHttpVerb();
+                for (OAuth2ScopeValidator validator : oAuth2ScopeValidators) {
+                    try {
+                        if (validator != null && ArrayUtils.isEmpty(scopeValidators)) {
+                            // validate scopes for old created applications
+                            isValid = validator.validateScope(accessTokenDO, resource);
+                            oAuth2ScopeValidators.clear();
+                        } else if (validator != null && appScopeValidators.contains(validator.getValidatorName())) {
+                            //take the intersection of defined scope validators and scope validators registered for the apps
+                            log.debug(String.format("Validating scope of token %s using %s", accessTokenDO.getTokenId(),
+                                    validator.getValidatorName()));
+
+                            isValid = validator.validateScope(accessTokenDO, resource);
+                            appScopeValidators.remove(validator.getValidatorName());
                         }
+                        if (!isValid) {
+                            log.debug(String.format("Scope validation failed for %s", validator.getValidatorName()));
+                            apiKeyValidationInfoDTO.setAuthorized(false);
+                            apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
+                            return false;
+                        }
+                    } catch (IdentityOAuth2Exception e) {
+                        log.error("ERROR while validating token scope " + e.getMessage(), e);
                         apiKeyValidationInfoDTO.setAuthorized(false);
                         apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
                         return false;
                     }
                 }
             }
-        } catch (IdentityOAuth2Exception e) {
-            log.error("ERROR while validating token scope " + e.getMessage(), e);
+            if (!appScopeValidators.isEmpty()) {   //if scope validators are not defined in identity.xml but there are
+                // scope validators assigned to an application, throws exception.
+                throw new IdentityOAuth2Exception(String.format("The scope validator(s) %s registered for application %s@%s" +
+                                " is/are not found in the server configuration ", StringUtils.join(appScopeValidators, ", "),
+                        appInfo.getApplicationName(), OAuth2Util.getTenantDomainOfOauthApp(appInfo)));
+            }
+
+        } catch (InvalidOAuthClientException e) {
+            log.error("Could not Fetch Application data for client with clientId = " + clientId);
             apiKeyValidationInfoDTO.setAuthorized(false);
             apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
+            return false;
+        } catch (IdentityOAuth2Exception e) {
+            log.error("Error while retrieving the app information");
+            apiKeyValidationInfoDTO.setAuthorized(false);
+            apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
+            return false;
         }
-
-        return isValid;
+        return true;
     }
-
 }

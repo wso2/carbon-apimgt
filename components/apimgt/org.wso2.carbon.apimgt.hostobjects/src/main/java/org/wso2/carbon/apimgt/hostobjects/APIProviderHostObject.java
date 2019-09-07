@@ -18,11 +18,6 @@
 
 package org.wso2.carbon.apimgt.hostobjects;
 
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.Swagger;
-import io.swagger.models.auth.SecuritySchemeDefinition;
-import io.swagger.parser.SwaggerParser;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -32,9 +27,8 @@ import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
@@ -81,24 +75,28 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.hostobjects.util.Json;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.reportgen.util.ReportGenUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
@@ -108,7 +106,6 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
-import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -119,8 +116,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -134,6 +131,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.cache.Caching;
@@ -153,6 +151,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static final String ALIAS = "alias";
     private static final String END_POINT = "endpoint";
     private static final String TIER = "tier";
+    private static final String validation = "schemaValidation";
 
     private APIProvider apiProvider;
 
@@ -424,6 +423,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String responseCache = (String) apiData.get("responseCache", apiData);
         String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        String swagger =  (String) apiData.get("swagger", apiData);
         JSONObject properties = null;
         if (!StringUtils.isEmpty(additionalProperties)) {
             JSONParser parser = new JSONParser();
@@ -549,9 +549,10 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (!apiData.get("swagger", apiData).equals("null")) {
 
+            SwaggerData swaggerData = new SwaggerData(api);
             //Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates =
-                    definitionFromOpenAPISpec.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
+                    definitionFromOpenAPISpec.getURITemplates(swaggerData, String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
 
             //scopes
@@ -572,10 +573,8 @@ public class APIProviderHostObject extends ScriptableObject {
             } catch (UserStoreException e) {
                 handleException("Error while reading tenant information ", e);
             }
-
-
             //Save swagger in the registry
-            apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
+            apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get(APIConstants.SWAGGER, apiData));
         }
 
         //get new key manager instance for  resource registration.
@@ -702,9 +701,9 @@ public class APIProviderHostObject extends ScriptableObject {
             //Read swagger from the registry todo: check why was this done
             //String swaggerFromRegistry = apiProvider.getOpenAPIDefinition(api.getId());
 
-
+            SwaggerData swaggerData = new SwaggerData(api);
             //Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(api,
+            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(swaggerData,
                     (String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
 
@@ -759,8 +758,13 @@ public class APIProviderHostObject extends ScriptableObject {
                         (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
             }
             OMElement seqElment = APIUtil.buildOMElement(seqFile.getInputStream());
+            String localName = seqElment.getLocalName();
             seqFileName = seqElment.getAttributeValue(new QName("name"));
-            apiProvider.addResourceFile(filePath + seqFileName, inSeq);
+            if ("sequence".equals(localName) && seqFileName != null) {
+                apiProvider.addResourceFile(filePath + seqFileName, inSeq);
+            } else {
+                throw new APIManagementException("Sequence is malformed");
+            }
         } catch (Exception e) {
             String errorMsg = "An Error has occurred while reading custom sequence file";
             log.error(errorMsg, e);
@@ -893,6 +897,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String techOwnerEmail = (String) apiData.get("techOwnerEmail", apiData);
         String bizOwner = (String) apiData.get("bizOwner", apiData);
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
+        String schemaValidation = (String) apiData.get(validation, apiData);
 //        String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
 //        String providerDomain = MultitenantUtils.getTenantDomain(provider);
 
@@ -984,10 +989,44 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setLastUpdated(new Date());
         api.setAccessControl(publisherAccessControl);
         api.setAccessControlRoles(publisherAccessControlRoles);
+        api.setEnableSchemaValidation(validation.equals(schemaValidation));
+
+        FileHostObject wsdlFile;
+        if (apiData.containsKey(APIConstants.WSDL_FILE)) {
+            wsdlFile = (FileHostObject) apiData.get(APIConstants.WSDL_FILE, apiData);
+            if (wsdlFile != null) {
+                if (wsdlFile.getName().endsWith(APIConstants.ZIP_FILE_EXTENSION)) {
+                    WSDLArchiveInfo archiveInfo = APIMWSDLReader
+                            .extractAndValidateWSDLArchive(wsdlFile.getInputStream()).getWsdlArchiveInfo();
+                    if (archiveInfo != null) {
+                        api.setWsdlArchivePath(archiveInfo.getAbsoluteFilePath());
+                        if (log.isDebugEnabled()) {
+                            log.debug("WSDL Archive in the file path " + archiveInfo.getAbsoluteFilePath()
+                                    + "is extracted and validated.");
+                        }
+                        ResourceFile wsdlResource = new ResourceFile(wsdlFile.getInputStream(),
+                                wsdlFile.getJavaScriptFile().getContentType());
+                        api.setWsdlArchive(wsdlResource);
+                        APIFileUtil.deleteDirectory(archiveInfo.getLocation());
+                    }
+                } else if (wsdlFile.getName().endsWith(APIConstants.WSDL_FILE_EXTENSION)) {
+                    String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator
+                            + APIConstants.WSDL_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
+                    String wsdlFilePath = path + File.separator + APIConstants.WSDL_FILE
+                            + APIConstants.WSDL_FILE_EXTENSION;
+                    APIFileUtil.extractSingleWSDLFile(wsdlFile.getInputStream(), path, wsdlFilePath);
+                    api.setWsdlUrl(APIConstants.FILE_URI_PREFIX + wsdlFilePath);
+                } else {
+                    throw new APIManagementException("Invalid file archive file extension: Use .zip format");
+                }
+            }
+        }
+
 
         if (apiData.get("swagger", apiData) != null) {
+            SwaggerData swaggerData = new SwaggerData(api);
             // Read URI Templates from swagger resource and set it to api object
-            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(api,
+            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(swaggerData,
                     (String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
             apiProvider.validateResourceThrottlingTiers(api, tenantDomain);
@@ -1092,10 +1131,6 @@ public class APIProviderHostObject extends ScriptableObject {
         name = (name != null ? name.trim() : null);
         version = (version != null ? version.trim() : null);
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
-        APIProvider apiProvider = getAPIProvider(thisObj);
-        if (apiProvider.getAPI(apiId) == null) {
-            return null;
-        }
 
         boolean isTenantFlowStarted = false;
         String apiJSON = null;
@@ -1106,6 +1141,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
+            APIProvider apiProvider = getAPIProvider(thisObj);
+            if (apiProvider.getAPI(apiId) == null) {
+                return null;
+            }
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             int tenantId;
             UserRegistry registry;
@@ -1113,7 +1152,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
 
-                apiJSON = definitionFromOpenAPISpec.getAPIDefinition(apiId, registry); //apiProvider.getSwagger12Definition(apiId);
+                apiJSON = OASParserUtil.getAPIDefinition(apiId, registry); //apiProvider.getSwagger12Definition(apiId);
             } catch (RegistryException e) {
                 handleException("Error when create registry instance ", e);
             } catch (UserStoreException e) {
@@ -1218,6 +1257,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String publisherAccessControl = (String) apiData.get(APIConstants.ACCESS_CONTROL_PARAMETER, apiData);
         String publisherAccessControlRoles = "";
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        String schemaValidation = (String) apiData.get(validation, apiData);
         JSONObject properties = null;
         if (!StringUtils.isEmpty(additionalProperties)) {
             JSONParser parser = new JSONParser();
@@ -1529,6 +1569,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
         api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
+        api.setEnableSchemaValidation(validation.equals(schemaValidation));
 
         if (!"none".equals(inSequence)) {
             api.setInSequence(inSequence);
@@ -1686,9 +1727,10 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         if (apiData.get("swagger", apiData) != null) {
+            SwaggerData swaggerData = new SwaggerData(api);
             // Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates =
-                    definitionFromOpenAPISpec.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
+                    definitionFromOpenAPISpec.getURITemplates(swaggerData, String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
 
             // scopes
@@ -1715,7 +1757,8 @@ public class APIProviderHostObject extends ScriptableObject {
             apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
             saveAPI(apiProvider, api, null, false);
         } else {
-            String apiDefinitionJSON = definitionFromOpenAPISpec.generateAPIDefinition(api);
+            SwaggerData swaggerData = new SwaggerData(api);
+            String apiDefinitionJSON = definitionFromOpenAPISpec.generateAPIDefinition(swaggerData);
             apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
         }
         return success;
@@ -1804,6 +1847,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
         String visibleRoles = "";
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        String schemaValidation = (String) apiData.get(validation, apiData);
         JSONObject properties = null;
         String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
         Object apiSecurityObject = apiData.get("apiSecurity", apiData);
@@ -2138,6 +2182,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
         api.setAsDefaultVersion("default_version".equals(defaultVersion));
+        api.setEnableSchemaValidation(validation.equals(schemaValidation));
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
             api.setEndpointSecured(true);
@@ -2188,8 +2233,9 @@ public class APIProviderHostObject extends ScriptableObject {
             }
 
             if (apiData.get("swagger", apiData) != null) {
+                SwaggerData swaggerData = new SwaggerData(api);
                 // Read URI Templates from swagger resource and set to api object
-                Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(api,
+                Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(swaggerData,
                         String.valueOf(apiData.get("swagger", apiData)));
                 api.setUriTemplates(uriTemplates);
 
@@ -2216,7 +2262,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
                 saveAPI(apiProvider, api, null, false);
             } else {
-                String apiDefinitionJSON = definitionFromOpenAPISpec.generateAPIDefinition(api);
+                SwaggerData swaggerData = new SwaggerData(api);
+                String apiDefinitionJSON = definitionFromOpenAPISpec.generateAPIDefinition(swaggerData);
                 apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
                 apiProvider.updateAPI(api);
             }
@@ -2898,6 +2945,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 }
                 myn.put(58, myn, checkValue("oauth2", api.getApiSecurity()));
                 myn.put(59, myn, checkValue("mutualssl", api.getApiSecurity()));
+                myn.put(60, myn, checkValue("basic_auth", api.getApiSecurity()));
+                myn.put(61, myn, checkValue("mutualssl_mandatory", api.getApiSecurity()));
+                myn.put(62, myn, checkValue("oauth_basic_auth_mandatory", api.getApiSecurity()));
+                myn.put(63, myn, checkValue(Boolean.toString(api.isEnabledSchemaValidation())));
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                         "-" + version);
@@ -3495,6 +3546,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 fileHostObject = (FileHostObject) args[8];
             } else if (Documentation.DocumentSourceType.INLINE.toString().equalsIgnoreCase(sourceType)) {
                 doc.setSourceType(Documentation.DocumentSourceType.INLINE);
+            } else if (Documentation.DocumentSourceType.MARKDOWN.toString().equalsIgnoreCase(sourceType)) {
+                doc.setSourceType(Documentation.DocumentSourceType.MARKDOWN);
             } else {
                 throw new APIManagementException("Invalid Source Type.");
             }
@@ -3845,6 +3898,65 @@ public class APIProviderHostObject extends ScriptableObject {
                     resultObj.put("totalLength", resultObj, result.get("length"));
                 }
 
+            } else if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                ArrayList<Object> compoundResult = (result.get("apis") != null) ?
+                        (ArrayList<Object>) result.get("apis") : null;
+                NativeArray apiArray = new NativeArray(0);
+
+                if (compoundResult != null && compoundResult.size() > 0) {
+                    Iterator it = compoundResult.iterator();
+                    int i = 0;
+                    while (it.hasNext()) {
+                        Object apiObject = it.next();
+                        if (apiObject instanceof API) {
+                            API api = (API) apiObject;
+                            APIIdentifier apiIdentifier = api.getId();
+                            NativeObject row = new NativeObject();
+                            row.put("name", row, apiIdentifier.getApiName());
+                            row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                            row.put("version", row, apiIdentifier.getVersion());
+                            row.put("status", row, checkValue(api.getStatus()));
+                            row.put("thumb", row, getWebContextRoot(api.getThumbnailUrl()));
+                            row.put("subs", row, apiProvider.getSubscribersOfAPI(api.getId()).size());
+                            if (providerName != null) {
+                                row.put("lastUpdatedDate", row, checkValue(api.getLastUpdated().toString()));
+                            }
+                            row.put("resultType", row, "API");
+                            apiArray.put(i, apiArray, row);
+                            i++;
+                        } else if (apiObject instanceof Map.Entry) {
+                            Map.Entry<Documentation, API> docEntry = (Map.Entry<Documentation, API>) apiObject;
+                            NativeObject row = new NativeObject();
+                            Documentation doc = docEntry.getKey();
+                            API api = docEntry.getValue();
+                            APIIdentifier apiIdentifier = api.getId();
+
+                            row.put("name", row, apiIdentifier.getApiName());
+                            row.put("provider", row,
+                                    APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                            row.put("version", row, apiIdentifier.getVersion());
+                            row.put("status", row, checkValue(api.getStatus()));
+                            row.put("thumb", row, getWebContextRoot(api.getThumbnailUrl()));
+                            row.put("subs", row, apiProvider.getSubscribersOfAPI(api.getId()).size());
+                            if (providerName != null) {
+                                row.put("lastUpdatedDate", row, checkValue(api.getLastUpdated().toString()));
+                            }
+
+                            row.put("docName", row, doc.getName());
+                            row.put("docSummary", row, doc.getSummary());
+                            row.put("docSourceURL", row, doc.getSourceUrl());
+                            row.put("docFilePath", row, doc.getFilePath());
+                            row.put("docSourceType", row, doc.getSourceType().name());
+                            row.put("resultType", row, "Document");
+                            apiArray.put(i, apiArray, row);
+                            i++;
+                        }
+                    }
+                }
+
+                resultObj.put("apis", resultObj, apiArray);
+                resultObj.put("totalLength", resultObj, result.get("length"));
+                resultObj.put("isMore", resultObj, result.get("isMore"));
             } else {
                 Set<API> apiSet = (Set<API>) result.get("apis");
                 //List<API> searchedList = apiProvider.searchAPIs(searchTerm, searchType, providerName);
@@ -4127,6 +4239,9 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             APIProvider apiProvider = getAPIProvider(thisObj);
+            // delete the local Entry for given API ID
+            API api = apiProvider.getAPI(apiId);
+            apiProvider.deleteSwaggerLocalEntry(api);
             apiProvider.deleteAPI(apiId);
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
 
@@ -4195,6 +4310,8 @@ public class APIProviderHostObject extends ScriptableObject {
             } else if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
                 doc.setSourceType(Documentation.DocumentSourceType.FILE);
                 fileHostObject = (FileHostObject) args[8];
+            } else if (Documentation.DocumentSourceType.MARKDOWN.toString().equalsIgnoreCase(sourceType)) {
+                doc.setSourceType(Documentation.DocumentSourceType.MARKDOWN);
             } else {
                 doc.setSourceType(Documentation.DocumentSourceType.INLINE);
             }
@@ -4772,6 +4889,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
+            String username = ((APIProviderHostObject) thisObj).getUsername();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
 
             APIProvider apiProvider = getAPIProvider(thisObj);
 
@@ -5528,90 +5647,6 @@ public class APIProviderHostObject extends ScriptableObject {
         return result;
     }
 
-    private static String addSecurityDef(String spec, Set<Scope> scopes) {
-
-        List<String> scopeNames = new ArrayList<String>();
-        Swagger swagger = new SwaggerParser().parse(spec);
-        Map<String, Path> paths = swagger.getPaths();
-        Operation operation;
-        APIManagerConfiguration config = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String revokeUrl = config.getFirstProperty(APIConstants.REVOKE_API_URL);
-        String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;
-        tokenUrl = tokenUrl != null ? tokenUrl.replace("'", "") : null;
-
-        OAuthAdminService oAuthAdminService = new OAuthAdminService();
-        String[] allowedGrantTypesArr = oAuthAdminService.getAllowedGrantTypes();
-        String allowedGrantTypes = StringUtils.join(allowedGrantTypesArr, ",");
-
-        APISecuritySchemeDefinition apiSecuritySchemeDefinition = new APISecuritySchemeDefinition();
-        apiSecuritySchemeDefinition.setType("oauth2");
-        apiSecuritySchemeDefinition.setAuthorizationUrl(tokenUrl);
-
-        apiSecuritySchemeDefinition.setFlow(allowedGrantTypes);
-
-        for (Scope s : scopes) {
-            scopeNames.add(s.getName());
-            apiSecuritySchemeDefinition.setScopes(s.getName(), s.getDescription());
-        }
-
-        String securityName = swagger.getInfo().getTitle().toLowerCase() + "_oauth";
-
-        for (Map.Entry<String, Path> entry : paths.entrySet()) {
-            operation = paths.get(entry.getKey()).getGet();
-            if (operation != null) {
-                paths.get(entry.getKey()).getGet().setSecurity(null);
-                paths.get(entry.getKey()).getGet().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getPatch();
-            if (operation != null) {
-                paths.get(entry.getKey()).getPatch().setSecurity(null);
-                paths.get(entry.getKey()).getPatch().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getDelete();
-            if (operation != null) {
-                paths.get(entry.getKey()).getDelete().setSecurity(null);
-                paths.get(entry.getKey()).getDelete().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getHead();
-            if (operation != null) {
-                paths.get(entry.getKey()).getHead().setSecurity(null);
-                paths.get(entry.getKey()).getHead().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getPost();
-            if (operation != null) {
-                paths.get(entry.getKey()).getPost().setSecurity(null);
-                paths.get(entry.getKey()).getPost().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getPut();
-            if (operation != null) {
-                paths.get(entry.getKey()).getPut().setSecurity(null);
-                paths.get(entry.getKey()).getPut().addSecurity(securityName, scopeNames);
-            }
-
-            operation = paths.get(entry.getKey()).getOptions();
-            if (operation != null) {
-                paths.get(entry.getKey()).getOptions().setSecurity(null);
-                paths.get(entry.getKey()).getOptions().addSecurity(securityName, scopeNames);
-            }
-
-        }
-
-        Map<String, SecuritySchemeDefinition> securityDefMap = new HashMap<String, SecuritySchemeDefinition>();
-
-        securityDefMap.put(securityName, apiSecuritySchemeDefinition);
-
-        swagger.setSecurityDefinitions(securityDefMap);
-
-        swagger.setPaths(paths);
-        return Json.pretty(swagger);
-    }
-    
     /**
      * Download microgateway usage report
      *

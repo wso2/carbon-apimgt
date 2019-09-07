@@ -17,7 +17,7 @@
 */
 package org.wso2.carbon.apimgt.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.Configuration;
@@ -66,7 +66,12 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
         String username = "";
         String organization = "";
         try {
-            String claim = "http://wso2.org/claims/organization";
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            String claim = config.getFirstProperty(APIConstants.API_STORE_GROUP_EXTRACTOR_CLAIM_URI);
+            if (StringUtils.isBlank(claim)) {
+                claim = "http://wso2.org/claims/organization";
+            }
             samlResponseStream = getByteArrayInputStream(loginResponse);
             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
             builderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -242,7 +247,12 @@ public class SAMLGroupIDExtractorImpl implements NewPostLoginExecutor {
         String[] groupIdArray = null;
 
         try {
-            String claim = "http://wso2.org/claims/organization";
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            String claim = config.getFirstProperty(APIConstants.API_STORE_GROUP_EXTRACTOR_CLAIM_URI);
+            if (StringUtils.isBlank(claim)) {
+                claim = "http://wso2.org/claims/organization";
+            }
             samlResponseStream = getByteArrayInputStream(loginResponse);
             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
             builderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);

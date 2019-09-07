@@ -1,7 +1,7 @@
 <APIManager>
     <DataSourceName>java:/comp/env/jdbc/WSO2AM_DB</DataSourceName>
     <Database>
-        <URL>jdbc:h2:target/repository/database/WSO2AM_DB;AUTO_SERVER=TRUE</URL>
+        <URL>jdbc:h2:./target/repository/database/WSO2AM_DB;AUTO_SERVER=TRUE</URL>
         <Username>wso2carbon</Username>
         <Password>wso2carbon</Password>
         <Driver>org.h2.Driver</Driver>
@@ -20,21 +20,6 @@
         <BAMUsername>admin</BAMUsername>
         <BAMPassword>admin</BAMPassword>
     </APIUsageTracking>
-    <!--<APIKeyValidator>
-        <ServerURL>https://localhost:9443/services/</ServerURL>
-        <Username>${admin.username}</Username>
-        <Password>${admin.password}</Password>
-        <EnableJWTCache>false</EnableJWTCache>
-        <EnableKeyMgtValidationInfoCache>false</EnableKeyMgtValidationInfoCache>
-        <KeyValidatorClientType>ThriftClient</KeyValidatorClientType>
-        <ThriftClientPort>10397</ThriftClientPort>
-        <ThriftClientConnectionTimeOut>10000</ThriftClientConnectionTimeOut>
-        <ThriftServerPort>10397</ThriftServerPort>
-        <EnableThriftServer>true</EnableThriftServer>
-        <TokenEndPointName>/oauth2/token</TokenEndPointName>
-        <RevokeAPIURL>https://${carbon.local.ip}:${https.nio.port}/revoke</RevokeAPIURL>
-        <EncryptPersistedTokens>false</EncryptPersistedTokens>
-    </APIKeyValidator>-->
 
     <APIKeyValidator>
         <ServerURL>https://localhost:9443/services/</ServerURL>
@@ -42,12 +27,7 @@
         <Password>admin</Password>
         <EnableJWTCache>false</EnableJWTCache>
         <EnableKeyMgtValidationInfoCache>false</EnableKeyMgtValidationInfoCache>
-        <KeyValidatorClientType>ThriftClient</KeyValidatorClientType>
-        <ThriftClientPort>10397</ThriftClientPort>
-        <ThriftClientConnectionTimeOut>10000</ThriftClientConnectionTimeOut>
-        <ThriftServerPort>10397</ThriftServerPort>
-        <!--ThriftServerHost>localhost</ThriftServerHost-->
-        <EnableThriftServer>true</EnableThriftServer>
+        <KeyValidatorClientType>WSClient</KeyValidatorClientType>
         <ApplicationTokenScope>am_application_scope</ApplicationTokenScope>
         <KeyValidationHandlerClassName>org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler</KeyValidationHandlerClassName>
         <TokenEndPointName>/oauth2/token</TokenEndPointName>

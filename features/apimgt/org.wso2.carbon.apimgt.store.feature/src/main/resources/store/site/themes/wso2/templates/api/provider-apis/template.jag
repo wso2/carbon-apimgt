@@ -28,7 +28,7 @@
                 thumbURL = jagg.getRegistryPath(thumbURL);
             }
             path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version +
-                   "&provider=" + api.provider+ urlPrefix;
+                   urlPrefix;
     %>
     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
     			<div class="white-wrapper">

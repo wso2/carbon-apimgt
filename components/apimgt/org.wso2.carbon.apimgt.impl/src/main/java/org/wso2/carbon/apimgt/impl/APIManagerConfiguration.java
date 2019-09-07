@@ -22,7 +22,6 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
@@ -36,6 +35,7 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
+import org.wso2.securevault.commons.MiscellaneousUtil;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -80,6 +80,7 @@ public class APIManagerConfiguration {
     public static final String WEBSOCKET_DEFAULT_GATEWAY_URL = "ws://localhost:9099";
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
     private JSONArray applicationAttributes = new JSONArray();
+    private JSONArray monetizationAttributes = new JSONArray();
 
     private SecretResolver secretResolver;
 
@@ -87,6 +88,26 @@ public class APIManagerConfiguration {
     private ThrottleProperties throttleProperties = new ThrottleProperties();
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
+    private static Properties realtimeNotifierProperties;
+    private static Properties persistentNotifierProperties;
+    private static String tokenRevocationClassName;
+
+    public static Properties getRealtimeTokenRevocationNotifierProperties() {
+        return realtimeNotifierProperties;
+    }
+
+    public static Properties getPersistentTokenRevocationNotifiersProperties() {
+        return persistentNotifierProperties;
+    }
+
+    public static String getTokenRevocationClassName() {
+        return tokenRevocationClassName;
+    }
+
+    public static boolean isTokenRevocationEnabled() {
+        return !tokenRevocationClassName.isEmpty();
+    }
+
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
 
     public Map<String, Map<String, String>> getLoginConfiguration() {
@@ -179,12 +200,43 @@ public class APIManagerConfiguration {
             OMElement element = (OMElement) childElements.next();
             String localName = element.getLocalName();
             nameStack.push(localName);
-            if (elementHasText(element)) {
-                String key = getKey(nameStack);
-                String value = element.getText();
-                if (secretResolver.isInitialized() && secretResolver.isTokenProtected(key)) {
-                    value = secretResolver.resolve(key);
+            if ("TokenRevocationNotifiers".equals(localName)) {
+                tokenRevocationClassName = element.getAttributeValue(new QName("class"));
+            } else if ("RealtimeNotifier".equals(localName)) {
+                Iterator revocationPropertiesIterator = element.getChildrenWithLocalName("Property");
+                Properties properties = new Properties();
+                while (revocationPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) revocationPropertiesIterator.next();
+                    properties.setProperty(propertyElem.getAttributeValue(new QName("name")),
+                            propertyElem.getText());
                 }
+                realtimeNotifierProperties = properties;
+            } else if ("PersistentNotifier".equals(localName)) {
+                Iterator revocationPropertiesIterator = element.getChildrenWithLocalName("Property");
+                Properties properties = new Properties();
+                while (revocationPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) revocationPropertiesIterator.next();
+                    if (propertyElem.getAttributeValue(new QName("name")).
+                            equalsIgnoreCase("password")) {
+                        if (secretResolver.isInitialized() && secretResolver
+                                .isTokenProtected("TokenRevocationNotifiers.Notifier.Password")) {
+                            properties.setProperty(propertyElem.getAttributeValue(new QName("name")),
+                                    secretResolver.
+                                            resolve("TokenRevocationNotifiers.Notifier.Password"));
+                        } else {
+                            properties.setProperty(propertyElem.getAttributeValue(new QName("name")),
+                                    propertyElem.getText());
+                        }
+                    } else {
+                        properties
+                                .setProperty(propertyElem.getAttributeValue(new QName("name")),
+                                        propertyElem.getText());
+                    }
+                }
+                persistentNotifierProperties = properties;
+            } else if (elementHasText(element)) {
+                String key = getKey(nameStack);
+                String value = MiscellaneousUtil.resolve(element, secretResolver);
                 addToConfiguration(key, APIUtil.replaceSystemProperty(value));
             } else if ("Environments".equals(localName)) {
                 Iterator environmentIterator = element.getChildrenWithLocalName("Environment");
@@ -215,15 +267,9 @@ public class APIManagerConfiguration {
 
                             environmentElem.getFirstChildWithName(new QName(
                                     APIConstants.API_GATEWAY_USERNAME)).getText()));
-
-                    String key = APIConstants.API_GATEWAY + APIConstants.API_GATEWAY_PASSWORD;
-                    String value;
-                    if (secretResolver.isInitialized() && secretResolver.isTokenProtected(key)) {
-                        value = secretResolver.resolve(key);
-                    } else {
-                        value = environmentElem.getFirstChildWithName(new QName(
-                                APIConstants.API_GATEWAY_PASSWORD)).getText();
-                    }
+                    OMElement passwordElement = environmentElem.getFirstChildWithName(new QName(
+                            APIConstants.API_GATEWAY_PASSWORD));
+                    String value = MiscellaneousUtil.resolve(passwordElement, secretResolver);
                     environment.setPassword(APIUtil.replaceSystemProperty(value));
                     environment.setApiGatewayEndpoint(APIUtil.replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName(
@@ -298,14 +344,7 @@ public class APIManagerConfiguration {
                         OMElement password = storeElem.getFirstChildWithName(new QName(
                                 APIConstants.EXTERNAL_API_STORE_PASSWORD));
                         if (password != null) {
-                            String key = APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORE + "." + APIConstants.EXTERNAL_API_STORE_PASSWORD + '_' + name;//Set store login password [optional]
-                            String value;
-                            if (secretResolver.isInitialized() && secretResolver.isTokenProtected(key)) {
-                                value = secretResolver.resolve(key);
-                            } else {
-
-                                value = password.getText();
-                            }
+                            String value = MiscellaneousUtil.resolve(password, secretResolver);
                             store.setPassword(APIUtil.replaceSystemProperty(value));
                             store.setUsername(APIUtil.replaceSystemProperty(
                                     storeElem.getFirstChildWithName(new QName(
@@ -323,30 +362,41 @@ public class APIManagerConfiguration {
                     parseLoginConfig(loginOMElement);
                 }
 
-            } else if (APIConstants.AdvancedThrottleConstants.THROTTLING_CONFIGURATIONS.equals(localName)){
+            } else if (APIConstants.AdvancedThrottleConstants.THROTTLING_CONFIGURATIONS.equals(localName)) {
                 setThrottleProperties(serverConfig);
-            } else if (APIConstants.WorkflowConfigConstants.WORKFLOW.equals(localName)){
+            } else if (APIConstants.WorkflowConfigConstants.WORKFLOW.equals(localName)) {
                 setWorkflowProperties(serverConfig);
-            } else if (APIConstants.ApplicationAttributes.APPLICATION_ATTRIBUTES.equals(localName)){
+            } else if (APIConstants.ApplicationAttributes.APPLICATION_ATTRIBUTES.equals(localName)) {
                 Iterator iterator = element.getChildrenWithLocalName(APIConstants.ApplicationAttributes.ATTRIBUTE);
                 while (iterator.hasNext()) {
                     OMElement omElement = (OMElement) iterator.next();
                     Iterator attributes = omElement.getChildElements();
                     JSONObject jsonObject = new JSONObject();
-                    while(attributes.hasNext()){
+                    boolean isHidden = Boolean.parseBoolean(omElement.getAttributeValue(new QName(APIConstants.ApplicationAttributes.HIDDEN)));
+                    boolean isRequired =
+                            Boolean.parseBoolean(omElement.getAttributeValue(new QName(APIConstants.ApplicationAttributes.REQUIRED)));
+                    jsonObject.put(APIConstants.ApplicationAttributes.HIDDEN, isHidden);
+                    while (attributes.hasNext()) {
                         OMElement attribute = (OMElement) attributes.next();
-                        if(attribute.getLocalName().equals("Name")){
-                            jsonObject.put(APIConstants.ApplicationAttributes.ATTRIBUTE,attribute.getText());
-                        }
-                        else if(attribute.getLocalName().equals("Description")){
-                            jsonObject.put(APIConstants.ApplicationAttributes.DESCRIPTION,attribute.getText());
+                        if (attribute.getLocalName().equals(APIConstants.ApplicationAttributes.NAME)) {
+                            jsonObject.put(APIConstants.ApplicationAttributes.ATTRIBUTE, attribute.getText());
+                        } else if (attribute.getLocalName().equals(APIConstants.ApplicationAttributes.DESCRIPTION)) {
+                            jsonObject.put(APIConstants.ApplicationAttributes.DESCRIPTION, attribute.getText());
+                        } else if (attribute.getLocalName().equals(APIConstants.ApplicationAttributes.DEFAULT) && isRequired) {
+                            jsonObject.put(APIConstants.ApplicationAttributes.DEFAULT, attribute.getText());
                         }
                     }
-                    String isRequired = omElement.getAttributeValue(new QName("required"));
-                    if (isRequired != null) {
-                        jsonObject.put(APIConstants.ApplicationAttributes.REQUIRED, Boolean.parseBoolean(isRequired));
+                    if (isHidden && isRequired && !jsonObject.containsKey(APIConstants.ApplicationAttributes.DEFAULT)) {
+                        log.error("A default value needs to be given for required, hidden application attributes.");
                     }
+                    jsonObject.put(APIConstants.ApplicationAttributes.REQUIRED, isRequired);
                     applicationAttributes.add(jsonObject);
+                }
+            } else if (APIConstants.Monetization.MONETIZATION_CONFIG.equals(localName)) {
+                OMElement additionalAttributes = element
+                        .getFirstChildWithName(new QName(APIConstants.Monetization.ADDITIONAL_ATTRIBUTES));
+                if (additionalAttributes != null) {
+                    setMonetizationAdditionalAttributes(additionalAttributes);
                 }
             }
             readChildElements(element, nameStack);
@@ -356,6 +406,10 @@ public class APIManagerConfiguration {
 
     public JSONArray getApplicationAttributes() {
         return applicationAttributes;
+    }
+
+    public JSONArray getMonetizationAttributes() {
+        return monetizationAttributes;
     }
 
     /**
@@ -404,7 +458,6 @@ public class APIManagerConfiguration {
 
         return key.toString();
     }
-
     private boolean elementHasText(OMElement element) {
         String text = element.getText();
         return text != null && text.trim().length() != 0;
@@ -510,37 +563,22 @@ public class APIManagerConfiguration {
             if (workflowDCREPElement != null) {
                 workflowProperties.setdCREndPoint(APIUtil.replaceSystemProperty(workflowDCREPElement.getText()));
             }
-            
+
             OMElement workflowTokenEpElement = workflowConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_TOKEN_EP));
             if (workflowTokenEpElement != null) {
                 workflowProperties.setTokenEndPoint(APIUtil.replaceSystemProperty(workflowTokenEpElement.getText()));
-            }            
-            
-            String workflowServerPassword;
-            String workflowServerPasswordKey = APIConstants.WorkflowConfigConstants.WORKFLOW + "."
-                    + APIConstants.WorkflowConfigConstants.WORKFLOW_SERVER_PASSWORD;
-            if (secretResolver.isInitialized() && secretResolver.isTokenProtected(workflowServerPasswordKey)) {
-                workflowServerPassword = secretResolver.resolve(workflowServerPasswordKey);
-            } else {
-                workflowServerPassword = workflowConfigurationElement
-                        .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_SERVER_PASSWORD))
-                        .getText();
-                workflowServerPassword = APIUtil.replaceSystemProperty(workflowServerPassword);
             }
+            OMElement workflowServerPasswordOmElement = workflowConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_SERVER_PASSWORD));
+            String workflowServerPassword = MiscellaneousUtil.resolve(workflowServerPasswordOmElement, secretResolver);
+            workflowServerPassword = APIUtil.replaceSystemProperty(workflowServerPassword);
             workflowProperties.setServerPassword(workflowServerPassword);
-            
-            String dcrEPPassword;
-            String dcrEPPasswordKey = APIConstants.WorkflowConfigConstants.WORKFLOW + "."
-                    + APIConstants.WorkflowConfigConstants.WORKFLOW_DCR_EP_PASSWORD;
-            if (secretResolver.isInitialized() && secretResolver.isTokenProtected(dcrEPPasswordKey)) {
-                dcrEPPassword = secretResolver.resolve(dcrEPPasswordKey);
-            } else {
-                dcrEPPassword = workflowConfigurationElement
-                        .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_DCR_EP_PASSWORD))
-                        .getText();
-                dcrEPPassword = APIUtil.replaceSystemProperty(dcrEPPassword);
-            }
+
+            OMElement dcrEPPasswordOmElement = workflowConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.WorkflowConfigConstants.WORKFLOW_DCR_EP_PASSWORD));
+            String dcrEPPassword = MiscellaneousUtil.resolve(dcrEPPasswordOmElement, secretResolver);
+            dcrEPPassword = APIUtil.replaceSystemProperty(dcrEPPassword);
             workflowProperties.setdCREndpointPassword(dcrEPPassword);
 
         }
@@ -635,17 +673,10 @@ public class APIManagerConfiguration {
                         trafficManager.setType(dataPublisherTypeElement.getText());
                     }
                     String dataPublisherConfigurationPassword;
-                    String dataPublisherConfigurationPasswordKey = APIConstants.AdvancedThrottleConstants
-                            .THROTTLING_CONFIGURATIONS + "." + APIConstants.AdvancedThrottleConstants
-                            .TRAFFIC_MANAGER + "." + APIConstants.AdvancedThrottleConstants.PASSWORD;
-                    if (secretResolver.isInitialized() && secretResolver.isTokenProtected
-                            (dataPublisherConfigurationPasswordKey)) {
-                        dataPublisherConfigurationPassword = secretResolver.resolve
-                                (dataPublisherConfigurationPasswordKey);
-                    } else {
-                        dataPublisherConfigurationPassword = trafficManagerConfigurationElement.getFirstChildWithName
-                                (new QName(APIConstants.AdvancedThrottleConstants.PASSWORD)).getText();
-                    }
+                    OMElement dataPublisherConfigurationPasswordOmElement = trafficManagerConfigurationElement
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.PASSWORD));
+                    dataPublisherConfigurationPassword = MiscellaneousUtil.
+                            resolve(dataPublisherConfigurationPasswordOmElement, secretResolver);
                     trafficManager.setPassword(APIUtil.replaceSystemProperty(dataPublisherConfigurationPassword));
                     throttleProperties.setTrafficManager(trafficManager);
                 }
@@ -759,28 +790,13 @@ public class APIManagerConfiguration {
                                 .getText()));
                         System.setProperty("jms.username", jmsConnectionProperties.getUsername());
                     }
-                    OMElement jmsConnectionDestinationElement = jmsConnectionDetailElement
-                            .getFirstChildWithName(new QName
-                                    (APIConstants.AdvancedThrottleConstants.JMS_CONNECTION_DESTINATION));
-                    if (jmsConnectionDestinationElement != null) {
-                        jmsConnectionProperties.setDestination(jmsConnectionDestinationElement.getText());
-                    }
                     OMElement jmsConnectionPasswordElement = jmsConnectionDetailElement.getFirstChildWithName(new
                             QName(APIConstants.AdvancedThrottleConstants.PASSWORD));
                     if (jmsConnectionPasswordElement != null) {
-                        String jmsConnectionPassword;
-                        String jmsConnectionPasswordKey = APIConstants.AdvancedThrottleConstants
-                                .THROTTLING_CONFIGURATIONS + "." + APIConstants.AdvancedThrottleConstants
-                                .JMS_CONNECTION_DETAILS + "." + APIConstants.AdvancedThrottleConstants
-                                .PASSWORD;
-                        if (secretResolver.isInitialized() && secretResolver.isTokenProtected
-                                (jmsConnectionPasswordKey)) {
-                            jmsConnectionPassword = secretResolver.resolve(jmsConnectionPasswordKey);
-                        } else {
-                            jmsConnectionPassword = jmsConnectionDetailElement.getFirstChildWithName(new QName
-                                    (APIConstants
-                                            .AdvancedThrottleConstants.PASSWORD)).getText();
-                        }
+                        OMElement jmsConnectionPasswordOmElement = jmsConnectionDetailElement
+                                .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.PASSWORD));
+                        String jmsConnectionPassword = MiscellaneousUtil.
+                                resolve(jmsConnectionPasswordOmElement, secretResolver);
                         jmsConnectionProperties.setPassword(APIUtil.replaceSystemProperty(jmsConnectionPassword));
                         System.setProperty("jms.password", jmsConnectionProperties.getPassword());
                     }
@@ -792,7 +808,8 @@ public class APIManagerConfiguration {
                         Properties properties = new Properties();
                         while (jmsProperties.hasNext()) {
                             OMElement property = (OMElement) jmsProperties.next();
-                            properties.put(property.getLocalName(), APIUtil.replaceSystemProperty(property.getText()));
+                            String value = MiscellaneousUtil.resolve(property, secretResolver);
+                            properties.put(property.getLocalName(), APIUtil.replaceSystemProperty(value));
                         }
                         jmsConnectionProperties.setJmsConnectionProperties(properties);
                     }
@@ -965,20 +982,10 @@ public class APIManagerConfiguration {
                         policyDeployerConfiguration.setUsername(APIUtil.replaceSystemProperty
                                 (policyDeployerServiceServiceUsernameElement.getText()));
                     }
-                    String policyDeployerServicePassword;
-                    String policyDeployerServicePasswordKey = APIConstants.AdvancedThrottleConstants
-                            .THROTTLING_CONFIGURATIONS + "." + APIConstants.AdvancedThrottleConstants
-                            .POLICY_DEPLOYER_CONFIGURATION + "." + APIConstants.AdvancedThrottleConstants
-                            .PASSWORD;
-                    if (secretResolver.isInitialized() && secretResolver.isTokenProtected
-                            (policyDeployerServicePasswordKey)) {
-                        policyDeployerServicePassword = secretResolver.resolve
-                                (policyDeployerServicePasswordKey);
-                    } else {
-                        policyDeployerServicePassword = policyDeployerConnectionElement
-                                .getFirstChildWithName(new QName(APIConstants
-                                        .AdvancedThrottleConstants.PASSWORD)).getText();
-                    }
+                    OMElement policyDeployerServicePasswordElement = policyDeployerConnectionElement
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.PASSWORD));
+                    String policyDeployerServicePassword = MiscellaneousUtil.
+                            resolve(policyDeployerServicePasswordElement, secretResolver);
                     policyDeployerConfiguration.setPassword(APIUtil.replaceSystemProperty
                             (policyDeployerServicePassword));
                 }
@@ -995,9 +1002,18 @@ public class APIManagerConfiguration {
                             .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
                     blockConditionRetrieverConfiguration.setEnabled(JavaUtils.isTrueExplicitly
                             (blockingConditionEnabledElement.getText()));
-                    String serviceUrl = "https://" + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" + System
-                            .getProperty(APIConstants.KEYMANAGER_PORT) + "/throttle/data/v1";
-                    blockConditionRetrieverConfiguration.setServiceUrl(serviceUrl);
+                    OMElement blockConditionRetrieverServiceUrlElement = blockConditionRetrieverElement
+                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.SERVICE_URL));
+                    if (blockConditionRetrieverServiceUrlElement != null) {
+                        blockConditionRetrieverConfiguration.setServiceUrl(APIUtil
+                                .replaceSystemProperty(blockConditionRetrieverServiceUrlElement
+                                        .getText()));
+                    } else {
+                        String serviceUrl = "https://" + System.getProperty(APIConstants.KEYMANAGER_HOSTNAME) + ":" +
+                                System.getProperty(APIConstants.KEYMANAGER_PORT) + "/throttle/data/v1";
+                        blockConditionRetrieverConfiguration.setServiceUrl(serviceUrl);
+                    }
+
                     blockConditionRetrieverConfiguration.setUsername(getFirstProperty(APIConstants
                             .API_KEY_VALIDATOR_USERNAME));
                     OMElement blockConditionRetrieverThreadPoolSizeElement = blockConditionRetrieverElement
@@ -1040,5 +1056,40 @@ public class APIManagerConfiguration {
     public WorkflowProperties getWorkflowProperties() {
         return workflowProperties;
     }
-    
+
+    /**
+     * To populate Monetization Additional Attributes
+     * @param element
+     */
+    private void setMonetizationAdditionalAttributes(OMElement element) {
+        Iterator iterator = element.getChildrenWithLocalName(APIConstants.Monetization.ATTRIBUTE);
+        while (iterator.hasNext()) {
+            OMElement omElement = (OMElement) iterator.next();
+            Iterator attributes = omElement.getChildElements();
+            JSONObject monetizationAttribute = new JSONObject();
+            boolean isHidden = Boolean.parseBoolean(
+                    omElement.getAttributeValue(new QName(APIConstants.Monetization.IS_ATTRIBUTE_HIDDEN)));
+            boolean isRequired = Boolean.parseBoolean(
+                    omElement.getAttributeValue(new QName(APIConstants.Monetization.IS_ATTRIBITE_REQUIRED)));
+            monetizationAttribute.put(APIConstants.Monetization.IS_ATTRIBUTE_HIDDEN, isHidden);
+            while (attributes.hasNext()) {
+                OMElement attribute = (OMElement) attributes.next();
+                if (attribute.getLocalName().equals(APIConstants.Monetization.ATTRIBUTE_NAME)) {
+                    monetizationAttribute.put(APIConstants.Monetization.ATTRIBUTE, attribute.getText());
+                } else if(attribute.getLocalName().equals(APIConstants.Monetization.ATTRIBUTE_DISPLAY_NAME)){
+                    monetizationAttribute.put(APIConstants.Monetization.ATTRIBUTE_DISPLAY_NAME, attribute.getText());
+                } else if (attribute.getLocalName().equals(APIConstants.Monetization.ATTRIBUTE_DESCRIPTION)) {
+                    monetizationAttribute.put(APIConstants.Monetization.ATTRIBUTE_DESCRIPTION, attribute.getText());
+                } else if (attribute.getLocalName().equals(APIConstants.Monetization.ATTRIBUTE_DEFAULT) && isRequired) {
+                    monetizationAttribute.put(APIConstants.Monetization.ATTRIBUTE_DEFAULT, attribute.getText());
+                }
+            }
+            if (isHidden && isRequired && !monetizationAttribute
+                    .containsKey(APIConstants.Monetization.ATTRIBUTE_DEFAULT)) {
+                log.error("A default value needs to be given for required, hidden monetization attributes.");
+            }
+            monetizationAttribute.put(APIConstants.Monetization.IS_ATTRIBITE_REQUIRED, isRequired);
+            monetizationAttributes.add(monetizationAttribute);
+        }
+    }
 }

@@ -1,9 +1,16 @@
 language: java
-sudo: false
+sudo: true
+# In below install command , we switch to Node v8.16.0 version since we need npm v5.7 or above to run `npm ci`
+install:
+  - if [ -z "${SHELLCHECK-}" ]; then nvm install v8.16.0; fi
+# Can't update to xenial distribution (ubuntu 16.04) bause of the Java JDK restriction (Not supporting )
+dist: trusty
 
 # Using -q Quiet output which only show errors, to overcome TravisCI log limit issue
-script: mvn clean install -q -B -V | grep -v DEBUG
+script: mvn clean install -q -B -V | grep -v DEBUG; test ${PIPESTATUS[0]} -eq 0;
 
 cache:
   directories:
-  - $HOME/.m2_1
+   - $HOME/.m2
+   - /home/travis/build/wso2/carbon-apimgt/features/apimgt/org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher-new/node_modules
+   - /home/travis/build/wso2/carbon-apimgt/features/apimgt/org.wso2.carbon.apimgt.store.feature/src/main/resources/store-new/node_modules

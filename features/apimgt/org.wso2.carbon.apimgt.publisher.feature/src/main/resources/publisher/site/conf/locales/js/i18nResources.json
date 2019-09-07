@@ -118,6 +118,8 @@
     "Show fewer options": "Show fewer options",
     "Show More Options": "Show More Options",
     "Show more details": "Show more details",
+    "Show Advanced Options": "Show Advanced Options",
+    "Show Fewer Advanced Options": "Show Fewer Advanced Options",
     "Subscriber Count": "Subscriber Count",
     "Subscription Count": "Subscription Count",
     "Success": "Success",
@@ -195,5 +197,6 @@
     "Are you sure you want to block this API?" : "Are you sure you want to block this API?",
     "Are you sure you want to retire this API?" : "Are you sure you want to retire this API?",
     "Are you sure you want to deploy as a prototype this API?" : "Are you sure you want to deploy as a prototype this API?",
-    "Are you sure you want to re-publish this API?" : "Are you sure you want to re-publish this API?"
+    "Are you sure you want to re-publish this API?" : "Are you sure you want to re-publish this API?",
+    "API Usage By Applications" : "API Usage By Applications"
 }

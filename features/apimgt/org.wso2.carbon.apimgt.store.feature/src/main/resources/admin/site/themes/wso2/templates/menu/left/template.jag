@@ -113,6 +113,11 @@
               <i class="fw fw-upload"></i><%= i18n.localize("Upload Tenant Theme") %></a>
             </li>
             <%}%>
+            <li <%if (reqUrl.match("applicationOwner") || reqUrl.match("changeOwner")){%> class="active" <% } %>><a
+              href="<%= jagg.url("/applicationOwner") %>"
+              onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+              <i class="fw fw-user"></i><%= i18n.localize("Applications") %></a>
+            </li>
           </ul>
         </li>
         <li class="nav-header">

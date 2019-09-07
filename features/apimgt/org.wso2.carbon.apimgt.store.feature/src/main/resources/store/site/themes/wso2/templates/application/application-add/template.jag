@@ -2,10 +2,10 @@
     var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
     var apiPath = "";
     var goBack = "";
-    if(session.get('apiPath') != null){
+    if (session.get('apiPath')) {
         apiPath = session.get('apiPath');
     }
-    if(request.getParameter('goBack') != null){
+    if (request.getParameter('goBack')) {
         goBack = request.getParameter('goBack');
     }
     var mod = jagg.module("manager");
@@ -125,6 +125,7 @@
         // Iterate through the keys, read from configuration file
         // Ex: [{"Required" : true, "Attribute" : "External Reference Id"}, {"Attribute" : "Billing Tier"}]
         for (i = 0; i < applicationAttributes.length; i++) { %>
+         <% if ( !Boolean(applicationAttributes[i].hidden ) && !applicationAttributes[i].Hidden ) { %>
             <div class="form-group">
             <% if (applicationAttributes[i].Attribute) { %>
                 <label class="col-md-3 col-lg-3 control-label" for="attribute_<%= i%>">
@@ -156,6 +157,7 @@
         }%>
         </div>
         <% }
+        }
     }%>
 
     <div class="form-group">

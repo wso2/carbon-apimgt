@@ -18,21 +18,17 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import io.swagger.codegen.ClientOptInput;
-import io.swagger.codegen.DefaultGenerator;
-import io.swagger.codegen.config.CodegenConfigurator;
-import io.swagger.models.Swagger;
-import io.swagger.parser.SwaggerParser;
-import io.swagger.util.Json;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.openapitools.codegen.ClientOptInput;
+import org.openapitools.codegen.DefaultGenerator;
+import org.openapitools.codegen.config.CodegenConfigurator;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -60,29 +56,28 @@ public class APIClientGenerationManager {
     private static final Map<String, String> langCodeGen = new HashMap<String, String>();
 
     public APIClientGenerationManager() {
-        langCodeGen.put("java", "io.swagger.codegen.languages.JavaClientCodegen");
-        langCodeGen.put("android", "io.swagger.codegen.languages.AndroidClientCodegen");
-        langCodeGen.put("csharp", "io.swagger.codegen.languages.CSharpClientCodegen");
-        langCodeGen.put("cpp", "io.swagger.codegen.languages.CppRestClientCodegen");
-        langCodeGen.put("dart", "io.swagger.codegen.languages.DartClientCodegen");
-        langCodeGen.put("flash", "io.swagger.codegen.languages.FlashClientCodegen");
-        langCodeGen.put("go", "io.swagger.codegen.languages.GoClientCodegen");
-        langCodeGen.put("groovy", "io.swagger.codegen.languages.GroovyClientCodegen");
-        langCodeGen.put("javascript", "io.swagger.codegen.languages.JavascriptClientCodegen");
-        langCodeGen.put("jmeter", "io.swagger.codegen.languages.JMeterCodegen");
-        langCodeGen.put("nodejs", "io.swagger.codegen.languages.NodeJSServerCodegen");
-        langCodeGen.put("perl", "io.swagger.codegen.languages.PerlClientCodegen");
-        langCodeGen.put("php", "io.swagger.codegen.languages.PhpClientCodegen");
-        langCodeGen.put("python", "io.swagger.codegen.languages.PythonClientCodegen");
-        langCodeGen.put("ruby", "io.swagger.codegen.languages.RubyClientCodegen");
-        langCodeGen.put("scala", "io.swagger.codegen.languages.ScalaClientCodegen");
-        langCodeGen.put("swift", "io.swagger.codegen.languages.SwiftCodegen");
-        langCodeGen.put("clojure", "io.swagger.codegen.languages.ClojureClientCodegen");
-        langCodeGen.put("aspNet5", "io.swagger.codegen.languages.AspNet5ServerCodegen");
-        langCodeGen.put("asyncScala", "io.swagger.codegen.languages.AsyncScalaClientCodegen");
-        langCodeGen.put("spring", "io.swagger.codegen.languages.SpringCodegen");
-        langCodeGen.put("csharpDotNet2", "io.swagger.codegen.languages.CsharpDotNet2ClientCodegen");
-        langCodeGen.put("haskell", "io.swagger.codegen.languages.HaskellServantCodegen");
+        langCodeGen.put("java", "org.openapitools.codegen.languages.JavaClientCodegen");
+        langCodeGen.put("android", "org.openapitools.codegen.languages.AndroidClientCodegen");
+        langCodeGen.put("csharp", "org.openapitools.codegen.languages.CSharpClientCodegen");
+        langCodeGen.put("cpp", "org.openapitools.codegen.languages.CppRestClientCodegen");
+        langCodeGen.put("dart", "org.openapitools.codegen.languages.DartClientCodegen");
+        langCodeGen.put("flash", "org.openapitools.codegen.languages.FlashClientCodegen");
+        langCodeGen.put("go", "org.openapitools.codegen.languages.GoClientCodegen");
+        langCodeGen.put("groovy", "org.openapitools.codegen.languages.GroovyClientCodegen");
+        langCodeGen.put("javascript", "org.openapitools.codegen.languages.JavascriptClientCodegen");
+        langCodeGen.put("jmeter", "org.openapitools.codegen.languages.JMeterCodegen");
+        langCodeGen.put("nodejs", "org.openapitools.codegen.languages.NodeJSServerCodegen");
+        langCodeGen.put("perl", "org.openapitools.codegen.languages.PerlClientCodegen");
+        langCodeGen.put("php", "org.openapitools.codegen.languages.PhpClientCodegen");
+        langCodeGen.put("python", "org.openapitools.codegen.languages.PythonClientCodegen");
+        langCodeGen.put("ruby", "org.openapitools.codegen.languages.RubyClientCodegen");
+        langCodeGen.put("swift", "org.openapitools.codegen.languages.SwiftCodegen");
+        langCodeGen.put("clojure", "org.openapitools.codegen.languages.ClojureClientCodegen");
+        langCodeGen.put("aspNet5", "org.openapitools.codegen.languages.AspNet5ServerCodegen");
+        langCodeGen.put("scala-akka-client", "org.openapitools.codegen.languages.ScalaAkkaClientCodegen");
+        langCodeGen.put("spring", "org.openapitools.codegen.languages.SpringCodegen");
+        langCodeGen.put("csharpDotNet2", "org.openapitools.codegen.languages.CsharpDotNet2ClientCodegen");
+        langCodeGen.put("haskell", "org.openapitools.codegen.languages.HaskellServantCodegen");
     }
 
     /**
@@ -127,27 +122,27 @@ public class APIClientGenerationManager {
             }
             Registry requiredRegistry = null;
             try {
-                requiredRegistry = getGovernanceUserRegistry(apiProvider, tenantId);
+                requiredRegistry = getGovernanceUserRegistry(MultitenantUtils.getTenantAwareUsername(apiProvider), tenantId);
             } catch (RegistryException e) {
                 handleSDKGenException("Error occurred when retrieving the tenant registry for tenant : " +
                         requestedTenant + " tenant ID : " + tenantId, e);
             }
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(apiProvider);
-            APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
             try {
-                swaggerAPIDefinition = definitionFromOpenAPISpec.getAPIDefinition(apiIdentifier, requiredRegistry);
+                swaggerAPIDefinition = OASParserUtil.getAPIDefinition(apiIdentifier, requiredRegistry);
             } catch (APIManagementException e) {
                 handleSDKGenException("Error loading swagger file for API " + apiName + " from registry.", e);
             }
+        }
+
+        if (StringUtils.isEmpty(swaggerAPIDefinition)) {
+            handleSDKGenException("Error loading the Swagger definition. Swagger file is empty.");
         }
 
         if (isTenantFlowStarted) {
             PrivilegedCarbonContext.endTenantFlow();
         }
 
-        Swagger swaggerDoc = new SwaggerParser().parse(swaggerAPIDefinition);
-        //format the swagger definition as a string before writing to the file
-        String formattedSwaggerAPIDefinition = Json.pretty(swaggerDoc);
         //create a temporary directory with a random name to store files created during generating the SDK
         String tempDirectoryLocation = APIConstants.TEMP_DIRECTORY_NAME + File.separator + UUID.randomUUID().toString();
         File tempDirectory = new File(tempDirectoryLocation);
@@ -172,7 +167,7 @@ public class APIClientGenerationManager {
             }
             fileWriter = new FileWriter(swaggerSpecFile.getAbsoluteFile());
             bufferedWriter = new BufferedWriter(fileWriter);
-            bufferedWriter.write(formattedSwaggerAPIDefinition);
+            bufferedWriter.write(swaggerAPIDefinition);
         } catch (IOException e) {
             handleSDKGenException("Error while storing the temporary swagger file in : " + specFileLocation, e);
         } finally {
@@ -242,7 +237,7 @@ public class APIClientGenerationManager {
                 .setModelPackage(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_MODAL_PACKAGE) + apiName);
         codegenConfigurator.setApiPackage(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_API_PACKAGE) + apiName);
         codegenConfigurator.setInputSpec(specLocation);
-        codegenConfigurator.setLang(langCodeGen.get(sdkLanguage));
+        codegenConfigurator.setGeneratorName(sdkLanguage);
         codegenConfigurator.setOutputDir(temporaryOutputPath);
         final ClientOptInput clientOptInput = codegenConfigurator.toClientOptInput();
         new DefaultGenerator().opts(clientOptInput).generate();
