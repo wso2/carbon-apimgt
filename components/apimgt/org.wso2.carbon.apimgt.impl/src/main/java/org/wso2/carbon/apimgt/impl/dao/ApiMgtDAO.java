@@ -1502,7 +1502,7 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve scopes ", e);
+            handleException("Failed to retrieve scopes for application subscription ", e);
         }
         return populateScopeSet(scopeHashMap);
     }
