@@ -101,6 +101,10 @@ public class RegularExpressionProtector extends AbstractMediator {
         if (messageProperty != null) {
             threatType = String.valueOf(messageProperty);
         }
+        if (isRequestBodyVulnerable(messageContext) || isRequestHeadersVulnerable(messageContext) ||
+                isRequestPathVulnerable(messageContext)) {
+            return true;
+        }
         return true;
     }
 
