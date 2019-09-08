@@ -129,6 +129,12 @@ class APIDefinition extends React.Component {
             promisedApi = api.getSwagger(api.id);
         }
 
+        api.getSettings().then((settings) => {
+            if (settings.SecurityAuditProperties != null) {
+                this.setState({ securityAuditProperties: settings.SecurityAuditProperties });
+            }
+        });
+
         promisedApi
             .then((response) => {
                 if (api.type === 'GRAPHQL') {
@@ -155,12 +161,6 @@ class APIDefinition extends React.Component {
                     doRedirectToLogin();
                 }
             });
-
-        api.getSettings().then((settings) => {
-            if (settings.SecurityAuditProperties != null) {
-                this.setState({ securityAuditProperties: settings.SecurityAuditProperties });
-            }
-        });
     }
 
     /**
@@ -345,7 +345,7 @@ class APIDefinition extends React.Component {
         this.setState({ openEditor: false });
         const { intl } = this.props;
         const { securityAuditProperties } = this.state;
-        if (!securityAuditProperties.apiToken && !securityAuditProperties.collectionId) {
+        if (securityAuditProperties.apiToken !== null && securityAuditProperties.collectionId != null) {
             Alert.info(intl.formatMessage({
                 id: 'Apis.Details.APIDefinition.info.updating.auditapi',
                 defaultMessage: 'Please click Audit API button again to reflect the changes made.',
@@ -510,8 +510,8 @@ class APIDefinition extends React.Component {
                         {/**
                            * Code for the Audit API button
                         */}
-                        {!securityAuditProperties.apiToken &&
-                        !securityAuditProperties.collectionId ?
+                        {((securityAuditProperties.apiToken !== null) &&
+                        (securityAuditProperties.collectionId !== null)) ?
                             <Button size='small' className={classes.button} onClick={this.onAuditApiClick}>
                                 <LockRounded className={classes.buttonIcon} />
                                 <FormattedMessage
