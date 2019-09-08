@@ -17,11 +17,22 @@
  */
 
 import React, { useState } from 'react';
-import { Typography, Grid, withStyles, RadioGroup, FormControlLabel, Radio, FormControl } from '@material-ui/core';
+import {
+    Typography,
+    Grid,
+    withStyles,
+    RadioGroup,
+    FormControlLabel,
+    Radio,
+    FormControl,
+    Divider,
+    Button,
+    Card,
+    CardContent,
+    CardActions,
+} from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
-import Button from '@material-ui/core/Button';
 
 const styles = theme => ({
     inlineMessageContainer: {
@@ -29,6 +40,24 @@ const styles = theme => ({
     },
     actions: {
         marginTop: theme.spacing(),
+    },
+    endpointTypeCard: {
+        margin: theme.spacing(),
+        maxWidth: theme.spacing(32),
+        transition: 'box-shadow 0.3s ease-in-out',
+        height: theme.spacing(40),
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    cardContent: {
+        height: theme.spacing(40),
+    },
+    content: {
+        marginTop: theme.spacing(),
+    },
+    cardActions: {
+        justifyContent: 'flex-end',
+        borderTop: 'solid #e0e0e0 thin',
     },
 });
 
@@ -129,15 +158,22 @@ function NewEndpointCreate(props) {
 
     return (
         <React.Fragment>
-            <Grid container direction='column'>
+            <Typography variant='h4' align='left' className={classes.titleWrapper}>
+                <FormattedMessage
+                    id='Apis.Details.Endpoints.NewEndpointCreate.add.endpoints.header'
+                    defaultMessage='Select an Endpoint Type to Add'
+                />
+            </Typography>
+            <Grid container justify='flex-start' spacing={2}>
                 {endpointTypes.map(((type) => {
                     return (
                         <Grid item className={classes.inlineMessageContainer}>
-                            <InlineMessage>
-                                <div className={classes.contentWrapper}>
+                            <Card className={classes.endpointTypeCard}>
+                                <CardContent className={classes.cardContent}>
                                     <Typography variant='h5' component='h3' className={classes.head}>
                                         {type.name}
                                     </Typography>
+                                    <Divider />
                                     <Typography component='p' className={classes.content}>
                                         {type.description}
                                     </Typography>
@@ -164,21 +200,20 @@ function NewEndpointCreate(props) {
                                             </FormControl>
                                         </div> :
                                         <div /> }
-                                    <div className={classes.actions}>
-                                        <Button
-                                            variant='contained'
-                                            color='primary'
-                                            className={classes.button}
-                                            onClick={() => generateEndpointConfig(type.type, endpointImplType)}
-                                        >
-                                            <FormattedMessage
-                                                id='Apis.Details.Endpoints.NewEndpointCreate.create.button'
-                                                defaultMessage='Add'
-                                            />
-                                        </Button>
-                                    </div>
-                                </div>
-                            </InlineMessage>
+                                </CardContent>
+                                <CardActions className={classes.cardActions}>
+                                    <Button
+                                        color='primary'
+                                        className={classes.button}
+                                        onClick={() => generateEndpointConfig(type.type, endpointImplType)}
+                                    >
+                                        <FormattedMessage
+                                            id='Apis.Details.Endpoints.NewEndpointCreate.create.button'
+                                            defaultMessage='Add'
+                                        />
+                                    </Button>
+                                </CardActions>
+                            </Card>
                         </Grid>
                     );
                 }))}
