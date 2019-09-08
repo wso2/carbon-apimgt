@@ -424,8 +424,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId,
-                    tenantDomain);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
             GraphQLSchemaDTO dto = new GraphQLSchemaDTO();
             dto.setSchemaDefinition(schemaContent);
@@ -552,8 +551,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
             if (body.getAdditionalProperties() != null) {
-                String errorMessage = RestApiPublisherUtils
-                        .validateAdditionalProperties(body.getAdditionalProperties());
+                String errorMessage = RestApiPublisherUtils.validateAdditionalProperties(body.getAdditionalProperties());
                 if (!errorMessage.isEmpty()) {
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
@@ -2692,20 +2690,18 @@ public class ApisApiServiceImpl implements ApisApiService {
             //This URI used to set the location header of the POST response
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
             return Response.created(createdApiUri).entity(createdApiDTO).build();
-
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + additionalPropertiesAPI.getProvider() + "-" +
                 additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion() + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving API location : " + additionalPropertiesAPI.getProvider() + "-" +
-                additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion();
+            String errorMessage = "Error while retrieving API location : " + additionalPropertiesAPI.getProvider() + "-"
+                    + additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
     } catch (IOException e) {
             String errorMessage = "Error while retrieving content from file : " + additionalPropertiesAPI.getProvider()
-                    + "-" + additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion()
-                    + "-" /*+ body.getEndpointConfig()*/;
-                    RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                    + "-" + additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
     }
         return null;
     }
@@ -2773,7 +2769,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         List<APIOperationsDTO> operationArray = new ArrayList<>();
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
-        Map<java.lang.String, graphql.language.TypeDefinition> operationList = typeRegistry.types();
+        Map<java.lang.String, TypeDefinition> operationList = typeRegistry.types();
         for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
             if (entry.getValue().getName().equals(APIConstants.GRAPHQL_QUERY) ||
                     entry.getValue().getName().equals(APIConstants.GRAPHQL_MUTATION)

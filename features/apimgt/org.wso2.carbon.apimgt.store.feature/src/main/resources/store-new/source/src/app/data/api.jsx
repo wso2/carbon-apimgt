@@ -143,8 +143,8 @@ export default class API extends Resource {
 
     /**
      * Get the schema of an GraphQL API
-     * @param apiId {String} UUID of the API in which the swagger is needed
-     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @param apiId {String} UUID of the API in which the schema is needed
+     * @param callback {function} Function which needs to be called upon success of the retrieving schema
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getGraphQLSchemaByAPIId(apiId, callback = null) {

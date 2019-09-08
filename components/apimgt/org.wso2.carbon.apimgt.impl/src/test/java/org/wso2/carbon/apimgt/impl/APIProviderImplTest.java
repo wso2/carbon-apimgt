@@ -1247,7 +1247,8 @@ public class APIProviderImplTest {
         APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
         PowerMockito.when(sh.getAPIManagerConfigurationService()).thenReturn(amConfigService);
         PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
-        Mockito.when(amConfig.getFirstProperty(APIConstants.API_GATEWAY_TYPE)).thenReturn(APIConstants.API_GATEWAY_TYPE_SYNAPSE);
+        Mockito.when(amConfig.getFirstProperty(APIConstants.API_GATEWAY_TYPE)).
+                thenReturn(APIConstants.API_GATEWAY_TYPE_SYNAPSE);
 
         RealmService realmService = Mockito.mock(RealmService.class);
         TenantManager tm = Mockito.mock(TenantManager.class);
@@ -1487,7 +1488,8 @@ public class APIProviderImplTest {
         APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
         PowerMockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(amConfigService);
         PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
-        Mockito.when(amConfig.getFirstProperty(APIConstants.API_GATEWAY_TYPE)).thenReturn(APIConstants.API_GATEWAY_TYPE_SYNAPSE);
+        Mockito.when(amConfig.getFirstProperty(APIConstants.API_GATEWAY_TYPE)).
+                thenReturn(APIConstants.API_GATEWAY_TYPE_SYNAPSE);
 
         RealmService realmService = Mockito.mock(RealmService.class);
         TenantManager tm = Mockito.mock(TenantManager.class);

@@ -270,7 +270,14 @@ class Details extends Component {
                             to={pathPrefix + 'schema definition'}
                             Icon={<CodeIcon />}
                         />
-                        <LeftMenuItem text='operations' to={pathPrefix + 'operations'} Icon={<ResourcesIcon />} />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.operations',
+                                defaultMessage: 'operations',
+                            })}
+                            to={pathPrefix + 'operations'}
+                            Icon={<ResourcesIcon />}
+                        />
                     </React.Fragment>
                 );
             default:
