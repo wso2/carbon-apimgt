@@ -29,15 +29,23 @@ import Progress from 'AppComponents/Shared/Progress';
 
 import MUIDataTable from 'mui-datatables';
 
+import TableRow from '@material-ui/core/TableRow';
+import TableCell from '@material-ui/core/TableCell';
+import MonacoEditor from 'react-monaco-editor';
+
 const styles = theme => ({
     rootPaper: {
         padding: theme.spacing.unit * 3,
         margin: theme.spacing.unit * 2,
     },
-    table: {
-        minWidth: 650,
+    inlineDecoration: {
+        background: '#FF0000',
+    },
+    contentLine: {
+        background: '#add8e6',
     },
 });
+
 
 /**
  * This Component hosts the API Security Audit Component
@@ -55,6 +63,7 @@ class APISecurityAudit extends Component {
             overallGrade: 0,
             numErrors: 0,
             loading: false,
+            apiDefinition: null,
         };
         this.keyCount = 0;
         this.dataArray = [];
@@ -67,6 +76,7 @@ class APISecurityAudit extends Component {
             4: 'HIGH',
             5: 'CRITICAL',
         };
+        this.searchTerm = null;
     }
 
     /**
@@ -76,9 +86,15 @@ class APISecurityAudit extends Component {
         // Include code to pass in the data from the backend
         this.setState({ loading: true });
         const { apiId } = this.props;
-        const api = new API();
+        const newApi = new API();
+        const promisedDefinition = newApi.getSwagger(apiId);
+        promisedDefinition.then((response) => {
+            this.setState({
+                apiDefinition: JSON.stringify(response.obj, null, 1),
+            });
+        });
 
-        api.getSecurityAuditReport(apiId)
+        newApi.getSecurityAuditReport(apiId)
             .then((response) => {
                 this.setState({
                     report: response.body.report,
@@ -109,7 +125,7 @@ class APISecurityAudit extends Component {
         overrides: {
             MUIDataTableBodyCell: {
                 root: {
-                    width: '60px',
+                    width: '30%',
                 },
             },
             MUIDataTableSelectCell: {
@@ -130,13 +146,13 @@ class APISecurityAudit extends Component {
      * @param {*} issues Issues array
      * @return {*} dataArray array
      */
-    getRowData(issues) {
+    getRowData(issues, category) {
         const dataArray = [];
         issues.forEach((issue) => {
             const rowData = [];
             rowData.push(
                 this.criticalityMap[issue.criticality],
-                issue.message, Math.round(issue.score),
+                issue.message, Math.round(issue.score), issue.pointerImpacted, category,
             );
             dataArray.push(rowData);
         });
@@ -144,15 +160,65 @@ class APISecurityAudit extends Component {
     }
 
     /**
+     * Method to get the URL to display for each issue
+     * TODO - Has to be replaced with API of database from 42Crunch when it is made available by them
+     * @param {*} category Category of Issue
+     * @returns {*} String URL
+     */
+    getMoreDetailUrl(category) {
+        const baseUrl = 'https://apisecurity.io/ref/';
+        let url = '';
+
+        switch (category) {
+            case 'OpenAPI Format Requirements':
+                url = baseUrl + 'oasconformance/';
+                break;
+            case 'Security':
+                url = baseUrl + 'security/';
+                break;
+            case 'Data Validation':
+                url = baseUrl + 'security/datavalidation/';
+                break;
+            default:
+                url = baseUrl;
+        }
+        return url;
+    }
+
+    /**
+     * editorDidMount method for Monaco Editor
+     * TODO - Amend this to be unique for each issue
+     * @param {*} editor
+     * @param {*} monaco
+     */
+    editorDidMount = (editor, monaco) => {
+        const { classes } = this.props;
+        // editor.setSelection(new monaco.Range(18, 8, 18, 15));
+        // const line = editor.getAction('actions.find').run(searchTerm);
+        editor.revealLineInCenter(15);
+        editor.deltaDecorations([], [
+            {
+                range: new monaco.Range(15, 1, 15, 50),
+                options: {
+                    isWholeLine: true,
+                    className: classes.inlineDecoration,
+                    glyphMarginClassName: classes.contentLine,
+                },
+            },
+        ]);
+    }
+
+    // editorDidMountParent(editor, monaco) {
+    // }
+
+    /**
      * @inheritdoc
      */
     render() {
-        // TODO - Make a criticality map where 1 is lowest and 4 is highest and color code if possible
-        // TODO - Add the Progress Circle and Progress Bars
         // TODO - Test the json data after finishing the structure
         const { classes } = this.props;
         const {
-            report, overallGrade, numErrors, loading,
+            report, overallGrade, numErrors, loading, apiDefinition,
         } = this.state;
 
         const reportObject = JSON.parse(report);
@@ -161,11 +227,101 @@ class APISecurityAudit extends Component {
             return <Progress />;
         }
 
-        const columns = ['Severity', 'Description', 'Score Impact'];
+        const columns = [
+            {
+                name: 'Severity',
+                options: {
+                    filter: true,
+                    sort: true,
+                },
+            },
+            {
+                name: 'Description',
+                options: {
+                    filter: true,
+                    sort: true,
+                },
+            },
+            {
+                name: 'Score Impact',
+                options: {
+                    filter: true,
+                    sort: true,
+                },
+            },
+            {
+                name: 'Pointer Impacted',
+                options: {
+                    // customBodyRenderer: (value, tableMeta, updateValue,  tableViewObj = this) => {
+                    //     if (tableMeta.rowData) {
+                    //         const path = tableMeta.rowData[3];
+                    //     }
+                    // },
+                    display: 'excluded',
+                    filter: false,
+                    sort: false,
+                },
+            },
+            {
+                name: 'Issue Category',
+                options: {
+                    display: 'excluded',
+                    filter: false,
+                    sort: false,
+                },
+            },
+        ];
+
+        const editorOptions = {
+            selectOnLineNumbers: true,
+            readOnly: true,
+            smoothScrolling: true,
+            wordWrap: 'on',
+            glyphMargin: true,
+        };
+
         const options = {
             filterType: 'dropdown',
             responsive: 'stacked',
             selectableRows: false,
+            expandableRows: true,
+            expandableRowsOnClick: true,
+            renderExpandableRow: (rowData) => {
+                // const colSpan = rowData.length + 1;
+
+                // const path = rowData[3] + '';
+                // const splitPath = path.split(',');
+                // const searchTerm = splitPath[(splitPath.length - 1)];
+                return (
+                    <TableRow>
+                        <TableCell colSpan='2'>
+                            <MonacoEditor
+                                width='85%'
+                                height='250px'
+                                theme='vs-dark'
+                                value={apiDefinition}
+                                options={editorOptions}
+                                editorDidMount={this.editorDidMount}
+                            />
+                        </TableCell>
+                        <TableCell>
+                            <Typography variant='body1' style={{ width: '70%' }}>
+                                Visit this
+                                <strong>
+                                    <a
+                                        href={this.getMoreDetailUrl(rowData[4])}
+                                        target='_blank'
+                                        rel='noopener noreferrer'
+                                    >
+                                     link
+                                    </a>
+                                </strong> to
+                                 view a detailed description, possible exploits and remediation for this issue.
+                            </Typography>
+                        </TableCell>
+                    </TableRow>
+                );
+            },
         };
         return (
             <div>
@@ -231,28 +387,55 @@ class APISecurityAudit extends Component {
                                                  Requirements - ({Math.round(reportObject.validation.grade)} / 25)
                                                 </strong>
                                             </Typography>
-                                            <Line
-                                                percent={((Math.round(reportObject.validation.grade)) / 25) * 100}
-                                                strokeColor='#3d98c7'
-                                            />
+                                            <VisibilitySensor>
+                                                {({ isVisible }) => {
+                                                    const gradeProgressScore = isVisible ?
+                                                        (((Math.round(reportObject.validation.grade)) / 25) * 100) : 0;
+                                                    return (
+                                                        <Line
+                                                            percent={gradeProgressScore}
+                                                            strokeColor='#3d98c7'
+                                                        />
+                                                    );
+                                                }
+                                                }
+                                            </VisibilitySensor>
                                             <Typography variant='body1'>
                                                 <strong>
                                                     Security - ({Math.round(reportObject.security.grade)} / 25)
                                                 </strong>
                                             </Typography>
-                                            <Line
-                                                percent={((Math.round(reportObject.security.grade)) / 25) * 100}
-                                                strokeColor='#3d98c7'
-                                            />
+                                            <VisibilitySensor>
+                                                {({ isVisible }) => {
+                                                    const gradeProgressScore = isVisible ?
+                                                        (((Math.round(reportObject.security.grade)) / 25) * 100) : 0;
+                                                    return (
+                                                        <Line
+                                                            percent={gradeProgressScore}
+                                                            strokeColor='#3d98c7'
+                                                        />
+                                                    );
+                                                }
+                                                }
+                                            </VisibilitySensor>
                                             <Typography variant='body1'>
                                                 <strong>
                                                     Data Validation - ({Math.round(reportObject.data.grade)} / 50)
                                                 </strong>
                                             </Typography>
-                                            <Line
-                                                percent={((Math.round(reportObject.data.grade)) / 50) * 100}
-                                                strokeColor='#3d98c7'
-                                            />
+                                            <VisibilitySensor>
+                                                {({ isVisible }) => {
+                                                    const gradeProgressScore = isVisible ?
+                                                        (((Math.round(reportObject.data.grade)) / 25) * 100) : 0;
+                                                    return (
+                                                        <Line
+                                                            percent={gradeProgressScore}
+                                                            strokeColor='#3d98c7'
+                                                        />
+                                                    );
+                                                }
+                                                }
+                                            </VisibilitySensor>
                                         </div>
                                     </div>
                                 </div>
@@ -267,7 +450,7 @@ class APISecurityAudit extends Component {
                                     <strong>Number of Issues:</strong> {reportObject.validation.issueCounter}
                                 </Typography>
                                 <Typography variant='body1'>
-                                    <strong>Grade:</strong> {Math.round(reportObject.validation.grade)} / 25
+                                    <strong>Score:</strong> {Math.round(reportObject.validation.grade)} / 25
                                 </Typography>
                                 <Typography variant='body1'>
                                     <strong>Criticality:</strong> {reportObject.validation.criticality}
@@ -279,7 +462,10 @@ class APISecurityAudit extends Component {
                                             <MuiThemeProvider theme={this.getMuiTheme()}>
                                                 <MUIDataTable
                                                     title='Issues'
-                                                    data={this.getRowData(reportObject.validation.issues)}
+                                                    data={this.getRowData(
+                                                        reportObject.validation.issues,
+                                                        'OpenAPI Format Requirements',
+                                                    )}
                                                     columns={columns}
                                                     options={options}
                                                 />
@@ -297,7 +483,7 @@ class APISecurityAudit extends Component {
                                     <strong>Number of Issues:</strong> {reportObject.security.issueCounter}
                                 </Typography>
                                 <Typography variant='body1'>
-                                    <strong>Grade:</strong> {Math.round(reportObject.security.grade)} / 25
+                                    <strong>Score:</strong> {Math.round(reportObject.security.grade)} / 25
                                 </Typography>
                                 <Typography variant='body1'>
                                     <strong>Criticality:</strong> {reportObject.security.criticality}
@@ -309,7 +495,7 @@ class APISecurityAudit extends Component {
                                             <MuiThemeProvider theme={this.getMuiTheme()}>
                                                 <MUIDataTable
                                                     title='Issues'
-                                                    data={this.getRowData(reportObject.security.issues)}
+                                                    data={this.getRowData(reportObject.security.issues, 'Security')}
                                                     columns={columns}
                                                     options={options}
                                                 />
@@ -326,7 +512,7 @@ class APISecurityAudit extends Component {
                                     <strong>Number of Issues:</strong> {reportObject.data.issueCounter}
                                 </Typography>
                                 <Typography variant='body1'>
-                                    <strong>Grade:</strong> {Math.round(reportObject.data.grade)} / 50
+                                    <strong>Score:</strong> {Math.round(reportObject.data.grade)} / 50
                                 </Typography>
                                 <Typography variant='body1'>
                                     <strong>Criticality:</strong> {reportObject.data.criticality}
@@ -338,7 +524,7 @@ class APISecurityAudit extends Component {
                                             <MuiThemeProvider theme={this.getMuiTheme()}>
                                                 <MUIDataTable
                                                     title='Issues'
-                                                    data={this.getRowData(reportObject.data.issues)}
+                                                    data={this.getRowData(reportObject.data.issues, 'Data Validation')}
                                                     columns={columns}
                                                     options={options}
                                                 />
