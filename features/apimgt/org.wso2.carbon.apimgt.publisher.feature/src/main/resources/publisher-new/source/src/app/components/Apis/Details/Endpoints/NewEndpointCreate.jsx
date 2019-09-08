@@ -38,9 +38,6 @@ const styles = theme => ({
     inlineMessageContainer: {
         marginBottom: theme.spacing(),
     },
-    actions: {
-        marginTop: theme.spacing(),
-    },
     endpointTypeCard: {
         margin: theme.spacing(),
         maxWidth: theme.spacing(32),
