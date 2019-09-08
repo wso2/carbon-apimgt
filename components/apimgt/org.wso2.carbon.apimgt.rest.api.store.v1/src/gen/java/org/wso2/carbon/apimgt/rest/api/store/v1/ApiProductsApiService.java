@@ -41,7 +41,7 @@ public interface ApiProductsApiService {
       public Response apiProductsApiProductIdRatingsGet(String apiProductId, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdRatingsRatingIdGet(String apiProductId, String ratingId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdSubscriptionPoliciesGet(String apiProductId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apiProductsApiProductIdSwaggerGet(String apiProductId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
+      public Response apiProductsApiProductIdSwaggerGet(String apiProductId, String labelName, String environmentName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdThumbnailGet(String apiProductId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsApiProductIdUserRatingPut(String apiProductId, RatingDTO body, MessageContext messageContext) throws APIManagementException;
       public Response apiProductsGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;

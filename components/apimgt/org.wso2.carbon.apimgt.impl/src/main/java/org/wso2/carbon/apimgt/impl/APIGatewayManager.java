@@ -141,7 +141,6 @@ public class APIGatewayManager {
                     localEntryAdminClient.deleteEntry(api.getUUID() + "_graphQL");
                     localEntryAdminClient.addLocalEntry("<localEntry key=\"" + api.getUUID() + "_graphQL" + "\">" +
                             definition + "</localEntry>");
-
                     Set<URITemplate> uriTemplates = new HashSet<>();
                     URITemplate template = new URITemplate();
                     template.setAuthType("Any");

@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -114,11 +115,13 @@ public class APIMappingUtil {
         model.setContext(context);
         model.setDescription(dto.getDescription());
 
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            model.setEndpointConfig(mapper.writeValueAsString(dto.getEndpointConfig()));
-        } catch (IOException e) {
-            handleException("Error while converting endpointConfig to json", e);
+        if (dto.getEndpointConfig() != null) {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                model.setEndpointConfig(mapper.writeValueAsString(dto.getEndpointConfig()));
+            } catch (IOException e) {
+                handleException("Error while converting endpointConfig to json", e);
+            }
         }
 
         model.setImplementation(dto.getEndpointImplementationType().toString());
@@ -227,7 +230,10 @@ public class APIMappingUtil {
                 model.addProperty(entry.getKey(), entry.getValue());
             }
         }
-        APIBusinessInformationDTO apiBusinessInformationDTO = dto.getBusinessInformation();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        APIBusinessInformationDTO apiBusinessInformationDTO = objectMapper.convertValue(dto.getBusinessInformation(),
+                APIBusinessInformationDTO.class);
         if (apiBusinessInformationDTO != null) {
             model.setBusinessOwner(apiBusinessInformationDTO.getBusinessOwner());
             model.setBusinessOwnerEmail(apiBusinessInformationDTO.getBusinessOwnerEmail());
@@ -1457,14 +1463,10 @@ public class APIMappingUtil {
      */
     private static List<APIOperationsDTO> getOperationsFromSwaggerDef(API api, String swaggerDefinition)
             throws APIManagementException {
-
         Optional<APIDefinition> apiDefinitionOptional = OASParserUtil.getOASParser(swaggerDefinition);
         APIDefinition apiDefinition = apiDefinitionOptional.get();
-        Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(api, swaggerDefinition);
-
-        if (!APIConstants.GRAPHQL_API.equals(api.getType())) {
-            uriTemplates = apiDefinition.getURITemplates(api, swaggerDefinition);
-        }
+        SwaggerData swaggerData = new SwaggerData(api);
+        Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerData, swaggerDefinition);
 
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         if (!StringUtils.isEmpty(swaggerDefinition)) {

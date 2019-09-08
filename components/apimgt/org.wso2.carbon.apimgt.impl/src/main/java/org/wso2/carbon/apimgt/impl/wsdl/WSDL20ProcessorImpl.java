@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.impl.wsdl;
 
 import com.google.common.primitives.Bytes;
+import org.apache.commons.lang.StringUtils;
 import org.apache.woden.WSDLException;
 import org.apache.woden.WSDLFactory;
 import org.apache.woden.WSDLReader;
@@ -41,9 +42,11 @@ import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
@@ -272,6 +275,32 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
         this.hasError = true;
         this.error = error;
     }
+
+//    /**
+//     * Updates the endpoints of the {@code description} based on the provided {@code endpointURLs} and {@code api}.
+//     *
+//     * @param endpointURLs Endpoint URIs
+//     * @param api Provided API object
+//     * @param description WSDL 2.0 description
+//     * @throws APIMgtWSDLException If an error occurred while updating endpoints
+//     */
+//    private void updateEndpoints(List<String> endpointURLs, API api, Description description)
+//            throws APIMgtWSDLException {
+//        String context = api.getContext().startsWith("/") ? api.getContext() : "/" + api.getContext();
+//        String selectedUrl;
+//        try {
+//            selectedUrl = APIMWSDLUtils.getSelectedEndpoint(endpointURLs) + context;
+//            if (log.isDebugEnabled()) {
+//                log.debug("Selected URL for updating endpoints of WSDL: " + selectedUrl);
+//            }
+//        } catch (MalformedURLException e) {
+//            throw new APIMgtWSDLException("Error while selecting endpoints for WSDL", e,
+//                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
+//        }
+//        if (!StringUtils.isBlank(selectedUrl)) {
+//            updateEndpoints(selectedUrl, description);
+//        }
+//    }
 
 
     private WSDLSource getWSDLSourceFromDocument(Document document, WSDLReader reader) {

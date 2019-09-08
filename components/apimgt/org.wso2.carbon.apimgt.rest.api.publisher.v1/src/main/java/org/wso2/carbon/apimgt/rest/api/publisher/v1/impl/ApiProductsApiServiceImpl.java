@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
@@ -721,7 +722,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
 
             APIDefinitionFromOpenAPISpec apiDefinitionUsingOASParser = new APIDefinitionFromOpenAPISpec();
-            String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(productToBeAdded);
+            SwaggerData swaggerData = new SwaggerData(productToBeAdded);
+            String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(swaggerData);
             apiProvider.saveSwagger20Definition(productToBeAdded.getId(), apiDefinition);
 
             APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);

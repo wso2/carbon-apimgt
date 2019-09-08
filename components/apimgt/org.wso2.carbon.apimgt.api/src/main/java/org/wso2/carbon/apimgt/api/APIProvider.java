@@ -602,45 +602,51 @@ public interface APIProvider extends APIManager {
 
     List<String> getCustomApiFaultSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
 
+    /**
+     * Publish API to external stores given by external store Ids
+     *
+     * @param api              API which need to published
+     * @param externalStoreIds APIStore Ids which need to publish API
+     * @throws APIManagementException If failed to publish to external stores
+     */
+    boolean publishToExternalAPIStores(API api, List<String> externalStoreIds) throws APIManagementException;
 
     /**
      * When enabled publishing to external APIStores support,publish the API to external APIStores
-     * @param api The API which need to published
+     *
+     * @param api         The API which need to published
      * @param apiStoreSet The APIStores set to which need to publish API
-     * @throws APIManagementException
-     *          If failed to update subscription status
+     * @throws APIManagementException If failed to publish to external stores
      */
     void publishToExternalAPIStores(API api, Set<APIStore> apiStoreSet, boolean apiOlderVersionExist)
             throws APIManagementException;
 
     /**
      * Update the API to external APIStores and database
-     * @param api The API which need to published
-     * @param apiStoreSet The APIStores set to which need to publish API
+     *
+     * @param api                  The API which need to published
+     * @param apiStoreSet          The APIStores set to whsich need to publish API
      * @param apiOlderVersionExist The api contained older versions
-     * @throws APIManagementException
-     *          If failed to update subscription status
+     * @throws APIManagementException If failed to update the APIs  in externals stores
      */
     boolean updateAPIsInExternalAPIStores(API api, Set<APIStore> apiStoreSet, boolean apiOlderVersionExist)
             throws APIManagementException;
 
-
     /**
      * When enabled publishing to external APIStores support,get all the external apistore details which are
      * published and stored in db and which are not unpublished
+     *
      * @param apiId The API Identifier which need to update in db
-     * @throws APIManagementException
-     *          If failed to update subscription status
+     * @throws APIManagementException If failed to get all external stores for the API
      */
-
     Set<APIStore> getExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * When enabled publishing to external APIStores support,get only the published external apistore details which are
      * stored in db
+     *
      * @param apiId The API Identifier which need to update in db
-     * @throws APIManagementException
-     *          If failed to update subscription status
+     * @throws APIManagementException If failed to get all the published external stores for the API
      */
     Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
 
@@ -1228,5 +1234,12 @@ public interface APIProvider extends APIManager {
      */
     public void addProductDocumentationContent(APIProduct apiProduct, String documentationName, String text) throws APIManagementException;
 
-
+    /**
+     * This method used to save the graphql schema content
+     *
+     * @param api api
+     * @param schemaDefinition schema Definition
+     * @throws APIManagementException if failed to add the schema as a resource to registry
+     */
+     void saveGraphqlSchemaDefinition(API api, String schemaDefinition) throws APIManagementException;
 }

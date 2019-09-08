@@ -48,10 +48,12 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
+import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -61,6 +63,7 @@ import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -2723,6 +2726,33 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return isSubscribed;
     }
 
+    /**
+     * This methods loads the monetization implementation class
+     *
+     * @return monetization implementation class
+     * @throws APIManagementException if failed to load monetization implementation class
+     */
+    public Monetization getMonetizationImplClass() throws APIManagementException {
+
+        APIManagerConfiguration configuration = getAPIManagerConfiguration();
+        Monetization monetizationImpl = null;
+        if (configuration == null) {
+            log.error("API Manager configuration is not initialized.");
+        } else {
+            String monetizationImplClass = configuration.getFirstProperty(APIConstants.Monetization.MONETIZATION_IMPL);
+            if (monetizationImplClass == null) {
+                monetizationImpl = new DefaultMonetizationImpl();
+            } else {
+                try {
+                    monetizationImpl = (Monetization) APIUtil.getClassForName(monetizationImplClass).newInstance();
+                } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+                    APIUtil.handleException("Failed to load monetization implementation class.", e);
+                }
+            }
+        }
+        return monetizationImpl;
+    }
+
     @Override
     public SubscriptionResponse addSubscription(Identifier identifier, String userId, int applicationId)
             throws APIManagementException {
@@ -3110,15 +3140,35 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiMgtDAO.updateSubscriptions(identifier, api.getContext(), applicationId, userId);
     }
 
+    /**
+     * @deprecated
+     * This method needs to be removed once the Jaggery web apps are removed.
+     *
+     */
     @Override
     public void addComment(APIIdentifier identifier, String commentText, String user) throws APIManagementException {
         apiMgtDAO.addComment(identifier, commentText, user);
     }
 
     @Override
+    public String addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException {
+        return apiMgtDAO.addComment(identifier, comment, user);
+    }
+
+    @Override
     public org.wso2.carbon.apimgt.api.model.Comment[] getComments(APIIdentifier identifier)
             throws APIManagementException {
         return apiMgtDAO.getComments(identifier);
+    }
+
+    @Override
+    public Comment getComment(APIIdentifier identifier, String commentId) throws APIManagementException {
+        return apiMgtDAO.getComment(identifier, commentId);
+    }
+
+    @Override
+    public void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException {
+        apiMgtDAO.deleteComment(identifier, commentId);
     }
 
     /**
@@ -4159,6 +4209,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public boolean isApplicationTokenExists(String accessToken) throws APIManagementException {
         return apiMgtDAO.isAccessTokenExists(accessToken);
+    }
+
+    @Override
+    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
+        return getGraphqlSchemaDefinition(apiId);
     }
 
     @Override
@@ -5283,21 +5338,36 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
 
     @Override
-    public String getOpenAPIDefinition(APIIdentifier apiId) throws APIManagementException {
+    public String getOpenAPIDefinition(Identifier apiId) throws APIManagementException {
         String definition = super.getOpenAPIDefinition(apiId);
         return APIUtil.removeXMediationScriptsFromSwagger(definition);
     }
 
     @Override
-    public String getOpenAPIDefinitionForEnvironment(APIIdentifier apiId, String environmentName)
+    public String getOpenAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
             throws APIManagementException {
-        API api = getLightweightAPI(apiId);
-        String apiTenantDomain = MultitenantUtils.getTenantDomain(api.getId().getProviderName());
+        String apiTenantDomain = "";
+        String basePath = "";
+        JSONObject swaggerObj = null;
 
-        JSONObject swaggerObj = getModifiedOpenAPIDefinition(api);
-        assert swaggerObj != null;
+        if (apiId instanceof APIIdentifier) {
+            API api = getLightweightAPI((APIIdentifier) apiId);
+            apiTenantDomain = MultitenantUtils.getTenantDomain(api.getId().getProviderName());
 
-        String basePath = api.getContext();
+            swaggerObj = getModifiedOpenAPIDefinition(api);
+            assert swaggerObj != null;
+
+            basePath = api.getContext();
+        } else if (apiId instanceof  APIProductIdentifier) {
+            APIProduct apiProduct = getAPIProduct((APIProductIdentifier) apiId);
+            apiTenantDomain = MultitenantUtils.getTenantDomain(apiProduct.getId().getProviderName());
+
+            swaggerObj = getModifiedOpenAPIDefinition(apiProduct);
+            assert swaggerObj != null;
+
+            basePath = apiProduct.getContext();
+        }
+
         Map<String, String> domains = getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
 
         String host;
@@ -5313,8 +5383,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             if (environment == null) {
                 handleException(
-                        "Could not find provided environment '" + environmentName + "' attached to the api '" + api
-                                .getId().toString() + "'");
+                        "Could not find provided environment '" + environmentName + "' attached to the api '" +
+                        apiId.toString() + "'");
             }
 
             assert environment != null;
@@ -5346,12 +5416,23 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String getOpenAPIDefinitionForLabel(APIIdentifier apiId, String labelName)
+    public String getOpenAPIDefinitionForLabel(Identifier apiId, String labelName)
             throws APIManagementException {
-        API api = getLightweightAPI(apiId);
+        JSONObject swaggerObj = null;
+        List<Label> gatewayLabels = new ArrayList<>();
 
-        JSONObject swaggerObj = getModifiedOpenAPIDefinition(api);
-        List<Label> gatewayLabels = api.getGatewayLabels();
+        if (apiId instanceof  APIIdentifier) {
+            API api = getLightweightAPI((APIIdentifier) apiId);
+
+            swaggerObj = getModifiedOpenAPIDefinition(api);
+            gatewayLabels = api.getGatewayLabels();
+        } else if (apiId instanceof  APIProductIdentifier) {
+            APIProduct apiProduct = getAPIProduct((APIProductIdentifier) apiId);
+
+            swaggerObj = getModifiedOpenAPIDefinition(apiProduct);
+            gatewayLabels = apiProduct.getGatewayLabels();
+        }
+
         Label labelObj = null;
 
         for (Label label : gatewayLabels) {
@@ -5363,7 +5444,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         if (labelObj == null) {
             handleException(
-                    "Could not find provided label '" + labelName + "' attached to the api '" + api.getId().toString()
+                    "Could not find provided label '" + labelName + "' attached to the api '" + apiId.toString()
                             + "'");
             return null;
         }
@@ -5467,6 +5548,54 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException when error occurs while performing operation
      */
     private JSONObject getModifiedOpenAPIDefinition(API api) throws APIManagementException {
+        String definition = super.getOpenAPIDefinition(api.getId());
+        definition = APIUtil.removeXMediationScriptsFromSwagger(definition);
+
+        try {
+            JSONObject swaggerObj = (JSONObject) new JSONParser().parse(definition);
+            String basePath = api.getContext();
+            JSONArray schemes = new JSONArray();
+            String[] apiTransports = api.getTransports().split(",");
+            if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL)) {
+                schemes.add(APIConstants.HTTPS_PROTOCOL);
+            }
+            if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)) {
+                schemes.add(APIConstants.HTTP_PROTOCOL);
+            }
+
+            JSONObject defaultImplicitSecurity = new JSONObject();
+            defaultImplicitSecurity.put(APIConstants.SWAGGER_SECURITY_TYPE, APIConstants.SWAGGER_SECURITY_OAUTH2);
+            defaultImplicitSecurity
+                    .put(APIConstants.SWAGGER_SECURITY_OAUTH2_AUTHORIZATION_URL, "https://wso2.gateway.com/authorize");
+            defaultImplicitSecurity
+                    .put(APIConstants.SWAGGER_SECURITY_OAUTH2_FLOW, APIConstants.SWAGGER_SECURITY_OAUTH2_IMPLICIT);
+            defaultImplicitSecurity.put(APIConstants.SWAGGER_SCOPES, new JSONArray());
+
+
+            swaggerObj.put(APIConstants.SWAGGER_BASEPATH, basePath);
+            swaggerObj.put(APIConstants.SWAGGER_SCHEMES, schemes);
+
+            JSONObject securityDefinitions = (JSONObject)swaggerObj.get(APIConstants.SWAGGER_SECURITY_DEFINITIONS);
+            if (securityDefinitions == null) {
+                securityDefinitions = new JSONObject();
+            }
+            securityDefinitions.put(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, defaultImplicitSecurity);
+            swaggerObj.put(APIConstants.SWAGGER_SECURITY_DEFINITIONS, securityDefinitions);
+            return swaggerObj;
+        } catch (ParseException e) {
+            handleException("Error while parsing API definition for " + api.getId().toString(), e);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the modified swagger definition of an API Product which is required for the try-out
+     *
+     * @param api APIProduct
+     * @return modified swagger definition of an API
+     * @throws APIManagementException when error occurs while performing operation
+     */
+    private JSONObject getModifiedOpenAPIDefinition(APIProduct api) throws APIManagementException {
         String definition = super.getOpenAPIDefinition(api.getId());
         definition = APIUtil.removeXMediationScriptsFromSwagger(definition);
 

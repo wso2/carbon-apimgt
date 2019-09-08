@@ -31,7 +31,7 @@ const styles = theme => ({
     commentIcon: {
         color: theme.palette.getContrastText(theme.palette.background.default),
     },
-    commentText: {
+    content: {
         color: theme.palette.getContrastText(theme.palette.background.default),
     },
     contentWrapper: {
@@ -43,9 +43,6 @@ const styles = theme => ({
     textField: {
         marginTop: 0,
         width: '88%',
-    },
-    category: {
-        width: '12%',
     },
 });
 
@@ -63,15 +60,14 @@ class CommentAdd extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            commentText: '',
-            category: 'General',
+            content: '',
             currentLength: 0,
         };
         this.inputChange = this.inputChange.bind(this);
         this.handleClickAddComment = this.handleClickAddComment.bind(this);
         this.handleClickCancel = this.handleClickCancel.bind(this);
-        this.handleCategoryChange = this.handleCategoryChange.bind(this);
-        this.filterCommentToAddReply = this.filterCommentToAddReply.bind(this);
+        //this.handleCategoryChange = this.handleCategoryChange.bind(this);
+        //this.filterCommentToAddReply = this.filterCommentToAddReply.bind(this);
     }
 
     /**
@@ -80,7 +76,7 @@ class CommentAdd extends React.Component {
      * @memberof CommentAdd
      */
     inputChange({ target }) {
-        this.setState({ commentText: target.value, currentLength: target.value.length });
+        this.setState({ content: target.value, currentLength: target.value.length });
     }
 
     /**
@@ -88,27 +84,19 @@ class CommentAdd extends React.Component {
      * @memberof CommentAdd
      */
     handleClickCancel() {
-        const { toggleShowReply } = this.props;
-        toggleShowReply();
+        this.setState({content:""})
+        // const { toggleShowReply } = this.props;
+        // toggleShowReply();
     }
 
-    /**
-     * Handles category when the category is changed
-     * @param {any} event Drop down select event
-     * @memberof CommentAdd
-     */
-    handleCategoryChange(event) {
-        this.setState({ category: event.target.value });
-    }
-
-    /**
-     * Filters the comment to add the reply
-     * @memberof CommentAdd
-     */
-    filterCommentToAddReply(commentToFilter) {
-        const { parentCommentId } = this.props;
-        return commentToFilter.commentId === parentCommentId;
-    }
+    // /**
+    //  * Filters the comment to add the reply
+    //  * @memberof CommentAdd
+    //  */
+    // filterCommentToAddReply(commentToFilter) {
+    //     const { parentCommentId } = this.props;
+    //     return commentToFilter.commentId === parentCommentId;
+    // }
 
     /**
      * Handles adding a new comment
@@ -116,30 +104,28 @@ class CommentAdd extends React.Component {
      */
     handleClickAddComment() {
         const {
-            apiId, parentCommentId, allComments, toggleShowReply, commentsUpdate, intl,
+            apiId, allComments, commentsUpdate, intl,
         } = this.props;
-        const { category, commentText } = this.state;
+        const { content } = this.state;
         const Api = new API();
         const comment = {
-            apiId,
-            category,
-            commentText: commentText.trim(),
-            parentCommentId,
+            content: content.trim(),
         };
 
         // to check whether a string does not contain only white spaces
-        if (comment.commentText.replace(/\s/g, '').length) {
+        if (comment.content.replace(/\s/g, '').length) {
             Api.addComment(apiId, comment)
                 .then((newComment) => {
-                    this.setState({ commentText: '', category: 'General' });
+                    this.setState({ content: ''});
                     const addedComment = newComment.body;
-                    if (parentCommentId === null) {
-                        allComments.push(addedComment);
-                    } else {
-                        const index = allComments.findIndex(this.filterCommentToAddReply);
-                        allComments[index].replies.push(addedComment);
-                        toggleShowReply();
-                    }
+                    // if (parentCommentId === null) {
+                    //     allComments.push(addedComment);
+                    // } else {
+                    //     const index = allComments.findIndex(this.filterCommentToAddReply);
+                    //     allComments[index].replies.push(addedComment);
+                    //     toggleShowReply();
+                    // }
+                    allComments.push(addedComment)
                     commentsUpdate(allComments);
                 })
                 .catch((error) => {
@@ -175,32 +161,10 @@ class CommentAdd extends React.Component {
         const {
             classes, cancelButton, theme, intl,
         } = this.props;
-        const { category, commentText, currentLength } = this.state;
+        const { content, currentLength } = this.state;
         return (
             <Grid container spacing={24} className={classes.contentWrapper}>
                 <Grid item xs zeroMinWidth>
-                    <FormControl className={classes.category}>
-                        <Select value={category} onChange={this.handleCategoryChange}>
-                            <MenuItem value='General'>
-                                <FormattedMessage
-                                    id='Apis.Details.Comments.CommentAdd.menu.general'
-                                    defaultMessage='General'
-                                />
-                            </MenuItem>
-                            <MenuItem value='Feature Request'>
-                                <FormattedMessage
-                                    id='Apis.Details.Comments.CommentAdd.feature.request'
-                                    defaultMessage='Feature Request'
-                                />
-                            </MenuItem>
-                            <MenuItem value='Bug Report'>
-                                <FormattedMessage
-                                    id='Apis.Details.Comments.CommentAdd.bug.report'
-                                    defaultMessage='Bug Report'
-                                />
-                            </MenuItem>
-                        </Select>
-                    </FormControl>
                     <TextField
                         id='standard-multiline-flexible'
                         autoFocus
@@ -212,10 +176,10 @@ class CommentAdd extends React.Component {
                             id: 'Apis.Details.Comments.CommentAdd.write.comment.help',
                         })}
                         inputProps={{ maxLength: theme.custom.maxCommentLength }}
-                        value={commentText}
+                        value={content}
                         onChange={this.inputChange}
                     />
-                    <Typography className={classes.commentText} align='right'>
+                    <Typography className={classes.content} align='right'>
                         {currentLength + '/' + theme.custom.maxCommentLength}
                     </Typography>
                     <Grid container spacing={8}>

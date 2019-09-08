@@ -1703,5 +1703,28 @@ public final class APIConstants {
     public static final String API_ID = "apiId";
     public static final String RATING_ID = "ratingId";
     public static final String RATING = "rating";
-    public static final String USER_NAME ="username";
+    public static final String USER_NAME = "username";
+
+    public static class RestApiConstants {
+        public static final String STORE_CONTEXT = "/store";
+        public static final String REST_API_PUBLISHER_VERSION_1 = "v1.0";
+        public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
+        public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
+                REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_1;
+        public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
+        public static final String REST_API_ADMIN_VERSION = "v0.14";
+        public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
+        public static final String REST_API_ADMIN_IMPORT_API_RESOURCE = "/import/api";
+        public static final String IMPORT_API_PRESERVE_PROVIDER = "preserveProvider";
+        public static final String IMPORT_API_OVERWRITE = "overwrite";
+        public static final String IMPORT_API_ARCHIVE_FILE = "file";
+        public static final String IMPORT_API_SUCCESS = "API imported successfully.";
+        public static final String REST_API_PUB_RESOURCE_PATH_APIS = "/apis";
+        public static final String REST_API_PUB_SEARCH_API_QUERY = "query";
+        public static final String PUB_SEARCH_API_QUERY_PARAMS_NAME = "name:";
+        public static final String PUB_SEARCH_API_QUERY_PARAMS_VERSION = "version:";
+        public static final String PUB_API_LIST_RESPONSE_PARAMS_LIST = "list";
+        public static final String PUB_API_LIST_RESPONSE_PARAMS_COUNT = "count";
+        public static final String PUB_API_RESPONSE_PARAMS_ID = "id";
+    }
 }

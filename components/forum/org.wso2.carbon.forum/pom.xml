@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>forum</artifactId>
-        <version>6.5.74-SNAPSHOT</version>
+        <version>6.5.85-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -50,6 +50,8 @@
                         </Export-Package>
                         <Import-Package>
                             org.apache.axis2.context.*; version="${imp.pkg.version.axis2}",
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>

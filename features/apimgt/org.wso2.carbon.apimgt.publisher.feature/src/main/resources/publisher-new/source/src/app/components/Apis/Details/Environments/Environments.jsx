@@ -18,11 +18,14 @@
 
 import React, { useContext, useState } from 'react';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
+
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { Link } from 'react-router-dom';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -32,6 +35,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Checkbox from '@material-ui/core/Checkbox';
 import Alert from 'AppComponents/Shared/Alert';
 import Paper from '@material-ui/core/Paper';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  * Renders an Environments list
@@ -40,33 +44,30 @@ import Paper from '@material-ui/core/Paper';
  */
 export default function Environments() {
     const { api, updateAPI } = useContext(APIContext);
-
+    const { settings } = useAppContext();
     const [gatewayEnvironments, setGatewayEnvironments] = useState([...api.gatewayEnvironments]);
+    const isNotCreator = AuthManager.isNotCreator();
+    const isNotPublisher = AuthManager.isNotPublisher();
+    const [isUpdating, setUpdating] = useState(false);
 
     /**
      *
      * Handle the Environments save button action
      */
     function addEnvironments() {
-        updateAPI({ gatewayEnvironments }).then(() => Alert.info('API Update Successfully'));
+        setUpdating(true);
+        updateAPI({ gatewayEnvironments })
+            .then(() => Alert.info('API Update Successfully'))
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while updating the environments');
+                }
+                console.error(error);
+            })
+            .finally(() => setUpdating(false));
     }
-
-    // TODO: Get environments from setting API
-    const environments =
-        {
-            environment: [
-                {
-                    name: 'Production and Sandbox',
-                    type: 'hybrid',
-                    serverUrl: 'https://localhost:9443/services/',
-                    showInApiConsole: true,
-                    endpoints: {
-                        http: 'http://localhost:8280',
-                        https: 'https://localhost:8243',
-                    },
-                },
-            ],
-        };
 
     return (
         <div>
@@ -90,10 +91,11 @@ export default function Environments() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {environments.environment.map(row => (
+                        {settings.environment.map(row => (
                             <TableRow key={row.name}>
                                 <TableCell padding='checkbox'>
                                     <Checkbox
+                                        disabled={isNotCreator && isNotPublisher}
                                         checked={gatewayEnvironments.includes(row.name)}
                                         onChange={
                                             (event) => {
@@ -129,6 +131,7 @@ export default function Environments() {
             >
                 <Grid item>
                     <Button
+                        disabled={isNotCreator && isNotPublisher && isUpdating}
                         type='submit'
                         variant='contained'
                         color='primary'
@@ -138,6 +141,7 @@ export default function Environments() {
                             id='Apis.Details.Environments.Environments.save'
                             defaultMessage='Save'
                         />
+                        {isUpdating && <CircularProgress size={20} />}
                     </Button>
                 </Grid>
                 <Grid item>

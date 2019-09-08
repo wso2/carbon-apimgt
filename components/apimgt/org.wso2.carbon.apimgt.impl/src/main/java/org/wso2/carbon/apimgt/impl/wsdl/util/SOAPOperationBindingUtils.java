@@ -247,9 +247,10 @@ public class SOAPOperationBindingUtils {
                         .getTenantId(tenantDomain);
                 APIUtil.loadTenantRegistry(tenantId);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
-                String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                        provider + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
-                        + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE;
+                String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
+                        + APIUtil.replaceEmailDomain(provider) + RegistryConstants.PATH_SEPARATOR + name
+                        + RegistryConstants.PATH_SEPARATOR + version + RegistryConstants.PATH_SEPARATOR
+                        + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE;
                 if (log.isDebugEnabled()) {
                     log.debug("Resource path to the soap to rest converted sequence: " + resourcePath);
                 }

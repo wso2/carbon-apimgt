@@ -346,10 +346,10 @@ public class SequenceUtils {
                         .getTenantId(tenantDomain);
                 APIUtil.loadTenantRegistry(tenantId);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
-                String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + provider
-                        + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
-                        + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE
-                        + RegistryConstants.PATH_SEPARATOR + seqType;
+                String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR
+                        + APIUtil.replaceEmailDomain(provider) + RegistryConstants.PATH_SEPARATOR + name
+                        + RegistryConstants.PATH_SEPARATOR + version + RegistryConstants.PATH_SEPARATOR
+                        + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE + RegistryConstants.PATH_SEPARATOR + seqType;
 
                 Collection collection = (Collection) registry.get(resourcePath);
                 String[] resources = collection.getChildren();
