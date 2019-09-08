@@ -849,8 +849,8 @@ class Resources extends React.Component {
                                     <Typography variant='body2' color='primary'>
                                         <FormattedMessage
                                             id='Apis.Details.Resources.Resources.update.not.allowed'
-                                            defaultMessage='*You are not authorized to update API resources due
-                                        to insufficient permissions'
+                                            defaultMessage={'*You are not authorized to update API resources due' +
+                                            ' to insufficient permissions'}
                                         />
                                     </Typography>
                                 </Grid>

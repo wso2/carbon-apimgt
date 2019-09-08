@@ -94,8 +94,7 @@ export default function AccessControl(props) {
                                 {'  '}
                                 <FormattedMessage
                                     id='Apis.Details.Configuration.components.AccessControl.tooltip.all.desc'
-                                    defaultMessage='The API is viewable, modifiable by all the publishers and
-                                creators.'
+                                    defaultMessage='The API is viewable, modifiable by all the publishers and creators.'
                                 />
                                 <br />
                                 <br />
@@ -108,8 +107,8 @@ export default function AccessControl(props) {
                                 {'  '}
                                 <FormattedMessage
                                     id='Apis.Details.Configuration.components.AccessControl.tooltip.restrict.desc'
-                                    defaultMessage='The API can be viewable and modifiable by only specific
-                                    publishers and creators with the roles that you specify'
+                                    defaultMessage={'The API can be viewable and modifiable by only specific' +
+                                    ' publishers and creators with the roles that you specify'}
                                 />
                             </p>
                         </React.Fragment>

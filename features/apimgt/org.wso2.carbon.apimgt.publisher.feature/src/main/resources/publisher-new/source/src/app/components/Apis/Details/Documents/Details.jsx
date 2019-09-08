@@ -411,7 +411,7 @@ class Details extends React.Component {
                                                             id='try.dropping.some.files.here.or.click.to.select.files.to.upload'
                                                             defaultMessage={
                                                                 'Try dropping some files here, or click to select' +
-                                                                'files to upload.'
+                                                                ' files to upload.'
                                                             }
                                                         />
                                                     </p>
