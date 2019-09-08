@@ -42,7 +42,6 @@ import org.wso2.carbon.identity.oauth.dao.OAuthAppDAO;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
