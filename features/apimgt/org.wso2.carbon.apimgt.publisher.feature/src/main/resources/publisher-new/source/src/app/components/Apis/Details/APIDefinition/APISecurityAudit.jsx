@@ -313,10 +313,10 @@ class APISecurityAudit extends Component {
                                         target='_blank'
                                         rel='noopener noreferrer'
                                     >
-                                     link
+                                    &nbsp;link&nbsp;
                                     </a>
-                                </strong> to
-                                 view a detailed description, possible exploits and remediation for this issue.
+                                </strong>
+                                to view a detailed description, possible exploits and remediation for this issue.
                             </Typography>
                         </TableCell>
                     </TableRow>
