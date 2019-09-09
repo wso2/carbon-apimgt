@@ -42,11 +42,11 @@ MeApiService delegate = new MeApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
-    }, tags={ "roles" })
+    }, tags={ "Roles" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested user has the role.", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested user does not have the role.", response = Void.class) })
-    public Response meRolesRoleIdHead(@ApiParam(value = "The Base 64 URL encoded role name with domain. If the given role is in secondary user-store, role ID should be derived as Base64URLEncode({user-store-name}/{role-name}). If the given role is in PRIMARY user-store, role ID can be derived as Base64URLEncode(role-name) ",required=true) @PathParam("roleId") String roleId) throws APIManagementException{
-        return delegate.meRolesRoleIdHead(roleId, securityContext);
+    public Response validateUserRole(@ApiParam(value = "The Base 64 URL encoded role name with domain. If the given role is in secondary user-store, role ID should be derived as Base64URLEncode({user-store-name}/{role-name}). If the given role is in PRIMARY user-store, role ID can be derived as Base64URLEncode(role-name) ",required=true) @PathParam("roleId") String roleId) throws APIManagementException{
+        return delegate.validateUserRole(roleId, securityContext);
     }
 }

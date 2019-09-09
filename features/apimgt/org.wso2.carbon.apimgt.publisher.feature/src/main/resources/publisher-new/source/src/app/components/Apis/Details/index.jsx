@@ -15,12 +15,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+/* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import LifeCycleIcon from '@material-ui/icons/Autorenew';
 import EndpointIcon from '@material-ui/icons/GamesOutlined';
+import PersonPinCircleOutlinedIcon from '@material-ui/icons/PersonPinCircleOutlined';
 import ResourcesIcon from '@material-ui/icons/VerticalSplit';
 import ScopesIcon from '@material-ui/icons/VpnKey';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
@@ -28,6 +29,7 @@ import BusinessIcon from '@material-ui/icons/Business';
 import CodeIcon from '@material-ui/icons/Code';
 import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
+import SubscriptionsIcon from '@material-ui/icons/RssFeed';
 import MonetizationIcon from '@material-ui/icons/LocalAtm';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl, defineMessages } from 'react-intl';
@@ -52,6 +54,7 @@ import Resources from './Resources/Resources';
 import ProductResourcesView from './Resources/ProductResourcesView';
 import ProductResourcesEdit from './ProductResources/ProductResourcesEdit';
 import Endpoints from './Endpoints/Endpoints';
+import Environments from './Environments/Environments';
 import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
 import Scope from './Scopes';
@@ -306,8 +309,16 @@ class Details extends Component {
         // TODO: Ideally, The state should hold the corresponding API object
         // which we could call it's `update` method safely ~tmkb
         if (isAPIProduct) {
-            const restAPI = new Api();
-            promisedUpdate = restAPI.updateProduct(JSON.parse(JSON.stringify(updatedProperties)));
+            const productClient = new APIProduct();
+
+            // api product put is failing when it has the following properties
+            const apiProductCopy = JSON.parse(JSON.stringify(updatedProperties));
+            if (apiProductCopy.client) delete apiProductCopy.client;
+            if (apiProductCopy._data) delete apiProductCopy._data;
+            if (apiProductCopy.apiType) delete apiProductCopy.apiType;
+            if (apiProductCopy.type) delete apiProductCopy.type;
+
+            promisedUpdate = productClient.update(apiProductCopy);
         } else if (!isEmpty(updatedProperties)) {
             // newApi object has to be provided as the updatedProperties. Then api will be updated.
             promisedUpdate = api.update(updatedProperties);
@@ -317,9 +328,15 @@ class Details extends Component {
         }
         return promisedUpdate
             .then((updatedAPI) => {
-                Alert.info(`${updatedAPI.name} API updated successfully`);
-                this.setState({ api: updatedAPI });
-                return updatedAPI;
+                if (isAPIProduct) {
+                    Alert.info(`${updatedAPI.body.name} API updated successfully`);
+                    this.setState({ api: updatedAPI.body });
+                    return updatedAPI.body;
+                } else {
+                    Alert.info(`${updatedAPI.name} API updated successfully`);
+                    this.setState({ api: updatedAPI });
+                    return updatedAPI;
+                }
             })
             .catch((error) => {
                 // TODO: Should log and handle the error case by the original callee ~tmkb
@@ -383,9 +400,13 @@ class Details extends Component {
 
         return (
             <React.Fragment>
-                <APIProvider value={{
-                    api, updateAPI: this.updateAPI, isAPIProduct, setAPI: this.setAPI,
-                }}
+                <APIProvider
+                    value={{
+                        api,
+                        updateAPI: this.updateAPI,
+                        isAPIProduct,
+                        setAPI: this.setAPI,
+                    }}
                 >
                     <div className={classes.LeftMenu}>
                         <Link to={'/' + (isAPIProduct ? 'api-products' : 'apis') + '/'}>
@@ -420,6 +441,16 @@ class Details extends Component {
                                 })}
                                 to={pathPrefix + 'endpoints'}
                                 Icon={<EndpointIcon />}
+                            />
+                        )}
+                        {!isAPIProduct && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.environments',
+                                    defaultMessage: 'environments',
+                                })}
+                                to={pathPrefix + 'environments'}
+                                Icon={<PersonPinCircleOutlinedIcon />}
                             />
                         )}
                         {this.getLeftMenuItemForAPIType(api.type)}
@@ -465,6 +496,14 @@ class Details extends Component {
                         />
                         <LeftMenuItem
                             text={intl.formatMessage({
+                                id: 'Apis.Details.index.subscriptions',
+                                defaultMessage: 'subscriptions',
+                            })}
+                            to={pathPrefix + 'subscriptions'}
+                            Icon={<SubscriptionsIcon />}
+                        />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
                                 id: 'Apis.Details.index.monetization',
                                 defaultMessage: 'monetization',
                             })}
@@ -500,7 +539,10 @@ class Details extends Component {
                                     component={() => <Configuration api={api} />}
                                 />
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
-
+                                <Route
+                                    path={Details.subPaths.ENVIRONMENTS}
+                                    component={() => <Environments api={api} />}
+                                />
                                 <Route path={Details.subPaths.OPERATIONS} component={() => <Operations api={api} />} />
                                 <Route
                                     exact
@@ -523,7 +565,7 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.SUBSCRIPTIONS}
-                                    component={() => <Subscriptions api={api} />}
+                                    component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
                                 />
                                 <Route path={Details.subPaths.SECURITY} component={() => <Security api={api} />} />
                                 <Route path={Details.subPaths.COMMENTS} component={() => <Comments api={api} />} />
@@ -541,6 +583,7 @@ class Details extends Component {
                                     component={() => <Properties api={api} />}
                                 />
                                 <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
+                                <Route path={Details.subPaths.SUBSCRIPTIONS} component={() => <Subscriptions />} />
                                 <Route
                                     path={Details.subPaths.MONETIZATION}
                                     component={() => <Monetization api={api} />}
@@ -569,6 +612,7 @@ Details.subPaths = {
     CONFIGURATION: '/apis/:api_uuid/configuration',
     CONFIGURATION_PRODUCT: '/api-products/:apiprod_uuid/configuration',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
+    ENVIRONMENTS: '/apis/:api_uuid/environments',
     OPERATIONS: '/apis/:api_uuid/operations',
     RESOURCES: '/apis/:api_uuid/resources',
     RESOURCES_PRODUCT: '/api-products/:apiprod_uuid/resources',

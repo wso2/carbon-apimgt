@@ -55,9 +55,10 @@ public interface APIPublisher {
 
     /**
      * The method to publish new version of existing  API to external Store
-     * @param api      API
-     * @param store    Store
-     * @return   published/not
+     *
+     * @param api   API
+     * @param store Store
+     * @return published/not
      */
     public boolean createVersionedAPIToStore(API api, APIStore store, String version) throws APIManagementException;
 }

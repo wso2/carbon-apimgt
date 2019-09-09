@@ -25,6 +25,7 @@ import {
 } from '@material-ui/core';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
+import AuthManager from 'AppData/AuthManager';
 
 const styles = theme => ({
     endpointInputWrapper: {
@@ -36,11 +37,11 @@ const styles = theme => ({
         width: '100%',
     },
     input: {
-        marginLeft: theme.spacing.unit,
+        marginLeft: theme.spacing(),
         flex: 1,
     },
     iconButton: {
-        padding: theme.spacing.unit,
+        padding: theme.spacing(),
     },
     divider: {
         width: 1,
@@ -65,15 +66,19 @@ function GenericEndpoint(props) {
         setAdvancedConfigOpen,
         deleteEndpoint,
         index,
+        readOnly,
     } = props;
     const [serviceUrl, setServiceUrl] = useState(endpointURL);
 
     useEffect(() => {
         setServiceUrl(endpointURL);
     }, [endpointURL]);
+    const isNotCreator = AuthManager.isNotCreator();
+
     return (
         <React.Fragment className={classes.endpointInputWrapper}>
             <TextField
+                disabled={isNotCreator}
                 label={<FormattedMessage
                     id='Apis.Details.Endpoints.GenericEndpoint.service.url.input'
                     defaultMessage='Service URL'
@@ -87,6 +92,7 @@ function GenericEndpoint(props) {
                 margin='normal'
                 required
                 InputProps={{
+                    readOnly,
                     endAdornment: (
                         <InputAdornment position='end'>
                             {type === 'prototyped' ?
@@ -121,6 +127,10 @@ function GenericEndpoint(props) {
         </React.Fragment>);
 }
 
+GenericEndpoint.defaultProps = {
+    readOnly: false,
+};
+
 GenericEndpoint.propTypes = {
     endpointURL: PropTypes.string.isRequired,
     deleteEndpoint: PropTypes.func.isRequired,
@@ -130,6 +140,7 @@ GenericEndpoint.propTypes = {
     index: PropTypes.number.isRequired,
     editEndpoint: PropTypes.func.isRequired,
     category: PropTypes.string.isRequired,
+    readOnly: PropTypes.bool,
 };
 
 export default withStyles(styles)(GenericEndpoint);

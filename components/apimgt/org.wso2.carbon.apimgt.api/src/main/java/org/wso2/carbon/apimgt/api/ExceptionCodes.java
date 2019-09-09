@@ -170,6 +170,8 @@ public enum ExceptionCodes implements ErrorHandler {
     OPENAPI_NOT_FOUND(900755, "OpenAPI definition not found", 404, "OpenAPI definition not found"),
     OPENAPI_URL_MALFORMED(900756, "OpenAPI definition retrieval from URL failed", 400, "Exception occurred while retrieving the OpenAPI definition from URL"),
     OPENAPI_URL_NO_200(900757, "OpenAPI definition retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
+    INVALID_OAS2_FOUND(900761, "Invalid OpenAPI V2 definition found", 400, "Invalid OpenAPI V2 definition found"),
+    INVALID_OAS3_FOUND(900762, "Invalid OpenAPI V3 definition found", 400, "Invalid OpenAPI V3 definition found"),
 
 
     // REST API related codes
@@ -269,7 +271,11 @@ public enum ExceptionCodes implements ErrorHandler {
     COMMENT_LENGTH_EXCEEDED(901103, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
             + "number of characters"),
     NEED_ADMIN_PERMISSION(901100, "Admin permission needed", 403,
-            "This user is not an admin");
+            "This user is not an admin"),
+
+    //External Stores related codes
+    EXTERNAL_STORE_ID_NOT_FOUND(901200,"External Store Not Found", 404, "Error while publishing to external stores. " +
+            "External Store Not Found");
 
     private final long errorCode;
     private final String errorMessage;

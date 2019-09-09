@@ -10,6 +10,8 @@ import { FormattedMessage } from 'react-intl';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
+import AuthManager from 'AppData/AuthManager';
+
 import BusinessPlans from './BusinessPlans';
 
 const styles = theme => ({
@@ -44,13 +46,15 @@ class Monetization extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            properties: [],
+            monetizationAttributes: [],
             monStatus: null,
             property: {},
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.isNotCreator = AuthManager.isNotCreator();
+        this.isNotPublisher = AuthManager.isNotPublisher();
     }
 
     componentDidMount() {
@@ -60,8 +64,8 @@ class Monetization extends Component {
     getMonetizationData() {
         const { api } = this.props;
         api.getSettings().then((settings) => {
-            if (settings.MonetizationProperties != null) {
-                this.setState({ properties: settings.MonetizationProperties });
+            if (settings.monetizationAttributes != null) {
+                this.setState({ monetizationAttributes: settings.monetizationAttributes });
             }
         });
         api.getMonetization(this.props.api.id).then((status) => {
@@ -122,21 +126,10 @@ class Monetization extends Component {
 
     render() {
         const { api, classes } = this.props;
-        const { properties, monStatus } = this.state;
-        if (!properties || monStatus === null) {
+        const { monetizationAttributes, monStatus } = this.state;
+        if (!monetizationAttributes || monStatus === null) {
             return <Progress />;
         }
-        const propertiesList = properties.map((property, i) => (
-            <TextField
-                fullWidth
-                id={property + i}
-                label={property}
-                name={property}
-                type='text'
-                margin='normal'
-                onChange={this.handleInputChange}
-                autoFocus
-            />));
         return (
             <Grid item xs={6}>
                 <Typography variant='title' gutterBottom>
@@ -146,6 +139,7 @@ class Monetization extends Component {
                     <FormControlLabel
                         control={
                             <Checkbox
+                                disabled={this.isNotCreator && this.isNotPublisher}
                                 id='monStatus'
                                 name='monStatus'
                                 checked={monStatus}
@@ -165,9 +159,22 @@ class Monetization extends Component {
                                     />
                                 </Typography>
                                 {
-                                    (properties.length > 0) ?
-                                        (propertiesList) :
-                                        (
+                                    (monetizationAttributes.length > 0) ?
+                                        (monetizationAttributes.map((monetizationAttribute, i) => (
+                                            <TextField
+                                                disabled={this.isNotCreator && this.isNotPublisher}
+                                                fullWidth
+                                                id={'attribute' + i}
+                                                label={monetizationAttribute.name}
+                                                name={monetizationAttribute.displayName}
+                                                type='text'
+                                                margin='normal'
+                                                required={monetizationAttribute.required}
+                                                onChange={this.handleInputChange}
+                                                autoFocus
+                                            />
+                                        )))
+                                        : (
                                             <Typography gutterBottom>
                                                 <FormattedMessage
                                                     id='Apis.Details.Monetization.Index.there.are.no

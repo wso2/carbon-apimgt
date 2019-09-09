@@ -753,7 +753,7 @@ public class ThrottleConditionEvaluatorTest {
         conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getComplexCondition1()}));
         conditionMap.put("default", Arrays.asList(new ConditionDto[]{getComplexCondition1(), getComplexCondition2()}));
         String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
-        Assert.assertEquals(condition, "default");
+        Assert.assertEquals(null, condition);
     }
 
     @Test
@@ -789,7 +789,7 @@ public class ThrottleConditionEvaluatorTest {
         conditionMap.put("condition1", Arrays.asList(new ConditionDto[]{getComplexCondition1()}));
         conditionMap.put("default", Arrays.asList(new ConditionDto[]{getComplexCondition1(), getComplexCondition2()}));
         String condition = throttleConditionEvaluator.getThrottledInCondition(messageContext, null, conditionMap);
-        Assert.assertEquals(condition, "default");
+        Assert.assertEquals(null, condition);
     }
 
     @Test

@@ -180,7 +180,6 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.common.AbstractUserStoreManager;
 import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.user.core.tenant.TenantConstants;
 import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -692,8 +691,8 @@ public final class APIUtil {
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
             //set data and status related to monetization
             api.setMonetizationStatus(Boolean.parseBoolean(artifact.getAttribute
-                    (APIConstants.API_MONETIZATION_STATUS)));
-            String monetizationInfo = artifact.getAttribute(APIConstants.API_MONETIZATION_PROPERTIES);
+                    (APIConstants.Monetization.API_MONETIZATION_STATUS)));
+            String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
             if (StringUtils.isNotBlank(monetizationInfo)) {
                 JSONParser parser = new JSONParser();
                 JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
@@ -1264,10 +1263,10 @@ public final class APIUtil {
             attachLabelsToAPIArtifact(artifact, api, tenantDomain);
 
             //set monetization status (i.e - enabled or disabled)
-            artifact.setAttribute(APIConstants.API_MONETIZATION_STATUS, Boolean.toString(api.getMonetizationStatus()));
+            artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS, Boolean.toString(api.getMonetizationStatus()));
             //set additional monetization data
             if (api.getMonetizationProperties() != null) {
-                artifact.setAttribute(APIConstants.API_MONETIZATION_PROPERTIES,
+                artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES,
                         api.getMonetizationProperties().toJSONString());
             }
 
@@ -1619,6 +1618,11 @@ public final class APIUtil {
     }
 
     public static String getOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
+                apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
+    }
+
+    public static String getGraphqlDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
     }
@@ -2308,7 +2312,7 @@ public final class APIUtil {
                             //Set store login username
                         } else {
                             log.error("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> " +
-                                    "config of api-manager.xml.");
+                                    "config of external-api-stores.xml.");
                         }
                     }
                     externalAPIStores.add(store);
@@ -7575,13 +7579,13 @@ public final class APIUtil {
                 //if search key is 'tag' instead of 'tags', allow it as well since rest api document says query
                 // param to use for tag search is 'tag'
 
-                if (APIConstants.TAG_SEARCH_TYPE_PREFIX3.equals(searchKey)) {
-                    searchKey = APIConstants.TAG_SEARCH_TYPE_PREFIX;
+                if (APIConstants.TAG_SEARCH_TYPE_PREFIX.equals(searchKey)) {
+                    searchKey = APIConstants.TAGS_SEARCH_TYPE_PREFIX;
                     searchValue = searchValue.replace(" ", "\\ ");
                 }
 
                 if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey) &&
-                        !APIConstants.TAG_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey)) {
+                        !APIConstants.TAGS_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey)) {
                     if (APIConstants.API_STATUS.equalsIgnoreCase(searchKey)) {
                         searchValue = searchValue.toLowerCase();
                     }
@@ -7869,7 +7873,8 @@ public final class APIUtil {
 
         // sub context and doc content doesn't support AND search
         if (inputSearchQuery != null && inputSearchQuery.contains(" ") && !inputSearchQuery
-                .contains(APIConstants.TAG_SEARCH_TYPE_PREFIX4)) {
+                .contains(APIConstants.TAG_COLON_SEARCH_TYPE_PREFIX) && (!inputSearchQuery
+                .contains(APIConstants.CONTENT_SEARCH_TYPE_PREFIX) || inputSearchQuery.split(":").length > 2)) {
             if (inputSearchQuery.split(" ").length > 1) {
                 String[] searchCriterias = inputSearchQuery.split(" ");
                 for (int i = 0; i < searchCriterias.length; i++) {
@@ -8779,5 +8784,10 @@ public final class APIUtil {
         org.wso2.carbon.user.core.UserStoreManager manager = realm.getUserStoreManager();
         AbstractUserStoreManager abstractManager = (AbstractUserStoreManager) manager;
         return abstractManager.isUserInRole(tenantAwareUserName, roleName);
+    }
+
+    public static JSONArray getMonetizationAttributes() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getMonetizationAttributes();
     }
 }

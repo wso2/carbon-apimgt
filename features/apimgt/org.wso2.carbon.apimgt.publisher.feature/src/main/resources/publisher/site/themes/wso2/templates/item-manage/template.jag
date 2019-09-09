@@ -1318,7 +1318,7 @@
                 <td class="resource-method-td resource_expand" data-path="$.paths.['{{ path }}'].{{ @key }}">
                     <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
                 </td>
-                <td class="resource_expand"><a class="resource-path" title="resource_path">{{ path }}</a></td>
+                <td class="resource_expand"><a class="resource-path" title="resource_path">{{ displayPath }}</a></td>
                 <td><span class="operation-summary change_summary" data-path="$.paths.['{{ path }}'].{{@key}}" data-attr="summary" >{{ summary }}</span></td>
                 <td><a class="operation-summary auth_type_select"  data-type="select" data-path="$.paths.['{{ path }}'].{{@key}}" data-attr="x-auth-type" data-value="{{ x-auth-type }}" title="x-auth-type"></a></td>
                 <td><a class='operation-summary throttling_select'  data-type="select" data-path="$.paths.['{{ path }}'].{{@key}}" data-attr="x-throttling-tier" title="x-throttling-tier">{{ x-throttling-tier }}</a></td>

@@ -81,12 +81,12 @@ class API extends Resource {
      * @param {Array} [userExcludes=[]] List of properties that are need to be excluded from the generated JSON object
      * @returns {JSON} JSON representation of the API
      */
-    toJSON(userExcludes = []) {
+    toJSON(resource = this, userExcludes = []) {
         var copy = {},
             excludes = ['_data', 'client', 'apiType', ...userExcludes];
-        for (var prop in this) {
+        for (var prop in resource) {
             if (!excludes.includes(prop)) {
-                copy[prop] = this[prop];
+                copy[prop] = resource[prop];
             }
         }
         return copy;
@@ -288,8 +288,9 @@ class API extends Resource {
         }
     }
 
-    save() {
-        const promisedAPIResponse = this.client.then(client => {
+    save(query) {
+        query = query ? query : 'v2';
+        const promisedAPIResponse = this.client.then((client) => {
             const properties = client.spec.definitions.API.properties;
             const data = {};
             Object.keys(this).forEach(apiAttribute => {
@@ -300,6 +301,7 @@ class API extends Resource {
             const payload = {
                 body: data,
                 'Content-Type': 'application/json',
+                openAPIVersion: query,
             };
             return client.apis['APIs'].post_apis(payload, this._requestMetaData());
         });
@@ -664,7 +666,7 @@ class API extends Resource {
                 schemaDefinition: graphQLSchema,
                 'Content-Type': 'multipart/form-data',
             };
-            return client.apis['GraphQL Schema (Individual)'].put_apis__apiId__graphql_schema(
+            return client.apis['GraphQL Schema'].put_apis__apiId__graphql_schema(
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -839,7 +841,7 @@ class API extends Resource {
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
     update(updatedProperties) {
-        const updatedAPI = { ...this.toJSON(), ...updatedProperties };
+        const updatedAPI = { ...this.toJSON(), ...this.toJSON(updatedProperties) };
         const promisedUpdate = this.client.then(client => {
             const payload = {
                 apiId: updatedAPI.id,
@@ -871,14 +873,11 @@ class API extends Resource {
      * @param {String} apiId API UUID
      * @returns {Promise} With given callback attached to the success chain else API invoke promise.
      */
-    subscriptions(id, callback = null) {
-        const promise_subscription = this.client.then(client => {
+    subscriptions(apiId, offset = null, limit = null, query = null, callback = null) {
+        const promise_subscription = this.client.then((client) => {
             return client.apis['Subscriptions'].get_subscriptions(
-                {
-                    apiId: id,
-                },
-                this._requestMetaData(),
-            );
+                { apiId, limit, offset, query },
+                this._requestMetaData());
         });
         if (callback) {
             return promise_subscription.then(callback);
@@ -1152,7 +1151,7 @@ class API extends Resource {
         };
 
         promise_create = this.client.then(client => {
-            return client.apis['API (Collection)'].post_apis_import_graphql_schema(
+            return client.apis['APIs'].post_apis_import_graphql_schema(
                 payload,
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
@@ -1166,9 +1165,10 @@ class API extends Resource {
         }
     }
 
-    validateGraphQLFile(file) {
-        const promised_validationResponse = this.client.then(client => {
-            return client.apis['API (Collection)'].post_apis_validate_graphql_schema(
+    static validateGraphQLFile(file) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        const promised_validationResponse = apiClient.then(client => {
+            return client.apis['Validation'].post_apis_validate_graphql_schema(
                 {
                     type: 'GraphQL',
                     file,
@@ -1310,6 +1310,28 @@ class API extends Resource {
         });
 
         return promised_getAPIThumbnail;
+    }
+
+    validateSystemRole(role) {
+        const promise = this.client.then((client) => {
+            return client.apis.Roles.validateSystemRole({ roleId: role }).then((resp) => {
+                return resp.ok;
+            }).catch(() => {
+                    return false;
+            });
+        });
+        return promise;
+    }
+
+    validateUSerRole(role) {
+        const promise = this.client.then((client) => {
+            return client.apis.Roles.validateUserRole({ roleId: role }).then((resp) => {
+                return resp.ok;
+            }).catch(() => {
+                return false;
+            });
+        });
+        return promise;
     }
 
     /**

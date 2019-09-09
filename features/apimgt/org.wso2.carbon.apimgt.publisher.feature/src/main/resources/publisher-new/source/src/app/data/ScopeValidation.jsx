@@ -19,7 +19,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import AuthManager from './AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 const resourcePath = {
     APIS: '/apis',
@@ -44,7 +44,7 @@ const resourcePath = {
     IMPORT_APIS: '/import/apis',
     SUBSCRIPTION: '/subscriptions',
     SUBSCRIPTIONS: '/subscriptions',
-    BLOCK_SUBSCRIPTION: '/subscriptions/block-subscription:',
+    BLOCK_SUBSCRIPTION: '/subscriptions/block-subscription',
     UNBLOCK_SUBSCRIPTION: '/subscriptions/unblock-subscription',
     POLICIES: "'/policies/{tierLevel}'",
     POLICY: "'/policies/{tierLevel}/{tierName}'",

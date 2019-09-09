@@ -23,6 +23,7 @@ import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import cloneDeep from 'lodash.clonedeep';
+import AuthManager from 'AppData/AuthManager';
 
 import EndpointOverview from './EndpointOverview';
 import ApiContext from '../components/ApiContext';
@@ -41,7 +42,7 @@ const styles = theme => ({
         paddingRight: '10px',
     },
     buttonSection: {
-        marginTop: theme.spacing.unit * 2,
+        marginTop: theme.spacing(2),
     },
     titleWrapper: {
         paddingTop: '10px',
@@ -49,6 +50,7 @@ const styles = theme => ({
     radioGroup: {
         display: 'flex',
         flexDirection: 'row',
+        marginLeft: theme.spacing(2),
     },
 });
 
@@ -65,6 +67,7 @@ function Endpoints(props) {
     const [apiObject, setModifiedAPI] = useState(api);
     const [endpointImplementation, setEndpointImplementation] = useState('');
     const [swagger, setSwagger] = useState(defaultSwagger);
+    const isNotCreator = AuthManager.isNotCreator();
 
     /**
      * Method to update the api.
@@ -90,7 +93,7 @@ function Endpoints(props) {
         const implType = api.endpointConfig.implementation_status;
         setModifiedAPI(cloneDeep(api));
         setEndpointImplementation(() => {
-            return lifeCycleStatus === 'PROTOTYPED' && implType === 'prototyped' ?
+            return lifeCycleStatus === 'PROTOTYPED' || implType === 'prototyped' ?
                 endpointImplType[1] : endpointImplType[0];
         });
     }, []);
@@ -199,6 +202,7 @@ function Endpoints(props) {
                                     variant='contained'
                                     color='primary'
                                     onClick={() => saveAPI(updateAPI)}
+                                    disabled={isNotCreator}
                                 >
                                     <FormattedMessage
                                         id='Apis.Details.Endpoints.Endpoints.save'
@@ -216,6 +220,19 @@ function Endpoints(props) {
                                     </Button>
                                 </Link>
                             </Grid>
+                            {isNotCreator
+                                && (
+                                    <Grid item>
+                                        <Typography variant='body2' color='primary'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Endpoints.Endpoints.update.not.allowed'
+                                                defaultMessage='*You are not authorized to update Endpoints of
+                                                the API due to insufficient permissions'
+                                            />
+                                        </Typography>
+                                    </Grid>
+                                )
+                            }
                         </Grid>
                     </div>)}
             </ApiContext.Consumer>

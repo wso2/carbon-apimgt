@@ -80,6 +80,7 @@ public class APIManagerConfiguration {
     public static final String WEBSOCKET_DEFAULT_GATEWAY_URL = "ws://localhost:9099";
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
     private JSONArray applicationAttributes = new JSONArray();
+    private JSONArray monetizationAttributes = new JSONArray();
 
     private SecretResolver secretResolver;
 
@@ -391,6 +392,12 @@ public class APIManagerConfiguration {
                     jsonObject.put(APIConstants.ApplicationAttributes.REQUIRED, isRequired);
                     applicationAttributes.add(jsonObject);
                 }
+            } else if (APIConstants.Monetization.MONETIZATION_CONFIG.equals(localName)) {
+                OMElement additionalAttributes = element
+                        .getFirstChildWithName(new QName(APIConstants.Monetization.ADDITIONAL_ATTRIBUTES));
+                if (additionalAttributes != null) {
+                    setMonetizationAdditionalAttributes(additionalAttributes);
+                }
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -399,6 +406,10 @@ public class APIManagerConfiguration {
 
     public JSONArray getApplicationAttributes() {
         return applicationAttributes;
+    }
+
+    public JSONArray getMonetizationAttributes() {
+        return monetizationAttributes;
     }
 
     /**
@@ -1045,5 +1056,40 @@ public class APIManagerConfiguration {
     public WorkflowProperties getWorkflowProperties() {
         return workflowProperties;
     }
-    
+
+    /**
+     * To populate Monetization Additional Attributes
+     * @param element
+     */
+    private void setMonetizationAdditionalAttributes(OMElement element) {
+        Iterator iterator = element.getChildrenWithLocalName(APIConstants.Monetization.ATTRIBUTE);
+        while (iterator.hasNext()) {
+            OMElement omElement = (OMElement) iterator.next();
+            Iterator attributes = omElement.getChildElements();
+            JSONObject monetizationAttribute = new JSONObject();
+            boolean isHidden = Boolean.parseBoolean(
+                    omElement.getAttributeValue(new QName(APIConstants.Monetization.IS_ATTRIBUTE_HIDDEN)));
+            boolean isRequired = Boolean.parseBoolean(
+                    omElement.getAttributeValue(new QName(APIConstants.Monetization.IS_ATTRIBITE_REQUIRED)));
+            monetizationAttribute.put(APIConstants.Monetization.IS_ATTRIBUTE_HIDDEN, isHidden);
+            while (attributes.hasNext()) {
+                OMElement attribute = (OMElement) attributes.next();
+                if (attribute.getLocalName().equals(APIConstants.Monetization.ATTRIBUTE_NAME)) {
+                    monetizationAttribute.put(APIConstants.Monetization.ATTRIBUTE, attribute.getText());
+                } else if(attribute.getLocalName().equals(APIConstants.Monetization.ATTRIBUTE_DISPLAY_NAME)){
+                    monetizationAttribute.put(APIConstants.Monetization.ATTRIBUTE_DISPLAY_NAME, attribute.getText());
+                } else if (attribute.getLocalName().equals(APIConstants.Monetization.ATTRIBUTE_DESCRIPTION)) {
+                    monetizationAttribute.put(APIConstants.Monetization.ATTRIBUTE_DESCRIPTION, attribute.getText());
+                } else if (attribute.getLocalName().equals(APIConstants.Monetization.ATTRIBUTE_DEFAULT) && isRequired) {
+                    monetizationAttribute.put(APIConstants.Monetization.ATTRIBUTE_DEFAULT, attribute.getText());
+                }
+            }
+            if (isHidden && isRequired && !monetizationAttribute
+                    .containsKey(APIConstants.Monetization.ATTRIBUTE_DEFAULT)) {
+                log.error("A default value needs to be given for required, hidden monetization attributes.");
+            }
+            monetizationAttribute.put(APIConstants.Monetization.IS_ATTRIBITE_REQUIRED, isRequired);
+            monetizationAttributes.add(monetizationAttribute);
+        }
+    }
 }

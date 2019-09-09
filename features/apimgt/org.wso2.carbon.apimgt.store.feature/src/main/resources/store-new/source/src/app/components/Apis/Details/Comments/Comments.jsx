@@ -24,7 +24,7 @@ import Grid from '@material-ui/core/Grid/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import APIProduct from 'AppData/APIProduct';
 import CONSTS from 'AppData/Constants';
-import Alert from '../../../Shared/Alert';
+import AuthManager from 'AppData/AuthManager';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
 import API from '../../../../data/api';
@@ -91,9 +91,9 @@ class Comments extends Component {
     componentDidMount() {
         const { apiType } = this.context;
         let {
-            apiId, theme, match, intl,
+            apiId, theme, match, intl, isOverview, setCount
         } = this.props;
-        if (match) apiId = match.params.api_uuid;
+        if (match) apiId = match.params.apiUuid;
 
         let restApi = null;
         if (apiType === CONSTS.API_TYPE) {
@@ -102,36 +102,37 @@ class Comments extends Component {
             restApi = new APIProduct();
         }
 
-        restApi
-            .getAllComments(apiId)
-            .then((result) => {
-                const commentList = result.body.list;
-                this.setState({ allComments: commentList, totalComments: commentList.length });
-                if (commentList.length < theme.custom.commentsLimit) {
-                    this.setState({ startCommentsToDisplay: 0, comments: commentList.slice(0, commentList.length) });
-                } else {
-                    this.setState({
-                        startCommentsToDisplay: commentList.length - theme.custom.commentsLimit,
-                        comments: commentList.slice(
-                            commentList.length - theme.custom.commentsLimit,
-                            commentList.length,
-                        ),
-                    });
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-                if (error.response) {
-                    Alert.error(error.response.body.message);
-                } else {
-                    Alert.error(
-                        intl.formatMessage({
-                            defaultMessage: 'Something went wrong while retrieving comments',
-                            id: 'AnonymousView.SignUp.something.went.wrong',
-                        }),
-                    );
-                }
-            });
+        const user = AuthManager.getUser();
+        if (user != null) {
+            restApi
+                .getAllComments(apiId)
+                .then((result) => {
+                    let commentList = result.body.list;
+                    if (isOverview) {
+                        setCount(commentList.length);
+                        if (commentList.length > 2) {
+                            commentList = commentList.slice(commentList.length - 3, commentList.length);
+                        }
+                    }
+                    this.setState({ allComments: commentList, totalComments: commentList.length });
+                    if (commentList.length < theme.custom.commentsLimit) {
+                        this.setState({ startCommentsToDisplay: 0, comments: commentList.slice(0, commentList.length) });
+                    } else {
+                        this.setState({
+                            startCommentsToDisplay: commentList.length - theme.custom.commentsLimit,
+                            comments: commentList.slice(
+                                commentList.length - theme.custom.commentsLimit,
+                                commentList.length,
+                            ),
+                        });
+                    }
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                });
+        }
     }
 
     /**
@@ -208,7 +209,7 @@ class Comments extends Component {
     render() {
         const { classes, showLatest } = this.props;
         const {
-            comments, expanded, allComments, startCommentsToDisplay, totalComments,
+            comments, expanded, allComments, startCommentsToDisplay, totalComments, commentsUpdate,
         } = this.state;
         return (
             <ApiContext.Consumer>
@@ -231,21 +232,22 @@ class Comments extends Component {
                                 </Typography>
                             </div>
                         )}
-                        {!showLatest && (
-                            <CommentAdd
-                                apiId={api.id}
-                                commentsUpdate={this.updateCommentList}
-                                allComments={allComments}
-                                parentCommentId={null}
-                                cancelButton={false}
-                            />
-                        )}
                         <Comment
                             comments={comments}
                             apiId={api.id}
                             commentsUpdate={this.updateCommentList}
                             allComments={allComments}
                         />
+                        {!showLatest && (
+                            <CommentAdd
+                                apiId={api.id}
+                                commentsUpdate={this.updateCommentList}
+                                allComments={allComments}
+                                parentCommentId={null}
+                                cancelButton={true}
+                            />
+                        )}
+
                         {startCommentsToDisplay !== 0 && (
                             <div className={classes.contentWrapper}>
                                 <Grid container spacing={32} className={classes.root}>
@@ -274,7 +276,7 @@ class Comments extends Component {
                                         <Typography className={classes.verticalSpace} variant='body2'>
                                             <FormattedMessage
                                                 id='Apis.Details.Comments.showing.comments'
-                                                defaultMessage='Showing comments'
+                                                defaultMessage='Showing comments '
                                             />
 
                                             {totalComments - startCommentsToDisplay + ' of ' + totalComments}

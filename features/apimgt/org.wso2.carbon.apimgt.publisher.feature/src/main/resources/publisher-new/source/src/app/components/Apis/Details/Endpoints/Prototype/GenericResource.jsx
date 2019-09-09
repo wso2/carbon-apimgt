@@ -40,7 +40,7 @@ const styles = theme => ({
         width: '80%',
     },
     resourcePathContainer: {
-        paddingTop: theme.spacing.unit,
+        paddingTop: theme.spacing(),
     },
     genericResourceContent: {
         boxShadow: 'inset 0px 3px 2px 0px #aaaaaa',

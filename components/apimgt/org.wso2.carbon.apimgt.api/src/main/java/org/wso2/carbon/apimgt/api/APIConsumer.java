@@ -379,10 +379,23 @@ public interface APIConsumer extends APIManager {
     /**
      * @param identifier Api identifier
      * @param comment comment text
-     * @param user Username of the comment author                        
+     * @param user Username of the comment author
      * @throws APIManagementException if failed to add comment for API
+     *
+     * @deprecated
+     * This method needs to be removed once the Jaggery web apps are removed.
      */
     void addComment(APIIdentifier identifier, String comment, String user) throws APIManagementException;
+
+    /**
+     * This method is to add a comment.
+     *
+     * @param identifier Api identifier
+     * @param comment comment object
+     * @param user Username of the comment author
+     * @throws APIManagementException if failed to add comment for API
+     */
+    String addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException;
 
     /**
      * @param identifier Api identifier
@@ -390,6 +403,25 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get comments for identifier
      */
     Comment[] getComments(APIIdentifier identifier) throws APIManagementException;
+
+    /**
+     * This method is to get a comment of an API.
+     *
+     * @param identifier API Identifier
+     * @param commentId Comment ID
+     * @return Comment
+     * @throws APIManagementException if failed to get comments for identifier
+     */
+    Comment getComment(APIIdentifier identifier, String commentId) throws APIManagementException;
+
+    /**
+     * This method is to delete a comment.
+     *
+     * @param identifier API Identifier
+     * @param commentId Comment ID
+     * @throws APIManagementException if failed to delete comment for identifier
+     */
+    void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException;
 
     /**
      * Adds an application
@@ -774,7 +806,7 @@ public interface APIConsumer extends APIManager {
      * @return swagger string
      * @throws APIManagementException if error occurred while obtaining the swagger definition
      */
-    String getOpenAPIDefinitionForEnvironment(APIIdentifier apiId, String environmentName)
+    String getOpenAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
             throws APIManagementException;
 
     /**
@@ -785,7 +817,7 @@ public interface APIConsumer extends APIManager {
      * @return swagger string
      * @throws APIManagementException if error occurred while obtaining the swagger definition
      */
-    String getOpenAPIDefinitionForLabel(APIIdentifier apiId, String labelName)
+    String getOpenAPIDefinitionForLabel(Identifier apiId, String labelName)
             throws APIManagementException;
 
     /**
@@ -865,6 +897,14 @@ public interface APIConsumer extends APIManager {
 	JSONObject resumeWorkflow(Object[] args);
 
     boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
+
+    /**
+     * This methods loads the monetization implementation class
+     *
+     * @return monetization implementation class
+     * @throws APIManagementException if failed to load monetization implementation class
+     */
+    Monetization getMonetizationImplClass() throws APIManagementException;
 
     /**
      * Returns wsdl document resource to be downloaded from the API store for a SOAP api

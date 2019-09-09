@@ -18,6 +18,7 @@
 
 import axios from 'axios';
 import qs from 'qs';
+import Configurations from 'Config';
 import Utils from './Utils';
 import User from './User';
 import APIClient from './APIClient';
@@ -130,6 +131,7 @@ class AuthManager {
                 return user;
             });
     }
+
     /**
      * Persist an user in browser local storage and in-memory, Since only one use can be
      * logged into the application at a time,
@@ -171,6 +173,14 @@ class AuthManager {
         return validScope.then((scope) => {
             return userscopes.includes(scope);
         });
+    }
+
+    static isNotCreator() {
+        return !AuthManager.getUser().scopes.includes('apim:api_create');
+    }
+
+    static isNotPublisher() {
+        return !AuthManager.getUser().scopes.includes('apim:api_publish');
     }
 
     /**
@@ -215,7 +225,7 @@ class AuthManager {
         const { data } = response;
         const { AM_ACC_TOKEN_DEFAULT_P1, expires_in: expiresIn } = data;
         const user = new User(environmentName, data.authUser);
-        user.setPartialToken(AM_ACC_TOKEN_DEFAULT_P1, expiresIn, Utils.CONST.CONTEXT_PATH);
+        user.setPartialToken(AM_ACC_TOKEN_DEFAULT_P1, expiresIn, Configurations.app.context);
         user.setExpiryTime(expiresIn);
         user.scopes = data.scopes.split(' ');
         return user;
@@ -240,7 +250,7 @@ class AuthManager {
         });
         promisedLogout
             .then(() => {
-                Utils.deleteCookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH, environmentName);
+                Utils.deleteCookie(User.CONST.WSO2_AM_TOKEN_1, Configurations.app.context, environmentName);
                 AuthManager.dismissUser(environmentName);
                 new APIClientFactory().destroyAPIClient(environmentName);
                 // Single client should be re initialize after log out
@@ -296,7 +306,7 @@ class AuthManager {
             scopes: AuthManager.CONST.USER_SCOPES,
         };
         const referrer = document.referrer.indexOf('https') !== -1 ? document.referrer : null;
-        const url = Utils.CONST.CONTEXT_PATH + environment.refreshTokenPath;
+        const url = Configurations.app.context + environment.refreshTokenPath;
         const headers = {
             Accept: 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -345,7 +355,7 @@ class AuthManager {
 
 // TODO: derive this from swagger definitions ~tmkb
 AuthManager.CONST = {
-    USER_SCOPES: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage ' +
-        'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
+    USER_SCOPES: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
+        + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
 };
 export default AuthManager;

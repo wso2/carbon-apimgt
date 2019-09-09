@@ -71,30 +71,25 @@ function validateInputs(){
     if (!validateInputCharactors(applicationNameTxt,applicationName,illegalChars)) {
         return false;
     }
- 
-     if (!validateForSpaces(applicationNameTxt, applicationName, errorHasSpacesMsg)) {
-         return false;
-     }
- 
-         var isInvalidAttribute = false;
-         $('#custom-attribute-tbody tr').each(function() {
-                 var attributeElement= $(this).find('input[name^=attributeName]');
-                 var attributeValueElement = $(this).find('input[name^=attributeValue]');
- 
-                 var attributeName = attributeElement.val();
-                 var attributeValue = attributeValueElement.val();
- 
-                 if (!validateAttributesInput(attributeName, attributeElement, requiredMsg, invalidErrorMsg)) {
-                     isInvalidAttribute = true;
-                     return false;
-                 }
-                 // We do not validate the attribute value input as it can be empty.
-             });
-             if (isInvalidAttribute) {
-                 return false;
-             }
-             return true;
-     };
+    var isInvalidAttribute = false;
+    $('#custom-attribute-tbody tr').each(function () {
+        var attributeElement = $(this).find('input[name^=attributeName]');
+        var attributeValueElement = $(this).find('input[name^=attributeValue]');
+
+        var attributeName = attributeElement.val();
+        var attributeValue = attributeValueElement.val();
+
+        if (!validateAttributesInput(attributeName, attributeElement, requiredMsg, invalidErrorMsg)) {
+            isInvalidAttribute = true;
+            return false;
+        }
+        // We do not validate the attribute value input as it can be empty.
+    });
+    if (isInvalidAttribute) {
+        return false;
+    }
+    return true;
+};
  
  function validateForSpaces(text, element, errorMsg) {
      var elementId = element.attr('id');

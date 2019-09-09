@@ -24,6 +24,7 @@ import {
 } from '@material-ui/core';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
+import AuthManager from 'AppData/AuthManager';
 
 const styles = theme => ({
     endpointInputWrapper: {
@@ -35,11 +36,11 @@ const styles = theme => ({
         width: '100%',
     },
     input: {
-        marginLeft: theme.spacing.unit,
+        marginLeft: theme.spacing(),
         flex: 1,
     },
     iconButton: {
-        padding: theme.spacing.unit,
+        padding: theme.spacing(),
     },
 });
 
@@ -64,6 +65,8 @@ function GenericEndpointAdd(props) {
         setServiceUrl('');
         addEndpoint(serviceUrl);
     };
+    const isNotCreator = AuthManager.isNotCreator();
+
     return (
         <React.Fragment className={classes.endpointInputWrapper}>
             <TextField
@@ -71,6 +74,7 @@ function GenericEndpointAdd(props) {
                     id='Apis.Details.Endpoints.GenericEndpoint.service.url.input'
                     defaultMessage='Service URL'
                 />}
+                disabled={isNotCreator}
                 className={classes.textField}
                 value={serviceUrl}
                 onChange={event => setServiceUrl(event.target.value)}

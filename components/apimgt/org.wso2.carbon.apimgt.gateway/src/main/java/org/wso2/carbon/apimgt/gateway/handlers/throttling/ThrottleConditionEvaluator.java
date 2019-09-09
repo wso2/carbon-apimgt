@@ -362,39 +362,37 @@ public class ThrottleConditionEvaluator {
         ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance().getThrottleProperties();
         boolean status = true;
         for (ConditionDto condition : conditionDtoList) {
+            status = true;
             if (condition.getIpCondition() != null) {
                 if (!isMatchingIP(axis2MessageContext, condition.getIpCondition())) {
                     status = false;
-                    break;
                 }
             } else if (condition.getIpRangeCondition() != null) {
                 if (!isWithinIP(axis2MessageContext, condition.getIpRangeCondition())) {
                     status = false;
-                    break;
                 }
             }
             if (condition.getHeaderConditions() != null && throttleProperties.isEnableHeaderConditions() &&
                     !condition.getHeaderConditions().getValues().isEmpty()) {
                 if (!isHeaderPresent(axis2MessageContext, condition.getHeaderConditions())) {
                     status = false;
-                    break;
                 }
             }
             if (condition.getJwtClaimConditions() != null && throttleProperties.isEnableJwtConditions() &&
                     !condition.getJwtClaimConditions().getValues().isEmpty()) {
                 if (!isJWTClaimPresent(authContext, condition.getJwtClaimConditions())) {
                     status = false;
-                    break;
                 }
             }
             if (condition.getQueryParameterConditions() != null && throttleProperties.isEnableQueryParamConditions() &&
                     !condition.getQueryParameterConditions().getValues().isEmpty()) {
                 if (!isQueryParamPresent(axis2MessageContext, condition.getQueryParameterConditions())) {
                     status = false;
-                    break;
                 }
             }
-
+            if (status) {
+                break;
+            }
         }
         return status;
     }

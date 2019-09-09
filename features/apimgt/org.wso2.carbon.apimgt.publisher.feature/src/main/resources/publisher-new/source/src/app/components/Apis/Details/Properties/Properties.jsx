@@ -39,6 +39,7 @@ import TableRow from '@material-ui/core/TableRow';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api.js';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import AuthManager from 'AppData/AuthManager';
 
 const styles = theme => ({
     root: {
@@ -235,13 +236,15 @@ class Properties extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            additionalProperties: null,
+            additionalProperties: {},
             showAddProperty: false,
             propertyKey: null,
             propertyValue: null,
         };
         this.handleUpdateList = this.handleUpdateList.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
+        this.isNotCreator = AuthManager.isNotCreator();
+        this.isNotPublisher = AuthManager.isNotPublisher();
     }
 
     toggleAddProperty = () => {
@@ -250,6 +253,7 @@ class Properties extends React.Component {
             return { showAddProperty: !showAddProperty };
         });
     };
+
     handleChange = name => (event) => {
         const { value } = event.target;
 
@@ -423,7 +427,12 @@ class Properties extends React.Component {
                             defaultMessage='API Properties'
                         />
                     </Typography>
-                    <Button size='small' className={classes.button} onClick={this.toggleAddProperty}>
+                    <Button
+                        size='small'
+                        className={classes.button}
+                        onClick={this.toggleAddProperty}
+                        disabled={this.isNotCreator && this.isNotPublisher}
+                    >
                         <AddCircle className={classes.buttonIcon} />
                         <FormattedMessage
                             id='Apis.Details.Properties.Properties.add.new.property'
@@ -457,6 +466,8 @@ class Properties extends React.Component {
                                         <TableRow>
                                             <TableCell>
                                                 <TextField
+                                                    disabled={this.isNotCreator
+                                                    && this.isNotPublisher}
                                                     required
                                                     id='outlined-required'
                                                     label={intl.formatMessage({
@@ -475,6 +486,8 @@ class Properties extends React.Component {
                                             </TableCell>
                                             <TableCell>
                                                 <TextField
+                                                    disabled={this.isNotCreator
+                                                    && this.isNotPublisher}
                                                     required
                                                     id='outlined-required'
                                                     label={intl.formatMessage({
@@ -494,7 +507,8 @@ class Properties extends React.Component {
                                                 <Button
                                                     variant='contained'
                                                     color='primary'
-                                                    disabled={!propertyValue || !propertyKey}
+                                                    disabled={!propertyValue || !propertyKey
+                                                    || (this.isNotCreator && this.isNotPublisher)}
                                                     onClick={() => this.handleAddToList(api.additionalProperties)}
                                                 >
                                                     <FormattedMessage
@@ -506,9 +520,9 @@ class Properties extends React.Component {
                                                     to={
                                                         (api.apiType === API.CONSTS.APIProduct
                                                             ? '/api-products/'
-                                                            : '/apis/') +
-                                                        api.id +
-                                                        '/overview'
+                                                            : '/apis/')
+                                                        + api.id
+                                                        + '/overview'
                                                     }
                                                 >
                                                     <Button onClick={this.toggleAddProperty}>
@@ -529,7 +543,7 @@ class Properties extends React.Component {
                             <Grid
                                 container
                                 direction='row'
-                                alignItems='flex-start'
+                                alignItems='center'
                                 spacing={4}
                                 className={classes.buttonSection}
                             >
@@ -539,6 +553,7 @@ class Properties extends React.Component {
                                             variant='contained'
                                             color='primary'
                                             onClick={() => this.handleSubmit(api, updateAPI)}
+                                            disabled={this.isNotCreator && this.isNotPublisher}
                                         >
                                             <FormattedMessage
                                                 id='Apis.Details.Properties.Properties.save'
@@ -557,6 +572,19 @@ class Properties extends React.Component {
                                         </Button>
                                     </Link>
                                 </Grid>
+                                {(this.isNotCreator && this.isNotPublisher)
+                                    && (
+                                        <Grid item>
+                                            <Typography variant='body2' color='primary'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Properties.Properties.update.not.allowed'
+                                                    defaultMessage='*You are not authorized to update properties of
+                                                    the API due to insufficient permissions'
+                                                />
+                                            </Typography>
+                                        </Grid>
+                                    )
+                                }
                             </Grid>
                         </div>
                     </Grid>

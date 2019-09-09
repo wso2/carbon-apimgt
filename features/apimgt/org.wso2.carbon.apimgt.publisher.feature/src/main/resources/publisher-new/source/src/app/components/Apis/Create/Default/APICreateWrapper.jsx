@@ -31,6 +31,7 @@ class APICreateWrapper extends Component {
         super(props);
         this.state = {
             api: new API(),
+            oasVersion: 'v3',
             valid: {
                 name: { empty: false, alreadyExists: false },
                 context: { empty: false, alreadyExists: false },
@@ -39,6 +40,7 @@ class APICreateWrapper extends Component {
         };
         this.handleSubmit = this.handleSubmit.bind(this);
         this.inputChange = this.inputChange.bind(this);
+        this.handleOASVersionChange = this.handleOASVersionChange.bind(this);
     }
     /**
      * Do create API from either swagger URL or swagger file upload.In case of URL pre fetch the swagger file and make
@@ -66,7 +68,7 @@ class APICreateWrapper extends Component {
             currentAPI.type = 'WS';
         }
         currentAPI
-            .save()
+            .save(this.state.oasVersion)
             .then((newAPI) => {
                 const redirectURL = '/apis/' + newAPI.id + '/overview';
                 Alert.info(`${newAPI.name} created.`);
@@ -113,6 +115,11 @@ class APICreateWrapper extends Component {
             return { api: changes, valid: validUpdated };
         });
     }
+
+    handleOASVersionChange(event) {
+        this.setState({ oasVersion: event.target.value });
+    }
+
     /**
      * @inheritDoc
      */
@@ -122,6 +129,8 @@ class APICreateWrapper extends Component {
             <React.Fragment>
                 <APICreateDefault
                     api={this.state.api}
+                    oasVersion={this.state.oasVersion}
+                    handleOASVersionChange={this.handleOASVersionChange}
                     handleSubmit={this.handleSubmit}
                     inputChange={this.inputChange}
                     isAPIProduct={false}

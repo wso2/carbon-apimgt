@@ -23,6 +23,7 @@ import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.entity.ContentType;
 import org.json.simple.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
@@ -71,7 +72,8 @@ import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -146,16 +148,18 @@ import static org.mockito.Matchers.any;
 
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor("org.wso2.carbon.context.PrivilegedCarbonContext")
-@PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class, APIGatewayManager.class,
+@PrepareForTest({ ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class, APIGatewayManager.class,
         GovernanceUtils.class, PrivilegedCarbonContext.class, WorkflowExecutorFactory.class, JavaUtils.class,
         APIProviderImpl.class, APIManagerFactory.class, RegistryUtils.class, ThrottlePolicyDeploymentManager.class,
-        LifecycleBeanPopulator.class, Caching.class, PaginationContext.class, MultitenantUtils.class, org.wso2.carbon.apimgt.impl.AbstractAPIManager.class })
+        LifecycleBeanPopulator.class, Caching.class, PaginationContext.class, MultitenantUtils.class,
+        AbstractAPIManager.class, OASParserUtil.class })
 public class APIProviderImplTest {
 
     private static String EP_CONFIG_WSDL = "{\"production_endpoints\":{\"url\":\"http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl\""
             + ",\"config\":null,\"template_not_supported\":false},\"endpoint_type\":\"wsdl\"}";
     private static String WSDL_URL = "http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl";
     private ApiMgtDAO apimgtDAO;
+    private Registry registry;
     private GenericArtifactManager artifactManager;
     private APIGatewayManager gatewayManager;
     private GenericArtifact artifact;
@@ -190,6 +194,7 @@ public class APIProviderImplTest {
         PowerMockito.when(ThrottlePolicyDeploymentManager.getInstance()).thenReturn(manager);
 
         artifactManager = Mockito.mock(GenericArtifactManager.class);
+        registry = Mockito.mock(Registry.class);
         PowerMockito.when(APIUtil.getArtifactManager(any(Registry.class), Mockito.anyString()))
                 .thenReturn(artifactManager);
         artifact = Mockito.mock(GenericArtifact.class);
@@ -1762,10 +1767,8 @@ public class APIProviderImplTest {
                 api.getId().getProviderName());
         Mockito.when(apiProvider.registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)).
                 thenReturn(true);
-        APIDefinitionFromOpenAPISpec apiDefinitionFromOpenAPISpec = Mockito.mock(APIDefinitionFromOpenAPISpec.class);
-        setFinalStatic(AbstractAPIManager.class.getDeclaredField("definitionFromOpenAPISpec"),
-                apiDefinitionFromOpenAPISpec);
-        Mockito.when(apiDefinitionFromOpenAPISpec.getAPIDefinition(apiId, apiProvider.registry)).thenReturn(
+        PowerMockito.mockStatic(OASParserUtil.class);
+        Mockito.when(OASParserUtil.getAPIDefinition(apiId, apiProvider.registry)).thenReturn(
                 "{\"info\": {\"swagger\":\"data\"}}");
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
 
@@ -2332,6 +2335,7 @@ public class APIProviderImplTest {
         //API Status is CREATED and user has permission
         Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)).thenReturn("PUBLISHED");
         Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME)).thenReturn("user1");
+        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)).thenReturn("password");
         Mockito.when(artifactManager.getGenericArtifact(apiSourceArtifact.getUUID())).thenReturn(artifact);
 
         PowerMockito.when(APIUtil.hasPermission(null, APIConstants.Permissions.API_PUBLISH)).thenReturn(true);
@@ -2374,6 +2378,9 @@ public class APIProviderImplTest {
         Mockito.when(gatewayManager.getAPIEndpointSecurityType(any(API.class), Matchers.anyString()))
                 .thenReturn(APIConstants.APIEndpointSecurityConstants.BASIC_AUTH,
                         APIConstants.APIEndpointSecurityConstants.DIGEST_AUTH);
+        PowerMockito.mockStatic(OASParserUtil.class);
+        Mockito.when(OASParserUtil.getAPIDefinition(api.getId(), apiProvider.registry)).thenReturn(
+                "{\"info\": {\"swagger\":\"data\"}}");
         apiProvider.updateAPI(api);
         Assert.assertEquals(1, api.getEnvironments().size());
         Assert.assertEquals(true, api.getEnvironments().contains("SANDBOX"));
@@ -2606,6 +2613,9 @@ public class APIProviderImplTest {
         Mockito.when(gatewayManager.publishToGateway(any(API.class), any(APITemplateBuilder.class),
                 Matchers.anyString())).thenReturn(failedToPubGWEnv);
         Mockito.when(APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, "carbon.super")).thenReturn(tiers);
+        PowerMockito.mockStatic(OASParserUtil.class);
+        Mockito.when(OASParserUtil.getAPIDefinition(api.getId(), apiProvider.registry)).thenReturn(
+                "{\"info\": {\"swagger\":\"data\"}}");
         apiProvider.updateAPI(api);
     }
 
@@ -4353,5 +4363,44 @@ public class APIProviderImplTest {
                 "setFilePermission", "filePath");
         InputStream inputStream = Mockito.mock(InputStream.class);
         apiProvider.addFileToDocumentation(api.getId(), doc, fileName, inputStream, contentType);
+    }
+
+    @Test
+    public void testSaveGraphqlSchemaDefinition() throws Exception {
+        Resource resource = new ResourceImpl();
+        String resourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + "admin" + RegistryConstants.PATH_SEPARATOR +
+                "API1" + RegistryConstants.PATH_SEPARATOR + "1.0.0" + RegistryConstants.PATH_SEPARATOR;
+        String schemaContent = "sample schema";
+        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
+        API api = new API(apiId);
+        Mockito.when(APIUtil.getGraphqlDefinitionFilePath("API1", "1.0.0", "admin")).thenReturn(resourcePath);
+
+        Resource resourceMock = Mockito.mock(Resource.class);
+        resourceMock.setContent(schemaContent);
+        resourceMock.setMediaType(String.valueOf(ContentType.TEXT_PLAIN));
+
+        ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        PowerMockito.when(sh.getRegistryService()).thenReturn(registryService);
+        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+        Mockito.when(userRegistry.newResource()).thenReturn(resource);
+
+        PowerMockito.doNothing().when(APIUtil.class, "clearResourcePermissions", Mockito.any(), Mockito.any(),
+                Mockito.anyInt());
+        PowerMockito.doNothing().when(APIUtil.class, "setResourcePermissions", Mockito.any(), Mockito.any(),
+                Mockito.any(),Mockito.any());
+
+        GraphQLSchemaDefinition graphQLSchemaDefinition = Mockito.mock(GraphQLSchemaDefinition.class);
+        PowerMockito.doCallRealMethod().when(graphQLSchemaDefinition).saveGraphQLSchemaDefinition(api, schemaContent, userRegistry);
+
+        //org.wso2.carbon.registry.api.RegistryException
+        Mockito.doThrow(RegistryException.class).when(registry).put(Matchers.anyString(), any(Resource.class));
+        try {
+            graphQLSchemaDefinition.saveGraphQLSchemaDefinition(api, schemaContent, registry);
+        } catch (APIManagementException e) {
+            String msg = "Error while adding Graphql Definition for API1-1.0.0";
+            Assert.assertEquals(msg, e.getMessage());
+        }
     }
 }

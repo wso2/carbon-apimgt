@@ -22,6 +22,7 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import ChipInput from 'material-ui-chip-input';
 import { FormattedMessage } from 'react-intl';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  *
@@ -32,6 +33,8 @@ import { FormattedMessage } from 'react-intl';
  */
 export default function Tags(props) {
     const { api, configDispatcher } = props;
+    const isNotCreator = AuthManager.isNotCreator();
+    const isNotPublisher = AuthManager.isNotPublisher();
     return (
         <React.Fragment>
             <Grid container>
@@ -45,13 +48,14 @@ export default function Tags(props) {
                 </Grid>
                 <Grid item xs={12}>
                     <ChipInput
+                        disabled={isNotCreator && isNotPublisher}
                         value={api.tags}
-                        helperText={
+                        helperText={(
                             <FormattedMessage
                                 id='Apis.Details.Configuration.components.Tags.helper'
                                 defaultMessage='Press `enter` after typing the tag name,To add a new tag'
                             />
-                        }
+                        )}
                         onAdd={(tag) => {
                             configDispatcher({ action: 'tags', value: [...api.tags, tag] });
                         }}

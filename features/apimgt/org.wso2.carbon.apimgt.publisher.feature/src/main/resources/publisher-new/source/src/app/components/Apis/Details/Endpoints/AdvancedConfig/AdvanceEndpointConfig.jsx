@@ -30,6 +30,7 @@ import {
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
+import AuthManager from 'AppData/AuthManager';
 
 const itemHeight = 48;
 const itemPaddingTop = 8;
@@ -46,9 +47,9 @@ const styles = theme => ({
     },
     subTitle: {
         fontSize: '1rem',
-        paddingTop: theme.spacing.unit,
-        paddingBottom: theme.spacing.unit,
-        marginBottom: theme.spacing.unit,
+        paddingTop: theme.spacing(),
+        paddingBottom: theme.spacing(),
+        marginBottom: theme.spacing(),
     },
     configContainer: {
         paddingTop: '10px',
@@ -59,7 +60,7 @@ const styles = theme => ({
         padding: '5px',
     },
     textField: {
-        marginRight: theme.spacing.unit,
+        marginRight: theme.spacing(),
         width: '45%',
     },
     advanceDialogActions: {
@@ -277,6 +278,8 @@ function AdvanceEndpointConfig(props) {
         const di = { ...advanceConfigObj, [field]: event.target.value };
         setAdvanceConfig(di);
     };
+
+    const isNotCreator = AuthManager.isNotCreator();
 
     return (
         <Grid container direction='column' className={classes.configContainer}>
@@ -502,6 +505,7 @@ function AdvanceEndpointConfig(props) {
                     onClick={() => onSaveAdvanceConfig(advanceConfigObj)}
                     color='primary'
                     autoFocus
+                    disabled={isNotCreator}
                 >
                     <FormattedMessage
                         id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.config.save.button'

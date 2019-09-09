@@ -153,6 +153,7 @@ public interface APIManager {
      */
     Set<String> getAPIVersions(String providerName, String apiName) throws APIManagementException;
 
+    String getGraphqlSchemaDefinition(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * Returns the swagger v2.0 definition as a string
@@ -161,7 +162,7 @@ public interface APIManager {
      * @return swagger string
      * @throws APIManagementException
      */
-    String getOpenAPIDefinition(APIIdentifier apiId) throws APIManagementException;
+    String getOpenAPIDefinition(Identifier apiId) throws APIManagementException;
 
     /**
      * Checks whether the given document already exists for the given api/product
@@ -682,15 +683,7 @@ public interface APIManager {
      * @return schema content matching name if exist else null
      */
     String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException;
-
-    /**
-     * Create a graphql schema in the path specified.
-     *
-     * @param resourcePath   Registry path of the resource
-     * @param schemaDefinition schema content
-     */
-    void uploadGraphqlSchema(String resourcePath, String schemaDefinition) throws APIManagementException;
-
+    
     /**
      * Returns the corresponding application given the subscriberId and application name
      *

@@ -133,7 +133,7 @@ export default class ProtectedApp extends Component {
      * @param {string} locale Locale name
      */
     loadLocale(locale = 'en') {
-        fetch(`${Utils.CONST.CONTEXT_PATH}/site/public/locales/${locale}.json`)
+        fetch(`${Configurations.app.context}/site/public/locales/${locale}.json`)
             .then(resp => resp.json())
             .then((data) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require

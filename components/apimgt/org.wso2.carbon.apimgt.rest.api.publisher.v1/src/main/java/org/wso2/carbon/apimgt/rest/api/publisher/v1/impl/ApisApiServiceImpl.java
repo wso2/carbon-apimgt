@@ -33,11 +33,10 @@ import graphql.schema.validation.SchemaValidator;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -46,6 +45,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.cxf.phase.PhaseInterceptorChain;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -58,6 +59,8 @@ import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -68,6 +71,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -78,9 +82,12 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
+import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
+import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
@@ -90,16 +97,16 @@ import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
@@ -109,11 +116,13 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.DocumentationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.ExternalStoreMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.Optional;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -194,7 +203,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisPost(APIDTO body, MessageContext messageContext) {
+    public Response apisPost(APIDTO body, String oasVersion, MessageContext messageContext) {
         URI createdApiUri;
         APIDTO createdApiDTO;
         try {
@@ -225,8 +234,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleInternalServerError(errorMessage, log);
                 }
             } else if (!isWSAPI) {
-                APIDefinitionFromOpenAPISpec apiDefinitionUsingOASParser = new APIDefinitionFromOpenAPISpec();
-                String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(apiToAdd);
+                APIDefinition oasParser;
+                if(RestApiConstants.OAS_VERSION_2.equalsIgnoreCase(oasVersion)) {
+                    oasParser = new OAS2Parser();
+                } else {
+                    oasParser = new OAS3Parser();
+                }
+                SwaggerData swaggerData = new SwaggerData(apiToAdd);
+                String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
                 apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
             }
 
@@ -443,22 +458,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                     tenantDomain);
 
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            schemaDefinition = URLDecoder.decode(schemaDefinition.split
-                    (APIConstants.GRAPHQL_SCHEMA_DEFINITION_SEPARATOR)[1], StandardCharsets.UTF_8.name());
             List<APIOperationsDTO> operationArray = extractGraphQLOperationList(schemaDefinition);
             Set<URITemplate> uriTemplates = APIMappingUtil.getURITemplates(originalAPI, operationArray);
             originalAPI.setUriTemplates(uriTemplates);
 
-            String resourcePath = apiIdentifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
-                    apiIdentifier.getApiName() + apiIdentifier.getVersion() +
-                    APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
-            resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
-            apiProvider.uploadGraphqlSchema(resourcePath, schemaDefinition);
+            apiProvider.saveGraphqlSchemaDefinition(originalAPI, schemaDefinition);
             apiProvider.updateAPI(originalAPI);
-
             String schema = apiProvider.getGraphqlSchema(apiIdentifier);
             return Response.ok().entity(schema).build();
-        } catch (APIManagementException | UnsupportedEncodingException | FaultGatewaysException e) {
+        } catch (APIManagementException | FaultGatewaysException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -478,6 +486,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) {
         APIDTO updatedApiDTO;
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange().get(RestApiConstants.USER_REST_API_SCOPES);
+        // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
+        if (tokenScopes == null) {
+            RestApiUtil.handleInternalServerError("Error occurred while updating the  API " + apiId +
+                    " as the token information hasn't been correctly set internally", log);
+            return null;
+        }
         try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -487,6 +503,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             boolean isWSAPI = originalAPI.getType() != null && APIConstants.APITransportType.WS == APIConstants.APITransportType
                     .valueOf(originalAPI.getType());
 
+            org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] apiDtoClassAnnotatedScopes =
+                    APIDTO.class.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
+            boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
+
+            if (!hasClassLevelScope) {
+                // Validate per-field scopes
+                body = getFieldOverriddenAPIDTO(body, originalAPI, tokenScopes);
+            }
             //Overriding some properties:
             body.setName(apiIdentifier.getApiName());
             body.setVersion(apiIdentifier.getVersion());
@@ -531,12 +555,18 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //attach micro-geteway labels
             assignLabelsToDTO(body, apiToUpdate);
-            apiProvider.updateAPI(apiToUpdate);
+            apiProvider.manageAPI(apiToUpdate);
 
             if (!isWSAPI) {
                 String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
-                APIDefinitionFromOpenAPISpec definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-                String newDefinition = definitionFromOpenAPISpec.generateAPIDefinition(apiToUpdate, oldDefinition,
+                Optional<APIDefinition> definitionOptional = OASParserUtil.getOASParser(oldDefinition);
+                if(!definitionOptional.isPresent()) {
+                    RestApiUtil.handleInternalServerError("Error occurred while getting swagger parser.", log);
+                    return null;
+                }
+                APIDefinition apiDefinition = definitionOptional.get();
+                SwaggerData swaggerData = new SwaggerData(apiToUpdate);
+                String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition,
                         true);
                 apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
             }
@@ -853,6 +883,86 @@ public class ApisApiServiceImpl implements ApisApiService {
 //            log.error("API Definition String could not be parsed into JSONObject");
 //        }
         return null;
+    }
+
+    /**
+     * Check whether the token has APIDTO class level Scope annotation
+     * @return true if the token has APIDTO class level Scope annotation
+     */
+    private boolean checkClassScopeAnnotation(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] apiDtoClassAnnotatedScopes, String[] tokenScopes) {
+
+        for (org.wso2.carbon.apimgt.rest.api.util.annotations.Scope classAnnotation : apiDtoClassAnnotatedScopes) {
+            for (String tokenScope : tokenScopes) {
+                if (classAnnotation.name().equals(tokenScope)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get the API DTO object in which the API field values are overridden with the user passed new values
+     * @throws APIManagementException
+     */
+    private APIDTO getFieldOverriddenAPIDTO(APIDTO apidto, API originalAPI,
+                                            String[] tokenScopes) throws APIManagementException {
+
+        APIDTO originalApiDTO;
+        APIDTO updatedAPIDTO;
+
+        try {
+            originalApiDTO = APIMappingUtil.fromAPItoDTO(originalAPI);
+
+            Field[] fields = APIDTO.class.getDeclaredFields();
+            ObjectMapper mapper = new ObjectMapper();
+            String newApiDtoJsonString = mapper.writeValueAsString(apidto);
+            JSONParser parser = new JSONParser();
+            JSONObject newApiDtoJson = (JSONObject) parser.parse(newApiDtoJsonString);
+
+            String originalApiDtoJsonString = mapper.writeValueAsString(originalApiDTO);
+            JSONObject originalApiDtoJson = (JSONObject) parser.parse(originalApiDtoJsonString);
+
+            for (Field field : fields) {
+                org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] fieldAnnotatedScopes =
+                        field.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
+                String originalElementValue = mapper.writeValueAsString(originalApiDtoJson.get(field.getName()));
+                String newElementValue = mapper.writeValueAsString(newApiDtoJson.get(field.getName()));
+
+                if (!StringUtils.equals(originalElementValue, newElementValue)) {
+                    originalApiDtoJson = overrideDTOValues(originalApiDtoJson, newApiDtoJson, field, tokenScopes,
+                            fieldAnnotatedScopes);
+                }
+            }
+
+            updatedAPIDTO = mapper.readValue(originalApiDtoJson.toJSONString(), APIDTO.class);
+
+        } catch (IOException | ParseException e) {
+            String msg = "Error while processing API DTO json strings";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return updatedAPIDTO;
+    }
+
+    /**
+     * Override the API DTO field values with the user passed new values considering the field-wise scopes defined as
+     * allowed to update in REST API definition yaml
+     */
+    private JSONObject overrideDTOValues(JSONObject originalApiDtoJson, JSONObject newApiDtoJson, Field field, String[]
+            tokenScopes, org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] fieldAnnotatedScopes) throws
+            APIManagementException {
+        for (String tokenScope : tokenScopes) {
+            for (org.wso2.carbon.apimgt.rest.api.util.annotations.Scope scopeAnt : fieldAnnotatedScopes) {
+                if (scopeAnt.name().equals(tokenScope)) {
+                    // do the overriding
+                    originalApiDtoJson.put(field.getName(), newApiDtoJson.get(field.getName()));
+                    return originalApiDtoJson;
+                }
+            }
+        }
+        throw new APIManagementException("User is not authorized to update one or more API fields. None of the " +
+                "required scopes found in user token to update the field. So the request will be failed.");
     }
 
     /**
@@ -1269,6 +1379,38 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
+     * Get external store list which the given API is already published to.
+     * @param apiId API Identifier
+     * @param ifNoneMatch If-None-Match header value
+     * @param messageContext CXF Message Context
+     * @return External Store list of published API
+     */
+    @Override
+    public Response getAllPublishedExternalStoresByAPI(String apiId, String ifNoneMatch, MessageContext messageContext)
+            throws APIManagementException {
+
+        APIIdentifier apiIdentifier = null;
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+
+        try {
+            apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while getting API: " + apiId;
+                log.error(errorMessage, e);
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+
+        Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(apiIdentifier);
+        ExternalStoreListDTO externalStoreListDTO =
+                ExternalStoreMappingUtil.fromExternalStoreCollectionToDTO(publishedStores);
+        return Response.ok().entity(externalStoreListDTO).build();
+    }
+    /**
      * Retrieves API Lifecycle history information
      *
      * @param apiId API Id
@@ -1487,6 +1629,42 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (APIManagementException e) {
             String errorMessage = "Error while configuring monetization for API ID : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return Response.serverError().build();
+    }
+
+    /**
+     * Publish API to given external stores.
+     *
+     * @param apiId API Id
+     * @param externalStoreIds  External Store Ids
+     * @param ifMatch   If-match header value
+     * @param messageContext CXF Message Context
+     * @return Response of published external store list
+     */
+    @Override
+    public Response publishAPIToExternalStores(String apiId, List<String> externalStoreIds, String ifMatch,
+                                                         MessageContext messageContext) throws APIManagementException {
+
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        API api = null;
+        try {
+            api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while getting API: " + apiId;
+                log.error(errorMessage, e);
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        if (apiProvider.publishToExternalAPIStores(api, externalStoreIds)) {
+            Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(api.getId());
+            ExternalStoreListDTO externalStoreListDTO =
+                    ExternalStoreMappingUtil.fromExternalStoreCollectionToDTO(publishedStores);
+            return Response.ok().entity(externalStoreListDTO).build();
         }
         return Response.serverError().build();
     }
@@ -1757,7 +1935,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch, MessageContext messageContext) {
         try {
-            APIDefinitionValidationResponse response = new APIDefinitionUsingOASParser()
+            APIDefinitionValidationResponse response = OASParserUtil
                     .validateAPIDefinition(apiDefinition, true);
             if (!response.isValid()) {
                 RestApiUtil.handleBadRequest(response.getErrorItems(), log);
@@ -1766,22 +1944,26 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+            APIDefinition oasParser = response.getParser();
             Set<URITemplate> uriTemplates = null;
             try {
-                uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(existingAPI, response.getJsonContent());
+                SwaggerData swaggerData = new SwaggerData(existingAPI);
+                uriTemplates = oasParser.getURITemplates(swaggerData, response.getJsonContent());
             } catch (APIManagementException e) {
                 // catch APIManagementException inside again to capture validation error
                 RestApiUtil.handleBadRequest(e.getMessage(), log);
             }
-            Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiDefinition);
+            Set<Scope> scopes = oasParser.getScopes(apiDefinition);
             //validating scope roles
             for (Scope scope : scopes) {
-                for (String aRole : scope.getRoles().split(",")) {
-                    boolean isValidRole = APIUtil.isRoleNameExist(RestApiUtil.getLoggedInUsername(), aRole);
-                    if (!isValidRole) {
-                        String error = "Role '" + aRole + "' Does not exist.";
-                        RestApiUtil.handleBadRequest(error, log);
+                String roles = scope.getRoles();
+                if (roles != null) {
+                    for (String aRole : roles.split(",")) {
+                        boolean isValidRole = APIUtil.isRoleNameExist(RestApiUtil.getLoggedInUsername(), aRole);
+                        if (!isValidRole) {
+                            String error = "Role '" + aRole + "' Does not exist.";
+                            RestApiUtil.handleBadRequest(error, log);
+                        }
                     }
                 }
             }
@@ -1791,7 +1973,9 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //Update API is called to update URITemplates and scopes of the API
             apiProvider.updateAPI(existingAPI);
-            apiProvider.saveSwagger20Definition(existingAPI.getId(), apiDefinition);
+            SwaggerData swaggerData = new SwaggerData(existingAPI);
+            String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
+            apiProvider.saveSwagger20Definition(existingAPI.getId(), updatedApiDefinition);
             //retrieves the updated swagger definition
             String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
             return Response.ok().entity(apiSwagger).build();
@@ -1877,12 +2061,18 @@ public class ApisApiServiceImpl implements ApisApiService {
             //for multiple http methods
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(api.getId());
             if (!org.apache.commons.lang3.StringUtils.isEmpty(apiSwaggerDefinition)) {
-                APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-                Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(api, apiSwaggerDefinition);
+                Optional<APIDefinition> definitionOptional = OASParserUtil.getOASParser(apiSwaggerDefinition);
+                if(!definitionOptional.isPresent()) {
+                    RestApiUtil.handleInternalServerError("Error occurred while getting swagger parser.", log);
+                    return null;
+                }
+                APIDefinition apiDefinition = definitionOptional.get();
+                SwaggerData swaggerData = new SwaggerData(api);
+                Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerData, apiSwaggerDefinition);
                 api.setUriTemplates(uriTemplates);
 
                 // scopes
-                Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiSwaggerDefinition);
+                Set<Scope> scopes = apiDefinition.getScopes(apiSwaggerDefinition);
                 api.setScopes(scopes);
             }
 
@@ -2027,12 +2217,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             String definitionToAdd;
             boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
             // Rearrange paths according to the API payload and save the OpenAPI definition
-            APIDefinitionFromOpenAPISpec definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-            definitionToAdd = definitionFromOpenAPISpec.generateAPIDefinition(apiToAdd,
+
+            APIDefinition apiDefinition = validationResponse.getParser();
+            SwaggerData swaggerData = new SwaggerData(apiToAdd);
+            definitionToAdd = apiDefinition.generateAPIDefinition(swaggerData,
                     validationResponse.getJsonContent(), syncOperations);
 
-            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(apiToAdd, definitionToAdd);
-            Set<Scope> scopes = definitionFromOpenAPISpec.getScopes(definitionToAdd);
+            Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerData, definitionToAdd);
+            Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
             apiToAdd.setUriTemplates(uriTemplates);
             apiToAdd.setScopes(scopes);
 
@@ -2300,29 +2492,22 @@ public class ApisApiServiceImpl implements ApisApiService {
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
+
             //adding the api
             apiProvider.addAPI(apiToAdd);
 
             //Save swagger definition of graphQL
             APIDefinitionFromOpenAPISpec apiDefinitionUsingOASParser = new APIDefinitionFromOpenAPISpec();
-            String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(apiToAdd);
+            SwaggerData swaggerData = new SwaggerData(apiToAdd);
+            String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(swaggerData);
             apiProvider.saveSwagger20Definition(apiToAdd.getId(), apiDefinition);
 
             APIIdentifier createdApiId = apiToAdd.getId();
+            apiProvider.saveGraphqlSchemaDefinition(apiToAdd, schema);
 
             //Retrieve the newly added API to send in the response payload
             API createdApi = apiProvider.getAPI(createdApiId);
 
-            String resourcePath = createdApiId.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
-                    createdApiId.getApiName() + createdApiId.getVersion() +
-                    APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
-            resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
-
-            if (apiProvider.checkIfResourceExists(resourcePath)) {
-                RestApiUtil.handleConflict("schema resource already exists for the API " +
-                        additionalPropertiesAPI.getId(), log);
-            }
-            apiProvider.uploadGraphqlSchema(resourcePath, schema);
             APIDTO createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
 
             //This URI used to set the location header of the POST response
@@ -2482,14 +2667,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             throws APIManagementException {
         handleInvalidParams(fileInputStream, url);
         OpenAPIDefinitionValidationResponseDTO responseDTO;
-        APIDefinition apiDefinition = new APIDefinitionUsingOASParser();
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         if (url != null) {
-            validationResponse = apiDefinition.validateAPIDefinitionByURL(url, returnContent);
+            validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, returnContent);
         } else if (fileInputStream != null) {
             try {
                 String openAPIContent = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
-                validationResponse = apiDefinition.validateAPIDefinition(openAPIContent, returnContent);
+                validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
             } catch (IOException e) {
                 RestApiUtil.handleInternalServerError("Error while reading file content", e, log);
             }

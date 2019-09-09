@@ -35,7 +35,7 @@
     cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P1', 'value':'', 'path': site.context + "/services/logout", "secure": true, "maxAge": 2};
     response.addCookie(cookie);
 
-    log.debug("redirecting to anonymous view");
-    response.sendRedirect(site.context + "/apis");
+    log.debug("redirecting to logout");
+    response.sendRedirect(site.context + "/logout");
 
 %>

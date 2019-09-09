@@ -104,10 +104,33 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
         super.removeSubscription(identifier, userId, applicationId, groupId);
     }
 
+    /**
+     * @deprecated
+     * This method needs to be removed once the Jaggery web apps are removed.
+     *
+     */
     @Override
     public void addComment(APIIdentifier identifier, String s, String user) throws APIManagementException {
         checkSubscribePermission();
         super.addComment(identifier, s, user);
+    }
+
+    @Override
+    public String addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException {
+        checkSubscribePermission();
+        return super.addComment(identifier, comment, user);
+    }
+
+    @Override
+    public Comment getComment(APIIdentifier identifier, String commentId) throws APIManagementException {
+        checkSubscribePermission();
+        return super.getComment(identifier, commentId);
+    }
+
+    @Override
+    public void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException {
+        checkSubscribePermission();
+        super.deleteComment(identifier,commentId);
     }
 
     @Override

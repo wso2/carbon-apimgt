@@ -49,6 +49,8 @@ import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import { Radio, RadioGroup } from '@material-ui/core';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import Resource from './Resource';
+import AuthManager from 'AppData/AuthManager';
+import Grid from "@material-ui/core/Grid";
 
 const styles = theme => ({
     root: {
@@ -177,6 +179,7 @@ class Resources extends React.Component {
         this.handlePolicyChange = this.handlePolicyChange.bind(this);
         this.updateAPI = this.updateAPI.bind(this);
         this.childResources = [];
+        this.isNotCreator = AuthManager.isNotCreator();
     }
     handleChange = name => (event) => {
         const tmpMethods = this.state.tmpMethods;
@@ -465,18 +468,19 @@ class Resources extends React.Component {
      * Updates the api
      */
     updateAPI() {
-        const api = new Api();
-        const { intl, api: { id } } = this.props;
+        const { intl, api, api: { id } } = this.props;
         const { policyLevel, selectedPolicy } = this.state;
         const promisedApi = api.get(id);
         promisedApi
             .then((getResponse) => {
-                const apiData = getResponse.body;
+                let apiThrottlingPolicy;
                 if (policyLevel === 'perAPI') {
-                    apiData.apiThrottlingPolicy = selectedPolicy;
+                    apiThrottlingPolicy = selectedPolicy;
                 } else {
-                    apiData.apiThrottlingPolicy = null;
+                    apiThrottlingPolicy = null;
                 }
+                let apiData = getResponse.body;
+                apiData.apiThrottlingPolicy = apiThrottlingPolicy;
                 const promisedUpdate = api.update(apiData);
                 promisedUpdate
                     .then(() => {
@@ -630,14 +634,14 @@ class Resources extends React.Component {
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
                         <FormattedMessage id='Apis.Details.Resources.Resources.resources' defaultMessage='Resources' />
                     </Typography>
-                    <Button size='small' className={classes.button} onClick={this.toggleAddResource}>
+                    <Button size='small' className={classes.button} onClick={this.toggleAddResource} disabled={this.isNotCreator}>
                         <AddCircle className={classes.buttonIcon} />
                         <FormattedMessage
                             id='Apis.Details.Resources.Resources.add.new.resource.button'
                             defaultMessage='Add New Resource'
                         />
                     </Button>
-                    <Button size='small' className={classes.button} onClick={this.toggleAssignPolicy}>
+                    <Button size='small' className={classes.button} onClick={this.toggleAssignPolicy} disabled={this.isNotCreator}>
                         <ScopesIcon className={classes.buttonIcon} />
                         <FormattedMessage
                             id='Apis.Details.Resources.Resources.assign.policies'
@@ -772,6 +776,7 @@ class Resources extends React.Component {
                                         checked={this.state.allChecked}
                                         onChange={this.handleCheckAll}
                                         value=''
+                                        disabled={this.isNotCreator}
                                     />}
                                     label='Check All'
                                 />
@@ -781,6 +786,7 @@ class Resources extends React.Component {
                                             className={classes.button}
                                             color='secondary'
                                             onClick={this.deleteSelected}
+                                            disabled={this.isNotCreator}
                                         >
                                             <FormattedMessage
                                                 id='Apis.Details.Resources.Resources.delete.selected'
@@ -822,14 +828,35 @@ class Resources extends React.Component {
                             );
                         })}
                     </List>
-                    <Button
-                        variant='contained'
-                        color='primary'
-                        className={classes.buttonMain}
-                        onClick={this.updateResources}
-                    >
-                        <FormattedMessage id='Apis.Details.Resources.Resources.save' defaultMessage='Save' />
-                    </Button>
+                    <Grid  container
+                           direction='row'
+                           alignItems='center'
+                           spacing={4}>
+                        <Grid item>
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                className={classes.buttonMain}
+                                onClick={this.updateResources}
+                                disabled={this.isNotCreator}
+                            >
+                                <FormattedMessage id='Apis.Details.Resources.Resources.save' defaultMessage='Save' />
+                            </Button>
+                        </Grid>
+                        {this.isNotCreator
+                            && (
+                                <Grid item>
+                                    <Typography variant='body2' color='primary'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Resources.Resources.update.not.allowed'
+                                            defaultMessage='*You are not authorized to update API resources due
+                                        to insufficient permissions'
+                                        />
+                                    </Typography>
+                                </Grid>
+                            )
+                        }
+                    </Grid>
                 </div>
             </div>
         );

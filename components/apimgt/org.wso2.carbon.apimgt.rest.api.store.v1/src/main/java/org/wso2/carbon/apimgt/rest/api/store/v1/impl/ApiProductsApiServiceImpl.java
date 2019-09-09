@@ -54,18 +54,19 @@ import javax.ws.rs.core.Response;
 public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     private static final Log log = LogFactory.getLog(ApiProductsApiServiceImpl.class);
 
+
     @Override
-    public Response apiProductsApiProductIdCommentsCommentIdDelete(String commentId, String apiProductId, String ifMatch, MessageContext messageContext) {
+    public Response apiProductsApiProductIdCommentsCommentIdDelete(String commentId, String apiProductId, String ifMatch, MessageContext messageContext) throws APIManagementException {
         return null;
     }
 
     @Override
-    public Response apiProductsApiProductIdCommentsCommentIdGet(String commentId, String apiProductId, String ifNoneMatch, MessageContext messageContext) {
+    public Response apiProductsApiProductIdCommentsCommentIdGet(String commentId, String apiProductId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         return null;
     }
 
     @Override
-    public Response apiProductsApiProductIdCommentsCommentIdPut(String commentId, String apiProductId, CommentDTO body, String ifMatch, MessageContext messageContext) {
+    public Response apiProductsApiProductIdCommentsCommentIdPut(String commentId, String apiProductId, CommentDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException {
         return null;
     }
 
@@ -111,7 +112,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if(!RestAPIStoreUtils.isUserAccessAllowedForAPIProduct(product)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
-            APIProductDTO productToReturn = APIMappingUtil.fromAPIProductToDTO(product);
+            APIProductDTO productToReturn = APIMappingUtil.fromAPIProductToDTO(product, requestedTenantDomain);
             return Response.ok().entity(productToReturn).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API Product : " + apiProductId;
@@ -138,11 +139,17 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return null;
     }
 
-    @Override public Response apiProductsApiProductIdSwaggerGet(String apiProductId, String ifNoneMatch,
-            String xWSO2Tenant, MessageContext messageContext) {
+    @Override public Response apiProductsApiProductIdSwaggerGet(String apiProductId, String labelName,
+                                                                String environmentName, String ifNoneMatch,
+                                                                String xWSO2Tenant, MessageContext messageContext) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(labelName) &&
+                    org.apache.commons.lang3.StringUtils.isNotEmpty(environmentName)) {
+                RestApiUtil.handleBadRequest("Only one of 'labelName' or 'environmentName' can be provided", log);
+            }
 
             if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
@@ -152,10 +159,22 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (product == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
+
+            //gets the first available environment if neither label nor environment is not provided
+            if (org.apache.commons.lang3.StringUtils.isEmpty(labelName) && org.apache.commons.lang3.StringUtils.isEmpty(environmentName)) {
+                environmentName = product.getEnvironments().iterator().next();
+            }
+
             if(!RestAPIStoreUtils.isUserAccessAllowedForAPIProduct(product)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
-            String apiSwagger = apiConsumer.getAPIDefinitionOfAPIProduct(product);
+
+            String apiSwagger = null;
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(environmentName)) {
+                apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(product.getId(), environmentName);
+            } else if (org.apache.commons.lang3.StringUtils.isNotEmpty(labelName)) {
+                apiSwagger = apiConsumer.getOpenAPIDefinitionForLabel(product.getId(), labelName);
+            }
             
             if (StringUtils.isEmpty(apiSwagger)) {
                 apiSwagger = "";

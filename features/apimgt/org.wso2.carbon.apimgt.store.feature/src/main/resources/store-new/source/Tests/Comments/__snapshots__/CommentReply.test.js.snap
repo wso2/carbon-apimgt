@@ -56,7 +56,7 @@ ShallowWrapper {
     theme={
       Object {
         "custom": Object {
-          "maxCommentLength": 1300,
+          "maxCommentLength": 512,
         },
       }
     }
