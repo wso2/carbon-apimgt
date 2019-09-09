@@ -42,6 +42,8 @@ import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.ImportApiService;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.tenant.TenantManager;
 
 import javax.ws.rs.core.Response;
 import java.io.File;
@@ -71,6 +73,11 @@ public class ImportApiServiceImplTestCase {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        RealmService realmService = Mockito.mock(RealmService.class);
+        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+        TenantManager tenantManager = Mockito.mock(TenantManager.class);
+        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+        PowerMockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(-1234);
         apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
         apimConfig = Mockito.mock(APIManagerConfiguration.class);
@@ -105,7 +112,6 @@ public class ImportApiServiceImplTestCase {
         Subscriber subscriber = new Subscriber("admin");
         Mockito.when(apiConsumer.getSubscriber("admin")).thenReturn(subscriber);
         Mockito.when(apiConsumer.addApplication(Mockito.any(Application.class), Mockito.anyString())).thenReturn(1);
-        PowerMockito.when(APIUtil.isTenantAvailable("carbon.super")).thenReturn(true);
         PowerMockito.spy(APIUtil.class);
         PowerMockito.doReturn(false).when(APIUtil.class, "isApplicationExist", "admin", "sampleApp", null);
         Mockito.when(apiConsumer.searchPaginatedAPIs("name=*sampleAPI*&version=*1.0.0*",
