@@ -3457,11 +3457,9 @@ paths:
         This operation can be used to publish an API to a list of external stores.
       parameters:
         - $ref: '#/parameters/apiId'
-        - name: externalStoreId
+        - name: externalStoreIds
+          type: string
           description: External Store Ids of stores which the API needs to be published or updated.
-          type: array
-          items:
-            type: string
           in: query
           required: true
         - $ref: '#/parameters/If-Match'
@@ -8258,6 +8256,11 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/MonetizationAttribute'
+      externalStoresEnabled:
+        type: boolean
+        description: |
+          Is External Stores configuration enabled
+        example: true
 
 #-----------------------------------------------------
 # The pagination resource

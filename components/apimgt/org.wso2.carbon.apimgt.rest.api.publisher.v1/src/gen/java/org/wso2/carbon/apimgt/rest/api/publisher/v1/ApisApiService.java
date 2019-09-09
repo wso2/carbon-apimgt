@@ -92,7 +92,7 @@ public interface ApisApiService {
       public Response getAllPublishedExternalStoresByAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, MessageContext messageContext) throws APIManagementException;
       public Response importWSDLDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, MessageContext messageContext) throws APIManagementException;
-      public Response publishAPIToExternalStores(String apiId, List<String> externalStoreId, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response publishAPIToExternalStores(String apiId, String externalStoreIds, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail, Boolean returnContent, MessageContext messageContext) throws APIManagementException;
       public Response validateWSDLDefinition(String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
