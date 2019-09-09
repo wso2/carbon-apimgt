@@ -1759,6 +1759,8 @@ paths:
           required: false
       tags:
         - Validation
+      x-examples:
+        $ref: docs/examples/apis/wsdl/validate_wsdl_post.yaml
       responses:
         200:
           description: |
