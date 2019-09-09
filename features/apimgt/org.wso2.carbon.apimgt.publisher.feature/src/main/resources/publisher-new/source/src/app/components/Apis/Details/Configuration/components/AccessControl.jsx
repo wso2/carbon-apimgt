@@ -62,31 +62,35 @@ export default function AccessControl(props) {
     const handleRoleAddition = (role) => {
         const systemRolePromise = APIValidation.role.validate(base64url.encode(role));
         const userRolePromise = APIValidation.userRole.validate(base64url.encode(role));
-        systemRolePromise.then((isValidSystemRole) => {
-            if (isValidSystemRole) {
+        systemRolePromise.then((systemRoleResponse) => {
+            if (systemRoleResponse.status === 200) {
                 setRoleValidity(true);
-                userRolePromise.then((isValidUserRole) => {
-                    if (isValidUserRole) {
+                userRolePromise.then((userRoleResponse) => {
+                    if (userRoleResponse.status === 200) {
                         setUserRoleValidity(true);
                         configDispatcher({
                             action: 'accessControlRoles',
                             value: [...api.accessControlRoles, role],
                         });
-                    } else {
-                        setUserRoleValidity(false);
-                        setInvalidRoles([...invalidRoles, role]);
                     }
                 }).catch((error) => {
-                    Alert.error('Error when validating role: ' + role);
-                    console.error('Error when validating user roles ' + error);
+                    if (error.status === 404) {
+                        setUserRoleValidity(false);
+                        setInvalidRoles([...invalidRoles, role]);
+                    } else {
+                        Alert.error('Error when validating role: ' + role);
+                        console.error('Error when validating user roles ' + error);
+                    }
                 });
-            } else {
-                setRoleValidity(false);
-                setInvalidRoles([...invalidRoles, role]);
             }
         }).catch((error) => {
-            Alert.error('Error when validating role: ' + role);
-            console.error('Error when validating roles ' + error);
+            if (error.status === 404) {
+                setRoleValidity(false);
+                setInvalidRoles([...invalidRoles, role]);
+            } else {
+                Alert.error('Error when validating role: ' + role);
+                console.error('Error when validating roles ' + error);
+            }
         });
     };
 

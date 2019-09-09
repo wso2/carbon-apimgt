@@ -59,20 +59,22 @@ export default function StoreVisibility(props) {
     }, [invalidRoles]);
     const handleRoleAddition = (role) => {
         const promise = APIValidation.role.validate(base64url.encode(role));
-        promise.then((isValid) => {
-            if (isValid) {
+        promise.then((response) => {
+            if (response.status === 200) {
                 setRoleValidity(true);
                 configDispatcher({
                     action: 'visibleRoles',
                     value: [...api.visibleRoles, role],
                 });
-            } else {
-                setRoleValidity(false);
-                setInvalidRoles([...invalidRoles, role]);
             }
         }).catch((error) => {
-            Alert.error('Error when validating role: ' + role);
-            console.error('Error when validating roles ' + error);
+            if (error.status === 404) {
+                setRoleValidity(false);
+                setInvalidRoles([...invalidRoles, role]);
+            } else {
+                Alert.error('Error when validating role: ' + role);
+                console.error('Error when validating roles ' + error);
+            }
         });
     };
 
