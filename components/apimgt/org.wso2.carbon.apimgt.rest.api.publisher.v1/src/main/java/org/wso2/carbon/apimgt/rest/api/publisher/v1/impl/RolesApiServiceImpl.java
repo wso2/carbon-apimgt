@@ -41,7 +41,7 @@ public class RolesApiServiceImpl implements RolesApiService {
      * @param roleId Base64 URL encoded form of role name -Base64URLEncode{user-store-name/role-name}
      * @return 200 if the given role exists
      */
-    public Response rolesRoleIdHead(String roleId, MessageContext messageContext) {
+    public Response validateSystemRole(String roleId, MessageContext messageContext) {
         Boolean isRoleExist = false;
         String username = RestApiUtil.getLoggedInUsername();
         if (roleId != null) {

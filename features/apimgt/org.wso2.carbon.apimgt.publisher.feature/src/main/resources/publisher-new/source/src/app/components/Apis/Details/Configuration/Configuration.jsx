@@ -155,11 +155,9 @@ export default function Configuration() {
                 nextState[action] = value;
                 return nextState;
             case 'accessControlRoles':
-                // TODO: need to do the role validation here ~tmkb
-                return { ...copyAPIConfig(state), [action]: value.split(',') };
+                return { ...copyAPIConfig(state), [action]: value };
             case 'visibleRoles':
-                // TODO: need to do the role validation here ~tmkb
-                return { ...copyAPIConfig(state), [action]: value.split(',') };
+                return { ...copyAPIConfig(state), [action]: value };
             case 'securityScheme':
                 // If event came from mandatory selector of either Application level or Transport level
                 if ([API_SECURITY_MUTUAL_SSL_MANDATORY, API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY].includes(event.name)) {

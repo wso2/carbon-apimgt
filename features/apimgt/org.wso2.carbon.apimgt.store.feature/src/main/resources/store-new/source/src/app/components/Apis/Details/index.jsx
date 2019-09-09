@@ -27,6 +27,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import APIProduct from 'AppData/APIProduct';
 import Api from 'AppData/api';
 import CONSTS from 'AppData/Constants';
+import AuthManager from 'AppData/AuthManager';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
@@ -215,8 +216,6 @@ class Details extends React.Component {
 
             // const subscriptionClient = new Subscription();
             promisedAPI = restApi.getAPIById(this.api_uuid);
-            existingSubscriptions = restApi.getSubscriptions(this.api_uuid, null);
-            promisedApplications = restApi.getAllApplications();
 
             promisedAPI.then((api) => {
                 this.setState({ api: api.body });
@@ -229,52 +228,57 @@ class Details extends React.Component {
                     this.setState({ notFound: true });
                 }
             });
+            const user = AuthManager.getUser();
+            if (user != null) {
+                existingSubscriptions = restApi.getSubscriptions(this.api_uuid, null);
+                promisedApplications = restApi.getAllApplications();
 
-            Promise.all([existingSubscriptions, promisedApplications])
-                .then((response) => {
-                    const [subscriptions, applications] = response.map(data => data.obj);
-                    const appIdToNameMapping = applications.list.reduce((acc, cur) => {
-                        acc[cur.applicationId] = cur.name;
-                        return acc;
-                    }, {});
-                    // get the application IDs of existing subscriptions
-                    const subscribedApplications = subscriptions.list.map((element) => {
-                        return {
-                            value: element.applicationId,
-                            policy: element.throttlingPolicy,
-                            status: element.status,
-                            subscriptionId: element.subscriptionId,
-                            label: appIdToNameMapping[element.applicationId],
-                        };
-                    });
-
-                    // Removing subscribed applications from all the applications and get
-                    // the available applications to subscribe
-                    const subscribedAppIds = subscribedApplications.map(sub => sub.value);
-                    const applicationsAvailable = applications.list
-                        .filter(app => !subscribedAppIds.includes(app.applicationId)
-                        && app.status === 'APPROVED')
-                        .map((filteredApp) => {
+                Promise.all([existingSubscriptions, promisedApplications])
+                    .then((response) => {
+                        const [subscriptions, applications] = response.map(data => data.obj);
+                        const appIdToNameMapping = applications.list.reduce((acc, cur) => {
+                            acc[cur.applicationId] = cur.name;
+                            return acc;
+                        }, {});
+                        // get the application IDs of existing subscriptions
+                        const subscribedApplications = subscriptions.list.map((element) => {
                             return {
-                                value: filteredApp.applicationId,
-                                label: filteredApp.name,
+                                value: element.applicationId,
+                                policy: element.throttlingPolicy,
+                                status: element.status,
+                                subscriptionId: element.subscriptionId,
+                                label: appIdToNameMapping[element.applicationId],
                             };
                         });
-                    this.setState({ subscribedApplications, applicationsAvailable }, () => {
-                        if (callback) {
-                            callback();
+
+                        // Removing subscribed applications from all the applications and get
+                        // the available applications to subscribe
+                        const subscribedAppIds = subscribedApplications.map(sub => sub.value);
+                        const applicationsAvailable = applications.list
+                            .filter(app => !subscribedAppIds.includes(app.applicationId)
+                            && app.status === 'APPROVED')
+                            .map((filteredApp) => {
+                                return {
+                                    value: filteredApp.applicationId,
+                                    label: filteredApp.name,
+                                };
+                            });
+                        this.setState({ subscribedApplications, applicationsAvailable }, () => {
+                            if (callback) {
+                                callback();
+                            }
+                        });
+                    })
+                    .catch((error) => {
+                        if (process.env.NODE_ENV !== 'production') {
+                            console.log(error);
+                        }
+                        const { status } = error;
+                        if (status === 404) {
+                            this.setState({ notFound: true });
                         }
                     });
-                })
-                .catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.log(error);
-                    }
-                    const { status } = error;
-                    if (status === 404) {
-                        this.setState({ notFound: true });
-                    }
-                });
+            }
         };
         const { apiType } = this.props;
         this.state = {

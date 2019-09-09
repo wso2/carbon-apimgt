@@ -184,6 +184,7 @@ import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
 
 /**
@@ -4596,7 +4597,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            saveSwaggerDefinition(getAPIProduct(apiId), jsonText);
+            saveAPIDefinition(getAPIProduct(apiId), jsonText, registry);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -4607,11 +4608,43 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-            definitionFromOpenAPISpec.saveAPIDefinition(apiProduct, jsonText, registry);
+            saveAPIDefinition(apiProduct, jsonText, registry);
 
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    private void saveAPIDefinition(APIProduct apiProduct, String apiDefinitionJSON,
+                                   org.wso2.carbon.registry.api.Registry registry) throws APIManagementException {
+        String apiName = apiProduct.getId().getName();
+        String apiVersion = apiProduct.getId().getVersion();
+        String apiProviderName = apiProduct.getId().getProviderName();
+
+        try {
+            String resourcePath = APIUtil.getAPIProductOpenAPIDefinitionFilePath(apiName, apiVersion, apiProviderName);
+            resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+            org.wso2.carbon.registry.api.Resource resource;
+            if (!registry.resourceExists(resourcePath)) {
+                resource = registry.newResource();
+            } else {
+                resource = registry.get(resourcePath);
+            }
+            resource.setContent(apiDefinitionJSON);
+            resource.setMediaType("application/json");
+            registry.put(resourcePath, resource);
+
+            String[] visibleRoles = null;
+            if (apiProduct.getVisibleRoles() != null) {
+                visibleRoles = apiProduct.getVisibleRoles().split(",");
+            }
+
+            //Need to set anonymous if the visibility is public
+            APIUtil.clearResourcePermissions(resourcePath, apiProduct.getId(), ((UserRegistry) registry).getTenantId());
+            APIUtil.setResourcePermissions(apiProviderName, apiProduct.getVisibility(), visibleRoles, resourcePath);
+
+        } catch (org.wso2.carbon.registry.api.RegistryException e) {
+            handleException("Error while adding Swagger Definition for " + apiName + '-' + apiVersion, e);
         }
     }
 
