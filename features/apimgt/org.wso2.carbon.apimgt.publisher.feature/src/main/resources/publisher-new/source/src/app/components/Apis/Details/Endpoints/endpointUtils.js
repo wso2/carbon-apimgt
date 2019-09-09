@@ -15,14 +15,6 @@
  */
 
 import cloneDeep from 'lodash.clonedeep';
-import { createIntl, createIntlCache } from 'react-intl';
-
-const cache = createIntlCache();
-
-const intl = createIntl({
-    locale: 'en-US',
-    messages: {},
-}, cache);
 
 /**
  * Utility method to get the endpoint property name based on the given endpoint type and category.
