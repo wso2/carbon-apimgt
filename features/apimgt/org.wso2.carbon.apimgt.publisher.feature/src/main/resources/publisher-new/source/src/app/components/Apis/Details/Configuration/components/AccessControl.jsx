@@ -62,27 +62,23 @@ export default function AccessControl(props) {
     const handleRoleAddition = (role) => {
         const systemRolePromise = APIValidation.role.validate(base64url.encode(role));
         const userRolePromise = APIValidation.userRole.validate(base64url.encode(role));
-        systemRolePromise.then((systemRoleResponse) => {
-            if (systemRoleResponse.status === 200) {
-                setRoleValidity(true);
-                userRolePromise.then((userRoleResponse) => {
-                    if (userRoleResponse.status === 200) {
-                        setUserRoleValidity(true);
-                        configDispatcher({
-                            action: 'accessControlRoles',
-                            value: [...api.accessControlRoles, role],
-                        });
-                    }
-                }).catch((error) => {
-                    if (error.status === 404) {
-                        setUserRoleValidity(false);
-                        setInvalidRoles([...invalidRoles, role]);
-                    } else {
-                        Alert.error('Error when validating role: ' + role);
-                        console.error('Error when validating user roles ' + error);
-                    }
+        systemRolePromise.then(() => {
+            setRoleValidity(true);
+            userRolePromise.then(() => {
+                setUserRoleValidity(true);
+                configDispatcher({
+                    action: 'accessControlRoles',
+                    value: [...api.accessControlRoles, role],
                 });
-            }
+            }).catch((error) => {
+                if (error.status === 404) {
+                    setUserRoleValidity(false);
+                    setInvalidRoles([...invalidRoles, role]);
+                } else {
+                    Alert.error('Error when validating role: ' + role);
+                    console.error('Error when validating user roles ' + error);
+                }
+            });
         }).catch((error) => {
             if (error.status === 404) {
                 setRoleValidity(false);

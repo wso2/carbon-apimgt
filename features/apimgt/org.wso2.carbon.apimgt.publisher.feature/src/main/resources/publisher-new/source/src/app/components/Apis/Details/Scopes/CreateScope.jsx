@@ -216,13 +216,11 @@ class CreateScope extends React.Component {
     handleRoleAddition(role) {
         const { validRoles, invalidRoles } = this.state;
         const promise = APIValidation.role.validate(base64url.encode(role));
-        promise.then((response) => {
-            if (response.status === 200) {
-                this.setState({
-                    roleValidity: true,
-                    validRoles: [...validRoles, role],
-                });
-            }
+        promise.then(() => {
+            this.setState({
+                roleValidity: true,
+                validRoles: [...validRoles, role],
+            });
         }).catch((error) => {
             if (error.status === 404) {
                 this.setState({
