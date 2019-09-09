@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
@@ -34,6 +35,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationAttributesDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductDTO;
@@ -45,6 +47,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
@@ -119,9 +122,34 @@ public class APIMappingUtil {
         dto.setTags(tagsToReturn);
 
         Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = model.getAvailableTiers();
-        List<String> tiersToReturn = new ArrayList<>();
-        for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
-            tiersToReturn.add(tier.getName());
+        List<APITiersDTO> tiersToReturn = new ArrayList<>();
+        for (org.wso2.carbon.apimgt.api.model.Tier currentTier : apiTiers) {
+            APITiersDTO apiTiersDTO = new APITiersDTO();
+            apiTiersDTO.setTierName(currentTier.getName());
+            apiTiersDTO.setTierPlan(currentTier.getTierPlan());
+            //monetization attributes are applicable only for commercial tiers
+            if (APIConstants.COMMERCIAL_TIER_PLAN.equalsIgnoreCase(currentTier.getTierPlan())) {
+                APIMonetizationAttributesDTO monetizationAttributesDTO = new APIMonetizationAttributesDTO();
+                if (MapUtils.isNotEmpty(currentTier.getMonetizationAttributes())) {
+                    Map<String, String> monetizationAttributes = currentTier.getMonetizationAttributes();
+                    //check for the billing plan (fixed or price per request)
+                    if (monetizationAttributes.get(APIConstants.Monetization.FIXED_PRICE) != null) {
+                        monetizationAttributesDTO.setFixedPrice(monetizationAttributes.get
+                                (APIConstants.Monetization.FIXED_PRICE));
+                    } else if (monetizationAttributes.get(APIConstants.Monetization.PRICE_PER_REQUEST) != null) {
+                        monetizationAttributesDTO.setPricePerRequest(monetizationAttributes.get
+                                (APIConstants.Monetization.PRICE_PER_REQUEST));
+                    }
+                    monetizationAttributesDTO.setCurrencyType(monetizationAttributes.get
+                            (APIConstants.Monetization.CURRENCY) != null ? monetizationAttributes.get
+                            (APIConstants.Monetization.CURRENCY) : StringUtils.EMPTY);
+                    monetizationAttributesDTO.setBillingCycle(monetizationAttributes.get
+                            (APIConstants.Monetization.BILLING_CYCLE) != null ? monetizationAttributes.get
+                            (APIConstants.Monetization.BILLING_CYCLE) : StringUtils.EMPTY);
+                }
+                apiTiersDTO.setMonetizationAttributes(monetizationAttributesDTO);
+            }
+            tiersToReturn.add(apiTiersDTO);
         }
         dto.setTiers(tiersToReturn);
 
