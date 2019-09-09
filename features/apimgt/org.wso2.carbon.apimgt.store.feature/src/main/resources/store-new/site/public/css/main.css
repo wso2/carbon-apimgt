@@ -369,3 +369,8 @@
   background: #f05107;
   color: rgb(255, 255, 255);
 }
+
+body {
+  margin: 0;
+  height: 100%;
+}

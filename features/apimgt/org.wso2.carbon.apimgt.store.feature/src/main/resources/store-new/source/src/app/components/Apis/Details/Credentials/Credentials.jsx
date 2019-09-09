@@ -125,20 +125,19 @@ class Credentials extends React.Component {
         } else {
             updateSubscriptionData(this.updateData);
         }
-        const { history: { location: {state} }} = this.props;
-        if(state) {
-            const {openWizard} = state;
-            if(openWizard) {
-                this.setState({wizardOn: true, openNew: true});
+        const { history: { location: { state } } } = this.props;
+        if (state) {
+            const { openWizard } = state;
+            if (openWizard) {
+                this.setState({ wizardOn: true, openNew: true });
                 this.props.history.replace({
                     pathname: this.props.location.pathname,
-                    state: {}
+                    state: {},
                 });
             }
         }
-            
     }
-    
+
     updateData = () => {
         const { api, applicationsAvailable } = this.context;
         const { subscriptionRequest } = this.state;

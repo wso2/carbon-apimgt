@@ -198,16 +198,6 @@ class Layout extends React.Component {
         this.setState({ openUserMenu: false });
     };
 
-    componentWillMount() {
-        document.body.style.height = '100%';
-        document.body.style.margin = '0';
-    }
-
-    componentWillUnmount() {
-        document.body.style.height = null;
-        document.body.style.margin = null;
-    }
-
     render() {
         const { classes, theme } = this.props;
         const { openNavBar } = this.state;
