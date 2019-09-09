@@ -125,7 +125,6 @@ public class APIMappingUtil {
         }
 
         model.setImplementation(dto.getEndpointImplementationType().toString());
-        model.setWsdlUrl(dto.getWsdlUri());
         model.setType(dto.getType().toString());
         if (dto.getLifeCycleStatus() != null) {
             model.setStatus((dto.getLifeCycleStatus() != null) ? dto.getLifeCycleStatus().toUpperCase() : null);
@@ -771,7 +770,20 @@ public class APIMappingUtil {
         apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
         apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
         dto.setCorsConfiguration(apiCorsConfigurationDTO);
-        dto.setWsdlUri(model.getWsdlUrl());
+
+        if (model.getWsdlUrl() != null) {
+            String wsdlRegistryUri = model.getWsdlUrl().toLowerCase();
+            APIWsdlInfoDTO wsdlInfoDTO = new APIWsdlInfoDTO();
+            if (wsdlRegistryUri.endsWith(APIConstants.ZIP_FILE_EXTENSION)) {
+                wsdlInfoDTO.setType(APIWsdlInfoDTO.TypeEnum.ZIP);
+            } else if (wsdlRegistryUri.endsWith(APIConstants.WSDL_EXTENSION)) {
+                wsdlInfoDTO.setType(APIWsdlInfoDTO.TypeEnum.WSDL);
+            } else {
+                log.warn("Unrecognized WSDL type in WSDL url: " + model.getWsdlUrl());
+            }
+            dto.setWsdlInfo(wsdlInfoDTO);
+        }
+
         setEndpointSecurityFromModelToApiDTO(model, dto);
         setMaxTpsFromModelToApiDTO(model, dto);
 

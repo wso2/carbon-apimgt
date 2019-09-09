@@ -892,11 +892,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String artifactPath = GovernanceUtils.getArtifactPath(registry, apiArtifact.getId());
             if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
                 String path = APIUtil.createWSDL(registry, api);
-                if (path != null) {
-                    registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
-                    apiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl()); //reset the wsdl path
-                    artifactManager.updateGenericArtifact(apiArtifact); //update the  artifact
-                }
+                updateWSDLUriInAPIArtifact(path, artifactManager, apiArtifact, artifactPath);
             }
             registry.commitTransaction();
             transactionCommitted = true;
@@ -3076,15 +3072,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
                 String path = APIUtil.createWSDL(registry, api);
-                if (path != null) {
-                    registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
-                    artifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl()); //reset the wsdl path to permlink
-                    artifactManager.updateGenericArtifact(artifact); //update the  artifact
-                }
+                updateWSDLUriInAPIArtifact(path, artifactManager, artifact, artifactPath);
             }
 
             if (api.getWsdlResource() != null) {
-                APIUtil.saveWSDLResource(registry, api);
+                String path = APIUtil.saveWSDLResource(registry, api);
+                updateWSDLUriInAPIArtifact(path, artifactManager, artifact, artifactPath);
             }
 
             //attaching micro-gateway labels to the API
@@ -3133,6 +3126,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } catch (RegistryException ex) {
                 handleException("Error while rolling back the transaction for API: " + api.getId().getApiName(), ex);
             }
+        }
+    }
+
+    /**
+     * Update WSDLUri in the API Registry artifact
+     *
+     * @param wsdlPath WSDL Registry Path
+     * @param artifactManager Artifact Manager
+     * @param artifact API Artifact
+     * @param artifactPath API Artifact path
+     * @throws RegistryException when error occurred while updating WSDL path
+     */
+    private void updateWSDLUriInAPIArtifact(String wsdlPath, GenericArtifactManager artifactManager,
+              GenericArtifact artifact, String artifactPath) throws RegistryException {
+        if (wsdlPath != null) {
+            registry.addAssociation(artifactPath, wsdlPath, CommonConstants.ASSOCIATION_TYPE01);
+            artifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, wsdlPath);
+            artifactManager.updateGenericArtifact(artifact); //update the  artifact
         }
     }
 

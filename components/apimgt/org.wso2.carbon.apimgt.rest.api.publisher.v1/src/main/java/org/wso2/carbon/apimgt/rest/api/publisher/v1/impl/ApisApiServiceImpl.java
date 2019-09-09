@@ -221,7 +221,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             boolean isWSAPI = APIDTO.TypeEnum.WS == body.getType();
-            boolean isSoapToRestConvertedApi = APIDTO.TypeEnum.SOAPTOREST == body.getType();
 
             // validate web socket api endpoint configurations
             if (isWSAPI && !RestApiPublisherUtils.isValidWSAPI(body)) {
@@ -232,18 +231,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //adding the api
             apiProvider.addAPI(apiToAdd);
 
-            if (isSoapToRestConvertedApi) {
-                if (StringUtils.isNotBlank(apiToAdd.getWsdlUrl())) {
-                    String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(body.getWsdlUri());
-                    apiProvider.saveSwaggerDefinition(apiToAdd, swaggerStr);
-                    SequenceGenerator.generateSequencesFromSwagger(swaggerStr, apiToAdd.getId());
-                } else {
-                    String errorMessage =
-                            "Error while generating the swagger since the wsdl url is null for: " + body.getProvider()
-                                    + "-" + body.getName() + "-" + body.getVersion();
-                    RestApiUtil.handleInternalServerError(errorMessage, log);
-                }
-            } else if (!isWSAPI) {
+            if (!isWSAPI) {
                 APIDefinition oasParser;
                 if(RestApiConstants.OAS_VERSION_2.equalsIgnoreCase(oasVersion)) {
                     oasParser = new OAS2Parser();
