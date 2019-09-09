@@ -462,20 +462,16 @@ class API extends Resource {
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getSwagger(id, callback = null) {
+    getSwagger() {
         const promise_get = this.client.then(client => {
             return client.apis['APIs'].get_apis__apiId__swagger(
                 {
-                    apiId: id,
+                    apiId: this.id,
                 },
                 this._requestMetaData(),
             );
         });
-        if (callback) {
-            return promise_get.then(callback);
-        } else {
-            return promise_get;
-        }
+        return promise_get;
     }
 
     /**
@@ -714,9 +710,7 @@ class API extends Resource {
                 }),
             );
         });
-        return promised_update.then(response => {
-            return this;
-        });
+        return promised_update;
     }
 
     /**

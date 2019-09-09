@@ -16,102 +16,164 @@
  * under the License.
  */
 
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import React, { useReducer, useEffect } from 'react';
 import Grid from '@material-ui/core/Grid';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import Typography from '@material-ui/core/Typography';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import cloneDeep from 'lodash.clonedeep';
+import isEmpty from 'lodash/isEmpty';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
-const useStyles = makeStyles(theme => ({
-    root: {
-        width: '100%',
-    },
-    heading: {
-        fontSize: theme.typography.pxToRem(15),
-        fontWeight: theme.typography.fontWeightRegular,
-    },
-}));
+import Operation from './components/Operation';
+import GroupOfOperations from './components/GroupOfOperations';
+import Alert from 'AppComponents/Shared/Alert';
 
 /**
- * This component handles the Resource page
+ * This component handles the Resource page in API details though it's written in a sharable way
+ * that anyone could use this to render resources in anywhere else if needed.
  *
  * @export
- * @returns
+ * @returns {React.Component} @inheritdoc
  */
 export default function Resources() {
-    const classes = useStyles();
+    /**
+     *
+     * Reducer to handle actions related to OpenAPI specification
+     * @param {Object} currentState Contains the /apis/{apiId}/swagger response body
+     * @param {Object} triggeredAction action triggered by
+     * @returns {Object} Next state
+     */
+    function openAPIActionsReducer(currentState, triggeredAction) {
+        const { action, event } = triggeredAction;
+        switch (action) {
+            case 'initState':
+                return event.value;
+            default:
+                break;
+        }
+        return currentState;
+    }
+    const [api, updateAPI] = useAPI();
+    const [openAPI, openAPIActionsDispatcher] = useReducer(openAPIActionsReducer, {});
+    useEffect(() => {
+        // Update the Swagger spec object when API object gets changed
+        api.getSwagger().then(response =>
+            openAPIActionsDispatcher({ action: 'initState', event: { value: response.body } }));
+    }, [api]);
+
+    // We don't give a * If openAPI object is null
+    if (isEmpty(openAPI)) {
+        return <CircularProgress />;
+    }
+    /**
+     *
+     * Save the OpenAPI changes using REST API, type parameter is required to
+     * identify the locally created data structured, i:e type `operation` will assume that `data` contains the
+     * object structure of locally created operation object which is a combination of REST API
+     * response `operations` field and OpenAPI spec operation information
+     * @param {String} type Type of data object
+     * @param {Object} data Data object
+     * @returns {Promise|null} A promise object which resolve to Swagger PUT response body.
+     */
+    function updateOpenAPI(type, data) {
+        const copyOfOpenAPI = cloneDeep(openAPI);
+        const { spec, ...apiOperation } = data;
+        switch (type) {
+            case 'operation':
+                copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()] = spec;
+                return api
+                    .updateSwagger(copyOfOpenAPI)
+                    .then((response) => {
+                        const { body: value } = response; // Rename response body as value (updated swagger)
+                        openAPIActionsDispatcher({ action: 'initState', event: { value } });
+                        return value;
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        Alert.error(`Error while updating the operation with path ${data.target} verb ${data.verb} `);
+                    })
+                    .then((openAPIResponse) => {
+                        const updatedOperations = api.operations.map((operation) => {
+                            if (operation.target === data.target && operation.verb === data.verb) {
+                                return apiOperation;
+                            } else {
+                                return operation;
+                            }
+                        });
+                        updateAPI({ operations: updatedOperations });
+                    });
+            default:
+                break;
+        }
+        return null;
+    }
+
+    const taggedOperations = { Default: [] };
+    api.operations.map((apiOperation) => {
+        const { target, verb } = apiOperation;
+        const openAPIOperation = openAPI.paths[target][verb.toLowerCase()];
+        if (!openAPIOperation) {
+            console.warn(`Could not find target = ${target} ` +
+                    `verb (lower cased) = ${verb.toLowerCase()} operation in OpenAPI definition`);
+        }
+        const operationInfo = { spec: openAPIOperation, ...apiOperation };
+        if (openAPIOperation.tags) {
+            openAPIOperation.tags.map((tag) => {
+                if (!taggedOperations[tag]) {
+                    taggedOperations[tag] = [];
+                }
+                taggedOperations[tag].push(operationInfo);
+                return operationInfo; // Just to satisfy an es-lint rule or could use `for ... of ...`
+            });
+        } else {
+            taggedOperations.Default.push(operationInfo);
+        }
+        return operationInfo; // Just to satisfy an es-lint rule
+    });
+    // if (openAPI.paths) {
+    //     for (const [path, verbs] of Object.entries(openAPI.paths)) {
+    //         for (const [verb, operationInfo] of Object.entries(verbs)) {
+    //             const operation = { path, verb, operationInfo };
+    //             if (operationInfo.tags) {
+    //                 operationInfo.tags.map((tag) => {
+    //                     if (!taggedOperations[tag]) {
+    //                         taggedOperations[tag] = [];
+    //                     }
+    //                     taggedOperations[tag].push(operation);
+    //                     return operation; // Just to satisfy an es-lint rule
+    //                 });
+    //             } else {
+    //                 taggedOperations.Default.push(operation);
+    //             }
+    //         }
+    //     }
+    // }
 
     return (
         <Grid container direction='column' justify='flex-start' spacing={2} alignItems='stretch'>
-            <Grid item>
-                <ExpansionPanel>
-                    <ExpansionPanelSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls='panel1a-content'
-                        id='panel1a-header'
-                    >
-                        <Typography className={classes.heading}>Expansion Panel 1</Typography>
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails>
-                        <Grid container direction='column' justify='flex-start' spacing={1} alignItems='stretch'>
-                            <Grid item>
-                                <ExpansionPanel>
-                                    <ExpansionPanelSummary
-                                        expandIcon={<ExpandMoreIcon />}
-                                        aria-controls='panel2a-content'
-                                        id='panel2a-header'
-                                    >
-                                        <Typography className={classes.heading}>Expansion Panel 2</Typography>
-                                    </ExpansionPanelSummary>
-                                    <ExpansionPanelDetails>
-                                        <Typography>
-                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-                                            malesuada lacus ex, sit amet blandit leo lobortis eget.
-                                        </Typography>
-                                    </ExpansionPanelDetails>
-                                </ExpansionPanel>
+            {Object.entries(taggedOperations).map(([tag, operations]) =>
+                !!operations.length && (
+                    <Grid item>
+                        <GroupOfOperations updateOpenAPI={updateOpenAPI} openAPI={openAPI} tag={tag}>
+                            <Grid
+                                container
+                                direction='column'
+                                justify='flex-start'
+                                spacing={1}
+                                alignItems='stretch'
+                            >
+                                {operations.map(operation => (
+                                    <Grid item>
+                                        <Operation
+                                            updateOpenAPI={updateOpenAPI}
+                                            openAPI={openAPI}
+                                            operation={operation}
+                                        />
+                                    </Grid>
+                                ))}
                             </Grid>
-                            <Grid item>
-                                <ExpansionPanel>
-                                    <ExpansionPanelSummary
-                                        expandIcon={<ExpandMoreIcon />}
-                                        aria-controls='panel2a-content'
-                                        id='panel2a-header'
-                                    >
-                                        <Typography className={classes.heading}>Expansion Panel 2</Typography>
-                                    </ExpansionPanelSummary>
-                                    <ExpansionPanelDetails>
-                                        <Typography>
-                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-                                            malesuada lacus ex, sit amet blandit leo lobortis eget.
-                                        </Typography>
-                                    </ExpansionPanelDetails>
-                                </ExpansionPanel>
-                            </Grid>
-                        </Grid>
-                    </ExpansionPanelDetails>
-                </ExpansionPanel>
-            </Grid>
-            <Grid item>
-                <ExpansionPanel>
-                    <ExpansionPanelSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls='panel2a-content'
-                        id='panel2a-header'
-                    >
-                        <Typography className={classes.heading}>Expansion Panel 2</Typography>
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails>
-                        <Typography>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex, sit
-                            amet blandit leo lobortis eget.
-                        </Typography>
-                    </ExpansionPanelDetails>
-                </ExpansionPanel>
-            </Grid>
+                        </GroupOfOperations>
+                    </Grid>
+                ))}
         </Grid>
     );
 }
