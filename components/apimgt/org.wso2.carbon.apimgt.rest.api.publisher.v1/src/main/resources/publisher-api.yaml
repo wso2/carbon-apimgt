@@ -5970,7 +5970,7 @@ paths:
         Check whether the given tenant already exists
       description: |
         Using this operation, user can check whether a given tenant exists or not.
-      operationId: getTenantExistense
+      operationId: getTenantExistence
       parameters:
       - $ref : '#/parameters/tenantDomain'
       tags:

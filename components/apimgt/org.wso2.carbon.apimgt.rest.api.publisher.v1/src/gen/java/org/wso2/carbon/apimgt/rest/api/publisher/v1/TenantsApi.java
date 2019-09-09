@@ -47,8 +47,8 @@ TenantsApiService delegate = new TenantsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Requested role name exists.", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested role name does not exist.", response = Void.class) })
-    public Response getTenantExistense(@ApiParam(value = "The domain of a specific tenant ",required=true) @PathParam("tenantDomain") String tenantDomain) throws APIManagementException{
-        return delegate.getTenantExistense(tenantDomain, securityContext);
+    public Response getTenantExistence(@ApiParam(value = "The domain of a specific tenant ",required=true) @PathParam("tenantDomain") String tenantDomain) throws APIManagementException{
+        return delegate.getTenantExistence(tenantDomain, securityContext);
     }
 
     @GET

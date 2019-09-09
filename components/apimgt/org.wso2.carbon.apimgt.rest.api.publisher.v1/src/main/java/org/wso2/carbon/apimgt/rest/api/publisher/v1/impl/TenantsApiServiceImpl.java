@@ -57,11 +57,11 @@ public class TenantsApiServiceImpl implements TenantsApiService {
      * @return 200 if the given tenant exists
      */
     @Override
-    public Response getTenantExistense(String tenantDomain, MessageContext messageContext) {
+    public Response getTenantExistence(String tenantDomain, MessageContext messageContext) {
         Boolean isTenantExist = false;
-        if(tenantDomain != null) {
+        if (tenantDomain != null) {
             try {
-                isTenantExist = APIUtil.isTenantExist(tenantDomain);
+                isTenantExist = APIUtil.isTenantAvailable(tenantDomain);
             } catch (UserStoreException e) {
                 RestApiUtil.handleInternalServerError("Error while getting checking if tenant exists", e, log);
             }

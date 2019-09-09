@@ -4599,21 +4599,23 @@ public final class APIUtil {
     }
 
     /**
-     * Check if tenant exists
+     * Check if tenant is available
      *
      * @param tenantDomain tenant Domain
-     * @return boolean isTenantExist
+     * @return isTenantAvailable
      * @throws UserStoreException
      */
-    public static boolean isTenantExist(String tenantDomain) throws UserStoreException {
-        boolean isTenantExist = false;
-        Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
-        for (Tenant tenant : tenants) {
-            if (tenant.isActive() && tenant.getDomain().equalsIgnoreCase(tenantDomain)) {
-                isTenantExist = true;
-            }
+    public static boolean isTenantAvailable(String tenantDomain) throws UserStoreException {
+
+        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .getTenantId(tenantDomain);
+
+        if (tenantId == -1) {
+            return false;
         }
-        return isTenantExist;
+
+        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .isTenantActive(tenantId);
     }
 
     /**
