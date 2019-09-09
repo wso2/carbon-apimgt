@@ -619,7 +619,7 @@ public class APIMappingUtil {
             dto.setEndpointConfig(endpointConfigJson);
         } catch (ParseException e) {
             //logs the error and continues as this is not a blocker
-            log.error("Cannot convert endpoint configurations when setting endpoint for API +" +
+            log.error("Cannot convert endpoint configurations when setting endpoint for API. " +
                     "API ID = " + model.getId(), e);
         }
       /*  if (!StringUtils.isBlank(model.getThumbnailUrl())) {todo

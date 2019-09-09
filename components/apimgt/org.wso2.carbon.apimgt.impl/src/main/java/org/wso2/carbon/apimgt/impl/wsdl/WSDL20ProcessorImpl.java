@@ -18,7 +18,6 @@
 package org.wso2.carbon.apimgt.impl.wsdl;
 
 import com.google.common.primitives.Bytes;
-import org.apache.commons.lang.StringUtils;
 import org.apache.woden.WSDLException;
 import org.apache.woden.WSDLFactory;
 import org.apache.woden.WSDLReader;
@@ -27,10 +26,12 @@ import org.apache.woden.WSDLWriter;
 import org.apache.woden.wsdl20.Description;
 import org.apache.woden.wsdl20.Endpoint;
 import org.apache.woden.wsdl20.Service;
+import org.apache.woden.wsdl20.xml.EndpointElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -42,11 +43,11 @@ import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
@@ -204,11 +205,6 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
     }
 
     @Override
-    public byte[] updateEndpoints(API api, String environmentName, String environmentType) throws APIMgtWSDLException {
-        return new byte[0];
-    }
-
-    @Override
     public boolean hasError() {
         return hasError;
     }
@@ -231,6 +227,26 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
     @Override
     public ErrorHandler getError() {
         return error;
+    }
+
+    @Override
+    public byte[] updateEndpoints(API api, String environmentName, String environmentType) throws APIMgtWSDLException {
+        Service[] serviceMap = wsdlDescription.getServices();
+        try {
+            for (Service svc : serviceMap) {
+                Endpoint[] portMap = svc.getEndpoints();
+                for (Endpoint endpoint : portMap) {
+                    EndpointElement element = endpoint.toElement();
+                    String endpointTransport = determineURLTransport(endpoint.getAddress().getScheme(),
+                            api.getTransports());
+                    setAddressUrl(element, new URI(APIUtil.getGatewayEndpoint(endpointTransport, environmentName,
+                            environmentType) + api.getContext()));
+                }
+            }
+        } catch (URISyntaxException | APIManagementException e) {
+            throw new APIMgtWSDLException("Error while setting gateway access URLs in the WSDL", e);
+        }
+        return getWSDL();
     }
 
     /**
@@ -276,32 +292,9 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
         this.error = error;
     }
 
-//    /**
-//     * Updates the endpoints of the {@code description} based on the provided {@code endpointURLs} and {@code api}.
-//     *
-//     * @param endpointURLs Endpoint URIs
-//     * @param api Provided API object
-//     * @param description WSDL 2.0 description
-//     * @throws APIMgtWSDLException If an error occurred while updating endpoints
-//     */
-//    private void updateEndpoints(List<String> endpointURLs, API api, Description description)
-//            throws APIMgtWSDLException {
-//        String context = api.getContext().startsWith("/") ? api.getContext() : "/" + api.getContext();
-//        String selectedUrl;
-//        try {
-//            selectedUrl = APIMWSDLUtils.getSelectedEndpoint(endpointURLs) + context;
-//            if (log.isDebugEnabled()) {
-//                log.debug("Selected URL for updating endpoints of WSDL: " + selectedUrl);
-//            }
-//        } catch (MalformedURLException e) {
-//            throw new APIMgtWSDLException("Error while selecting endpoints for WSDL", e,
-//                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
-//        }
-//        if (!StringUtils.isBlank(selectedUrl)) {
-//            updateEndpoints(selectedUrl, description);
-//        }
-//    }
-
+    private void setAddressUrl(EndpointElement endpoint,URI uri) {
+        endpoint.setAddress(uri);
+    }
 
     private WSDLSource getWSDLSourceFromDocument(Document document, WSDLReader reader) {
         Element domElement = document.getDocumentElement();

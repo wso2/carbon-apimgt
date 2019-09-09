@@ -682,7 +682,7 @@ public interface APIManager {
      * @param apiId api identifier of the API
      * @return wsdl content matching name if exist else throws an APIManagementException
      */
-    Resource getWsdl(APIIdentifier apiId) throws APIManagementException;
+    ResourceFile getWSDL(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * Returns the graphql schema content in registry specified by the schema name
@@ -691,7 +691,7 @@ public interface APIManager {
      * @return schema content matching name if exist else null
      */
     String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException;
-    
+
     /**
      * Returns the corresponding application given the subscriberId and application name
      *

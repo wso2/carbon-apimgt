@@ -987,29 +987,51 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return wsdl content matching name if exist else null
      */
     @Override
-    public Resource getWsdl(APIIdentifier apiId) throws APIManagementException {
+    public ResourceFile getWSDL(APIIdentifier apiId) throws APIManagementException {
         String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION +
                 APIUtil.createWsdlFileName(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion());
+        String tenantDomain = getTenantDomain(apiId);
+        boolean isTenantFlowStarted = false;
         try {
+            Registry registry;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                startTenantFlow(tenantDomain);
+                int id = getTenantManager().getTenantId(tenantDomain);
+                registry = getRegistryService().getGovernanceSystemRegistry(id);
+            } else {
+                if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
+                    registry = getRegistryService().getGovernanceUserRegistry(apiId.getProviderName(),
+                            MultitenantConstants.SUPER_TENANT_ID);
+                } else {
+                    registry = this.registry;
+                }
+            }
             if (registry.resourceExists(wsdlResourcePath)) {
-                return registry.get(wsdlResourcePath);
+                Resource resource = registry.get(wsdlResourcePath);
+                return new ResourceFile(resource.getContentStream(), resource.getMediaType());
             } else {
                 wsdlResourcePath =
                         APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION + apiId
                                 .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + apiId.getApiName() +
                                 apiId.getVersion() + APIConstants.ZIP_FILE_EXTENSION;
                 if (registry.resourceExists(wsdlResourcePath)) {
-                    return registry.get(wsdlResourcePath);
+                    Resource resource = registry.get(wsdlResourcePath);
+                    return new ResourceFile(resource.getContentStream(), resource.getMediaType());
                 } else {
                     throw new APIManagementException("No WSDL found for the API: " + apiId,
                             ExceptionCodes.from(ExceptionCodes.NO_WSDL_AVAILABLE_FOR_API, apiId.getApiName(),
                                     apiId.getVersion()));
                 }
             }
-        } catch (RegistryException e) {
+        } catch (RegistryException | org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Error while getting wsdl file from the registry for API: " + apiId.toString();
             log.error(msg, e);
             throw new APIManagementException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                endTenantFlow();
+            }
         }
     }
 

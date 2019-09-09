@@ -665,7 +665,7 @@ public class AbstractAPIManagerTestCase {
         Mockito.when(registry.get(wsdlResourcePath)).thenThrow(RegistryException.class).thenReturn(resource);
         Mockito.when(registry.resourceExists(wsdlResourcePath)).thenReturn(true);
         try {
-            abstractAPIManager.getWsdl(identifier);
+            abstractAPIManager.getWSDL(identifier);
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Error while getting wsdl file from the registry"));
         }
@@ -673,7 +673,7 @@ public class AbstractAPIManagerTestCase {
         resource.setContent(wsdlContent);
         InputStream inputStream = new ArrayInputStream();
         Mockito.when(resourceMock.getContentStream()).thenReturn(inputStream);
-        Assert.assertTrue(((String)abstractAPIManager.getWsdl(identifier).getContent()).contains(wsdlContent));
+        Assert.assertTrue(((String)abstractAPIManager.getWSDL(identifier).getContent()).contains(wsdlContent));
         PowerMockito.mockStatic(IOUtils.class);
     }
 

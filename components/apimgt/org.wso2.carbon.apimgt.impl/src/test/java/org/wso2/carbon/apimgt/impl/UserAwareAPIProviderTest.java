@@ -278,13 +278,13 @@ public class UserAwareAPIProviderTest {
     }
 
     /**
-     * This method checks the behaviour of getWsdl method when there is no wsdl for the relevant API.
+     * This method checks the behaviour of getWSDL method when there is no wsdl for the relevant API.
      *
      */
     @Test
     public void testGetWsdl() {
         try {
-            userAwareAPIProvider.getWsdl(apiIdentifier);
+            userAwareAPIProvider.getWSDL(apiIdentifier);
             Assert.fail("Non-existing WSDL file was retrieved successfully");
         } catch (APIManagementException e) {
             Assert.assertTrue("Required error message is not present in exception error log",

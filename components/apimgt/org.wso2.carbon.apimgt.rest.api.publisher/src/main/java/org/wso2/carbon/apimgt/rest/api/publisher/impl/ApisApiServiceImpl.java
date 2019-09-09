@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
-import com.google.gson.Gson;
 import com.nimbusds.jose.util.StandardCharset;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
@@ -59,7 +58,6 @@ import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
-import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
@@ -93,7 +91,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1752,9 +1749,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
                     tenantDomain);
-            Resource wsdlResource = apiProvider.getWsdl(apiIdentifier);
+            ResourceFile wsdlResource = apiProvider.getWSDL(apiIdentifier);
             WsdlDTO dto = new WsdlDTO();
-            byte[] wsdlContent = Base64.getEncoder().encode(APIUtil.toByteArray(wsdlResource.getContentStream()));
+            byte[] wsdlContent = Base64.getEncoder().encode(APIUtil.toByteArray(wsdlResource.getContent()));
             dto.setWsdlDefinition(new String(wsdlContent, StandardCharset.UTF_8));
             dto.setName(apiIdentifier.getProviderName() + "--" + apiIdentifier.getApiName() +
                     apiIdentifier.getVersion() + ".wsdl");
@@ -1771,7 +1768,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError(errorMessageCommon, e, log);
             }
-        } catch (IOException | RegistryException e) {
+        } catch (IOException e) {
             RestApiUtil.handleInternalServerError(errorMessageCommon, e, log);
         }
         return null;
@@ -1804,9 +1801,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             apiProvider.uploadWsdl(resourcePath, body.getWsdlDefinition());
 
-            Resource wsdlResource = apiProvider.getWsdl(apiIdentifier);
+            ResourceFile wsdlResource = apiProvider.getWSDL(apiIdentifier);
             WsdlDTO wsdlDTO = new WsdlDTO();
-            byte[] wsdlContent = Base64.getEncoder().encode(APIUtil.toByteArray(wsdlResource.getContentStream()));
+            byte[] wsdlContent = Base64.getEncoder().encode(APIUtil.toByteArray(wsdlResource.getContent()));
             wsdlDTO.setWsdlDefinition(new String(wsdlContent, StandardCharset.UTF_8));
             wsdlDTO.setName(apiIdentifier.getProviderName() + "--" + apiIdentifier.getApiName() +
                     apiIdentifier.getVersion() + ".wsdl");
@@ -1823,7 +1820,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError(errorMessageCommon, e, log);
             }
-        } catch (IOException | RegistryException e) {
+        } catch (IOException e) {
             RestApiUtil.handleInternalServerError(errorMessageCommon, e, log);
         }
         return null;

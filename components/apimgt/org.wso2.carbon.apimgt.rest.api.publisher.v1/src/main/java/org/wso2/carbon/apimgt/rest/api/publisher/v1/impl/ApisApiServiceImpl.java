@@ -52,7 +52,6 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -76,7 +75,6 @@ import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
@@ -89,7 +87,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -98,7 +95,6 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
@@ -2102,26 +2098,28 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private void validateWSDLAndReset(InputStream fileInputStream, Attachment fileDetail, String url)
             throws APIManagementException {
-        if (!fileInputStream.markSupported()) {
-            log.warn("Marking is not supported in 'fileInputStream' InputStream type: "
-                    + fileInputStream.getClass() + ". Skipping validating WSDL to avoid re-reading from the " +
-                    "input stream.");
-        } else {
-            Map validationResponseMap = validateWSDL(url, fileInputStream, fileDetail);
-            WSDLValidationResponse validationResponse =
-                    (WSDLValidationResponse)validationResponseMap.get(RestApiConstants.RETURN_MODEL);
+        Map validationResponseMap = validateWSDL(url, fileInputStream, fileDetail);
+        WSDLValidationResponse validationResponse =
+                (WSDLValidationResponse)validationResponseMap.get(RestApiConstants.RETURN_MODEL);
 
-            if (validationResponse.getWsdlInfo() == null) {
-                // Validation failure
-                RestApiUtil.handleBadRequest(validationResponse.getError(), log);
-            }
+        if (validationResponse.getWsdlInfo() == null) {
+            // Validation failure
+            RestApiUtil.handleBadRequest(validationResponse.getError(), log);
+        }
 
-            // For uploading the WSDL below will require re-reading from the input stream hence resetting
-            try {
-                fileInputStream.reset();
-            } catch (IOException e) {
-                throw new APIManagementException("Error occurred while trying to reset the content stream of the " +
-                        "WSDL", e);
+        if (fileInputStream != null) {
+            if (fileInputStream.markSupported()) {
+                // For uploading the WSDL below will require re-reading from the input stream hence resetting
+                try {
+                    fileInputStream.reset();
+                } catch (IOException e) {
+                    throw new APIManagementException("Error occurred while trying to reset the content stream of the " +
+                            "WSDL", e);
+                }
+            } else {
+                log.warn("Marking is not supported in 'fileInputStream' InputStream type: "
+                        + fileInputStream.getClass() + ". Skipping validating WSDL to avoid re-reading from the " +
+                        "input stream.");
             }
         }
     }
@@ -2192,14 +2190,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getWSDLOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext)
             throws APIManagementException {
-        String errorMessageCommon = "Error while retrieving wsdl of API: " + apiId;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            Resource getWSDLResponse = apiProvider.getWsdl(apiIdentifier);
-            return Response.ok(getWSDLResponse.getContentStream(), getWSDLResponse.getMediaType()).build();
+            ResourceFile getWSDLResponse = apiProvider.getWSDL(apiIdentifier);
+            return Response.ok(getWSDLResponse.getContent(), getWSDLResponse.getContentType()).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
@@ -2212,8 +2209,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 throw e;
             }
-        } catch (RegistryException e) {
-            RestApiUtil.handleInternalServerError(errorMessageCommon, e, log);
         }
         return null;
     }

@@ -56,6 +56,7 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -4948,6 +4949,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return criteria;
     }
 
+    @Deprecated // Remove this method once the jaggery store app is removed.
     @Override
     public String getWSDLDocument(String username, String tenantDomain, String resourceUrl,
             Map environmentDetails, Map apiDetails) throws APIManagementException {
@@ -5029,6 +5031,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     data.toJSONString());
         }
         return data.toJSONString();
+    }
+
+    @Override
+    public ResourceFile getWSDL(APIIdentifier apiIdentifier, String environmentName, String environmentType) throws APIManagementException {
+        return null;
     }
 
     @Override

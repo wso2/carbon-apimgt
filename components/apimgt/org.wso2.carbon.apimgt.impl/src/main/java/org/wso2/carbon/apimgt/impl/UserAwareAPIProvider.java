@@ -89,9 +89,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public Resource getWsdl(APIIdentifier apiId) throws APIManagementException {
+    public ResourceFile getWSDL(APIIdentifier apiId) throws APIManagementException {
         checkAccessControlPermission(apiId);
-        return super.getWsdl(apiId);
+        return super.getWSDL(apiId);
     }
 
     @Override
