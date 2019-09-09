@@ -42,7 +42,7 @@ public class OASTestBase {
     private URITemplate petPost;
     private URITemplate itemPost;
     private URITemplate itemGet;
-    
+
     public OASTestBase() {
         sampleScope = new Scope();
         sampleScope.setName("sample");
@@ -114,7 +114,7 @@ public class OASTestBase {
         exUriTemplate.setThrottlingTiers("Unlimited");
         exUriTemplate.setScope(extensionScope);
         exUriTemplate.setScopes(extensionScope);
-        
+
         String scopesOnlyInSecurity = jsonObject.getJSONObject("scopesOnlyInSecurity").toString();
         Set<URITemplate> uriTemplates = parser.getURITemplates(null, scopesOnlyInSecurity);
         Assert.assertEquals(1, uriTemplates.size());
@@ -155,7 +155,7 @@ public class OASTestBase {
     }
 
     public void testGenerateAPIDefinition(APIDefinition parser) throws Exception {
-        APIIdentifier identifier = new APIIdentifier("admin","simple","1.0.0");
+        APIIdentifier identifier = new APIIdentifier("admin", "simple", "1.0.0");
         API api = new API(identifier);
         api.setScopes(new HashSet<>(Arrays.asList(sampleScope, extensionScope)));
         api.setUriTemplates(new HashSet<>(Arrays.asList(petGet)));
@@ -179,7 +179,7 @@ public class OASTestBase {
         JSONObject jsonObject = new JSONObject(content);
         String equalNoOfResources = jsonObject.getJSONObject("equalNoOfResources").toString();
 
-        APIIdentifier identifier = new APIIdentifier("admin","simple","1.0.0");
+        APIIdentifier identifier = new APIIdentifier("admin", "simple", "1.0.0");
         API api = new API(identifier);
         api.setScopes(new HashSet<>(Arrays.asList(sampleScope, extensionScope)));
         api.setUriTemplates(new HashSet<>(Arrays.asList(petGet, petPost, itemGet, itemPost)));
@@ -213,10 +213,10 @@ public class OASTestBase {
         Iterator iterator = uriTemplates.iterator();
         while (iterator.hasNext()) {
             URITemplate element = (URITemplate) iterator.next();
-            if("/pets".equalsIgnoreCase(element.getUriTemplate())) {
+            if ("/pets".equalsIgnoreCase(element.getUriTemplate())) {
                 Assert.fail("Removed paths from API operation should not present.");
             }
-            if("/items".equalsIgnoreCase(element.getUriTemplate()) && "PUT".equalsIgnoreCase(element.getHTTPVerb())) {
+            if ("/items".equalsIgnoreCase(element.getUriTemplate()) && "PUT".equalsIgnoreCase(element.getHTTPVerb())) {
                 Assert.fail("Removed item from API operation should not present.");
             }
         }
@@ -259,7 +259,7 @@ public class OASTestBase {
         updatedItemGet.setScope(newScope);
         updatedItemGet.setScopes(newScope);
 
-        APIIdentifier identifier = new APIIdentifier("admin","simple","1.0.0");
+        APIIdentifier identifier = new APIIdentifier("admin", "simple", "1.0.0");
         API api = new API(identifier);
         api.setScopes(new HashSet<>(Arrays.asList(sampleScope, extensionScope, newScope)));
         api.setUriTemplates(new HashSet<>(Arrays.asList(petPost, updatedItemGet)));
