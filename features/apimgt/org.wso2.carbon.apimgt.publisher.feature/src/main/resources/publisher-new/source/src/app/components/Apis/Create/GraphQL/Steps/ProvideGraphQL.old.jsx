@@ -250,8 +250,8 @@ class ProvideGraphQL extends Component {
                                         <div>
                                             <FormattedMessage
                                                 id='Apis.GraphQL.Steps.ProvideGraphQL.try.dropping.schema.file'
-                                                defaultMessage='Try dropping schema file here, or click to select
-                                        schema to upload.'
+                                                defaultMessage={'Try dropping schema file here, or click to select ' +
+                                                'schema to upload.'}
                                             />
                                         </div>
                                     </div>

@@ -456,7 +456,7 @@ function ProductResourcesEdit() {
             <div className={classes.titleWrapper}>
                 <Typography variant='h4' align='left' className={classes.mainTitle}>
                     <FormattedMessage
-                        id='Apis.Details.ProductResources.ProductResources.title'
+                        id='Apis.Details.ProductResources.ProductResourcesEdit.title'
                         defaultMessage='Manage Resources'
                     />
                 </Typography>
@@ -465,13 +465,13 @@ function ProductResourcesEdit() {
                 <Grid container>
                     <Grid item xs={7} className={classes.leftMost}>
                         <FormattedMessage
-                            id='Apis.Details.ProductResources.ProductResources.find.and.select'
+                            id='Apis.Details.ProductResources.ProductResourcesEdit.find.and.select'
                             defaultMessage='Find and select resources for the API Product'
                         />
                     </Grid>
                     <Grid item xs={5} className={classes.rightMost}>
                         <FormattedMessage
-                            id='Apis.Details.ProductResources.ProductResources.find.and.select'
+                            id='Apis.Details.ProductResources.ProductResourcesEdit.find.and.select'
                             defaultMessage='Find and select resources for the API Product'
                         />
                         <div />
@@ -484,7 +484,7 @@ function ProductResourcesEdit() {
                     <Grid item xs={3}>
                         <div className={classes.colTitle}>
                             <FormattedMessage
-                                id='Apis.Details.ProductResources.ProductResources.select.an.api'
+                                id='Apis.Details.ProductResources.ProductResourcesEdit.select.an.api'
                                 defaultMessage='Select an API'
                             />
                         </div>
@@ -541,7 +541,7 @@ function ProductResourcesEdit() {
                         <Paper className={classes.paper}>
                             <div className={classes.colTitle}>
                                 <FormattedMessage
-                                    id='Apis.Details.ProductResources.ProductResources.api.resources'
+                                    id='Apis.Details.ProductResources.ProductResourcesEdit.api.resources'
                                     defaultMessage='API Resources'
                                 />
                             </div>
@@ -556,7 +556,7 @@ function ProductResourcesEdit() {
                                         component='div'
                                     >
                                         <FormattedMessage
-                                            id='Apis.Details.ProductResources.ProductResources.api.all.resources'
+                                            id='Apis.Details.ProductResources.ProductResourcesEdit.api.all.resources'
                                             defaultMessage={
                                                 'All resources available with the API are displayed bellow.' +
                                                 'Click the right hand side arrow to add them to the api product.'
@@ -572,7 +572,7 @@ function ProductResourcesEdit() {
                                 >
                                     <Typography variant='body2'>
                                         <FormattedMessage
-                                            id='Apis.Details.ProductResources.ProductResources.toolbar.addall'
+                                            id='Apis.Details.ProductResources.ProductResourcesEdit.toolbar.add.selected'
                                             defaultMessage='Add Selected'
                                         />
                                     </Typography>
@@ -585,7 +585,7 @@ function ProductResourcesEdit() {
                                 >
                                     <Typography variant='body2'>
                                         <FormattedMessage
-                                            id='Apis.Details.ProductResources.ProductResources.toolbar.addall'
+                                            id='Apis.Details.ProductResources.ProductResourcesEdit.toolbar.add.all'
                                             defaultMessage='Add All'
                                         />
                                     </Typography>
@@ -684,13 +684,13 @@ function ProductResourcesEdit() {
                                     <div className={classes.messageWrapper}>
                                         <Typography variant='h5' component='h3'>
                                             <FormattedMessage
-                                                id='Apis.Details.ProductResources.ProductResources.empty.title'
-                                                defaultMessage='No resources are avaialable'
+                                                id='Apis.Details.ProductResources.ProductResourcesEdit.empty.title'
+                                                defaultMessage='No resources are available'
                                             />
                                         </Typography>
                                         <Typography component='p'>
                                             <FormattedMessage
-                                                id='Apis.Details.ProductResources.ProductResources.empty.content'
+                                                id='Apis.Details.ProductResources.ProductResourcesEdit.empty.content'
                                                 defaultMessage='Use the left side panel to add resources'
                                             />
                                         </Typography>
@@ -748,13 +748,13 @@ function ProductResourcesEdit() {
                                 <Button variant='contained' color='primary' onClick={save} disabled={updating}>
                                     {updating && (
                                         <FormattedMessage
-                                            id='Apis.Details.Properties.Properties.updating'
+                                            id='Apis.Details.ProductResources.ProductResourcesEdit.updating'
                                             defaultMessage='Updating ...'
                                         />
                                     )}
                                     {!updating && (
                                         <FormattedMessage
-                                            id='Apis.Details.Properties.Properties.save'
+                                            id='Apis.Details.ProductResources.ProductResourcesEdit.save'
                                             defaultMessage='Save'
                                         />
                                     )}
@@ -765,7 +765,7 @@ function ProductResourcesEdit() {
                             <Link to={'/apis/' + api.id + '/overview'}>
                                 <Button>
                                     <FormattedMessage
-                                        id='Apis.Details.Properties.Properties.cancel'
+                                        id='Apis.Details.ProductResources.ProductResourcesEdit.cancel'
                                         defaultMessage='Cancel'
                                     />
                                 </Button>

@@ -177,8 +177,8 @@ class Monetization extends Component {
                                         : (
                                             <Typography gutterBottom>
                                                 <FormattedMessage
-                                                    id='Apis.Details.Monetization.Index.there.are.no
-                                                        .monetization.properties.configured'
+                                                    id={'Apis.Details.Monetization.Index.there.are.no' +
+                                                        ' .monetization.properties.configured'}
                                                     defaultMessage='There are no monetization properties configured'
                                                 />
                                             </Typography>

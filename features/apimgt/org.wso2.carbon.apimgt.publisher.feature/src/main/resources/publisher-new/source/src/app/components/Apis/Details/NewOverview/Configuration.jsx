@@ -183,7 +183,7 @@ function Configuration(props) {
                                                         id='Apis.Details.NewOverview.Configuration.tooltip'
                                                         defaultMessage={
                                                             'Marks one API version in a group as ' +
-                                                            'the default so that it can be invoked' +
+                                                            'the default so that it can be invoked ' +
                                                             'without specifying ' +
                                                             'the version number in the URL. For example, if you mark ' +
                                                             'http://host:port/youtube/2.0 as the default API, ' +
@@ -396,7 +396,7 @@ function Configuration(props) {
                                                 id='Apis.Details.NewOverview.Configuration.access.control.tooltip'
                                                 defaultMessage={
                                                     'Restricted by roles : The API can be viewable and' +
-                                                    'modifiable by only specific publishers and creators ' +
+                                                    ' modifiable by only specific publishers and creators ' +
                                                     'with the roles that you specify'
                                                 }
                                             />
@@ -431,7 +431,7 @@ function Configuration(props) {
                                             <FormattedMessage
                                                 id='Apis.Details.NewOverview.Configuration.visibility.store.all.tooltip'
                                                 defaultMessage={
-                                                    'Public: The API is accessible to everyone and can be' +
+                                                    'Public: The API is accessible to everyone and can be ' +
                                                     'advertised in multiple stores - a central store ' +
                                                     'and/or non-WSO2 stores.'
                                                 }
