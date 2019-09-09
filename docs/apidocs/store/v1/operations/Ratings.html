@@ -474,16 +474,16 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdRatingsGet"></a>Get API ratings</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/apis/{apiId}/ratings</code>
+            <h4 class="operation-heading"><a name="apisApiIdRatingsGet"></a>Retrieve API ratings</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/apis/{apiId}/ratings</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to get the list of ratings of an API.
+            <p class="marked">This operation can be used to retrieve the list of ratings of an API.
 
 &#x60;X-WSO2-Tenant&#x60; header can be used to retrieve ratings of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:subscribe</code>
+                <p>Not required</p>
 
             <h4 class="section-heading">
                 Examples
@@ -516,12 +516,12 @@ Content-Type: application/json
   &quot;userRating&quot; : 3,
   &quot;count&quot; : 2,
   &quot;list&quot; : [ {
-    &quot;ratingId&quot; : &quot;2&quot;,
+    &quot;ratingId&quot; : &quot;d93fb282-8uj6-48fc-2345-993fb89085e1&quot;,
     &quot;apiId&quot; : &quot;e93fb282-b456-48fc-8981-003fb89086ae&quot;,
     &quot;username&quot; : &quot;admin&quot;,
     &quot;rating&quot; : 3
   }, {
-    &quot;ratingId&quot; : &quot;4&quot;,
+    &quot;ratingId&quot; : &quot;d93fb282-8uj6-48fc-2345-993fb89085e1&quot;,
     &quot;apiId&quot; : &quot;e93fb282-b456-48fc-8981-003fb89086ae&quot;,
     &quot;username&quot; : &quot;john&quot;,
     &quot;rating&quot; : 4
@@ -690,19 +690,10 @@ Content-Type: application/json
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. Rating returned. </p></td>
+                        <td class="parameter"><p class="marked">OK. Rating list returned. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#RatingList">RatingList</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested rating does not exist. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
                             </span>
                         </td>
                     </tr>
@@ -889,19 +880,10 @@ X-WSO2-Tenant: test.com
                             </span>
                         </td>
                     </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Resource to be deleted does not exist. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdUserRatingGet"></a>Get user API rating</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/apis/{apiId}/user-rating</code>
+            <h4 class="operation-heading"><a name="apisApiIdUserRatingGet"></a>Retrieve API rating of user</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/apis/{apiId}/user-rating</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to get the user rating of an API.
@@ -939,7 +921,7 @@ X-WSO2-Tenant: test.com
 Content-Type: application/json
 
 {
-  &quot;ratingId&quot; : &quot;6&quot;,
+  &quot;ratingId&quot; : &quot;d93fb282-8uj6-48fc-2345-993fb89085e1&quot;,
   &quot;apiId&quot; : &quot;e93fb282-b456-48fc-8981-003fb89086ae&quot;,
   &quot;username&quot; : &quot;peter&quot;,
   &quot;rating&quot; : 5
@@ -1152,7 +1134,7 @@ X-WSO2-Tenant: test.com
 Content-Type: application/json
 
 {
-  &quot;ratingId&quot; : &quot;7&quot;,
+  &quot;ratingId&quot; : &quot;d93fb282-8uj6-48fc-2345-993fb89085e1&quot;,
   &quot;apiId&quot; : &quot;e93fb282-b456-48fc-8981-003fb89086ae&quot;,
   &quot;username&quot; : &quot;john&quot;,
   &quot;rating&quot; : 4

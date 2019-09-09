@@ -157,14 +157,13 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/ratings")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get API ratings", notes = "This operation can be used to get the list of ratings of an API.  `X-WSO2-Tenant` header can be used to retrieve ratings of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used. ", response = RatingListDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve API ratings", notes = "This operation can be used to retrieve the list of ratings of an API.  `X-WSO2-Tenant` header can be used to retrieve ratings of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used. ", response = RatingListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+            
         })
     }, tags={ "Ratings",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Rating returned. ", response = RatingListDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested rating does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 200, message = "OK. Rating list returned. ", response = RatingListDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
     public Response apisApiIdRatingsGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset, @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
         return delegate.apisApiIdRatingsGet(apiId, limit, offset, xWSO2Tenant, securityContext);
@@ -252,8 +251,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         })
     }, tags={ "Ratings",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
-        @ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = ErrorDTO.class) })
+        @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class) })
     public Response apisApiIdUserRatingDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.apisApiIdUserRatingDelete(apiId, xWSO2Tenant, ifMatch, securityContext);
     }
@@ -262,7 +260,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/user-rating")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get user API rating", notes = "This operation can be used to get the user rating of an API.  `X-WSO2-Tenant` header can be used to retrieve the logged in user rating of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used. ", response = RatingDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve API rating of user", notes = "This operation can be used to get the user rating of an API.  `X-WSO2-Tenant` header can be used to retrieve the logged in user rating of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used. ", response = RatingDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
