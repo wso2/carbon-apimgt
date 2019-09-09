@@ -105,7 +105,7 @@ public class ImportApiServiceImplTestCase {
         Subscriber subscriber = new Subscriber("admin");
         Mockito.when(apiConsumer.getSubscriber("admin")).thenReturn(subscriber);
         Mockito.when(apiConsumer.addApplication(Mockito.any(Application.class), Mockito.anyString())).thenReturn(1);
-        PowerMockito.when(RestApiUtil.isTenantAvailable("carbon.super")).thenReturn(true);
+        PowerMockito.when(APIUtil.isTenantAvailable("carbon.super")).thenReturn(true);
         PowerMockito.spy(APIUtil.class);
         PowerMockito.doReturn(false).when(APIUtil.class, "isApplicationExist", "admin", "sampleApp", null);
         Mockito.when(apiConsumer.searchPaginatedAPIs("name=*sampleAPI*&version=*1.0.0*",
@@ -140,7 +140,7 @@ public class ImportApiServiceImplTestCase {
         Subscriber subscriber = new Subscriber("admin");
         Mockito.when(apiConsumer.getSubscriber("admin")).thenReturn(subscriber);
         Mockito.when(apiConsumer.addApplication(Mockito.any(Application.class), Mockito.anyString())).thenReturn(1);
-        PowerMockito.when(RestApiUtil.isTenantAvailable("carbon.super")).thenReturn(true);
+        PowerMockito.when(APIUtil.isTenantAvailable("carbon.super")).thenReturn(true);
         PowerMockito.spy(APIUtil.class);
         PowerMockito.doReturn(false).when(APIUtil.class, "isApplicationExist", "admin", "sampleApp", null);
         Mockito.when(apiConsumer.searchPaginatedAPIs("name=*sampleAPI*&version=*1.0.0*",
