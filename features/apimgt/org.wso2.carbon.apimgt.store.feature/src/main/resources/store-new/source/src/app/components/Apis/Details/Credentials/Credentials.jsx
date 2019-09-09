@@ -125,13 +125,13 @@ class Credentials extends React.Component {
         } else {
             updateSubscriptionData(this.updateData);
         }
-        const { history: { location: { state } } } = this.props;
+        const { history: { location: { state, pathname }, replace } } = this.props;
         if (state) {
             const { openWizard } = state;
             if (openWizard) {
                 this.setState({ wizardOn: true, openNew: true });
-                this.props.history.replace({
-                    pathname: this.props.location.pathname,
+                replace({
+                    pathname,
                     state: {},
                 });
             }
@@ -381,6 +381,15 @@ Credentials.propTypes = {
         titleSub: PropTypes.shape({}),
         tableMain: PropTypes.shape({}),
         th: PropTypes.shape({}),
+    }).isRequired,
+    history: PropTypes.shape({
+        location: PropTypes.shape({
+            state: PropTypes.shape({
+                openWizard: PropTypes.bool.isRequired,
+            }).isRequired,
+            pathname: PropTypes.string.isRequired,
+        }).isRequired,
+        replace: PropTypes.func.isRequired,
     }).isRequired,
     intl: PropTypes.func.isRequired,
 };

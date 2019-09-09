@@ -1,12 +1,11 @@
-import React, { useEffect, useState, useContext } from 'react';
-import Tenants from 'AppData/Tenants';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import Settings from 'AppComponents/Shared/SettingsContext';
-import { withStyles, withTheme } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import { classes } from 'istanbul-lib-coverage';
 import Typography from '@material-ui/core/Typography';
+import PropTypes from 'prop-types';
 
 
 const styles = theme => ({
@@ -19,17 +18,23 @@ const styles = theme => ({
     },
     paper: {
         padding: theme.spacing.unit * 2,
-        textAlign: 'center',
+        textAlign: 'left',
         color: theme.palette.text.secondary,
         margin: 'auto',
         '-webkit-box-shadow': '0px 0px 2px 0px rgba(0,0,0,0.5)',
         '-moz-box-shadow': '0px 0px 2px 0px rgba(0,0,0,0.5)',
         'box-shadow': '0px 0px 2px 0px rgba(0,0,0,0.5)',
+        '&:hover': {
+            background: '#eeeeee',
+            cursor: 'grab',
+        },
     },
     list: {
         background: theme.palette.background.paper,
         display: 'block',
-        // height: theme.spacing.unit * 12,
+        margin: 'auto',
+        'margin-top': '100px',
+        padding: `${theme.spacing.unit * 3}px ${theme.spacing.unit * 2}px`,
     },
     listItem: {
         margin: 'auto',
@@ -38,48 +43,33 @@ const styles = theme => ({
 
 
 const tenantListing = (props) => {
-    // const [tenantList, setTenantList] = useState([]);
     const settingContext = useContext(Settings);
     const { tenantList, classes, theme } = props;
-    console.info('inside funciotn', theme);
-    useEffect(() => {
-        // const tenantApi = new Tenants();
-        // tenantApi.getTenantsByState().then((response) => {
-        //     setTenantList(response.body);
-        // }).catch((error) => {
-        //     console.log('error when getting tenants ' + error);
-        // });
-    }, []);
-    console.log(tenantList);
-    console.log(settingContext);
     return (
         <div className={classes.root}>
-            {/* <Grid container md={6} justify='center' spacing={0} className={classes.list}>
-
-                <Grid item xs={12} md={5} className={classes.listItem}>
-                    <Paper elevation={0} square className={classes.paper}>
-                        <Typography noWrap>carbon1</Typography>
-                    </Paper>
-                </Grid>
-                <Grid item xs={12} md={5} className={classes.listItem}>
-                    <Paper elevation={0} square className={classes.paper}>
-                        <Typography noWrap>carbon2</Typography>
-                    </Paper>
-                </Grid>
-
-
-            </Grid> */}
-            <Grid container md={6} justify='center' spacing={0} className={classes.list}>
+            <Grid container md={4} justify='left' spacing={0} className={classes.list}>
                 {tenantList.map(({ domain }) => {
                     return (
-                    // <Link to={`/apis?tenant=${domain}`} onClick={() => settingContext.setTenantDomain(domain)}>
-                    // {domain}
-                    // {' '}
-                    // </Link>
-                        <Grid item xs={12} md={5} className={classes.listItem}>
-                            <Paper elevation={0} square className={classes.paper}>
-                                <Typography noWrap>{domain}</Typography>
-                            </Paper>
+                        <Grid item xs={12} md={12} className={classes.listItem}>
+                            <Link
+                                style={{
+                                    textDecoration: 'none',
+                                }}
+                                to={`/apis?tenant=${domain}`}
+                                onClick={() => settingContext.setTenantDomain(domain)}
+                            >
+                                <Paper elevation={0} square className={classes.paper}>
+                                    <Typography
+                                        noWrap
+                                        style={{
+                                            fontSize: theme.typography.h5.fontSize,
+                                            fontWeight: theme.typography.h1.fontWeight,
+                                        }}
+                                    >
+                                        {domain}
+                                    </Typography>
+                                </Paper>
+                            </Link>
                         </Grid>
                     );
                 })}
@@ -88,4 +78,23 @@ const tenantListing = (props) => {
     );
 };
 
+tenantListing.propTypes = {
+    classes: PropTypes.shape({
+        root: PropTypes.string,
+        list: PropTypes.string,
+        paper: PropTypes.string,
+        listItem: PropTypes.string,
+    }).isRequired,
+    tenantList: PropTypes.arrayOf(PropTypes.string).isRequired,
+    theme: PropTypes.shape({
+        typography: PropTypes.shape({
+            h5: PropTypes.shape({
+                fontSize: PropTypes.string.isRequired,
+            }).isRequired,
+            h1: PropTypes.shape({
+                fontWeight: PropTypes.string.isRequired,
+            }).isRequired,
+        }).isRequired,
+    }).isRequired,
+};
 export default withStyles(styles, { withTheme: true })(tenantListing);
