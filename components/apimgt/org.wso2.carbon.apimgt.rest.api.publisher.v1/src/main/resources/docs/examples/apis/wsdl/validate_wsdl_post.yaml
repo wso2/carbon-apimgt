@@ -201,7 +201,6 @@
   title: Trying to Validate an Invalid WSDL
   rawRequest: |
     POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl HTTP/1.1
-    Accept-Encoding: gzip,deflate
     Content-Type: multipart/form-data; boundary="----=_Part_17_807981233.1568034538839"
     MIME-Version: 1.0
     Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7

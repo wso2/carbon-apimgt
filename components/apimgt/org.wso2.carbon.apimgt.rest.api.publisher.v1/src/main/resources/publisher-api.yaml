@@ -1526,6 +1526,8 @@ paths:
 
         WSDL can be speficied as a single file or a ZIP archive with WSDLs and reference XSDs etc.
         Specify additionalProperties with **at least** API's name, version, context and endpointConfig.
+      x-examples:
+        $ref: docs/examples/apis/wsdl/import_wsdl_post.yaml
       parameters:
         - in: formData
           name: file
