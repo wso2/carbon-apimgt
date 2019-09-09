@@ -104,7 +104,7 @@ function GenericResource(props) {
                             theme='vs-dark'
                             value={scriptContent}
                             options={{ selectOnLineNumbers: true }}
-                            language='xml'
+                            language='javascript'
                             onChange={content => onChange(content, resourcePath, resourceMethod)}
                         />
                     </Grid>

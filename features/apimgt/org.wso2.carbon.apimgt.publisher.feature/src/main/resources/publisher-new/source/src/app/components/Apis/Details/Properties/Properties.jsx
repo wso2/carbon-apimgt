@@ -471,8 +471,8 @@ class Properties extends React.Component {
                                                     required
                                                     id='outlined-required'
                                                     label={intl.formatMessage({
-                                                        id: `Apis.Details.Properties.Properties.
-                                                                show.add.property.property.name`,
+                                                        id: 'Apis.Details.Properties.Properties.show.add.property.' +
+                                                            'property.name',
                                                         defaultMessage: 'Property Name',
                                                     })}
                                                     margin='normal'
@@ -578,8 +578,8 @@ class Properties extends React.Component {
                                             <Typography variant='body2' color='primary'>
                                                 <FormattedMessage
                                                     id='Apis.Details.Properties.Properties.update.not.allowed'
-                                                    defaultMessage='*You are not authorized to update properties of
-                                                    the API due to insufficient permissions'
+                                                    defaultMessage={'*You are not authorized to update properties of' +
+                                                    ' the API due to insufficient permissions'}
                                                 />
                                             </Typography>
                                         </Grid>
