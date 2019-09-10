@@ -2487,9 +2487,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public Map<String, Object> searchPaginatedAPIs(Registry registry, String searchQuery, int start, int end,
                                                    boolean limitAttributes) throws APIManagementException {
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
-        SortedSet<API> apiProductSet = new TreeSet<API>(new APINameComparator());
         List<API> apiList = new ArrayList<API>();
-        List<APIProduct> apiProductList = new ArrayList<APIProduct>();
         Map<String, Object> result = new HashMap<String, Object>();
         int totalLength = 0;
         boolean isMore = false;
@@ -2540,7 +2538,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
 
             if (!isFound) {
-                result.put("apiProduct", apiProductSet);
                 result.put("apis", apiSet);
                 result.put("length", 0);
                 result.put("isMore", isMore);
@@ -2556,22 +2553,13 @@ public abstract class AbstractAPIManager implements APIManager {
             int tempLength = 0;
             for (GovernanceArtifact artifact : governanceArtifacts) {
                 API resultAPI;
-                APIProduct resultAPIproduct;
-                if (APIConstants.AuditLogConstants.API_PRODUCT.equals(artifact.getAttribute
-                        (APIConstants.API_OVERVIEW_TYPE))) {
-                    resultAPIproduct = APIUtil.getAPIProduct(artifact, registry);
-                    if (resultAPIproduct != null) {
-                        apiProductList.add(resultAPIproduct);
-                    }
+                if (limitAttributes) {
+                    resultAPI = APIUtil.getAPI(artifact);
                 } else {
-                    if (limitAttributes) {
-                        resultAPI = APIUtil.getAPI(artifact);
-                    } else {
-                        resultAPI = APIUtil.getAPI(artifact, registry);
-                    }
-                    if (resultAPI != null) {
-                        apiList.add(resultAPI);
-                    }
+                    resultAPI = APIUtil.getAPI(artifact, registry);
+                }
+                if (resultAPI != null) {
+                    apiList.add(resultAPI);
                 }
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -2620,7 +2608,6 @@ public abstract class AbstractAPIManager implements APIManager {
             PaginationContext.destroy();
         }
         result.put("apis", apiSet);
-        result.put("apiProduct", apiProductSet);
         result.put("length", totalLength);
         result.put("isMore", isMore);
         return result;

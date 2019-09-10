@@ -1240,9 +1240,6 @@ public final class APIUtil {
             for (String key : keys) {
                 if (key.contains("URITemplate")) {
                     artifact.removeAttribute(key);
-
-
-                    
                 }
             }
 
