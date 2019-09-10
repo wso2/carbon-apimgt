@@ -488,6 +488,18 @@ public class RestApiUtil {
      * Returns a new BadRequestException
      *
      * @param description description of the exception
+     * @param code error code
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException buildBadRequestException(String description, Long code) {
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, code, description);
+        return new BadRequestException(errorDTO);
+    }
+
+    /**
+     * Returns a new BadRequestException
+     *
+     * @param description description of the exception
      * @return a new BadRequestException with the specified details as a response DTO
      */
     public static BadRequestException buildBadRequestException(String description, Throwable e) {
@@ -652,6 +664,20 @@ public class RestApiUtil {
      */
     public static void handleBadRequest(String msg, Log log) throws BadRequestException {
         BadRequestException badRequestException = buildBadRequestException(msg);
+        log.error(msg);
+        throw badRequestException;
+    }
+
+    /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     *
+     * @param msg error message
+     * @param log Log instance
+     * @param code error code
+     * @throws BadRequestException
+     */
+    public static void handleBadRequest(String msg, Long code, Log log) throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(msg, code);
         log.error(msg);
         throw badRequestException;
     }

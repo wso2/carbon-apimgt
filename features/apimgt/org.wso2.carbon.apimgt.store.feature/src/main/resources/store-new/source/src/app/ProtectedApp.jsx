@@ -56,7 +56,7 @@ export default class ProtectedApp extends Component {
             messages: {},
             userResolved: false,
             scopesFound: false,
-            tenantList: [],
+            tenantList: null,
         };
         this.environments = [];
         this.loadLocale = this.loadLocale.bind(this);
@@ -74,7 +74,7 @@ export default class ProtectedApp extends Component {
 
         // Check if tenant domain is present as a query param if not retrieve the tenant list
         if (tenant) {
-            setTenantDomain(tenant);
+            this.setState({ tenantList: [] }, setTenantDomain(tenant));
         } else {
             tenantApi.getTenantsByState().then((response) => {
                 this.setState({ tenantList: response.body.list });
@@ -205,6 +205,10 @@ export default class ProtectedApp extends Component {
             isAuthenticated = true;
         }
 
+        // Waiting till the tenant list is retrieved
+        if (tenantList === null && tenantDomain === null) {
+            return <Loading />;
+        }
         // user is redirected to tenant listing page if there are any tenants present and
         // if the user is not authenticated and if there is no tenant domain prsent in the context
         if (tenantList.length > 0 && !isAuthenticated && tenantDomain === null) {

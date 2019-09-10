@@ -25,7 +25,7 @@ const styles = theme => ({
         '-moz-box-shadow': '0px 0px 2px 0px rgba(0,0,0,0.5)',
         'box-shadow': '0px 0px 2px 0px rgba(0,0,0,0.5)',
         '&:hover': {
-            background: '#eeeeee',
+            background: theme.palette.grey[100],
             cursor: 'grab',
         },
     },
@@ -35,6 +35,7 @@ const styles = theme => ({
         margin: 'auto',
         'margin-top': '100px',
         padding: `${theme.spacing.unit * 3}px ${theme.spacing.unit * 2}px`,
+        overflow: scroll,
     },
     listItem: {
         margin: 'auto',
