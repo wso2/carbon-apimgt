@@ -625,4 +625,15 @@ export default class API extends Resource {
             return client.apis['Unified Search'].get_search(params, Resource._requestMetaData());
         });
     }
+
+    /**
+     * method to get store settings such as grant types, scopes, application sharing settings etc
+     * @returns {Promise} promise object return from SwaggerClient-js
+     * @memberof API
+     */
+    getSettings(){
+        return this.client.then((client) => {
+            return client.apis.Settings.get_settings(this._requestMetaData());
+        });
+    }
 }
