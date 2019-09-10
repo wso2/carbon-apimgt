@@ -1364,6 +1364,9 @@ public abstract class AbstractAPIManager implements APIManager {
             GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registryType, APIConstants
                     .DOCUMENTATION_KEY);
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
+            if(artifact == null) {
+                return documentation;
+            }
             APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(artifact.getPath());
             checkAccessControlPermission(apiIdentifier);
             if (null != artifact) {
