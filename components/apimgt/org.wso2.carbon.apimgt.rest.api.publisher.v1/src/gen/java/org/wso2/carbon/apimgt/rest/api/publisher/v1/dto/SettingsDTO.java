@@ -21,8 +21,8 @@ public class SettingsDTO   {
   
     private List<EnvironmentDTO> environment = new ArrayList<>();
     private List<String> scopes = new ArrayList<>();
-    private Object securityAuditProperties = null;
     private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<>();
+    private Object securityAuditProperties = null;
 
   /**
    **/
@@ -84,7 +84,7 @@ public class SettingsDTO   {
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("SecurityAuditProperties")
+  @JsonProperty("securityAuditProperties")
   public Object getSecurityAuditProperties() {
     return securityAuditProperties;
   }
@@ -104,8 +104,8 @@ public class SettingsDTO   {
     SettingsDTO settings = (SettingsDTO) o;
     return Objects.equals(environment, settings.environment) &&
         Objects.equals(scopes, settings.scopes) &&
-        Objects.equals(securityAuditProperties, settings.securityAuditProperties) &&
-        Objects.equals(monetizationAttributes, settings.monetizationAttributes);
+        Objects.equals(monetizationAttributes, settings.monetizationAttributes) &&
+        Objects.equals(securityAuditProperties, settings.securityAuditProperties);
   }
 
   @Override
@@ -120,8 +120,8 @@ public class SettingsDTO   {
     
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
-    sb.append("    securityAuditProperties: ").append(toIndentedString(securityAuditProperties)).append("\n");
     sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");
+    sb.append("    securityAuditProperties: ").append(toIndentedString(securityAuditProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }

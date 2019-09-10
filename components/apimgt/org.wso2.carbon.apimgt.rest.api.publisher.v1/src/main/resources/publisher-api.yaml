@@ -3392,75 +3392,6 @@ paths:
   ######################################################
   /apis/{apiId}/auditapi:
     #-----------------------------------------------------
-    # Create new Security Audit API
-    #-----------------------------------------------------
-    post:
-      security:
-        - OAuth2Security:
-            - apim:api_view
-      summary: Create new Security Audit API
-      description: |
-        Create new Security Audit API
-      parameters:
-        - $ref: "#/parameters/Accept"
-        - $ref: "#/parameters/apiId"
-        - in: body
-          name: body
-          description: |
-            API object that needs to be added
-          required: true
-          schema:
-            $ref: '#/definitions/APISecurityAuditInfo'
-      tags:
-        API Audit
-      responses:
-        200:
-          description: |
-            OK.
-            UUID returned
-          schema:
-            $ref: '#/definitions/AuditReport'
-        404:
-          description: |
-            Not Created.
-            The Audit API was not created.
-          schema:
-            $ref: '#/definitions/Error'
-
-    #-----------------------------------------------------
-    # Update Swagger Definition in Security Audit API
-    #-----------------------------------------------------
-    put:
-      security:
-        - OAuth2Security:
-            - apim:api_view
-      summary: Update Swagger Definition in Security Audit API
-      description: |
-        Update Swagger Definition in Security Audit API
-      parameters:
-        - $ref: "#/parameters/Accept"
-        - $ref: "#/parameters/apiId"
-      tags:
-        API Audit
-      responses:
-        200:
-          description: |
-            OK.
-            Swagger Definition has been updated
-          headers:
-            Content-Type:
-              description: |
-                The content of the body.
-              default: application/json
-              type: string
-        404:
-          description: |
-            Not Found.
-            The Audit API was not found.
-          schema:
-            $ref: '#/definitions/Error'
-
-    #-----------------------------------------------------
     # Retrieve the Security Audit Report of the Audit API
     #-----------------------------------------------------
     get:
@@ -8409,7 +8340,7 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/MonetizationAttribute'
-      SecurityAuditProperties:
+      securityAuditProperties:
         type: object
         items:
           type: string
