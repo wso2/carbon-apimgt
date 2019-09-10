@@ -91,7 +91,7 @@ class SampleAPI extends Component {
         const swaggerUpdatePromise = promisedSampleAPI.then((sampleAPI) => {
             Alert.info(intl.formatMessage({
                 id: 'Apis.Listing.SampleAPI.SampleAPI.created',
-                defaultMessage: 'Sample Pet-Store API created successfully',
+                defaultMessage: 'Sample PizzaShackAPI API created successfully',
             }));
             return sampleAPI.updateSwagger(getSampleSwagger('Unlimited'));
         });
@@ -105,7 +105,7 @@ class SampleAPI extends Component {
                     this.setState({ published: true, api });
                     Alert.info(intl.formatMessage({
                         id: 'Apis.Listing.SampleAPI.SampleAPI.published',
-                        defaultMessage: 'Pet-Store API published successfully',
+                        defaultMessage: 'PizzaShackAPI API published successfully',
                     }));
                 })
                 .catch((error) => {
