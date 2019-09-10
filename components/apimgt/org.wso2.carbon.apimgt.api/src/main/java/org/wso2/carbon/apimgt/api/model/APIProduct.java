@@ -24,17 +24,20 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 
 public class APIProduct {
     // TODO add rest of the properties
     private APIProductIdentifier id;
     private String uuid;
+    private String type;
     private int productId;
     private String context;
     private String description;
     private Set<Tier> availableTiers = new LinkedHashSet<Tier>();
     private Set<String> tags = new LinkedHashSet<String>();
+    private String contextTemplate;
     private String visibility;
     private String visibleRoles;
     private String visibleTenants;
@@ -43,6 +46,9 @@ public class APIProduct {
     private String state;
     private String businessOwner;
     private String businessOwnerEmail;
+    private String technicalOwner;
+    private String technicalOwnerEmail;
+
     private String tenantDomain;
     private List<APIProductResource> productResources = new ArrayList<>();
     private String definition;
@@ -56,6 +62,7 @@ public class APIProduct {
      * API security at the gateway level.
      */
     private String apiSecurity = "oauth2";
+    private static final String NULL_VALUE = "NULL";
 
     private String transports;
     private String responseCache;
@@ -134,6 +141,31 @@ public class APIProduct {
     }
     public void setState(String state) {
         this.state = state;
+    }
+
+    public String getTechnicalOwner() {
+        return technicalOwner;
+    }
+    public void setTechnicalOwner(String technicalOwner) {
+        this.technicalOwner = technicalOwner;
+    }
+    public String getTechnicalOwnerEmail() {
+        return technicalOwnerEmail;
+    }
+    public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
+        this.technicalOwnerEmail = technicalOwnerEmail;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        if (StringUtils.isEmpty(type) || NULL_VALUE.equalsIgnoreCase(StringUtils.trim(type))) {
+            this.type = "APIProduct";
+        } else {
+            this.type = type;
+        }
     }
     public String getBusinessOwner() {
         return businessOwner;
@@ -354,6 +386,14 @@ public class APIProduct {
 
     public Date getLastUpdated() {
         return lastUpdated;
+    }
+
+    public void setContextTemplate(String contextTemplate) {
+        this.contextTemplate = contextTemplate;
+    }
+
+    public String getContextTemplate() {
+        return contextTemplate;
     }
 
     @Override

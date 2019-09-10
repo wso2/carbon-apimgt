@@ -65,7 +65,9 @@ function actualContext({ context, version }) {
  * @returns
  */
 export default function DefaultAPIForm(props) {
-    const { onChange, onValidate, api } = props;
+    const {
+        onChange, onValidate, api, isAPIProduct,
+    } = props;
     const classes = useStyles();
     const [validity, setValidity] = useState({});
 
@@ -80,11 +82,15 @@ export default function DefaultAPIForm(props) {
      */
     function validate(state) {
         setValidity(state);
-        let isFormValid = Object.values(state)
-            .map(value => value === null || value === undefined) // Map the validation entries to booleans
+        // Map the validation entries to booleans
+        let isFormValid = Object.entries(state)
+            .map(([key, value]) =>
+                value === null || value === undefined || (isAPIProduct && ['version', 'endpoints'].includes(key)))
             .reduce((acc, cVal) => acc && cVal); // Aggregate the individual validation states
         // API Name , Version & Context is a must that's why `&&` chain
-        isFormValid = isFormValid && Boolean(api.name) && Boolean(api.version) && Boolean(api.context);
+        // if isAPIProduct gets true version validation has been skipped
+        isFormValid =
+            isFormValid && Boolean(api.name) && (isAPIProduct || Boolean(api.version)) && Boolean(api.context);
         onValidate(isFormValid, state);
     }
 
@@ -121,100 +127,147 @@ export default function DefaultAPIForm(props) {
                     variant='outlined'
                 />
                 <Grid container spacing={2}>
-                    <Grid item md={4}>
-                        <TextField
-                            fullWidth
-                            error={validity.version}
-                            id='outlined-name'
-                            label={
-                                <React.Fragment>
-                                    <sup className={classes.mandatoryStar}>*</sup>{' '}
-                                    <FormattedMessage
-                                        id='Apis.Create.WSDL.Steps.DefaultAPIForm.version'
-                                        defaultMessage='Version'
-                                    />
-                                </React.Fragment>
-                            }
-                            name='version'
-                            value={api.version}
-                            onChange={onChange}
-                            InputProps={{
-                                onBlur: ({ target: { value } }) => {
-                                    validate({
-                                        ...validity,
-                                        version: APIValidation.apiVersion.required().validate(value).error,
-                                    });
-                                },
-                            }}
-                            helperText={validity.version && validity.version.message}
-                            margin='normal'
-                            variant='outlined'
-                        />
-                    </Grid>
-                    <Grid item md={8}>
-                        <TextField
-                            fullWidth
-                            id='outlined-name'
-                            error={validity.context}
-                            label={
-                                <React.Fragment>
-                                    <sup className={classes.mandatoryStar}>*</sup>{' '}
-                                    <FormattedMessage
-                                        id='Apis.Create.WSDL.Steps.DefaultAPIForm.context'
-                                        defaultMessage='Context'
-                                    />
-                                </React.Fragment>
-                            }
-                            name='context'
-                            value={api.context}
-                            onChange={onChange}
-                            InputProps={{
-                                onBlur: ({ target: { value } }) => {
-                                    validate({
-                                        ...validity,
-                                        context: APIValidation.apiContext.required().validate(value).error,
-                                    });
-                                },
-                            }}
-                            helperText={
-                                (validity.context && validity.context.message) ||
-                                `API will be exposed in ${actualContext(api)} context at the gateway`
-                            }
-                            margin='normal'
-                            variant='outlined'
-                        />
-                    </Grid>
-                </Grid>
-                <TextField
-                    fullWidth
-                    id='outlined-name'
-                    label='Endpoint'
-                    name='endpoint'
-                    value={api.endpoint}
-                    onChange={onChange}
-                    InputProps={{
-                        onBlur: ({ target: { value } }) => {
-                            validate({
-                                ...validity,
-                                endpointURL: value ? APIValidation.url.validate(value).error : null,
-                            });
-                        },
-                    }}
-                    helperText={
-                        validity.endpointURL && (
-                            <span>
-                                Enter a valid {''}
-                                <a rel='noopener noreferrer' target='_blank' href='http://tools.ietf.org/html/rfc3986'>
-                                    RFC 3986
-                                </a>{' '}
-                                URI
-                            </span>
-                        )
+                    {!isAPIProduct ? (
+                        <React.Fragment>
+                            <Grid item md={4}>
+                                <TextField
+                                    fullWidth
+                                    error={validity.version}
+                                    id='outlined-name'
+                                    label={
+                                        <React.Fragment>
+                                            <sup className={classes.mandatoryStar}>*</sup>{' '}
+                                            <FormattedMessage
+                                                id='Apis.Create.WSDL.Steps.DefaultAPIForm.version'
+                                                defaultMessage='Version'
+                                            />
+                                        </React.Fragment>
+                                    }
+                                    name='version'
+                                    value={api.version}
+                                    onChange={onChange}
+                                    InputProps={{
+                                        onBlur: ({ target: { value } }) => {
+                                            validate({
+                                                ...validity,
+                                                version: APIValidation.apiVersion.required().validate(value).error,
+                                            });
+                                        },
+                                    }}
+                                    helperText={validity.version && validity.version.message}
+                                    margin='normal'
+                                    variant='outlined'
+                                />
+                            </Grid>
+                            <Grid item md={8}>
+                                <TextField
+                                    fullWidth
+                                    id='outlined-name'
+                                    error={validity.context}
+                                    label={
+                                        <React.Fragment>
+                                            <sup className={classes.mandatoryStar}>*</sup>{' '}
+                                            <FormattedMessage
+                                                id='Apis.Create.WSDL.Steps.DefaultAPIForm.context'
+                                                defaultMessage='Context'
+                                            />
+                                        </React.Fragment>
+                                    }
+                                    name='context'
+                                    value={api.context}
+                                    onChange={onChange}
+                                    InputProps={{
+                                        onBlur: ({ target: { value } }) => {
+                                            validate({
+                                                ...validity,
+                                                context: APIValidation.apiContext.required().validate(value).error,
+                                            });
+                                        },
+                                    }}
+                                    helperText={
+                                        (validity.context && validity.context.message) ||
+                                        `API will be exposed in ${actualContext(api)} context at the gateway`
+                                    }
+                                    margin='normal'
+                                    variant='outlined'
+                                />
+                            </Grid>
+                        </React.Fragment>
+
+                    ) :
+                        <React.Fragment>
+                            <Grid item md={12}>
+                                <TextField
+                                    fullWidth
+                                    id='outlined-name'
+                                    error={validity.context}
+                                    label={
+                                        <React.Fragment>
+                                            <sup className={classes.mandatoryStar}>*</sup>{' '}
+                                            <FormattedMessage
+                                                id='Apis.Create.WSDL.Steps.DefaultAPIForm.context'
+                                                defaultMessage='Context'
+                                            />
+                                        </React.Fragment>
+                                    }
+                                    name='context'
+                                    value={api.context}
+                                    onChange={onChange}
+                                    InputProps={{
+                                        onBlur: ({ target: { value } }) => {
+                                            validate({
+                                                ...validity,
+                                                context: APIValidation.apiContext.required().validate(value).error,
+                                            });
+                                        },
+                                    }}
+                                    helperText={
+                                        (validity.context && validity.context.message) ||
+                            `API will be exposed in ${actualContext(api)} context at the gateway`
+                                    }
+                                    margin='normal'
+                                    variant='outlined'
+                                />
+                            </Grid>
+                        </React.Fragment>
                     }
-                    error={validity.endpointURL}
-                    margin='normal'
-                    variant='outlined'
-                />
+                </Grid>
+                {!isAPIProduct && (
+                    <TextField
+                        fullWidth
+                        id='outlined-name'
+                        label='Endpoint'
+                        name='endpoint'
+                        value={api.endpoint}
+                        onChange={onChange}
+                        InputProps={{
+                            onBlur: ({ target: { value } }) => {
+                                validate({
+                                    ...validity,
+                                    endpointURL: value ? APIValidation.url.validate(value).error : null,
+                                });
+                            },
+                        }}
+                        helperText={
+                            validity.endpointURL && (
+                                <span>
+                                    Enter a valid {''}
+                                    <a
+                                        rel='noopener noreferrer'
+                                        target='_blank'
+                                        href='http://tools.ietf.org/html/rfc3986'
+                                    >
+                                        RFC 3986
+                                    </a>{' '}
+                                    URI
+                                </span>
+                            )
+                        }
+                        error={validity.endpointURL}
+                        margin='normal'
+                        variant='outlined'
+                    />
+                )}
 
                 <SelectPolicies policies={api.policies} onChange={onChange} />
             </form>
@@ -235,6 +288,7 @@ DefaultAPIForm.defaultProps = {
 };
 DefaultAPIForm.propTypes = {
     api: PropTypes.shape({}),
+    isAPIProduct: PropTypes.shape({}).isRequired,
     onChange: PropTypes.func.isRequired,
     onValidate: PropTypes.func,
 };

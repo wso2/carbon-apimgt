@@ -640,7 +640,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
         try {
             //for now one criterea is supported
-            String searchQuery = StringUtils.replace(query, ":", "=");
+            String searchQuery = RestApiConstants.GET_API_PRODUCT_QUERY;
 
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));

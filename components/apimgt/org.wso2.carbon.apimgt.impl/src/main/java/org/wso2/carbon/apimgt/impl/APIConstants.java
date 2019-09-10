@@ -139,8 +139,8 @@ public final class APIConstants {
     //registry location for consumer
     public static final String API_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
 
-    //registry location for consumer
-    public static final String API_PRODUCT_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/products";
+//    //registry location for consumer
+//    public static final String API_PRODUCT_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/products";
 
     //registry location for API documentation
     public static final String API_DOC_LOCATION = API_APPLICATION_DATA_LOCATION + "/api-docs";
@@ -1371,15 +1371,10 @@ public final class APIConstants {
     public static final String CONTENT_SEARCH_TYPE_PREFIX = "content";
 
     //api-product related constants
-    public static final String API_PRODUCT_KEY = "product";
-    public static final String API_PRODUCT_RESOURCE_COLLECTION = "products";
-    public static final String API_PRODUCT_RESOURCE_NAME = "/product";
     public static final String API_PRODUCT_VERSION = "1.0.0";
-    public static final String PRODUCT_DOCUMENTATION_KEY = "productdocument";
-    public static final String DOC_PRODUCT_BASE_PATH = "overview_productBasePath";
-    public static final String PRODUCT_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/products";
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
+    public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS" , "SOAPTOREST", "GRAPHQL"};
 
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";

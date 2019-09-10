@@ -2803,7 +2803,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             artifactKey = APIConstants.DOCUMENTATION_KEY;
         } else if (id instanceof APIProductIdentifier) {
             identifierType = APIConstants.API_PRODUCT_IDENTIFIER_TYPE;
-            artifactKey = APIConstants.PRODUCT_DOCUMENTATION_KEY;
+            artifactKey = APIConstants.DOCUMENTATION_KEY;
         }
 
         try {
@@ -6634,10 +6634,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void deleteAPIProduct(APIProductIdentifier identifier) throws APIManagementException {
         //this is the product resource collection path
-        String productResourcePath = APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
-                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
-                .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName()
-                + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+        String productResourcePath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
 
         //this is the product rxt instance path
         String apiProductArtifactPath = APIUtil.getAPIProductPath(identifier);
@@ -6646,7 +6645,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         try {
             GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_PRODUCT_KEY);
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
             if (artifactManager == null) {
                 String errorMessage = "Failed to retrieve artifact manager when deleting API Product" + identifier;
                 log.error(errorMessage);
@@ -6697,32 +6696,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_PRODUCT, apiLogObject.toString(),
                     APIConstants.AuditLogConstants.DELETED, this.username);
 
-             /*remove empty directories*/
-            String apiProductCollectionPath = APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
-                    + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
-                    .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName();
-            if (registry.resourceExists(apiProductCollectionPath)) {
-                //at the moment product versioning is not supported so we are directly deleting this collection as
-                // this is known to be empty
-                registry.delete(apiProductCollectionPath);
-            }
-
-            String productProviderPath = APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
-                    + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
-                    .getProviderName();
-
-            if (registry.resourceExists(productProviderPath)) {
-                Resource providerCollection = registry.get(productProviderPath);
-                CollectionImpl collection = (CollectionImpl) providerCollection;
-                //if there is no api product for given provider delete the provider directory
-                if (collection.getChildCount() == 0) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("No more API Products from the provider " + identifier.getProviderName() + " found. " +
-                                "Removing provider collection from registry");
-                    }
-                    registry.delete(productProviderPath);
-                }
-            }
         } catch (RegistryException e) {
             handleException("Failed to remove the API from : " + productResourcePath, e);
         }
@@ -6872,7 +6845,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to create APIProduct
      */
     protected void createAPIProduct(APIProduct apiProduct) throws APIManagementException {
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_PRODUCT_KEY);
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
 
         if (artifactManager == null) {
             String errorMessage = "Failed to retrieve artifact manager when creating API Product" + apiProduct.getId().getName();
@@ -6955,7 +6928,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             registry.beginTransaction();
             String productArtifactId = registry.get(APIUtil.getAPIProductPath(apiProduct.getId())).getUUID();
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_PRODUCT_KEY);
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
             GenericArtifact artifact = artifactManager.getGenericArtifact(productArtifactId);
             if (artifactManager == null) {
                 String errorMessage =
@@ -7027,7 +7000,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void createDocumentation(APIProduct product, Documentation documentation) throws APIManagementException {
         try {
             APIProductIdentifier productId = product.getId();
-            GenericArtifactManager artifactManager = new GenericArtifactManager(registry, APIConstants.PRODUCT_DOCUMENTATION_KEY);
+            GenericArtifactManager artifactManager = new GenericArtifactManager(registry, APIConstants.DOCUMENTATION_KEY);
             GenericArtifact artifact = artifactManager.newGovernanceArtifact(new QName(documentation.getName()));
             artifactManager.addGenericArtifact(APIUtil.createDocArtifactContent(artifact, productId, documentation));
             String productPath = APIUtil.getAPIProductPath(productId);
@@ -7079,7 +7052,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String docPath = APIUtil.getProductDocPath(productId) + documentation.getName();
         try {
             String docArtifactId = registry.get(docPath).getUUID();
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.PRODUCT_DOCUMENTATION_KEY);
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.DOCUMENTATION_KEY);
             GenericArtifact artifact = artifactManager.getGenericArtifact(docArtifactId);
             String docVisibility = documentation.getVisibility().name();
             String[] authorizedRoles = new String[0];
@@ -7187,7 +7160,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             Resource docResource = registry.get(documentationPath);
             GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
-                    APIConstants.PRODUCT_DOCUMENTATION_KEY);
+                    APIConstants.DOCUMENTATION_KEY);
             GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
             Documentation doc = APIUtil.getDocumentation(docArtifact);
 
