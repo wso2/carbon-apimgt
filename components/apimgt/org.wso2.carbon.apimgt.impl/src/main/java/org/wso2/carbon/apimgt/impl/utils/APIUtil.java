@@ -2313,15 +2313,12 @@ public final class APIUtil {
             }
         } catch (ClassNotFoundException e) {
             String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be found";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (InstantiationException e) {
             String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be load";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (IllegalAccessException e) {
             String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be access";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return externalAPIStores;
