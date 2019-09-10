@@ -39,6 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -98,11 +99,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 
 import java.io.*;
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URISyntaxException;
-import java.net.URLConnection;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -647,23 +644,84 @@ public class ApisApiServiceImpl implements ApisApiService {
                         if (isDebugEnabled) {
                             log.debug("HTTP status " + response.getStatusLine().getStatusCode());
                         }
-                        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-//                            BufferedReader reader = new BufferedReader(
-//                                    new InputStreamReader(response.getEntity().getContent()));
-//                            String inputLine;
-//                            StringBuilder responseString = new StringBuilder();
-//
-//                            while ((inputLine = reader.readLine()) != null) {
-//                                responseString.append(inputLine);
-//                            }
-                            log.info("API Definition successfully updated");
-                        } else {
+                        if (!(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)) {
                             throw new APIManagementException("Error while sending data to " + putUrl +
                                     ". Found http status " + response.getStatusLine());
                         }
                     } finally {
                         httpPut.releaseConnection();
                     }
+                }
+            } else {
+                final String boundary = "X-WSO2-BOUNDARY";
+                final String LINE_FEED = "\r\n";
+                HttpURLConnection httpConn;
+                OutputStream outputStream;
+                PrintWriter writer;
+                String postUrl = "https://platform.42crunch.com/api/v1/apis";
+                String collectionId = config.getFirstProperty(APIConstants.API_SECURITY_AUDIT_CID);
+
+                URL url = new URL (postUrl);
+                httpConn = (HttpURLConnection) url.openConnection();
+                httpConn.setUseCaches(false);
+                httpConn.setDoOutput(true); // indicates POST method
+                httpConn.setDoInput(true);
+                httpConn.setRequestProperty("Content-Type",
+                        "multipart/form-data; boundary=" + boundary);
+                httpConn.setRequestProperty("Accept", "application/json");
+                httpConn.setRequestProperty("x-api-key", "b57973cf-b74c-4ade-921d-ece83251eceb");
+                outputStream = httpConn.getOutputStream();
+                writer = new PrintWriter(new OutputStreamWriter(outputStream),
+                        true);
+
+                // Name property
+                writer.append("--" + boundary).append(LINE_FEED);
+                writer.append("Content-Disposition: form-data; name=\"name\"")
+                        .append(LINE_FEED);
+                writer.append(LINE_FEED);
+                writer.append(apiIdentifier.getApiName()).append(LINE_FEED);
+                writer.flush();
+
+                // Specfile property
+                writer.append("--" + boundary).append(LINE_FEED);
+                writer.append("Content-Disposition: form-data; name=\"specfile\"; filename=\"swagger.json\"")
+                        .append(LINE_FEED);
+                writer.append("Content-Type: application/json").append(
+                        LINE_FEED);
+                writer.append(LINE_FEED);
+                writer.append(apiDefinition).append(LINE_FEED);
+                writer.flush();
+
+                // CollectionID property
+                writer.append("--" + boundary).append(LINE_FEED);
+                writer.append("Content-Disposition: form-data; name=\"cid\"")
+                        .append(LINE_FEED);
+                writer.append(LINE_FEED);
+                writer.append(collectionId).append(LINE_FEED);
+                writer.flush();
+
+                writer.append("--" + boundary + "--").append(LINE_FEED);
+                writer.close();
+
+                // Checks server's status code first
+                int status = httpConn.getResponseCode();
+                if (status == HttpURLConnection.HTTP_OK) {
+                    if(isDebugEnabled) {
+                        log.debug("HTTP status " + status);
+                    }
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(
+                            httpConn.getInputStream()));
+                    String inputLine = null;
+                    StringBuilder responseString = new StringBuilder();
+
+                    while((inputLine = reader.readLine()) != null) {
+                        responseString.append(inputLine);
+                    }
+                    reader.close();
+                    httpConn.disconnect();
+                    JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
+                    uuid = (String) ((JSONObject) responseJson.get("desc")).get("id");
+                    ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, uuid);
                 }
             }
 
