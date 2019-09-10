@@ -18,7 +18,6 @@
 
 import React, { Component } from 'react';
 import qs from 'qs';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { addLocaleData, defineMessages, IntlProvider } from 'react-intl';
 import Configurations from 'Config';
 import Tenants from 'AppData/Tenants';
@@ -206,12 +205,13 @@ export default class ProtectedApp extends Component {
         }
 
         // Waiting till the tenant list is retrieved
-        if (tenantList === null && tenantDomain === null) {
+        if (tenantList === null) {
             return <Loading />;
         }
         // user is redirected to tenant listing page if there are any tenants present and
-        // if the user is not authenticated and if there is no tenant domain prsent in the context
-        if (tenantList.length > 0 && !isAuthenticated && tenantDomain === null) {
+        // if the user is not authenticated and if there is no tenant domain present in the context
+        // tenantDomain contains INVALID when the tenant does not exist
+        if (tenantDomain === 'INVALID' || (tenantList.length > 0 && !isAuthenticated && tenantDomain === null)) {
             return <TenantListing tenantList={tenantList} />;
         }
         /**

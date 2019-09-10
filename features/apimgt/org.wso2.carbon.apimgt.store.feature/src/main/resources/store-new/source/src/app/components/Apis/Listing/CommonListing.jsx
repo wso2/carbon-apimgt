@@ -104,9 +104,7 @@ class CommonListing extends React.Component {
                 }
             })
             .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
+                console.log(error);
             });
     }
 
