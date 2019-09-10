@@ -41,11 +41,13 @@ Content-Type: application/json
   &quot;list&quot; : [ {
     &quot;id&quot; : &quot;StoreABC&quot;,
     &quot;displayName&quot; : &quot;StoreABC&quot;,
-    &quot;type&quot; : &quot;wso2&quot;
+    &quot;type&quot; : &quot;wso2&quot;,
+    &quot;endpoint&quot; : &quot;http://localhost:9764/store&quot;
   }, {
     &quot;id&quot; : &quot;StoreXYZ&quot;,
     &quot;displayName&quot; : &quot;StoreXYZ&quot;,
-    &quot;type&quot; : &quot;wso2&quot;
+    &quot;type&quot; : &quot;wso2&quot;,
+    &quot;endpoint&quot; : &quot;http://localhost:9764/store&quot;
   } ]
 }</code></div>
 
@@ -178,12 +180,10 @@ Content-Type: application/json
   &quot;count&quot; : 2,
   &quot;list&quot; : [ {
     &quot;id&quot; : &quot;StoreABC&quot;,
-    &quot;displayName&quot; : &quot;StoreABC&quot;,
-    &quot;type&quot; : &quot;wso2&quot;
+    &quot;lastUpdatedTime&quot; : &quot;2019-09-10 11:28:48.769&quot;
   }, {
     &quot;id&quot; : &quot;StoreXYZ&quot;,
-    &quot;displayName&quot; : &quot;StoreXYZ&quot;,
-    &quot;type&quot; : &quot;wso2&quot;
+    &quot;lastUpdatedTime&quot; : &quot;2019-09-10 11:28:48.769&quot;
   } ]
 }</code></div>
 
@@ -352,7 +352,7 @@ variant of the resource.
                         <td class="parameter"><p class="marked">OK. External Store list is returned. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#ExternalStoreList">ExternalStoreList</a>
+                                    <a href="#!/models#APIExternalStoreList">APIExternalStoreList</a>
                             </span>
                         </td>
                     </tr>
@@ -415,12 +415,10 @@ Content-Type: application/json
   &quot;count&quot; : 2,
   &quot;list&quot; : [ {
     &quot;id&quot; : &quot;StoreABC&quot;,
-    &quot;displayName&quot; : &quot;StoreABC&quot;,
-    &quot;type&quot; : &quot;wso2&quot;
+    &quot;lastUpdatedTime&quot; : &quot;2019-09-10 11:28:48.769&quot;
   }, {
     &quot;id&quot; : &quot;StoreXYZ&quot;,
-    &quot;displayName&quot; : &quot;StoreXYZ&quot;,
-    &quot;type&quot; : &quot;wso2&quot;
+    &quot;lastUpdatedTime&quot; : &quot;2019-09-10 11:28:48.769&quot;
   } ]
 }</code></div>
 
@@ -648,7 +646,7 @@ Content-Type: application/json
                         <td class="parameter"><p class="marked">OK. API was successfully published to all the selected external stores. </p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#ExternalStoreList">ExternalStoreList</a>
+                                    <a href="#!/models#APIExternalStoreList">APIExternalStoreList</a>
                             </span>
                         </td>
                     </tr>
