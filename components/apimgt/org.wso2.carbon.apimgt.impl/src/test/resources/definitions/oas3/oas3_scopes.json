@@ -1,0 +1,181 @@
+{
+  "scopesOnlyInSecurity": {
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Swagger Petstore",
+      "license": {
+        "name": "MIT"
+      },
+      "version": "1.0.0"
+    },
+    "servers": [{
+                  "url": "http://petstore.swagger.io/v1"
+                }],
+    "paths": {
+      "/pets": {
+        "get": {
+          "tags": [
+            "pets"
+          ],
+          "summary": "List all pets",
+          "responses": {
+            "default": {
+              "description": "unexpected error"
+            }
+          },
+          "security": [{
+                         "default": [
+                           "sample"
+                         ]
+                       }],
+          "x-auth-type": "Application & Application User",
+          "x-throttling-tier": "Unlimited"
+        }
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "default": {
+          "type": "oauth2",
+          "flows": {
+            "implicit": {
+              "authorizationUrl": "http://example.org/api/oauth/dialog",
+              "scopes": {
+                "sample": "sample description",
+                "extensionScope": "extensionScope description",
+              },
+              "x-scopes-bindings": {
+                "sample": "admin",
+                "extensionScope": "admin"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "scopesOnlyInExtension": {
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Swagger Petstore",
+      "license": {
+        "name": "MIT"
+      },
+      "version": "1.0.0"
+    },
+    "servers": [{
+                  "url": "http://petstore.swagger.io/v1"
+                }],
+    "paths": {
+      "/pets": {
+        "get": {
+          "tags": [
+            "pets"
+          ],
+          "summary": "List all pets",
+          "responses": {
+            "default": {
+              "description": "unexpected error"
+            }
+          },
+          "x-auth-type": "Application & Application User",
+          "x-throttling-tier": "Unlimited",
+          "x-scope": "extensionScope"
+        }
+      }
+    },
+    "x-wso2-security": {
+      "default": {
+        "x-wso2-scopes": [
+        {
+          "name": "sample",
+          "description": "sample description",
+          "key": "sample",
+          "roles": "admin"
+        },
+        {
+          "name": "extensionScope",
+          "description": "extensionScope description",
+          "key": "extensionScope",
+          "roles": "admin"
+        }
+        ]
+      }
+    }
+  },
+
+  "scopesInExtensionAndSec": {
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Swagger Petstore",
+      "license": {
+        "name": "MIT"
+      },
+      "version": "1.0.0"
+    },
+    "servers": [{
+                  "url": "http://petstore.swagger.io/v1"
+                }],
+    "paths": {
+      "/pets": {
+        "get": {
+          "tags": [
+            "pets"
+          ],
+          "summary": "List all pets",
+          "responses": {
+            "default": {
+              "description": "unexpected error"
+            }
+          },
+          "security": [{
+                         "default": [
+                           "sample"
+                         ]
+                       }],
+          "x-auth-type": "Application & Application User",
+          "x-throttling-tier": "Unlimited",
+        }
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "default": {
+          "type": "oauth2",
+          "flows": {
+            "implicit": {
+              "authorizationUrl": "http://example.org/api/oauth/dialog",
+              "scopes": {
+                "sample": "sample description",
+                "extensionScope": "extensionScope description",
+              },
+              "x-scopes-bindings": {
+                "sample": "admin",
+                "extensionScope": "admin"
+              }
+            }
+          }
+        }
+      }
+    },
+    "x-wso2-security": {
+      "default": {
+        "x-wso2-scopes": [
+        {
+          "name": "sample",
+          "description": "sample description",
+          "key": "sample",
+          "roles": "admin"
+        },
+        {
+          "name": "extensionScope",
+          "description": "extensionScope description",
+          "key": "extensionScope",
+          "roles": "admin"
+        }
+        ]
+      }
+    }
+  }
+}
