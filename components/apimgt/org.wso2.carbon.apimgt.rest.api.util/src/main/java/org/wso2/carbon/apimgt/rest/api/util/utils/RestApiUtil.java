@@ -923,19 +923,6 @@ public class RestApiUtil {
     }
 
     /**
-     * Checks whether the specified tenant domain is available
-     *
-     * @param tenantDomain tenant domain
-     * @return true if tenant domain available
-     * @throws UserStoreException
-     */
-    public static boolean isTenantAvailable(String tenantDomain) throws UserStoreException {
-        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .getTenantId(tenantDomain);
-        return tenantId != -1;
-    }
-
-    /**
      * Check whether the HTTP method is allowed for given resources
      *
      * @param method HTTP method

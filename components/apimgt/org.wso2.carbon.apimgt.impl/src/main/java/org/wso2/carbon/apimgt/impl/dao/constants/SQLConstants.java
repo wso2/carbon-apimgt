@@ -2417,8 +2417,8 @@ public class SQLConstants {
             "SELECT SUBS_CREATE_STATE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
 
     public static final String ADD_EXTERNAL_API_STORE_SQL =
-            " INSERT INTO AM_EXTERNAL_STORES (API_ID,STORE_ID,STORE_DISPLAY_NAME,STORE_ENDPOINT,STORE_TYPE)" +
-            " VALUES (?,?,?,?,?)";
+            " INSERT INTO AM_EXTERNAL_STORES (API_ID,STORE_ID,STORE_DISPLAY_NAME,STORE_ENDPOINT,STORE_TYPE," +
+                    "LAST_UPDATED_TIME) VALUES (?,?,?,?,?,?)";
 
     public static final String REMOVE_EXTERNAL_API_STORE_SQL =
             "DELETE FROM AM_EXTERNAL_STORES WHERE API_ID=? AND STORE_ID=? AND STORE_TYPE=?";
@@ -2428,16 +2428,18 @@ public class SQLConstants {
             "   AM_EXTERNAL_STORES" +
             " SET " +
             "   STORE_ENDPOINT = ?, " +
-            "   STORE_TYPE = ? " +
+            "   STORE_TYPE = ?, " +
+            "   LAST_UPDATED_TIME = ? " +
             " WHERE " +
-            "   API_ID = ? AND STORE_ID=?";
+            "   API_ID = ? AND STORE_ID = ? ";
 
     public static final String GET_EXTERNAL_API_STORE_DETAILS_SQL =
             "SELECT " +
             "   ES.STORE_ID, " +
             "   ES.STORE_DISPLAY_NAME, " +
             "   ES.STORE_ENDPOINT, " +
-            "   ES.STORE_TYPE " +
+            "   ES.STORE_TYPE, " +
+            "   ES.LAST_UPDATED_TIME " +
              "FROM " +
             "   AM_EXTERNAL_STORES ES " +
             " WHERE " +

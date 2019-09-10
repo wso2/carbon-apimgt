@@ -41,7 +41,7 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.TENANT_STATE_INACTIVE;
  */
 public class TenantsApiServiceImpl implements TenantsApiService {
 
-    private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
+    private static final Log log = LogFactory.getLog(TenantsApiServiceImpl.class);
 
     /**
      * This is used to get the tenants using its state

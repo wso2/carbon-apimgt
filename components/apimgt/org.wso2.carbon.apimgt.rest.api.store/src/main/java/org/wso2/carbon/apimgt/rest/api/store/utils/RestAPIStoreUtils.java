@@ -163,7 +163,7 @@ public class RestAPIStoreUtils {
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             API api;
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
             if (RestApiUtil.isUUID(apiId) && apiConsumer != null) {
@@ -195,7 +195,7 @@ public class RestAPIStoreUtils {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
             APIIdentifier apiIdentifier = getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);

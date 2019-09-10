@@ -288,8 +288,8 @@ class Scopes extends React.Component {
                                 <Typography variant='body2' color='primary'>
                                     <FormattedMessage
                                         id='Apis.Details.Scopes.Scopes.update.not.allowed'
-                                        defaultMessage='*You are not authorized to update Scopes of
-                                                    the API due to insufficient permissions'
+                                        defaultMessage={'*You are not authorized to update Scopes of' +
+                                        ' the API due to insufficient permissions'}
                                     />
                                 </Typography>
                             </Grid>

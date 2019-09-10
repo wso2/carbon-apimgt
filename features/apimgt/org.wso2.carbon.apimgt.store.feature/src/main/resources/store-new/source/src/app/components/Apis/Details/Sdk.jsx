@@ -30,6 +30,7 @@ import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl, } from 'react-intl';
+import AuthManager from 'AppData/AuthManager';
 import Api from '../../../data/api';
 /**
  *
@@ -59,26 +60,29 @@ class Sdk extends React.Component {
      */
     componentDidMount() {
         const api = new Api();
-        const promised_languages = api.getSdkLanguages();
+        const user = AuthManager.getUser();
+        if (user != null) {
+            const promised_languages = api.getSdkLanguages();
 
-        promised_languages
-            .then((response) => {
-                if (response.obj.length == 0) {
-                    this.setState({ sdkLanguages: false });
-                    return;
-                }
-                this.setState({ sdkLanguages: response.obj });
-                this.setState({ items: response.obj });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
+            promised_languages
+                .then((response) => {
+                    if (response.obj.length === 0) {
+                        this.setState({ sdkLanguages: false });
+                        return;
+                    }
+                    this.setState({ sdkLanguages: response.obj });
+                    this.setState({ items: response.obj });
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                    const status = error.status;
+                    if (status === 404) {
+                        this.setState({ notFound: true });
+                    }
+                });
+        }
     }
 
     /**

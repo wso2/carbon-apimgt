@@ -125,7 +125,7 @@ public class ApplicationImportExportManager {
             APIIdentifier apiIdentifier = subscribedAPI.getApiId();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack
                     (apiIdentifier.getProviderName()));
-            if (!StringUtils.isEmpty(tenantDomain) && RestApiUtil.isTenantAvailable(tenantDomain)) {
+            if (!StringUtils.isEmpty(tenantDomain) && APIUtil.isTenantAvailable(tenantDomain)) {
                 String name = apiIdentifier.getApiName();
                 String version = apiIdentifier.getVersion();
                 //creating a solr compatible search query

@@ -424,8 +424,8 @@ export default function Configuration() {
                                     <Typography variant='body2' color='primary'>
                                         <FormattedMessage
                                             id='Apis.Details.Configuration.Configuration.update.not.allowed'
-                                            defaultMessage='* You are not authorized to update particular fields of
-                                                    the API due to insufficient permissions'
+                                            defaultMessage={'* You are not authorized to update particular fields of' +
+                                            ' the API due to insufficient permissions'}
                                         />
                                     </Typography>
                                 </Grid>

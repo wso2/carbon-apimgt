@@ -495,8 +495,8 @@ class APIDefinition extends React.Component {
                                 <Typography variant='body2' color='primary'>
                                     <FormattedMessage
                                         id='Apis.Details.APIDefinition.APIDefinition.update.not.allowed'
-                                        defaultMessage='*You are not authorized to update API Definition due to
-                                    insufficient permissions'
+                                        defaultMessage={'*You are not authorized to update API Definition due to' +
+                                        ' insufficient permissions'}
                                     />
                                 </Typography>
                             )

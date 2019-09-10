@@ -62,31 +62,31 @@ export default function AccessControl(props) {
     const handleRoleAddition = (role) => {
         const systemRolePromise = APIValidation.role.validate(base64url.encode(role));
         const userRolePromise = APIValidation.userRole.validate(base64url.encode(role));
-        systemRolePromise.then((isValidSystemRole) => {
-            if (isValidSystemRole) {
-                setRoleValidity(true);
-                userRolePromise.then((isValidUserRole) => {
-                    if (isValidUserRole) {
-                        setUserRoleValidity(true);
-                        configDispatcher({
-                            action: 'accessControlRoles',
-                            value: [...api.accessControlRoles, role],
-                        });
-                    } else {
-                        setUserRoleValidity(false);
-                        setInvalidRoles([...invalidRoles, role]);
-                    }
-                }).catch((error) => {
+        systemRolePromise.then(() => {
+            setRoleValidity(true);
+            userRolePromise.then(() => {
+                setUserRoleValidity(true);
+                configDispatcher({
+                    action: 'accessControlRoles',
+                    value: [...api.accessControlRoles, role],
+                });
+            }).catch((error) => {
+                if (error.status === 404) {
+                    setUserRoleValidity(false);
+                    setInvalidRoles([...invalidRoles, role]);
+                } else {
                     Alert.error('Error when validating role: ' + role);
                     console.error('Error when validating user roles ' + error);
-                });
-            } else {
+                }
+            });
+        }).catch((error) => {
+            if (error.status === 404) {
                 setRoleValidity(false);
                 setInvalidRoles([...invalidRoles, role]);
+            } else {
+                Alert.error('Error when validating role: ' + role);
+                console.error('Error when validating roles ' + error);
             }
-        }).catch((error) => {
-            Alert.error('Error when validating role: ' + role);
-            console.error('Error when validating roles ' + error);
         });
     };
 
@@ -174,8 +174,7 @@ export default function AccessControl(props) {
                                 {'  '}
                                 <FormattedMessage
                                     id='Apis.Details.Configuration.components.AccessControl.tooltip.all.desc'
-                                    defaultMessage='The API is viewable, modifiable by all the publishers and
-                                creators.'
+                                    defaultMessage='The API is viewable, modifiable by all the publishers and creators.'
                                 />
                                 <br />
                                 <br />
@@ -188,8 +187,8 @@ export default function AccessControl(props) {
                                 {'  '}
                                 <FormattedMessage
                                     id='Apis.Details.Configuration.components.AccessControl.tooltip.restrict.desc'
-                                    defaultMessage='The API can be viewable and modifiable by only specific
-                                    publishers and creators with the roles that you specify'
+                                    defaultMessage={'The API can be viewable and modifiable by only specific' +
+                                    ' publishers and creators with the roles that you specify'}
                                 />
                             </p>
                         </React.Fragment>
