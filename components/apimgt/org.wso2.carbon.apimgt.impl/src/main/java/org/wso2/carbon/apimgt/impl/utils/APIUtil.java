@@ -4599,6 +4599,26 @@ public final class APIUtil {
     }
 
     /**
+     * Check if tenant is available
+     *
+     * @param tenantDomain tenant Domain
+     * @return isTenantAvailable
+     * @throws UserStoreException
+     */
+    public static boolean isTenantAvailable(String tenantDomain) throws UserStoreException {
+
+        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .getTenantId(tenantDomain);
+
+        if (tenantId == -1) {
+            return false;
+        }
+
+        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .isTenantActive(tenantId);
+    }
+
+    /**
      * Retrieves the role list of system
      *
      * @throws APIManagementException If an error occurs

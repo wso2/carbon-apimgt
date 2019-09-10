@@ -89,7 +89,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
 
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
             String newSearchQuery = APIUtil.constructNewSearchQuery(query);
@@ -174,7 +174,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
 
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
@@ -230,7 +230,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
 
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
@@ -281,7 +281,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
 
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
@@ -331,7 +331,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
 
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
@@ -401,7 +401,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
 
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
@@ -446,7 +446,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
             //this will fail if user does not have access to the API or the API does not exist
