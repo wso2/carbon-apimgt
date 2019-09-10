@@ -3416,7 +3416,7 @@ paths:
             OK.
             External Store list is returned.
           schema:
-            $ref: '#/definitions/ExternalStoreList'
+            $ref: '#/definitions/APIExternalStoreList'
           headers:
             Content-Type:
               description: |
@@ -3457,11 +3457,9 @@ paths:
         This operation can be used to publish an API to a list of external stores.
       parameters:
         - $ref: '#/parameters/apiId'
-        - name: externalStoreId
+        - name: externalStoreIds
+          type: string
           description: External Store Ids of stores which the API needs to be published or updated.
-          type: array
-          items:
-            type: string
           in: query
           required: true
         - $ref: '#/parameters/If-Match'
@@ -3473,7 +3471,7 @@ paths:
             OK.
             API was successfully published to all the selected external stores.
           schema:
-            $ref: '#/definitions/ExternalStoreList'
+            $ref: '#/definitions/APIExternalStoreList'
           headers:
             ETag:
               description: |
@@ -7771,6 +7769,44 @@ definitions:
         description: |
           The type of the Store. This can be a WSO2-specific API Store or an external one.
         example: wso2
+      endpoint:
+        type: string
+        description: |
+          The endpoint URL of the external store
+        example: http://localhost:9764/store
+
+#-----------------------------------------------------
+# The API-External-Store resource
+#-----------------------------------------------------
+  APIExternalStore:
+    title: API External Store
+    properties:
+      id:
+        type: string
+        description: |
+          The external store identifier, which is a unique value.
+        example: Store123#
+      lastUpdatedTime:
+        description: |
+          The recent timestamp which a given API is updated in the external store.
+        type: string
+        example: 2019-09-09T13:57:16.229
+
+#-----------------------------------------------------
+# The API-External-Store List resource
+#-----------------------------------------------------
+  APIExternalStoreList:
+    title: API External Store List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of external stores returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/APIExternalStore'
 
 #-----------------------------------------------------
 # The External-Store List resource
@@ -8363,6 +8399,11 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/MonetizationAttribute'
+      externalStoresEnabled:
+        type: boolean
+        description: |
+          Is External Stores configuration enabled
+        example: true
 
 #-----------------------------------------------------
 # The pagination resource

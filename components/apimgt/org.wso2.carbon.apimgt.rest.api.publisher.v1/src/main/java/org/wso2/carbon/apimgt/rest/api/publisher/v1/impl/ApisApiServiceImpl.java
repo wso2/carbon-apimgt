@@ -104,6 +104,7 @@ import java.util.Set;
 import java.util.Map;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
@@ -1126,9 +1127,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(apiIdentifier);
-        ExternalStoreListDTO externalStoreListDTO =
-                ExternalStoreMappingUtil.fromExternalStoreCollectionToDTO(publishedStores);
-        return Response.ok().entity(externalStoreListDTO).build();
+        APIExternalStoreListDTO apiExternalStoreListDTO =
+                ExternalStoreMappingUtil.fromAPIExternalStoreCollectionToDTO(publishedStores);
+        return Response.ok().entity(apiExternalStoreListDTO).build();
     }
     /**
      * Retrieves API Lifecycle history information
@@ -1363,12 +1364,13 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return Response of published external store list
      */
     @Override
-    public Response publishAPIToExternalStores(String apiId, List<String> externalStoreIds, String ifMatch,
+    public Response publishAPIToExternalStores(String apiId, String externalStoreIds, String ifMatch,
                                                          MessageContext messageContext) throws APIManagementException {
 
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         API api = null;
+        List<String> externalStoreIdList = Arrays.asList(externalStoreIds.split("\\s*,\\s*"));
         try {
             api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         } catch (APIManagementException e) {
@@ -1380,11 +1382,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
-        if (apiProvider.publishToExternalAPIStores(api, externalStoreIds)) {
+        if (apiProvider.publishToExternalAPIStores(api, externalStoreIdList)) {
             Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(api.getId());
-            ExternalStoreListDTO externalStoreListDTO =
-                    ExternalStoreMappingUtil.fromExternalStoreCollectionToDTO(publishedStores);
-            return Response.ok().entity(externalStoreListDTO).build();
+            APIExternalStoreListDTO apiExternalStoreListDTO =
+                    ExternalStoreMappingUtil.fromAPIExternalStoreCollectionToDTO(publishedStores);
+            return Response.ok().entity(apiExternalStoreListDTO).build();
         }
         return Response.serverError().build();
     }
