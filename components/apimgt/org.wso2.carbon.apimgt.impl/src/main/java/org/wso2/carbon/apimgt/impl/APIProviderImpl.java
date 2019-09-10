@@ -5996,17 +5996,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier)
-            throws APIManagementException {
-        List<ClientCertificateDTO> clientCertificateDTOS = certificateManager
-                .searchClientCertificates(tenantId, alias, apiIdentifier);
-        if (clientCertificateDTOS != null && clientCertificateDTOS.size() > 0) {
-            return clientCertificateDTOS.get(0);
-        }
-        return null;
-    }
-
-    @Override
     public CertificateInformationDTO getCertificateStatus(String alias) throws APIManagementException {
         return certificateManager.getCertificateInformation(alias);
     }
