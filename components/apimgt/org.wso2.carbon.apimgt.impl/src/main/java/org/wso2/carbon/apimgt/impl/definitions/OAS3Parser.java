@@ -19,7 +19,6 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
-import io.swagger.models.Swagger;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -58,6 +57,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -73,13 +73,12 @@ public class OAS3Parser extends APIDefinition {
     /**
      * This method returns URI templates according to the given swagger file
      *
-     * @param swaggerData                 API
      * @param resourceConfigsJSON swaggerJSON
      * @return URI Templates
      * @throws APIManagementException
      */
     @Override
-    public Set<URITemplate> getURITemplates(SwaggerData swaggerData, String resourceConfigsJSON) throws APIManagementException {
+    public Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(resourceConfigsJSON, null, null);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
@@ -172,9 +171,9 @@ public class OAS3Parser extends APIDefinition {
                 scope.setName(entry.getKey());
                 scope.setDescription(entry.getValue());
                 Map<String, String> scopeBindings;
-                if (oAuthFlow.getExtensions() != null &&
-                        (scopeBindings = (Map<String, String>) oAuthFlow.getExtensions()
-                                .get(APIConstants.SWAGGER_X_SCOPES_BINDINGS)) != null) {
+                if (oAuthFlow.getExtensions() != null && (scopeBindings =
+                        (Map<String, String>) oAuthFlow.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS))
+                        != null) {
                     if (scopeBindings.get(scope.getKey()) != null) {
                         scope.setRoles(scopeBindings.get(scope.getKey()));
                     }
@@ -234,24 +233,23 @@ public class OAS3Parser extends APIDefinition {
      * additional resources inside the swagger will be removed from the swagger. Changes to scopes, throtting policies,
      * on the resource will be updated on the swagger
      *
-     * @param swaggerData            api
-     * @param swagger        swagger definition
-     * @param syncOperations whether to sync operations between API and swagger. If true, the operations of the swagger
-     *                       will be synced from the API's operations. Additional operations of the swagger will be
-     *                       removed and new operations of API will be added. If false, all the operations will be
-     *                       taken from swagger.
+     * @param swaggerData api
+     * @param swagger     swagger definition
      * @return API definition in string format
      * @throws APIManagementException if error occurred when generating API Definition
      */
     @Override
-    public String generateAPIDefinition(SwaggerData swaggerData, String swagger, boolean syncOperations) throws APIManagementException {
+    public String generateAPIDefinition(SwaggerData swaggerData, String swagger) throws APIManagementException {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(swagger, null, null);
         OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
         Set<SwaggerData.Resource> copy = new HashSet<>(swaggerData.getResources());
 
-        for (String pathKey : openAPI.getPaths().keySet()) {
-            PathItem pathItem = openAPI.getPaths().get(pathKey);
+        Iterator<Map.Entry<String, PathItem>> itr = openAPI.getPaths().entrySet().iterator();
+        while (itr.hasNext()) {
+            Map.Entry<String, PathItem> pathEntry = itr.next();
+            String pathKey = pathEntry.getKey();
+            PathItem pathItem = pathEntry.getValue();
             for (Map.Entry<PathItem.HttpMethod, Operation> entry : pathItem.readOperationsMap().entrySet()) {
                 Operation operation = entry.getValue();
                 boolean operationFound = false;
@@ -269,6 +267,9 @@ public class OAS3Parser extends APIDefinition {
                 if (!operationFound) {
                     pathItem.operation(entry.getKey(), null);
                 }
+            }
+            if (pathItem.readOperations().isEmpty()) {
+                itr.remove();
             }
         }
 
@@ -350,8 +351,9 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException If an error occurred
      */
     @Override
-    public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData) throws APIManagementException {
-        return generateAPIDefinition(swaggerData, oasDefinition, true);
+    public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData)
+            throws APIManagementException {
+        return generateAPIDefinition(swaggerData, oasDefinition);
     }
 
     /**
@@ -409,13 +411,13 @@ public class OAS3Parser extends APIDefinition {
         Set<Scope> scopeList = new LinkedHashSet<>();
         Map<String, Object> extensions = openAPI.getExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {
-            Map<String, Object> securityDefinitions = (Map<String, Object>) extensions
-                    .get(APIConstants.SWAGGER_X_WSO2_SECURITY);
+            Map<String, Object> securityDefinitions =
+                    (Map<String, Object>) extensions.get(APIConstants.SWAGGER_X_WSO2_SECURITY);
             for (Map.Entry<String, Object> entry : securityDefinitions.entrySet()) {
                 Map<String, Object> securityDefinition = (Map<String, Object>) entry.getValue();
                 if (securityDefinition.containsKey(APIConstants.SWAGGER_X_WSO2_SCOPES)) {
-                    List<Map<String, String>> oauthScope = (List<Map<String, String>>) securityDefinition
-                            .get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+                    List<Map<String, String>> oauthScope =
+                            (List<Map<String, String>>) securityDefinition.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
                     for (Map<String, String> anOauthScope : oauthScope) {
                         Scope scope = new Scope();
                         scope.setKey(anOauthScope.get(APIConstants.SWAGGER_SCOPE_KEY));
@@ -433,7 +435,7 @@ public class OAS3Parser extends APIDefinition {
     /**
      * Include Scope details to the definition
      *
-     * @param openAPI openapi definition
+     * @param openAPI     openapi definition
      * @param swaggerData Swagger related API data
      */
     private void updateSwaggerSecurityDefinition(OpenAPI openAPI, SwaggerData swaggerData) {
@@ -468,11 +470,11 @@ public class OAS3Parser extends APIDefinition {
             Map<String, String> scopeBindings = new HashMap<>();
             for (Scope scope : scopes) {
                 oas3Scopes.put(scope.getName(), scope.getDescription());
-                oAuthFlow.setScopes(oas3Scopes);
                 scopeBindings.put(scope.getName(), scope.getRoles());
             }
             oAuthFlow.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
         }
+        oAuthFlow.setScopes(oas3Scopes);
         updateLegacyScopesFromSwagger(openAPI, swaggerData);
     }
 
@@ -520,16 +522,17 @@ public class OAS3Parser extends APIDefinition {
             openAPI.addExtension(APIConstants.SWAGGER_X_WSO2_SECURITY, xWSO2SecurityDefinitionObject);
         }
     }
+
     /**
      * Add a new path based on the provided URI template to swagger if it does not exists. If it exists,
      * adds the respective operation to the existing path
      *
-     * @param openAPI     swagger object
+     * @param openAPI  swagger object
      * @param resource API resource data
      */
     private void addOrUpdatePathToSwagger(OpenAPI openAPI, SwaggerData.Resource resource) {
         PathItem path;
-        if(openAPI.getPaths() == null) {
+        if (openAPI.getPaths() == null) {
             openAPI.setPaths(new Paths());
         }
         if (openAPI.getPaths().get(resource.getPath()) != null) {
@@ -566,8 +569,8 @@ public class OAS3Parser extends APIDefinition {
     /**
      * Updates managed info of a provided operation such as auth type and throttling
      *
-     * @param resource API resource data
-     * @param operation   swagger operation
+     * @param resource  API resource data
+     * @param operation swagger operation
      */
     private void updateOperationManagedInfo(SwaggerData.Resource resource, Operation operation) {
         String authType = resource.getAuthType();

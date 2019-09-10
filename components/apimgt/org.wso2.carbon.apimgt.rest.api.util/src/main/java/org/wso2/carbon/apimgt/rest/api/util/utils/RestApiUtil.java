@@ -1232,8 +1232,7 @@ public class RestApiUtil {
 
         Set<URITemplate> uriTemplates = null;
         try {
-            SwaggerData swaggerData = new SwaggerData(api);
-            uriTemplates = oasParser.getURITemplates(swaggerData, swagger);
+            uriTemplates = oasParser.getURITemplates(swagger);
         } catch (APIManagementException e) {
             log.error("Error while parsing swagger content to get URI Templates", e);
         }
@@ -1326,9 +1325,8 @@ public class RestApiUtil {
                     log.error("Error occurred while parsing swagger definition");
                     return Collections.EMPTY_SET;
                 }
-                SwaggerData swaggerData = new SwaggerData(api);
                 //Get URL templates from swagger content w created
-                storeResourceMappings = oasParser.getURITemplates(swaggerData, definition);
+                storeResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
@@ -1370,9 +1368,8 @@ public class RestApiUtil {
                     log.error("Error occurred while parsing swagger definition");
                     return Collections.EMPTY_SET;
                 }
-                SwaggerData swaggerData = new SwaggerData(api);
                 //Get URL templates from swagger content we created
-                publisherResourceMappings = oasParser.getURITemplates(swaggerData, definition);
+                publisherResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
@@ -1408,9 +1405,8 @@ public class RestApiUtil {
                     log.error("Error occurred while parsing swagger definition");
                     return Collections.EMPTY_SET;
                 }
-                SwaggerData swaggerData = new SwaggerData(api);
                 //Get URL templates from swagger content we created
-                adminAPIResourceMappings = oasParser.getURITemplates(swaggerData, definition);
+                adminAPIResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {

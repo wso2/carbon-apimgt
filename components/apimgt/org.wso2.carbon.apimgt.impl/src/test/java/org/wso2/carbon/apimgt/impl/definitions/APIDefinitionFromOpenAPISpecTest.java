@@ -110,9 +110,7 @@ public class APIDefinitionFromOpenAPISpecTest {
         uriTemplates.add(getUriTemplate("PUT", "None", "/*"));
         uriTemplates.add(getUriTemplate("DELETE", "Any", "/*"));
         uriTemplates.add(getUriTemplate("GET", "Any", "/abc"));
-        API api = new API(new APIIdentifier("admin", "PhoneVerification", "1.0.0"));
-        SwaggerData swaggerData = new SwaggerData(api);
-        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPI20.getURITemplates(swaggerData, swagger);
+        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPI20.getURITemplates(swagger);
         Assert.assertEquals(uriTemplateSet, uriTemplates);
     }
 
@@ -239,9 +237,7 @@ public class APIDefinitionFromOpenAPISpecTest {
         uriTemplates.add(getUriTemplate("PUT", "None", "/*"));
         uriTemplates.add(getUriTemplate("DELETE", "Any", "/*"));
         uriTemplates.add(getUriTemplate("GET", "Any", "/abc"));
-        API api = new API(new APIIdentifier("admin", "PhoneVerification", "1.0.0"));
-        SwaggerData swaggerData = new SwaggerData(api);
-        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPI300.getURITemplates(swaggerData, openAPISpec300);
+        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPI300.getURITemplates(openAPISpec300);
         Assert.assertEquals(uriTemplateSet, uriTemplates);
 
     }
@@ -278,9 +274,7 @@ public class APIDefinitionFromOpenAPISpecTest {
 
         Set<URITemplate> expectedTemplates = new LinkedHashSet<URITemplate>();
         expectedTemplates.add(getUriTemplate("GET", "Application", "/item"));
-        API api = new API(new APIIdentifier("admin", "OAPI", "1.0.0"));
-        SwaggerData swaggerData = new SwaggerData(api);
-        Set<URITemplate> actualTemplates = apiDef.getURITemplates(swaggerData, openApi);
+        Set<URITemplate> actualTemplates = apiDef.getURITemplates(openApi);
         Assert.assertEquals(actualTemplates, expectedTemplates);
     }
 

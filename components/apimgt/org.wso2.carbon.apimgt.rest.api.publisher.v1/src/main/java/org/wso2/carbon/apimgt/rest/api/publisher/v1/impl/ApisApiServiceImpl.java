@@ -580,8 +580,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
                 APIDefinition apiDefinition = definitionOptional.get();
                 SwaggerData swaggerData = new SwaggerData(apiToUpdate);
-                String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition,
-                        true);
+                String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
                 apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
             }
             API updatedApi = apiProvider.getAPI(apiIdentifier);
@@ -1667,8 +1666,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIDefinition oasParser = response.getParser();
             Set<URITemplate> uriTemplates = null;
             try {
-                SwaggerData swaggerData = new SwaggerData(existingAPI);
-                uriTemplates = oasParser.getURITemplates(swaggerData, response.getJsonContent());
+                uriTemplates = oasParser.getURITemplates(response.getJsonContent());
             } catch (APIManagementException e) {
                 // catch APIManagementException inside again to capture validation error
                 RestApiUtil.handleBadRequest(e.getMessage(), log);
@@ -1787,8 +1785,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     return null;
                 }
                 APIDefinition apiDefinition = definitionOptional.get();
-                SwaggerData swaggerData = new SwaggerData(api);
-                Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerData, apiSwaggerDefinition);
+                Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(apiSwaggerDefinition);
                 api.setUriTemplates(uriTemplates);
 
                 // scopes
@@ -1934,19 +1931,25 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             API apiToAdd = prepareToCreateAPIByDTO(apiDTOFromProperties);
 
-            String definitionToAdd;
             boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
             // Rearrange paths according to the API payload and save the OpenAPI definition
 
             APIDefinition apiDefinition = validationResponse.getParser();
-            SwaggerData swaggerData = new SwaggerData(apiToAdd);
-            definitionToAdd = apiDefinition.generateAPIDefinition(swaggerData,
-                    validationResponse.getJsonContent(), syncOperations);
-
-            Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerData, definitionToAdd);
+            SwaggerData swaggerData;
+            String definitionToAdd = validationResponse.getJsonContent();
+            if (syncOperations) {
+                swaggerData = new SwaggerData(apiToAdd);
+                definitionToAdd = apiDefinition.generateAPIDefinition(swaggerData, definitionToAdd);
+            }
+            Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
             Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
             apiToAdd.setUriTemplates(uriTemplates);
             apiToAdd.setScopes(scopes);
+            if (!syncOperations) {
+                swaggerData = new SwaggerData(apiToAdd);
+                definitionToAdd = apiDefinition
+                        .generateAPIDefinition(swaggerData, validationResponse.getJsonContent());
+            }
 
             // adding the API and definition
             apiProvider.addAPI(apiToAdd);

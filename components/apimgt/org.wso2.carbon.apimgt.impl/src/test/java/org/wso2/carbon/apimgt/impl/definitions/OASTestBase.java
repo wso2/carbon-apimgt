@@ -116,17 +116,17 @@ public class OASTestBase {
         exUriTemplate.setScopes(extensionScope);
 
         String scopesOnlyInSecurity = jsonObject.getJSONObject("scopesOnlyInSecurity").toString();
-        Set<URITemplate> uriTemplates = parser.getURITemplates(null, scopesOnlyInSecurity);
+        Set<URITemplate> uriTemplates = parser.getURITemplates(scopesOnlyInSecurity);
         Assert.assertEquals(1, uriTemplates.size());
         Assert.assertTrue(uriTemplates.contains(petGet));
 
         String scopesOnlyInExtension = jsonObject.getJSONObject("scopesOnlyInExtension").toString();
-        uriTemplates = parser.getURITemplates(null, scopesOnlyInExtension);
+        uriTemplates = parser.getURITemplates(scopesOnlyInExtension);
         Assert.assertEquals(1, uriTemplates.size());
         Assert.assertTrue(uriTemplates.contains(exUriTemplate));
 
         String scopesInExtensionAndSec = jsonObject.getJSONObject("scopesInExtensionAndSec").toString();
-        uriTemplates = parser.getURITemplates(null, scopesInExtensionAndSec);
+        uriTemplates = parser.getURITemplates(scopesInExtensionAndSec);
         Assert.assertEquals(1, uriTemplates.size());
         Assert.assertTrue(uriTemplates.contains(petGet));
     }
@@ -165,7 +165,7 @@ public class OASTestBase {
         Assert.assertTrue(response.isValid());
         Assert.assertTrue(response.getParser().getClass().equals(parser.getClass()));
 
-        Set<URITemplate> uriTemplates = parser.getURITemplates(null, definition);
+        Set<URITemplate> uriTemplates = parser.getURITemplates(definition);
         Assert.assertEquals(1, uriTemplates.size());
         Assert.assertTrue(uriTemplates.contains(petGet));
 
@@ -175,7 +175,7 @@ public class OASTestBase {
         Assert.assertTrue(scopes.contains(extensionScope));
     }
 
-    public void testGenerateAPIDefinition2(APIDefinition parser, String content) throws Exception {
+    public void testGenerateAPIDefinition2(APIDefinition parser, String content, OASParserEvaluator evaluator) throws Exception {
         JSONObject jsonObject = new JSONObject(content);
         String equalNoOfResources = jsonObject.getJSONObject("equalNoOfResources").toString();
 
@@ -184,12 +184,12 @@ public class OASTestBase {
         api.setScopes(new HashSet<>(Arrays.asList(sampleScope, extensionScope)));
         api.setUriTemplates(new HashSet<>(Arrays.asList(petGet, petPost, itemGet, itemPost)));
 
-        String definition = parser.generateAPIDefinition(new SwaggerData(api), equalNoOfResources, true);
+        String definition = parser.generateAPIDefinition(new SwaggerData(api), equalNoOfResources);
         APIDefinitionValidationResponse response = parser.validateAPIDefinition(definition, false);
         Assert.assertTrue(response.isValid());
         Assert.assertTrue(response.getParser().getClass().equals(parser.getClass()));
 
-        Set<URITemplate> uriTemplates = parser.getURITemplates(null, definition);
+        Set<URITemplate> uriTemplates = parser.getURITemplates(definition);
         Assert.assertEquals(4, uriTemplates.size());
         Assert.assertTrue(uriTemplates.contains(petGet));
         Assert.assertTrue(uriTemplates.contains(petPost));
@@ -204,12 +204,18 @@ public class OASTestBase {
         // Remove operation and path from API object
         String extraResourcesInDefinition = jsonObject.getJSONObject("extraResourcesInDefinition").toString();
         api.setUriTemplates(new HashSet<>(Arrays.asList(itemGet, itemPost)));
-        definition = parser.generateAPIDefinition(new SwaggerData(api), extraResourcesInDefinition, true);
+        definition = parser.generateAPIDefinition(new SwaggerData(api), extraResourcesInDefinition);
         response = parser.validateAPIDefinition(definition, false);
         Assert.assertTrue(response.isValid());
         Assert.assertTrue(response.getParser().getClass().equals(parser.getClass()));
-        uriTemplates = parser.getURITemplates(null, definition);
+        uriTemplates = parser.getURITemplates(definition);
         Assert.assertEquals(2, uriTemplates.size());
+
+        //assert generated paths
+        if(evaluator != null) {
+            evaluator.eval(definition);
+        }
+
         Iterator iterator = uriTemplates.iterator();
         while (iterator.hasNext()) {
             URITemplate element = (URITemplate) iterator.next();
@@ -226,11 +232,11 @@ public class OASTestBase {
         // Add operation and path to API object
         String lessResourcesInDefinition = jsonObject.getJSONObject("lessResourcesInDefinition").toString();
         api.setUriTemplates(new HashSet<>(Arrays.asList(petGet, petPost, itemGet, itemPost)));
-        definition = parser.generateAPIDefinition(new SwaggerData(api), lessResourcesInDefinition, true);
+        definition = parser.generateAPIDefinition(new SwaggerData(api), lessResourcesInDefinition);
         response = parser.validateAPIDefinition(definition, false);
         Assert.assertTrue(response.isValid());
         Assert.assertTrue(response.getParser().getClass().equals(parser.getClass()));
-        uriTemplates = parser.getURITemplates(null, definition);
+        uriTemplates = parser.getURITemplates(definition);
         Assert.assertEquals(4, uriTemplates.size());
         Assert.assertTrue(uriTemplates.contains(petGet));
         Assert.assertTrue(uriTemplates.contains(petPost));
@@ -264,7 +270,7 @@ public class OASTestBase {
         api.setScopes(new HashSet<>(Arrays.asList(sampleScope, extensionScope, newScope)));
         api.setUriTemplates(new HashSet<>(Arrays.asList(petPost, updatedItemGet)));
 
-        String definition = parser.generateAPIDefinition(new SwaggerData(api), equalNoOfResourcesWithExtension, true);
+        String definition = parser.generateAPIDefinition(new SwaggerData(api), equalNoOfResourcesWithExtension);
         APIDefinitionValidationResponse response = parser.validateAPIDefinition(definition, false);
         Assert.assertTrue(response.isValid());
         return definition;
@@ -281,5 +287,9 @@ public class OASTestBase {
         uriTemplate.setThrottlingTiers("Unlimited");
         uriTemplate.setScope(null);
         return uriTemplate;
+    }
+
+    interface OASParserEvaluator {
+        void eval(String definition);
     }
 }
