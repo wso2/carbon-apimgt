@@ -117,8 +117,6 @@ function EditableRow(props) {
     const [newKey, setKey] = useState(null);
     const [newValue, setValue] = useState(null);
     const [editMode, setEditMode] = useState(false);
-    const isNotCreator = AuthManager.isNotCreator();
-    const isNotPublisher = AuthManager.isNotPublisher();
 
     const updateEditMode = function () {
         setEditMode(!editMode);
@@ -248,7 +246,8 @@ function Properties(props) {
     const [propertyKey, setPropertyKey] = useState(null);
     const [propertyValue, setPropertyValue] = useState(null);
     const [updating, setUpdating] = useState(false);
-
+    const isNotCreator = AuthManager.isNotCreator();
+    const isNotPublisher = AuthManager.isNotPublisher();
     const toggleAddProperty = () => {
         setShowAddProperty(!showAddProperty);
     };
@@ -416,7 +415,7 @@ function Properties(props) {
                     size='small'
                     className={classes.button}
                     onClick={toggleAddProperty}
-                    disabled={this.isNotCreator && this.isNotPublisher}
+                    disabled={isNotCreator && isNotPublisher}
                 >
                     <AddCircle className={classes.buttonIcon} />
                     <FormattedMessage
@@ -465,7 +464,7 @@ function Properties(props) {
                                                 onChange={handleChange('propertyKey')}
                                                 onKeyDown={handleKeyDown('propertyKey')}
                                                 error={validateEmpty(propertyKey)}
-                                                disabled={this.isNotCreator && this.isNotPublisher}
+                                                disabled={isNotCreator && isNotPublisher}
                                             />
                                         </TableCell>
                                         <TableCell>
@@ -483,7 +482,7 @@ function Properties(props) {
                                                 onChange={handleChange('propertyValue')}
                                                 onKeyDown={handleKeyDown('propertyValue')}
                                                 error={validateEmpty(propertyValue)}
-                                                disabled={this.isNotCreator && this.isNotPublisher}
+                                                disabled={isNotCreator && isNotPublisher}
                                             />
                                         </TableCell>
                                         <TableCell align='right'>
@@ -491,9 +490,7 @@ function Properties(props) {
                                                 variant='contained'
                                                 color='primary'
                                                 disabled={
-                                                    !propertyValue ||
-                                                    !propertyKey ||
-                                                    (this.isNotCreator && this.isNotPublisher)
+                                                    !propertyValue || !propertyKey || (isNotCreator && isNotPublisher)
                                                 }
                                                 onClick={handleAddToList}
                                             >
@@ -539,7 +536,7 @@ function Properties(props) {
                                         variant='contained'
                                         color='primary'
                                         onClick={handleSubmit}
-                                        disabled={updating || (this.isNotCreator && this.isNotPublisher)}
+                                        disabled={updating || (isNotCreator && isNotPublisher)}
                                     >
                                         {updating && (
                                             <React.Fragment>
@@ -569,7 +566,7 @@ function Properties(props) {
                                     </Button>
                                 </Link>
                             </Grid>
-                            {this.isNotCreator && this.isNotPublisher && (
+                            {isNotCreator && isNotPublisher && (
                                 <Grid item xs={12}>
                                     <Typography variant='body2' color='primary'>
                                         <FormattedMessage
