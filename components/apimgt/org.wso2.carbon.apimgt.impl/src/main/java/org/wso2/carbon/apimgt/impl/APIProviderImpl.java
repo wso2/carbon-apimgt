@@ -3751,7 +3751,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throws APIManagementException {
         Set<APIStore> publishedStores = getPublishedExternalAPIStores(api.getId());
         Set<APIStore> notPublishedAPIStores = new HashSet<APIStore>();
-        Set<APIStore> modifiedPublishedApiStores = new HashSet<APIStore>();
         Set<APIStore> updateApiStores = new HashSet<APIStore>();
         Set<APIStore> removedApiStores = new HashSet<APIStore>();
         StringBuilder errorStatus = new StringBuilder("Failed to update External Stores : ");
@@ -3775,12 +3774,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             log.error(e);
                             errorStatus.append(store.getDisplayName()).append(',');
                         }
-                        if (!store.getEndpoint().equals(apiStore.getEndpoint())
-                                || !store.getType().equals(apiStore.getType())
-                                || !store.getDisplayName().equals(apiStore.getDisplayName())) {
-                            //Include the store definition to update the db stored APIStore set
-                            modifiedPublishedApiStores.add(APIUtil.getExternalAPIStore(store.getName(), tenantId));
-                        }
                         publishedToStore = true; //Already the API has published to external APIStore
 
                         //In this case,the API is already added to external APIStore,thus we don't need to publish it again.
@@ -3802,8 +3795,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         //Update the APIs which are already exist in the external APIStore
         updateAPIInExternalAPIStores(api, updateApiStores);
-        updateExternalAPIStoresDetails(api.getId(), modifiedPublishedApiStores); //Update database saved published APIStore details,if there are any
-        //modifications in api-manager.xml
+        //Update database saved published APIStore details
+        updateExternalAPIStoresDetails(api.getId(), updateApiStores);
 
         deleteFromExternalAPIStores(api, removedApiStores);
         if (failure) {
