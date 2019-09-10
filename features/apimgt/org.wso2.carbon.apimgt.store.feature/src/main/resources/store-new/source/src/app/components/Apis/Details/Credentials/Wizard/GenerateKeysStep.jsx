@@ -36,7 +36,8 @@ const generateKeysStep = (props) => {
 
     const [keyRequest, setKeyRequest] = useState({
         keyType: 'PRODUCTION',
-        supportedGrantTypes: ['client_credentials'],
+        serverSupportedGrantTypes: [],
+        supportedGrantTypes: [],
         callbackUrl: 'https://wso2.am.com',
     });
 

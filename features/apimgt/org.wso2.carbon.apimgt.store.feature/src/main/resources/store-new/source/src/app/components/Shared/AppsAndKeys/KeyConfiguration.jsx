@@ -25,6 +25,8 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import Configurations from 'Config';
+import PropTypes from 'prop-types';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 
 const styles = theme => ({
@@ -61,6 +63,22 @@ const styles = theme => ({
  */
 class KeyConfiguration extends React.Component {
     /**
+     * Get the display names for the server supported grant types
+     * @param serverSupportedGrantTypes
+     * @param grantTypeDisplayNameMap
+     */
+    getGrantTypeDisplayList(serverSupportedGrantTypes, grantTypeDisplayNameMap) {
+        const modifiedserverSupportedGrantTypes = {};
+        serverSupportedGrantTypes.forEach((grantType) => {
+            modifiedserverSupportedGrantTypes[grantType] = grantTypeDisplayNameMap[grantType];
+            if (!grantTypeDisplayNameMap[grantType]) {
+                modifiedserverSupportedGrantTypes[grantType] = grantType;
+            }
+        });
+        return modifiedserverSupportedGrantTypes;
+    }
+
+    /**
      * This method is used to handle the updating of key generation
      * request object.
      * @param {*} field field that should be updated in key request
@@ -91,6 +109,16 @@ class KeyConfiguration extends React.Component {
     }
 
     /**
+     * returns whether grant type checkbox should be disabled or not
+     * @param grantType
+     */
+    isGrantTypeDisabled(grantType) {
+        const { keyRequest, isUserOwner } = this.props;
+        const { callbackUrl } = keyRequest;
+        return !(isUserOwner && !(!callbackUrl && (grantType === 'authorization_code' || grantType === 'implicit')));
+    }
+
+    /**
      *
      *
      * @returns {Component}
@@ -100,21 +128,12 @@ class KeyConfiguration extends React.Component {
         const {
             classes, keyRequest, notFound, intl, isUserOwner,
         } = this.props;
-        const { supportedGrantTypes, callbackUrl } = keyRequest;
+        const { serverSupportedGrantTypes, supportedGrantTypes, callbackUrl } = keyRequest;
         if (notFound) {
             return <ResourceNotFound />;
         }
-
-        let isRefreshChecked = false;
-        let isPasswordChecked = false;
-        let isImplicitChecked = false;
-        let isCodeChecked = false;
-        if (supportedGrantTypes) {
-            isRefreshChecked = supportedGrantTypes.includes('refresh_token');
-            isPasswordChecked = supportedGrantTypes.includes('password');
-            isImplicitChecked = supportedGrantTypes.includes('implicit');
-            isCodeChecked = supportedGrantTypes.includes('authorization_code');
-        }
+        const grantTypeDisplayListMap = this.getGrantTypeDisplayList(serverSupportedGrantTypes,
+            Configurations.grantTypes);
 
         return (
             <React.Fragment>
@@ -124,74 +143,28 @@ class KeyConfiguration extends React.Component {
                     </InputLabel>
                     <div className={classes.checkboxWrapper}>
                         <div className={classes.checkboxWrapperColumn}>
-                            <FormControlLabel
-                                control={(
-                                    <Checkbox
-                                        id='refresh_token'
-                                        checked={isRefreshChecked}
-                                        onChange={e => this.handleChange('grantType', e)}
-                                        value='refresh_token'
-                                        disabled={!isUserOwner}
+                            {Object.keys(grantTypeDisplayListMap).map((key) => {
+                                const value = grantTypeDisplayListMap[key];
+                                return (
+                                    <FormControlLabel
+                                        control={(
+                                            <Checkbox
+                                                id={key}
+                                                checked={!!(supportedGrantTypes
+                                                    && supportedGrantTypes.includes(key))
+                                                    && !this.isGrantTypeDisabled(key)}
+                                                onChange={e => this.handleChange('grantType', e)}
+                                                value={value}
+                                                disabled={this.isGrantTypeDisabled(key)}
+                                            />
+                                        )}
+                                        label={intl.formatMessage({
+                                            defaultMessage: value,
+                                            id: 'Shared.AppsAndKeys.KeyConfiguration.' + value.replace(/ /g, '.'),
+                                        })}
                                     />
-                                )}
-                                label={intl.formatMessage({
-                                    defaultMessage: 'Refresh Token',
-                                    id: 'Shared.AppsAndKeys.KeyConfiguration.refresh.token',
-                                })}
-                            />
-                            <FormControlLabel
-                                control={(
-                                    <Checkbox
-                                        id='password'
-                                        checked={isPasswordChecked}
-                                        value='password'
-                                        onChange={e => this.handleChange('grantType', e)}
-                                        disabled={!isUserOwner}
-                                    />
-                                )}
-                                label='Password'
-                            />
-                            <FormControlLabel
-                                control={(
-                                    <Checkbox
-                                        id='implicit'
-                                        checked={isImplicitChecked}
-                                        value='implicit'
-                                        onChange={e => this.handleChange('grantType', e)}
-                                        disabled={!isUserOwner}
-                                    />
-                                )}
-                                label={intl.formatMessage({
-                                    defaultMessage: 'Implicit',
-                                    id: 'Shared.AppsAndKeys.KeyConfiguration.implicit',
-                                })}
-                            />
-                        </div>
-                        <div className={classes.checkboxWrapperColumn}>
-                            <FormControlLabel
-                                control={(
-                                    <Checkbox
-                                        id='authorization_code'
-                                        checked={isCodeChecked}
-                                        value='authorization_code'
-                                        onChange={e => this.handleChange('grantType', e)}
-                                        disabled={!isUserOwner}
-                                    />
-                                )}
-                                label={intl.formatMessage({
-                                    defaultMessage: 'Code',
-                                    id: 'Shared.AppsAndKeys.KeyConfiguration.code',
-                                })}
-                            />
-                            <FormControlLabel
-                                control={
-                                    <Checkbox id='client_credentials' checked disabled value='client_credentials' />
-                                }
-                                label={intl.formatMessage({
-                                    defaultMessage: 'Client Credential',
-                                    id: 'Shared.AppsAndKeys.KeyConfiguration.code',
-                                })}
-                            />
+                                );
+                            })}
                         </div>
                     </div>
                     <FormHelperText>
@@ -231,5 +204,19 @@ class KeyConfiguration extends React.Component {
         );
     }
 }
+
+KeyConfiguration.propTypes = {
+    classes: PropTypes.instanceOf(Object).isRequired,
+    keyRequest: PropTypes.shape({
+        callbackUrl: PropTypes.string,
+        serverSupportedGrantTypes: PropTypes.array,
+        supportedGrantTypes: PropTypes.array,
+    }).isRequired,
+    isUserOwner: PropTypes.bool.isRequired,
+    notFound: PropTypes.bool.isRequired,
+    updateKeyRequest: PropTypes.func.isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
+};
+
 
 export default injectIntl(withStyles(styles)(KeyConfiguration));
