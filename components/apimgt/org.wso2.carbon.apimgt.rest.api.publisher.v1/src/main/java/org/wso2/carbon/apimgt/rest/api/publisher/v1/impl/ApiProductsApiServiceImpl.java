@@ -68,6 +68,8 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.*;
+
 public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     private static final Log log = LogFactory.getLog(ApiProductsApiServiceImpl.class);
 
@@ -114,10 +116,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
                 String resource = documentation.getFilePath();
                 Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
-                Object fileDataStream = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_DATA);
-                Object contentType = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE);
+                Object fileDataStream = docResourceMap.get(DOCUMENTATION_RESOURCE_MAP_DATA);
+                Object contentType = docResourceMap.get(DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE);
                 contentType = contentType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : contentType;
-                String name = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME).toString();
+                String name = docResourceMap.get(DOCUMENTATION_RESOURCE_MAP_NAME).toString();
                 return Response.ok(fileDataStream)
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, contentType)
                         .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
@@ -125,7 +127,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) || documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
                 String content = apiProvider.getDocumentationContent(productIdentifier, documentation.getName());
                 return Response.ok(content)
-                        .header(RestApiConstants.HEADER_CONTENT_TYPE, APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE)
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, DOCUMENTATION_INLINE_CONTENT_TYPE)
                         .build();
             } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.URL)) {
                 String sourceUrl = documentation.getSourceUrl();
@@ -640,7 +642,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
         try {
             //for now one criterea is supported
-            String searchQuery = RestApiConstants.GET_API_PRODUCT_QUERY;
+            String searchQuery = StringUtils.replace(query, ":", "=");
+            searchQuery = searchQuery.equals("") ? RestApiConstants.GET_API_PRODUCT_QUERY : query + SEARCH_AND_TAG +
+                    RestApiConstants.GET_API_PRODUCT_QUERY;
 
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
@@ -680,10 +684,10 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             // if not add product
             provider = body.getProvider();
             if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
-                if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
+                if (!APIUtil.hasPermission(username, Permissions.APIM_ADMIN)) {
                     if (log.isDebugEnabled()) {
                         log.debug("User " + username + " does not have admin permission ("
-                                + APIConstants.Permissions.APIM_ADMIN + ") hence provider (" + provider
+                                + Permissions.APIM_ADMIN + ") hence provider (" + provider
                                 + ") overridden with current user (" + username + ")");
                     }
                     provider = username;
@@ -753,6 +757,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      */
     private boolean isAuthorizationFailure(Exception e) {
         String errorMessage = e.getMessage();
-        return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
+        return errorMessage != null && errorMessage.contains(UN_AUTHORIZED_ERROR_MESSAGE);
     }
 }

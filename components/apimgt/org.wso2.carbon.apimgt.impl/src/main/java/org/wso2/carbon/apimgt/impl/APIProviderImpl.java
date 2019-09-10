@@ -6696,6 +6696,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API_PRODUCT, apiLogObject.toString(),
                     APIConstants.AuditLogConstants.DELETED, this.username);
 
+            /*remove empty directories*/
+            String apiProductCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                    identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName();
+            if (registry.resourceExists(apiProductCollectionPath)) {
+                //at the moment product versioning is not supported so we are directly deleting this collection as
+                // this is known to be empty
+                registry.delete(apiProductCollectionPath);
+            }
+
+            String productProviderPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                    identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName();
+
+            if (registry.resourceExists(productProviderPath)) {
+                Resource providerCollection = registry.get(productProviderPath);
+                CollectionImpl collection = (CollectionImpl) providerCollection;
+                //if there is no api product for given provider delete the provider directory
+                if (collection.getChildCount() == 0) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("No more API Products from the provider " + identifier.getProviderName() + " found. " +
+                                "Removing provider collection from registry");
+                    }
+                    registry.delete(productProviderPath);
+                }
+            }
+
         } catch (RegistryException e) {
             handleException("Failed to remove the API from : " + productResourcePath, e);
         }
