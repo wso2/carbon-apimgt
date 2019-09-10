@@ -2280,7 +2280,7 @@ public final class APIUtil {
                     store.setType(type); //Set Store type [eg:wso2]
                     String name = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
                     if (name == null) {
-                        log.error("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
+                        log.error("The ExternalAPIStore name attribute is not defined in external-api-stores.xml.");
                     }
                     store.setName(name); //Set store name
                     OMElement configDisplayName = storeElem.getFirstChildWithName
