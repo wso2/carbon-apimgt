@@ -280,8 +280,6 @@ public final class APIUtil {
     public static String multiGrpAppSharing = null;
 
     private static final String CONFIG_ELEM_OAUTH = "OAuth";
-    private static final String CONFIG_ELEM_SUPPORTED_GRANT_TYPES = "SupportedGrantTypes";
-    private static final String CONFIG_ELEM_GRANT_TYPE_NAME = "GrantTypeName";
     private static final String REVOKE = "revoke";
     private static final String TOKEN = "token";
 
