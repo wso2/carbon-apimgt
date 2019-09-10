@@ -62,31 +62,31 @@ export default function AccessControl(props) {
     const handleRoleAddition = (role) => {
         const systemRolePromise = APIValidation.role.validate(base64url.encode(role));
         const userRolePromise = APIValidation.userRole.validate(base64url.encode(role));
-        systemRolePromise.then((isValidSystemRole) => {
-            if (isValidSystemRole) {
-                setRoleValidity(true);
-                userRolePromise.then((isValidUserRole) => {
-                    if (isValidUserRole) {
-                        setUserRoleValidity(true);
-                        configDispatcher({
-                            action: 'accessControlRoles',
-                            value: [...api.accessControlRoles, role],
-                        });
-                    } else {
-                        setUserRoleValidity(false);
-                        setInvalidRoles([...invalidRoles, role]);
-                    }
-                }).catch((error) => {
+        systemRolePromise.then(() => {
+            setRoleValidity(true);
+            userRolePromise.then(() => {
+                setUserRoleValidity(true);
+                configDispatcher({
+                    action: 'accessControlRoles',
+                    value: [...api.accessControlRoles, role],
+                });
+            }).catch((error) => {
+                if (error.status === 404) {
+                    setUserRoleValidity(false);
+                    setInvalidRoles([...invalidRoles, role]);
+                } else {
                     Alert.error('Error when validating role: ' + role);
                     console.error('Error when validating user roles ' + error);
-                });
-            } else {
+                }
+            });
+        }).catch((error) => {
+            if (error.status === 404) {
                 setRoleValidity(false);
                 setInvalidRoles([...invalidRoles, role]);
+            } else {
+                Alert.error('Error when validating role: ' + role);
+                console.error('Error when validating roles ' + error);
             }
-        }).catch((error) => {
-            Alert.error('Error when validating role: ' + role);
-            console.error('Error when validating roles ' + error);
         });
     };
 

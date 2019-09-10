@@ -52,7 +52,7 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
 
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
@@ -109,7 +109,7 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
 
         try {
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 

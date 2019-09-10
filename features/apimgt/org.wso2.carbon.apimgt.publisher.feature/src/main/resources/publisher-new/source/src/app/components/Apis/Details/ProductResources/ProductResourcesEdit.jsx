@@ -381,6 +381,7 @@ function ProductResourcesEdit() {
                 setUpdating(false);
             })
             .catch((error) => {
+                setUpdating(false);
                 if (process.env.NODE_ENV !== 'production') console.log(error);
                 const { status } = error;
                 if (status === 401) {

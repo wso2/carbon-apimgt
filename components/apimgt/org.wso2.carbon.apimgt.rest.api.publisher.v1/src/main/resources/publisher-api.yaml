@@ -3416,7 +3416,7 @@ paths:
             OK.
             External Store list is returned.
           schema:
-            $ref: '#/definitions/ExternalStoreList'
+            $ref: '#/definitions/APIExternalStoreList'
           headers:
             Content-Type:
               description: |
@@ -3457,11 +3457,9 @@ paths:
         This operation can be used to publish an API to a list of external stores.
       parameters:
         - $ref: '#/parameters/apiId'
-        - name: externalStoreId
+        - name: externalStoreIds
+          type: string
           description: External Store Ids of stores which the API needs to be published or updated.
-          type: array
-          items:
-            type: string
           in: query
           required: true
         - $ref: '#/parameters/If-Match'
@@ -3473,7 +3471,7 @@ paths:
             OK.
             API was successfully published to all the selected external stores.
           schema:
-            $ref: '#/definitions/ExternalStoreList'
+            $ref: '#/definitions/APIExternalStoreList'
           headers:
             ETag:
               description: |
@@ -5893,6 +5891,101 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The tenant resource APIs
+######################################################
+  '/tenants':
+    #--------------------------------------------------------
+    # Retrieve tenants by state
+    #--------------------------------------------------------
+    get:
+      security:
+      - OAuth2Security:
+        - apim:api_view
+      x-examples:
+        $ref: docs/examples/tenants/tenants.yaml
+      summary: |
+        Get get tenants by state
+      description: |
+        This operation is to get tenants by state
+      operationId: getTenantsByState
+      parameters:
+      - name: state
+        description: |
+          The state represents the current state of the tenant
+
+          Supported states are [ active, inactive]
+
+        in: query
+        type: string
+        required: false
+        default: 'active'
+        enum:
+        - active
+        - inactive
+      - $ref: '#/parameters/limit'
+      - $ref: '#/parameters/offset'
+      tags:
+      - Tenants
+      responses:
+        200:
+          description: |
+            OK.
+            Tenant names returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            type: '#/definitions/TenantList'
+        404:
+          description: |
+            Not Found.
+            Requested application does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+  ######################################################
+  # Check tenant existence
+  ######################################################
+  /tenants/{tenantDomain}:
+    #-----------------------------------------------------
+    # The tenant existence check resource
+    #-----------------------------------------------------
+    head:
+      security:
+      - OAuth2Security:
+        - apim:api_view
+      x-examples:
+        $ref: docs/examples/tenants/tenants.yaml
+      summary:
+        Check whether the given tenant already exists
+      description: |
+        Using this operation, user can check whether a given tenant exists or not.
+      operationId: getTenantExistence
+      parameters:
+      - $ref : '#/parameters/tenantDomain'
+      tags:
+      - Tenants
+      responses:
+        200:
+          description:
+            OK.
+            Requested role name exists.
+        404:
+          description:
+            Not Found.
+            Requested role name does not exist.
+
+
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -6184,6 +6277,16 @@ parameters:
     required: true
     type: string
     x-encoded: true
+
+  # Tenant Domain
+  tenantDomain:
+    name: tenantDomain
+    in: path
+    description: |
+      The domain of a specific tenant
+    required: true
+    type: string
+
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
@@ -7666,6 +7769,44 @@ definitions:
         description: |
           The type of the Store. This can be a WSO2-specific API Store or an external one.
         example: wso2
+      endpoint:
+        type: string
+        description: |
+          The endpoint URL of the external store
+        example: http://localhost:9764/store
+
+#-----------------------------------------------------
+# The API-External-Store resource
+#-----------------------------------------------------
+  APIExternalStore:
+    title: API External Store
+    properties:
+      id:
+        type: string
+        description: |
+          The external store identifier, which is a unique value.
+        example: Store123#
+      lastUpdatedTime:
+        description: |
+          The recent timestamp which a given API is updated in the external store.
+        type: string
+        example: 2019-09-09T13:57:16.229
+
+#-----------------------------------------------------
+# The API-External-Store List resource
+#-----------------------------------------------------
+  APIExternalStoreList:
+    title: API External Store List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of external stores returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/APIExternalStore'
 
 #-----------------------------------------------------
 # The External-Store List resource
@@ -8258,6 +8399,11 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/MonetizationAttribute'
+      externalStoresEnabled:
+        type: boolean
+        description: |
+          Is External Stores configuration enabled
+        example: true
 
 #-----------------------------------------------------
 # The pagination resource
@@ -8313,6 +8459,37 @@ definitions:
         description: |
           Default value of the attribute
 
+  #-----------------------------------------------------
+  # The Tenant resource
+  #-----------------------------------------------------
+  Tenant :
+    title: Tenant
+    properties:
+      domain:
+        type: string
+        description: tenant domain
+        example: "wso2.com"
+      status:
+        type: string
+        description: current status of the tenant active/inactive
+        example: "active"
+ #-----------------------------------------------------
+ # The Tenant List resource
+ #-----------------------------------------------------
+  TenantList :
+    title: Tenant list
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of tenants returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Tenant'
+      pagination:
+        $ref: '#/definitions/Pagination'
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

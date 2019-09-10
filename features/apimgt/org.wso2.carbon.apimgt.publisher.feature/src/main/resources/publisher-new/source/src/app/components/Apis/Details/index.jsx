@@ -317,7 +317,6 @@ class Details extends Component {
             if (apiProductCopy._data) delete apiProductCopy._data;
             if (apiProductCopy.apiType) delete apiProductCopy.apiType;
             if (apiProductCopy.type) delete apiProductCopy.type;
-
             promisedUpdate = productClient.update(apiProductCopy);
         } else if (!isEmpty(updatedProperties)) {
             // newApi object has to be provided as the updatedProperties. Then api will be updated.

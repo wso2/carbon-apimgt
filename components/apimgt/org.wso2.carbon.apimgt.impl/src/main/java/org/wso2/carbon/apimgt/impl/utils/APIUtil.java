@@ -2260,26 +2260,19 @@ public final class APIUtil {
      */
     public static Set<APIStore> getExternalStores(int tenantId) throws APIManagementException {
         // First checking if ExternalStores are defined in api-manager.xml
-        Set<APIStore> externalAPIStores = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration().getExternalAPIStores();
+        Set<APIStore> externalAPIStores = getGlobalExternalStores();
         // If defined, return Store Config provided there.
         if (externalAPIStores != null && !externalAPIStores.isEmpty()) {
             return externalAPIStores;
         }
         // Else Read the config from Tenant's Registry.
-        externalAPIStores = new HashSet<APIStore>();
+        externalAPIStores = new HashSet<>();
         try {
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
-                Resource resource = registry.get(APIConstants.EXTERNAL_API_STORES_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                OMElement element = AXIOMUtil.stringToOM(content);
-                Iterator apistoreIterator = element.getChildrenWithLocalName("ExternalAPIStore");
-
-                while (apistoreIterator.hasNext()) {
+            Iterator apiStoreIterator = getExternalStoresIteratorFromConfig(tenantId);
+            if (apiStoreIterator != null) {
+                while (apiStoreIterator.hasNext()) {
                     APIStore store = new APIStore();
-                    OMElement storeElem = (OMElement) apistoreIterator.next();
+                    OMElement storeElem = (OMElement) apiStoreIterator.next();
                     String type = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_TYPE));
                     String className =
                             storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_CLASS_NAME));
@@ -2287,7 +2280,7 @@ public final class APIUtil {
                     store.setType(type); //Set Store type [eg:wso2]
                     String name = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
                     if (name == null) {
-                        log.error("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
+                        log.error("The ExternalAPIStore name attribute is not defined in external-api-stores.xml.");
                     }
                     store.setName(name); //Set store name
                     OMElement configDisplayName = storeElem.getFirstChildWithName
@@ -2317,7 +2310,37 @@ public final class APIUtil {
                     }
                     externalAPIStores.add(store);
                 }
+            }
+        } catch (ClassNotFoundException e) {
+            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be found";
+            throw new APIManagementException(msg, e);
+        } catch (InstantiationException e) {
+            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be load";
+            throw new APIManagementException(msg, e);
+        } catch (IllegalAccessException e) {
+            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be access";
+            throw new APIManagementException(msg, e);
+        }
+        return externalAPIStores;
+    }
 
+    /**
+     * Get OMElement iterator for external stores configured in external-store.xml in tenant registry.
+     *
+     * @param tenantId Tenant ID
+     * @return ExternalStores OMElement Iterator
+     * @throws APIManagementException If an error occurs while reading external-store.xml
+     */
+    private static Iterator getExternalStoresIteratorFromConfig(int tenantId) throws APIManagementException {
+        Iterator apiStoreIterator = null;
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+            if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
+                Resource resource = registry.get(APIConstants.EXTERNAL_API_STORES_LOCATION);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                OMElement element = AXIOMUtil.stringToOM(content);
+                apiStoreIterator = element.getChildrenWithLocalName("ExternalAPIStore");
             }
         } catch (RegistryException e) {
             String msg = "Error while retrieving External Stores Configuration from registry";
@@ -2327,22 +2350,38 @@ public final class APIUtil {
             String msg = "Malformed XML found in the External Stores Configuration resource";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        } catch (ClassNotFoundException e) {
-            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be found";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (InstantiationException e) {
-            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be load";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (IllegalAccessException e) {
-            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be access";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
         }
-        return externalAPIStores;
+        return apiStoreIterator;
     }
 
+    /**
+     * Check if external stores are configured and exists for given tenant.
+     *
+     * @param tenantDomain Tenant Domain of logged in user
+     * @return Whether external stores are configured and non empty
+     */
+    public static boolean isExternalStoresEnabled(String tenantDomain) throws APIManagementException {
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        //First check external stores are present globally
+        Set<APIStore> globalExternalStores = getGlobalExternalStores();
+        if (globalExternalStores != null && !globalExternalStores.isEmpty()) {
+            return true;
+        }
+        //If not present check in registry
+        Iterator apiStoreIterator = getExternalStoresIteratorFromConfig(tenantId);
+        return apiStoreIterator != null && apiStoreIterator.hasNext();
+    }
+
+    /**
+     * Get external stores configured globally in api-manager.xml.
+     *
+     * @return Globally configured external store set
+     */
+    public static Set<APIStore> getGlobalExternalStores() {
+        // First checking if ExternalStores are defined in api-manager.xml
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getExternalAPIStores();
+    }
 
     /**
      * Returns the External API Store Configuration with the given Store Name
@@ -4596,6 +4635,26 @@ public final class APIUtil {
             }
         }
         return tenantDomains;
+    }
+
+    /**
+     * Check if tenant is available
+     *
+     * @param tenantDomain tenant Domain
+     * @return isTenantAvailable
+     * @throws UserStoreException
+     */
+    public static boolean isTenantAvailable(String tenantDomain) throws UserStoreException {
+
+        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .getTenantId(tenantDomain);
+
+        if (tenantId == -1) {
+            return false;
+        }
+
+        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .isTenantActive(tenantId);
     }
 
     /**
