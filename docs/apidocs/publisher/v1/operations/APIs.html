@@ -3062,7 +3062,9 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/35ee8a2d-d9ef-4d6d-8
             <h4 class="operation-heading"><a name="getWSDLOfAPI"></a>Get WSDL definition</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/wsdl</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to retrieve the WSDL definition of an API.
+            <p class="marked">This operation can be used to retrieve the WSDL definition of an API. It can be either a single WSDL file or a WSDL archive.
+
+The type of the WSDL of the API is indicated at the &quot;wsdlInfo&quot; element of the API payload definition.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
@@ -3071,6 +3073,75 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/35ee8a2d-d9ef-4d6d-8
             <h4 class="section-heading">
                 Examples
             </h4>
+            <h4 class="section-heading">
+                <u>Retrieve the WSDL of an API</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-getWSDLOfAPI">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-getWSDLOfAPI"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP 1/1
+Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-getWSDLOfAPI">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-getWSDLOfAPI" class="pre collapse in"><code class="json">HTTP/1.1 200
+Content-Type: application/wsdl+xml
+Content-Length: 7670
+
+&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot;?&gt;
+&lt;wsdl:definitions targetNamespace&#x3D;&quot;http://ws.cdyne.com/&quot; xmlns:s&#x3D;&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:wsdl&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/&quot; xmlns:mime&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/mime/&quot; xmlns:tns&#x3D;&quot;http://ws.cdyne.com/&quot; xmlns:http&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/http/&quot; xmlns:tm&#x3D;&quot;http://microsoft.com/wsdl/mime/textMatching/&quot; xmlns:soap12&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/soap12/&quot; xmlns:soap&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/soap/&quot; xmlns:soapenc&#x3D;&quot;http://schemas.xmlsoap.org/soap/encoding/&quot;&gt;
+  &lt;wsdl:documentation xmlns:wsdl&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/&quot;&gt;Our system uses a multiple sources for resolution.  Including a host database, trace route information, and other systems.  Resolves IP addresses to Organization, Country, City..
+  ...
+  ...
+    &lt;wsdl:port name&#x3D;&quot;IP2GeoHttpGet&quot; binding&#x3D;&quot;tns:IP2GeoHttpGet&quot;&gt;
+      &lt;http:address location&#x3D;&quot;https://ws.cdyne.com/ip2geo/ip2geo.asmx&quot;/&gt;
+    &lt;/wsdl:port&gt;
+    &lt;wsdl:port name&#x3D;&quot;IP2GeoHttpPost&quot; binding&#x3D;&quot;tns:IP2GeoHttpPost&quot;&gt;
+      &lt;http:address location&#x3D;&quot;https://ws.cdyne.com/ip2geo/ip2geo.asmx&quot;/&gt;
+    &lt;/wsdl:port&gt;
+  &lt;/wsdl:service&gt;
+&lt;/wsdl:definitions&gt;
+</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl&#39; -H &#39;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&#39; </code></div>
+
+            <h4 class="section-heading">
+                <u>Retrieve the WSDL Archive of an API</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-getWSDLOfAPI">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-getWSDLOfAPI"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP 1/1
+Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-getWSDLOfAPI">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-getWSDLOfAPI" class="pre collapse in"><code class="json">HTTP/1.1 200
+Content-Type: application/zip; name&#x3D;stockQuote1xsd.zip
+Content-Length: 1642
+
+&lt;binary-data&gt;</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl&#39; -H &#39;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&#39; </code></div>
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -4008,7 +4079,7 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9
 </code></div>
 
             <h4 class="section-heading">
-                <u>Create a SOAP API From a WSDL File</u>
+                <u>Create a SOAP API from a WSDL File</u>
             </h4>
                 <div class="pointer" data-toggle="collapse" data-target="#request-importWSDLDefinition">
                     <h5 class="section-heading">
@@ -4160,7 +4231,7 @@ Location: https://localhost:9443/api/am/publisher/v1.0/apis/ac12ad69-7b81-4bf9-9
 </code></div>
 
             <h4 class="section-heading">
-                <u>Create an API From a a WSDL Archive</u>
+                <u>Create an API from a WSDL Archive</u>
             </h4>
                 <div class="pointer" data-toggle="collapse" data-target="#request-importWSDLDefinition">
                     <h5 class="section-heading">
@@ -4637,7 +4708,9 @@ which are extracted from the WSDL.
             <h4 class="operation-heading"><a name="updateWSDLOfAPI"></a>Update WSDL definition</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/wsdl</code>
             <p class="marked"></p>
 
-            <p class="marked">This operation can be used to update the WSDL definition of an existing API. WSDL to be updated is passed as a form data parameter &#x60;inlineContent&#x60;.
+            <p class="marked">This operation can be used to update the WSDL definition of an existing API. WSDL to be updated can be passed as either &quot;url&quot; or &quot;file&quot;.
+Only one of &quot;url&quot; or &quot;file&quot; can be used at the same time. &quot;file&quot; can be specified as a single WSDL file or as a zip file which has a WSDL
+and its dependencies (eg: XSDs)
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
@@ -4646,6 +4719,121 @@ which are extracted from the WSDL.
             <h4 class="section-heading">
                 Examples
             </h4>
+            <h4 class="section-heading">
+                <u>Update the WSDL of an API by URL</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-updateWSDLOfAPI">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-updateWSDLOfAPI"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP/1.1
+Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_32_1344536553.1568106480012&quot;
+MIME-Version: 1.0
+Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
+Content-Length: 425
+
+
+------&#x3D;_Part_32_1344536553.1568106480012
+Content-Type: text/plain; charset&#x3D;us-ascii
+Content-Transfer-Encoding: 7bit
+Content-Disposition: form-data; name&#x3D;&quot;file&quot;
+
+
+------&#x3D;_Part_32_1344536553.1568106480012
+Content-Type: text/plain; charset&#x3D;us-ascii
+Content-Transfer-Encoding: 7bit
+Content-Disposition: form-data; name&#x3D;&quot;url&quot;
+
+https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl
+------&#x3D;_Part_32_1344536553.1568106480012--
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-updateWSDLOfAPI">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-updateWSDLOfAPI" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+Content-Length: 0
+</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F url&#x3D;&#39;https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl&#39; -X PUT https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl
+</code></div>
+
+            <h4 class="section-heading">
+                <u>Update the WSDL of an API by file or archive</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-updateWSDLOfAPI">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-updateWSDLOfAPI"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl HTTP/1.1
+Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_34_1125730933.1568107415435&quot;
+MIME-Version: 1.0
+Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
+Content-Length: 5697
+
+
+------&#x3D;_Part_34_1125730933.1568107415435
+Content-Type: text/xml; charset&#x3D;UTF-8; name&#x3D;stockQuote.wsdl
+Content-Transfer-Encoding: binary
+Content-Disposition: form-data; name&#x3D;&quot;file&quot;; filename&#x3D;&quot;stockQuote.wsdl&quot;
+
+&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;utf-8&quot;?&gt;
+&lt;wsdl:definitions xmlns:tm&#x3D;&quot;http://microsoft.com/wsdl/mime/textMatching/&quot; xmlns:soapenc&#x3D;&quot;http://schemas.xmlsoap.org/soap/encoding/&quot; xmlns:mime&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/mime/&quot; xmlns:tns&#x3D;&quot;http://www.webserviceX.NET/&quot; xmlns:soap&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/soap/&quot; xmlns:s&#x3D;&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:soap12&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/soap12/&quot; xmlns:http&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/http/&quot; targetNamespace&#x3D;&quot;http://www.webserviceX.NET/&quot; xmlns:wsdl&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/&quot;&gt;
+  &lt;wsdl:types&gt;
+    &lt;s:schema elementFormDefault&#x3D;&quot;qualified&quot; targetNamespace&#x3D;&quot;http://www.webserviceX.NET/&quot;&gt;
+      &lt;s:element name&#x3D;&quot;GetQuote&quot;&gt;
+        &lt;s:complexType&gt;
+          &lt;s:sequence&gt;
+            &lt;s:element minOccurs&#x3D;&quot;0&quot; maxOccurs&#x3D;&quot;1&quot; name&#x3D;&quot;symbol&quot; type&#x3D;&quot;s:string&quot; /&gt;
+          &lt;/s:sequence&gt;
+        &lt;/s:complexType&gt;
+      &lt;/s:element&gt;
+      &lt;s:element name&#x3D;&quot;GetQuoteResponse&quot;&gt;
+        &lt;s:complexType&gt;
+          &lt;s:sequence&gt;
+            &lt;s:element minOccurs&#x3D;&quot;0&quot; maxOccurs&#x3D;&quot;1&quot; name&#x3D;&quot;GetQuoteResult&quot; type&#x3D;&quot;s:string&quot; /&gt;
+          &lt;/s:sequence&gt;
+        &lt;/s:complexType&gt;
+      &lt;/s:element&gt;
+      &lt;s:element name&#x3D;&quot;string&quot; nillable&#x3D;&quot;true&quot; type&#x3D;&quot;s:string&quot; /&gt;
+    &lt;/s:schema&gt;
+  &lt;/wsdl:types&gt;
+  ...
+  ...
+  ...
+    &lt;wsdl:port name&#x3D;&quot;StockQuoteHttpGet&quot; binding&#x3D;&quot;tns:StockQuoteHttpGet&quot;&gt;
+      &lt;http:address location&#x3D;&quot;http://www.webservicex.net/stockquote.asmx&quot; /&gt;
+    &lt;/wsdl:port&gt;
+    &lt;wsdl:port name&#x3D;&quot;StockQuoteHttpPost&quot; binding&#x3D;&quot;tns:StockQuoteHttpPost&quot;&gt;
+      &lt;http:address location&#x3D;&quot;http://www.webservicex.net/stockquote.asmx&quot; /&gt;
+    &lt;/wsdl:port&gt;
+  &lt;/wsdl:service&gt;
+&lt;/wsdl:definitions&gt;
+
+------&#x3D;_Part_34_1125730933.1568107415435--
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-updateWSDLOfAPI">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-updateWSDLOfAPI" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+Content-Length: 0</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockQuote.wsdl -X PUT https://localhost:9443/api/am/publisher/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl
+</code></div>
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">

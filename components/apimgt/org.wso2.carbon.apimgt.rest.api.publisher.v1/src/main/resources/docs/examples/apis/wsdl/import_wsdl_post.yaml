@@ -130,7 +130,7 @@
       }
 
 - id: importWSDLFileAndCreateSOAPAPI
-  title: Create a SOAP API From a WSDL File
+  title: Create a SOAP API from a WSDL File
   rawRequest: |
     POST https://localhost:9443/api/am/publisher/v1.0/apis/import-wsdl HTTP/1.1
     Content-Type: multipart/form-data; boundary="----=_Part_30_581164590.1568040945994"
@@ -299,7 +299,7 @@
       }
 
 - id: importWSDLArchive
-  title: Create an API From a a WSDL Archive
+  title: Create an API from a WSDL Archive
   rawRequest: |
     POST https://localhost:9443/api/am/publisher/v1.0/apis/import-wsdl HTTP/1.1
     Content-Type: multipart/form-data; boundary="----=_Part_29_1617587938.1568040715278"

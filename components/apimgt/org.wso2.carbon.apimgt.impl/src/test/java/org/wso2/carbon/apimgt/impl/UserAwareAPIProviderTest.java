@@ -92,6 +92,8 @@ public class UserAwareAPIProviderTest {
                 .thenReturn(artifactManager);
         PowerMockito.doNothing().when(ServiceReferenceHolder.class, "setUserRealm", Mockito.any());
         PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
+        PowerMockito.when(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName())).
+                thenReturn(apiIdentifier.getProviderName());
         Mockito.doReturn(realmService).when(serviceReferenceHolder).getRealmService();
         Mockito.doReturn(tenantManager).when(realmService).getTenantManager();
         Mockito.doReturn(registryService).when(serviceReferenceHolder).getRegistryService();

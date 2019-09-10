@@ -198,7 +198,7 @@
         }
       }
 - id: validateWSDLInvalid
-  title: Trying to Validate an Invalid WSDL
+  title: Trying to validate an invalid WSDL
   rawRequest: |
     POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl HTTP/1.1
     Content-Type: multipart/form-data; boundary="----=_Part_17_807981233.1568034538839"
