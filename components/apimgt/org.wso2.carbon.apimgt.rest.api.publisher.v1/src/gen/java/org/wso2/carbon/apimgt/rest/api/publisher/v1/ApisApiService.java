@@ -10,13 +10,13 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExternalStoreListDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;

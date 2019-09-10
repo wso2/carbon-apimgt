@@ -18,12 +18,14 @@ getAllExternalStores:
           {
             "id": "StoreABC",
             "displayName": "StoreABC",
-            "type": "wso2"
+            "type": "wso2",
+            "endpoint": "http://localhost:9764/store"
           },
           {
             "id": "StoreXYZ",
             "displayName": "StoreXYZ",
-            "type": "wso2"
+            "type": "wso2",
+            "endpoint": "http://localhost:9764/store"
           }
           ]
         }
@@ -63,13 +65,11 @@ getPublishedExternalStoresByAPI:
           "list": [
           {
             "id": "StoreABC",
-            "displayName": "StoreABC",
-            "type": "wso2"
+            "lastUpdatedTime": "2019-09-10 11:28:48.769"
           },
           {
             "id": "StoreXYZ",
-            "displayName": "StoreXYZ",
-            "type": "wso2"
+            "lastUpdatedTime": "2019-09-10 11:28:48.769"
           }
           ]
         }
@@ -129,13 +129,11 @@ publishToExternalStore:
           "list": [
           {
             "id": "StoreABC",
-            "displayName": "StoreABC",
-            "type": "wso2"
+            "lastUpdatedTime": "2019-09-10 11:28:48.769"
           },
           {
             "id": "StoreXYZ",
-            "displayName": "StoreXYZ",
-            "type": "wso2"
+            "lastUpdatedTime": "2019-09-10 11:28:48.769"
           }
           ]
         }

@@ -104,6 +104,7 @@ import java.util.Set;
 import java.util.Map;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
@@ -1126,9 +1127,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
 
         Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(apiIdentifier);
-        ExternalStoreListDTO externalStoreListDTO =
-                ExternalStoreMappingUtil.fromExternalStoreCollectionToDTO(publishedStores);
-        return Response.ok().entity(externalStoreListDTO).build();
+        APIExternalStoreListDTO apiExternalStoreListDTO =
+                ExternalStoreMappingUtil.fromAPIExternalStoreCollectionToDTO(publishedStores);
+        return Response.ok().entity(apiExternalStoreListDTO).build();
     }
     /**
      * Retrieves API Lifecycle history information
@@ -1383,9 +1384,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         if (apiProvider.publishToExternalAPIStores(api, externalStoreIdList)) {
             Set<APIStore> publishedStores = apiProvider.getPublishedExternalAPIStores(api.getId());
-            ExternalStoreListDTO externalStoreListDTO =
-                    ExternalStoreMappingUtil.fromExternalStoreCollectionToDTO(publishedStores);
-            return Response.ok().entity(externalStoreListDTO).build();
+            APIExternalStoreListDTO apiExternalStoreListDTO =
+                    ExternalStoreMappingUtil.fromAPIExternalStoreCollectionToDTO(publishedStores);
+            return Response.ok().entity(apiExternalStoreListDTO).build();
         }
         return Response.serverError().build();
     }
