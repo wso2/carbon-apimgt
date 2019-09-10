@@ -19,89 +19,141 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import io.swagger.models.HttpMethod;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.Swagger;
+import io.swagger.models.auth.OAuth2Definition;
+import io.swagger.parser.SwaggerParser;
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
-public class OAS2ParserTest {
+public class OAS2ParserTest extends OASTestBase {
+    private OAS2Parser oas2Parser = new OAS2Parser();
+
+    @Test
+    public void testGetURITemplates() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2_scopes.json";
+        String oas2Scope = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        testGetURITemplates(oas2Parser, oas2Scope);
+    }
+
+    @Test
+    public void testGetScopes() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2_scopes.json";
+        String oas2Scope = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        testGetScopes(oas2Parser, oas2Scope);
+    }
+
+    @Test
+    public void testGenerateAPIDefinition() throws Exception {
+        testGenerateAPIDefinition(oas2Parser);
+    }
+
+    @Test
+    public void testUpdateAPIDefinition() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2Resources.json";
+        String oas2Resources = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        testGenerateAPIDefinition2(oas2Parser, oas2Resources);
+    }
+
+    @Test
+    public void testUpdateAPIDefinitionWithExtensions() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2Resources.json";
+        String oas2Resources = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        SwaggerParser swaggerParser = new SwaggerParser();
+
+        // check remove vendor extensions
+        System.setProperty(APIDefinition.KEEP_LEGACY_EXTENSION_PROP, Boolean.toString(false));
+        String definition = testGenerateAPIDefinitionWithExtension(oas2Parser, oas2Resources);
+        Swagger swaggerObj = swaggerParser.parse(definition);
+        boolean isExtensionNotFound =
+                swaggerObj.getVendorExtensions() == null || swaggerObj.getVendorExtensions().isEmpty();
+        Assert.assertTrue(isExtensionNotFound);
+        Assert.assertEquals(2, swaggerObj.getPaths().size());
+
+        Iterator<Map.Entry<String, Path>> itr = swaggerObj.getPaths().entrySet().iterator();
+        while (itr.hasNext()) {
+            Map.Entry<String, Path> pathEntry = itr.next();
+            Path path = pathEntry.getValue();
+            for (Map.Entry<HttpMethod, Operation> operationEntry : path.getOperationMap().entrySet()) {
+                Operation operation = operationEntry.getValue();
+                Assert.assertFalse(operation.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_SCOPE));
+            }
+        }
+
+        // check preserve vendor extensions
+        System.setProperty(APIDefinition.KEEP_LEGACY_EXTENSION_PROP, Boolean.toString(true));
+        definition = testGenerateAPIDefinitionWithExtension(oas2Parser, oas2Resources);
+        swaggerObj = swaggerParser.parse(definition);
+        Assert.assertTrue(swaggerObj.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY));
+        Assert.assertEquals(2, swaggerObj.getPaths().size());
+
+        itr = swaggerObj.getPaths().entrySet().iterator();
+        while (itr.hasNext()) {
+            Map.Entry<String, Path> pathEntry = itr.next();
+            Path path = pathEntry.getValue();
+            for (Map.Entry<HttpMethod, Operation> operationEntry : path.getOperationMap().entrySet()) {
+                Operation operation = operationEntry.getValue();
+                Assert.assertTrue(operation.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_SCOPE));
+            }
+        }
+
+        // check updated scopes in both extension and security definition
+        Operation itemGet = swaggerObj.getPath("/items").getGet();
+        Assert.assertEquals("newScope", itemGet.getVendorExtensions().get(APIConstants.SWAGGER_X_SCOPE));
+        Assert.assertTrue(itemGet.getSecurity().get(0).get("default").contains("newScope"));
+
+        // check available scopes in security definition
+        OAuth2Definition oAuth2Definition = (OAuth2Definition) swaggerObj.getSecurityDefinitions().get("default");
+        Assert.assertTrue(oAuth2Definition.getScopes().containsKey("newScope"));
+        Assert.assertEquals("newScopeDescription", oAuth2Definition.getScopes().get("newScope"));
+
+        Assert.assertTrue(oAuth2Definition.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_SCOPES_BINDINGS));
+        Map<String, String> scopeBinding = (Map<String, String>) oAuth2Definition.getVendorExtensions()
+                .get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+        Assert.assertTrue(scopeBinding.containsKey("newScope"));
+        Assert.assertEquals("admin", scopeBinding.get("newScope"));
+
+        // check available scopes in extensions
+        Map<String, LinkedHashMap<String, ArrayList<LinkedHashMap<String, String>>>> scopesInEx =
+                (Map<String, LinkedHashMap<String, ArrayList<LinkedHashMap<String, String>>>>) swaggerObj
+                        .getVendorExtensions().get(APIConstants.SWAGGER_X_WSO2_SECURITY);
+        ArrayList<LinkedHashMap<String, String>> scopeList =
+                scopesInEx.get(APIConstants.SWAGGER_OBJECT_NAME_APIM).get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+        Assert.assertEquals(3, scopeList.size());
+        boolean found = false;
+        for (LinkedHashMap<String, String> map : scopeList) {
+            if ("newScope".equals(map.get("name"))) {
+                Assert.assertEquals("admin", map.get("roles"));
+                Assert.assertEquals("newScope", map.get("key"));
+                Assert.assertEquals("newScopeDescription", map.get("description"));
+                found = true;
+            }
+        }
+        Assert.assertTrue("Newly added scope not found in the updated definition", found);
+    }
+
     @Test
     public void testGetURITemplatesOfOpenAPI20Spec() throws Exception {
-
-        OAS2Parser apiDefinitionFromOpenAPI20 = new OAS2Parser();
-        String swagger = "{\n" +
-                "  \"paths\": {\n" +
-                "    \"/*\": {\n" +
-                "      \"get\": {\n" +
-                "        \"x-auth-type\": \"Application\",\n" +
-                "        \"x-throttling-tier\": \"Unlimited\",\n" +
-                "        \"responses\": {\n" +
-                "          \"200\": {\n" +
-                "            \"description\": \"OK\"\n" +
-                "          }\n" +
-                "        }\n" +
-                "      },\n" +
-                "      \"post\": {\n" +
-                "        \"x-auth-type\": \"Application User\",\n" +
-                "        \"x-throttling-tier\": \"Unlimited\",\n" +
-                "        \"responses\": {\n" +
-                "          \"200\": {\n" +
-                "            \"description\": \"OK\"\n" +
-                "          }\n" +
-                "        }\n" +
-                "      },\n" +
-                "      \"put\": {\n" +
-                "        \"x-auth-type\": \"None\",\n" +
-                "        \"x-throttling-tier\": \"Unlimited\",\n" +
-                "        \"responses\": {\n" +
-                "          \"200\": {\n" +
-                "            \"description\": \"OK\"\n" +
-                "          }\n" +
-                "        }\n" +
-                "      },\n" +
-                "      \"delete\": {\n" +
-                "        \"x-throttling-tier\": \"Unlimited\",\n" +
-                "        \"responses\": {\n" +
-                "          \"200\": {\n" +
-                "            \"description\": \"OK\"\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    },\n" +
-                "    \"/abc\": {\n" +
-                "      \"get\": {\n" +
-                "        \"x-auth-type\": \"Application & Application User\",\n" +
-                "        \"x-throttling-tier\": \"Unlimited\",\n" +
-                "        \"responses\": {\n" +
-                "          \"200\": {\n" +
-                "            \"description\": \"OK\"\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  },\n" +
-                "  \"x-wso2-security\": {\n" +
-                "    \"apim\": {\n" +
-                "      \"x-wso2-scopes\": []\n" +
-                "    }\n" +
-                "  },\n" +
-                "  \"swagger\": \"2.0\",\n" +
-                "  \"info\": {\n" +
-                "    \"title\": \"PhoneVerification\",\n" +
-                "    \"description\": \"Verify a phone number\",\n" +
-                "    \"contact\": {\n" +
-                "      \"email\": \"xx@ee.com\",\n" +
-                "      \"name\": \"xx\"\n" +
-                "    },\n" +
-                "    \"version\": \"1.0.0\"\n" +
-                "  }\n" +
-                "}";
-        Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
+        String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2_uri_template.json";
+        String swagger = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        Set<URITemplate> uriTemplates = new LinkedHashSet<>();
         uriTemplates.add(getUriTemplate("POST", "Application User", "/*"));
         uriTemplates.add(getUriTemplate("GET", "Application", "/*"));
         uriTemplates.add(getUriTemplate("PUT", "None", "/*"));
@@ -109,20 +161,7 @@ public class OAS2ParserTest {
         uriTemplates.add(getUriTemplate("GET", "Application & Application User", "/abc"));
         API api = new API(new APIIdentifier("admin", "PhoneVerification", "1.0.0"));
         SwaggerData swaggerData = new SwaggerData(api);
-        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPI20.getURITemplates(swaggerData, swagger);
+        Set<URITemplate> uriTemplateSet = oas2Parser.getURITemplates(swaggerData, swagger);
         Assert.assertEquals(uriTemplateSet, uriTemplates);
-    }
-
-    protected URITemplate getUriTemplate(String httpVerb, String authType, String uriTemplateString) {
-        URITemplate uriTemplate = new URITemplate();
-        uriTemplate.setAuthTypes(authType);
-        uriTemplate.setAuthType(authType);
-        uriTemplate.setHTTPVerb(httpVerb);
-        uriTemplate.setHttpVerbs(httpVerb);
-        uriTemplate.setUriTemplate(uriTemplateString);
-        uriTemplate.setThrottlingTier("Unlimited");
-        uriTemplate.setThrottlingTiers("Unlimited");
-        uriTemplate.setScope(null);
-        return uriTemplate;
     }
 }

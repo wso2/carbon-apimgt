@@ -58,6 +58,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +105,7 @@ public class OAS2Parser extends APIDefinition {
                             throw new APIManagementException("Scope '" + firstScope + "' not found.");
                         }
                         template.setScope(scope);
+                        template.setScopes(scope);
                     } else {
                         template = OASParserUtil.setScopesToTemplate(template, opScopes);
                     }
@@ -152,13 +155,12 @@ public class OAS2Parser extends APIDefinition {
         if (oauth2SchemeKey != null && securityDefinitions != null
                 && (oAuth2Definition = (OAuth2Definition) securityDefinitions.get(oauth2SchemeKey)) != null
                 && oAuth2Definition.getScopes() != null) {
-            Set<Scope> scopeSet = new HashSet<>();
+            Set<Scope> scopeSet = new LinkedHashSet<>();
             for (Map.Entry<String, String> entry : oAuth2Definition.getScopes().entrySet()) {
                 Scope scope = new Scope();
                 scope.setKey(entry.getKey());
                 scope.setName(entry.getKey());
                 scope.setDescription(entry.getValue());
-                scopeSet.add(scope);
                 Map<String, String> scopeBindings;
                 if (oAuth2Definition.getVendorExtensions() != null &&
                         (scopeBindings = (Map<String, String>) oAuth2Definition.getVendorExtensions()
@@ -167,6 +169,7 @@ public class OAS2Parser extends APIDefinition {
                         scope.setRoles(scopeBindings.get(scope.getKey()));
                     }
                 }
+                scopeSet.add(scope);
             }
             return scopeSet;
         } else {
@@ -273,13 +276,15 @@ public class OAS2Parser extends APIDefinition {
         // path -> [verb1 -> template1, verb2 -> template2, ..]
         Map<String, Map<String, SwaggerData.Resource>> resourceMap = getResourceMap(swaggerData);
 
-        for (Map.Entry<String, Path> pathEntry : swaggerObj.getPaths().entrySet()) {
+        Iterator<Map.Entry<String, Path>> itr = swaggerObj.getPaths().entrySet().iterator();
+        while(itr.hasNext()){
+            Map.Entry<String, Path> pathEntry = itr.next();
             String pathName = pathEntry.getKey();
             Path path = pathEntry.getValue();
             Map<String, SwaggerData.Resource> resourcesForPath = resourceMap.get(pathName);
             if (resourcesForPath == null) {
                 //remove paths that are not in URI Templates
-                swaggerObj.getPaths().remove(pathName);
+                itr.remove();
             } else {
                 //If path is available in the URI template, then check for operations(verbs)
                 for (Map.Entry<HttpMethod, Operation> operationEntry : path.getOperationMap().entrySet()) {
@@ -384,7 +389,7 @@ public class OAS2Parser extends APIDefinition {
             oAuth2Definition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
         }
         swagger.addSecurityDefinition(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, oAuth2Definition);
-        removeLegacyScopesFromSwagger(swagger);
+        updateLegacyScopesFromSwagger(swagger, swaggerData);
     }
 
     /**
@@ -407,7 +412,7 @@ public class OAS2Parser extends APIDefinition {
         operation.setVendorExtension(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
         operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
 
-        removeLegacyScopesFromOperation(operation);
+        updateLegacyScopesFromOperation(resource, operation);
         if(resource.getScope() != null) {
             String oauth2SchemeKey = APIConstants.SWAGGER_APIM_DEFAULT_SECURITY;
             List<Map<String, List<String>>> security = operation.getSecurity();
@@ -433,9 +438,12 @@ public class OAS2Parser extends APIDefinition {
      *
      * @param operation
      */
-    private void removeLegacyScopesFromOperation(Operation operation) {
-        if(isLegacyExtensionsPreserved()) {
+    private void updateLegacyScopesFromOperation(SwaggerData.Resource resource, Operation operation) {
+        if (isLegacyExtensionsPreserved()) {
             log.debug("preserveLegacyExtensions is enabled.");
+            if (resource.getScope() != null) {
+                operation.setVendorExtension(APIConstants.SWAGGER_X_SCOPE, resource.getScope().getKey());
+            }
             return;
         }
         Map<String, Object> extensions = operation.getVendorExtensions();
@@ -449,14 +457,43 @@ public class OAS2Parser extends APIDefinition {
      *
      * @param swagger
      */
-    private void removeLegacyScopesFromSwagger(Swagger swagger) {
+    private void updateLegacyScopesFromSwagger(Swagger swagger, SwaggerData swaggerData) {
         if(isLegacyExtensionsPreserved()) {
             log.debug("preserveLegacyExtensions is enabled.");
+            setLegacyScopeExtensionToSwagger(swagger, swaggerData);
             return;
         }
         Map<String, Object> extensions = swagger.getVendorExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {
             extensions.remove(APIConstants.SWAGGER_X_WSO2_SECURITY);
+        }
+    }
+
+    /**
+     * Set scopes to the swagger extension
+     *
+     * @param swagger     swagger object
+     * @param swaggerData Swagger API data
+     */
+    private void setLegacyScopeExtensionToSwagger(Swagger swagger, SwaggerData swaggerData) {
+        Set<Scope> scopes = swaggerData.getScopes();
+
+        if (scopes != null && !scopes.isEmpty()) {
+            List<Map<String, String>> xSecurityScopesArray = new ArrayList<>();
+            for (Scope scope : scopes) {
+                Map<String, String> xWso2ScopesObject = new LinkedHashMap<>();
+                xWso2ScopesObject.put(APIConstants.SWAGGER_SCOPE_KEY, scope.getKey());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_NAME, scope.getName());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_ROLES, scope.getRoles());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_DESCRIPTION, scope.getDescription());
+                xSecurityScopesArray.add(xWso2ScopesObject);
+            }
+            Map<String, Object> xWSO2Scopes = new LinkedHashMap<>();
+            xWSO2Scopes.put(APIConstants.SWAGGER_X_WSO2_SCOPES, xSecurityScopesArray);
+            Map<String, Object> xWSO2SecurityDefinitionObject = new LinkedHashMap<>();
+            xWSO2SecurityDefinitionObject.put(APIConstants.SWAGGER_OBJECT_NAME_APIM, xWSO2Scopes);
+
+            swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_SECURITY, xWSO2SecurityDefinitionObject);
         }
     }
 
