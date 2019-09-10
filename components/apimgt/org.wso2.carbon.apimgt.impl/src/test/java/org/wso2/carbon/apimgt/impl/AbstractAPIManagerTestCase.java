@@ -673,7 +673,7 @@ public class AbstractAPIManagerTestCase {
         resource.setContent(wsdlContent);
         InputStream inputStream = new ArrayInputStream();
         Mockito.when(resourceMock.getContentStream()).thenReturn(inputStream);
-        Assert.assertTrue(((String)abstractAPIManager.getWSDL(identifier).getContent()).contains(wsdlContent));
+        Assert.assertEquals(wsdlContent, IOUtils.toString(abstractAPIManager.getWSDL(identifier).getContent()));
         PowerMockito.mockStatic(IOUtils.class);
     }
 
