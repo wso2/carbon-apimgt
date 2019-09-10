@@ -535,6 +535,16 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
+    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier)
+            throws APIManagementException {
+        ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias);
+        if (clientCertificateDTO != null) {
+            checkAccessControlPermission(clientCertificateDTO.getApiIdentifier());
+        }
+        return clientCertificateDTO;
+    }
+
+    @Override
     public CertificateInformationDTO getCertificateStatus(String alias) throws APIManagementException {
         checkCreatePermission();
         return super.getCertificateStatus(alias);
