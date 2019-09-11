@@ -109,7 +109,6 @@ public class WSDL11SOAPOperationExtractor extends WSDL11ProcessorImpl {
     }
 
     public WSDL11SOAPOperationExtractor(APIMWSDLReader wsdlReader) {
-        //WSDL11SOAPOperationExtractor.wsdlReader = wsdlReader;
     }
 
     @Override

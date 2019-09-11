@@ -134,7 +134,14 @@ abstract class AbstractWSDLProcessor implements WSDLProcessor {
         return dbf;
     }
 
-
+    /**
+     * If the provided comma separated "transports" include both http,https, then return the provided scheme. Otherwise,
+     * return the transport available at "transports"
+     *
+     * @param scheme http or https
+     * @param transports available transports as comma separated values.
+     * @return return the supported transport compared to the "scheme" and available "transports"
+     */
     String determineURLTransport(String scheme, String transports) {
         // If transports is defined as "http,https" consider the actual transport
         // protocol of the url, else give priority to the transport defined at API level
