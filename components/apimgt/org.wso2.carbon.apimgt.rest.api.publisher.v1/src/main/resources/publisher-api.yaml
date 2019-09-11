@@ -1693,9 +1693,9 @@ paths:
                 You can search in attributes by using an **"<attribute>:"** modifier.
 
                 Eg.
-                "apiName:wso2" will match an API if the provider of the API is exactly "wso2".
+                "name:wso2" will match an API if the provider of the API is exactly "wso2".
 
-                Supported attribute modifiers are [** version, context, apiName **]
+                Supported attribute modifiers are [** version, context, name **]
 
                 If no advanced attribute modifier has been specified, search will match the
                 given query string against API Name.
