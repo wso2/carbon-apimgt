@@ -71,7 +71,7 @@ class BrowserRouter extends React.Component {
     }
 }
 BrowserRouter.propTypes = {
-    children: PropTypes.shape({}).isRequired,
+    children: PropTypes.node.isRequired,
 };
 
 export default BrowserRouter;

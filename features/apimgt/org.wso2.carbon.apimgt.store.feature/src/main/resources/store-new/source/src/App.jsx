@@ -25,7 +25,7 @@ import SignUp from './app/components/AnonymousView/SignUp';
 import Progress from './app/components/Shared/Progress';
 import { SettingsProvider } from './app/components/Shared/SettingsContext';
 import AuthManager from './app/data/AuthManager';
-import BrowserRouter from './app/CustomRouter/BrowserRouter';
+import BrowserRouter from './app/components/Base/CustomRouter/BrowserRouter';
 
 const LoadableProtectedApp = Loadable({
     loader: () => import(// eslint-disable-line function-paren-newline

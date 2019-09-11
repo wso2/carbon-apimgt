@@ -8,7 +8,6 @@ import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import Tenants from 'AppData/Tenants';
 
-
 const styles = theme => ({
     root: {
         flexGrow: 1,
