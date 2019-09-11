@@ -51,6 +51,7 @@ public class WSDLSOAPOperationExtractorImplTestCase {
         byte[] wsdlContent = wsdlReader.getWSDL();
         WSDL11SOAPOperationExtractor processor = SOAPOperationBindingUtils.getWSDL11SOAPOperationExtractor(wsdlContent,
                 wsdlReader);
+
         operations = processor.getWsdlInfo().getSoapBindingOperations();
     }
     @Test

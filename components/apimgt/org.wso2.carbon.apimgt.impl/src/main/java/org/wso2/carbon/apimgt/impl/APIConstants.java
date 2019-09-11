@@ -1523,6 +1523,12 @@ public final class APIConstants {
         HTTP, WS, GRAPHQL
     }
 
+    public static final String API_TYPE_SOAP = "SOAP";
+    public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";
+
+    public static final String[] HTTP_DEFAULT_METHODS = {"get", "put", "post", "delete", "patch"};
+    public static final String[] SOAP_DEFAULT_METHODS = {"post"};
+
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
     public static final String REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA = "[~!@#;%^*()+={}|<>\"\',\\[\\]&/$\\\\]";
@@ -1583,6 +1589,7 @@ public final class APIConstants {
     public static final String NULL_GROUPID_LIST = "null";
 
     public static final String APPLICATION_GZIP = "application/gzip";
+    public static final String APPLICATION_ZIP = "application/zip";
     public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
     public static final String JSON_FILENAME_EXTENSION = ".json";
     public static final String JSON_GZIP_FILENAME_EXTENSION = ".json.gz";

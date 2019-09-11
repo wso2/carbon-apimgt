@@ -17,28 +17,15 @@
  */
 package org.wso2.carbon.apimgt.impl.wsdl;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.xerces.impl.Constants;
-import org.apache.xerces.util.SecurityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
-import org.xml.sax.SAXException;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 import java.net.URL;
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Interface to extend different the wsdl operation extractor implementations.
@@ -75,6 +62,26 @@ public interface WSDLProcessor {
      * @throws APIMgtWSDLException
      */
     WSDLInfo getWsdlInfo() throws APIMgtWSDLException;
+
+
+    /**
+     * Retrieves a byte array content of the WSDL.
+     *
+     * @return A {@link ByteArrayOutputStream} of the WSDL
+     * @throws APIMgtWSDLException If an error occurs while creating {@link ByteArrayOutputStream}
+     */
+    byte[] getWSDL() throws APIMgtWSDLException;
+
+    /**
+     * Clear the actual service Endpoint and use Gateway Endpoint instead of the
+     * actual Endpoint for the given environment type.
+     *
+     * @param api             API object
+     * @param environmentName gateway environment name
+     * @param environmentType gateway environment type
+     * @throws APIMgtWSDLException when error occurred getting WSDL address location
+     */
+    byte[] updateEndpoints(API api, String environmentName, String environmentType) throws APIMgtWSDLException;
 
     /**
      * Returns whether this WSDL processor processed the provided WSDL content bytes or WSDL file path without an error.

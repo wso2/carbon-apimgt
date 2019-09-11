@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
-import com.google.gson.Gson;
+import com.nimbusds.jose.util.StandardCharset;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -58,7 +58,6 @@ import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
-import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
@@ -95,6 +94,7 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -350,7 +350,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 if (StringUtils.isNotBlank(apiToAdd.getWsdlUrl())) {
                     String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(body.getWsdlUri());
                     apiProvider.saveSwagger20Definition(apiToAdd.getId(), swaggerStr);
-                    SequenceGenerator.generateSequencesFromSwagger(swaggerStr, new Gson().toJson(body));
+                    SequenceGenerator.generateSequencesFromSwagger(swaggerStr, apiToAdd.getId());
                 } else {
                     String errorMessage =
                             "Error while generating the swagger since the wsdl url is null for: " + body.getProvider()
@@ -1742,15 +1742,17 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdWsdlGet(String apiId, String accept, String ifNoneMatch,
                                      String ifModifiedSince) {
+        String errorMessageCommon = "Error while retrieving wsdl of API: " + apiId;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
                     tenantDomain);
-            String wsdlContent = apiProvider.getWsdl(apiIdentifier);
+            ResourceFile wsdlResource = apiProvider.getWSDL(apiIdentifier);
             WsdlDTO dto = new WsdlDTO();
-            dto.setWsdlDefinition(wsdlContent);
+            byte[] wsdlContent = Base64.getEncoder().encode(APIUtil.toByteArray(wsdlResource.getContent()));
+            dto.setWsdlDefinition(new String(wsdlContent, StandardCharset.UTF_8));
             dto.setName(apiIdentifier.getProviderName() + "--" + apiIdentifier.getApiName() +
                     apiIdentifier.getVersion() + ".wsdl");
             return Response.ok().entity(dto).build();
@@ -1764,9 +1766,10 @@ public class ApisApiServiceImpl extends ApisApiService {
                         .handleAuthorizationFailure("Authorization failure while retrieving wsdl of API: " + apiId, e,
                                 log);
             } else {
-                String errorMessage = "Error while retrieving wsdl of API: " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                RestApiUtil.handleInternalServerError(errorMessageCommon, e, log);
             }
+        } catch (IOException e) {
+            RestApiUtil.handleInternalServerError(errorMessageCommon, e, log);
         }
         return null;
     }
@@ -1783,6 +1786,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdWsdlPost(String apiId, WsdlDTO body, String contentType, String ifMatch,
             String ifUnmodifiedSince) {
+        String errorMessageCommon = "Error while uploading wsdl of API : " + apiId;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -1797,8 +1801,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             apiProvider.uploadWsdl(resourcePath, body.getWsdlDefinition());
 
+            ResourceFile wsdlResource = apiProvider.getWSDL(apiIdentifier);
             WsdlDTO wsdlDTO = new WsdlDTO();
-            wsdlDTO.setWsdlDefinition(apiProvider.getWsdl(apiIdentifier));
+            byte[] wsdlContent = Base64.getEncoder().encode(APIUtil.toByteArray(wsdlResource.getContent()));
+            wsdlDTO.setWsdlDefinition(new String(wsdlContent, StandardCharset.UTF_8));
             wsdlDTO.setName(apiIdentifier.getProviderName() + "--" + apiIdentifier.getApiName() +
                     apiIdentifier.getVersion() + ".wsdl");
             return Response.ok().entity(wsdlDTO).build();
@@ -1812,9 +1818,10 @@ public class ApisApiServiceImpl extends ApisApiService {
                         .handleAuthorizationFailure("Authorization failure while uploading wsdl for API: " + apiId, e,
                                 log);
             } else {
-                String errorMessage = "Error while uploading wsdl of API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                RestApiUtil.handleInternalServerError(errorMessageCommon, e, log);
             }
+        } catch (IOException e) {
+            RestApiUtil.handleInternalServerError(errorMessageCommon, e, log);
         }
         return null;
     }

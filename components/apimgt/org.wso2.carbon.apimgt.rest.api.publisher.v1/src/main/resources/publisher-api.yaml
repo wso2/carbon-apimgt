@@ -1527,6 +1527,8 @@ paths:
 
         WSDL can be speficied as a single file or a ZIP archive with WSDLs and reference XSDs etc.
         Specify additionalProperties with **at least** API's name, version, context and endpointConfig.
+      x-examples:
+        $ref: docs/examples/apis/wsdl/import_wsdl_post.yaml
       parameters:
         - in: formData
           name: file
@@ -1547,9 +1549,9 @@ paths:
           name: implementationType
           type: string
           enum:
-            - soap
-            - httpBinding
-          default: soap
+            - SOAPTOREST
+            - SOAP
+          default: SOAP
           description: |
             If 'SOAP' is specified, the API will be created with only one resource 'POST /*' which is to be used for SOAP
             operations.
@@ -1671,7 +1673,7 @@ paths:
   # The "Validate API Definition" utility API
   ######################################################
 
-  '/apis/validate-openapi':
+  /apis/validate-openapi:
     post:
       consumes:
         - multipart/form-data
@@ -1760,6 +1762,8 @@ paths:
           required: false
       tags:
         - Validation
+      x-examples:
+        $ref: docs/examples/apis/wsdl/validate_wsdl_post.yaml
       responses:
         200:
           description: |
@@ -1789,7 +1793,7 @@ paths:
 # The "Validate GRAPH_QL API Definition" utility API
 ######################################################
 
-  '/apis/validate-graphql-schema':
+  /apis/validate-graphql-schema:
     post:
       consumes:
       - multipart/form-data
@@ -2975,18 +2979,19 @@ paths:
 #-----------------------------------------------------
     get:
       produces:
-        - application/octet-stream
+        - application/wsdl+xml
+        - application/zip
       security:
         - OAuth2Security:
           - apim:api_view
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl"
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+      operationId: getWSDLOfAPI
       summary: Get WSDL definition
       description: |
-        This operation can be used to retrieve the WSDL definition of an API.
+        This operation can be used to retrieve the WSDL definition of an API. It can be either a single WSDL file or a WSDL archive.
+
+        The type of the WSDL of the API is indicated at the "wsdlInfo" element of the API payload definition.
+      x-examples:
+        $ref: docs/examples/apis/wsdl/apiId_wsdl_get.yaml
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-None-Match'
@@ -3033,22 +3038,14 @@ paths:
       security:
         - OAuth2Security:
           - apim:api_create
-      x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F inlineContent=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/wsdl\""
-      x-wso2-request: |
-       PUT https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/wsdl
-       Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013
-       Content-Length: 477
-       Content-Type: multipart/form-data; boundary=------------------------4f51e636c0003d99
-
-       --------------------------4f51e636c0003d99
-       Content-Disposition: form-data; name="apiDefinition"
-
-       {"paths":{"\/*":{"get":{"x-auth-type":"Application","x-throttling-policy":"Unlimited","responses":{"200":{"description":"OK"}}}}},"x-wso2-security":{"apim":{"x-wso2-scopes":[]}},"swagger":"2.0","info":{"title":"PhoneVerification","description":"Verify a phone number","contact":{"email":"xx@ee.com","name":"xx"},"version":"1.0.0"}}
-       --------------------------4f51e636c0003d99--
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+      operationId: updateWSDLOfAPI
       summary: Update WSDL definition
       description: |
-        This operation can be used to update the WSDL definition of an existing API. WSDL to be updated is passed as a form data parameter `inlineContent`.
+        This operation can be used to update the WSDL definition of an existing API. WSDL to be updated can be passed as either "url" or "file".
+        Only one of "url" or "file" can be used at the same time. "file" can be specified as a single WSDL file or as a zip file which has a WSDL
+        and its dependencies (eg: XSDs)
+      x-examples:
+        $ref: docs/examples/apis/wsdl/apiId_wsdl_put.yaml
       parameters:
         - $ref: '#/parameters/apiId'
         - in: formData
@@ -3056,6 +3053,11 @@ paths:
           description: WSDL file or archive to upload
           type: file
           required: true
+        - in: formData
+          name: url
+          description: WSDL Definition url
+          type: string
+          required: false
         - $ref: '#/parameters/If-Match'
       tags:
         - APIs
@@ -6540,11 +6542,15 @@ definitions:
       lifeCycleStatus:  # NEED TO RENAME AS lifeCycleState
         type: string
         example: CREATED
-      wsdlUri:
-        description: |
-          WSDL URL if the API is based on a WSDL endpoint
-        type: string
-        example: "http://www.webservicex.com/globalweather.asmx?wsdl"
+      wsdlInfo:
+        description: WSDL information of the API. This is only available if the API is a SOAP API.
+        properties:
+          type:
+            type: string
+            description: Indicates whether the WSDL is a single WSDL or an archive in ZIP format
+            enum:
+              - WSDL
+              - ZIP
       responseCachingEnabled:
         type: boolean
         example: true
@@ -6570,6 +6576,7 @@ definitions:
           - HTTP
           - WS
           - SOAPTOREST
+          - SOAP
           - GRAPHQL
         example: HTTP
         default: HTTP

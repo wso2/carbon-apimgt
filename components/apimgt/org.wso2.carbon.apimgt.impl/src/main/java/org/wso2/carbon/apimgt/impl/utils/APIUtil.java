@@ -70,6 +70,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.PasswordResolver;
@@ -93,6 +94,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Provider;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -125,6 +127,7 @@ import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -1968,7 +1971,7 @@ public final class APIUtil {
                     .getAbsolutePath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
                     + wsdlResourcePath;
 
-            APIMWSDLReader wsdlReader = new APIMWSDLReader(api.getWsdlUrl());
+            APIMWSDLReader wsdlReader = new APIMWSDLReader();
             OMElement wsdlContentEle;
             String wsdRegistryPath;
 
@@ -1988,22 +1991,18 @@ public final class APIUtil {
             // Hence if this is a registry url, should not go in to the following if block
             if (!api.getWsdlUrl().matches(wsdRegistryPath) && (api.getWsdlUrl().startsWith("http:") || api.getWsdlUrl()
                     .startsWith("https:") || api.getWsdlUrl().startsWith("file:"))) {
-                if (isWSDL2Document(api.getWsdlUrl())) {
-                    wsdlContentEle = wsdlReader.readAndCleanWsdl2(api);
-                    wsdlResource.setContent(wsdlContentEle.toString());
-                } else {
-                    wsdlContentEle = wsdlReader.readAndCleanWsdl(api);
-                    wsdlResource.setContent(wsdlContentEle.toString());
+                URL wsdlUrl;
+                try {
+                    wsdlUrl = new URL(api.getWsdlUrl());
+                } catch (MalformedURLException e) {
+                    throw new APIManagementException("Invalid/Malformed WSDL URL : " + api.getWsdlUrl(), e,
+                            ExceptionCodes.INVALID_WSDL_URL_EXCEPTION);
                 }
+                // Get the WSDL 1.1 or 2.0 processor and process the content based on the version
+                WSDLProcessor wsdlProcessor = APIMWSDLReader.getWSDLProcessorForUrl(wsdlUrl);
+                byte[] wsdlContent = wsdlProcessor.getWSDL();
+                wsdlResource.setContent(wsdlContent);
 
-                registry.put(wsdlResourcePath, wsdlResource);
-                //set the anonymous role for wsld resource to avoid basicauth security.
-                String[] visibleRoles = null;
-                if (api.getVisibleRoles() != null) {
-                    visibleRoles = api.getVisibleRoles().split(",");
-                }
-                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
-                        wsdlResourcePath);
             } else {
                 byte[] wsdl = (byte[]) registry.get(wsdlResourcePath).getContent();
                 if (isWSDL2Resource(wsdl)) {
@@ -2013,15 +2012,21 @@ public final class APIUtil {
                     wsdlContentEle = wsdlReader.updateWSDL(wsdl, api);
                     wsdlResource.setContent(wsdlContentEle.toString());
                 }
+            }
 
-                registry.put(wsdlResourcePath, wsdlResource);
-                //set the anonymous role for wsld resource to avoid basicauth security.
-                String[] visibleRoles = null;
-                if (api.getVisibleRoles() != null) {
-                    visibleRoles = api.getVisibleRoles().split(",");
-                }
-                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
-                        wsdlResourcePath);
+            registry.put(wsdlResourcePath, wsdlResource);
+            //set the anonymous role for wsld resource to avoid basicauth security.
+            String[] visibleRoles = null;
+            if (api.getVisibleRoles() != null) {
+                visibleRoles = api.getVisibleRoles().split(",");
+            }
+            setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                    wsdlResourcePath);
+
+            //Delete any WSDL archives if exists
+            String wsdlArchivePath = APIUtil.getWsdlArchivePath(api.getId());
+            if (registry.resourceExists(wsdlArchivePath)) {
+                registry.delete(wsdlArchivePath);
             }
 
             //set the wsdl resource permlink as the wsdlURL.
@@ -2049,28 +2054,52 @@ public final class APIUtil {
      * @throws RegistryException
      * @throws APIManagementException
      */
-    public static String saveWSDLArchive(Registry registry, API api) throws RegistryException, APIManagementException {
-        String wsdlArchiveResourcePath =
+    public static String saveWSDLResource(Registry registry, API api) throws RegistryException, APIManagementException {
+        ResourceFile wsdlResource = api.getWsdlResource();
+        String wsdlResourcePath;
+        boolean isZip = false;
+        String wsdlResourcePathArchive =
                 APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION + api.getId()
                         .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + api.getId().getApiName() +
                         api.getId().getVersion() + APIConstants.ZIP_FILE_EXTENSION;
+        String wsdlResourcePathFile = APIConstants.API_WSDL_RESOURCE_LOCATION +
+                createWsdlFileName(api.getId().getProviderName(), api.getId().getApiName(), api.getId().getVersion());
+
+        if (wsdlResource.getContentType().equals(APIConstants.APPLICATION_ZIP)) {
+            wsdlResourcePath = wsdlResourcePathArchive;
+            isZip = true;
+        } else {
+            wsdlResourcePath = wsdlResourcePathFile;
+        }
+
         String absoluteWSDLResourcePath = RegistryUtils
                 .getAbsolutePath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                + wsdlArchiveResourcePath;
+                + wsdlResourcePath;
         try {
-            if (api.getWsdlArchive() != null) {
-                Resource wsdlResource = registry.newResource();
-                wsdlResource.setContentStream(api.getWsdlArchive().getContent());
-                wsdlResource.setMediaType(api.getWsdlArchive().getContentType());
-                registry.put(wsdlArchiveResourcePath, wsdlResource);
-                String[] visibleRoles = null;
-                if (api.getVisibleRoles() != null) {
-                    visibleRoles = api.getVisibleRoles().split(",");
-                }
-                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
-                        wsdlArchiveResourcePath);
-                api.setWsdlUrl(getRegistryResourceHTTPPermlink(absoluteWSDLResourcePath));
+            Resource wsdlResourceToUpdate = registry.newResource();
+            wsdlResourceToUpdate.setContentStream(api.getWsdlResource().getContent());
+            wsdlResourceToUpdate.setMediaType(api.getWsdlResource().getContentType());
+            registry.put(wsdlResourcePath, wsdlResourceToUpdate);
+            String[] visibleRoles = null;
+            if (api.getVisibleRoles() != null) {
+                visibleRoles = api.getVisibleRoles().split(",");
             }
+            setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                    wsdlResourcePath);
+
+            if(isZip) {
+                //Delete any WSDL file if exists
+                if (registry.resourceExists(wsdlResourcePathFile)) {
+                    registry.delete(wsdlResourcePathFile);
+                }
+            } else {
+                //Delete any WSDL archives if exists
+                if (registry.resourceExists(wsdlResourcePathArchive)) {
+                    registry.delete(wsdlResourcePathArchive);
+                }
+            }
+
+            api.setWsdlUrl(getRegistryResourceHTTPPermlink(absoluteWSDLResourcePath));
         } catch (RegistryException e) {
             String msg = "Failed to add WSDL Archive " + api.getWsdlUrl() + " to the registry";
             log.error(msg, e);
@@ -2080,7 +2109,7 @@ public final class APIUtil {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
-        return wsdlArchiveResourcePath;
+        return wsdlResourcePath;
     }
 
     /**
