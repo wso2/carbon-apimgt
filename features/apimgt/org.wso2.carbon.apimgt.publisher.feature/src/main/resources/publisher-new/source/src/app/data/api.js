@@ -399,6 +399,18 @@ class API extends Resource {
         }
     }
 
+    validateAPI(query) {
+        return this.client.then((client) => {
+            return client.apis.Validation.validateAPI({ query: query }).then((resp) => {
+                console.log(resp);
+                return resp.ok;
+            }).catch((err) => {
+                console.log(err);
+                return false;
+            });
+        });
+    }
+
     /**
      * Create a new version of a given API
      * @param version {string} new API version.
