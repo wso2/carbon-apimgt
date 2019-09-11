@@ -52,6 +52,7 @@ const APIDetailsTopMenu = (props) => {
     const {
         classes, theme, api, isAPIProduct,
     } = props;
+    const isVisibleInStore = (api.lifeCycleStatus === 'PROTOTYPED' || api.lifeCycleStatus === 'PUBLISHED');
     // todo: need to support rev proxy ~tmkb
     return (
         <div className={classes.root}>
@@ -84,21 +85,21 @@ const APIDetailsTopMenu = (props) => {
                     State
                 </Typography>
             </div>
-
             <VerticalDivider height={70} />
-
-            <a
-                target='_blank'
-                rel='noopener noreferrer'
-                href={`${window.location.origin}/store-new/apis/${api.id}/overview`}
-                className={classes.viewInStoreLauncher}
-            >
-                <div>
-                    <LaunchIcon />
-                </div>
-                <div className={classes.linkText}>View In store</div>
-            </a>
-            <VerticalDivider height={70} />
+            {isVisibleInStore &&
+                <a
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    href={`${window.location.origin}/store-new/apis/${api.id}/overview`}
+                    className={classes.viewInStoreLauncher}
+                >
+                    <div>
+                        <LaunchIcon />
+                    </div>
+                    <div className={classes.linkText}>View In store</div>
+                </a>
+            }
+            {isVisibleInStore && <VerticalDivider height={70} />}
             <Tooltip title={moment(api.lastUpdatedTime).calendar()} aria-label='add'>
                 <Typography variant='caption' display='block'>
                     <FormattedMessage

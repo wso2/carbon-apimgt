@@ -783,7 +783,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             API api = apiConsumer.getAPIbyUUID(apiId, requestedTenantDomain);
-            return APIMappingUtil.fromAPItoDTO(api,requestedTenantDomain);
+            if (APIConstants.PUBLISHED.equals(api.getStatus()) || APIConstants.PROTOTYPED.equals(api.getStatus())) {
+                return APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
+            }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
