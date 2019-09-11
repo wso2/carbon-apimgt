@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.wsdl.template.RESTToSOAPMsgTemplate;
@@ -87,10 +88,10 @@ public class SequenceGenerator {
      * Generates in/out sequences from the swagger given
      *
      * @param swaggerStr swagger string
-     * @param apiDataStr api data as json string
+     * @param apiIdentifier api identifier object
      * @throws APIManagementException
      */
-    public static void generateSequencesFromSwagger(String swaggerStr, String apiDataStr)
+    public static void generateSequencesFromSwagger(String swaggerStr, APIIdentifier apiIdentifier)
             throws APIManagementException {
 
         Swagger swagger = new SwaggerParser().parse(swaggerStr);
@@ -183,7 +184,7 @@ public class SequenceGenerator {
                     String inSequence = template.getMappingInSequence(sequenceMap, operationId, soapAction,
                             namespace, soapNamespace, arraySequenceElements);
                     String outSequence = template.getMappingOutSequence();
-                    saveApiSequences(apiDataStr, inSequence, outSequence, httpMethod.toString().toLowerCase(),
+                    saveApiSequences(apiIdentifier, inSequence, outSequence, httpMethod.toString().toLowerCase(),
                             pathName);
                 } catch (APIManagementException e) {
                     handleException("Error when generating sequence property and arg elements for soap operation: " + operationId, e);
@@ -224,18 +225,14 @@ public class SequenceGenerator {
         }
     }
 
-    private static void saveApiSequences(String apiDataStr, String inSequence, String outSequence, String method,
+    private static void saveApiSequences(APIIdentifier apiIdentifier, String inSequence, String outSequence, String method,
             String resourcePath) throws APIManagementException {
 
-        JSONParser parser = new JSONParser();
         boolean isTenantFlowStarted = false;
-
-        org.json.simple.JSONObject apiData;
         try {
-            apiData = (org.json.simple.JSONObject) parser.parse(apiDataStr);
-            String provider = (String) apiData.get("provider");
-            String name = (String) apiData.get("name");
-            String version = (String) apiData.get("version");
+            String provider = apiIdentifier.getProviderName();
+            String name = apiIdentifier.getName();
+            String version = apiIdentifier.getVersion();
 
             if (provider != null) {
                 provider = APIUtil.replaceEmailDomain(provider);
@@ -282,9 +279,6 @@ public class SequenceGenerator {
                 handleException(
                         "Error while saving the soap to rest converted sequence for resource path: " + resourcePath, e);
             }
-
-        } catch (ParseException e) {
-            handleException("Error occurred while parsing the sequence json", e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();

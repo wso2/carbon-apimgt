@@ -139,7 +139,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.rootCauseMessageMatches(e, "start index seems to be greater than the limit count")) {
-                //this is not an error of the user as he does not know the total number of apis available. Thus sends 
+                //this is not an error of the user as he does not know the total number of apis available. Thus sends
                 //  an empty response
                 apiListDTO.setCount(0);
                 apiListDTO.setNext("");

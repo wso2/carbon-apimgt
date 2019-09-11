@@ -198,6 +198,11 @@ public class OAS3Parser extends APIDefinition {
     public String generateAPIDefinition(SwaggerData swaggerData) throws APIManagementException {
         OpenAPI openAPI = new OpenAPI();
 
+        // create path if null
+        if (openAPI.getPaths() == null) {
+            openAPI.setPaths(new Paths());
+        }
+
         //Create info object
         Info info = new Info();
         info.setTitle(swaggerData.getTitle());

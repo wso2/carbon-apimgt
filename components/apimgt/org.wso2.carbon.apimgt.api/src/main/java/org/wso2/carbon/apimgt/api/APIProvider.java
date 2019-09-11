@@ -293,6 +293,22 @@ public interface APIProvider extends APIManager {
     void manageAPI(API api) throws APIManagementException, FaultGatewaysException;
 
     /**
+     * Update the WSDL of an API from a ResourceFile set to the API object
+     *
+     * @param api API object
+     * @throws APIManagementException if fails to update the WSDL of the API
+     */
+    void updateWsdlFromResourceFile(API api) throws APIManagementException;
+
+    /**
+     * Update the WSDL of an API from a URL set to the API object
+     *
+     * @param api API object
+     * @throws APIManagementException if fails to update the WSDL of the API
+     */
+    void updateWsdlFromUrl(API api) throws APIManagementException;
+
+    /**
      * Change the lifecycle state of the specified API
      *
      * @param api The API whose status to be updated
@@ -633,16 +649,16 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If failed to get all the published external stores for the API
      */
     Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
-    
+
     /**
      * Checks the Gateway Type
-     * 
+     *
      * @return True if gateway is Synpase
      * @throws APIManagementException
-     *         
+     *
      */
     boolean isSynapseGateway() throws APIManagementException;
-    
+
     /**
      * Search APIs by swagger document content. This method searches the given search term in the registry and returns
      * a set of APIs which satisfies the given search term
