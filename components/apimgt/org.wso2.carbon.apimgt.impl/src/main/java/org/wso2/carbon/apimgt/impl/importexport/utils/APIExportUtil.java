@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -71,6 +72,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -532,16 +534,6 @@ public class APIExportUtil {
 
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            String apiInJson = gson.toJson(apiToReturn);
-            switch (exportFormat) {
-                case JSON:
-                    CommonUtil.writeFile(archivePath + APIImportExportConstants.JSON_API_FILE_LOCATION, apiInJson);
-                    break;
-                case YAML:
-                    String apiInYaml = CommonUtil.jsonToYaml(apiInJson);
-                    CommonUtil.writeFile(archivePath + APIImportExportConstants.YAML_API_FILE_LOCATION, apiInYaml);
-                    break;
-            }
 
             //If a web socket API is exported, it does not contain a swagger file.
             //Therefore swagger export is only required for REST or SOAP based APIs
@@ -550,7 +542,10 @@ public class APIExportUtil {
                 JsonParser parser = new JsonParser();
                 JsonObject json = parser.parse(swaggerDefinition).getAsJsonObject();
                 String formattedSwaggerJson = gson.toJson(json);
-
+               Optional<APIDefinition> optional = OASParserUtil.getOASParser(swaggerDefinition);
+               APIDefinition apiDefinition = optional.get();
+               Set<Scope> scopes = apiDefinition.getScopes(swaggerDefinition);
+               apiToReturn.setScopes(scopes);
                 switch (exportFormat) {
                     case YAML:
                         String swaggerInYaml = CommonUtil.jsonToYaml(formattedSwaggerJson);
@@ -566,6 +561,17 @@ public class APIExportUtil {
                     log.debug("Meta information retrieved successfully for API: " + apiToReturn.getId().getApiName()
                             + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiToReturn.getId().getVersion());
                 }
+            }
+
+            String apiInJson = gson.toJson(apiToReturn);
+            switch (exportFormat) {
+            case JSON:
+                CommonUtil.writeFile(archivePath + APIImportExportConstants.JSON_API_FILE_LOCATION, apiInJson);
+                break;
+            case YAML:
+                String apiInYaml = CommonUtil.jsonToYaml(apiInJson);
+                CommonUtil.writeFile(archivePath + APIImportExportConstants.YAML_API_FILE_LOCATION, apiInYaml);
+                break;
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Swagger definition for API: "

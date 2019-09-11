@@ -69,7 +69,14 @@ public class OAS2ParserTest extends OASTestBase {
     public void testUpdateAPIDefinition() throws Exception {
         String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2Resources.json";
         String oas2Resources = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
-        testGenerateAPIDefinition2(oas2Parser, oas2Resources);
+        OASParserEvaluator evaluator = (definition -> {
+            SwaggerParser swaggerParser = new SwaggerParser();
+            Swagger swagger = swaggerParser.parse(definition);
+            Assert.assertNotNull(swagger);
+            Assert.assertEquals(1, swagger.getPaths().size());
+            Assert.assertFalse(swagger.getPaths().containsKey("/noresource/{resid}"));
+        });
+        testGenerateAPIDefinition2(oas2Parser, oas2Resources, evaluator);
     }
 
     @Test
@@ -159,9 +166,7 @@ public class OAS2ParserTest extends OASTestBase {
         uriTemplates.add(getUriTemplate("PUT", "None", "/*"));
         uriTemplates.add(getUriTemplate("DELETE", "Any", "/*"));
         uriTemplates.add(getUriTemplate("GET", "Application & Application User", "/abc"));
-        API api = new API(new APIIdentifier("admin", "PhoneVerification", "1.0.0"));
-        SwaggerData swaggerData = new SwaggerData(api);
-        Set<URITemplate> uriTemplateSet = oas2Parser.getURITemplates(swaggerData, swagger);
+        Set<URITemplate> uriTemplateSet = oas2Parser.getURITemplates(swagger);
         Assert.assertEquals(uriTemplateSet, uriTemplates);
     }
 }

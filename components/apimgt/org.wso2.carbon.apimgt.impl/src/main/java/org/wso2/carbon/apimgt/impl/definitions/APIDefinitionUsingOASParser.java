@@ -91,7 +91,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
     private static final Log log = LogFactory.getLog(APIDefinitionUsingOASParser.class);
 
     @Override
-    public Set<URITemplate> getURITemplates(SwaggerData swaggerData, String apiDefinition)
+    public Set<URITemplate> getURITemplates(String apiDefinition)
             throws APIManagementException {
         SwaggerParser parser = new SwaggerParser();
         Swagger swagger = parser.parse(apiDefinition);
@@ -202,7 +202,7 @@ public class APIDefinitionUsingOASParser extends APIDefinition {
     }
 
     @Override
-    public String generateAPIDefinition(SwaggerData swaggerData, String apiDefinition, boolean syncOperations)
+    public String generateAPIDefinition(SwaggerData swaggerData, String apiDefinition)
             throws APIManagementException {
         SwaggerParser parser = new SwaggerParser();
         Swagger swaggerObj = parser.parse(apiDefinition);

@@ -1687,8 +1687,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(api.getId());
             if (!StringUtils.isEmpty(apiSwaggerDefinition)) {
                 APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-                SwaggerData swaggerData = new SwaggerData(api);
-                Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(swaggerData, apiSwaggerDefinition);
+                Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(apiSwaggerDefinition);
                 api.setUriTemplates(uriTemplates);
 
                 // scopes
@@ -1850,8 +1849,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             API existingAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
             APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-            SwaggerData swaggerData = new SwaggerData(existingAPI);
-            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(swaggerData, apiDefinition);
+            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(apiDefinition);
             Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiDefinition);
             existingAPI.setUriTemplates(uriTemplates);
             existingAPI.setScopes(scopes);

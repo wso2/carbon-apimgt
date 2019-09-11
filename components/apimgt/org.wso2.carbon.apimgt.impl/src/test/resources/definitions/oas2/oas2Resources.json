@@ -310,6 +310,38 @@
             }
           ]
         }
+      },
+      "/noresource/{resid}": {
+        "get": {
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "parameters": [
+            {
+              "name": "resid",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "consumes": [
+            "application/json"
+          ],
+          "x-auth-type": "Application & Application User",
+          "x-throttling-tier": "Unlimited",
+          "security": [
+            {
+              "default": [
+                "sample"
+              ]
+            }
+          ]
+        }
       }
     },
     "info": {
