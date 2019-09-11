@@ -447,14 +447,15 @@ class Details extends Component {
                             />
                         )}
                         {this.getLeftMenuItemForAPIType(api.type)}
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.lifecycle',
-                                defaultMessage: 'lifecycle',
-                            })}
-                            to={pathPrefix + 'lifecycle'}
-                            Icon={<LifeCycleIcon />}
-                        />
+                        {!isAPIProduct && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.lifecycle',
+                                    defaultMessage: 'lifecycle',
+                                })}
+                                to={pathPrefix + 'lifecycle'}
+                                Icon={<LifeCycleIcon />}
+                            />)}
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.left.menu.scope',
@@ -495,14 +496,15 @@ class Details extends Component {
                             to={pathPrefix + 'subscriptions'}
                             Icon={<SubscriptionsIcon />}
                         />
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.monetization',
-                                defaultMessage: 'monetization',
-                            })}
-                            to={pathPrefix + 'monetization'}
-                            Icon={<MonetizationIcon />}
-                        />
+                        {!isAPIProduct && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.monetization',
+                                    defaultMessage: 'monetization',
+                                })}
+                                to={pathPrefix + 'monetization'}
+                                Icon={<MonetizationIcon />}
+                            />)}
                     </div>
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} />
