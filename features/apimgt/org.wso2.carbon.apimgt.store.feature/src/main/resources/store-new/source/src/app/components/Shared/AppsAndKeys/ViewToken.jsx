@@ -44,6 +44,7 @@ const styles = theme => ({
         border: '1px solid #ced4da',
         padding: '5px 12px',
         width: 350,
+        height: 100,
         transition: theme.transitions.create(['border-color', 'box-shadow']),
         fontFamily: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"',
             'Arial', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'].join(','),
@@ -147,6 +148,8 @@ class ViewToken extends React.Component {
                     <TextField
                         defaultValue={token.accessToken}
                         id='bootstrap-input'
+                        multiline
+                        rows={4}
                         InputProps={{
                             disableUnderline: true,
                             classes: {

@@ -47,6 +47,7 @@ import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -214,7 +215,9 @@ public class OAuthAuthenticator implements Authenticator {
                 verbInfoDTO.setHttpVerb(httpMethod);
                 verbInfoDTO.setAuthType(authenticationScheme);
                 verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
-                synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoDTO);
+                List<VerbInfoDTO> verbs = new ArrayList<>(1);
+                verbs.add(verbInfoDTO);
+                synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbs);
             } else {
                 // If an OAuth token
                 authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
