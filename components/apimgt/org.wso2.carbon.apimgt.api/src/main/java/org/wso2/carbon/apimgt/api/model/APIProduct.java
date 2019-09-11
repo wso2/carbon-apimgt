@@ -434,4 +434,12 @@ public class APIProduct {
     public void removeTags(Set<String> tags) {
         this.tags.removeAll(tags);
     }
+
+    public String getRating() {
+        return rating;
+    }
+
+    public void setRating(String rating) {
+        this.rating = rating;
+    }
 }

@@ -185,9 +185,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 }
                 identifier = RestAPIStoreUtils.getAPIIdentifierFromUUID(body.getApiId(), tenantDomain);
             } else if (body.getType() != null && TypeEnum.API_PRODUCT == body.getType()
-                    && body.getApiProductId() != null) {
+                    && body.getApiId() != null) {
 
-                String uuid = body.getApiProductId();
+                String uuid = body.getApiId();
                 APIProduct product = apiConsumer.getAPIProductbyUUID(uuid, tenantDomain);
                 if(product == null) {
                     RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, uuid, log);
@@ -241,10 +241,10 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             RestApiUtil.handleAuthorizationFailure(e.getMessage(), e, log);
         } catch (SubscriptionAlreadyExistingException e) {
             String id =  "";
-            if(!StringUtils.isEmpty(body.getApiId())){
+            if(TypeEnum.API == body.getType()){
                id = "API " + body.getApiId(); 
-            } else if (!StringUtils.isEmpty(body.getApiProductId())) {
-                id = "Product " + body.getApiProductId(); 
+            } else if (TypeEnum.API_PRODUCT == body.getType()) {
+                id = "Product " + body.getApiId();
             }
             RestApiUtil.handleResourceAlreadyExistsError(
                     "Specified subscription already exists for " + id + " for application "

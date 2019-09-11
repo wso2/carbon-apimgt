@@ -4907,11 +4907,6 @@ definitions:
         description: The unique identifier of the API.
       apiInfo:
         $ref: '#/definitions/APIInfo'
-      apiProductId:
-        type: string
-        description: The unique identifier of the API Product.
-      apiProductInfo:
-        $ref: '#/definitions/APIProductInfo'
       applicationInfo:
         $ref: '#/definitions/ApplicationInfo'
       throttlingPolicy:

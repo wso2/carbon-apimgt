@@ -27,11 +27,13 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -407,7 +409,7 @@ public class APIMappingUtil {
      * @param api API object
      * @return a minimal representation DTO
      */
-    public static APIInfoDTO fromAPIToInfoDTO(API api) {
+    static APIInfoDTO fromAPIToInfoDTO(API api) {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(api.getDescription());
         apiInfoDTO.setContext(api.getContext());
@@ -433,6 +435,36 @@ public class APIMappingUtil {
         //        if (!StringUtils.isBlank(api.getThumbnailUrl())) {
         //            apiInfoDTO.setThumbnailUri(getThumbnailUri(api.getUUID()));
         //        }
+        return apiInfoDTO;
+    }
+
+    /**
+     * Creates a minimal DTO representation of an API Product object
+     *
+     * @param apiProduct API Product object
+     * @return a minimal representation DTO
+     */
+    static APIInfoDTO fromAPIToInfoDTO(APIProduct apiProduct) {
+        APIInfoDTO apiInfoDTO = new APIInfoDTO();
+        apiInfoDTO.setDescription(apiProduct.getDescription());
+        apiInfoDTO.setContext(apiProduct.getContext());
+        apiInfoDTO.setId(apiProduct.getUuid());
+        APIProductIdentifier apiId = apiProduct.getId();
+        apiInfoDTO.setName(apiId.getName());
+        apiInfoDTO.setVersion(apiId.getVersion());
+        apiInfoDTO.setProvider(apiId.getProviderName());
+        apiInfoDTO.setLifeCycleStatus(apiProduct.getState());
+        apiInfoDTO.setType(APIType.API_PRODUCT.toString());
+        apiInfoDTO.setAvgRating(String.valueOf(apiProduct.getRating()));
+        String providerName = apiProduct.getId().getProviderName();
+        apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+        Set<Tier> throttlingPolicies = apiProduct.getAvailableTiers();
+        List<String> throttlingPolicyNames = new ArrayList<>();
+        for (Tier tier : throttlingPolicies) {
+            throttlingPolicyNames.add(tier.getName());
+        }
+        apiInfoDTO.setThrottlingPolicies(throttlingPolicyNames);
+
         return apiInfoDTO;
     }
 
@@ -700,31 +732,6 @@ public class APIMappingUtil {
         dto.setTiers(tiersToReturn);
 
         return dto;
-    }
-    
-    /**
-     * Creates a minimal DTO representation of an API Product object
-     *
-     * @param apiProduct API product object
-     * @return a minimal representation DTO
-     */
-    public static APIProductInfoDTO fromAPIProductToInfoDTO(APIProduct apiProduct) {
-        APIProductInfoDTO apiProductInfoDTO = new APIProductInfoDTO();
-        apiProductInfoDTO.setDescription(apiProduct.getDescription());
-        apiProductInfoDTO.setId(apiProduct.getUuid());
-        apiProductInfoDTO.setName(apiProduct.getId().getName());
-        String providerName = apiProduct.getId().getProviderName();
-        apiProductInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
-        apiProductInfoDTO.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
-                .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
-        Set<Tier> availableTiers = apiProduct.getAvailableTiers();
-        List<String> tiers = new ArrayList<>();
-        for (Tier tier : availableTiers) {
-            tiers.add(tier.getName());
-        }
-        apiProductInfoDTO.setThrottlingPolicies(tiers);
-
-        return apiProductInfoDTO;
     }
 
     /**
