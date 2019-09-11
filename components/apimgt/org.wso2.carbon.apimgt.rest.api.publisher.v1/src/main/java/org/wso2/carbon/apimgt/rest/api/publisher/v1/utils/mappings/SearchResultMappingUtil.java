@@ -22,7 +22,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductSearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentSearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultDTO;
@@ -64,6 +68,30 @@ public class SearchResultMappingUtil {
     }
 
     /**
+     * Get API result representation for content search
+     *
+     * @param apiProduct APIProduct
+     * @return APIProductSearchResultDTO
+     */
+    public static APIProductSearchResultDTO fromAPIProductToAPIResultDTO(APIProduct apiProduct) {
+
+        APIProductSearchResultDTO apiProductResultDTO = new APIProductSearchResultDTO();
+        apiProductResultDTO.setId(apiProduct.getUuid());
+        APIProductIdentifier apiproductId = apiProduct.getId();
+        apiProductResultDTO.setName(apiproductId.getName());
+        apiProductResultDTO.setVersion(apiproductId.getVersion());
+        apiProductResultDTO.setProvider(apiproductId.getProviderName());
+        String context = apiProduct.getContextTemplate();
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+        apiProductResultDTO.setContext(context);
+        apiProductResultDTO.setType(SearchResultDTO.TypeEnum.APIPRODUCT);
+        apiProductResultDTO.setDescription(apiProduct.getDescription());
+        apiProductResultDTO.setThumbnailUri(apiProduct.getThumbnailUrl());
+        return apiProductResultDTO;
+    }
+    /**
      * Get Document result representation for content search
      *
      * @param document Api Document
@@ -77,6 +105,7 @@ public class SearchResultMappingUtil {
         docResultDTO.setDocType(DocumentSearchResultDTO.DocTypeEnum.valueOf(document.getType().toString()));
         docResultDTO.setType(SearchResultDTO.TypeEnum.DOC);
         docResultDTO.setSummary(document.getSummary());
+        docResultDTO.associatedType(APIConstants.AuditLogConstants.API);
         docResultDTO.setVisibility(DocumentSearchResultDTO.VisibilityEnum.valueOf(document.getVisibility().toString()));
         docResultDTO.setSourceType(DocumentSearchResultDTO.SourceTypeEnum.valueOf(document.getSourceType().toString()));
         docResultDTO.setOtherTypeName(document.getOtherTypeName());
@@ -85,6 +114,27 @@ public class SearchResultMappingUtil {
         docResultDTO.setApiVersion(apiId.getVersion());
         docResultDTO.setApiProvider(apiId.getProviderName());
         docResultDTO.setApiUUID(api.getUUID());
+        return docResultDTO;
+    }
+
+    public static DocumentSearchResultDTO fromDocumentationToProductDocumentResultDTO(Documentation document,
+                                                                                      APIProduct apiProduct) {
+
+        DocumentSearchResultDTO docResultDTO = new DocumentSearchResultDTO();
+        docResultDTO.setId(document.getId());
+        docResultDTO.setName(document.getName());
+        docResultDTO.setDocType(DocumentSearchResultDTO.DocTypeEnum.valueOf(document.getType().toString()));
+        docResultDTO.setType(SearchResultDTO.TypeEnum.DOC);
+        docResultDTO.associatedType(APIConstants.AuditLogConstants.API_PRODUCT);
+        docResultDTO.setSummary(document.getSummary());
+        docResultDTO.setVisibility(DocumentSearchResultDTO.VisibilityEnum.valueOf(document.getVisibility().toString()));
+        docResultDTO.setSourceType(DocumentSearchResultDTO.SourceTypeEnum.valueOf(document.getSourceType().toString()));
+        docResultDTO.setOtherTypeName(document.getOtherTypeName());
+        APIProductIdentifier apiId = apiProduct.getId();
+        docResultDTO.setApiName(apiId.getName());
+        docResultDTO.setApiVersion(apiId.getVersion());
+        docResultDTO.setApiProvider(apiId.getProviderName());
+        docResultDTO.setApiUUID(apiProduct.getUuid());
         return docResultDTO;
     }
 

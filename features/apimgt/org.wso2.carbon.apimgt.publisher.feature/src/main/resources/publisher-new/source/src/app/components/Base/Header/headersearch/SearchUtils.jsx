@@ -63,6 +63,31 @@ function renderInput(inputProps) {
     );
 }
 
+function getPath(suggestion) {
+    switch (suggestion.type) {
+        case 'API':
+            return `/apis/${suggestion.id}/overview`;
+        case 'APIPRODUCT':
+            return `/api-products/${suggestion.id}/overview`;
+        default:
+            if (suggestion.associatedType === 'API') {
+                return `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/details`;
+            } else {
+                return `/api-products/${suggestion.apiUUID}/documents/${suggestion.id}/details`;
+            }
+    }
+}
+
+function getSufix(suggestion) {
+    switch (suggestion.type) {
+        case 'API':
+            return suggestion.version;
+        case 'APIPRODUCT':
+            return '';
+        default:
+            return suggestion.apiName + ' ' + suggestion.apiVersion;
+    }
+}
 /**
  *
  * Use your imagination to define how suggestions are rendered.
@@ -73,14 +98,33 @@ function renderInput(inputProps) {
 function renderSuggestion(suggestion, { query, isHighlighted }) {
     const matches = match(suggestion.name, query);
     const parts = parse(suggestion.name, matches);
+    const path = getPath(suggestion);
+    const suffix = getSufix(suggestion);
     const path =
         suggestion.type === 'API'
             ? `/apis/${suggestion.id}/overview`
             : `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/view`;
     // TODO: Style the version ( and apiName if docs) apearing in the menu item
-    const suffix = suggestion.type === 'API' ? suggestion.version : suggestion.apiName + ' ' + suggestion.apiVersion;
+
     return (
         <React.Fragment>
+            <Link to={path}>
+                <MenuItem selected={isHighlighted} component='div'>
+                    {(suggestion.type === 'API' || suggestion.type === 'APIPRODUCT') ? <APIsIcon /> : <DocumentsIcon />}
+                    {parts.map((part, index) => {
+                        return part.highlight ? (
+                            <span key={String(index)} style={{ fontWeight: 500 }}>
+                                {part.text}
+                            </span>
+                        ) : (
+                            <strong key={String(index)} style={{ fontWeight: 300 }}>
+                                {part.text}
+                            </strong>
+                        );
+                    })}
+                    <pre />
+                    <pre />
+                    {suffix}
             <Link to={path} style={{ color: 'black' }}>
                 <MenuItem selected={isHighlighted}>
                     <ListItemIcon>

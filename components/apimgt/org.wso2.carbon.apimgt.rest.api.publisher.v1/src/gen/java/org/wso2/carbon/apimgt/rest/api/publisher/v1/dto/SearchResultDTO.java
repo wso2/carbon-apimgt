@@ -24,7 +24,7 @@ public class SearchResultDTO   {
 @XmlEnum(String.class)
 public enum TypeEnum {
 
-    @XmlEnumValue("DOC") DOC(String.valueOf("DOC")), @XmlEnumValue("API") API(String.valueOf("API"));
+    @XmlEnumValue("DOC") DOC(String.valueOf("DOC")), @XmlEnumValue("API") API(String.valueOf("API")), @XmlEnumValue("APIProduct") APIPRODUCT(String.valueOf("APIProduct"));
 
 
     private String value;
