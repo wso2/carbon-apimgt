@@ -783,8 +783,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             API api = apiConsumer.getAPIbyUUID(apiId, requestedTenantDomain);
-            if (APIConstants.PUBLISHED.equals(api.getStatus()) || APIConstants.PROTOTYPED.equals(api.getStatus())) {
+            if (APIConstants.PUBLISHED.equals(api.getStatus()) || APIConstants.PROTOTYPED.equals(api.getStatus())
+                            || APIConstants.DEPRECATED.equals(api.getStatus())) {
                 return APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
+            } else {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
