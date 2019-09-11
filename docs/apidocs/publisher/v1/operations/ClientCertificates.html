@@ -2,7 +2,7 @@
     <h1><a name="Client Certificates"></a>Client Certificates</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="clientCertificatesAliasContentGet"></a>Download a certificate.</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/client-certificates/{alias}/content</code>
+            <h4 class="operation-heading"><a name="apisApiIdClientCertificatesAliasContentGet"></a>Download a certificate.</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/client-certificates/{alias}/content</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to download a certificate which matches the given alias.
@@ -33,6 +33,33 @@
                     <th>Default</th>
                 </tr>
                 </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">The api identifier</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
                     <tr>
                         <td class="parameter">
                             
@@ -117,7 +144,7 @@
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="clientCertificatesAliasDelete"></a>Delete a certificate.</h4> <code>DELETE https://apis.wso2.com/api/am/publisher/v1.0/client-certificates/{alias}</code>
+            <h4 class="operation-heading"><a name="apisApiIdClientCertificatesAliasDelete"></a>Delete a certificate.</h4> <code>DELETE https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/client-certificates/{alias}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to delete an uploaded certificate.
@@ -166,6 +193,33 @@
                         <td>
                             <p class="param-description marked">The alias of the certificate that should be deleted.
 </p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">The api identifier</p>
                         </td>
                         <td>
                             <span class="param-type">
@@ -233,7 +287,7 @@
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="clientCertificatesAliasGet"></a>Get the certificate information.</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/client-certificates/{alias}</code>
+            <h4 class="operation-heading"><a name="apisApiIdClientCertificatesAliasGet"></a>Get the certificate information.</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/client-certificates/{alias}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to get the information about a certificate.
@@ -281,6 +335,33 @@
                         </td>
                         <td>
                             <p class="param-description marked"></p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">The api identifier</p>
                         </td>
                         <td>
                             <span class="param-type">
@@ -348,7 +429,7 @@
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="clientCertificatesAliasPut"></a>Update a certificate.</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.0/client-certificates/{alias}</code>
+            <h4 class="operation-heading"><a name="apisApiIdClientCertificatesAliasPut"></a>Update a certificate.</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/client-certificates/{alias}</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to update an uploaded certificate.
@@ -396,6 +477,33 @@
                         </td>
                         <td>
                             <p class="param-description marked">Alias for the certificate</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">The api identifier</p>
                         </td>
                         <td>
                             <span class="param-type">
@@ -517,7 +625,7 @@
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="clientCertificatesGet"></a>Retrieve/ Search uploaded Client Certificates.</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/client-certificates</code>
+            <h4 class="operation-heading"><a name="apisApiIdClientCertificatesGet"></a>Retrieve/ Search uploaded Client Certificates.</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/client-certificates</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve and search the uploaded client certificates.
@@ -548,6 +656,33 @@
                     <th>Default</th>
                 </tr>
                 </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">UUID of the API</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
                     <tr>
                         <td class="parameter">
                             
@@ -631,33 +766,6 @@
                             <p class="marked"></p>
                         </td>
                     </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            <span class="param-in">Query </span>
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>apiId</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">UUID of the API</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
             </table>
 
             <h4 class="section-heading">Responses</h4>
@@ -706,7 +814,7 @@
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="clientCertificatesPost"></a>Upload a new certificate.</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/client-certificates</code>
+            <h4 class="operation-heading"><a name="apisApiIdClientCertificatesPost"></a>Upload a new certificate.</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/client-certificates</code>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to upload a new certificate for an endpoint.
@@ -793,9 +901,9 @@
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <span class="param-in">Form </span>
                             
                             
+                            <span class="param-in">Path </span>
                             
                             
                         </td>

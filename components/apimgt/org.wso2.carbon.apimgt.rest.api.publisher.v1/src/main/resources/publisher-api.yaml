@@ -203,6 +203,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+      operationId: validateAPI
       summary: |
         Check given API attibute name is already exist
       description: |
@@ -3921,7 +3922,7 @@ paths:
   # The "Certificate Management" resource APIs
   ######################################################
 
-  /client-certificates:
+  /apis/{apiId}/client-certificates:
     #-------------------------------------------------------------------
     # Retrieve/ Search the uploaded certificates.
     #-------------------------------------------------------------------
@@ -3953,9 +3954,9 @@ paths:
           required: false
           type: string
           description: Alias for the client certificate
-        - in: query
+        - in: path
           name: apiId
-          required: false
+          required: true
           type: string
           description: UUID of the API
       responses:
@@ -4027,7 +4028,7 @@ paths:
           description: Alias for the certificate
           required: true
           type: string
-        - in: formData
+        - in: path
           name: apiId
           description: apiId to which the certificate should be applied.
           required: true
@@ -4071,7 +4072,7 @@ paths:
   #-------------------------------------------------------------------
   # Update certificate resource.
   #-------------------------------------------------------------------
-  /client-certificates/{alias}:
+  /apis/{apiId}/client-certificates/{alias}:
     put:
       security:
         - OAuth2Security:
@@ -4105,6 +4106,11 @@ paths:
           name : tier
           description: The tier of the certificate
           required: false
+          type: string
+        - in: path
+          name: apiId
+          description: The api identifier
+          required: true
           type: string
       tags:
         - Client Certificates
@@ -4165,6 +4171,11 @@ paths:
           name: alias
           description: |
             The alias of the certificate that should be deleted.
+          required: true
+          type: string
+        - in: path
+          name: apiId
+          description: The api identifier
           required: true
           type: string
       tags:
@@ -4228,6 +4239,11 @@ paths:
           name: alias
           type: string
           required: true
+        - in: path
+          name: apiId
+          description: The api identifier
+          required: true
+          type: string
       tags:
         - Client Certificates
       responses:
@@ -4262,7 +4278,7 @@ paths:
   #-------------------------------------------------------------------
   # Download the certificate which matches the alias.
   #-------------------------------------------------------------------
-  /client-certificates/{alias}/content:
+  /apis/{apiId}/client-certificates/{alias}/content:
     get:
       security:
         - OAuth2Security:
@@ -4281,6 +4297,11 @@ paths:
       description: |
         This operation can be used to download a certificate which matches the given alias.
       parameters:
+        - in: path
+          name: apiId
+          description: The api identifier
+          required: true
+          type: string
         - in: path
           name: alias
           type: string
