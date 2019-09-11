@@ -382,7 +382,7 @@ public class OAS3Parser extends APIDefinition {
      */
     private List<String> getScopeOfOperationsFromExtensions(Operation operation) {
         Map<String, Object> extensions = operation.getExtensions();
-        if (extensions.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
+        if (extensions !=null && extensions.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
             String scopeKey = (String) extensions.get(APIConstants.SWAGGER_X_SCOPE);
             return Collections.singletonList(scopeKey);
         }
