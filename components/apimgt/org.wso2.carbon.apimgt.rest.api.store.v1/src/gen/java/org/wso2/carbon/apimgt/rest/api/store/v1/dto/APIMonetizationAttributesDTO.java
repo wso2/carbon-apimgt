@@ -62,7 +62,7 @@ public class APIMonetizationAttributesDTO   {
   }
 
   
-  @ApiModelProperty(example = "LKR", value = "")
+  @ApiModelProperty(example = "USD", value = "")
   @JsonProperty("currencyType")
   public String getCurrencyType() {
     return currencyType;
