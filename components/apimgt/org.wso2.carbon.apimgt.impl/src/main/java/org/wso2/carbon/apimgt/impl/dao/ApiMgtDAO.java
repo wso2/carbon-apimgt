@@ -1097,7 +1097,7 @@ public class ApiMgtDAO {
             SubscribedAPI subscribedAPI = null;
             if (resultSet.next()) {
                 int applicationId = resultSet.getInt("APPLICATION_ID");
-                Application application = getApplicationById(applicationId);
+                Application application = getLightweightApplicationById(applicationId);
                 if(!StringUtils.isEmpty(resultSet.getString("API_NAME"))) {
                     APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(resultSet.getString
                             ("API_PROVIDER")), resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
@@ -6430,6 +6430,55 @@ public class ApiMgtDAO {
                 Map<String,String> applicationAttributes = getApplicationAttributes(connection, applicationId);
                 application.setApplicationAttributes(applicationAttributes);
             }
+        } catch (SQLException e) {
+            handleException("Error while obtaining details of the Application : " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return application;
+    }
+
+    public Application getLightweightApplicationById(int applicationId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        Application application = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            String query = SQLConstants.GET_APPLICATION_BY_ID_SQL;
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setInt(1, applicationId);
+
+            rs = prepStmt.executeQuery();
+            if (rs.next()) {
+                String applicationName = rs.getString("NAME");
+                String subscriberId = rs.getString("SUBSCRIBER_ID");
+                String subscriberName = rs.getString("USER_ID");
+
+                Subscriber subscriber = new Subscriber(subscriberName);
+                subscriber.setId(Integer.parseInt(subscriberId));
+                application = new Application(applicationName, subscriber);
+
+                application.setOwner(rs.getString("CREATED_BY"));
+                application.setDescription(rs.getString("DESCRIPTION"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setCallbackUrl(rs.getString("CALLBACK_URL"));
+                application.setId(rs.getInt("APPLICATION_ID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
+                application.setUUID(rs.getString("UUID"));
+                application.setTier(rs.getString("APPLICATION_TIER"));
+                application.setTokenType(rs.getString("TOKEN_TYPE"));
+                subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+
+                if (multiGroupAppSharingEnabled) {
+                    if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
+                        application.setGroupId(getGroupId(applicationId));
+                    }
+                }
+            }
+
         } catch (SQLException e) {
             handleException("Error while obtaining details of the Application : " + applicationId, e);
         } finally {
