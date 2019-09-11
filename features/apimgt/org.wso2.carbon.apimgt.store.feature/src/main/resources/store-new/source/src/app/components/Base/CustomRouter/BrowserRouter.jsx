@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBrowserHistory } from 'history';
 import { Router } from 'react-router';
-import isPlainObject from 'lodash/isplainobject';
+import isPlainObject from 'lodash.isplainobject';
 import Settings from 'AppComponents/Shared/SettingsContext';
 import queryString from 'query-string';
 import PropTypes from 'prop-types';
