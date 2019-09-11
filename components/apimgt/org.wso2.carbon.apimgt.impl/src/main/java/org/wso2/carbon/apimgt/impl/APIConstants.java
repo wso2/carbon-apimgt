@@ -1366,6 +1366,7 @@ public final class APIConstants {
     private static final String VERSION_SEARCH_TYPE_PREFIX = "version";
     private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
     public static final String CONTENT_SEARCH_TYPE_PREFIX = "content";
+    public static final String TYPE_SEARCH_TYPE_PREFIX = "type";
 
     //api-product related constants
     public static final String API_PRODUCT_VERSION = "1.0.0";
@@ -1556,8 +1557,8 @@ public final class APIConstants {
     // Reserved keywords for search.
     public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
             NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
-            VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
-            API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX };
+            VERSION_SEARCH_TYPE_PREFIX , LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
+            API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX };
     // Prefix for registry attributes.
     public static final String OVERVIEW_PREFIX = "overview_";
     /**
@@ -1618,6 +1619,7 @@ public final class APIConstants {
     public static final String API_PRODUCT_SUBSCRIPTION_TYPE = "APIProduct";
     public static final String API_SUBSCRIPTION_TYPE = "API";
     public static final String TYPE = "type";
+    public static final String TYPE_SEARCH_TYPE_KEY = "type=";
 
     public static class OASResourceAuthTypes {
         public static final String APPLICATION_OR_APPLICATION_USER = "Application & Application User";
