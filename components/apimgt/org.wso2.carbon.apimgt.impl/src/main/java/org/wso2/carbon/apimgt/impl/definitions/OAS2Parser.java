@@ -69,6 +69,7 @@ import java.util.Set;
  */
 public class OAS2Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS2Parser.class);
+    private static final String SWAGGER_SECURITY_SCHEMA_KEY = "default";
 
     /**
      * This method returns URI templates according to the given swagger file
@@ -83,7 +84,6 @@ public class OAS2Parser extends APIDefinition {
         Swagger swagger = parser.parse(resourceConfigsJSON);
         Set<URITemplate> urlTemplates = new LinkedHashSet<>();
         Set<Scope> scopes = getScopes(resourceConfigsJSON);
-        String oauth2SchemeKey = getOAuth2SecuritySchemeKey(swagger);
 
         for (String pathString : swagger.getPaths().keySet()) {
             Path path = swagger.getPath(pathString);
@@ -94,7 +94,7 @@ public class OAS2Parser extends APIDefinition {
                 template.setHTTPVerb(entry.getKey().name().toUpperCase());
                 template.setHttpVerbs(entry.getKey().name().toUpperCase());
                 template.setUriTemplate(pathString);
-                List<String> opScopes = getScopeOfOperations(oauth2SchemeKey, operation);
+                List<String> opScopes = getScopeOfOperations(SWAGGER_SECURITY_SCHEMA_KEY, operation);
                 if (!opScopes.isEmpty()) {
                     if (opScopes.size() == 1) {
                         String firstScope = opScopes.get(0);
@@ -146,12 +146,11 @@ public class OAS2Parser extends APIDefinition {
     public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
         SwaggerParser parser = new SwaggerParser();
         Swagger swagger = parser.parse(resourceConfigsJSON);
-        String oauth2SchemeKey = getOAuth2SecuritySchemeKey(swagger);
 
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
         OAuth2Definition oAuth2Definition;
-        if (oauth2SchemeKey != null && securityDefinitions != null
-                && (oAuth2Definition = (OAuth2Definition) securityDefinitions.get(oauth2SchemeKey)) != null
+        if (securityDefinitions != null
+                && (oAuth2Definition = (OAuth2Definition) securityDefinitions.get(SWAGGER_SECURITY_SCHEMA_KEY)) != null
                 && oAuth2Definition.getScopes() != null) {
             Set<Scope> scopeSet = new LinkedHashSet<>();
             for (Map.Entry<String, String> entry : oAuth2Definition.getScopes().entrySet()) {
@@ -562,25 +561,6 @@ public class OAS2Parser extends APIDefinition {
         } catch (JsonProcessingException e) {
             throw new APIManagementException("Error while generating Swagger json from model", e);
         }
-    }
-
-    /**
-     * Retrieves the "Auth2" security scheme key
-     *
-     * @param swagger Swgger object
-     * @return "Auth2" security scheme key
-     */
-    private String getOAuth2SecuritySchemeKey(Swagger swagger) {
-        final String oauth2Type = new OAuth2Definition().getType();
-        Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
-        if (securityDefinitions != null) {
-            for (Map.Entry<String, SecuritySchemeDefinition> definitionEntry : securityDefinitions.entrySet()) {
-                if (oauth2Type.equals(definitionEntry.getValue().getType())) {
-                    return definitionEntry.getKey();
-                }
-            }
-        }
-        return null;
     }
 
     /**

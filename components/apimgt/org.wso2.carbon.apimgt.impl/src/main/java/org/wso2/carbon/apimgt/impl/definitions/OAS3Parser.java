@@ -69,6 +69,7 @@ import java.util.Set;
  */
 public class OAS3Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS3Parser.class);
+    private static final String OPENAPI_SECURITY_SCHEMA_KEY = "default";
 
     /**
      * This method returns URI templates according to the given swagger file
@@ -87,7 +88,6 @@ public class OAS3Parser extends APIDefinition {
         OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
         Set<URITemplate> urlTemplates = new LinkedHashSet<>();
         Set<Scope> scopes = getScopes(resourceConfigsJSON);
-        String oauth2SchemeKey = getOAuth2SecuritySchemeKey(openAPI);
 
         for (String pathKey : openAPI.getPaths().keySet()) {
             PathItem pathItem = openAPI.getPaths().get(pathKey);
@@ -98,7 +98,7 @@ public class OAS3Parser extends APIDefinition {
                     template.setHTTPVerb(entry.getKey().name().toUpperCase());
                     template.setHttpVerbs(entry.getKey().name().toUpperCase());
                     template.setUriTemplate(pathKey);
-                    List<String> opScopes = getScopeOfOperations(oauth2SchemeKey, operation);
+                    List<String> opScopes = getScopeOfOperations(OPENAPI_SECURITY_SCHEMA_KEY, operation);
                     if (!opScopes.isEmpty()) {
                         if (opScopes.size() == 1) {
                             String firstScope = opScopes.get(0);
@@ -155,13 +155,12 @@ public class OAS3Parser extends APIDefinition {
             throw new APIManagementException("Error Occurred while parsing OpenAPI3 definition.");
         }
         OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
-        String oauth2SchemeKey = getOAuth2SecuritySchemeKey(openAPI);
         Map<String, SecurityScheme> securitySchemes;
         SecurityScheme securityScheme;
         OAuthFlow oAuthFlow;
         Scopes scopes;
         if (openAPI.getComponents() != null && (securitySchemes = openAPI.getComponents().getSecuritySchemes()) != null
-                && (securityScheme = securitySchemes.get(oauth2SchemeKey)) != null
+                && (securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY)) != null
                 && (oAuthFlow = securityScheme.getFlows().getImplicit()) != null
                 && (scopes = oAuthFlow.getScopes()) != null) {
             Set<Scope> scopeSet = new HashSet<>();
@@ -357,16 +356,6 @@ public class OAS3Parser extends APIDefinition {
     }
 
     /**
-     * Retrieves the "Auth2" security scheme key
-     *
-     * @param openAPI OpenAPI object
-     * @return "Auth2" security scheme key
-     */
-    private String getOAuth2SecuritySchemeKey(OpenAPI openAPI) {
-        return APIConstants.SWAGGER_APIM_DEFAULT_SECURITY;
-    }
-
-    /**
      * Gets a list of scopes using the security requirements
      *
      * @param oauth2SchemeKey OAuth2 security element key
@@ -440,7 +429,6 @@ public class OAS3Parser extends APIDefinition {
      */
     private void updateSwaggerSecurityDefinition(OpenAPI openAPI, SwaggerData swaggerData) {
 
-        String oauth2SchemeKey = getOAuth2SecuritySchemeKey(openAPI);
         if (openAPI.getComponents() == null) {
             openAPI.setComponents(new Components());
         }
@@ -449,11 +437,11 @@ public class OAS3Parser extends APIDefinition {
             securitySchemes = new HashMap<>();
             openAPI.getComponents().setSecuritySchemes(securitySchemes);
         }
-        SecurityScheme securityScheme = securitySchemes.get(oauth2SchemeKey);
+        SecurityScheme securityScheme = securitySchemes.get(OPENAPI_SECURITY_SCHEMA_KEY);
         if (securityScheme == null) {
             securityScheme = new SecurityScheme();
             securityScheme.setType(SecurityScheme.Type.OAUTH2);
-            securitySchemes.put(oauth2SchemeKey, securityScheme);
+            securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY, securityScheme);
         }
         if (securityScheme.getFlows() == null) {
             securityScheme.setFlows(new OAuthFlows());
@@ -588,21 +576,20 @@ public class OAS3Parser extends APIDefinition {
 
         updateLegacyScopesFromOperation(resource, operation);
         if (resource.getScope() != null) {
-            String oauth2SchemeKey = APIConstants.SWAGGER_APIM_DEFAULT_SECURITY;
             List<SecurityRequirement> security = operation.getSecurity();
             if (security == null) {
                 security = new ArrayList<>();
                 operation.setSecurity(security);
             }
             for (Map<String, List<String>> requirement : security) {
-                if (requirement.get(oauth2SchemeKey) != null) {
-                    requirement.put(oauth2SchemeKey, Arrays.asList(resource.getScope().getKey()));
+                if (requirement.get(OPENAPI_SECURITY_SCHEMA_KEY) != null) {
+                    requirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Arrays.asList(resource.getScope().getKey()));
                     return;
                 }
             }
             // if oauth2SchemeKey not present, add a new
             SecurityRequirement defaultRequirement = new SecurityRequirement();
-            defaultRequirement.put(oauth2SchemeKey, Arrays.asList(resource.getScope().getKey()));
+            defaultRequirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Arrays.asList(resource.getScope().getKey()));
             security.add(defaultRequirement);
         }
     }
