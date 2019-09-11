@@ -52,7 +52,7 @@ function InFlow(props) {
     const { mediationPolicies } = api;
     const type = 'IN';
     const inMediationPolicy = mediationPolicies.filter(seq => seq.type === type)[0];
-    const [engagedPlicyFile, setEngagedPolicyFile] = useState({
+    const [engagedPolicyFile, setEngagedPolicyFile] = useState({
         id: inMediationPolicy !== (null || undefined) ? inMediationPolicy.id : '',
         name: inMediationPolicy !== (null || undefined) ? inMediationPolicy.name : '',
         type: inMediationPolicy !== (null || undefined) ? inMediationPolicy.type : '',
@@ -60,8 +60,8 @@ function InFlow(props) {
     });
     const [editable, setEditable] = useState(false);
     const handleInputChange = (event) => {
-        const isEditable = event.target.value;
-        setEditable(isEditable);
+        const policy = event.target.value;
+        setEngagedPolicyFile(policy);
     };
     const handleToggleInFlowEdit = (event) => {
         const isEditable = event.target.checked;
@@ -104,7 +104,7 @@ function InFlow(props) {
             />
             {!editable ? (
                 <EngagedInMediationPolicy
-                    engagedPlicyFile={engagedPlicyFile}
+                    engagedPolicyFile={engagedPolicyFile}
                     handleInputChange={handleInputChange}
                     api={api}
                 />
@@ -113,7 +113,7 @@ function InFlow(props) {
                     <div className={classes.itemWrapper}>
                         <EditInMediationPolicy
                             handleInputChange={handleInputChange}
-                            engagedPlicyFile={engagedPlicyFile}
+                            engagedPolicyFile={engagedPolicyFile}
                             api={api}
                             updateMediationPolicy={updateMediationPolicy}
                         />

@@ -31,6 +31,8 @@ import { FormattedMessage } from 'react-intl';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
+import Alert from 'AppComponents/Shared/Alert';
+import isEmpty from 'lodash/isEmpty';
 import InFlow from './InFlow';
 import OutFlow from './OutFlow';
 import FaultFlow from './FaultFlow';
@@ -60,35 +62,73 @@ const styles = theme => ({
  */
 function Overview(props) {
     const { classes, api } = props;
-    const [mediationPolicies, setMediationPolices] = useState([]);
+    const inFlowMediationPolicy = (api.mediationPolicies.filter(seq => seq.type === 'IN')[0]);
+    const outFlowMediationPolicy = (api.mediationPolicies.filter(seq => seq.type === 'OUT')[0]);
+    const faultFlowMediationPolicy = (api.mediationPolicies.filter(seq => seq.type === 'FAULT')[0]);
+    const [inPolicyName, setInPolicyName] = useState(inFlowMediationPolicy !== (null || undefined) ?
+        { id: inFlowMediationPolicy.id, name: inFlowMediationPolicy.name, type: inFlowMediationPolicy.type } : {});
+    const [outPolicyName, setOutPolicyName] = useState(outFlowMediationPolicy !== (null || undefined) ?
+        { id: outFlowMediationPolicy.id, name: outFlowMediationPolicy.name, type: outFlowMediationPolicy.type } : {});
+    const [faultPolicyName, setFaultPolicyName] = useState(faultFlowMediationPolicy !== (null || undefined) ?
+        { id: faultFlowMediationPolicy.id, name: faultFlowMediationPolicy.name, type: faultFlowMediationPolicy.type } :
+        {});
+    const mediationPolicies = [];
+    if (!isEmpty(inPolicyName)) {
+        mediationPolicies.push(inPolicyName);
+    }
+    if (!isEmpty(outPolicyName)) {
+        mediationPolicies.push(outPolicyName);
+    }
+    if (!isEmpty(faultPolicyName)) {
+        mediationPolicies.push(faultPolicyName);
+    }
 
-    const [inFlowMediationPolicy, setInFlowMediationPolicy] = useState(api.mediationPolicies.inSequence);
-    const [outFlowMediationPolicy, setOutFlowMediationPolicy] = useState(api.mediationPolicies.outSequence);
-    const [faultFlowMediationPolicy, setFaultFlowMediationPolicy] = useState(api.mediationPolicies.faultSequence);
     /**
      * Method to update the api.
      *
      * @param {function} updateAPI The api update function.
      */
-    const saveAPI = (updateAPI) => {
-        updateAPI(mediationPolicies);
+    const saveAPI = () => {
+        // oldAPI.mediationPolicies = mediationPolicies;
+        // updateAPI(oldAPI);
+        const promisedApi = api.get(api.id);
+        promisedApi
+            .then((getResponse) => {
+                const apiData = getResponse.body;
+                apiData.mediationPolicies = mediationPolicies;
+                const promisedUpdate = api.update(apiData);
+                promisedUpdate
+                    .then(() => {
+                        Alert.info('Mediation Policies updated successfully.');
+                    })
+                    .catch((errorResponse) => {
+                        console.error(errorResponse);
+                        Alert.error('Error occurred while updating API mediation policies');
+                    });
+            })
+            .catch((errorResponse) => {
+                console.error(errorResponse);
+                Alert.error('Error occurred while retrieving API to save mediation policies');
+            });
     };
     const updateInMediationPolicy = (policies) => {
-        setInFlowMediationPolicy(policies);
+        setInPolicyName({ id: policies.id, name: policies.name, type: policies.type });
     };
     const updateOutMediationPolicy = (policies) => {
-        setOutFlowMediationPolicy(policies);
+        setOutPolicyName({ id: policies.id, name: policies.name, type: policies.type });
     };
     const updateFaultMediationPolicy = (policies) => {
-        setFaultFlowMediationPolicy(policies);
+        setFaultPolicyName({ id: policies.id, name: policies.name, type: policies.type });
     };
     useEffect(() => {
-        setInFlowMediationPolicy(inFlowMediationPolicy);
-        setFaultFlowMediationPolicy(faultFlowMediationPolicy);
-        setOutFlowMediationPolicy(outFlowMediationPolicy);
-        setMediationPolices([inFlowMediationPolicy, outFlowMediationPolicy, faultFlowMediationPolicy]);
-    }, [inFlowMediationPolicy, outFlowMediationPolicy, faultFlowMediationPolicy]);
-
+        setInPolicyName(inPolicyName);
+    }, [inPolicyName]);
+    useEffect(() => {
+        setOutPolicyName(outPolicyName);
+    }, [outPolicyName]);
+    useEffect(() => {
+        setFaultPolicyName(faultPolicyName);
+    }, [faultPolicyName]);
     return (
         <div >
             <div className={classes.titleWrapper}>

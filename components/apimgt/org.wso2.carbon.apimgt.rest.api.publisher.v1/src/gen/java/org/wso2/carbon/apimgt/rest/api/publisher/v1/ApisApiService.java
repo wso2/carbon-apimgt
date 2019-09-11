@@ -69,10 +69,10 @@ public interface ApisApiService {
       public Response apisApiIdLifecycleStatePendingTasksDelete(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdMediationPoliciesGet(String apiId, Integer limit, Integer offset, String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdMediationPoliciesMediationPolicyIdContentGet(String apiId, String mediationPolicyId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdMediationPoliciesMediationPolicyIdContentPut(String type, String apiId, String mediationPolicyId, InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdMediationPoliciesMediationPolicyIdDelete(String apiId, String mediationPolicyId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdMediationPoliciesMediationPolicyIdGet(String apiId, String mediationPolicyId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdMediationPoliciesMediationPolicyIdPut(String type, String apiId, String mediationPolicyId, InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response apisApiIdMediationPoliciesPost(String type, String apiId, InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdMediationPoliciesPost(String type, String apiId, InputStream mediationPolicyFileInputStream, Attachment mediationPolicyFileDetail, String inlineContent, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdMonetizationGet(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdMonetizePost(String apiId, APIMonetizationInfoDTO body, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;

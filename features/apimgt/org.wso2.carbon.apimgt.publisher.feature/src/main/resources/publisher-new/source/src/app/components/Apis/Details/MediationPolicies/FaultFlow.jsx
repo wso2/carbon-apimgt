@@ -15,11 +15,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FormControl from '@material-ui/core/FormControl';
 import { FormattedMessage } from 'react-intl';
 import { withStyles, Switch, FormControlLabel } from '@material-ui/core';
 import PropTypes from 'prop-types';
+import API from 'AppData/api.js';
+import Alert from 'AppComponents/Shared/Alert';
 import EngagedFaultMediationPolicy from './Engaged/EngagedFaultMediationPolicy';
 import EditFaultMediationPolicy from './Edit/EditfaultMediationPolicy';
 
@@ -40,18 +42,45 @@ const styles = {
 function FaultFlow(props) {
     const { api, classes, updateMediationPolicy } = props;
     const { mediationPolicies } = api;
-    const faultMediationPolicy = mediationPolicies.filter(seq => seq.type === 'FAULT');
-    const engagedPlicyFile = faultMediationPolicy === null ? '' : faultMediationPolicy;
+    const type = 'FAULT';
+    const faultMediationPolicy = mediationPolicies.filter(seq => seq.type === type)[0];
+    const [engagedPolicyFile, setEngagedPolicyFile] = useState({
+        id: faultMediationPolicy !== (null || undefined) ? faultMediationPolicy.id : '',
+        name: faultMediationPolicy !== (null || undefined) ? faultMediationPolicy.name : '',
+        type: faultMediationPolicy !== (null || undefined) ? faultMediationPolicy.type : '',
+        content: {},
+    });
     const [editable, setEditable] = useState(false);
 
     const handleInputChange = (event) => {
-        const isEditable = event.target.value;
-        setEditable(isEditable);
+        const policy = event.target.value;
+        setEngagedPolicyFile(policy);
     };
     const handleToggleFaultFlowEdit = (event) => {
         const isEditable = event.target.checked;
         setEditable(isEditable);
     };
+    useEffect(() => {
+        if (!editable) {
+            API.get(api.id).then((response) => {
+                const faultPolicy = response.mediationPolicies.filter(seq => seq.type === type)[0];
+                setEngagedPolicyFile({
+                    id: faultPolicy !== (null || undefined) ? faultPolicy.id : '',
+                    name: faultPolicy !== (null || undefined) ? faultPolicy.name : '',
+                    type: faultPolicy !== (null || undefined) ? faultPolicy.type : '',
+                    content: {},
+                });
+            }).catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                    Alert.error(<FormattedMessage
+                        id='Apis.Details.MediationPolicies.Edit.EditOutMediationPolicy.global.error'
+                        defaultMessage='Error retrieving API mediation policies'
+                    />);
+                }
+            });
+        }
+    }, [editable]);
     return (
         <FormControl className={classes.formControl}>
             <FormControlLabel
@@ -67,7 +96,7 @@ function FaultFlow(props) {
             />
             {!editable ? (
                 <EngagedFaultMediationPolicy
-                    engagedPlicyFile={engagedPlicyFile}
+                    engagedPolicyFile={engagedPolicyFile}
                     handleInputChange={handleInputChange}
                     api={api}
                 />
@@ -76,7 +105,7 @@ function FaultFlow(props) {
                     <div className={classes.itemWrapper}>
                         <EditFaultMediationPolicy
                             handleInputChange={handleInputChange}
-                            engagedPlicyFile={engagedPlicyFile}
+                            engagedPolicyFile={engagedPolicyFile}
                             api={api}
                             updateMediationPolicy={updateMediationPolicy}
                         />

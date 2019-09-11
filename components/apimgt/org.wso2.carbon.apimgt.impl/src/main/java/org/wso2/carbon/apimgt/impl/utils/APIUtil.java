@@ -5198,6 +5198,88 @@ public final class APIUtil {
     }
 
     /**
+     * Returns attributes correspond to the given mediation policy name and direction
+     *
+     * @param policyName name of the  sequence
+     * @param tenantId   logged in user's tenantId
+     * @param direction  in/out/fault
+     * @param identifier API identifier
+     * @return attributes(path, uuid) of the given mediation sequence or null
+     * @throws APIManagementException If failed to get the uuid of the mediation sequence
+     */
+    public static Map<String, String> getMediationPolicyAttributes(String policyName, int tenantId, String direction,
+                                                                   APIIdentifier identifier) throws
+            APIManagementException {
+
+        org.wso2.carbon.registry.api.Collection seqCollection = null;
+        String seqCollectionPath = "";
+        Map<String, String> mediationPolicyAttributes = new HashMap<>(3);
+        try {
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
+
+            if ("in".equals(direction)) {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                                APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+            } else if ("out".equals(direction)) {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                                APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+            } else if ("fault".equals(direction)) {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry
+                        .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
+                                APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+            }
+
+            if (seqCollection == null) {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get
+                        (getSequencePath(identifier,
+                                direction));
+
+            }
+            if (seqCollection != null) {
+                String[] childPaths = seqCollection.getChildren();
+                for (String childPath : childPaths) {
+                    Resource mediationPolicy = registry.get(childPath);
+                    OMElement seqElment = APIUtil.buildOMElement(mediationPolicy.getContentStream());
+                    String seqElmentName = seqElment.getAttributeValue(new QName("name"));
+                    if (policyName.equals(seqElmentName)) {
+                        mediationPolicyAttributes.put("path", childPath);
+                        mediationPolicyAttributes.put("uuid", mediationPolicy.getUUID());
+                        mediationPolicyAttributes.put("name", policyName);
+                        return mediationPolicyAttributes;
+                    }
+                }
+            }
+
+            // If the sequence not found the default sequences, check in custom sequences
+
+            seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get
+                    (getSequencePath(identifier, direction));
+            if (seqCollection != null) {
+                String[] childPaths = seqCollection.getChildren();
+                for (String childPath : childPaths) {
+                    Resource mediationPolicy = registry.get(childPath);
+                    OMElement seqElment = APIUtil.buildOMElement(mediationPolicy.getContentStream());
+                    if (policyName.equals(seqElment.getAttributeValue(new QName("name")))) {
+                        mediationPolicyAttributes.put("path", childPath);
+                        mediationPolicyAttributes.put("uuid", mediationPolicy.getUUID());
+                        mediationPolicyAttributes.put("name", policyName);
+                        return mediationPolicyAttributes;
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            String msg = "Issue is in accessing the Registry";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        }
+        return mediationPolicyAttributes;
+    }
+
+    /**
      * Returns true if sequence is set
      *
      * @param sequence

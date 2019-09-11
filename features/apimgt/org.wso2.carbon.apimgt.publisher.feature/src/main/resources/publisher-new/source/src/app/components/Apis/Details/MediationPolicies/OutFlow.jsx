@@ -15,12 +15,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
 import { FormattedMessage } from 'react-intl';
 import { withStyles, Switch, FormControlLabel } from '@material-ui/core';
 import PropTypes from 'prop-types';
+import API from 'AppData/api.js';
+import Alert from 'AppComponents/Shared/Alert';
 import EditOutMediationPolicy from './Edit/EditOutMediationPolicy';
 import EngagedOutMediationPolicy from './Engaged/EngagedOutMediationPolicy';
 
@@ -38,20 +40,46 @@ const styles = {
  * @returns {any} HTML representation.
  */
 function OutFlow(props) {
-    const { classes, api, updateMediationPolicy } = props;
+    const { api, classes, updateMediationPolicy } = props;
     const { mediationPolicies } = api;
-    const outMediationPolicy = mediationPolicies.filter(seq => seq.type === 'OUT');
-    const engagedPlicyFile = outMediationPolicy === null ? '' : outMediationPolicy;
+    const type = 'OUT';
+    const outMediationPolicy = mediationPolicies.filter(seq => seq.type === type)[0];
+    const [engagedPolicyFile, setEngagedPolicyFile] = useState({
+        id: outMediationPolicy !== (null || undefined) ? outMediationPolicy.id : '',
+        name: outMediationPolicy !== (null || undefined) ? outMediationPolicy.name : '',
+        type: outMediationPolicy !== (null || undefined) ? outMediationPolicy.type : '',
+        content: {},
+    });
     const [editable, setEditable] = useState(false);
-
     const handleInputChange = (event) => {
-        const isEditable = event.target.value;
-        setEditable(isEditable);
+        const policy = event.target.value;
+        setEngagedPolicyFile(policy);
     };
     const handleToggleOutFlowEdit = (event) => {
         const isEditable = event.target.checked;
         setEditable(isEditable);
     };
+    useEffect(() => {
+        if (!editable) {
+            API.get(api.id).then((response) => {
+                const outPolicy = response.mediationPolicies.filter(seq => seq.type === type)[0];
+                setEngagedPolicyFile({
+                    id: outPolicy !== (null || undefined) ? outPolicy.id : '',
+                    name: outPolicy !== (null || undefined) ? outPolicy.name : '',
+                    type: outPolicy !== (null || undefined) ? outPolicy.type : '',
+                    content: {},
+                });
+            }).catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                    Alert.error(<FormattedMessage
+                        id='Apis.Details.MediationPolicies.Edit.EditOutMediationPolicy.global.error'
+                        defaultMessage='Error retrieving API mediation policies'
+                    />);
+                }
+            });
+        }
+    }, [editable]);
     return (
         <FormControl className={classes.formControl}>
             <FormControlLabel
@@ -67,7 +95,7 @@ function OutFlow(props) {
             />
             {!editable ? (
                 <EngagedOutMediationPolicy
-                    engagedPlicyFile={engagedPlicyFile}
+                    engagedPolicyFile={engagedPolicyFile}
                     handleInputChange={handleInputChange}
                     api={api}
                 />
@@ -76,7 +104,7 @@ function OutFlow(props) {
                     <div className={classes.itemWrapper}>
                         <EditOutMediationPolicy
                             handleInputChange={handleInputChange}
-                            engagedPlicyFile={engagedPlicyFile}
+                            engagedPolicyFile={engagedPolicyFile}
                             api={api}
                             updateMediationPolicy={updateMediationPolicy}
                         />

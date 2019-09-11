@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -150,20 +151,20 @@ public class APIMappingUtil {
             model.setCacheTimeout(APIConstants.API_RESPONSE_CACHE_TIMEOUT);
         }
 
-/*        if (dto.getSequences() != null) { todo
-            List<SequenceDTO> sequences = dto.getSequences();
+        if (dto.getMediationPolicies() != null) {
+            List<MediationPolicyDTO> policies = dto.getMediationPolicies();
 
             //validate whether provided sequences are available
-            for (SequenceDTO sequence : sequences) {
-                if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equalsIgnoreCase(sequence.getType())) {
-                    model.setInSequence(sequence.getName());
-                } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equalsIgnoreCase(sequence.getType())) {
-                    model.setOutSequence(sequence.getName());
+            for (MediationPolicyDTO policy : policies) {
+                if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equalsIgnoreCase(policy.getType())) {
+                    model.setInSequence(policy.getName());
+                } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equalsIgnoreCase(policy.getType())) {
+                    model.setOutSequence(policy.getName());
                 } else {
-                    model.setFaultSequence(sequence.getName());
+                    model.setFaultSequence(policy.getName());
                 }
             }
-        }*/
+        }
 
         if (dto.getSubscriptionAvailability() != null) {
             model.setSubscriptionAvailability(
@@ -591,7 +592,8 @@ public class APIMappingUtil {
     public static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-
+        String uuid = "uuid";
+        String path = "path";
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
@@ -628,48 +630,63 @@ public class APIMappingUtil {
       /*  if (!StringUtils.isBlank(model.getThumbnailUrl())) {todo
             dto.setThumbnailUri(getThumbnailUri(model.getUUID()));
         }*/
-/*        List<SequenceDTO> sequences = new ArrayList<>();todo
-
-        String inSequenceName = model.getInSequence();
-        if (inSequenceName != null && !inSequenceName.isEmpty()) {
+        List<MediationPolicyDTO> mediationPolicies = new ArrayList<>();
+        String inMedPolicyName = model.getInSequence();
+        if (inMedPolicyName != null && !inMedPolicyName.isEmpty()) {
             String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN;
-            boolean sharedStatus = getSharedStatus(inSequenceName,type,dto);
-            String uuid = getSequenceId(inSequenceName,type,dto);
-            SequenceDTO inSequence = new SequenceDTO();
-            inSequence.setName(inSequenceName);
-            inSequence.setType(type);
-            inSequence.setShared(sharedStatus);
-            inSequence.setId(uuid);
-            sequences.add(inSequence);
+            Map<String, String> mediationPolicyAttributes = getMediationPolicyAttributes(inMedPolicyName, type, dto);
+            String mediationPolicyUUID =
+                    mediationPolicyAttributes.containsKey(uuid) ? mediationPolicyAttributes.get(uuid) : null;
+            String mediationPolicyRegistryPath =
+                    mediationPolicyAttributes.containsKey(path) ? mediationPolicyAttributes.get(path) : null;
+            boolean sharedStatus = getSharedStatus(mediationPolicyRegistryPath, inMedPolicyName);
+
+            MediationPolicyDTO inMedPolicy = new MediationPolicyDTO();
+            inMedPolicy.setName(inMedPolicyName);
+            inMedPolicy.setType(type.toUpperCase());
+            inMedPolicy.setShared(sharedStatus);
+            inMedPolicy.setId(mediationPolicyUUID);
+            mediationPolicies.add(inMedPolicy);
         }
 
-        String outSequenceName = model.getOutSequence();
-        if (outSequenceName != null && !outSequenceName.isEmpty()) {
+        String outMedPolicyName = model.getOutSequence();
+        if (outMedPolicyName != null && !outMedPolicyName.isEmpty()) {
             String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT;
-            boolean sharedStatus = getSharedStatus(outSequenceName,type,dto);
-            String uuid = getSequenceId(outSequenceName,type,dto);
-            SequenceDTO outSequence = new SequenceDTO();
-            outSequence.setName(outSequenceName);
-            outSequence.setType(type);
-            outSequence.setShared(sharedStatus);
-            outSequence.setId(uuid);
-            sequences.add(outSequence);
+            Map<String, String> mediationPolicyAttributes = getMediationPolicyAttributes(outMedPolicyName, type, dto);
+            String mediationPolicyUUID =
+                    mediationPolicyAttributes.containsKey(uuid) ? mediationPolicyAttributes.get(uuid) : null;
+            String mediationPolicyRegistryPath =
+                    mediationPolicyAttributes.containsKey(path) ? mediationPolicyAttributes.get(path) : null;
+            boolean sharedStatus = getSharedStatus(mediationPolicyRegistryPath, outMedPolicyName);
+
+            MediationPolicyDTO outMedPolicy = new MediationPolicyDTO();
+            outMedPolicy.setName(outMedPolicyName);
+            outMedPolicy.setType(type.toUpperCase());
+            outMedPolicy.setShared(sharedStatus);
+            outMedPolicy.setId(mediationPolicyUUID);
+            mediationPolicies.add(outMedPolicy);
         }
 
         String faultSequenceName = model.getFaultSequence();
         if (faultSequenceName != null && !faultSequenceName.isEmpty()) {
             String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT;
-            boolean sharedStatus = getSharedStatus(faultSequenceName,type,dto);
-            String uuid = getSequenceId(faultSequenceName,type,dto);
-            SequenceDTO faultSequence = new SequenceDTO();
-            faultSequence.setName(faultSequenceName);
-            faultSequence.setType(type);
-            faultSequence.setShared(sharedStatus);
-            faultSequence.setId(uuid);
-            sequences.add(faultSequence);
+
+            Map<String, String> mediationPolicyAttributes = getMediationPolicyAttributes(faultSequenceName, type, dto);
+            String mediationPolicyUUID =
+                    mediationPolicyAttributes.containsKey(uuid) ? mediationPolicyAttributes.get(uuid) : null;
+            String mediationPolicyRegistryPath =
+                    mediationPolicyAttributes.containsKey(path) ? mediationPolicyAttributes.get(path) : null;
+            boolean sharedStatus = getSharedStatus(mediationPolicyRegistryPath, faultSequenceName);
+
+            MediationPolicyDTO faultMedPolicy = new MediationPolicyDTO();
+            faultMedPolicy.setName(faultSequenceName);
+            faultMedPolicy.setType(type.toUpperCase());
+            faultMedPolicy.setShared(sharedStatus);
+            faultMedPolicy.setId(mediationPolicyUUID);
+            mediationPolicies.add(faultMedPolicy);
         }
 
-        dto.setSequences(sequences);*/
+        dto.setMediationPolicies(mediationPolicies);
 
         dto.setLifeCycleStatus(model.getStatus());
 
@@ -2168,5 +2185,48 @@ public class APIMappingUtil {
             api = apiProvider.getAPI(apiIdentifier);
         }
         return api;
+    }
+
+    /**
+     * Returns shared status of the mediation policy
+     *
+     * @param policyName   mediation sequence name
+     * @param resourcePath registry resource path
+     * @return true, if the mediation policy is a shared resource(global policy)
+     */
+    private static boolean getSharedStatus(String resourcePath, String policyName) {
+
+        if (null != resourcePath && resourcePath.contains(APIConstants.API_CUSTOM_SEQUENCE_LOCATION)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns uuid of the specified mediation policy
+     *
+     * @param sequenceName mediation sequence name
+     * @param direction    in/out/fault
+     * @param dto          APIDetailedDTO contains details of the exporting API
+     * @return UUID of sequence or null
+     */
+    private static Map<String, String> getMediationPolicyAttributes(String sequenceName, String direction,
+                                                                    APIDTO dto) {
+
+        APIIdentifier apiIdentifier = new APIIdentifier(dto.getProvider(), dto.getName(),
+                dto.getVersion());
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                    getTenantId(tenantDomain);
+            return APIUtil.getMediationPolicyAttributes(sequenceName, tenantId, direction, apiIdentifier);
+        } catch (UserStoreException e) {
+            log.error("Error occurred while reading tenant information ", e);
+
+        } catch (APIManagementException e) {
+            log.error("Error occurred while getting the uuid of the mediation sequence", e);
+        }
+
+        return null;
     }
 }

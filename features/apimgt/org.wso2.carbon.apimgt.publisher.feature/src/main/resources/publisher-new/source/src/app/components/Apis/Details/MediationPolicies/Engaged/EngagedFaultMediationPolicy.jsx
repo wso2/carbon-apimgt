@@ -69,7 +69,7 @@ function EngagedFaultMediationPolicy(props) {
                 margin='normal'
                 type='text'
                 onChange={handleInputChange}
-                value={engagedPolicyFile}
+                value={engagedPolicyFile.name}
             />
         </div>
     );

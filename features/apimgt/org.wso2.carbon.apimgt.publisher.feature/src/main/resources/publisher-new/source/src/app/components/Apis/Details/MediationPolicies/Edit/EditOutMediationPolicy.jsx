@@ -127,28 +127,31 @@ function EditOutMediationPolicy(props) {
     // user uploaded api specific mediation policies
     const [outSeqCustom, setOutSeqCustom] = useState([]);
     const { id } = api;
-    const selectedPolicy = api.mediationPolicies.outSequence;
+    const type = 'OUT';
+    const selectedPolicy = api.mediationPolicies.filter(seq => seq.type === type)[0];
     const [selectedPolicyFile, setSelectedPolicyFile] = useState({
         id: selectedPolicy !== (null || undefined) ? selectedPolicy.id : '',
         name: selectedPolicy !== (null || undefined) ? selectedPolicy.name : '',
         type: selectedPolicy !== (null || undefined) ? selectedPolicy.type : '',
         content: {},
     });
-    const type = 'OUT';
+    const [fileToUpload, setFileToUpload] = useState('');
     useEffect(() => {
-        API.getGlobalMediationPolicies()
-            .then((response) => {
-                setGlobalOutMediationPolicies([...response.obj.list.filter(seq => seq.type === type)]);
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                    Alert.error(<FormattedMessage
-                        id='Apis.Details.MediationPolicies.Edit.EditOutMediationPolicy.global.error'
-                        defaultMessage='Error retrieving Global mediation policies'
-                    />);
-                }
-            });
+        if (globalOutMediationPolicies.length <= 0) {
+            API.getGlobalMediationPolicies()
+                .then((response) => {
+                    setGlobalOutMediationPolicies([...response.obj.list.filter(seq => seq.type === type)]);
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                        Alert.error(<FormattedMessage
+                            id='Apis.Details.MediationPolicies.Edit.EditOutMediationPolicy.global.error'
+                            defaultMessage='Error retrieving Global mediation policies'
+                        />);
+                    }
+                });
+        }
         API.getMediationPolicies(id)
             .then((response) => {
                 setOutSeqCustom([...response.obj.list.filter(seq => seq.type === type)]);
@@ -164,13 +167,14 @@ function EditOutMediationPolicy(props) {
             });
     }, [selectedPolicyFile]);
     const saveMediationPolicy = (newPolicy) => {
-        const promisedApi = API.addMediationPolicy(newPolicy, api.id, type.toLowerCase);
+        const promisedApi = API.addMediationPolicy(newPolicy, api.id, type);
         promisedApi.then(() => {
             Alert.info(FormattedMessage({
                 id: 'Apis.Details.MediationPolicies.MediationPoliciesComponente.success',
                 defaultMessage: 'Mediation policy added successfully',
             }));
         }).catch((errorResponse) => {
+            setFileToUpload('');
             console.log(errorResponse);
             Alert.error(JSON.stringify(errorResponse));
         });
@@ -181,8 +185,9 @@ function EditOutMediationPolicy(props) {
      * */
     const onDrop = (policy) => {
         const policyFile = policy[0];
-        saveMediationPolicy(policyFile);
         if (policyFile) {
+            setFileToUpload(policyFile.name);
+            saveMediationPolicy(policyFile);
             setSelectedPolicyFile({ name: policyFile.name, content: policyFile });
         }
     };
@@ -195,14 +200,19 @@ function EditOutMediationPolicy(props) {
         const policy = event.target;
         if (policy.name !== 'none') {
             setSelectedPolicyFile({
-                id: policy.name, name: policy.value, type: { type }, content: '',
+                id: policy.name, name: policy.value, type, content: '',
+            });
+            updateMediationPolicy({
+                id: policy.name, name: policy.value, type, content: '',
             });
         } else {
             setSelectedPolicyFile({
-                id: 'none', name: policy.value, type: { type }, content: '',
+                id: 'none', name: policy.value, type, content: '',
+            });
+            updateMediationPolicy({
+                id: 'none', name: policy.value, type, content: '',
             });
         }
-        updateMediationPolicy(selectedPolicyFile);
     }
     /**
     * Handles the Global mediation policy download.
@@ -255,52 +265,6 @@ function EditOutMediationPolicy(props) {
     return (
         <FormControl className={classes.formControl}>
             <div className={classes.titleWrapper}>
-                <RadioGroup
-                    aria-label='outflow'
-                    name='outflow'
-                    className={classes.radioGroup}
-                    value={selectedPolicy}
-                    onChange={handleChange}
-                >
-                    <FormLabel component='customPolicies'>Custom OUT Mediation Policies</FormLabel>
-                    {outSeqCustom.map(seq => (
-                        <FormControlLabel
-                            name={seq.id}
-                            type={seq.type}
-                            control={<Radio />}
-                            label={seq.name}
-                            value={seq.name}
-                        />
-                    ))}
-                    <FormControlLabel
-                        name='none'
-                        type='out'
-                        control={<Radio />}
-                        label={<FormattedMessage
-                            id='Apis.Details.MediationPolicies.Edit.EditOutMediationPolicies.none'
-                            defaultMessage='No Mediation'
-                        />}
-                        value='none'
-                    />
-                    <FormLabel component='globalPolicies'>Global OUT Mediation Policies</FormLabel>
-                    {globalOutMediationPolicies.map(seq => (
-                        <FormControlLabel
-                            name={seq.id}
-                            type={seq.type}
-                            control={<Radio />}
-                            label={seq.name}
-                            value={seq.name}
-                        />
-                    ))}
-                </RadioGroup>
-                {/* </div> */}
-                <Button onClick={handleDownload}>
-                    <Icon>arrow_downward</Icon>
-                    <FormattedMessage
-                        id='Apis.Details.MediationPolicies.Edit.EditOutMediationPolicies.download'
-                        defaultMessage='Download'
-                    />
-                </Button>
                 <Dropzone
                     multiple={false}
                     className={classes.dropzone}
@@ -313,19 +277,90 @@ function EditOutMediationPolicy(props) {
                     {({ getRootProps, getInputProps }) => (
                         <div {...getRootProps({ style: dropzoneStyles })}>
                             <input {...getInputProps()} />
-                            <div className={classes.dropZoneWrapper}>
-                                <Icon className={classes.dropIcon}>cloud_upload</Icon>
-                                <Typography>
-                                    <FormattedMessage
-                                        id={'Apis.Details.MediationPolicies.Edit.EditOutMediationPolicy.'
+                            {fileToUpload === '' ? (
+                                <div className={classes.dropZoneWrapper}>
+                                    <Icon className={classes.dropIcon}>cloud_upload</Icon>
+                                    <Typography>
+                                        <FormattedMessage
+                                            id={'Apis.Details.MediationPolicies.Edit.EditOutMediationPolicy.'
                                             + 'click.or.drop.to.upload.file'}
-                                        defaultMessage='Click or drag the mediation file to upload.'
-                                    />
-                                </Typography>
-                            </div>
+                                            defaultMessage='Click or drag the mediation file to upload.'
+                                        />
+                                    </Typography>
+                                </div>
+                            ) : (
+                                <div className={classes.uploadedFile}>
+                                    <Icon style={{ fontSize: 56 }}>insert_drive_file</Icon>
+                                    {fileToUpload}
+                                </div>
+                            )}
                         </div>
                     )}
                 </Dropzone>
+                <RadioGroup
+                    aria-label='outflow'
+                    name='outflow'
+                    className={classes.radioGroup}
+                    value={selectedPolicyFile.name}
+                    onChange={handleChange}
+                >
+                    <FormLabel component='customPolicies'>
+                        <FormattedMessage
+                            id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.custom.out.policies'
+                            defaultMessage='Custom OUT Mediation Policies'
+                        />
+                    </FormLabel>
+                    {outSeqCustom.map(seq => (
+                        <FormControlLabel
+                            name={seq.id}
+                            type={seq.type}
+                            control={<Radio />}
+                            label={<FormattedMessage
+                                id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.custom.out.policy'
+                                defaultMessage={seq.name}
+                            />}
+                            value={seq.name}
+                            checked={selectedPolicyFile.name === seq.name}
+                        />
+                    ))}
+                    <FormControlLabel
+                        name='none'
+                        type='out'
+                        control={<Radio />}
+                        label={<FormattedMessage
+                            id='Apis.Details.MediationPolicies.Edit.EditOutMediationPolicies.none'
+                            defaultMessage='No Mediation'
+                        />}
+                        value='none'
+                    />
+                    <FormLabel component='globalPolicies'>
+                        <FormattedMessage
+                            id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.global.out.policies'
+                            defaultMessage='Global OUT Mediation Policies'
+                        />
+                    </FormLabel>
+                    {globalOutMediationPolicies.map(seq => (
+                        <FormControlLabel
+                            name={seq.id}
+                            type={seq.type}
+                            control={<Radio />}
+                            label={<FormattedMessage
+                                id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.global.out.policy'
+                                defaultMessage={seq.name}
+                            />}
+                            value={seq.name}
+                            checked={selectedPolicyFile.name === seq.name}
+                        />
+                    ))}
+                </RadioGroup>
+                {/* </div> */}
+                <Button onClick={handleDownload}>
+                    <Icon>arrow_downward</Icon>
+                    <FormattedMessage
+                        id='Apis.Details.MediationPolicies.Edit.EditOutMediationPolicies.download'
+                        defaultMessage='Download'
+                    />
+                </Button>
             </div>
         </FormControl>
     );

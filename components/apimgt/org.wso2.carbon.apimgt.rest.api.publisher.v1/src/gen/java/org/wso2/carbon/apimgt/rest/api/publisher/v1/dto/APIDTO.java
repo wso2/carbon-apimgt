@@ -748,7 +748,7 @@ public enum EndpointImplementationTypeEnum {
   }
 
   
-  @ApiModelProperty(example = "\"\\\"sequences\\\": [ {\\\"name\\\": \\\"json_to_xml_in_message\\\",\\\"config\\\": null,\\\"type\\\": \\\"in\\\"}, {\\\"name\\\": \\\"xml_to_json_out_message\\\",\\\"config\\\": null,\\\"type\\\": \\\"out\\\"}, {\\\"name\\\": \\\"json_fault\\\",\\\"config\\\": null,\\\"type\\\": \\\"fault\\\"} ],\"", value = "")
+  @ApiModelProperty(example = "\"\\\"mediationPolicies\\\": [ {\\\"name\\\": \\\"json_to_xml_in_message\\\",\\\"type\\\": \\\"in\\\"}, {\\\"name\\\": \\\"xml_to_json_out_message\\\",\\\"type\\\": \\\"out\\\"}, {\\\"name\\\": \\\"json_fault\\\",\\\"type\\\": \\\"fault\\\"} ],\"", value = "")
   @JsonProperty("mediationPolicies")
   public List<MediationPolicyDTO> getMediationPolicies() {
     return mediationPolicies;

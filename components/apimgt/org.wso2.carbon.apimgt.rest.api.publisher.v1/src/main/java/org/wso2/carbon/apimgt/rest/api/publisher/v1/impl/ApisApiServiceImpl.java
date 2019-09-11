@@ -1637,7 +1637,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
 
     @Override
-    public Response apisApiIdMediationPoliciesMediationPolicyIdPut(String type, String apiId, String mediationPolicyId,
+    public Response apisApiIdMediationPoliciesMediationPolicyIdContentPut(String type, String apiId, String mediationPolicyId,
                                                                    InputStream fileInputStream, Attachment fileDetail, String inlineContent, String ifMatch, MessageContext messageContext) {
 
         InputStream contentStream = null;
@@ -1801,8 +1801,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             if (fileInputStream != null) {
-                String filename = fileDetail.getContentDisposition().getFilename();
-//                fileName = fileDetail.getDataHandler().getName();
                 String fileContentType = URLConnection.guessContentTypeFromName(fileName);
 
                 if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
@@ -1822,7 +1820,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 //Getting created Api specific mediation policy
                 Mediation createdMediation = apiProvider.getApiSpecificMediationPolicy
                         (apiResourcePath, uuid);
-                createdMediation.setSourceType(Mediation.MediationSourceType.FILE);
                 MediationDTO createdPolicy =
                         MediationMappingUtil.fromMediationToDTO(createdMediation);
                 URI uploadedMediationUri = new URI(mediationPolicyUrl);

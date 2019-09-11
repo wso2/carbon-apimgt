@@ -23,7 +23,6 @@ public class Mediation {
     private String name;
     private String type;
     private String config;
-    private MediationSourceType sourceType = MediationSourceType.FILE;
 
     public Mediation(){}
 
@@ -43,25 +42,4 @@ public class Mediation {
     public void setConfig(String mConfig){this.config=mConfig;}
 
     public String getConfig(){return config;}
-
-    public MediationSourceType getSourceType() {
-
-        return sourceType;
-    }
-
-    public void setSourceType(MediationSourceType sourceType) {
-
-        this.sourceType = sourceType;
-    }
-
-    public enum MediationSourceType {
-        FILE("File"), INLINE("In line");
-
-        private String type;
-
-        MediationSourceType(String type) {
-
-            this.type = type;
-        }
-    }
 }

@@ -34,8 +34,8 @@ public class MediationPoliciesApiServiceImpl implements MediationPoliciesApiServ
      * @param ifNoneMatch If-None-Match header value
      * @return Matched global mediation policies for given search condition
      */
-    public Response mediationPoliciesGet(Integer limit, Integer offset, String query, String ifNoneMatch,
-                                         MessageContext messageContext) {
+    @Override
+    public Response getAllGlobalMediationPolicies(Integer limit, Integer offset, String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
         //pre-processing
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -52,9 +52,15 @@ public class MediationPoliciesApiServiceImpl implements MediationPoliciesApiServ
             return null;
         }
     }
-
+    /**
+     * Returns content of a global Mediation policy
+     *
+     * @param mediationPolicyId       search condition
+     * @param ifNoneMatch If-None-Match header value
+     * @return Matched global mediation policies for given search condition
+     */
     @Override
-    public Response mediationPoliciesMediationPolicyIdContentGet(String mediationPolicyId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+    public Response getGlobalMediationPolicyContent(String mediationPolicyId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
 
         String username = RestApiUtil.getLoggedInUsername();
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();

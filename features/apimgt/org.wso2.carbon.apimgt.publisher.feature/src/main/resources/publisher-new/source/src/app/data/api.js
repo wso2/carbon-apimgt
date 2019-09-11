@@ -1687,7 +1687,7 @@ class API extends Resource {
     static getMediationPolicies(apiId) {
         const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return restApiClient.then((client) => {
-            return client.apis["API Mediation Policies"].get_apis__apiId__mediation_policies({
+            return client.apis["API Mediation Policies"].apisApiIdMediationPoliciesGet({
                     apiId: apiId
                 },
                 this._requestMetaData(),
@@ -1704,7 +1704,7 @@ class API extends Resource {
     static addMediationPolicy(policyFile, apiId, type) {
         const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return restApiClient.then((client) => {
-            return client.apis["API Mediation Policies"].post_apis__apiId__mediation_policies({
+            return client.apis["API Mediation Policies"].apisApiIdMediationPoliciesPost({
                 apiId: apiId,
                 type: type.toLowerCase(),
                 file: policyFile
@@ -1761,14 +1761,13 @@ class API extends Resource {
      * @returns {Promise}
      *
      */
-    static updateMediationPolicy(seqId, apiId) {
+    static updateMediationPolicyContent(seqId, apiId) {
         const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return restApiClient.then((client) => {
-            return client.apis["API Mediation Policy"].put_apis__apiId__mediation_policies__mediationPolicyId_({
+            return client.apis["API Mediation Policy"].apisApiIdMediationPoliciesMediationPolicyIdContentPut({
                     mediationPolicyId: seqId,
                     apiId: apiId,
                     type: 'in',
-                    'Content-Type': 'multipart/form-data'
                 },
                 this._requestMetaData({
                     'Content-Type': 'multipart/form-data'
@@ -1787,7 +1786,7 @@ class API extends Resource {
     static getMediationPolicyContent(mediationPolicyId, apiId) {
         const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return restApiClient.then((client) => {
-            return client.apis["API Mediation Policy"].get_apis__apiId__mediation_policies__mediationPolicyId__content({
+            return client.apis["API Mediation Policy"].apisApiIdMediationPoliciesMediationPolicyIdContentGet({
                 mediationPolicyId: mediationPolicyId,
                 apiId: apiId,
                 },
@@ -1806,7 +1805,7 @@ class API extends Resource {
     static getGlobalMediationPolicies() {
         const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return restApiClient.then((client) => {
-            return client.apis["Global Mediation Policies"].get_mediation_policies({},
+            return client.apis["Global Mediation Policies"].getAllGlobalMediationPolicies({},
                 this._requestMetaData(),
             );
         });
@@ -1822,7 +1821,7 @@ class API extends Resource {
     static getGlobalMediationPolicyContent(mediationPolicyId) {
         const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
         return restApiClient.then((client) => {
-            return client.apis["Global Mediation Policy"].get_mediation_policies__mediationPolicyId__content({
+            return client.apis["Global Mediation Policy"].getGlobalMediationPolicyContent({
                 mediationPolicyId: mediationPolicyId,
             },
                 this._requestMetaData(),
