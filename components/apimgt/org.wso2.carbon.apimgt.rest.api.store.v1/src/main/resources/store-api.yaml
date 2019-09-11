@@ -4344,8 +4344,27 @@ definitions:
         type: array
         description: The subscription tiers selected for the particular API
         items:
-          type: string
-        example: ["Unlimited"]
+          properties:
+            tierName:
+              type: string
+              example: Gold
+            tierPlan:
+              type: string
+              example: COMMERCIAL
+            monetizationAttributes:
+              properties:
+                fixedPrice:
+                  type: string
+                  example: "10"
+                pricePerRequest:
+                  type: string
+                  example: "1"
+                currencyType:
+                  type: string
+                  example: "USD"
+                billingCycle:
+                  type: string
+                  example: "month"
       hasThumbnail:
         type: boolean
         example: true

@@ -760,7 +760,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), xWSO2Tenant);
 
         if (apiInfo != null ) {
-            List<String> apiTiers = apiInfo.getTiers();
+            List<APITiersDTO> apiTiers = apiInfo.getTiers();
             if (apiTiers != null && !apiTiers.isEmpty()) {
                 List<Tier> apiThrottlingPolicies = new ArrayList<>();
                 for (Tier policy : availableThrottlingPolicyList) {
