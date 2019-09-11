@@ -41,7 +41,9 @@ import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -174,9 +176,11 @@ public class MutualSSLAuthenticator implements Authenticator {
         authContext.setTier(tier);
         /* For the mutual SSL based authenticated request, the resource level throttling is not considered, hence
         assigning the unlimited tier for that. */
+        List<VerbInfoDTO> verbInfoList = new ArrayList<>(1);
         VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
         verbInfoDTO.setThrottling(APIConstants.UNLIMITED_TIER);
-        messageContext.setProperty(APIConstants.VERB_INFO_DTO, verbInfoDTO);
+        verbInfoList.add(verbInfoDTO);
+        messageContext.setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
         if (log.isDebugEnabled()) {
             log.debug("Auth context for the API " + getAPIIdentifier(messageContext) + ": Username[" + authContext
                     .getUsername() + "APIKey[(" + authContext.getApiKey() + "] Tier[" + authContext.getTier() + "]");
