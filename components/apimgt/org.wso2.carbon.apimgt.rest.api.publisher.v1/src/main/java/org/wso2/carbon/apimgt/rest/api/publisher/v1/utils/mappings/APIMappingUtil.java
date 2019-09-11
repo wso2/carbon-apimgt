@@ -1465,7 +1465,12 @@ public class APIMappingUtil {
             throws APIManagementException {
         Optional<APIDefinition> apiDefinitionOptional = OASParserUtil.getOASParser(swaggerDefinition);
         APIDefinition apiDefinition = apiDefinitionOptional.get();
-        Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerDefinition);
+        Set<URITemplate> uriTemplates;
+        if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+            uriTemplates = api.getUriTemplates();
+        } else {
+            uriTemplates = apiDefinition.getURITemplates(swaggerDefinition);
+        }
 
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         if (!StringUtils.isEmpty(swaggerDefinition)) {
