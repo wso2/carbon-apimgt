@@ -103,7 +103,8 @@ export default function DefaultAPIForm(props) {
             case 'context':
                 const contextValidity = APIValidation.apiContext.required().validate(value).error;
                 if (contextValidity === null) {
-                    const apiContext = value + '/' + api.version;
+                    const apiContext = value.includes('/') ?
+                        value + '/' + api.version : '/' + value + '/' + api.version;
                     APIValidation.apiParameter.validate(field + ':' + apiContext).then((isValid) => {
                         setValidity(() => {
                             if (isValid) {
@@ -120,7 +121,8 @@ export default function DefaultAPIForm(props) {
             case 'version':
                 const versionValidity = APIValidation.apiVersion.required().validate(value).error;
                 if (versionValidity === null) {
-                    const apiVersion = api.context + '/' + value;
+                    const apiVersion = api.context.includes('/') ?
+                        api.context + '/' + value : '/' + api.context + '/' + value;
                     APIValidation.apiParameter.validate(field + ':' + apiVersion).then((isValid) => {
                         setValidity(() => {
                             if (isValid) {
@@ -186,33 +188,6 @@ export default function DefaultAPIForm(props) {
                 <Grid container spacing={2}>
                     {!isAPIProduct ? (
                         <React.Fragment>
-                            <Grid item md={4}>
-                                <TextField
-                                    fullWidth
-                                    error={validity.version}
-                                    id='outlined-name'
-                                    label={
-                                        <React.Fragment>
-                                            <sup className={classes.mandatoryStar}>*</sup>{' '}
-                                            <FormattedMessage
-                                                id='Apis.Create.WSDL.Steps.DefaultAPIForm.version'
-                                                defaultMessage='Version'
-                                            />
-                                        </React.Fragment>
-                                    }
-                                    name='version'
-                                    value={api.version}
-                                    onChange={onChange}
-                                    InputProps={{
-                                        onBlur: ({ target: { value } }) => {
-                                            validate('version', value);
-                                        },
-                                    }}
-                                    helperText={validity.version && validity.version.message}
-                                    margin='normal'
-                                    variant='outlined'
-                                />
-                            </Grid>
                             <Grid item md={8}>
                                 <TextField
                                     fullWidth
@@ -239,6 +214,33 @@ export default function DefaultAPIForm(props) {
                                         (validity.context && validity.context.message) ||
                                         `API will be exposed in ${actualContext(api)} context at the gateway`
                                     }
+                                    margin='normal'
+                                    variant='outlined'
+                                />
+                            </Grid>
+                            <Grid item md={4}>
+                                <TextField
+                                    fullWidth
+                                    error={validity.version}
+                                    id='outlined-name'
+                                    label={
+                                        <React.Fragment>
+                                            <sup className={classes.mandatoryStar}>*</sup>{' '}
+                                            <FormattedMessage
+                                                id='Apis.Create.WSDL.Steps.DefaultAPIForm.version'
+                                                defaultMessage='Version'
+                                            />
+                                        </React.Fragment>
+                                    }
+                                    name='version'
+                                    value={api.version}
+                                    onChange={onChange}
+                                    InputProps={{
+                                        onBlur: ({ target: { value } }) => {
+                                            validate('version', value);
+                                        },
+                                    }}
+                                    helperText={validity.version && validity.version.message}
                                     margin='normal'
                                     variant='outlined'
                                 />

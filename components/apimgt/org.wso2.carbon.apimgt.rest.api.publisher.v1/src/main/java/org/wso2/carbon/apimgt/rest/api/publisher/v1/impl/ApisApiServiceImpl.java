@@ -2117,6 +2117,24 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
+    public Response validateDocument(String apiId, String name, String ifMatch, MessageContext messageContext) {
+        if (StringUtils.isEmpty(name) || StringUtils.isEmpty(apiId)) {
+            RestApiUtil.handleBadRequest("API Id and/ or document name should not be empty", log);
+        }
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            return apiProvider.isDocumentationExist(apiIdentifier, name) ? Response.status(Response.Status.OK).build() :
+                    Response.status(Response.Status.NOT_FOUND).build();
+
+        } catch(APIManagementException e){
+            RestApiUtil.handleInternalServerError("Error while checking the api existence", e, log);
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    @Override
     public Response apisApiIdResourcePathsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
             MessageContext messageContext) {
         try {

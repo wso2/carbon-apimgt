@@ -2582,6 +2582,61 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  #----------------------------------------------------------------------------
+  # API Document Name validation method.
+  #----------------------------------------------------------------------------
+  /apis/{apiId}/documents/validate:
+    post:
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/validate?name=docName\""
+      x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/validate?name=docName\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n"
+      x-wso2-response: "HTTP/1.1 200 OK \n"
+      security:
+        - OAuth2Security:
+            - apim:document_create
+      summary: Check whether a document with the provided name exist.
+      description: |
+        This operation can be used to verify the document name exists or not.
+      operationId: validateDocument
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: query
+          name: name
+          description: |
+            The name of the document which needs to be checked for the existance.
+          required: true
+          type: string
+        - $ref: '#/parameters/If-Match'
+      tags:
+        - API Documents
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response if the api name exist.
+          schema:
+            $ref: '#/definitions/Document'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Requested document not found.
+          schema:
+            $ref: '#/definitions/Error'
+
   ######################################################
   # The "specific mediation policy" resource APIs
   ######################################################

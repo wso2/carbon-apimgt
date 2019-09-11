@@ -1062,6 +1062,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @POST
+    @Path("/{apiId}/documents/validate")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Check whether a document with the provided name exist.", notes = "This operation can be used to verify the document name exists or not. ", response = DocumentDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:document_create", description = "Create API documents")
+        })
+    }, tags={ "API Documents",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response if the api name exist. ", response = DocumentDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Requested document not found. ", response = ErrorDTO.class) })
+    public Response validateDocument(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "The name of the document which needs to be checked for the existance. ",required=true)  @QueryParam("name") String name, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.validateDocument(apiId, name, ifMatch, securityContext);
+    }
+
+    @POST
     @Path("/validate-openapi")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })

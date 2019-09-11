@@ -58,10 +58,24 @@ const apiSchema = Joi.extend(joi => ({
     name: 'api',
     rules: [
         {
-            name: 'parameter',
+            name: 'isAPIParameterExist',
             validate(params, value, state, options) { // eslint-disable-line no-unused-vars
                 const api = new API();
                 return api.validateAPI(value);
+            },
+        },
+    ],
+}));
+
+const documentSchema = Joi.extend(joi => ({
+    base: joi.string(),
+    name: 'document',
+    rules: [
+        {
+            name: 'isDocumentPresent',
+            validate(params, value, state, options) { // eslint-disable-line no-unused-vars
+                const api = new API();
+                return api.validateDocument(value.id, value.name);
             },
         },
     ],
@@ -74,7 +88,8 @@ const definition = {
     url: Joi.string().uri(),
     role: roleSchema.systemRole().role(),
     userRole: userRoleSchema.userRole().role(),
-    apiParameter: apiSchema.api().parameter(),
+    apiParameter: apiSchema.api().isAPIParameterExist(),
+    apiDocument: documentSchema.document().isDocumentPresent(),
 };
 
 export default definition;
