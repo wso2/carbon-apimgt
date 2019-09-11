@@ -6838,6 +6838,10 @@ definitions:
         items:
           type: string
         example: ["Production and Sandbox"]
+      apiType:
+        type: string
+        description: The api type to be used. Accepted values are API, API PRODUCT
+        example: APIProduct
       transport:
         description: |
           Supported transports for the API (http and/or https).
@@ -6845,6 +6849,11 @@ definitions:
         items:
           type: string
         example: ["http","https"]
+      tags:
+        type: array
+        items:
+          type: string
+        example: ["substract","add"]
       policies:
         type: array
         items:
@@ -6968,6 +6977,13 @@ definitions:
       businessOwnerEmail:
         type: string
         example: businessowner@wso2.com
+      technicalOwner:
+        type: string
+        example: technicalowner
+      technicalOwnerEmail:
+        type: string
+        example: technicalowner@wso2.com
+
 #-----------------------------------------------------
 # The Application resource
 #-----------------------------------------------------

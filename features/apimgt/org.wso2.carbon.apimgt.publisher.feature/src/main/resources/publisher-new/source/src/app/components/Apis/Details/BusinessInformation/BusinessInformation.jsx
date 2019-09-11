@@ -338,6 +338,7 @@ BusinessInformation.propTypes = {
             businessOwnerEmail: PropTypes.string,
             technicalOwner: PropTypes.string,
             technicalOwnerEmail: PropTypes.string,
+            apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]),
         }).isRequired,
     }).isRequired,
     updateAPI: PropTypes.func.isRequired,
