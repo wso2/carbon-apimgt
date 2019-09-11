@@ -1,0 +1,25 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "OAPI",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/item": {
+      "parameters": [],
+      "servers": [],
+      "summary": "Valid summary but invalid in WSO2",
+      "description": "Valid description but invalid in WSO2",
+      "x-custom-field": "Valid custom field but invalid in WSO2",
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "x-auth-type": "Application",
+        "x-throttling-tier": "Unlimited"
+      }
+    }
+  }
+}

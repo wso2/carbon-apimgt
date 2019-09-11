@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,85 +15,104 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import Snackbar from '@material-ui/core/Snackbar';
-import IconButton from '@material-ui/core/IconButton';
+import clsx from 'clsx';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import ErrorIcon from '@material-ui/icons/Error';
+import InfoIcon from '@material-ui/icons/Info';
 import CloseIcon from '@material-ui/icons/Close';
+import { amber, green } from '@material-ui/core/colors';
+import IconButton from '@material-ui/core/IconButton';
+import Snackbar from '@material-ui/core/Snackbar';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import WarningIcon from '@material-ui/icons/Warning';
+import { makeStyles } from '@material-ui/core/styles';
 
-import Info from '@material-ui/icons/Info';
-import Error from '@material-ui/icons/Error';
-import Warning from '@material-ui/icons/Warning';
-import Done from '@material-ui/icons/Done';
-import Loading from '@material-ui/core/CircularProgress';
+const variantIcon = {
+    success: CheckCircleIcon,
+    warning: WarningIcon,
+    error: ErrorIcon,
+    info: InfoIcon,
+};
 
-const styles = {
-    root: {
-        position: 'relative' /* Overriding the default Snackbar root properties to stack messages */,
-        padding: '5px' /* To add some space between messages when stacking messages */,
+const useStyles1 = makeStyles(theme => ({
+    success: {
+        backgroundColor: green[600],
     },
-};
-/**
- * Build the message which is displayed in the Alert content
- */
-const Message = (props) => {
+    error: {
+        backgroundColor: theme.palette.error.dark,
+    },
+    info: {
+        backgroundColor: theme.palette.primary.main,
+    },
+    warning: {
+        backgroundColor: amber[700],
+    },
+    icon: {
+        fontSize: 20,
+    },
+    iconVariant: {
+        opacity: 0.9,
+        marginRight: theme.spacing(1),
+    },
+    message: {
+        display: 'flex',
+        alignItems: 'center',
+    },
+}));
+
+function MySnackbarContentWrapper(props) {
+    const classes = useStyles1();
     const {
-        classes, message, handleClose, type,
+        className, message, onClose, variant, ...other
     } = props;
-    const Icon = Message.iconTypes[type];
+    const Icon = variantIcon[variant];
+
     return (
-        <div>
-            <Snackbar
-                classes={{ root: classes.root }}
-                open
-                anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'center',
-                }}
-                ContentProps={{
-                    'aria-describedby': 'message-id',
-                }}
-                message={
-                    <span id='message-id'>
-                        {Icon}
-                        {message}
-                    </span>
-                }
-                action={[
-                    <IconButton
-                        key='close'
-                        aria-label='Close'
-                        color='default'
-                        className={classes.close}
-                        onClick={handleClose}
-                    >
-                        <CloseIcon />
-                    </IconButton>,
-                ]}
-            />
-        </div>
+        <SnackbarContent
+            className={clsx(classes[variant], className)}
+            aria-describedby='client-snackbar'
+            message={
+                <span id='client-snackbar' className={classes.message}>
+                    <Icon className={clsx(classes.icon, classes.iconVariant)} />
+                    {message}
+                </span>
+            }
+            action={[
+                <IconButton key='close' aria-label='close' color='inherit' onClick={onClose}>
+                    <CloseIcon className={classes.icon} />
+                </IconButton>,
+            ]}
+            {...other}
+        />
     );
-};
-/* TODO: Need to add color accordingly ~tmkb */
-Message.iconTypes = {
-    info: <Info color='primary' />,
-    success: <Done />,
-    error: <Error color='error' />,
-    warning: <Warning />,
-    loading: <Loading />,
+}
+
+MySnackbarContentWrapper.propTypes = {
+    className: PropTypes.string.isRequired,
+    message: PropTypes.string.isRequired,
+    onClose: PropTypes.func.isRequired,
+    variant: PropTypes.oneOf(['error', 'info', 'success', 'warning']).isRequired,
 };
 
+export default function Message(props) {
+    const { message, handleClose, type } = props;
+    return (
+        <Snackbar
+            anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+            }}
+            open
+            onClose={handleClose}
+        >
+            <MySnackbarContentWrapper onClose={handleClose} variant={type} message={message} />
+        </Snackbar>
+    );
+}
 Message.propTypes = {
-    classes: PropTypes.shape({
-        root: PropTypes.string,
-        close: PropTypes.string,
-
-    }).isRequired,
     message: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
     handleClose: PropTypes.func.isRequired,
     type: PropTypes.string.isRequired,
 };
-
-export default withStyles(styles)(Message);

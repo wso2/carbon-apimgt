@@ -27,6 +27,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
+import AuthManager from 'AppData/AuthManager';
 
 /**
  *
@@ -37,6 +38,8 @@ import { FormattedMessage } from 'react-intl';
  */
 export default function DefaultVersion(props) {
     const { api, configDispatcher } = props;
+    const isNotCreator = AuthManager.isNotCreator();
+
     return (
         <Grid container spacing={1} alignItems='flex-start' xs={11}>
             <Grid item>
@@ -50,47 +53,52 @@ export default function DefaultVersion(props) {
                     <RadioGroup
                         aria-label='Is Default'
                         value={api.isDefaultVersion}
-                        onChange={({ target: { value } }) =>
-                            configDispatcher({ action: 'isDefaultVersion', value: value === 'true' })
+                        onChange={({
+                            target: { value },
+                        }) => configDispatcher({
+                            action: 'isDefaultVersion', value: value === 'true',
+                        })
                         }
                         style={{ display: 'flow-root' }}
                     >
                         <FormControlLabel
+                            disabled={isNotCreator}
                             value
                             control={<Radio />}
-                            label={
+                            label={(
                                 <FormattedMessage
                                     id='Apis.Details.Configuration.Configuration.isdefault.yes'
                                     defaultMessage='Yes'
                                 />
-                            }
+                            )}
                         />
                         <FormControlLabel
+                            disabled={isNotCreator}
                             value={false}
                             control={<Radio />}
-                            label={
+                            label={(
                                 <FormattedMessage
                                     id='Apis.Details.Configuration.Configuration.isdefault.no'
                                     defaultMessage='No'
                                 />
-                            }
+                            )}
                         />
                     </RadioGroup>
                 </FormControl>
             </Grid>
             <Grid item xs={1}>
                 <Tooltip
-                    title={
+                    title={(
                         <FormattedMessage
                             id='Apis.Details.Configuration.Configuration.defaultversion.tooltip'
                             defaultMessage={
-                                'If a particular version of an API is default, ' +
-                                'That API can be invoked without specifying the version' +
-                                ' parameter in the path, The default version will be wired ' +
-                                'to that request automatically'
+                                'If a particular version of an API is default, '
+                                + 'That API can be invoked without specifying the version'
+                                + ' parameter in the path, The default version will be wired '
+                                + 'to that request automatically'
                             }
                         />
-                    }
+                    )}
                     aria-label='add'
                     placement='right-end'
                     interactive

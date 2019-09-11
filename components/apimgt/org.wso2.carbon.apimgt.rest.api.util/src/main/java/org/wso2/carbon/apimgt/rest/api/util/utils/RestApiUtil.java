@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
@@ -922,19 +923,6 @@ public class RestApiUtil {
     }
 
     /**
-     * Checks whether the specified tenant domain is available
-     *
-     * @param tenantDomain tenant domain
-     * @return true if tenant domain available
-     * @throws UserStoreException
-     */
-    public static boolean isTenantAvailable(String tenantDomain) throws UserStoreException {
-        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .getTenantId(tenantDomain);
-        return tenantId != -1;
-    }
-
-    /**
      * Check whether the HTTP method is allowed for given resources
      *
      * @param method HTTP method
@@ -1231,7 +1219,8 @@ public class RestApiUtil {
 
         Set<URITemplate> uriTemplates = null;
         try {
-            uriTemplates = oasParser.getURITemplates(api, swagger);
+            SwaggerData swaggerData = new SwaggerData(api);
+            uriTemplates = oasParser.getURITemplates(swaggerData, swagger);
         } catch (APIManagementException e) {
             log.error("Error while parsing swagger content to get URI Templates", e);
         }
@@ -1324,8 +1313,9 @@ public class RestApiUtil {
                     log.error("Error occurred while parsing swagger definition");
                     return Collections.EMPTY_SET;
                 }
+                SwaggerData swaggerData = new SwaggerData(api);
                 //Get URL templates from swagger content w created
-                storeResourceMappings = oasParser.getURITemplates(api, definition);
+                storeResourceMappings = oasParser.getURITemplates(swaggerData, definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
@@ -1367,8 +1357,9 @@ public class RestApiUtil {
                     log.error("Error occurred while parsing swagger definition");
                     return Collections.EMPTY_SET;
                 }
+                SwaggerData swaggerData = new SwaggerData(api);
                 //Get URL templates from swagger content we created
-                publisherResourceMappings = oasParser.getURITemplates(api, definition);
+                publisherResourceMappings = oasParser.getURITemplates(swaggerData, definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
@@ -1404,8 +1395,9 @@ public class RestApiUtil {
                     log.error("Error occurred while parsing swagger definition");
                     return Collections.EMPTY_SET;
                 }
+                SwaggerData swaggerData = new SwaggerData(api);
                 //Get URL templates from swagger content we created
-                adminAPIResourceMappings = oasParser.getURITemplates(api, definition);
+                adminAPIResourceMappings = oasParser.getURITemplates(swaggerData, definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {

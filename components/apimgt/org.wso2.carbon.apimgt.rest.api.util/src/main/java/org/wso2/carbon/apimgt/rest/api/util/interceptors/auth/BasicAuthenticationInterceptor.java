@@ -275,9 +275,10 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 }
             }
         }
+        //Add the validated user scope list to the cxf message
+        inMessage.getExchange().put(RestApiConstants.USER_REST_API_SCOPES, validatedUserScopes.toArray());
+
         if (!validatedUserScopes.isEmpty()) {
-            //Add the successfully validated user scope list to the cxf message
-            inMessage.put(RestApiConstants.USER_REST_API_SCOPES, validatedUserScopes.toArray(new Scope[0]));
             if (log.isDebugEnabled()) {
                 log.debug("Successfully validated REST API Scopes for the user " + username);
             }

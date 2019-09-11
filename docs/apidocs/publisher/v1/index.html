@@ -193,25 +193,25 @@
                                         <li id="op-apisCopyApiPost"><a href="#!/operations#APIs#apisCopyApiPost">Create a new API version</a></li>
                                         <li id="op-apisGet"><a href="#!/operations#APIs#apisGet">Retrieve/Search APIs
 </a></li>
-                                        <li id="op-apisHead"><a href="#!/operations#APIs#apisHead">Check given API attibute name is already exist
-</a></li>
                                         <li id="op-apisImportGraphqlSchemaPost"><a href="#!/operations#APIs#apisImportGraphqlSchemaPost">Import API Definition</a></li>
                                         <li id="op-apisPost"><a href="#!/operations#APIs#apisPost">Create a new API</a></li>
                                         <li id="op-importOpenAPIDefinition"><a href="#!/operations#APIs#importOpenAPIDefinition">Import an OpenAPI Definition</a></li>
                                         <li id="op-importWSDLDefinition"><a href="#!/operations#APIs#importWSDLDefinition">Import a WSDL Definition</a></li>
                                         <li id="op-updateAPIThumbnail"><a href="#!/operations#APIs#updateAPIThumbnail">Upload a thumbnail image</a></li>
+                                        <li id="op-validateAPI"><a href="#!/operations#APIs#validateAPI">Check given API attibute name is already exist
+</a></li>
                             </ul>
                         </li>
                         <hr/>
                         <span class="class-name">Client Certificates</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-clientCertificatesAliasContentGet"><a href="#!/operations#ClientCertificates#clientCertificatesAliasContentGet">Download a certificate.</a></li>
-                                        <li id="op-clientCertificatesAliasDelete"><a href="#!/operations#ClientCertificates#clientCertificatesAliasDelete">Delete a certificate.</a></li>
-                                        <li id="op-clientCertificatesAliasGet"><a href="#!/operations#ClientCertificates#clientCertificatesAliasGet">Get the certificate information.</a></li>
-                                        <li id="op-clientCertificatesAliasPut"><a href="#!/operations#ClientCertificates#clientCertificatesAliasPut">Update a certificate.</a></li>
-                                        <li id="op-clientCertificatesGet"><a href="#!/operations#ClientCertificates#clientCertificatesGet">Retrieve/ Search uploaded Client Certificates.</a></li>
-                                        <li id="op-clientCertificatesPost"><a href="#!/operations#ClientCertificates#clientCertificatesPost">Upload a new certificate.</a></li>
+                                        <li id="op-apisApiIdClientCertificatesAliasContentGet"><a href="#!/operations#ClientCertificates#apisApiIdClientCertificatesAliasContentGet">Download a certificate.</a></li>
+                                        <li id="op-apisApiIdClientCertificatesAliasDelete"><a href="#!/operations#ClientCertificates#apisApiIdClientCertificatesAliasDelete">Delete a certificate.</a></li>
+                                        <li id="op-apisApiIdClientCertificatesAliasGet"><a href="#!/operations#ClientCertificates#apisApiIdClientCertificatesAliasGet">Get the certificate information.</a></li>
+                                        <li id="op-apisApiIdClientCertificatesAliasPut"><a href="#!/operations#ClientCertificates#apisApiIdClientCertificatesAliasPut">Update a certificate.</a></li>
+                                        <li id="op-apisApiIdClientCertificatesGet"><a href="#!/operations#ClientCertificates#apisApiIdClientCertificatesGet">Retrieve/ Search uploaded Client Certificates.</a></li>
+                                        <li id="op-apisApiIdClientCertificatesPost"><a href="#!/operations#ClientCertificates#apisApiIdClientCertificatesPost">Upload a new certificate.</a></li>
                             </ul>
                         </li>
                         <hr/>
@@ -227,19 +227,19 @@
                             </ul>
                         </li>
                         <hr/>
-                        <span class="class-name">GraphQL Schema</span>
-                        <li class="section-box">
-                            <ul class="nav nav-stacked">
-                                        <li id="op-apisApiIdGraphqlSchemaPut"><a href="#!/operations#GraphQLSchema#apisApiIdGraphqlSchemaPut">Add a Schema to a GraphQL API</a></li>
-                            </ul>
-                        </li>
-                        <hr/>
                         <span class="class-name">External Stores</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                         <li id="op-getAllExternalStores"><a href="#!/operations#ExternalStores#getAllExternalStores">Retrieve external store list to publish an API</a></li>
                                         <li id="op-getAllPublishedExternalStoresByAPI"><a href="#!/operations#ExternalStores#getAllPublishedExternalStoresByAPI">Get the list of external stores which an API is published to</a></li>
                                         <li id="op-publishAPIToExternalStores"><a href="#!/operations#ExternalStores#publishAPIToExternalStores">Publish an API to external stores</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">GraphQL Schema</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdGraphqlSchemaPut"><a href="#!/operations#GraphQLSchema#apisApiIdGraphqlSchemaPut">Add a Schema to a GraphQL API</a></li>
                             </ul>
                         </li>
                         <hr/>
@@ -274,11 +274,11 @@
                             </ul>
                         </li>
                         <hr/>
-                        <span class="class-name">roles</span>
+                        <span class="class-name">Roles</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-meRolesRoleIdHead"><a href="#!/operations#Roles#meRolesRoleIdHead">Validate whether the logged-in user has the given role</a></li>
-                                        <li id="op-rolesRoleIdHead"><a href="#!/operations#Roles#rolesRoleIdHead">Check given role name is already exist</a></li>
+                                        <li id="op-validateSystemRole"><a href="#!/operations#Roles#validateSystemRole">Check given role name is already exist</a></li>
+                                        <li id="op-validateUserRole"><a href="#!/operations#Roles#validateUserRole">Validate whether the logged-in user has the given role</a></li>
                             </ul>
                         </li>
                         <hr/>
@@ -296,6 +296,15 @@
                                         <li id="op-subscriptionsBlockSubscriptionPost"><a href="#!/operations#Subscriptions#subscriptionsBlockSubscriptionPost">Block a subscription</a></li>
                                         <li id="op-subscriptionsGet"><a href="#!/operations#Subscriptions#subscriptionsGet">Get all Subscriptions</a></li>
                                         <li id="op-subscriptionsUnblockSubscriptionPost"><a href="#!/operations#Subscriptions#subscriptionsUnblockSubscriptionPost">Unblock a Subscription</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Tenants</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-getTenantExistence"><a href="#!/operations#Tenants#getTenantExistence">Check whether the given tenant already exists</a></li>
+                                        <li id="op-getTenantsByState"><a href="#!/operations#Tenants#getTenantsByState">Get get tenants by state
+</a></li>
                             </ul>
                         </li>
                         <hr/>
@@ -344,6 +353,16 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-APIEndpointSecurity"><a href="#!/models#APIEndpointSecurity">APIEndpointSecurity</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIExternalStore"><a href="#!/models#APIExternalStore">APIExternalStore</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIExternalStoreList"><a href="#!/models#APIExternalStoreList">APIExternalStoreList</a></li>
                             </ul>
                         </li>
                         <li class="section-box">
@@ -689,6 +708,16 @@
                         <li class="section-box">
                             <ul class="nav nav-stacked">
                                 <li id="def-SubscriptionList"><a href="#!/models#SubscriptionList">SubscriptionList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Tenant"><a href="#!/models#Tenant">Tenant</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-TenantList"><a href="#!/models#TenantList">TenantList</a></li>
                             </ul>
                         </li>
                         <li class="section-box">

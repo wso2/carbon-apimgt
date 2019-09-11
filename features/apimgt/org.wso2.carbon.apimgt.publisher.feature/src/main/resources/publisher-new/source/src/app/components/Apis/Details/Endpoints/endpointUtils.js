@@ -142,9 +142,65 @@ function getEndpointConfigByImpl(implementationType) {
         tmpEndpointConfig.sandbox_endpoints = { config: null, url: 'http://localhost' };
     } else {
         tmpEndpointConfig.endpoint_type = 'http';
-        tmpEndpointConfig.production_endpoints = { url: 'http://myservice/resource' };
-        tmpEndpointConfig.sandbox_endpoints = { url: 'http://myservice/resource' };
+        tmpEndpointConfig.production_endpoints = { url: '' };
+        tmpEndpointConfig.sandbox_endpoints = { url: '' };
         tmpEndpointConfig.failOver = 'False';
+    }
+    return tmpEndpointConfig;
+}
+
+/**
+ * Get the endpoint config based on the selected endpoint type.
+ * Supported endpoint types:
+ * 1. http
+ * 2. address
+ * 3. prototyped
+ * 4. awslambda
+ * 5. default (Dynamic)
+ *
+ * @param {string} endpointType The selected endpoint type.
+ * @return {endpointConfig} Endpoint config object.
+ * */
+function createEndpointConfig(endpointType) {
+    const tmpEndpointConfig = {};
+    switch (endpointType) {
+        case 'http':
+            tmpEndpointConfig.endpoint_type = 'http';
+            tmpEndpointConfig.production_endpoints = { url: '' };
+            tmpEndpointConfig.sandbox_endpoints = { url: '' };
+            tmpEndpointConfig.failOver = 'False';
+            break;
+        case 'address':
+            tmpEndpointConfig.endpoint_type = 'address';
+            tmpEndpointConfig.production_endpoints = {
+                url: '',
+                endpoint_type: 'address',
+                template_not_supported: false,
+            };
+            tmpEndpointConfig.sandbox_endpoints = {
+                url: '',
+                endpoint_type: 'address',
+                template_not_supported: false,
+            };
+            tmpEndpointConfig.failOver = 'False';
+            break;
+        case 'prototyped':
+            tmpEndpointConfig.implementation_status = 'prototyped';
+            tmpEndpointConfig.endpoint_type = 'http';
+            tmpEndpointConfig.production_endpoints = { config: null, url: 'http://localhost' };
+            tmpEndpointConfig.sandbox_endpoints = { config: null, url: 'http://localhost' };
+            break;
+        case 'awslambda':
+            tmpEndpointConfig.endpoint_type = 'awslambda';
+            tmpEndpointConfig.accessKey = '';
+            tmpEndpointConfig.secretKey = '';
+            break;
+        default:
+            tmpEndpointConfig.endpoint_type = 'default';
+            tmpEndpointConfig.production_endpoints = { url: 'default' };
+            tmpEndpointConfig.sandbox_endpoints = { url: 'default' };
+            tmpEndpointConfig.failOver = 'False';
+            break;
     }
     return tmpEndpointConfig;
 }
@@ -155,4 +211,5 @@ export {
     getEndpointTemplateByType,
     endpointsToList,
     getEndpointConfigByImpl,
+    createEndpointConfig,
 };

@@ -1300,6 +1300,20 @@ class API extends Resource {
         return promised_getAPIThumbnail;
     }
 
+    validateSystemRole(role) {
+        const promise = this.client.then((client) => {
+            return client.apis.Roles.validateSystemRole({ roleId: role })
+        });
+        return promise;
+    }
+
+    validateUSerRole(role) {
+        const promise = this.client.then((client) => {
+            return client.apis.Roles.validateUserRole({ roleId: role })
+        });
+        return promise;
+    }
+
     /**
      * Add new thumbnail image to an API
      *

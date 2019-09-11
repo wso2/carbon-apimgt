@@ -8356,6 +8356,7 @@ public class ApiMgtDAO {
                 ps.setString(3, store.getDisplayName());
                 ps.setString(4, store.getEndpoint());
                 ps.setString(5, store.getType());
+                ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
                 ps.addBatch();
             }
 
@@ -8489,8 +8490,9 @@ public class ApiMgtDAO {
                 APIStore store = (APIStore) storeObject;
                 ps.setString(1, store.getEndpoint());
                 ps.setString(2, store.getType());
-                ps.setInt(3, apiId);
-                ps.setString(4, store.getName());
+                ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+                ps.setInt(4, apiId);
+                ps.setString(5, store.getName());
                 ps.addBatch();
             }
 
@@ -8571,6 +8573,7 @@ public class ApiMgtDAO {
                 store.setDisplayName(rs.getString("STORE_DISPLAY_NAME"));
                 store.setEndpoint(rs.getString("STORE_ENDPOINT"));
                 store.setType(rs.getString("STORE_TYPE"));
+                store.setLastUpdated(rs.getTimestamp("LAST_UPDATED_TIME"));
                 store.setPublished(true);
                 storesSet.add(store);
             }

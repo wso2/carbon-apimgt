@@ -806,7 +806,7 @@ public interface APIConsumer extends APIManager {
      * @return swagger string
      * @throws APIManagementException if error occurred while obtaining the swagger definition
      */
-    String getOpenAPIDefinitionForEnvironment(APIIdentifier apiId, String environmentName)
+    String getOpenAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
             throws APIManagementException;
 
     /**
@@ -817,7 +817,7 @@ public interface APIConsumer extends APIManager {
      * @return swagger string
      * @throws APIManagementException if error occurred while obtaining the swagger definition
      */
-    String getOpenAPIDefinitionForLabel(APIIdentifier apiId, String labelName)
+    String getOpenAPIDefinitionForLabel(Identifier apiId, String labelName)
             throws APIManagementException;
 
     /**
@@ -897,6 +897,14 @@ public interface APIConsumer extends APIManager {
 	JSONObject resumeWorkflow(Object[] args);
 
     boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
+
+    /**
+     * This methods loads the monetization implementation class
+     *
+     * @return monetization implementation class
+     * @throws APIManagementException if failed to load monetization implementation class
+     */
+    Monetization getMonetizationImplClass() throws APIManagementException;
 
     /**
      * Returns wsdl document resource to be downloaded from the API store for a SOAP api

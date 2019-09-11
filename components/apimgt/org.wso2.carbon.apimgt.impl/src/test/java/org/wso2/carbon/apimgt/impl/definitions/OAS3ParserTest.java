@@ -1,252 +1,165 @@
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.security.OAuthFlow;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.Optional;
+import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
-
-public class OAS3ParserTest {
+public class OAS3ParserTest extends OASTestBase {
+    private OAS3Parser oas3Parser = new OAS3Parser();
 
     @Test
-    public void getURITemplates() throws Exception {
-        //todo: to be implement
-        /*String oas3 = IOUtils
-                .toString(getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "petstore_v3.yaml"),
-                        "UTF-8");
-        OAS3Parser oas3Parser = new OAS3Parser();
-        Set<URITemplate> uriTemplates = oas3Parser.getURITemplates(null, oas3);
-        System.out.println();*/
+    public void testGetURITemplates() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3_scopes.json";
+        String oas3Scope = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        testGetURITemplates(oas3Parser, oas3Scope);
     }
 
     @Test
-    public void getScopes() {
+    public void testGetScopes() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3_scopes.json";
+        String oas3Scope = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        testGetScopes(oas3Parser, oas3Scope);
     }
 
     @Test
-    public void saveAPIDefinition() {
+    public void testGenerateAPIDefinition() throws Exception {
+        testGenerateAPIDefinition(oas3Parser);
     }
 
     @Test
-    public void getAPIDefinition() {
+    public void testUpdateAPIDefinition() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3Resources.json";
+        String oas2Resources = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        testGenerateAPIDefinition2(oas3Parser, oas2Resources);
     }
 
     @Test
-    public void generateAPIDefinition() {
+    public void testUpdateAPIDefinitionWithExtensions() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3Resources.json";
+        String oas3Resources = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+
+        // check remove vendor extensions
+        System.setProperty(APIDefinition.KEEP_LEGACY_EXTENSION_PROP, Boolean.toString(false));
+        String definition = testGenerateAPIDefinitionWithExtension(oas3Parser, oas3Resources);
+        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(definition, null, null);
+        OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
+        boolean isExtensionNotFound = openAPI.getExtensions() == null || !openAPI.getExtensions()
+                .containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY);
+        Assert.assertTrue(isExtensionNotFound);
+        Assert.assertEquals(2, openAPI.getPaths().size());
+
+        Iterator<Map.Entry<String, PathItem>> itr = openAPI.getPaths().entrySet().iterator();
+        while (itr.hasNext()) {
+            Map.Entry<String, PathItem> pathEntry = itr.next();
+            PathItem path = pathEntry.getValue();
+            for (Operation operation : path.readOperations()) {
+                Assert.assertFalse(operation.getExtensions().containsKey(APIConstants.SWAGGER_X_SCOPE));
+            }
+        }
+
+        // check preserve vendor extensions
+        System.setProperty(APIDefinition.KEEP_LEGACY_EXTENSION_PROP, Boolean.toString(true));
+        definition = testGenerateAPIDefinitionWithExtension(oas3Parser, oas3Resources);
+        parseAttemptForV3 = openAPIV3Parser.readContents(definition, null, null);
+        openAPI = parseAttemptForV3.getOpenAPI();
+        Assert.assertTrue(openAPI.getExtensions().containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY));
+        Assert.assertEquals(2, openAPI.getPaths().size());
+
+        itr = openAPI.getPaths().entrySet().iterator();
+        while (itr.hasNext()) {
+            Map.Entry<String, PathItem> pathEntry = itr.next();
+            PathItem path = pathEntry.getValue();
+            for (Operation operation : path.readOperations()) {
+                Assert.assertTrue(operation.getExtensions().containsKey(APIConstants.SWAGGER_X_SCOPE));
+            }
+        }
+
+        // check updated scopes in both extension and security definition
+        Operation itemGet = openAPI.getPaths().get("/items").getGet();
+        Assert.assertEquals("newScope", itemGet.getExtensions().get(APIConstants.SWAGGER_X_SCOPE));
+        Assert.assertTrue(itemGet.getSecurity().get(0).get("default").contains("newScope"));
+
+        // check available scopes in security definition
+        SecurityScheme securityScheme = openAPI.getComponents().getSecuritySchemes().get("default");
+        OAuthFlow implicityOauth = securityScheme.getFlows().getImplicit();
+        Assert.assertTrue(implicityOauth.getScopes().containsKey("newScope"));
+        Assert.assertEquals("newScopeDescription", implicityOauth.getScopes().get("newScope"));
+
+        Assert.assertTrue(implicityOauth.getExtensions().containsKey(APIConstants.SWAGGER_X_SCOPES_BINDINGS));
+        Map<String, String> scopeBinding =
+                (Map<String, String>) implicityOauth.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+        Assert.assertTrue(scopeBinding.containsKey("newScope"));
+        Assert.assertEquals("admin", scopeBinding.get("newScope"));
+
+        // check available scopes in extensions
+        Map<String, LinkedHashMap<String, ArrayList<LinkedHashMap<String, String>>>> scopesInEx =
+                (Map<String, LinkedHashMap<String, ArrayList<LinkedHashMap<String, String>>>>) openAPI.getExtensions()
+                        .get(APIConstants.SWAGGER_X_WSO2_SECURITY);
+        ArrayList<LinkedHashMap<String, String>> scopeList =
+                scopesInEx.get(APIConstants.SWAGGER_OBJECT_NAME_APIM).get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+        Assert.assertEquals(3, scopeList.size());
+        boolean found = false;
+        for (LinkedHashMap<String, String> map : scopeList) {
+            if ("newScope".equals(map.get("name"))) {
+                Assert.assertEquals("admin", map.get("roles"));
+                Assert.assertEquals("newScope", map.get("key"));
+                Assert.assertEquals("newScopeDescription", map.get("description"));
+                found = true;
+            }
+        }
+        Assert.assertTrue("Newly added scope not found in the updated definition", found);
     }
 
     @Test
-    public void generateAPIDefinition1() throws Exception {
-        //todo: to be implement
-        /*
-        String oas3 = IOUtils
-                .toString(getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "swagger.json"),
-                        "UTF-8");
-        Optional<APIDefinition> optional = OASParserUtil.getOASParser(oas3);
-        Assert.assertTrue(optional.isPresent());
-        Assert.assertTrue(optional.get() instanceof OAS3Parser);
-
-        String apiData = IOUtils
-                .toString(getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "apiData.json"),
-                        "UTF-8");*/
-
-    }
-
-    @Test
-    public void getAPIOpenAPIDefinitionTimeStamps() {
-    }
-
-    @Test
-    public void validateAPIDefinition() {
-    }
-
-    @Test
-    public void testGetURITemplatesOfOpenAPI300Spec() throws APIManagementException {
-
-        OAS3Parser apiDefinitionFromOpenAPI300 = new OAS3Parser();
+    public void testGetURITemplatesOfOpenAPI300Spec() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3_uri_template.json";
         String openAPISpec300 =
-                "{\n" +
-                        "   \"openapi\":\"3.0.0\",\n" +
-                        "   \"paths\":{\n" +
-                        "      \"/*\":{\n" +
-                        "         \"get\":{\n" +
-                        "            \"responses\":{\n" +
-                        "               \"200\":{\n" +
-                        "                  \"description\":\"\"\n" +
-                        "               }\n" +
-                        "            },\n" +
-                        "            \"x-auth-type\":\"Application\",\n" +
-                        "            \"x-throttling-tier\":\"Unlimited\"\n" +
-                        "         },\n" +
-                        "         \"post\":{\n" +
-                        "            \"requestBody\":{\n" +
-                        "               \"content\":{\n" +
-                        "                  \"application/json\":{\n" +
-                        "                     \"schema\":{\n" +
-                        "                        \"type\":\"object\",\n" +
-                        "                        \"properties\":{\n" +
-                        "                           \"payload\":{\n" +
-                        "                              \"type\":\"string\"\n" +
-                        "                           }\n" +
-                        "                        }\n" +
-                        "                     }\n" +
-                        "                  }\n" +
-                        "               },\n" +
-                        "               \"required\":true,\n" +
-                        "               \"description\":\"Request Body\"\n" +
-                        "            },\n" +
-                        "            \"responses\":{\n" +
-                        "               \"200\":{\n" +
-                        "                  \"description\":\"\"\n" +
-                        "               }\n" +
-                        "            },\n" +
-                        "            \"x-auth-type\":\"Application User\",\n" +
-                        "            \"x-throttling-tier\":\"Unlimited\"\n" +
-                        "         },\n" +
-                        "         \"put\":{\n" +
-                        "            \"requestBody\":{\n" +
-                        "               \"content\":{\n" +
-                        "                  \"application/json\":{\n" +
-                        "                     \"schema\":{\n" +
-                        "                        \"type\":\"object\",\n" +
-                        "                        \"properties\":{\n" +
-                        "                           \"payload\":{\n" +
-                        "                              \"type\":\"string\"\n" +
-                        "                           }\n" +
-                        "                        }\n" +
-                        "                     }\n" +
-                        "                  }\n" +
-                        "               },\n" +
-                        "               \"required\":true,\n" +
-                        "               \"description\":\"Request Body\"\n" +
-                        "            },\n" +
-                        "            \"responses\":{\n" +
-                        "               \"200\":{\n" +
-                        "                  \"description\":\"\"\n" +
-                        "               }\n" +
-                        "            },\n" +
-                        "            \"x-auth-type\":\"None\",\n" +
-                        "            \"x-throttling-tier\":\"Unlimited\"\n" +
-                        "         },\n" +
-                        "         \"delete\":{\n" +
-                        "            \"responses\":{\n" +
-                        "               \"200\":{\n" +
-                        "                  \"description\":\"\"\n" +
-                        "               }\n" +
-                        "            },\n" +
-                        "            \"x-throttling-tier\":\"Unlimited\"\n" +
-                        "         }\n" +
-                        "      },\n" +
-                        "      \"/abc\":{\n" +
-                        "         \"get\":{\n" +
-                        "            \"responses\":{\n" +
-                        "               \"200\":{\n" +
-                        "                  \"description\":\"\"\n" +
-                        "               }\n" +
-                        "            },\n" +
-                        "            \"x-throttling-tier\":\"Unlimited\"\n" +
-                        "         }\n" +
-                        "      }\n" +
-                        "   },\n" +
-                        "   \"info\":{\n" +
-                        "      \"title\":\"PhoneVerification\",\n" +
-                        "      \"version\":\"1.0.0\"\n" +
-                        "   },\n" +
-                        "   \"servers\":[\n" +
-                        "      {\n" +
-                        "         \"url\":\"https://172.19.0.1:8243/phoneVerification/1.0.0\"\n" +
-                        "      },\n" +
-                        "      {\n" +
-                        "         \"url\":\"http://172.19.0.1:8243/phoneVerification/1.0.0\"\n" +
-                        "      }\n" +
-                        "   ],\n" +
-                        "   \"components\":{\n" +
-                        "      \"securitySchemes\":{\n" +
-                        "         \"default\":{\n" +
-                        "            \"type\":\"oauth2\",\n" +
-                        "            \"flows\":{\n" +
-                        "               \"implicit\":{\n" +
-                        "                  \"authorizationUrl\":\"https://172.19.0.1:8243/authorize\",\n" +
-                        "                  \"scopes\":{\n" +
-                        "\n" +
-                        "                  }\n" +
-                        "               }\n" +
-                        "            }\n" +
-                        "         }\n" +
-                        "      }\n" +
-                        "   }\n" +
-                        "}";
-
-        Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
+                IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        Set<URITemplate> uriTemplates = new LinkedHashSet<>();
         uriTemplates.add(getUriTemplate("POST", "Application User", "/*"));
         uriTemplates.add(getUriTemplate("GET", "Application", "/*"));
         uriTemplates.add(getUriTemplate("PUT", "None", "/*"));
         uriTemplates.add(getUriTemplate("DELETE", "Any", "/*"));
         uriTemplates.add(getUriTemplate("GET", "Any", "/abc"));
         API api = new API(new APIIdentifier("admin", "PhoneVerification", "1.0.0"));
-        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPI300.getURITemplates(api, openAPISpec300);
+        SwaggerData swaggerData = new SwaggerData(api);
+        Set<URITemplate> uriTemplateSet = oas3Parser.getURITemplates(swaggerData, openAPISpec300);
         Assert.assertEquals(uriTemplateSet, uriTemplates);
 
     }
 
     @Test
-    public void testOpenApi3WithNonHttpVerbElementInPathItem() throws APIManagementException {
-        OAS3Parser apiDef = new OAS3Parser();
-        String openApi =
-                "{\n"
-                        + "  \"openapi\": \"3.0.0\",\n"
-                        + "  \"info\": {\n"
-                        + "    \"title\": \"OAPI\",\n"
-                        + "    \"version\": \"1.0.0\"\n"
-                        + "  },\n"
-                        + "  \"paths\": {\n"
-                        + "    \"/item\": {\n"
-                        + "      \"parameters\": [],\n"
-                        + "      \"servers\": [],\n"
-                        + "      \"summary\": \"Valid summary but invalid in WSO2\",\n"
-                        + "      \"description\": \"Valid description but invalid in WSO2\",\n"
-                        + "      \"x-custom-field\": \"Valid custom field but invalid in WSO2\",\n"
-                        + "      \"get\": {\n"
-                        + "        \"responses\": {\n"
-                        + "          \"200\": {\n"
-                        + "            \"description\": \"OK\"\n"
-                        + "          }\n"
-                        + "        },\n"
-                        + "        \"x-auth-type\":\"Application\",\n"
-                        + "        \"x-throttling-tier\":\"Unlimited\"\n"
-                        + "      }\n"
-                        + "    }\n"
-                        + "  }\n"
-                        + "}";
-
-        Set<URITemplate> expectedTemplates = new LinkedHashSet<URITemplate>();
+    public void testOpenApi3WithNonHttpVerbElementInPathItem() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3_non_httpverb.json";
+        String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        Set<URITemplate> expectedTemplates = new LinkedHashSet<>();
         expectedTemplates.add(getUriTemplate("GET", "Application", "/item"));
         API api = new API(new APIIdentifier("admin", "OAPI", "1.0.0"));
-        Set<URITemplate> actualTemplates = apiDef.getURITemplates(api, openApi);
+        SwaggerData swaggerData = new SwaggerData(api);
+        Set<URITemplate> actualTemplates = oas3Parser.getURITemplates(swaggerData, openApi);
         Assert.assertEquals(actualTemplates, expectedTemplates);
     }
 
-    protected URITemplate getUriTemplate(String httpVerb, String authType, String uriTemplateString) {
-        URITemplate uriTemplate = new URITemplate();
-        uriTemplate.setAuthTypes(authType);
-        uriTemplate.setAuthType(authType);
-        uriTemplate.setHTTPVerb(httpVerb);
-        uriTemplate.setHttpVerbs(httpVerb);
-        uriTemplate.setUriTemplate(uriTemplateString);
-        uriTemplate.setThrottlingTier("Unlimited");
-        uriTemplate.setThrottlingTiers("Unlimited");
-        uriTemplate.setScope(null);
-        return uriTemplate;
-    }
 }

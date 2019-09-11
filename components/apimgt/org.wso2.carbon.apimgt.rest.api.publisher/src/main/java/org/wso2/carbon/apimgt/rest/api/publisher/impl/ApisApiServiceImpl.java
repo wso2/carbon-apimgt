@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -57,6 +58,7 @@ import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
@@ -1685,7 +1687,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(api.getId());
             if (!StringUtils.isEmpty(apiSwaggerDefinition)) {
                 APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-                Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(api, apiSwaggerDefinition);
+                SwaggerData swaggerData = new SwaggerData(api);
+                Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(swaggerData, apiSwaggerDefinition);
                 api.setUriTemplates(uriTemplates);
 
                 // scopes
@@ -1840,7 +1843,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             API existingAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
             APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(existingAPI, apiDefinition);
+            SwaggerData swaggerData = new SwaggerData(existingAPI);
+            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(swaggerData, apiDefinition);
             Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiDefinition);
             existingAPI.setUriTemplates(uriTemplates);
             existingAPI.setScopes(scopes);

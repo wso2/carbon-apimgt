@@ -29,6 +29,7 @@ import API from 'AppData/api';
 
 import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
 import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm';
+import APIProduct from 'AppData/APIProduct';
 
 /**
  * Handle API creation from WSDL.
@@ -113,51 +114,96 @@ function APICreateDefault(props) {
             };
         }
         apiData.gatewayEnvironments = ['Production and Sandbox'];
-        const newAPI = new API(apiData);
-        newAPI
-            .save()
-            .then((api) => {
-                Alert.info('API created successfully');
-                props.history.push(`/apis/${api.id}/overview`);
-            })
-            .catch((error) => {
-                if (error.response) {
-                    Alert.error(error.response.body.description);
-                } else {
-                    Alert.error('Something went wrong while adding the API');
-                }
-                console.error(error);
-            })
-            .finally(() => setCreating(false));
+        if (props.isAPIProduct) {
+            const newAPIProduct = new APIProduct(apiData);
+            newAPIProduct.saveProduct(apiData)
+                .then((apiProduct) => {
+                    Alert.info('API Product created successfully');
+                    props.history.push(`/api-products/${apiProduct.id}/overview`);
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        Alert.error(error.response.body.description);
+                    } else {
+                        Alert.error('Something went wrong while adding the API Product');
+                    }
+                })
+                .finally(() => setCreating(false));
+        } else {
+            const newAPI = new API(apiData);
+            newAPI
+                .save()
+                .then((api) => {
+                    Alert.info('API created successfully');
+                    props.history.push(`/apis/${api.id}/overview`);
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        Alert.error(error.response.body.description);
+                    } else {
+                        Alert.error('Something went wrong while adding the API');
+                    }
+                    console.error(error);
+                })
+                .finally(() => setCreating(false));
+        }
     }
 
     return (
         <APICreateBase
             title={
-                <React.Fragment>
-                    <Typography variant='h5'>
-                        <FormattedMessage
-                            id='Apis.Create.Default.APICreateDefault.heading'
-                            defaultMessage='Create an API'
-                        />
-                    </Typography>
-                    <Typography variant='caption'>
-                        <FormattedMessage
-                            id='Apis.Create.Default.APICreateDefault.sub.heading'
-                            defaultMessage={
-                                'Create an API providing Name, Version and Context parameters' +
+                props.isAPIProduct ? (
+                    <React.Fragment>
+                        <Typography variant='h5'>
+                            <FormattedMessage
+                                id='Apis.Create.Default.APICreateDefault.apiProduct.heading'
+                                defaultMessage='Create an API Product'
+                            />
+                        </Typography>
+                        <Typography variant='caption'>
+                            <FormattedMessage
+                                id='Apis.Create.Default.APICreateDefault.apiProduct.sub.heading'
+                                defaultMessage={
+                                    'Create an API Product providing Name, Context parameters' +
+                                ' and optionally bushiness plans'
+                                }
+                            />
+                        </Typography>
+                    </React.Fragment>
+                ) :
+                    (
+                        <React.Fragment>
+                            <Typography variant='h5'>
+                                <FormattedMessage
+                                    id='Apis.Create.Default.APICreateDefault.api.heading'
+                                    defaultMessage='Create an API'
+                                />
+                            </Typography>
+                            <Typography variant='caption'>
+                                <FormattedMessage
+                                    id='Apis.Create.Default.APICreateDefault.api.sub.heading'
+                                    defaultMessage={
+                                        'Create an API providing Name, Version and Context parameters' +
                                 ' and optionally backend endpoint and bushiness plans'
-                            }
-                        />
-                    </Typography>
-                </React.Fragment>
+                                    }
+                                />
+                            </Typography>
+                        </React.Fragment>
+
+                    )
+
             }
         >
             <Grid container spacing={3}>
                 <Grid item md={12} />
                 <Grid item md={1} />
                 <Grid item md={11}>
-                    <DefaultAPIForm onValidate={handleOnValidate} onChange={handleOnChange} api={apiInputs} />
+                    <DefaultAPIForm
+                        onValidate={handleOnValidate}
+                        onChange={handleOnChange}
+                        api={apiInputs}
+                        isAPIProduct={props.isAPIProduct}
+                    />
                 </Grid>
                 <Grid item md={1} />
                 <Grid item md={9}>
@@ -190,5 +236,6 @@ function APICreateDefault(props) {
 }
 APICreateDefault.propTypes = {
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
+    isAPIProduct: PropTypes.shape({}).isRequired,
 };
 export default withRouter(APICreateDefault);

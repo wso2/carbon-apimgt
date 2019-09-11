@@ -121,7 +121,6 @@ class ProductResourcesView extends React.Component {
         super(props);
         this.state = {
             paths: null,
-            swagger: null,
             scopes: [],
             notFound: false,
             showAddResource: false,
@@ -140,15 +139,6 @@ class ProductResourcesView extends React.Component {
         const promised_api = apiProduct.getSwagger(this.api_uuid);
         promised_api
             .then((response) => {
-                let tempScopes = [];
-                if (response.obj.security && response.obj.security.length !== 0) {
-                    response.obj.security.map((object, i) => {
-                        if (object.OAuth2Security) {
-                            tempScopes = object.OAuth2Security;
-                        }
-                    });
-                }
-                this.setState({ swagger: response.obj, scopes: tempScopes });
                 if (response.obj.paths !== undefined) {
                     this.setState({ paths: response.obj.paths });
                 }
@@ -166,28 +156,30 @@ class ProductResourcesView extends React.Component {
 
     render() {
         const {
-            swagger, policyLevel, apiPolicies, scopes, paths,
+            policyLevel, apiPolicies, scopes, paths,
         } = this.state;
         const { classes, api } = this.props;
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFountMessage} />;
         }
-        if (swagger === null || paths === null) {
+        if (paths === null) {
             return <Progress />;
         }
-        const apiResources = api.apis
+        const apiResources = api.apis;
+        const apiResourcesDetails = apiResources
             .map((key) => {
                 const operations = key.operations.map(item => item.target);
-                const paths = Object.keys(paths).filter(item => operations.includes(item))
-                const filteredPaths  = paths.reduce((acc,cur) => {
+                const filteredPaths  = Object.keys(paths).filter(item => operations.includes(item))
+                .reduce((acc,cur) => {
                     acc[cur] = paths[cur]
                     return acc;
                 },{})
                 return {
-                    name:operations.name,
+                    name:key.name,
                     paths:filteredPaths
                 }
             })
+            console.log("**", apiResourcesDetails)
         return (
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
@@ -204,8 +196,8 @@ class ProductResourcesView extends React.Component {
                 </div>
                 <div className={classes.contentWrapper}>
                     <List>
-                        {Object.keys(apiResources).map((key) => {
-                            const resource = apiResources[key];
+                        {Object.keys(apiResourcesDetails).map((key) => {
+                            const resource = apiResourcesDetails[key];
                             return( <div className={classes.root}>
                                     <Typography className={classes.heading} variant='h5'>
                                     {resource.name}

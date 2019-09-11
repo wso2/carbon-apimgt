@@ -9,6 +9,7 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
@@ -17,6 +18,7 @@ public class ExternalStoreDTO   {
     private String id = null;
     private String displayName = null;
     private String type = null;
+    private String endpoint = null;
 
   /**
    * The external store identifier, which is a unique value. 
@@ -72,6 +74,24 @@ public class ExternalStoreDTO   {
     this.type = type;
   }
 
+  /**
+   * The endpoint URL of the external store 
+   **/
+  public ExternalStoreDTO endpoint(String endpoint) {
+    this.endpoint = endpoint;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "http://localhost:9764/store", value = "The endpoint URL of the external store ")
+  @JsonProperty("endpoint")
+  public String getEndpoint() {
+    return endpoint;
+  }
+  public void setEndpoint(String endpoint) {
+    this.endpoint = endpoint;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -84,12 +104,13 @@ public class ExternalStoreDTO   {
     ExternalStoreDTO externalStore = (ExternalStoreDTO) o;
     return Objects.equals(id, externalStore.id) &&
         Objects.equals(displayName, externalStore.displayName) &&
-        Objects.equals(type, externalStore.type);
+        Objects.equals(type, externalStore.type) &&
+        Objects.equals(endpoint, externalStore.endpoint);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, displayName, type);
+    return Objects.hash(id, displayName, type, endpoint);
   }
 
   @Override
@@ -100,6 +121,7 @@ public class ExternalStoreDTO   {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    endpoint: ").append(toIndentedString(endpoint)).append("\n");
     sb.append("}");
     return sb.toString();
   }

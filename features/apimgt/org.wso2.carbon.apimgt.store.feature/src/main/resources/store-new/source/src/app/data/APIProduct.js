@@ -31,7 +31,7 @@ export default class APIProduct extends Resource {
 
     /**
      * Get all API Products
-     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @param {function} callback A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API Product invoke promise.
      */
     getAllAPIProducts(params = {}, callback = null) {
@@ -49,8 +49,8 @@ export default class APIProduct extends Resource {
 
     /**
      * Get details of a given API product
-     * @param id {string} UUID of the api product.
-     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @param {string} id UUID of the api product.
+     * @param {function} callback A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API product invoke promise.
      */
     getAPIById(id, callback = null) {
@@ -149,7 +149,7 @@ export default class APIProduct extends Resource {
 
     /**
      * Get application by id
-     * @param callback {function} Function which needs to be called upon success
+     * @param {function} callback Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      * @deprecated Use Application.all method instead
      */
@@ -170,8 +170,9 @@ export default class APIProduct extends Resource {
 
     /**
      * Get keys of an application
-     * @param applicationId id of the application that needs to get the keys
-     * @param callback {function} Function which needs to be called upon success
+     * @param {String} apiId UUID of the API Product in which the swagger is needed
+     * @param {String} applicationId id of the application that needs to get the keys
+     * @param {function} callback  Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSubscriptions(apiId, applicationId, callback = null) {
@@ -186,6 +187,46 @@ export default class APIProduct extends Resource {
             return promisedGet.then(callback);
         } else {
             return promisedGet;
+        }
+    }
+
+    /**
+     * Get the swagger of an API Product
+     * @param {String} apiProductId UUID of the API Product in which the swagger is needed
+     * @param {String} environmentName API environment name
+     * @param {function} callback Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getSwaggerByAPIIdAndEnvironment(apiProductId, environmentName, callback = null) {
+        const promiseGet = this.client.then((client) => {
+            return client.apis['API Products'].get_api_products__apiProductId__swagger(
+                { apiProductId, environmentName }, this._requestMetaData(),
+            );
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get the swagger of an API Product
+     * @param {String} apiProductId UUID of the API in which the swagger is needed
+     * @param {String} labelName Micro gateway label
+     * @param {function} callback Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getSwaggerByAPIIdAndLabel(apiProductId, labelName, callback = null) {
+        const promiseGet = this.client.then((client) => {
+            return client.apis['API Products'].get_api_products__apiProductId__swagger(
+                { apiProductId, labelName }, this._requestMetaData(),
+            );
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
         }
     }
 }

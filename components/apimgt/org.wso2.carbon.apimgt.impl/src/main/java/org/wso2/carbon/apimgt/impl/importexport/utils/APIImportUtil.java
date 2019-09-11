@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -347,8 +348,9 @@ public final class APIImportUtil {
                 String swaggerContent = loadSwaggerFile(pathToArchive);
                 addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider);
 
+                SwaggerData swaggerData = new SwaggerData(importedApi);
                 //Load required properties from swagger to the API
-                Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(importedApi, swaggerContent);
+                Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(swaggerData, swaggerContent);
                 for (URITemplate uriTemplate : uriTemplates) {
                     Scope scope = uriTemplate.getScope();
                     if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))

@@ -9,6 +9,7 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
@@ -16,6 +17,8 @@ public class APIProductBusinessInformationDTO   {
   
     private String businessOwner = null;
     private String businessOwnerEmail = null;
+    private String technicalOwner = null;
+    private String technicalOwnerEmail = null;
 
   /**
    **/
@@ -51,6 +54,40 @@ public class APIProductBusinessInformationDTO   {
     this.businessOwnerEmail = businessOwnerEmail;
   }
 
+  /**
+   **/
+  public APIProductBusinessInformationDTO technicalOwner(String technicalOwner) {
+    this.technicalOwner = technicalOwner;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "technicalowner", value = "")
+  @JsonProperty("technicalOwner")
+  public String getTechnicalOwner() {
+    return technicalOwner;
+  }
+  public void setTechnicalOwner(String technicalOwner) {
+    this.technicalOwner = technicalOwner;
+  }
+
+  /**
+   **/
+  public APIProductBusinessInformationDTO technicalOwnerEmail(String technicalOwnerEmail) {
+    this.technicalOwnerEmail = technicalOwnerEmail;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "technicalowner@wso2.com", value = "")
+  @JsonProperty("technicalOwnerEmail")
+  public String getTechnicalOwnerEmail() {
+    return technicalOwnerEmail;
+  }
+  public void setTechnicalOwnerEmail(String technicalOwnerEmail) {
+    this.technicalOwnerEmail = technicalOwnerEmail;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -62,12 +99,14 @@ public class APIProductBusinessInformationDTO   {
     }
     APIProductBusinessInformationDTO apIProductBusinessInformation = (APIProductBusinessInformationDTO) o;
     return Objects.equals(businessOwner, apIProductBusinessInformation.businessOwner) &&
-        Objects.equals(businessOwnerEmail, apIProductBusinessInformation.businessOwnerEmail);
+        Objects.equals(businessOwnerEmail, apIProductBusinessInformation.businessOwnerEmail) &&
+        Objects.equals(technicalOwner, apIProductBusinessInformation.technicalOwner) &&
+        Objects.equals(technicalOwnerEmail, apIProductBusinessInformation.technicalOwnerEmail);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(businessOwner, businessOwnerEmail);
+    return Objects.hash(businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail);
   }
 
   @Override
@@ -77,6 +116,8 @@ public class APIProductBusinessInformationDTO   {
     
     sb.append("    businessOwner: ").append(toIndentedString(businessOwner)).append("\n");
     sb.append("    businessOwnerEmail: ").append(toIndentedString(businessOwnerEmail)).append("\n");
+    sb.append("    technicalOwner: ").append(toIndentedString(technicalOwner)).append("\n");
+    sb.append("    technicalOwnerEmail: ").append(toIndentedString(technicalOwnerEmail)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -232,7 +233,10 @@ public class APIMappingUtil {
                 model.addProperty(entry.getKey(), entry.getValue());
             }
         }
-        APIBusinessInformationDTO apiBusinessInformationDTO = dto.getBusinessInformation();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        APIBusinessInformationDTO apiBusinessInformationDTO = objectMapper.convertValue(dto.getBusinessInformation(),
+                APIBusinessInformationDTO.class);
         if (apiBusinessInformationDTO != null) {
             model.setBusinessOwner(apiBusinessInformationDTO.getBusinessOwner());
             model.setBusinessOwnerEmail(apiBusinessInformationDTO.getBusinessOwnerEmail());
@@ -1464,11 +1468,8 @@ public class APIMappingUtil {
             throws APIManagementException {
         Optional<APIDefinition> apiDefinitionOptional = OASParserUtil.getOASParser(swaggerDefinition);
         APIDefinition apiDefinition = apiDefinitionOptional.get();
-        Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(api, swaggerDefinition);
-
-        if (!APIConstants.GRAPHQL_API.equals(api.getType())) {
-            uriTemplates = apiDefinition.getURITemplates(api, swaggerDefinition);
-        }
+        SwaggerData swaggerData = new SwaggerData(api);
+        Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerData, swaggerDefinition);
 
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         if (!StringUtils.isEmpty(swaggerDefinition)) {
@@ -1569,10 +1570,33 @@ public class APIMappingUtil {
         productDto.setId(product.getUuid());
         productDto.setContext(product.getContext());
         productDto.setDescription(product.getDescription());
+        productDto.setApiType(APIConstants.AuditLogConstants.API_PRODUCT);
+
+        Set<String> apiTags = product.getTags();
+        List<String> tagsToReturn = new ArrayList<>(apiTags);
+        productDto.setTags(tagsToReturn);
+
         APIProductBusinessInformationDTO businessInformation = new APIProductBusinessInformationDTO();
         businessInformation.setBusinessOwner(product.getBusinessOwner());
         businessInformation.setBusinessOwnerEmail(product.getBusinessOwnerEmail());
+        businessInformation.setTechnicalOwner(product.getTechnicalOwner());
+        businessInformation.setTechnicalOwner(product.getTechnicalOwnerEmail());
         productDto.setBusinessInformation(businessInformation );
+
+        APICorsConfigurationDTO apiCorsConfigurationDTO = new APICorsConfigurationDTO();
+        CORSConfiguration corsConfiguration = product.getCorsConfiguration();
+        if (corsConfiguration == null) {
+            corsConfiguration = APIUtil.getDefaultCorsConfiguration();
+        }
+        apiCorsConfigurationDTO
+                .setAccessControlAllowOrigins(corsConfiguration.getAccessControlAllowOrigins());
+        apiCorsConfigurationDTO
+                .setAccessControlAllowHeaders(corsConfiguration.getAccessControlAllowHeaders());
+        apiCorsConfigurationDTO
+                .setAccessControlAllowMethods(corsConfiguration.getAccessControlAllowMethods());
+        apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
+        apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
+        productDto.setCorsConfiguration(apiCorsConfigurationDTO);
 
         productDto.setState(StateEnum.valueOf(product.getState()));
         productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
@@ -1739,11 +1763,16 @@ public class APIMappingUtil {
             context = "/t/" + providerDomain + context;
         }
 
+        product.setType(APIConstants.API_PRODUCT_IDENTIFIER_TYPE.replaceAll("\\s",""));
         product.setContext(context);
+        context = checkAndSetVersionParam(context);
+        product.setContextTemplate(context);
 
         if(dto.getBusinessInformation() != null) {
             product.setBusinessOwner(dto.getBusinessInformation().getBusinessOwner());
             product.setBusinessOwnerEmail(dto.getBusinessInformation().getBusinessOwnerEmail());
+            product.setTechnicalOwner(dto.getBusinessInformation().getTechnicalOwner());
+            product.setTechnicalOwnerEmail(dto.getBusinessInformation().getTechnicalOwnerEmail());
         }
 
         String state = dto.getState() == null ? APIStatus.CREATED.toString() :dto.getState().toString() ;

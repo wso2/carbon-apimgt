@@ -228,7 +228,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String getOpenAPIDefinition(APIIdentifier apiId) throws APIManagementException {
+    public String getOpenAPIDefinition(Identifier apiId) throws APIManagementException {
         checkAccessControlPermission(apiId);
         return super.getOpenAPIDefinition(apiId);
     }
@@ -527,6 +527,16 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public ClientCertificateDTO getClientCertificate(int tenantId, String alias) throws APIManagementException {
+        ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias);
+        if (clientCertificateDTO != null) {
+            checkAccessControlPermission(clientCertificateDTO.getApiIdentifier());
+        }
+        return clientCertificateDTO;
+    }
+
+    @Override
+    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier)
+            throws APIManagementException {
         ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias);
         if (clientCertificateDTO != null) {
             checkAccessControlPermission(clientCertificateDTO.getApiIdentifier());

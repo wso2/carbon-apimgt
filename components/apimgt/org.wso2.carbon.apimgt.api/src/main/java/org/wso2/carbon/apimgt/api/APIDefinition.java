@@ -17,12 +17,10 @@
 */
 package org.wso2.carbon.apimgt.api;
 
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.registry.api.Registry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,14 +40,14 @@ public abstract class APIDefinition {
 
 
     private static final Pattern CURLY_BRACES_PATTERN = Pattern.compile("(?<=\\{)(?!\\s*\\{)[^{}]+");
-    private static final String KEEP_LEGACY_EXTENSION_PROP = "preserveLegacyExtensions";
+    public static final String KEEP_LEGACY_EXTENSION_PROP = "preserveLegacyExtensions";
 
     /**
      * This method extracts the URI templates from the API definition
      *
      * @return URI templates
      */
-    public abstract Set<URITemplate> getURITemplates(API api, String resourceConfigsJSON) throws APIManagementException;
+    public abstract Set<URITemplate> getURITemplates(SwaggerData swaggerData, String resourceConfigsJSON) throws APIManagementException;
 
     /**
      * This method extracts the scopes from the API definition
@@ -60,32 +58,13 @@ public abstract class APIDefinition {
     public abstract Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
 
     /**
-     * This method saves the APIProduct definition
-     *
-     * @param apiProduct               API to be saved
-     * @param apiDefinitionJSON API definition as JSON string
-     * @param registry          user registry
-     */
-    public abstract void saveAPIDefinition(APIProduct apiProduct, String apiDefinitionJSON, Registry registry)
-            throws APIManagementException;
-
-    /**
      * This method generates API definition to the given api
      *
-     * @param api api
+     * @param swaggerData api
      * @return API definition in string format
      * @throws APIManagementException
      */
-    public abstract String generateAPIDefinition(API api) throws APIManagementException;
-
-    /**
-     * This method generates API definition to the given apiProduct
-     *
-     * @param apiProduct apiProduct
-     * @return API definition in string format
-     * @throws APIManagementException
-     */
-    public abstract String generateAPIDefinition(APIProduct apiProduct) throws APIManagementException;
+    public abstract String generateAPIDefinition(SwaggerData swaggerData) throws APIManagementException;
 
     /**
      * This method generates API definition using the given api's URI templates and the swagger.
@@ -94,7 +73,7 @@ public abstract class APIDefinition {
      * additional resources inside the swagger will be removed from the swagger. Changes to scopes, throtting policies,
      * on the resource will be updated on the swagger
      *
-     * @param api api
+     * @param swaggerData api
      * @param swagger swagger definition
      * @param syncOperations whether to sync operations between API and swagger. If true, the operations of the swagger
      *                       will be synced from the API's operations. Additional operations of the swagger will be
@@ -103,7 +82,7 @@ public abstract class APIDefinition {
      * @return API definition in string format
      * @throws APIManagementException if error occurred when generating API Definition
      */
-    public abstract String generateAPIDefinition(API api, String swagger, boolean syncOperations)
+    public abstract String generateAPIDefinition(SwaggerData swaggerData, String swagger, boolean syncOperations)
             throws APIManagementException;
 
     /**
@@ -123,23 +102,23 @@ public abstract class APIDefinition {
     }
 
     /**
-     * Creates a helper uri template map using provided API's URI templates.
+     * Creates a helper resource path map using provided swagger data.
      * Creates map in below format:
-     *      /order      -> [post -> template1]
-     *      /order/{id} -> [get -> template2, put -> template3, ..]
+     *      /order      -> [post -> resource1]
+     *      /order/{id} -> [get -> resource2, put -> resource3, ..]
      *
-     * @param api API object
-     * @return a structured uri template map using provided API's URI templates
+     * @param swaggerData Swagger Data object
+     * @return a structured uri template map using provided Swagger Data Resource Paths
      */
-    public Map<String, Map<String, URITemplate>> getURITemplateMap(API api) {
-        Map<String, Map<String, URITemplate>> uriTemplateMap = new HashMap<>();
-        for (URITemplate uriTemplate : api.getUriTemplates()) {
-            Map<String, URITemplate> templates = uriTemplateMap.get(uriTemplate.getUriTemplate());
-            if (templates == null) {
-                templates = new HashMap<>();
-                uriTemplateMap.put(uriTemplate.getUriTemplate(), templates);
+    public Map<String, Map<String, SwaggerData.Resource>> getResourceMap(SwaggerData swaggerData) {
+        Map<String, Map<String, SwaggerData.Resource>> uriTemplateMap = new HashMap<>();
+        for (SwaggerData.Resource resource : swaggerData.getResources()) {
+            Map<String, SwaggerData.Resource> resources = uriTemplateMap.get(resource.getPath());
+            if (resources == null) {
+                resources = new HashMap<>();
+                uriTemplateMap.put(resource.getPath(), resources);
             }
-            templates.put(uriTemplate.getHTTPVerb().toUpperCase(), uriTemplate);
+            resources.put(resource.getVerb().toUpperCase(), resource);
         }
         return uriTemplateMap;
     }
@@ -158,11 +137,11 @@ public abstract class APIDefinition {
      * Populate definition with wso2 APIM specific information
      *
      * @param oasDefinition OAS definition
-     * @param api           API
+     * @param swaggerData           API
      * @return Generated OAS definition
      * @throws APIManagementException If an error occurred
      */
-    public abstract String populateCustomManagementInfo(String oasDefinition, API api) throws APIManagementException;
+    public abstract String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData) throws APIManagementException;
 
     /**
      * Check extension migration is disabled
