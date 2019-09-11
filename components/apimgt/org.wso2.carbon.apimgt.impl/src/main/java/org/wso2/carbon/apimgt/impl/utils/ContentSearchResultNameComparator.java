@@ -35,6 +35,7 @@ public class ContentSearchResultNameComparator implements Comparator {
 
     @Override
     public int compare(Object o1, Object o2) {
+
         if (o1 instanceof API && o2 instanceof API) {
             API api1 = (API) o1;
             API api2 = (API) o2;
@@ -43,7 +44,7 @@ public class ContentSearchResultNameComparator implements Comparator {
             APIProduct apiProduct1 = (APIProduct) o1;
             APIProduct apiProduct2 = (APIProduct) o2;
             return productNameComparator.compare(apiProduct1, apiProduct2);
-        } else if (o1 instanceof API &&  o2 instanceof APIProduct) {
+        } else if (o1 instanceof API && o2 instanceof APIProduct) {
             API api = (API) o1;
             APIProduct apiProduct = (APIProduct) o2;
             return api.getId().getApiName().compareToIgnoreCase(apiProduct.getId().getName());
