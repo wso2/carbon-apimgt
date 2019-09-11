@@ -232,6 +232,8 @@ public final class RestApiConstants {
     public static final String SEQUENCE_ARTIFACT_ID = "id";
     public static final String HTTP_METHOD = "method";
 
+    public static final String GET_API_PRODUCT_QUERY  = "type=APIProduct";
+
     public static final String RETURN_MODEL = "model";
     public static final String RETURN_MODEL_BEFORE_ADDED = "model_before_added";
     public static final String RETURN_DTO = "dto";

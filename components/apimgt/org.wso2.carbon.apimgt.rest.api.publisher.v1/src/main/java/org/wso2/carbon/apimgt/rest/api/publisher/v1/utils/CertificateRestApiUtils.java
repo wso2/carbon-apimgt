@@ -24,8 +24,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -247,5 +250,36 @@ public class CertificateRestApiUtils {
             log.debug(String.format("The query string for the api : %s", query));
         }
         return query;
+    }
+
+    /**
+     * To pre validate client certificate given for an alias
+     *
+     * @param alias Alias of the certificate.
+     * @return Client certificate
+     * @throws APIManagementException API Management Exception.
+     */
+    public static ClientCertificateDTO preValidateClientCertificate(String alias, APIIdentifier apiIdentifier)
+            throws APIManagementException {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
+        if (StringUtils.isEmpty(alias)) {
+            RestApiUtil.handleBadRequest("The alias cannot be empty", log);
+        }
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        if (!apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
+            RestApiUtil.handleBadRequest(
+                    "The client certificate based authentication is not configured for this server", log);
+        }
+        ClientCertificateDTO clientCertificate = apiProvider.getClientCertificate(tenantId, alias, apiIdentifier);
+        if (clientCertificate == null) {
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Could not find a client certificate in truststore which belongs to "
+                        + "tenant : %d and with alias : %s. Hence the operation is terminated.", tenantId, alias));
+            }
+            String message = "Certificate for alias '" + alias + "' is not found.";
+            RestApiUtil.handleResourceNotFoundError(message, log);
+        }
+        return clientCertificate;
     }
 }

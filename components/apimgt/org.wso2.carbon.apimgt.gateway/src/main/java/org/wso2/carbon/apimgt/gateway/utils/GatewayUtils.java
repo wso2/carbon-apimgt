@@ -445,6 +445,9 @@ public class GatewayUtils {
      */
     public static String extractAddressBasePath(org.apache.synapse.MessageContext mc) {
         String endpointAddress = (String) mc.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
+        if (endpointAddress == null) {
+            endpointAddress = APIMgtGatewayConstants.DUMMY_ENDPOINT_ADDRESS;
+        }
         if (endpointAddress.contains("?")) {
             endpointAddress = endpointAddress.substring(0, endpointAddress.indexOf("?"));
         }

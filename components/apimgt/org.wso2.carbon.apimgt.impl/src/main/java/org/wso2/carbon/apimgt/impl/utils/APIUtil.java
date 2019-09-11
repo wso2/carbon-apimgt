@@ -1144,7 +1144,6 @@ public final class APIUtil {
             String apiStatus = api.getStatus();
             artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, api.getId().getVersion());
-            artifact.setAttribute(APIConstants.TYPE, api.getType());
             artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, String.valueOf(api.isDefaultVersion()));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());
@@ -1302,12 +1301,15 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, apiProduct.getId().getProviderName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, apiProduct.getContext());
             artifact.setAttribute(APIConstants.API_OVERVIEW_DESCRIPTION, apiProduct.getDescription());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TYPE, APIConstants.AuditLogConstants.API_PRODUCT);
             artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, apiProduct.getState());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBILITY, apiProduct.getVisibility());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES, apiProduct.getVisibleRoles());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS, apiProduct.getVisibleTenants());
             artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER, apiProduct.getBusinessOwner());
             artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL, apiProduct.getBusinessOwnerEmail());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TEC_OWNER, apiProduct.getTechnicalOwner());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL, apiProduct.getTechnicalOwnerEmail());
             artifact.setAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY, apiProduct.getSubscriptionAvailability());
             artifact.setAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS, apiProduct.getSubscriptionAvailableTenants());
             artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, apiProduct.getThumbnailUrl());
@@ -1327,6 +1329,27 @@ public final class APIUtil {
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, writeEnvironmentsToArtifact(apiProduct));
             artifact.setAttribute(APIConstants.API_OVERVIEW_TRANSPORTS, apiProduct.getTransports());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
+                    APIUtil.getCorsConfigurationJsonFromDto(apiProduct.getCorsConfiguration()));
+            //Validate if the API has an unsupported context before setting it in the artifact
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
+                String invalidContext = File.separator + APIConstants.VERSION_PLACEHOLDER;
+                if (invalidContext.equals(apiProduct.getContextTemplate())) {
+                    throw new APIManagementException( "API : " + apiProduct.getId() + " has an unsupported context : " +
+                                    apiProduct.getContextTemplate());
+                }
+            } else {
+                String invalidContext =
+                        APIConstants.TENANT_PREFIX + tenantDomain + File.separator + APIConstants.VERSION_PLACEHOLDER;
+                if (invalidContext.equals(apiProduct.getContextTemplate())) {
+                    throw new APIManagementException( "API : " + apiProduct.getId() + " has an unsupported context : " +
+                            apiProduct.getContextTemplate());
+                }
+            }
+            // This is to support the pluggable version strategy.
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, apiProduct.getContextTemplate());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + apiProduct.getId().getName();
             log.error(msg, e);
@@ -1631,7 +1654,7 @@ public final class APIUtil {
     }
 
     public static String getAPIProductOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
-        return APIConstants.API_PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
     }
 
@@ -1645,11 +1668,9 @@ public final class APIUtil {
      * @return path path to the
      */
     public static String getAPIProductOpenAPIDefinitionFilePath(APIProductIdentifier identifier) {
-        return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
-                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR
-                + identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR
-                + identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion()
-                + RegistryConstants.PATH_SEPARATOR;
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName() +
+                RegistryConstants.PATH_SEPARATOR + identifier.getName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getVersion() + RegistryConstants.PATH_SEPARATOR;
     }
 
     /**
@@ -1672,10 +1693,10 @@ public final class APIUtil {
      * @return APIProduct path
      */
     public static String getAPIProductPath(APIProductIdentifier identifier) {
-        return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
-                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
-                .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName()
-                + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() + APIConstants.API_PRODUCT_RESOURCE_NAME;
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getVersion() + APIConstants.API_RESOURCE_NAME;
     }
 
     /**
@@ -1685,11 +1706,10 @@ public final class APIUtil {
      * @return Icon storage path.
      */
     public static String getProductIconPath(APIProductIdentifier identifier) {
-        String artifactPath = APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
-                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
-                .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName()
-                + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR
-                + APIConstants.API_ICON_IMAGE;
+        String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() +
+                RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
         return artifactPath;
     }
 
@@ -1732,8 +1752,7 @@ public final class APIUtil {
      * @return API Product provider path
      */
     public static String getAPIProductProviderPath(APIProductIdentifier identifier) {
-        return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
-                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName();
+        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName();
     }
 
     /**
@@ -1808,12 +1827,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.DOC_OTHER_TYPE_NAME, documentation.getOtherTypeName());
             String basePath = id.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                     id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion();
-            if (id instanceof APIIdentifier) {
-                artifact.setAttribute(APIConstants.DOC_API_BASE_PATH, basePath);
-            } else if (id instanceof APIProductIdentifier) {
-                artifact.setAttribute(APIConstants.DOC_PRODUCT_BASE_PATH, basePath);
-            }
-
+            artifact.setAttribute(APIConstants.DOC_API_BASE_PATH, basePath);
         } catch (GovernanceException e) {
             String msg = "Failed to create doc artifact content from :" + documentation.getName();
             log.error(msg, e);
@@ -7956,9 +7970,33 @@ public final class APIUtil {
      * @throws APIManagementException If there is an error in the search query
      */
     public static String constructNewSearchQuery(String query) throws APIManagementException {
-        String newSearchQuery = "";
-        String inputSearchQuery = query.trim();
 
+        return constructQueryWithProvidedCriterias(query.trim());
+    }
+
+    /**
+     * Used to reconstruct the input get APIs query as sub context and doc content doesn't support AND search
+     * @param query Input apis get query
+     * @return Reconstructed new apis get query
+     * @throws APIManagementException If there is an error in the search query
+     */
+    public static String constructApisGetQuery(String query) throws APIManagementException {
+        String newSearchQuery = constructQueryWithProvidedCriterias(query.trim());
+
+        String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY + APIUtil.getORBasedSearchCriteria
+                (APIConstants.API_SUPPORTED_TYPE_LIST);
+        newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
+        return newSearchQuery;
+    }
+
+    /**
+     *
+     * @param inputSearchQuery search Query
+     * @return Reconstructed new search query
+     * @throws APIManagementException If there is an error in the search query
+     */
+    private static String constructQueryWithProvidedCriterias(String inputSearchQuery) throws APIManagementException {
+        String newSearchQuery = "";
         // sub context and doc content doesn't support AND search
         if (inputSearchQuery != null && inputSearchQuery.contains(" ") && !inputSearchQuery
                 .contains(APIConstants.TAG_COLON_SEARCH_TYPE_PREFIX) && (!inputSearchQuery
@@ -8704,6 +8742,8 @@ public final class APIUtil {
             apiProduct.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
             apiProduct.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
             apiProduct.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+            apiProduct.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
+            apiProduct.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
             apiProduct.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
             apiProduct.setSubscriptionAvailableTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
@@ -8713,7 +8753,7 @@ public final class APIUtil {
             apiProduct.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             apiProduct.setCreatedTime(registry.get(artifactPath).getCreatedTime());
             apiProduct.setLastUpdated(registry.get(artifactPath).getLastModified());
-
+            apiProduct.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
@@ -8722,6 +8762,9 @@ public final class APIUtil {
             Map<String, Tier> definedTiers = getTiers(tenantId);
             Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, productName);
             apiProduct.setAvailableTiers(availableTier);
+
+            // We set the context template here
+            apiProduct.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
 
             List<APIProductResource> resources = ApiMgtDAO.getInstance().
                     getAPIProductResourceMappings(apiProductIdentifier);
@@ -8820,7 +8863,7 @@ public final class APIUtil {
      * @return relevant API Product Identifier
      */
     public static APIProductIdentifier getProductIdentifier(String productPath) {
-        int length = (APIConstants.PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR).length();
+        int length = (APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR).length();
         String relativePath = productPath.substring(length);
         String[] values = relativePath.split(RegistryConstants.PATH_SEPARATOR);
         if (values.length > 3) {
@@ -8847,7 +8890,7 @@ public final class APIUtil {
      * @return Doc path
      */
     public static String getProductDocPath(APIProductIdentifier productId) {
-        return APIConstants.PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 productId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 productId.getName() + RegistryConstants.PATH_SEPARATOR +
                 productId.getVersion() + RegistryConstants.PATH_SEPARATOR +

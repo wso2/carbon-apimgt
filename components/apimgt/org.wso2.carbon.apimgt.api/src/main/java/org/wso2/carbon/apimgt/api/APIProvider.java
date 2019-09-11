@@ -1095,6 +1095,21 @@ public interface APIProvider extends APIManager {
     ClientCertificateDTO getClientCertificate(int tenantId, String alias) throws APIManagementException;
 
     /**
+     * Method to check whether a client certificate for the given alias is present in trust store and whether it can
+     * be modified by current user.
+     *
+     * @param tenantId : Id of the tenant.
+     * @param alias    : Relevant alias.
+     * @param apiIdentifier : The identifier of the api.
+     * @return Instance of {@link ClientCertificateDTO} if the client certificate is present and
+     * modifiable by current user.
+     * @throws APIManagementException API Management Exception.
+     */
+    ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier)
+            throws APIManagementException;
+
+
+    /**
      * Method to get the status of the certificate which matches the given alias.
      * This method can me modified to get other necessary information as well. Such as CN etc.
      *
@@ -1193,7 +1208,7 @@ public interface APIProvider extends APIManager {
 
     /**
      * Remove openapi definition of the product
-     * @param APIProduct product
+     * @param product product
      * @throws APIManagementException
      */
     void removeAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;

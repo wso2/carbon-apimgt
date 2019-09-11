@@ -1581,10 +1581,33 @@ public class APIMappingUtil {
         productDto.setId(product.getUuid());
         productDto.setContext(product.getContext());
         productDto.setDescription(product.getDescription());
+        productDto.setApiType(APIConstants.AuditLogConstants.API_PRODUCT);
+
+        Set<String> apiTags = product.getTags();
+        List<String> tagsToReturn = new ArrayList<>(apiTags);
+        productDto.setTags(tagsToReturn);
+
         APIProductBusinessInformationDTO businessInformation = new APIProductBusinessInformationDTO();
         businessInformation.setBusinessOwner(product.getBusinessOwner());
         businessInformation.setBusinessOwnerEmail(product.getBusinessOwnerEmail());
+        businessInformation.setTechnicalOwner(product.getTechnicalOwner());
+        businessInformation.setTechnicalOwner(product.getTechnicalOwnerEmail());
         productDto.setBusinessInformation(businessInformation );
+
+        APICorsConfigurationDTO apiCorsConfigurationDTO = new APICorsConfigurationDTO();
+        CORSConfiguration corsConfiguration = product.getCorsConfiguration();
+        if (corsConfiguration == null) {
+            corsConfiguration = APIUtil.getDefaultCorsConfiguration();
+        }
+        apiCorsConfigurationDTO
+                .setAccessControlAllowOrigins(corsConfiguration.getAccessControlAllowOrigins());
+        apiCorsConfigurationDTO
+                .setAccessControlAllowHeaders(corsConfiguration.getAccessControlAllowHeaders());
+        apiCorsConfigurationDTO
+                .setAccessControlAllowMethods(corsConfiguration.getAccessControlAllowMethods());
+        apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
+        apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
+        productDto.setCorsConfiguration(apiCorsConfigurationDTO);
 
         productDto.setState(StateEnum.valueOf(product.getState()));
         productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
@@ -1751,11 +1774,16 @@ public class APIMappingUtil {
             context = "/t/" + providerDomain + context;
         }
 
+        product.setType(APIConstants.API_PRODUCT_IDENTIFIER_TYPE.replaceAll("\\s",""));
         product.setContext(context);
+        context = checkAndSetVersionParam(context);
+        product.setContextTemplate(context);
 
         if(dto.getBusinessInformation() != null) {
             product.setBusinessOwner(dto.getBusinessInformation().getBusinessOwner());
             product.setBusinessOwnerEmail(dto.getBusinessInformation().getBusinessOwnerEmail());
+            product.setTechnicalOwner(dto.getBusinessInformation().getTechnicalOwner());
+            product.setTechnicalOwnerEmail(dto.getBusinessInformation().getTechnicalOwnerEmail());
         }
 
         String state = dto.getState() == null ? APIStatus.CREATED.toString() :dto.getState().toString() ;

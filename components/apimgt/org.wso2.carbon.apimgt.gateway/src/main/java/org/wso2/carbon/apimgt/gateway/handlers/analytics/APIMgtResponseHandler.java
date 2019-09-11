@@ -159,6 +159,10 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             apiVersion = apiVersion.split(":v")[1];
             String url = (String) mc.getProperty(RESTConstants.REST_URL_PREFIX);
 
+            if (url == null) {
+                url = (String) axis2MC.getProperty(APIMgtGatewayConstants.SERVICE_PREFIX);
+            }
+
             URL apiurl = new URL(url);
             int port = apiurl.getPort();
             String protocol = mc.getProperty(SynapseConstants.TRANSPORT_IN_NAME) + "-" + port;

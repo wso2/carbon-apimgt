@@ -1175,19 +1175,11 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     public boolean isDocumentationExist(Identifier identifier, String docName) throws APIManagementException {
         String docPath = "";
-        if (identifier instanceof APIIdentifier) {
+
             docPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
                     + RegistryConstants.PATH_SEPARATOR + identifier.getName() + RegistryConstants.PATH_SEPARATOR
                     + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.DOC_DIR
                     + RegistryConstants.PATH_SEPARATOR + docName;
-        } else if (identifier instanceof APIProductIdentifier) {
-            docPath = APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
-                    + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
-                    .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName()
-                    + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR
-                    + APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR + docName;
-        }
-
         try {
             return registry.resourceExists(docPath);
         } catch (RegistryException e) {
@@ -1203,11 +1195,10 @@ public abstract class AbstractAPIManager implements APIManager {
         String docArtifactKeyType = StringUtils.EMPTY;
         if (id instanceof APIIdentifier) {
             resourcePath = APIUtil.getAPIPath((APIIdentifier) id);
-            docArtifactKeyType = APIConstants.DOCUMENTATION_KEY;
         } else if (id instanceof APIProductIdentifier) {
             resourcePath = APIUtil.getAPIProductPath((APIProductIdentifier) id);
-            docArtifactKeyType = APIConstants.PRODUCT_DOCUMENTATION_KEY;
         }
+        docArtifactKeyType = APIConstants.DOCUMENTATION_KEY;
 
         try {
             Association[] docAssociations = registry.getAssociations(resourcePath,
@@ -2634,7 +2625,6 @@ public abstract class AbstractAPIManager implements APIManager {
                     }
                 }
             }
-
             apiSet.addAll(apiList);
         } catch (RegistryException e) {
             String msg = "Failed to search APIs with type";
@@ -3073,7 +3063,7 @@ public abstract class AbstractAPIManager implements APIManager {
             }
 
             GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                    APIConstants.API_PRODUCT_KEY);
+                    APIConstants.API_KEY);
 
             GenericArtifact apiProductArtifact = artifactManager.getGenericArtifact(uuid);
             if (apiProductArtifact != null) {
@@ -3120,7 +3110,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 registry = this.registry;
             }
             GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                    APIConstants.API_PRODUCT_KEY);
+                    APIConstants.API_KEY);
             Resource productResource = registry.get(apiProductPath);
             String artifactId = productResource.getUUID();
             if (artifactId == null) {
@@ -3241,7 +3231,7 @@ public abstract class AbstractAPIManager implements APIManager {
             PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
 
             List<GovernanceArtifact> governanceArtifacts = GovernanceUtils
-                    .findGovernanceArtifacts(getSearchQuery(searchQuery), registry, APIConstants.API_PRODUCT_RXT_MEDIA_TYPE,
+                    .findGovernanceArtifacts(getSearchQuery(searchQuery), registry, APIConstants.API_RXT_MEDIA_TYPE,
                             true);
             totalLength = PaginationContext.getInstance().getLength();
             boolean isFound = true;
@@ -3374,7 +3364,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 registryType = registry;
             }
             GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registryType, APIConstants
-                    .PRODUCT_DOCUMENTATION_KEY);
+                    .DOCUMENTATION_KEY);
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
             APIProductIdentifier productIdentifier = APIUtil.getProductIdentifier(artifact.getPath());
             checkAccessControlPermission(productIdentifier);
@@ -3401,7 +3391,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public APIProduct getAPIProduct(String productPath) throws APIManagementException {
         try {
             GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                    APIConstants.API_PRODUCT_KEY);
+                    APIConstants.API_KEY);
             Resource productResource = registry.get(productPath);
             String artifactId = productResource.getUUID();
             if (artifactId == null) {
