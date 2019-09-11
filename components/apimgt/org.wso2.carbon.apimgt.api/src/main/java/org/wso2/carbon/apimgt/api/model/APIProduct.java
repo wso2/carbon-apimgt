@@ -50,6 +50,7 @@ public class APIProduct {
     private String technicalOwnerEmail;
 
     private String tenantDomain;
+    private String rating;
     private List<APIProductResource> productResources = new ArrayList<>();
     private String definition;
     private JSONObject additionalProperties = new JSONObject();
