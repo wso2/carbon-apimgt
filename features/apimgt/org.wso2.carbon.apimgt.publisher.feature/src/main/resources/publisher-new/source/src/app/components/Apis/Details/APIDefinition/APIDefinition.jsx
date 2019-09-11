@@ -131,8 +131,8 @@ class APIDefinition extends React.Component {
         }
 
         api.getSettings().then((settings) => {
-            if (settings.SecurityAuditProperties != null) {
-                this.setState({ securityAuditProperties: settings.SecurityAuditProperties });
+            if (settings.securityAuditProperties !== null && settings.securityAuditProperties.length !== 0) {
+                this.setState({ securityAuditProperties: settings.securityAuditProperties });
             }
         });
 
@@ -345,11 +345,11 @@ class APIDefinition extends React.Component {
         window.localStorage.setItem('swagger-editor-content', '');
         this.setState({ openEditor: false });
         const { intl } = this.props;
-        const { securityAuditProperties } = this.state;
-        if (securityAuditProperties.apiToken !== null && securityAuditProperties.collectionId != null) {
+        const { isAuditApiClicked } = this.state;
+        if (isAuditApiClicked === true) {
             Alert.info(intl.formatMessage({
                 id: 'Apis.Details.APIDefinition.info.updating.auditapi',
-                defaultMessage: 'Please click Audit API button again to reflect the changes made.',
+                defaultMessage: 'To reflect the changes made you need to click Audit API',
             }));
         }
     }
@@ -518,20 +518,17 @@ class APIDefinition extends React.Component {
                             </Button>
                         </a>
 
-                        {/**
-                           * Code for the Audit API button
-                        */}
-                        {((securityAuditProperties.apiToken !== null) &&
-                        (securityAuditProperties.collectionId !== null)) ?
-                            <Button size='small' className={classes.button} onClick={this.onAuditApiClick}>
-                                <LockRounded className={classes.buttonIcon} />
-                                <FormattedMessage
-                                    id='Apis.Details.APIDefinition.APIDefinition.audit.api'
-                                    defaultMessage='Audit API'
-                                />
-                            </Button> : (null)
+                        {(securityAuditProperties.apiToken && securityAuditProperties.collectionId) ?
+                            (
+                                <Button size='small' className={classes.button} onClick={this.onAuditApiClick}>
+                                    <LockRounded className={classes.buttonIcon} />
+                                    <FormattedMessage
+                                        id='Apis.Details.APIDefinition.APIDefinition.audit.api'
+                                        defaultMessage='Audit API'
+                                    />
+                                </Button>
+                            ) : (null)
                         }
-
 
                         {this.isNotCreator
                             && (

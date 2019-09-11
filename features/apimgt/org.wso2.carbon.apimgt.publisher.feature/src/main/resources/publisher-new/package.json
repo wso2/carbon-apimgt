@@ -27,6 +27,7 @@
         "async-react-component": "^0.7.0",
         "autosuggest-highlight": "^3.1.1",
         "axios": "^0.19.0",
+        "base64url": "3.0.1",
         "bundle-loader": "^0.5.5",
         "caniuse-api": "^1.6.1",
         "downshift": "^3.1.0",
@@ -47,6 +48,7 @@
         "rc-notification": "^3.0.1",
         "react": "^16.8.6",
         "react-autosuggest": "^9.3.4",
+        "react-circular-progressbar": "^2.0.2",
         "react-color": "^2.17.3",
         "react-dom": "^16.8.6",
         "react-draft-wysiwyg": "^1.13.2",
@@ -63,12 +65,12 @@
         "react-tagsinput": "3.19.0",
         "react-tap-event-plugin": "^2.0.1",
         "react-toastify": "^1.7.0",
+        "react-visibility-sensor": "^5.1.1",
         "swagger-client": "^3.9.0",
         "swagger-editor": "^3.6.30",
         "swagger-parser": "^7.0.1",
         "typeface-roboto": "0.0.35",
-        "url-loader": "^0.5.9",
-        "base64url": "3.0.1"
+        "url-loader": "^0.5.9"
     },
     "devDependencies": {
         "@babel/core": "^7.4.4",

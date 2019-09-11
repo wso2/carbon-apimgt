@@ -26,6 +26,7 @@ import Paper from '@material-ui/core/Paper';
 import { withStyles, createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import { Line } from 'rc-progress';
 import Progress from 'AppComponents/Shared/Progress';
+import { withRouter } from 'react-router';
 
 import MUIDataTable from 'mui-datatables';
 
@@ -83,9 +84,8 @@ class APISecurityAudit extends Component {
      * @inheritdoc
      */
     componentDidMount() {
-        // Include code to pass in the data from the backend
         this.setState({ loading: true });
-        const { apiId } = this.props;
+        const { apiId, history } = this.props;
         const newApi = new API();
         const promisedDefinition = newApi.getSwagger(apiId);
         promisedDefinition.then((response) => {
@@ -104,13 +104,13 @@ class APISecurityAudit extends Component {
                 });
             })
             .catch((error) => {
-                this.setState({ loading: false });
-                console.error(error);
-                if (error.response) {
-                    Alert.error(error.response.body.message);
-                } else {
-                    Alert.error('Something went wrong while retrieving the API Security Report');
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
                 }
+                this.setState({ loading: false });
+                Alert.error('Something went wrong while retrieving the API Security Report');
+                const redirectUrl = '/apis/' + apiId + '/api definition';
+                history.push(redirectUrl);
             });
     }
 
@@ -144,6 +144,7 @@ class APISecurityAudit extends Component {
     /**
      * Get Row data for MUI Table
      * @param {*} issues Issues array
+     * @param {String} category The category of the issue
      * @return {*} dataArray array
      */
     getRowData(issues, category) {
@@ -152,7 +153,7 @@ class APISecurityAudit extends Component {
             const rowData = [];
             rowData.push(
                 this.criticalityMap[issue.criticality],
-                issue.message, Math.round(issue.score), issue.pointerImpacted, category,
+                issue.message, Math.round(issue.score), issue.pointer, category,
             );
             dataArray.push(rowData);
         });
@@ -187,35 +188,44 @@ class APISecurityAudit extends Component {
 
     /**
      * editorDidMount method for Monaco Editor
-     * TODO - Amend this to be unique for each issue
-     * @param {*} editor
-     * @param {*} monaco
+     * @param {*} editor Monaco Editor editor
+     * @param {*} monaco Monaco Editor monaco
+     * @param {String} searchTerm SearchTerm for pointer
      */
-    editorDidMount = (editor, monaco) => {
+    editorDidMount = (editor, monaco, searchTerm) => {
         const { classes } = this.props;
-        // editor.setSelection(new monaco.Range(18, 8, 18, 15));
-        // const line = editor.getAction('actions.find').run(searchTerm);
-        editor.revealLineInCenter(15);
-        editor.deltaDecorations([], [
-            {
-                range: new monaco.Range(15, 1, 15, 50),
-                options: {
-                    isWholeLine: true,
-                    className: classes.inlineDecoration,
-                    glyphMarginClassName: classes.contentLine,
-                },
-            },
-        ]);
+        if (searchTerm !== 'none') {
+            const termArray = searchTerm.split('/');
+            const lastTerm = [];
+            for (let i = 0; i < termArray.length; i++) {
+                lastTerm.push(editor.getModel().findNextMatch(termArray[i], 1, false, false, null, false));
+            }
+            const finalMatchIndex = lastTerm.length - 1;
+            if (lastTerm[finalMatchIndex] != null) {
+                editor.revealLineInCenter(lastTerm[finalMatchIndex].range.startLineNumber);
+                editor.deltaDecorations([], [
+                    {
+                        range: new monaco.Range(
+                            lastTerm[finalMatchIndex].range.startLineNumber,
+                            lastTerm[finalMatchIndex].range.startColumn,
+                            lastTerm[finalMatchIndex].range.endLineNumber,
+                            lastTerm[finalMatchIndex].range.endColumn,
+                        ),
+                        options: {
+                            isWholeLine: true,
+                            className: classes.inlineDecoration,
+                            glyphMarginClassName: classes.contentLine,
+                        },
+                    },
+                ]);
+            }
+        }
     }
-
-    // editorDidMountParent(editor, monaco) {
-    // }
 
     /**
      * @inheritdoc
      */
     render() {
-        // TODO - Test the json data after finishing the structure
         const { classes } = this.props;
         const {
             report, overallGrade, numErrors, loading, apiDefinition,
@@ -250,13 +260,8 @@ class APISecurityAudit extends Component {
                 },
             },
             {
-                name: 'Pointer Impacted',
+                name: 'Pointer',
                 options: {
-                    // customBodyRenderer: (value, tableMeta, updateValue,  tableViewObj = this) => {
-                    //     if (tableMeta.rowData) {
-                    //         const path = tableMeta.rowData[3];
-                    //     }
-                    // },
                     display: 'excluded',
                     filter: false,
                     sort: false,
@@ -287,11 +292,17 @@ class APISecurityAudit extends Component {
             expandableRows: true,
             expandableRowsOnClick: true,
             renderExpandableRow: (rowData) => {
-                // const colSpan = rowData.length + 1;
+                let searchTerm;
+                const path = rowData[3] + '';
+                if (path.includes('get') ||
+                    path.includes('put') ||
+                    path.includes('post') ||
+                    path.includes('delete')) {
+                    searchTerm = path;
+                } else {
+                    searchTerm = 'none';
+                }
 
-                // const path = rowData[3] + '';
-                // const splitPath = path.split(',');
-                // const searchTerm = splitPath[(splitPath.length - 1)];
                 return (
                     <TableRow>
                         <TableCell colSpan='2'>
@@ -301,7 +312,7 @@ class APISecurityAudit extends Component {
                                 theme='vs-dark'
                                 value={apiDefinition}
                                 options={editorOptions}
-                                editorDidMount={this.editorDidMount}
+                                editorDidMount={(editor, monaco) => this.editorDidMount(editor, monaco, searchTerm)}
                             />
                         </TableCell>
                         <TableCell>
@@ -339,7 +350,6 @@ class APISecurityAudit extends Component {
                                     <Typography variant='h5' styles={{ marginLeft: '40px' }}>
                                         Audit Score and Summary
                                     </Typography>
-                                    {/** Show total score and possibly a Progress Ring */}
                                     <div style={{ display: 'flex', marginTop: 25 }}>
                                         <div style={{ width: 250, marginLeft: 40, marginRight: 40 }}>
                                             <VisibilitySensor>
@@ -545,6 +555,9 @@ APISecurityAudit.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     apiId: PropTypes.string.isRequired,
     theme: PropTypes.shape({}).isRequired,
+    history: PropTypes.shape({
+        push: PropTypes.func.isRequired,
+    }).isRequired,
 };
 
-export default withStyles(styles)(APISecurityAudit);
+export default withRouter(withStyles(styles)(APISecurityAudit));
