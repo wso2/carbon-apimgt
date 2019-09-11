@@ -5237,9 +5237,7 @@ public final class APIUtil {
      * @throws APIManagementException If failed to get the uuid of the mediation sequence
      */
     public static Map<String, String> getMediationPolicyAttributes(String policyName, int tenantId, String direction,
-                                                                   APIIdentifier identifier) throws
-            APIManagementException {
-
+                                           APIIdentifier identifier) throws APIManagementException {
         org.wso2.carbon.registry.api.Collection seqCollection = null;
         String seqCollectionPath = "";
         Map<String, String> mediationPolicyAttributes = new HashMap<>(3);
@@ -5247,15 +5245,15 @@ public final class APIUtil {
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
 
-            if ("in".equals(direction)) {
+            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
                         .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-            } else if ("out".equals(direction)) {
+            } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
                         .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
-            } else if ("fault".equals(direction)) {
+            } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(direction)) {
                 seqCollection = (org.wso2.carbon.registry.api.Collection) registry
                         .get(APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator +
                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
