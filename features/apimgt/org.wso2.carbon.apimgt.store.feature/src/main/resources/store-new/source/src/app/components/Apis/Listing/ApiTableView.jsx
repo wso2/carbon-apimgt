@@ -59,7 +59,6 @@ class ApiTableView extends React.Component {
         super(props);
         this.state = {
             data: [],
-            redirect: false,
         };
         this.page = 0;
         this.count = 100;
