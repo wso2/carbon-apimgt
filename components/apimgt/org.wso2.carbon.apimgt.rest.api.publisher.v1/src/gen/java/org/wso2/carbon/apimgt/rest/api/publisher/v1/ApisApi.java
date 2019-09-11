@@ -1,13 +1,16 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExternalStoreListDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
@@ -58,6 +61,112 @@ public class ApisApi  {
 
 ApisApiService delegate = new ApisApiServiceImpl();
 
+
+    @GET
+    @Path("/{apiId}/client-certificates/{alias}/content")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Download a certificate.", notes = "This operation can be used to download a certificate which matches the given alias. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates")
+        })
+    }, tags={ "Client Certificates",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Alias not provided or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Certificate for the Alias not found. ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
+    public Response apisApiIdClientCertificatesAliasContentGet(@ApiParam(value = "The api identifier",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "",required=true) @PathParam("alias") String alias) throws APIManagementException{
+        return delegate.apisApiIdClientCertificatesAliasContentGet(apiId, alias, securityContext);
+    }
+
+    @DELETE
+    @Path("/{apiId}/client-certificates/{alias}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete a certificate.", notes = "This operation can be used to delete an uploaded certificate. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:client_certificates_update", description = "Update and delete client certificates")
+        })
+    }, tags={ "Client Certificates",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. The Certificate deleted successfully. ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Alias not found or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. | Failed to delete the certificate. Certificate could not found for the given alias ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
+    public Response apisApiIdClientCertificatesAliasDelete(@ApiParam(value = "The alias of the certificate that should be deleted. ",required=true) @PathParam("alias") String alias, @ApiParam(value = "The api identifier",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.apisApiIdClientCertificatesAliasDelete(alias, apiId, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/client-certificates/{alias}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get the certificate information.", notes = "This operation can be used to get the information about a certificate. ", response = CertificateInfoDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates")
+        })
+    }, tags={ "Client Certificates",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. ", response = CertificateInfoDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Alias not found or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Alias not found ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
+    public Response apisApiIdClientCertificatesAliasGet(@ApiParam(value = "",required=true) @PathParam("alias") String alias, @ApiParam(value = "The api identifier",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.apisApiIdClientCertificatesAliasGet(alias, apiId, securityContext);
+    }
+
+    @PUT
+    @Path("/{apiId}/client-certificates/{alias}")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update a certificate.", notes = "This operation can be used to update an uploaded certificate. ", response = ClientCertMetadataDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates")
+        })
+    }, tags={ "Client Certificates",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. The Certificate updated successfully. ", response = ClientCertMetadataDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Failure due to not providing alias. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. Updating certificate failed. Alias not found or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
+    public Response apisApiIdClientCertificatesAliasPut(@ApiParam(value = "Alias for the certificate",required=true) @PathParam("alias") String alias, @ApiParam(value = "The api identifier",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "certificate", required = false) InputStream certificateInputStream, @Multipart(value = "certificate" , required = false) Attachment certificateDetail, @Multipart(value = "tier", required = false)  String tier) throws APIManagementException{
+        return delegate.apisApiIdClientCertificatesAliasPut(alias, apiId, certificateInputStream, certificateDetail, tier, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/client-certificates")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve/ Search uploaded Client Certificates.", notes = "This operation can be used to retrieve and search the uploaded client certificates. ", response = ClientCertificatesDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:client_certificates_view", description = "View client certificates")
+        })
+    }, tags={ "Client Certificates",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with the list of matching certificate information in the body. ", response = ClientCertificatesDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Failure due to not providing alias or server is not configured to support mutual SSL authentication. ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
+    public Response apisApiIdClientCertificatesGet(@ApiParam(value = "UUID of the API",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Alias for the client certificate")  @QueryParam("alias") String alias) throws APIManagementException{
+        return delegate.apisApiIdClientCertificatesGet(apiId, limit, offset, alias, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/client-certificates")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Upload a new certificate.", notes = "This operation can be used to upload a new certificate for an endpoint. ", response = ClientCertMetadataDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:client_certificates_add", description = "Add client certificates")
+        })
+    }, tags={ "Client Certificates",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. The Certificate added successfully. ", response = ClientCertMetadataDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Failures due to existing alias or expired certificate. ", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error Failed to add the Certificate due to an Internal Server Error ", response = ErrorDTO.class) })
+    public Response apisApiIdClientCertificatesPost( @Multipart(value = "certificate") InputStream certificateInputStream, @Multipart(value = "certificate" ) Attachment certificateDetail, @Multipart(value = "alias")  String alias, @ApiParam(value = "apiId to which the certificate should be applied.",required=true) @PathParam("apiId") String apiId, @Multipart(value = "tier")  String tier) throws APIManagementException{
+        return delegate.apisApiIdClientCertificatesPost(certificateInputStream, certificateDetail, alias, apiId, tier, securityContext);
+    }
 
     @DELETE
     @Path("/{apiId}")
@@ -707,43 +816,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.apisApiIdThumbnailGet(apiId, ifNoneMatch, securityContext);
     }
 
-    @GET
-    @Path("/{apiId}/wsdl")
-    @Consumes({ "application/json" })
-    @Produces({ "application/octet-stream" })
-    @ApiOperation(value = "Get WSDL definition", notes = "This operation can be used to retrieve the WSDL definition of an API. ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
-        })
-    }, tags={ "APIs",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Requested WSDL document of the API is returned ", response = Void.class),
-        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response apisApiIdWsdlGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
-        return delegate.apisApiIdWsdlGet(apiId, ifNoneMatch, securityContext);
-    }
-
-    @PUT
-    @Path("/{apiId}/wsdl")
-    @Consumes({ "multipart/form-data" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Update WSDL definition", notes = "This operation can be used to update the WSDL definition of an existing API. WSDL to be updated is passed as a form data parameter `inlineContent`. ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
-        })
-    }, tags={ "APIs",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Successful response with updated WSDL definition ", response = Void.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
-        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified. ", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response apisApiIdWsdlPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.apisApiIdWsdlPut(apiId, fileInputStream, fileDetail, ifMatch, securityContext);
-    }
-
     @POST
     @Path("/change-lifecycle")
     @Consumes({ "application/json" })
@@ -796,24 +868,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
     public Response apisGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset, @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"provider:wso2\" will match an API if the provider of the API contains \"wso2\". \"provider:\"wso2\"\" will match an API if the provider of the API is exactly \"wso2\". \"status:PUBLISHED\" will match an API if the API is in PUBLISHED state. \"label:external\" will match an API if it contains a Microgateway label called \"external\".  Also you can use combined modifiers Eg. name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.  Supported attribute modifiers are [**version, context, name, status, description, subcontext, doc, provider, label**]  If no advanced attribute modifier has been specified,  the API names containing the search term will be returned as a result.  Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl) ")  @QueryParam("query") String query, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Defines whether the returned response should contain full details of API ")  @QueryParam("expand") Boolean expand, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept,  @ApiParam(value = "Tenant domain, whose APIs should be retrieved. If not specified, the logged in user's tenant domain will be considered for this. ")  @QueryParam("tenantDomain") String tenantDomain) throws APIManagementException{
         return delegate.apisGet(limit, offset, xWSO2Tenant, query, ifNoneMatch, expand, accept, tenantDomain, securityContext);
-    }
-
-    @HEAD
-    
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Check given API attibute name is already exist ", notes = "Using this operation, you can check a given API context is already used. You need to provide the context name you want to check. ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_view", description = "View API")
-        })
-    }, tags={ "APIs",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Requested API attibute status is returned ", response = Void.class),
-        @ApiResponse(code = 400, message = "Bad Request. Requested API attribute does not meet requiremnts. ", response = Void.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested API attribute does not exist. ", response = ErrorDTO.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response apisHead( @ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"provider:wso2\" will match an API if the provider of the API is exactly \"wso2\".  Additionally you can use wildcards.  Eg. \"provider:wso2*\" will match an API if the provider of the API starts with \"wso2\".  Supported attribute modifiers are [**version, context, lifeCycleStatus, description, subcontext, doc, provider**]  If no advanced attribute modifier has been specified, search will match the given query string against API Name. ")  @QueryParam("query") String query, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
-        return delegate.apisHead(query, ifNoneMatch, securityContext);
     }
 
     @POST
@@ -871,17 +925,35 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/external-stores")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get the list of external stores which an API is published to", notes = "This operation can be used to retrieve a list of external stores which an API is published to by providing the id of the API. ", response = ExternalStoreListDTO.class, authorizations = {
+    @ApiOperation(value = "Get the list of external stores which an API is published to", notes = "This operation can be used to retrieve a list of external stores which an API is published to by providing the id of the API. ", response = APIExternalStoreListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "External Stores",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. External Store list is returned. ", response = ExternalStoreListDTO.class),
+        @ApiResponse(code = 200, message = "OK. External Store list is returned. ", response = APIExternalStoreListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal server error while getting external stores of the API.", response = ErrorDTO.class) })
     public Response getAllPublishedExternalStoresByAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.getAllPublishedExternalStoresByAPI(apiId, ifNoneMatch, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/wsdl")
+    @Consumes({ "application/json" })
+    @Produces({ "application/wsdl+xml", "application/zip" })
+    @ApiOperation(value = "Get WSDL definition", notes = "This operation can be used to retrieve the WSDL definition of an API. It can be either a single WSDL file or a WSDL archive.  The type of the WSDL of the API is indicated at the \"wsdlInfo\" element of the API payload definition. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Requested WSDL document of the API is returned ", response = Void.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
+    public Response getWSDLOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.getWSDLOfAPI(apiId, ifNoneMatch, securityContext);
     }
 
     @POST
@@ -922,17 +994,17 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/publish-to-external-stores")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Publish an API to external stores", notes = "This operation can be used to publish an API to a list of external stores. ", response = ExternalStoreListDTO.class, authorizations = {
+    @ApiOperation(value = "Publish an API to external stores", notes = "This operation can be used to publish an API to a list of external stores. ", response = APIExternalStoreListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "External Stores",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. API was successfully published to all the selected external stores. ", response = ExternalStoreListDTO.class),
+        @ApiResponse(code = 200, message = "OK. API was successfully published to all the selected external stores. ", response = APIExternalStoreListDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Request API resource or external store Ids not found. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal server error while publishing to external stores", response = ErrorDTO.class) })
-    public Response publishAPIToExternalStores(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "External Store Ids of stores which the API needs to be published or updated.",required=true)  @QueryParam("externalStoreId") List<String> externalStoreId, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.publishAPIToExternalStores(apiId, externalStoreId, ifMatch, securityContext);
+    public Response publishAPIToExternalStores(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @NotNull @ApiParam(value = "External Store Ids of stores which the API needs to be published or updated.",required=true)  @QueryParam("externalStoreIds") String externalStoreIds, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.publishAPIToExternalStores(apiId, externalStoreIds, ifMatch, securityContext);
     }
 
     @PUT
@@ -951,6 +1023,43 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
     public Response updateAPIThumbnail(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.updateAPIThumbnail(apiId, fileInputStream, fileDetail, ifMatch, securityContext);
+    }
+
+    @PUT
+    @Path("/{apiId}/wsdl")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update WSDL definition", notes = "This operation can be used to update the WSDL definition of an existing API. WSDL to be updated can be passed as either \"url\" or \"file\". Only one of \"url\" or \"file\" can be used at the same time. \"file\" can be specified as a single WSDL file or as a zip file which has a WSDL and its dependencies (eg: XSDs) ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with updated WSDL definition ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
+    public Response updateWSDLOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail, @Multipart(value = "url", required = false)  String url, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
+        return delegate.updateWSDLOfAPI(apiId, fileInputStream, fileDetail, url, ifMatch, securityContext);
+    }
+
+    @HEAD
+    
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Check given API attibute name is already exist ", notes = "Using this operation, you can check a given API context is already used. You need to provide the context name you want to check. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Requested API attibute status is returned ", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Requested API attribute does not meet requiremnts. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested API attribute does not exist. ", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
+    public Response validateAPI( @ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"provider:wso2\" will match an API if the provider of the API is exactly \"wso2\".  Additionally you can use wildcards.  Eg. \"provider:wso2*\" will match an API if the provider of the API starts with \"wso2\".  Supported attribute modifiers are [**version, context, lifeCycleStatus, description, subcontext, doc, provider**]  If no advanced attribute modifier has been specified, search will match the given query string against API Name. ")  @QueryParam("query") String query, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.validateAPI(query, ifNoneMatch, securityContext);
     }
 
     @POST

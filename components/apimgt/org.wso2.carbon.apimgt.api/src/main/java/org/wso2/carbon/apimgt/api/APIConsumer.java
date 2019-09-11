@@ -169,7 +169,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get API for subscriber
      */
     Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException;
-    
+
     /**
      * @param subscriber the subscriber to be subscribed to the API
      * @param groupingId the groupId of the subscriber
@@ -321,13 +321,13 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
-     * 
+     *
      * @param subscriptionId id of the subscription
      * @return
      * @throws APIManagementException if failed to get subscription detail from database
      */
     String getSubscriptionStatusById(int subscriptionId) throws APIManagementException;
- 
+
     /**
      * Unsubscribe the specified user from the specified API in the given application
      *
@@ -351,7 +351,7 @@ public interface APIConsumer extends APIManager {
             APIManagementException;
 
     /** Removes a subscription specified by SubscribedAPI object
-     * 
+     *
      * @param subscription SubscribedAPI object which contains the subscription information
      * @throws APIManagementException
      */
@@ -636,17 +636,17 @@ public interface APIConsumer extends APIManager {
      */
     Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
                                                 Identifier identifier, String groupingId) throws APIManagementException;
-    
+
     Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException;
 
     Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
 
     Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end, boolean limitAttributes) throws APIManagementException;
-    
+
     int getUserRating(APIIdentifier apiId, String user) throws APIManagementException;
 
     JSONObject getUserRatingInfo(APIIdentifier apiId, String user) throws APIManagementException;
-    
+
     float getAverageAPIRating(APIIdentifier apiId) throws APIManagementException;
 
     JSONArray getAPIRatings(APIIdentifier apiId) throws APIManagementException;
@@ -708,7 +708,7 @@ public interface APIConsumer extends APIManager {
     /**
      * Check whether given Tier is denied for the user
      * @param tierName
-     * @return 
+     * @return
      * @throws APIManagementException if failed to get the tiers
      */
     boolean isTierDeneid(String tierName)throws APIManagementException;
@@ -755,7 +755,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed get API from APIIdentifier
      */
     API getLightweightAPI(APIIdentifier identifier) throws APIManagementException;
-    
+
     /**
      * Returns a paginated list of all APIs in given Status. If a given API has multiple APIs,
      * only the latest version will be included
@@ -770,7 +770,7 @@ public interface APIConsumer extends APIManager {
 
     Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String Status,
                                                           boolean returnAPITags) throws APIManagementException;
-    
+
     /**
      * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
      * only the latest version will be included in this list.
@@ -811,7 +811,7 @@ public interface APIConsumer extends APIManager {
 
     /**
      * Returns the swagger definition of the API for the given microgateway gateway label as a string
-     * 
+     *
      * @param apiId id of the APIIdentifier
      * @param labelName name of the microgateway label
      * @return swagger string
@@ -919,6 +919,18 @@ public interface APIConsumer extends APIManager {
      */
     String getWSDLDocument(String username, String tenantDomain, String resourceUrl, Map environmentDetails,
             Map apiDetails) throws APIManagementException;
+
+    /**
+     * Returns the WSDL ResourceFile (Single WSDL or ZIP) for the provided API and environment details
+     *
+     * @param apiIdentifier API Identifier object
+     * @param environmentName environment name
+     * @param environmentType environment type
+     * @return WSDL of the API
+     * @throws APIManagementException when error occurred while getting the WSDL
+     */
+    ResourceFile getWSDL(APIIdentifier apiIdentifier, String environmentName, String environmentType)
+            throws APIManagementException;
 
     /**
      * Returns application attributes defined in configuration

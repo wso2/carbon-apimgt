@@ -55,7 +55,7 @@ public class API implements Serializable {
     private String context;
     private String contextTemplate;
     private String thumbnailUrl;
-    private ResourceFile wsdlArchive;
+    private ResourceFile wsdlResource;
     private Set<String> tags = new LinkedHashSet<String>();
     private Set<Documentation> documents = new LinkedHashSet<Documentation>();
     private String httpVerb;
@@ -925,12 +925,12 @@ public class API implements Serializable {
         this.wsdlArchivePath = wsdlArchivePath;
     }
 
-    public ResourceFile getWsdlArchive() {
-        return wsdlArchive;
+    public ResourceFile getWsdlResource() {
+        return wsdlResource;
     }
 
-    public void setWsdlArchive(ResourceFile wsdlArchive) {
-        this.wsdlArchive = wsdlArchive;
+    public void setWsdlResource(ResourceFile wsdl) {
+        this.wsdlResource = wsdl;
     }
 
     public List<APIEndpoint> getEndpoint() {

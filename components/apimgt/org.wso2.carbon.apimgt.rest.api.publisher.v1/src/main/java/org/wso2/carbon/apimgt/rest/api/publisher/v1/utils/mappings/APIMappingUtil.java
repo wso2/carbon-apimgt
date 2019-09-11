@@ -125,7 +125,6 @@ public class APIMappingUtil {
         }
 
         model.setImplementation(dto.getEndpointImplementationType().toString());
-        model.setWsdlUrl(dto.getWsdlUri());
         model.setType(dto.getType().toString());
         if (dto.getLifeCycleStatus() != null) {
             model.setStatus((dto.getLifeCycleStatus() != null) ? dto.getLifeCycleStatus().toUpperCase() : null);
@@ -619,7 +618,7 @@ public class APIMappingUtil {
             dto.setEndpointConfig(endpointConfigJson);
         } catch (ParseException e) {
             //logs the error and continues as this is not a blocker
-            log.error("Cannot convert endpoint configurations when setting endpoint for API +" +
+            log.error("Cannot convert endpoint configurations when setting endpoint for API. " +
                     "API ID = " + model.getId(), e);
         }
       /*  if (!StringUtils.isBlank(model.getThumbnailUrl())) {todo
@@ -771,7 +770,20 @@ public class APIMappingUtil {
         apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
         apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
         dto.setCorsConfiguration(apiCorsConfigurationDTO);
-        dto.setWsdlUri(model.getWsdlUrl());
+
+        if (model.getWsdlUrl() != null) {
+            String wsdlRegistryUri = model.getWsdlUrl().toLowerCase();
+            APIWsdlInfoDTO wsdlInfoDTO = new APIWsdlInfoDTO();
+            if (wsdlRegistryUri.endsWith(APIConstants.ZIP_FILE_EXTENSION)) {
+                wsdlInfoDTO.setType(APIWsdlInfoDTO.TypeEnum.ZIP);
+            } else if (wsdlRegistryUri.endsWith(APIConstants.WSDL_EXTENSION)) {
+                wsdlInfoDTO.setType(APIWsdlInfoDTO.TypeEnum.WSDL);
+            } else {
+                log.warn("Unrecognized WSDL type in WSDL url: " + model.getWsdlUrl());
+            }
+            dto.setWsdlInfo(wsdlInfoDTO);
+        }
+
         setEndpointSecurityFromModelToApiDTO(model, dto);
         setMaxTpsFromModelToApiDTO(model, dto);
 
@@ -1519,15 +1531,17 @@ public class APIMappingUtil {
     private static List<APIOperationsDTO> getDefaultOperationsList(String apiType) {
 
         List<APIOperationsDTO> operationsDTOs = new ArrayList<>();
-        String[] suportMethods = null;
+        String[] supportedMethods = null;
 
         if (apiType.equals(APIConstants.GRAPHQL_API)) {
-            suportMethods = APIConstants.GRAPHQL_SUPPORTED_METHODS;
+            supportedMethods = APIConstants.GRAPHQL_SUPPORTED_METHODS;
+        } else if (apiType.equals(APIConstants.API_TYPE_SOAP)) {
+            supportedMethods = APIConstants.SOAP_DEFAULT_METHODS;
         } else {
-            suportMethods = RestApiConstants.SUPPORTED_METHODS;
+            supportedMethods = APIConstants.HTTP_DEFAULT_METHODS;
         }
 
-        for (String verb : suportMethods) {
+        for (String verb : supportedMethods) {
             APIOperationsDTO operationsDTO = new APIOperationsDTO();
             operationsDTO.setTarget("/*");
             operationsDTO.setVerb(verb);
@@ -1567,10 +1581,33 @@ public class APIMappingUtil {
         productDto.setId(product.getUuid());
         productDto.setContext(product.getContext());
         productDto.setDescription(product.getDescription());
+        productDto.setApiType(APIConstants.AuditLogConstants.API_PRODUCT);
+
+        Set<String> apiTags = product.getTags();
+        List<String> tagsToReturn = new ArrayList<>(apiTags);
+        productDto.setTags(tagsToReturn);
+
         APIProductBusinessInformationDTO businessInformation = new APIProductBusinessInformationDTO();
         businessInformation.setBusinessOwner(product.getBusinessOwner());
         businessInformation.setBusinessOwnerEmail(product.getBusinessOwnerEmail());
+        businessInformation.setTechnicalOwner(product.getTechnicalOwner());
+        businessInformation.setTechnicalOwner(product.getTechnicalOwnerEmail());
         productDto.setBusinessInformation(businessInformation );
+
+        APICorsConfigurationDTO apiCorsConfigurationDTO = new APICorsConfigurationDTO();
+        CORSConfiguration corsConfiguration = product.getCorsConfiguration();
+        if (corsConfiguration == null) {
+            corsConfiguration = APIUtil.getDefaultCorsConfiguration();
+        }
+        apiCorsConfigurationDTO
+                .setAccessControlAllowOrigins(corsConfiguration.getAccessControlAllowOrigins());
+        apiCorsConfigurationDTO
+                .setAccessControlAllowHeaders(corsConfiguration.getAccessControlAllowHeaders());
+        apiCorsConfigurationDTO
+                .setAccessControlAllowMethods(corsConfiguration.getAccessControlAllowMethods());
+        apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
+        apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
+        productDto.setCorsConfiguration(apiCorsConfigurationDTO);
 
         productDto.setState(StateEnum.valueOf(product.getState()));
         productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
@@ -1737,11 +1774,16 @@ public class APIMappingUtil {
             context = "/t/" + providerDomain + context;
         }
 
+        product.setType(APIConstants.API_PRODUCT_IDENTIFIER_TYPE.replaceAll("\\s",""));
         product.setContext(context);
+        context = checkAndSetVersionParam(context);
+        product.setContextTemplate(context);
 
         if(dto.getBusinessInformation() != null) {
             product.setBusinessOwner(dto.getBusinessInformation().getBusinessOwner());
             product.setBusinessOwnerEmail(dto.getBusinessInformation().getBusinessOwnerEmail());
+            product.setTechnicalOwner(dto.getBusinessInformation().getTechnicalOwner());
+            product.setTechnicalOwnerEmail(dto.getBusinessInformation().getTechnicalOwnerEmail());
         }
 
         String state = dto.getState() == null ? APIStatus.CREATED.toString() :dto.getState().toString() ;

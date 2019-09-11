@@ -1302,22 +1302,14 @@ class API extends Resource {
 
     validateSystemRole(role) {
         const promise = this.client.then((client) => {
-            return client.apis.Roles.validateSystemRole({ roleId: role }).then((resp) => {
-                return resp.ok;
-            }).catch(() => {
-                    return false;
-            });
+            return client.apis.Roles.validateSystemRole({ roleId: role })
         });
         return promise;
     }
 
     validateUSerRole(role) {
         const promise = this.client.then((client) => {
-            return client.apis.Roles.validateUserRole({ roleId: role }).then((resp) => {
-                return resp.ok;
-            }).catch(() => {
-                return false;
-            });
+            return client.apis.Roles.validateUserRole({ roleId: role })
         });
         return promise;
     }

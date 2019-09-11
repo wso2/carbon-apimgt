@@ -71,7 +71,7 @@ public class TiersApiServiceImpl extends TiersApiService {
         try {
             List<Tier> tierList = new ArrayList<>();
 
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
@@ -144,7 +144,7 @@ public class TiersApiServiceImpl extends TiersApiService {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
 
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
