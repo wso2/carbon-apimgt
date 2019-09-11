@@ -4644,8 +4644,8 @@ definitions:
 
           **OAUTH:** A UUID based access token which is issued by default.
           **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments.
-        default: OAUTH
-        example: OAUTH
+        default: JWT
+        example: JWT
       status:
         type: string
         example: APPROVED

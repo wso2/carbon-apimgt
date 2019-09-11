@@ -84,7 +84,7 @@ class NewApp extends React.Component {
                 name: '',
                 throttlingPolicy: '',
                 description: '',
-                tokenType: 'OAUTH',
+                tokenType: 'JWT',
                 groups: null,
                 attributes: {},
             },
