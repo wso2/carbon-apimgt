@@ -276,6 +276,7 @@ Utils.CONST = {
     LOGIN_TOKEN_PATH: '/login/token',
 
     LOGOUT_CALLBACK: '/services/auth/callback/logout',
+    INTROSPECT: '/services/auth/introspect',
     SWAGGER_YAML: '/api/am/publisher/v1.0/swagger.yaml',
     PROTOCOL: 'https://',
 };
