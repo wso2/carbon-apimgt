@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import deburr from 'lodash/deburr';
 import Downshift from 'downshift';
@@ -26,47 +26,46 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Chip from '@material-ui/core/Chip';
 import API from 'AppData/api';
 import CONSTS from 'AppData/Constants';
-import APIContext  from 'AppComponents/Apis/Details/components/ApiContext';
 
 const useStyles = makeStyles(theme => ({
-  root: {
-      flexGrow: 1,
-      height: 250,
-  },
-  container: {
-      flexGrow: 1,
-      position: 'relative',
-  },
-  paper: {
-      position: 'absolute',
-      zIndex: 1,
-      marginTop: theme.spacing(1),
-      left: 0,
-      right: 0,
-  },
-  chip: {
-      margin: theme.spacing(0.5, 0.25),
-  },
-  inputRoot: {
-      flexWrap: 'wrap',
-  },
-  inputInput: {
-      width: 'auto',
-      flexGrow: 1,
-  },
-  divider: {
-      height: theme.spacing(2),
-  },
+    root: {
+        flexGrow: 1,
+        height: 250,
+    },
+    container: {
+        flexGrow: 1,
+        position: 'relative',
+    },
+    paper: {
+        position: 'absolute',
+        zIndex: 1,
+        marginTop: theme.spacing(1),
+        left: 0,
+        right: 0,
+    },
+    chip: {
+        margin: theme.spacing(0.5, 0.25),
+    },
+    inputRoot: {
+        flexWrap: 'wrap',
+    },
+    inputInput: {
+        width: 'auto',
+        flexGrow: 1,
+    },
+    divider: {
+        height: theme.spacing(2),
+    },
 }));
 
 function renderInput(inputProps) {
     const {
- InputProps, classes, ref, ...other 
-} = inputProps;
+        InputProps, classes, ref, ...other
+    } = inputProps;
 
     return (
-      <TextField
-          InputProps={{
+        <TextField
+            InputProps={{
                 inputRef: ref,
                 classes: {
                     root: classes.inputRoot,
@@ -74,7 +73,7 @@ function renderInput(inputProps) {
                 },
                 ...InputProps,
             }}
-          {...other}
+            {...other}
         />
     );
 }
@@ -83,14 +82,20 @@ renderInput.propTypes = {
     /**
    * Override or extend the styles applied to the component.
    */
-    classes: PropTypes.object.isRequired,
-    InputProps: PropTypes.object,
+    classes: PropTypes.shape({
+        type: PropTypes.string,
+        inputType: PropTypes.string,
+    }).isRequired,
+    InputProps: PropTypes.shape({
+        type: PropTypes.string,
+        inputType: PropTypes.string,
+    }).isRequired,
 };
 
 function renderSuggestion(suggestionProps) {
     const {
- suggestion, index, itemProps, highlightedIndex, selectedItem 
-} = suggestionProps;
+        suggestion, index, itemProps, highlightedIndex, selectedItem,
+    } = suggestionProps;
     const isHighlighted = highlightedIndex === index;
     const isSelected = (selectedItem || '').indexOf(suggestion) > -1;
 
@@ -104,7 +109,7 @@ function renderSuggestion(suggestionProps) {
                 fontWeight: isSelected ? 500 : 400,
             }}
         >
-        {suggestion}
+            {suggestion}
         </MenuItem>
     );
 }
@@ -112,30 +117,33 @@ function renderSuggestion(suggestionProps) {
 renderSuggestion.propTypes = {
     highlightedIndex: PropTypes.oneOfType([PropTypes.oneOf([null]), PropTypes.number]).isRequired,
     index: PropTypes.number.isRequired,
-    itemProps: PropTypes.object.isRequired,
+    itemProps: PropTypes.shape({
+        type: PropTypes.string,
+        inputType: PropTypes.string,
+    }).isRequired,
     selectedItem: PropTypes.string.isRequired,
     suggestion: PropTypes.string.isRequired,
 };
 
 function getSuggestions(value, suggestions, { showEmpty = false } = {}) {
-  const inputValue = deburr(value.trim()).toLowerCase();
-  const inputLength = inputValue.length;
-  let count = 0;
+    const inputValue = deburr(value.trim()).toLowerCase();
+    const inputLength = inputValue.length;
+    let count = 0;
 
-  return inputLength === 0 && !showEmpty
-    ? []
-    : suggestions.filter(suggestion => {
-        const keep =
+    return inputLength === 0 && !showEmpty
+        ? []
+        : suggestions.filter((suggestion) => {
+            const keep =
           count < 5 && suggestion.slice(0, inputLength).toLowerCase() === inputValue;
-        if (keep) {
-          count += 1;
-        }
-        return keep;
-      });
+            if (keep) {
+                count += 1;
+            }
+            return keep;
+        });
 }
 
 function DownshiftMultiple(props) {
-    let {setTenantList} = props;
+    const { setTenantList } = props;
     const { classes, suggestions } = props;
     const [inputValue, setInputValue] = React.useState('');
     const [selectedItem, setSelectedItem] = React.useState([]);
@@ -160,7 +168,6 @@ function DownshiftMultiple(props) {
         setSelectedItem(newSelectedItem);
 
         setTenantList(newSelectedItem);
-        
     }
 
     const handleDelete = item => () => {
@@ -187,7 +194,7 @@ function DownshiftMultiple(props) {
                 highlightedIndex,
             }) => {
                 const {
-                    onBlur, onChange, onFocus, ...inputProps 
+                    onBlur, onChange, onFocus, ...inputProps
                 } = getInputProps({
                     onKeyDown: handleKeyDown,
                     placeholder: 'Select multiple tenants',
@@ -229,7 +236,7 @@ function DownshiftMultiple(props) {
                                         itemProps: getItemProps({ item: suggestion }),
                                         highlightedIndex,
                                         selectedItem: selectedItem2,
-                                    }),)}
+                                    }))}
                             </Paper>
                         ) : null}
                     </div>
@@ -240,32 +247,48 @@ function DownshiftMultiple(props) {
 }
 
 DownshiftMultiple.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({
+        type: PropTypes.string,
+        inputType: PropTypes.string,
+    }).isRequired,
+    setTenantList: PropTypes.shape({
+        type: PropTypes.string,
+        inputType: PropTypes.string,
+    }).isRequired,
+    suggestions: PropTypes.shape({
+        type: PropTypes.string,
+        inputType: PropTypes.string,
+    }).isRequired,
 };
 
 export default function IntegrationDownshift(props) {
-  
     const classes = useStyles();
-    let [suggestions, setsuggestions] = useState({});
-    let {setTenantList} = props
+    const [suggestions, setsuggestions] = useState({});
+    const { setTenantList } = props;
 
     const restApi = new API();
 
     useEffect(() => {
-      restApi.getTenantsByState(CONSTS.TENANT_STATE_ACTIVE)
-      .then((result) => {
-          const tenants = result.body.list;
-          suggestions = tenants.map((tenant) => { return tenant.domain; });
-          console.log(suggestions)
-          setsuggestions(suggestions);
-      });
-    }, [])
+        restApi.getTenantsByState(CONSTS.TENANT_STATE_ACTIVE)
+            .then((result) => {
+                const tenants = result.body.list;
+                const newSuggestions = tenants.map((tenant) => { return tenant.domain; });
+                setsuggestions(newSuggestions);
+            });
+    }, []);
 
     return (
         <div className={classes.root}>
             <div className={classes.divider} />
-            <DownshiftMultiple classes={classes}  suggestions={suggestions} setTenantList={setTenantList} />
+            <DownshiftMultiple classes={classes} suggestions={suggestions} setTenantList={setTenantList} />
             <div className={classes.divider} />
         </div>
     );
 }
+
+IntegrationDownshift.propTypes = {
+    setTenantList: PropTypes.shape({
+        type: PropTypes.string,
+        inputType: PropTypes.string,
+    }).isRequired,
+};

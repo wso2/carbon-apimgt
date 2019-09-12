@@ -60,7 +60,7 @@ const useStyles = makeStyles(theme => ({
     gridLabel: {
         marginTop: theme.spacing.unit * 3.5,
     },
-    saveButton: { 
+    saveButton: {
         marginLeft: theme.spacing.unit * 90,
         marginTop: theme.spacing.unit * 2,
     },
@@ -73,7 +73,7 @@ const useStyles = makeStyles(theme => ({
  */
 export default function SimpleSelect(props) {
     const classes = useStyles();
-    const { intl, api, updateAPI } = props;
+    const { updateAPI } = props;
     const [tenantList, setTenantList] = React.useState([]);
     const [values, setValues] = React.useState({
         availability: 'currentTenant',
@@ -100,18 +100,20 @@ export default function SimpleSelect(props) {
                 availabilityValue = 'SPECIFIC_TENANTS';
                 availableTenantsList = tenantList;
             }
-            updateAPI({ subscriptionAvailability: availabilityValue, subscriptionAvailableTenants: availableTenantsList })
+            updateAPI({
+                subscriptionAvailability: availabilityValue,
+                subscriptionAvailableTenants: availableTenantsList,
+            })
                 .then(() => {
-                    Alert.info("Tenant availability updated successfully");
+                    Alert.info('Tenant availability updated successfully');
                 })
                 .catch((error) => {
                     if (process.env.NODE_ENV !== 'production') {
                         console.error(error);
                     }
-                    Alert.error("Error occurred while updating tenant availability");
-                })
+                    Alert.error('Error occurred while updating tenant availability');
+                });
         }
-
     }
 
     /**
