@@ -180,8 +180,8 @@ const subscribeToApi = (props) => {
                             className={classes.selectEmpty}
                         >
                             {throttlingPolicyList.map(policy => (
-                                <MenuItem value={policy} key={policy}>
-                                    {policy}
+                                <MenuItem value={policy.tierName} key={policy.tierName}>
+                                    {policy.tierName}
                                 </MenuItem>
                             ))}
                         </Select>
@@ -192,8 +192,8 @@ const subscribeToApi = (props) => {
                             />
                             {' '}
                             {throttlingPolicyList.map((policy, index) => (
-                                <span key={policy}>
-                                    {policy}
+                                <span key={policy.tierName}>
+                                    {policy.tierName}
                                     {index !== throttlingPolicyList.length - 1 && <span>,</span>}
                                 </span>
                             ))}

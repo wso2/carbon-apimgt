@@ -293,6 +293,22 @@ public interface APIProvider extends APIManager {
     void manageAPI(API api) throws APIManagementException, FaultGatewaysException;
 
     /**
+     * Update the WSDL of an API from a ResourceFile set to the API object
+     *
+     * @param api API object
+     * @throws APIManagementException if fails to update the WSDL of the API
+     */
+    void updateWsdlFromResourceFile(API api) throws APIManagementException;
+
+    /**
+     * Update the WSDL of an API from a URL set to the API object
+     *
+     * @param api API object
+     * @throws APIManagementException if fails to update the WSDL of the API
+     */
+    void updateWsdlFromUrl(API api) throws APIManagementException;
+
+    /**
      * Change the lifecycle state of the specified API
      *
      * @param api The API whose status to be updated
@@ -633,16 +649,16 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If failed to get all the published external stores for the API
      */
     Set<APIStore> getPublishedExternalAPIStores(APIIdentifier apiId) throws APIManagementException;
-    
+
     /**
      * Checks the Gateway Type
-     * 
+     *
      * @return True if gateway is Synpase
      * @throws APIManagementException
-     *         
+     *
      */
     boolean isSynapseGateway() throws APIManagementException;
-    
+
     /**
      * Search APIs by swagger document content. This method searches the given search term in the registry and returns
      * a set of APIs which satisfies the given search term
@@ -1079,6 +1095,21 @@ public interface APIProvider extends APIManager {
     ClientCertificateDTO getClientCertificate(int tenantId, String alias) throws APIManagementException;
 
     /**
+     * Method to check whether a client certificate for the given alias is present in trust store and whether it can
+     * be modified by current user.
+     *
+     * @param tenantId : Id of the tenant.
+     * @param alias    : Relevant alias.
+     * @param apiIdentifier : The identifier of the api.
+     * @return Instance of {@link ClientCertificateDTO} if the client certificate is present and
+     * modifiable by current user.
+     * @throws APIManagementException API Management Exception.
+     */
+    ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier)
+            throws APIManagementException;
+
+
+    /**
      * Method to get the status of the certificate which matches the given alias.
      * This method can me modified to get other necessary information as well. Such as CN etc.
      *
@@ -1177,7 +1208,7 @@ public interface APIProvider extends APIManager {
 
     /**
      * Remove openapi definition of the product
-     * @param APIProduct product
+     * @param product product
      * @throws APIManagementException
      */
     void removeAPIDefinitionOfAPIProduct(APIProduct product) throws APIManagementException;

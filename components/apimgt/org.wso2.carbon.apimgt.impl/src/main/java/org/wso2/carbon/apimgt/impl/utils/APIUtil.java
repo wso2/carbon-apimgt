@@ -71,6 +71,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.PasswordResolver;
@@ -94,6 +95,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Provider;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -126,6 +128,7 @@ import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -1142,7 +1145,6 @@ public final class APIUtil {
             String apiStatus = api.getStatus();
             artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, api.getId().getVersion());
-            artifact.setAttribute(APIConstants.TYPE, api.getType());
             artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, String.valueOf(api.isDefaultVersion()));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());
@@ -1300,12 +1302,15 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, apiProduct.getId().getProviderName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, apiProduct.getContext());
             artifact.setAttribute(APIConstants.API_OVERVIEW_DESCRIPTION, apiProduct.getDescription());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TYPE, APIConstants.AuditLogConstants.API_PRODUCT);
             artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, apiProduct.getState());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBILITY, apiProduct.getVisibility());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES, apiProduct.getVisibleRoles());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS, apiProduct.getVisibleTenants());
             artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER, apiProduct.getBusinessOwner());
             artifact.setAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL, apiProduct.getBusinessOwnerEmail());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TEC_OWNER, apiProduct.getTechnicalOwner());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL, apiProduct.getTechnicalOwnerEmail());
             artifact.setAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY, apiProduct.getSubscriptionAvailability());
             artifact.setAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS, apiProduct.getSubscriptionAvailableTenants());
             artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, apiProduct.getThumbnailUrl());
@@ -1325,6 +1330,27 @@ public final class APIUtil {
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, writeEnvironmentsToArtifact(apiProduct));
             artifact.setAttribute(APIConstants.API_OVERVIEW_TRANSPORTS, apiProduct.getTransports());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
+                    APIUtil.getCorsConfigurationJsonFromDto(apiProduct.getCorsConfiguration()));
+            //Validate if the API has an unsupported context before setting it in the artifact
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
+                String invalidContext = File.separator + APIConstants.VERSION_PLACEHOLDER;
+                if (invalidContext.equals(apiProduct.getContextTemplate())) {
+                    throw new APIManagementException( "API : " + apiProduct.getId() + " has an unsupported context : " +
+                                    apiProduct.getContextTemplate());
+                }
+            } else {
+                String invalidContext =
+                        APIConstants.TENANT_PREFIX + tenantDomain + File.separator + APIConstants.VERSION_PLACEHOLDER;
+                if (invalidContext.equals(apiProduct.getContextTemplate())) {
+                    throw new APIManagementException( "API : " + apiProduct.getId() + " has an unsupported context : " +
+                            apiProduct.getContextTemplate());
+                }
+            }
+            // This is to support the pluggable version strategy.
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, apiProduct.getContextTemplate());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + apiProduct.getId().getName();
             log.error(msg, e);
@@ -1629,7 +1655,7 @@ public final class APIUtil {
     }
 
     public static String getAPIProductOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
-        return APIConstants.API_PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
     }
 
@@ -1643,11 +1669,9 @@ public final class APIUtil {
      * @return path path to the
      */
     public static String getAPIProductOpenAPIDefinitionFilePath(APIProductIdentifier identifier) {
-        return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
-                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR
-                + identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR
-                + identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion()
-                + RegistryConstants.PATH_SEPARATOR;
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName() +
+                RegistryConstants.PATH_SEPARATOR + identifier.getName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getVersion() + RegistryConstants.PATH_SEPARATOR;
     }
 
     /**
@@ -1670,10 +1694,10 @@ public final class APIUtil {
      * @return APIProduct path
      */
     public static String getAPIProductPath(APIProductIdentifier identifier) {
-        return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
-                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
-                .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName()
-                + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() + APIConstants.API_PRODUCT_RESOURCE_NAME;
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getVersion() + APIConstants.API_RESOURCE_NAME;
     }
 
     /**
@@ -1683,11 +1707,10 @@ public final class APIUtil {
      * @return Icon storage path.
      */
     public static String getProductIconPath(APIProductIdentifier identifier) {
-        String artifactPath = APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
-                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier
-                .getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getName()
-                + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() + RegistryConstants.PATH_SEPARATOR
-                + APIConstants.API_ICON_IMAGE;
+        String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion() +
+                RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
         return artifactPath;
     }
 
@@ -1730,8 +1753,7 @@ public final class APIUtil {
      * @return API Product provider path
      */
     public static String getAPIProductProviderPath(APIProductIdentifier identifier) {
-        return APIConstants.API_APPLICATION_DATA_LOCATION + RegistryConstants.PATH_SEPARATOR
-                + APIConstants.API_PRODUCT_RESOURCE_COLLECTION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName();
+        return APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName();
     }
 
     /**
@@ -1806,12 +1828,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.DOC_OTHER_TYPE_NAME, documentation.getOtherTypeName());
             String basePath = id.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                     id.getName() + RegistryConstants.PATH_SEPARATOR + id.getVersion();
-            if (id instanceof APIIdentifier) {
-                artifact.setAttribute(APIConstants.DOC_API_BASE_PATH, basePath);
-            } else if (id instanceof APIProductIdentifier) {
-                artifact.setAttribute(APIConstants.DOC_PRODUCT_BASE_PATH, basePath);
-            }
-
+            artifact.setAttribute(APIConstants.DOC_API_BASE_PATH, basePath);
         } catch (GovernanceException e) {
             String msg = "Failed to create doc artifact content from :" + documentation.getName();
             log.error(msg, e);
@@ -1955,7 +1972,7 @@ public final class APIUtil {
                     .getAbsolutePath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
                     + wsdlResourcePath;
 
-            APIMWSDLReader wsdlReader = new APIMWSDLReader(api.getWsdlUrl());
+            APIMWSDLReader wsdlReader = new APIMWSDLReader();
             OMElement wsdlContentEle;
             String wsdRegistryPath;
 
@@ -1975,22 +1992,18 @@ public final class APIUtil {
             // Hence if this is a registry url, should not go in to the following if block
             if (!api.getWsdlUrl().matches(wsdRegistryPath) && (api.getWsdlUrl().startsWith("http:") || api.getWsdlUrl()
                     .startsWith("https:") || api.getWsdlUrl().startsWith("file:"))) {
-                if (isWSDL2Document(api.getWsdlUrl())) {
-                    wsdlContentEle = wsdlReader.readAndCleanWsdl2(api);
-                    wsdlResource.setContent(wsdlContentEle.toString());
-                } else {
-                    wsdlContentEle = wsdlReader.readAndCleanWsdl(api);
-                    wsdlResource.setContent(wsdlContentEle.toString());
+                URL wsdlUrl;
+                try {
+                    wsdlUrl = new URL(api.getWsdlUrl());
+                } catch (MalformedURLException e) {
+                    throw new APIManagementException("Invalid/Malformed WSDL URL : " + api.getWsdlUrl(), e,
+                            ExceptionCodes.INVALID_WSDL_URL_EXCEPTION);
                 }
+                // Get the WSDL 1.1 or 2.0 processor and process the content based on the version
+                WSDLProcessor wsdlProcessor = APIMWSDLReader.getWSDLProcessorForUrl(wsdlUrl);
+                byte[] wsdlContent = wsdlProcessor.getWSDL();
+                wsdlResource.setContent(wsdlContent);
 
-                registry.put(wsdlResourcePath, wsdlResource);
-                //set the anonymous role for wsld resource to avoid basicauth security.
-                String[] visibleRoles = null;
-                if (api.getVisibleRoles() != null) {
-                    visibleRoles = api.getVisibleRoles().split(",");
-                }
-                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
-                        wsdlResourcePath);
             } else {
                 byte[] wsdl = (byte[]) registry.get(wsdlResourcePath).getContent();
                 if (isWSDL2Resource(wsdl)) {
@@ -2000,15 +2013,21 @@ public final class APIUtil {
                     wsdlContentEle = wsdlReader.updateWSDL(wsdl, api);
                     wsdlResource.setContent(wsdlContentEle.toString());
                 }
+            }
 
-                registry.put(wsdlResourcePath, wsdlResource);
-                //set the anonymous role for wsld resource to avoid basicauth security.
-                String[] visibleRoles = null;
-                if (api.getVisibleRoles() != null) {
-                    visibleRoles = api.getVisibleRoles().split(",");
-                }
-                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
-                        wsdlResourcePath);
+            registry.put(wsdlResourcePath, wsdlResource);
+            //set the anonymous role for wsld resource to avoid basicauth security.
+            String[] visibleRoles = null;
+            if (api.getVisibleRoles() != null) {
+                visibleRoles = api.getVisibleRoles().split(",");
+            }
+            setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                    wsdlResourcePath);
+
+            //Delete any WSDL archives if exists
+            String wsdlArchivePath = APIUtil.getWsdlArchivePath(api.getId());
+            if (registry.resourceExists(wsdlArchivePath)) {
+                registry.delete(wsdlArchivePath);
             }
 
             //set the wsdl resource permlink as the wsdlURL.
@@ -2036,28 +2055,52 @@ public final class APIUtil {
      * @throws RegistryException
      * @throws APIManagementException
      */
-    public static String saveWSDLArchive(Registry registry, API api) throws RegistryException, APIManagementException {
-        String wsdlArchiveResourcePath =
+    public static String saveWSDLResource(Registry registry, API api) throws RegistryException, APIManagementException {
+        ResourceFile wsdlResource = api.getWsdlResource();
+        String wsdlResourcePath;
+        boolean isZip = false;
+        String wsdlResourcePathArchive =
                 APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION + api.getId()
                         .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + api.getId().getApiName() +
                         api.getId().getVersion() + APIConstants.ZIP_FILE_EXTENSION;
+        String wsdlResourcePathFile = APIConstants.API_WSDL_RESOURCE_LOCATION +
+                createWsdlFileName(api.getId().getProviderName(), api.getId().getApiName(), api.getId().getVersion());
+
+        if (wsdlResource.getContentType().equals(APIConstants.APPLICATION_ZIP)) {
+            wsdlResourcePath = wsdlResourcePathArchive;
+            isZip = true;
+        } else {
+            wsdlResourcePath = wsdlResourcePathFile;
+        }
+
         String absoluteWSDLResourcePath = RegistryUtils
                 .getAbsolutePath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                + wsdlArchiveResourcePath;
+                + wsdlResourcePath;
         try {
-            if (api.getWsdlArchive() != null) {
-                Resource wsdlResource = registry.newResource();
-                wsdlResource.setContentStream(api.getWsdlArchive().getContent());
-                wsdlResource.setMediaType(api.getWsdlArchive().getContentType());
-                registry.put(wsdlArchiveResourcePath, wsdlResource);
-                String[] visibleRoles = null;
-                if (api.getVisibleRoles() != null) {
-                    visibleRoles = api.getVisibleRoles().split(",");
-                }
-                setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
-                        wsdlArchiveResourcePath);
-                api.setWsdlUrl(getRegistryResourceHTTPPermlink(absoluteWSDLResourcePath));
+            Resource wsdlResourceToUpdate = registry.newResource();
+            wsdlResourceToUpdate.setContentStream(api.getWsdlResource().getContent());
+            wsdlResourceToUpdate.setMediaType(api.getWsdlResource().getContentType());
+            registry.put(wsdlResourcePath, wsdlResourceToUpdate);
+            String[] visibleRoles = null;
+            if (api.getVisibleRoles() != null) {
+                visibleRoles = api.getVisibleRoles().split(",");
             }
+            setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                    wsdlResourcePath);
+
+            if(isZip) {
+                //Delete any WSDL file if exists
+                if (registry.resourceExists(wsdlResourcePathFile)) {
+                    registry.delete(wsdlResourcePathFile);
+                }
+            } else {
+                //Delete any WSDL archives if exists
+                if (registry.resourceExists(wsdlResourcePathArchive)) {
+                    registry.delete(wsdlResourcePathArchive);
+                }
+            }
+
+            api.setWsdlUrl(getRegistryResourceHTTPPermlink(absoluteWSDLResourcePath));
         } catch (RegistryException e) {
             String msg = "Failed to add WSDL Archive " + api.getWsdlUrl() + " to the registry";
             log.error(msg, e);
@@ -2067,7 +2110,7 @@ public final class APIUtil {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
-        return wsdlArchiveResourcePath;
+        return wsdlResourcePath;
     }
 
     /**
@@ -7928,9 +7971,33 @@ public final class APIUtil {
      * @throws APIManagementException If there is an error in the search query
      */
     public static String constructNewSearchQuery(String query) throws APIManagementException {
-        String newSearchQuery = "";
-        String inputSearchQuery = query.trim();
 
+        return constructQueryWithProvidedCriterias(query.trim());
+    }
+
+    /**
+     * Used to reconstruct the input get APIs query as sub context and doc content doesn't support AND search
+     * @param query Input apis get query
+     * @return Reconstructed new apis get query
+     * @throws APIManagementException If there is an error in the search query
+     */
+    public static String constructApisGetQuery(String query) throws APIManagementException {
+        String newSearchQuery = constructQueryWithProvidedCriterias(query.trim());
+
+        String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY + APIUtil.getORBasedSearchCriteria
+                (APIConstants.API_SUPPORTED_TYPE_LIST);
+        newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
+        return newSearchQuery;
+    }
+
+    /**
+     *
+     * @param inputSearchQuery search Query
+     * @return Reconstructed new search query
+     * @throws APIManagementException If there is an error in the search query
+     */
+    private static String constructQueryWithProvidedCriterias(String inputSearchQuery) throws APIManagementException {
+        String newSearchQuery = "";
         // sub context and doc content doesn't support AND search
         if (inputSearchQuery != null && inputSearchQuery.contains(" ") && !inputSearchQuery
                 .contains(APIConstants.TAG_COLON_SEARCH_TYPE_PREFIX) && (!inputSearchQuery
@@ -8668,6 +8735,8 @@ public final class APIUtil {
             apiProduct.setVisibleTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS));
             apiProduct.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
             apiProduct.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+            apiProduct.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
+            apiProduct.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
             apiProduct.setSubscriptionAvailability(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
             apiProduct.setSubscriptionAvailableTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
@@ -8677,7 +8746,7 @@ public final class APIUtil {
             apiProduct.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             apiProduct.setCreatedTime(registry.get(artifactPath).getCreatedTime());
             apiProduct.setLastUpdated(registry.get(artifactPath).getLastModified());
-
+            apiProduct.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
@@ -8686,6 +8755,9 @@ public final class APIUtil {
             Map<String, Tier> definedTiers = getTiers(tenantId);
             Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, productName);
             apiProduct.setAvailableTiers(availableTier);
+
+            // We set the context template here
+            apiProduct.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
 
             List<APIProductResource> resources = ApiMgtDAO.getInstance().
                     getAPIProductResourceMappings(apiProductIdentifier);
@@ -8784,7 +8856,7 @@ public final class APIUtil {
      * @return relevant API Product Identifier
      */
     public static APIProductIdentifier getProductIdentifier(String productPath) {
-        int length = (APIConstants.PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR).length();
+        int length = (APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR).length();
         String relativePath = productPath.substring(length);
         String[] values = relativePath.split(RegistryConstants.PATH_SEPARATOR);
         if (values.length > 3) {
@@ -8811,7 +8883,7 @@ public final class APIUtil {
      * @return Doc path
      */
     public static String getProductDocPath(APIProductIdentifier productId) {
-        return APIConstants.PRODUCT_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+        return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 productId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 productId.getName() + RegistryConstants.PATH_SEPARATOR +
                 productId.getVersion() + RegistryConstants.PATH_SEPARATOR +

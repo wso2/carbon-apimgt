@@ -1,23 +1,22 @@
 /*
-*  Copyright (c) 2005-2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2005-2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.apimgt.api;
 
-import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -38,7 +37,6 @@ import java.util.regex.Pattern;
 @SuppressWarnings("unused")
 public abstract class APIDefinition {
 
-
     private static final Pattern CURLY_BRACES_PATTERN = Pattern.compile("(?<=\\{)(?!\\s*\\{)[^{}]+");
     public static final String KEEP_LEGACY_EXTENSION_PROP = "preserveLegacyExtensions";
 
@@ -47,7 +45,7 @@ public abstract class APIDefinition {
      *
      * @return URI templates
      */
-    public abstract Set<URITemplate> getURITemplates(SwaggerData swaggerData, String resourceConfigsJSON) throws APIManagementException;
+    public abstract Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException;
 
     /**
      * This method extracts the scopes from the API definition
@@ -74,16 +72,11 @@ public abstract class APIDefinition {
      * on the resource will be updated on the swagger
      *
      * @param swaggerData api
-     * @param swagger swagger definition
-     * @param syncOperations whether to sync operations between API and swagger. If true, the operations of the swagger
-     *                       will be synced from the API's operations. Additional operations of the swagger will be
-     *                       removed and new operations of API will be added. If false, all the operations will be
-     *                       taken from swagger.
+     * @param swagger     swagger definition
      * @return API definition in string format
      * @throws APIManagementException if error occurred when generating API Definition
      */
-    public abstract String generateAPIDefinition(SwaggerData swaggerData, String swagger, boolean syncOperations)
-            throws APIManagementException;
+    public abstract String generateAPIDefinition(SwaggerData swaggerData, String swagger) throws APIManagementException;
 
     /**
      * Extract and return path parameters in the given URI template
@@ -104,8 +97,8 @@ public abstract class APIDefinition {
     /**
      * Creates a helper resource path map using provided swagger data.
      * Creates map in below format:
-     *      /order      -> [post -> resource1]
-     *      /order/{id} -> [get -> resource2, put -> resource3, ..]
+     * /order      -> [post -> resource1]
+     * /order/{id} -> [get -> resource2, put -> resource3, ..]
      *
      * @param swaggerData Swagger Data object
      * @return a structured uri template map using provided Swagger Data Resource Paths
@@ -126,7 +119,7 @@ public abstract class APIDefinition {
     /**
      * This method validates the given OpenAPI definition by content
      *
-     * @param apiDefinition OpenAPI Definition content
+     * @param apiDefinition     OpenAPI Definition content
      * @param returnJsonContent whether to return the converted json form of the OpenAPI definition
      * @return APIDefinitionValidationResponse object with validation information
      */
@@ -137,11 +130,12 @@ public abstract class APIDefinition {
      * Populate definition with wso2 APIM specific information
      *
      * @param oasDefinition OAS definition
-     * @param swaggerData           API
+     * @param swaggerData   API
      * @return Generated OAS definition
      * @throws APIManagementException If an error occurred
      */
-    public abstract String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData) throws APIManagementException;
+    public abstract String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData)
+            throws APIManagementException;
 
     /**
      * Check extension migration is disabled

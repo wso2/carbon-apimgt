@@ -348,9 +348,8 @@ public final class APIImportUtil {
                 String swaggerContent = loadSwaggerFile(pathToArchive);
                 addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider);
 
-                SwaggerData swaggerData = new SwaggerData(importedApi);
                 //Load required properties from swagger to the API
-                Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(swaggerData, swaggerContent);
+                Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(swaggerContent);
                 for (URITemplate uriTemplate : uriTemplates) {
                     Scope scope = uriTemplate.getScope();
                     if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))

@@ -139,9 +139,6 @@ public final class APIConstants {
     //registry location for consumer
     public static final String API_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
 
-    //registry location for consumer
-    public static final String API_PRODUCT_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/products";
-
     //registry location for API documentation
     public static final String API_DOC_LOCATION = API_APPLICATION_DATA_LOCATION + "/api-docs";
 
@@ -1369,17 +1366,13 @@ public final class APIConstants {
     private static final String VERSION_SEARCH_TYPE_PREFIX = "version";
     private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
     public static final String CONTENT_SEARCH_TYPE_PREFIX = "content";
+    public static final String TYPE_SEARCH_TYPE_PREFIX = "type";
 
     //api-product related constants
-    public static final String API_PRODUCT_KEY = "product";
-    public static final String API_PRODUCT_RESOURCE_COLLECTION = "products";
-    public static final String API_PRODUCT_RESOURCE_NAME = "/product";
     public static final String API_PRODUCT_VERSION = "1.0.0";
-    public static final String PRODUCT_DOCUMENTATION_KEY = "productdocument";
-    public static final String DOC_PRODUCT_BASE_PATH = "overview_productBasePath";
-    public static final String PRODUCT_ROOT_LOCATION = API_APPLICATION_DATA_LOCATION + "/products";
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
+    public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS" , "SOAPTOREST", "GRAPHQL"};
 
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
@@ -1530,6 +1523,12 @@ public final class APIConstants {
         HTTP, WS, GRAPHQL
     }
 
+    public static final String API_TYPE_SOAP = "SOAP";
+    public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";
+
+    public static final String[] HTTP_DEFAULT_METHODS = {"get", "put", "post", "delete", "patch"};
+    public static final String[] SOAP_DEFAULT_METHODS = {"post"};
+
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
     public static final String REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA = "[~!@#;%^*()+={}|<>\"\',\\[\\]&/$\\\\]";
@@ -1565,7 +1564,7 @@ public final class APIConstants {
     public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
             NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
             VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
-            API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX };
+            API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX };
     // Prefix for registry attributes.
     public static final String OVERVIEW_PREFIX = "overview_";
     /**
@@ -1590,6 +1589,7 @@ public final class APIConstants {
     public static final String NULL_GROUPID_LIST = "null";
 
     public static final String APPLICATION_GZIP = "application/gzip";
+    public static final String APPLICATION_ZIP = "application/zip";
     public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
     public static final String JSON_FILENAME_EXTENSION = ".json";
     public static final String JSON_GZIP_FILENAME_EXTENSION = ".json.gz";
@@ -1626,6 +1626,7 @@ public final class APIConstants {
     public static final String API_PRODUCT_SUBSCRIPTION_TYPE = "APIProduct";
     public static final String API_SUBSCRIPTION_TYPE = "API";
     public static final String TYPE = "type";
+    public static final String TYPE_SEARCH_TYPE_KEY = "type=";
 
     public static class OASResourceAuthTypes {
         public static final String APPLICATION_OR_APPLICATION_USER = "Application & Application User";

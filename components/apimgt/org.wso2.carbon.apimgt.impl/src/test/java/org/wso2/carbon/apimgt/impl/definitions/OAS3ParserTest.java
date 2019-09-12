@@ -51,7 +51,16 @@ public class OAS3ParserTest extends OASTestBase {
     public void testUpdateAPIDefinition() throws Exception {
         String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3Resources.json";
         String oas2Resources = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
-        testGenerateAPIDefinition2(oas3Parser, oas2Resources);
+
+        OASParserEvaluator evaluator = (definition -> {
+            OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+            SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(definition, null, null);
+            OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
+            Assert.assertNotNull(openAPI);
+            Assert.assertEquals(1, openAPI.getPaths().size());
+            Assert.assertFalse(openAPI.getPaths().containsKey("/noresource/{resid}"));
+        });
+        testGenerateAPIDefinition2(oas3Parser, oas2Resources, evaluator);
     }
 
     @Test
@@ -143,9 +152,7 @@ public class OAS3ParserTest extends OASTestBase {
         uriTemplates.add(getUriTemplate("PUT", "None", "/*"));
         uriTemplates.add(getUriTemplate("DELETE", "Any", "/*"));
         uriTemplates.add(getUriTemplate("GET", "Any", "/abc"));
-        API api = new API(new APIIdentifier("admin", "PhoneVerification", "1.0.0"));
-        SwaggerData swaggerData = new SwaggerData(api);
-        Set<URITemplate> uriTemplateSet = oas3Parser.getURITemplates(swaggerData, openAPISpec300);
+        Set<URITemplate> uriTemplateSet = oas3Parser.getURITemplates(openAPISpec300);
         Assert.assertEquals(uriTemplateSet, uriTemplates);
 
     }
@@ -156,9 +163,7 @@ public class OAS3ParserTest extends OASTestBase {
         String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
         Set<URITemplate> expectedTemplates = new LinkedHashSet<>();
         expectedTemplates.add(getUriTemplate("GET", "Application", "/item"));
-        API api = new API(new APIIdentifier("admin", "OAPI", "1.0.0"));
-        SwaggerData swaggerData = new SwaggerData(api);
-        Set<URITemplate> actualTemplates = oas3Parser.getURITemplates(swaggerData, openApi);
+        Set<URITemplate> actualTemplates = oas3Parser.getURITemplates(openApi);
         Assert.assertEquals(actualTemplates, expectedTemplates);
     }
 

@@ -302,6 +302,35 @@
           "x-auth-type": "Application & Application User",
           "x-throttling-tier": "Unlimited"
         }
+      },
+      "/noresource/{resid}": {
+        "get": {
+          "parameters": [
+            {
+              "name": "resid",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {}
+            }
+          },
+          "security": [
+            {
+              "default": [
+                "sample"
+              ]
+            }
+          ],
+          "x-auth-type": "Application & Application User",
+          "x-throttling-tier": "Unlimited"
+        }
       }
     },
     "components": {

@@ -89,7 +89,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
-import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -549,10 +548,9 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (!apiData.get("swagger", apiData).equals("null")) {
 
-            SwaggerData swaggerData = new SwaggerData(api);
             //Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates =
-                    definitionFromOpenAPISpec.getURITemplates(swaggerData, String.valueOf(apiData.get("swagger", apiData)));
+                    definitionFromOpenAPISpec.getURITemplates(String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
 
             //scopes
@@ -703,8 +701,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
             SwaggerData swaggerData = new SwaggerData(api);
             //Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(swaggerData,
-                    (String) apiData.get("swagger", apiData));
+            Set<URITemplate> uriTemplates =
+                    definitionFromOpenAPISpec.getURITemplates((String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
 
             apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
@@ -1006,7 +1004,7 @@ public class APIProviderHostObject extends ScriptableObject {
                         }
                         ResourceFile wsdlResource = new ResourceFile(wsdlFile.getInputStream(),
                                 wsdlFile.getJavaScriptFile().getContentType());
-                        api.setWsdlArchive(wsdlResource);
+                        api.setWsdlResource(wsdlResource);
                         APIFileUtil.deleteDirectory(archiveInfo.getLocation());
                     }
                 } else if (wsdlFile.getName().endsWith(APIConstants.WSDL_FILE_EXTENSION)) {
@@ -1026,8 +1024,8 @@ public class APIProviderHostObject extends ScriptableObject {
         if (apiData.get("swagger", apiData) != null) {
             SwaggerData swaggerData = new SwaggerData(api);
             // Read URI Templates from swagger resource and set it to api object
-            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(swaggerData,
-                    (String) apiData.get("swagger", apiData));
+            Set<URITemplate> uriTemplates =
+                    definitionFromOpenAPISpec.getURITemplates((String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
             apiProvider.validateResourceThrottlingTiers(api, tenantDomain);
             // Save the swagger definition in the registry
@@ -1730,7 +1728,7 @@ public class APIProviderHostObject extends ScriptableObject {
             SwaggerData swaggerData = new SwaggerData(api);
             // Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates =
-                    definitionFromOpenAPISpec.getURITemplates(swaggerData, String.valueOf(apiData.get("swagger", apiData)));
+                    definitionFromOpenAPISpec.getURITemplates(String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
 
             // scopes
@@ -2235,8 +2233,8 @@ public class APIProviderHostObject extends ScriptableObject {
             if (apiData.get("swagger", apiData) != null) {
                 SwaggerData swaggerData = new SwaggerData(api);
                 // Read URI Templates from swagger resource and set to api object
-                Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(swaggerData,
-                        String.valueOf(apiData.get("swagger", apiData)));
+                Set<URITemplate> uriTemplates =
+                        definitionFromOpenAPISpec.getURITemplates(String.valueOf(apiData.get("swagger", apiData)));
                 api.setUriTemplates(uriTemplates);
 
                 // scopes
