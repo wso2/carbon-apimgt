@@ -53,6 +53,34 @@ const userRoleSchema = Joi.extend(joi => ({
     ],
 }));
 
+const apiSchema = Joi.extend(joi => ({
+    base: joi.string(),
+    name: 'api',
+    rules: [
+        {
+            name: 'isAPIParameterExist',
+            validate(params, value, state, options) { // eslint-disable-line no-unused-vars
+                const api = new API();
+                return api.validateAPI(value);
+            },
+        },
+    ],
+}));
+
+const documentSchema = Joi.extend(joi => ({
+    base: joi.string(),
+    name: 'document',
+    rules: [
+        {
+            name: 'isDocumentPresent',
+            validate(params, value, state, options) { // eslint-disable-line no-unused-vars
+                const api = new API();
+                return api.validateDocument(value.id, value.name);
+            },
+        },
+    ],
+}));
+
 const definition = {
     apiName: Joi.string().regex(/^[a-zA-Z0-9]{1,30}$/),
     apiVersion: Joi.string().regex(/^[a-zA-Z0-9.]{1,30}$/),
@@ -60,6 +88,8 @@ const definition = {
     url: Joi.string().uri(),
     role: roleSchema.systemRole().role(),
     userRole: userRoleSchema.userRole().role(),
+    apiParameter: apiSchema.api().isAPIParameterExist(),
+    apiDocument: documentSchema.document().isDocumentPresent(),
 };
 
 export default definition;

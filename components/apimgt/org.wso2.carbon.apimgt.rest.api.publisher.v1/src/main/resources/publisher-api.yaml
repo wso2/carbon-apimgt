@@ -188,78 +188,6 @@ paths:
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
-
-#-----------------------------------------------------
-# The attibutes of the API existance check resource
-#-----------------------------------------------------
-    head:
-      x-wso2-curl: "curl -I -k -X HEAD \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/publisher/v1.0/apis?query=name%3AapiName"
-      x-wso2-request: |
-        HEAD https://localhost:9443/api/am/publisher/v1.0/apis?query=name%3AapiName HTTP/1.1
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK
-                        Connection: keep-alive
-                        Content-Length: 0"
-      security:
-        - OAuth2Security:
-            - apim:api_view
-      operationId: validateAPI
-      summary: |
-        Check given API attibute name is already exist
-      description: |
-            Using this operation, you can check a given API context is already used. You need to provide the context name you want to check.
-      parameters:
-        - name : query
-          in: query
-          description: |
-            **Search condition**.
-
-            You can search in attributes by using an **"<attribute>:"** modifier.
-
-            Eg.
-            "provider:wso2" will match an API if the provider of the API is exactly "wso2".
-
-            Additionally you can use wildcards.
-
-            Eg.
-            "provider:wso2*" will match an API if the provider of the API starts with "wso2".
-
-            Supported attribute modifiers are [**version, context, lifeCycleStatus,
-            description, subcontext, doc, provider**]
-
-            If no advanced attribute modifier has been specified, search will match the
-            given query string against API Name.
-
-          type: string
-        - $ref : "#/parameters/If-None-Match"
-      tags:
-        - APIs
-      responses:
-        200:
-          description: |
-            OK.
-            Requested API attibute status is returned
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-        400:
-            description: |
-              Bad Request.
-              Requested API attribute does not meet requiremnts.
-        404:
-          description: |
-            Not Found.
-            Requested API attribute does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported
-          schema:
-            $ref: '#/definitions/Error'
 #-----------------------------------------------------
 # Create a new API
 #-----------------------------------------------------
@@ -1733,6 +1661,66 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ######################################################
+  # The "Validate API" utility API.
+  # This api is used to check the existance of
+  # apiName and context/version.
+  ######################################################
+
+  /apis/validate:
+    post:
+      x-examples:
+        $ref: docs/examples/apis/apis_validate.yaml
+      security:
+        - OAuth2Security:
+            - apim:api_create
+      summary: Check given API attibute name is already exist.
+      operationId: validateAPI
+      description: |
+        Using this operation, you can check a given API context is already used. You need to provide the context name you want to check.
+      parameters:
+        - in: query
+          name: query
+          description: |
+                **Search condition**.
+
+                You can search in attributes by using an **"<attribute>:"** modifier.
+
+                Eg.
+                "name:wso2" will match an API if the provider of the API is exactly "wso2".
+
+                Supported attribute modifiers are [** version, context, name **]
+
+                If no advanced attribute modifier has been specified, search will match the
+                given query string against API Name.
+          type: string
+          required: true
+        - $ref: "#/parameters/If-None-Match"
+      tags:
+        - Validation
+      responses:
+        200:
+          description: |
+            OK.
+            API definition validation information is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # The "Validate WSDL Definition" utility API
 ######################################################
@@ -2585,6 +2573,60 @@ paths:
           description: |
             Precondition Failed.
             The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+  #----------------------------------------------------------------------------
+  # API Document Name validation method.
+  #----------------------------------------------------------------------------
+  /apis/{apiId}/documents/validate:
+    post:
+      x-examples:
+        $ref: docs/examples/apis/apis_id_document_validate.yaml
+      security:
+        - OAuth2Security:
+            - apim:document_create
+      summary: Check whether a document with the provided name exist.
+      description: |
+        This operation can be used to verify the document name exists or not.
+      operationId: validateDocument
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: query
+          name: name
+          description: |
+            The name of the document which needs to be checked for the existance.
+          required: true
+          type: string
+        - $ref: '#/parameters/If-Match'
+      tags:
+        - API Documents
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response if the api name exist.
+          schema:
+            $ref: '#/definitions/Document'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Requested document not found.
           schema:
             $ref: '#/definitions/Error'
 

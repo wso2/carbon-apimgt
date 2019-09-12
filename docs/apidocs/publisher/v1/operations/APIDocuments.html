@@ -1327,4 +1327,196 @@ variant of the resource.
                     </tr>
                 </tbody>
             </table>
+            <hr/>
+            <h4 class="operation-heading"><a name="validateDocument"></a>Check whether a document with the provided name exist.</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/documents/validate</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to verify the document name exists or not.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:document_create</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-validateDocument">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-validateDocument"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/validate?name&#x3D;docName HTTP/1.1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-validateDocument">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-validateDocument" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 0
+</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -X POST -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot;
+https://localhost:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/validate?name&#x3D;docName
+</code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>name</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">The name of the document which needs to be checked for the existance.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Successful response if the api name exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Document">Document</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Requested document not found. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 </div>
