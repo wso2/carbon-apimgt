@@ -13,14 +13,11 @@ public class BotDetectedData {
     private String uuid;
     private String notificationType;
 
-    public BotDetectedData(){
-
-    }
-    public  long getCurrentTime(){
+    public long getCurrentTime() {
         return currentTime;
     }
 
-    public  void setCurrentTime(long currentTime){
+    public void setCurrentTime(long currentTime) {
         this.currentTime = currentTime;
     }
 
@@ -36,64 +33,63 @@ public class BotDetectedData {
         return apiMethod;
     }
 
-    public void setApiMethod(String apiMethod){
+    public void setApiMethod(String apiMethod) {
         this.apiMethod = apiMethod;
     }
 
-    public String getHeaderSet(){
+    public String getHeaderSet() {
         return headerSet;
     }
 
-    public void setHeaderSet(String headerSet){
+    public void setHeaderSet(String headerSet) {
         this.headerSet = headerSet;
     }
 
-    public String getMessageBody(){
+    public String getMessageBody() {
         return messageBody;
     }
 
-    public void setMessageBody(String messageBody){
+    public void setMessageBody(String messageBody) {
         this.messageBody = messageBody;
     }
 
-    public String getClientIp(){
+    public String getClientIp() {
         return clientIp;
     }
 
-    public void setClientIp(String clientIp){
+    public void setClientIp(String clientIp) {
         this.clientIp = clientIp;
     }
 
-    public String getTenantDomain(){
+    public String getTenantDomain() {
         return tenantDomain;
     }
 
-    public void setTenantDomain(String tenantDomain){
+    public void setTenantDomain(String tenantDomain) {
         this.tenantDomain = tenantDomain;
     }
 
-    public String getEmail(){
-
+    public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email){
-            this.email = email;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public void setUuid(String uuid){
+    public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
-    public String getUuid(){
+    public String getUuid() {
         return uuid;
     }
 
-    public void setNotificationType(String notificationType){
+    public void setNotificationType(String notificationType) {
         this.notificationType = notificationType;
     }
 
-    public String getNotificationType(){
+    public String getNotificationType() {
         return notificationType;
     }
 

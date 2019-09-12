@@ -17,6 +17,9 @@ import java.util.Map;
 
 /**
  * This @BotDetectionMediator mediator refers at the OpenService api
+ * If invoked this OpenService api by a bot, it will detect this meditor
+ * take headers, pseed body and client IP and log it in seperate log
+ * If enabled alert through analytics, will triger an email to admins of the system
  */
 public class BotDetectionMediator extends APIMgtCommonExecutionPublisher {
     private static final Log log = LogFactory.getLog(BotDetectionMediator.class);
@@ -25,7 +28,7 @@ public class BotDetectionMediator extends APIMgtCommonExecutionPublisher {
     private int throttleLimit = 2;
 
     /**
-     *
+     * initiated a cache to keep the bot access count
      */
     public BotDetectionMediator() {
         super();
@@ -38,9 +41,9 @@ public class BotDetectionMediator extends APIMgtCommonExecutionPublisher {
                 getAxis2MessageContext();
 
         String clientIP = DataPublisherUtil.getClientIp(msgContext);
-        if(isThrottledOut(clientIP)){
-            messageContext.setProperty("BOT_THROTTLED_OUT",true);
-            messageContext.setProperty("BOT_IP",clientIP);
+        if (isThrottledOut(clientIP)) {
+            messageContext.setProperty("BOT_THROTTLED_OUT", true);
+            messageContext.setProperty("BOT_IP", clientIP);
             return true;
         }
         String messageBody;
@@ -90,20 +93,20 @@ public class BotDetectionMediator extends APIMgtCommonExecutionPublisher {
     }
 
     /**
-     * @param clientIp
-     * @return
+     * @param clientIp get to count the bot access
+     * @return increse count and if throttle limit passed will trottle out
      */
-    private boolean isThrottledOut(String clientIp){
-        synchronized ("BOT_DETECTION_".concat(clientIp).intern()){
+    private boolean isThrottledOut(String clientIp) {
+        synchronized ("BOT_DETECTION_".concat(clientIp).intern()) {
             int counter = 0;
             Object counterObject = botAccessCountCache.get(clientIp);
-            if (counterObject != null){
+            if (counterObject != null) {
                 counter = (int) counterObject;
-                if(counter > throttleLimit){
+                if (counter > throttleLimit) {
                     return true;
                 }
             }
-            botAccessCountCache.put(clientIp,++counter);
+            botAccessCountCache.put(clientIp, ++counter);
             return false;
         }
     }
