@@ -72,6 +72,13 @@ class APICardView extends React.Component {
                 },
             },
             {
+                name: 'Name',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.APIList.name',
+                    defaultMessage: 'Name',
+                }),
+            },
+            {
                 name: 'Policy',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.APIList.policy',
@@ -94,13 +101,6 @@ class APICardView extends React.Component {
                         }
                     },
                 },
-            },
-            {
-                name: 'Name',
-                label: intl.formatMessage({
-                    id: 'Apis.Listing.APIList.name',
-                    defaultMessage: 'Name',
-                }),
             },
         ];
 

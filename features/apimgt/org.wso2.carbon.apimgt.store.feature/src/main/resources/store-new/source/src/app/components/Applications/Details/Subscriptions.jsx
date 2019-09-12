@@ -333,7 +333,15 @@ class Subscriptions extends React.Component {
                     </div>
 
                     <Grid container className='tab-grid' spacing={16}>
-                        <Grid item xs={6}>
+                        <Grid item xs={6} className={classes.cardGrid}>
+                            <APIList
+                                apisNotFound={apisNotFound}
+                                unsubscribedAPIList={unsubscribedAPIList}
+                                applicationId={applicationId}
+                                handleSubscribe={(app, api, policy) => this.handleSubscribe(app, api, policy)}
+                            />
+                        </Grid>
+                        <Grid item xs={6} xl={10}>
                             <Card className={classes.card}>
                                 <CardActions>
                                     <Typography variant='h6' gutterBottom className={classes.cardTitle}>
@@ -397,14 +405,6 @@ class Subscriptions extends React.Component {
                                     }
                                 </CardContent>
                             </Card>
-                        </Grid>
-                        <Grid item xs={6} className={classes.cardGrid}>
-                            <APIList
-                                apisNotFound={apisNotFound}
-                                unsubscribedAPIList={unsubscribedAPIList}
-                                applicationId={applicationId}
-                                handleSubscribe={(app, api, policy) => this.handleSubscribe(app, api, policy)}
-                            />
                         </Grid>
                     </Grid>
                 </div>
