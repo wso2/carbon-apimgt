@@ -127,13 +127,9 @@ class APIClient {
             // If an unauthenticated response is received, we check whether the token is valid by introspecting it.
             // If it is not valid, we need to clear the stored tokens (in cookies etc) in the browser by redirecting the
             //   user to logout.
-            if (data.status === 401 && data.obj != null && data.obj.description === 'Unauthenticated request') {
+            if (data.status === 401 && data.body != null && data.body.description === 'Unauthenticated request') {
                 const userData = AuthManager.getUserFromToken();
-                userData.then((user) => {
-                    if (user) {
-                        window.location = Configurations.app.context + Utils.CONST.LOGOUT_CALLBACK;
-                    }
-                }).catch((error) => {
+                userData.catch((error) => {
                     console.error('Error occurred while checking token status. Hence redirecting to login', error);
                     window.location = Configurations.app.context + Utils.CONST.LOGOUT_CALLBACK;
                 });
