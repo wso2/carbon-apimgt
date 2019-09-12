@@ -1442,6 +1442,7 @@ public final class APIConstants {
     public static final String MULTI_ATTRIBUTE_SEPARATOR_DEFAULT = ",";
     public static final String MULTI_ATTRIBUTE_SEPARATOR = "MultiAttributeSeparator";
     public static final String CUSTOM_URL = "customUrl";
+    public static final String API_PRODUCT = "APIProduct";
 
     public static class AuditLogConstants {
         public static final String CREATED = "created";

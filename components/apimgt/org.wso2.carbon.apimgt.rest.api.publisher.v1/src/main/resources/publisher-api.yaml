@@ -8488,10 +8488,6 @@ definitions:
           type: string
           description: A string that represents the context of the user's request
           example: CalculatorAPI
-        version:
-          type: string
-          description: The version of the API
-          example: 1.0.0
         provider:
           description: |
             If the provider value is not given, the user invoking the API will be used as the provider.
@@ -8499,8 +8495,8 @@ definitions:
           example: admin
         status:
           type: string
-          description: This describes in which status of the lifecycle the API is
-          example: CREATED
+          description: This describes in which status of the lifecycle the APIPRODUCT is
+          example: PUBLISHED
         thumbnailUri:
           type: string
           example: /apis/01234567-0123-0123-0123-012345678901/thumbnail

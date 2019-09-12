@@ -367,11 +367,19 @@ class TableView extends React.Component {
                 const artifact = tableViewObj.state.apisAndApiProducts[dataIndex];
                 if (artifact) {
                     if (artifact.type === 'DOC') {
-                        return <DocThumb doc={artifact} />;
+                        return (<DocThumb doc={artifact} />);
+                    } else if (artifact.type === 'APIPRODUCT') {
+                        return (<ApiThumb
+                            api={artifact}
+                            isAPIProduct
+                            updateData={tableViewObj.updateData}
+                        />);
                     } else {
-                        return (
-                            <ApiThumb api={artifact} isAPIProduct={isAPIProduct} updateData={tableViewObj.updateData} />
-                        );
+                        return (<ApiThumb
+                            api={artifact}
+                            isAPIProduct={isAPIProduct}
+                            updateData={tableViewObj.updateData}
+                        />);
                     }
                 }
                 return <span />;

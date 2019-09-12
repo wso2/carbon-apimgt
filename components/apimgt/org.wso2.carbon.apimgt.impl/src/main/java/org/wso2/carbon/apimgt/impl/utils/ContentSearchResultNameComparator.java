@@ -54,48 +54,20 @@ public class ContentSearchResultNameComparator implements Comparator {
             return apiProduct.getId().getName().compareToIgnoreCase(api.getId().getName());
         } else if (o1 instanceof API && o2 instanceof Map.Entry) {
             API api = (API) o1;
-            if (((Map.Entry) o2).getValue() instanceof API) {
-                Map.Entry<Documentation, API> documentEntry = (Map.Entry<Documentation, API>) o2;
-                Documentation doc = documentEntry.getKey();
-                return api.getId().getApiName().compareToIgnoreCase(doc.getName());
-            } else {
-                Map.Entry<Documentation, APIProduct> documentEntry = (Map.Entry<Documentation, APIProduct>) o2;
-                Documentation doc = documentEntry.getKey();
-                return api.getId().getApiName().compareToIgnoreCase(doc.getName());
-            }
+            Documentation doc = getDocumentFromEntry(o2);
+            return api.getId().getApiName().compareToIgnoreCase(doc.getName());
         } else if (o1 instanceof Map.Entry && o2 instanceof API) {
             API api = (API) o2;
-            if (((Map.Entry) o1).getValue() instanceof API) {
-                Map.Entry<Documentation, API> documentEntry = (Map.Entry<Documentation, API>) o1;
-                Documentation doc = documentEntry.getKey();
-                return api.getId().getApiName().compareToIgnoreCase(doc.getName());
-            } else {
-                Map.Entry<Documentation, APIProduct> documentEntry = (Map.Entry<Documentation, APIProduct>) o1;
-                Documentation doc = documentEntry.getKey();
-                return api.getId().getApiName().compareToIgnoreCase(doc.getName());
-            }
+            Documentation doc = getDocumentFromEntry(o1);
+            return api.getId().getApiName().compareToIgnoreCase(doc.getName());
         } else if (o1 instanceof APIProduct && o2 instanceof Map.Entry) {
-            APIProduct api = (APIProduct) o1;
-            if (((Map.Entry) o2).getValue() instanceof API) {
-                Map.Entry<Documentation, API> documentEntry = (Map.Entry<Documentation, API>) o2;
-                Documentation doc = documentEntry.getKey();
-                return api.getId().getName().compareToIgnoreCase(doc.getName());
-            } else {
-                Map.Entry<Documentation, APIProduct> documentEntry = (Map.Entry<Documentation, APIProduct>) o2;
-                Documentation doc = documentEntry.getKey();
-                return api.getId().getName().compareToIgnoreCase(doc.getName());
-            }
+            APIProduct apiProduct = (APIProduct) o1;
+            Documentation doc = getDocumentFromEntry(o2);
+            return apiProduct.getId().getName().compareToIgnoreCase(doc.getName());
         } else if (o1 instanceof Map.Entry && o2 instanceof APIProduct) {
-            APIProduct api = (APIProduct) o2;
-            if (((Map.Entry) o1).getValue() instanceof API) {
-                Map.Entry<Documentation, API> documentEntry = (Map.Entry<Documentation, API>) o1;
-                Documentation doc = documentEntry.getKey();
-                return api.getId().getName().compareToIgnoreCase(doc.getName());
-            } else {
-                Map.Entry<Documentation, APIProduct> documentEntry = (Map.Entry<Documentation, APIProduct>) o1;
-                Documentation doc = documentEntry.getKey();
-                return api.getId().getName().compareToIgnoreCase(doc.getName());
-            }
+            APIProduct apiProduct = (APIProduct) o2;
+            Documentation doc = getDocumentFromEntry(o1);
+            return apiProduct.getId().getName().compareToIgnoreCase(doc.getName());
         } else {
             Documentation doc1;
             Documentation doc2;
@@ -125,5 +97,24 @@ public class ContentSearchResultNameComparator implements Comparator {
             }
             return doc1.getName().compareToIgnoreCase(doc2.getName());
         }
+    }
+
+    /**
+     * Get relevant documentation from entry Object
+     *
+     * @param entryObject document entry object
+     * @return documentation
+     */
+    private Documentation getDocumentFromEntry(Object entryObject) {
+
+        Documentation doc;
+        if (((Map.Entry) entryObject).getValue() instanceof API) {
+            Map.Entry<Documentation, API> documentEntry = (Map.Entry<Documentation, API>) entryObject;
+            doc = documentEntry.getKey();
+        } else {
+            Map.Entry<Documentation, APIProduct> documentEntry = (Map.Entry<Documentation, APIProduct>) entryObject;
+            doc = documentEntry.getKey();
+        }
+        return doc;
     }
 }

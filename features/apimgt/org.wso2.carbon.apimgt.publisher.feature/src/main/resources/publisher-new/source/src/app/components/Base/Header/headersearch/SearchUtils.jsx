@@ -28,6 +28,10 @@ import Icon from '@material-ui/core/Icon';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import SearchOutlined from '@material-ui/icons/SearchOutlined';
 import { Link } from 'react-router-dom';
+import { useTheme } from '@material-ui/styles';
+import APIsIcon from '@material-ui/icons/SettingsApplicationsOutlined';
+import DocumentsIcon from '@material-ui/icons/LibraryBooks';
+import CustomIcon from 'AppComponents/Shared/CustomIcon';
 
 import API from 'AppData/api';
 import SearchParser from './SearchParser';
@@ -78,7 +82,7 @@ function getPath(suggestion) {
     }
 }
 
-function getSufix(suggestion) {
+function getArtifactMetaInfo(suggestion) {
     switch (suggestion.type) {
         case 'API':
             return suggestion.version;
@@ -86,6 +90,22 @@ function getSufix(suggestion) {
             return '';
         default:
             return suggestion.apiName + ' ' + suggestion.apiVersion;
+    }
+}
+
+function getIcon(type) {
+    switch (type) {
+        case 'API':
+            return <APIsIcon />;
+        case 'APIPRODUCT':
+            return (<CustomIcon
+                width={16}
+                height={16}
+                icon='api-product'
+                strokeColor='#000000'
+            />);
+        default:
+            return <DocumentsIcon />;
     }
 }
 /**
@@ -99,18 +119,14 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
     const matches = match(suggestion.name, query);
     const parts = parse(suggestion.name, matches);
     const path = getPath(suggestion);
-    const suffix = getSufix(suggestion);
-    const path =
-        suggestion.type === 'API'
-            ? `/apis/${suggestion.id}/overview`
-            : `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/view`;
+    const artifactMetaInfo = getArtifactMetaInfo(suggestion);
     // TODO: Style the version ( and apiName if docs) apearing in the menu item
 
     return (
         <React.Fragment>
             <Link to={path}>
                 <MenuItem selected={isHighlighted} component='div'>
-                    {(suggestion.type === 'API' || suggestion.type === 'APIPRODUCT') ? <APIsIcon /> : <DocumentsIcon />}
+                    {getIcon(suggestion.type)}
                     {parts.map((part, index) => {
                         return part.highlight ? (
                             <span key={String(index)} style={{ fontWeight: 500 }}>
@@ -124,7 +140,8 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
                     })}
                     <pre />
                     <pre />
-                    {suffix}
+                    {artifactMetaInfo}
+
             <Link to={path} style={{ color: 'black' }}>
                 <MenuItem selected={isHighlighted}>
                     <ListItemIcon>
@@ -147,7 +164,7 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
                                 </strong>
                             );
                         })}
-                        secondary={suffix}
+                        secondary={artifactMetaInfo}
                     />
                 </MenuItem>
             </Link>

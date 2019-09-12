@@ -114,7 +114,7 @@ class APIProduct extends Resource {
      */
     toJSON(resource = this, userExcludes = []) {
         var copy = {},
-            excludes = ['_data', 'client', 'apiType', ...userExcludes];
+            excludes = ['_data', 'client', 'type', ...userExcludes];
         for (var prop in resource) {
             if (!excludes.includes(prop)) {
                 copy[prop] = resource[prop];
