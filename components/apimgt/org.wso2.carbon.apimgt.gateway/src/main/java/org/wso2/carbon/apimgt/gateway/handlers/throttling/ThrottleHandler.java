@@ -341,10 +341,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                 }
 
                             }
-
                         } else {
                             log.warn("Unable to find throttling information for resource and http verb. Throttling "
-                                    + "will not apply");
+                                    + "will not be applied");
                         }
                         context1.stop();
                         if (isThrottled) {
@@ -409,9 +408,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                                                     synCtx, authContext);
                                         }
                                     } else {
-                                        if (log.isDebugEnabled()) {
-                                            log.debug("Request throttled at custom throttling");
-                                        }
+                                        log.debug("Request throttled at custom throttling");
                                         synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,
                                                 APIThrottleConstants.CUSTOM_POLICY_LIMIT_EXCEED);
                                         isThrottled = true;

@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -209,9 +210,11 @@ public class BasicAuthAuthenticator implements Authenticator {
                     authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
                     authContext.setStopOnQuotaReach(true);//Since we don't have details on unauthenticated tier we setting stop on quota reach true
                     //Resource level throttling
+                    List<VerbInfoDTO> verbInfoList = new ArrayList<>(1);
                     VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
                     verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
-                    synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoDTO);
+                    verbInfoList.add(verbInfoDTO);
+                    synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
 
                     //In basic authentication scenario, we will use the username for throttling.
                     authContext.setApiKey(username);

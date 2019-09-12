@@ -18,14 +18,14 @@
         "count": 2,
         "list": [
         {
-          "ratingId": "2",
+          "ratingId": "d93fb282-8uj6-48fc-2345-993fb89085e1",
           "apiId": "e93fb282-b456-48fc-8981-003fb89086ae",
           "username": "admin",
           "rating": 3
 
         },
         {
-          "ratingId": "4",
+          "ratingId": "d93fb282-8uj6-48fc-2345-993fb89085e1",
           "apiId": "e93fb282-b456-48fc-8981-003fb89086ae",
           "username": "john",
           "rating": 4

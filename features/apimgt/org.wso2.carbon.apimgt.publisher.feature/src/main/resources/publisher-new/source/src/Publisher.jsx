@@ -20,6 +20,7 @@ import React from 'react';
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 import Loadable from 'react-loadable';
 import AuthManager from 'AppData/AuthManager';
+import CONSTS from 'AppData/Constants';
 import qs from 'qs';
 import Utils from 'AppData/Utils';
 import Logout from 'AppComponents/Logout';
@@ -29,6 +30,7 @@ import Configurations from 'Config';
 
 // Localization
 import { IntlProvider } from 'react-intl';
+import LoginDenied from './app/LoginDenied';
 
 const LoadableProtectedApp = Loadable({
     loader: () =>
@@ -94,7 +96,7 @@ class Publisher extends React.Component {
                 this.setState({ user, userResolved: true });
             } else {
                 console.log('No relevant scopes found, redirecting to login page');
-                this.setState({ userResolved: true });
+                this.setState({ userResolved: true, notEnoughPermission: true });
             }
         } else {
             // If no user data available , Get the user info from existing token information
@@ -104,21 +106,19 @@ class Publisher extends React.Component {
             userPromise
                 .then((loggedUser) => {
                     if (loggedUser != null) {
-                        const hasViewScope = loggedUser.scopes.includes('apim:api_view');
-                        if (hasViewScope) {
-                            this.setState({ user: loggedUser, userResolved: true });
-                        } else {
-                            console.log('No relevant scopes found, redirecting to login page');
-                            this.setState({ userResolved: true });
-                        }
+                        this.setState({ user: loggedUser, userResolved: true });
                     } else {
                         console.log('User returned with null, redirect to login page');
                         this.setState({ userResolved: true });
                     }
                 })
                 .catch((error) => {
-                    console.log('Error: ' + error + ',redirecting to login page');
-                    this.setState({ userResolved: true });
+                    if (error && error.message === CONSTS.errorCodes.INSUFFICIENT_PREVILEGES) {
+                        this.setState({ userResolved: true, notEnoughPermission: true });
+                    } else {
+                        console.log('Error: ' + error + ',redirecting to login page');
+                        this.setState({ userResolved: true });
+                    }
                 });
         }
     }
@@ -151,7 +151,9 @@ class Publisher extends React.Component {
      * @memberof Publisher
      */
     render() {
-        const { user, userResolved, messages } = this.state;
+        const {
+            user, userResolved, messages, notEnoughPermission,
+        } = this.state;
         const locale = languageWithoutRegionCode || language;
         if (!userResolved) {
             return <Progress />;
@@ -165,6 +167,9 @@ class Publisher extends React.Component {
                             <Route path='/logout' component={Logout} />
                             <Route
                                 render={() => {
+                                    if (notEnoughPermission) {
+                                        return <LoginDenied />;
+                                    }
                                     return <LoadableProtectedApp user={user} />;
                                 }}
                             />

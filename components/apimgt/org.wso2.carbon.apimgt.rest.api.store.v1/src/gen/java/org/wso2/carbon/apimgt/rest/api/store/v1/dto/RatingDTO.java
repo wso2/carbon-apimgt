@@ -17,7 +17,7 @@ public class RatingDTO   {
   
     private String ratingId = null;
     private String apiId = null;
-    private String username = null;
+    private String ratedBy = null;
     private Integer rating = null;
 
   /**
@@ -56,19 +56,19 @@ public class RatingDTO   {
 
   /**
    **/
-  public RatingDTO username(String username) {
-    this.username = username;
+  public RatingDTO ratedBy(String ratedBy) {
+    this.ratedBy = ratedBy;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("username")
-  public String getUsername() {
-    return username;
+  @JsonProperty("ratedBy")
+  public String getRatedBy() {
+    return ratedBy;
   }
-  public void setUsername(String username) {
-    this.username = username;
+  public void setRatedBy(String ratedBy) {
+    this.ratedBy = ratedBy;
   }
 
   /**
@@ -101,13 +101,13 @@ public class RatingDTO   {
     RatingDTO rating = (RatingDTO) o;
     return Objects.equals(ratingId, rating.ratingId) &&
         Objects.equals(apiId, rating.apiId) &&
-        Objects.equals(username, rating.username) &&
+        Objects.equals(ratedBy, rating.ratedBy) &&
         Objects.equals(rating, rating.rating);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(ratingId, apiId, username, rating);
+    return Objects.hash(ratingId, apiId, ratedBy, rating);
   }
 
   @Override
@@ -117,7 +117,7 @@ public class RatingDTO   {
     
     sb.append("    ratingId: ").append(toIndentedString(ratingId)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
-    sb.append("    username: ").append(toIndentedString(username)).append("\n");
+    sb.append("    ratedBy: ").append(toIndentedString(ratedBy)).append("\n");
     sb.append("    rating: ").append(toIndentedString(rating)).append("\n");
     sb.append("}");
     return sb.toString();

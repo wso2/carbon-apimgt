@@ -28,6 +28,8 @@ import APIProduct from 'AppData/APIProduct';
 import Api from 'AppData/api';
 import CONSTS from 'AppData/Constants';
 import AuthManager from 'AppData/AuthManager';
+import withSettings from 'AppComponents/Shared/withSettingsContext';
+import Alert from 'AppComponents/Shared/Alert';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
@@ -35,7 +37,6 @@ import InfoBar from './InfoBar';
 import RightPanel from './RightPanel';
 import { ApiContext } from './ApiContext';
 import Progress from '../../Shared/Progress';
-
 
 const LoadableSwitch = withRouter(Loadable.Map({
     loader: {
@@ -220,10 +221,18 @@ class Details extends React.Component {
             promisedAPI.then((api) => {
                 this.setState({ api: api.body });
             }).catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
+                const { status, response } = error;
+                const { setTenantDomain, intl } = this.props;
+
+                const message = intl.formatMessage({
+                    defaultMessage: 'Invalid tenant domain',
+                    id: 'Apis.Details.index.invalid.tenant.domain',
+                });
+                if (response && response.body.code === 901300) {
+                    setTenantDomain('INVALID');
+                    Alert.error(message);
                 }
-                const { status } = error;
+                console.error('Error when getting apis', error);
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
@@ -407,4 +416,4 @@ Details.propTypes = {
     }).isRequired,
 };
 
-export default injectIntl(withStyles(styles, { withTheme: true })(Details));
+export default withSettings(injectIntl(withStyles(styles, { withTheme: true })(Details)));

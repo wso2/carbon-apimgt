@@ -22,8 +22,8 @@
     "dependencies": {
         "@material-ui/core": "^3.9.0",
         "@material-ui/icons": "^4.2.1",
-        "autosuggest-highlight": "^3.1.1",
         "async-mutex": "^0.1.3",
+        "autosuggest-highlight": "^3.1.1",
         "axios": "^0.16.1",
         "caniuse-api": "^1.6.1",
         "cleanup-dependencies": "0.0.6",
@@ -33,6 +33,8 @@
         "eslint-plugin-jsx-a11y": "^6.1.2",
         "file-loader": "^0.11.2",
         "js-file-download": "^0.4.1",
+        "lodash.clonedeep": "^4.5.0",
+        "lodash.isplainobject": "^4.0.6",
         "material-design-icons": "^3.0.1",
         "material-ui-chip-input": "^1.0.0",
         "mui-datatables": "^2.8.1",

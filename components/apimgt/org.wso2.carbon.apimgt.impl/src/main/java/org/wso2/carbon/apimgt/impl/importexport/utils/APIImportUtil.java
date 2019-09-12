@@ -52,7 +52,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.lifecycle.LifeCycle;
@@ -79,6 +79,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -209,7 +211,6 @@ public final class APIImportUtil {
         String currentStatus;
         String targetStatus;
         String lifecycleAction = null;
-        APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
         String pathToYamlFile = pathToArchive + APIImportExportConstants.YAML_API_FILE_LOCATION;
         String pathToJsonFile = pathToArchive + APIImportExportConstants.JSON_API_FILE_LOCATION;
         UserRegistry registry;
@@ -349,7 +350,9 @@ public final class APIImportUtil {
                 addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider);
 
                 //Load required properties from swagger to the API
-                Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(swaggerContent);
+                Optional<APIDefinition> optional = OASParserUtil.getOASParser(swaggerContent);
+                APIDefinition apiDefinition = optional.get();
+                Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerContent);
                 for (URITemplate uriTemplate : uriTemplates) {
                     Scope scope = uriTemplate.getScope();
                     if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))
@@ -361,7 +364,7 @@ public final class APIImportUtil {
                     }
                 }
                 importedApi.setUriTemplates(uriTemplates);
-                Set<Scope> scopes = definitionFromOpenAPISpec.getScopes(swaggerContent);
+                Set<Scope> scopes = apiDefinition.getScopes(swaggerContent);
                 importedApi.setScopes(scopes);
             }
 

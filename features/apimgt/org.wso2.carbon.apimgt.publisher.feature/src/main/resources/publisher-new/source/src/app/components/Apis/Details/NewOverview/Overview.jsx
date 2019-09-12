@@ -33,6 +33,7 @@ import BusinessInformation from './BusinessInformation';
 import Scopes from './Scopes';
 import Documents from './Documents';
 import AdditionalProperties from './AdditionalProperties';
+import MediationPolicies from './MediationPolicies';
 import Lifecycle from './Lifecycle';
 
 const styles = theme => ({
@@ -156,6 +157,7 @@ function Overview(props) {
                 <Configuration parentClasses={classes} />
                 {getResourcesClassForAPIs(api.type)}
                 <AdditionalProperties parentClasses={classes} />
+                <MediationPolicies parentClasses={classes} />
             </Grid>
             <Grid item xs={12} md={6} lg={6}>
                 <Lifecycle parentClasses={classes} />

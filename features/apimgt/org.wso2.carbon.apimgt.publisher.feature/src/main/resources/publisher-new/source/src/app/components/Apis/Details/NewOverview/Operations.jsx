@@ -90,7 +90,10 @@ function Operations(props) {
                         </Typography>
                         <Link to={'/apis/' + api.id + '/operations'}>
                             <Button variant='contained' color='default'>
-                                Edit
+                                <FormattedMessage
+                                    id='Apis.Details.NewOverview.Operations.edit'
+                                    defaultMessage='Edit'
+                                />
                             </Button>
                         </Link>
                     </div>

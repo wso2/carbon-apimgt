@@ -1502,7 +1502,7 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve scopes ", e);
+            handleException("Failed to retrieve scopes for application subscription ", e);
         }
         return populateScopeSet(scopeHashMap);
     }
@@ -3434,18 +3434,20 @@ public class ApiMgtDAO {
             }
 
             String sqlAddQuery;
+            String ratingId = UUID.randomUUID().toString();
             if (!userRatingExists) {
                 //This query to update the AM_API_RATINGS table
-                sqlAddQuery = SQLConstants.APP_API_RATING_SQL;
+                sqlAddQuery = SQLConstants.ADD_API_RATING_SQL;
             } else {
                 //This query to insert into the AM_API_RATINGS table
                 sqlAddQuery = SQLConstants.UPDATE_API_RATING_SQL;
             }
             // Adding data to the AM_API_RATINGS  table
             ps = conn.prepareStatement(sqlAddQuery);
-            ps.setInt(1, rating);
-            ps.setInt(2, apiId);
-            ps.setInt(3, subscriber.getId());
+            ps.setString(1, ratingId);
+            ps.setInt(2, rating);
+            ps.setInt(3, apiId);
+            ps.setInt(4, subscriber.getId());
             ps.executeUpdate();
 
         } catch (SQLException e) {
@@ -3492,7 +3494,7 @@ public class ApiMgtDAO {
 
         try {
             int tenantId;
-            int rateId = -1;
+            String rateId = null;
             tenantId = APIUtil.getTenantId(userId);
             //Get subscriber Id
             Subscriber subscriber = getSubscriber(userId, tenantId, conn);
@@ -3519,15 +3521,15 @@ public class ApiMgtDAO {
             rs = psSelect.executeQuery();
 
             while (rs.next()) {
-                rateId = rs.getInt("RATING_ID");
+                rateId = rs.getString("RATING_ID");
             }
-            String sqlAddQuery;
-            if (rateId != -1) {
+            String sqlDeleteQuery;
+            if (rateId != null) {
                 //This query to delete the specific rate row from the AM_API_RATINGS table
-                sqlAddQuery = SQLConstants.REMOVE_RATING_SQL;
+                sqlDeleteQuery = SQLConstants.REMOVE_RATING_SQL;
                 // Adding data to the AM_API_RATINGS  table
-                ps = conn.prepareStatement(sqlAddQuery);
-                ps.setInt(1, rateId);
+                ps = conn.prepareStatement(sqlDeleteQuery);
+                ps.setString(1, rateId);
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
@@ -3654,7 +3656,7 @@ public class ApiMgtDAO {
         JSONObject ratingObj = new JSONObject();
         int userRating = 0;
         int apiId = -1;
-        int ratingId = -1;
+        String ratingId = null;
         try {
             int tenantId;
             tenantId = APIUtil.getTenantId(userId);
@@ -3681,10 +3683,10 @@ public class ApiMgtDAO {
 
             while (rs.next()) {
                 apiId = rs.getInt("API_ID");
-                ratingId = rs.getInt("RATING_ID");
+                ratingId = rs.getString("RATING_ID");
                 userRating = rs.getInt("RATING");
             }
-            if (ratingId != -1) {
+            if (ratingId != null) {
                 // A rating record exists
                 ratingObj.put(APIConstants.API_ID, apiId);
                 ratingObj.put(APIConstants.RATING_ID, ratingId);
@@ -3741,7 +3743,7 @@ public class ApiMgtDAO {
         ResultSet rsSubscriber = null;
         JSONArray ratingArray = new JSONArray();
         int userRating = 0;
-        int ratingId = -1;
+        String ratingId = null;
         int apiId = -1;
         int subscriberId = -1;
         try {
@@ -3762,7 +3764,7 @@ public class ApiMgtDAO {
                 JSONObject ratingObj = new JSONObject();
                 String subscriberName = null;
                 apiId = rs.getInt("API_ID");
-                ratingId = rs.getInt("RATING_ID");
+                ratingId = rs.getString("RATING_ID");
                 subscriberId = rs.getInt("SUBSCRIBER_ID");
                 userRating = rs.getInt("RATING");
                 ratingObj.put(APIConstants.API_ID, apiId);

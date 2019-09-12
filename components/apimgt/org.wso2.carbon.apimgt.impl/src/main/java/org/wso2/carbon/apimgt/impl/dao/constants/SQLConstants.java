@@ -1472,8 +1472,8 @@ public class SQLConstants {
     public static final String GET_API_RATING_SQL =
             "SELECT RATING FROM AM_API_RATINGS WHERE API_ID= ? AND SUBSCRIBER_ID=? ";
 
-    public static final String APP_API_RATING_SQL =
-            "INSERT INTO AM_API_RATINGS (RATING,API_ID, SUBSCRIBER_ID)  VALUES (?,?,?)";
+    public static final String ADD_API_RATING_SQL =
+            "INSERT INTO AM_API_RATINGS (RATING_ID, RATING, API_ID, SUBSCRIBER_ID)  VALUES (?,?,?,?)";
 
     public static final String UPDATE_API_RATING_SQL =
             "UPDATE AM_API_RATINGS SET RATING=? WHERE API_ID= ? AND SUBSCRIBER_ID=?";

@@ -297,8 +297,7 @@ class InfoBar extends React.Component {
             const url = windowUrl.createObjectURL(binary);
             const anchor = document.createElement('a');
             anchor.href = url;
-            anchor.download = api.provider + '-' + api.name + '-' + api.version
-            + '.graphql';
+            anchor.download = api.provider + '-' + api.name + '-' + api.version + '.graphql';
             anchor.click();
             windowUrl.revokeObjectURL(url);
         });
@@ -443,7 +442,12 @@ class InfoBar extends React.Component {
                                                             </div>
                                                         </TableCell>
                                                         <TableCell>
-                                                            <Button onClick={this.getSchema} size='small' fontSize='small' variant='outlined'>
+                                                            <Button
+                                                                onClick={this.getSchema}
+                                                                size='small'
+                                                                fontSize='small'
+                                                                variant='outlined'
+                                                            >
                                                                 <FormattedMessage
                                                                     id='Apis.Details.InfoBar.graphQL.schema'
                                                                     defaultMessage='GraphQL Schema'

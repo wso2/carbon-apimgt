@@ -21,5 +21,6 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface MediationPoliciesApiService {
-      public Response mediationPoliciesGet(Integer limit, Integer offset, String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getAllGlobalMediationPolicies(Integer limit, Integer offset, String query, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getGlobalMediationPolicyContent(String mediationPolicyId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
 }

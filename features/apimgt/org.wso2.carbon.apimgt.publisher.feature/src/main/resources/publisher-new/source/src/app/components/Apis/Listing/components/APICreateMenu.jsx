@@ -78,7 +78,20 @@ const APICreateMenu = (props) => {
             <Divider />
             <ListItem>
                 <Link to='/apis/create/graphQL' className={classes.links}>
-                    <ListItemText primary='I Have a GraphQL SDL schema' secondary='Import a GraphQL SDL schema' />
+                    <ListItemText
+                        primary={
+                            <FormattedMessage
+                                id='Apis.Listing.components.APICreateMenu.primary.graphql'
+                                defaultMessage='I Have a GraphQL SDL schema'
+                            />
+                        }
+                        secondary={
+                            <FormattedMessage
+                                id='Apis.Listing.components.APICreateMenu.secondary.graphql'
+                                defaultMessage='Import a GraphQL SDL schema'
+                            />
+                        }
+                    />
                 </Link>
             </ListItem>
             <Divider />
