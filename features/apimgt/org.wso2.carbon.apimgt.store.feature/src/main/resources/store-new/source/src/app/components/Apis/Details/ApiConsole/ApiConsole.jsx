@@ -347,6 +347,8 @@ class ApiConsole extends React.Component {
             return 'API Not found !';
         }
 
+        const authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
+
         return (
             <React.Fragment>
                 <Grid container className={classes.grid}>
@@ -495,7 +497,7 @@ class ApiConsole extends React.Component {
                                     ),
                                     startAdornment: (
                                         <InputAdornment className={classes.inputAdornmentStart} position='start'>
-                                            {api.authorizationHeader ? api.authorizationHeader : 'Authorization'}
+                                            {authorizationHeader}
                                             {' '}
                                             :Bearer
                                         </InputAdornment>
@@ -505,7 +507,8 @@ class ApiConsole extends React.Component {
                         </Grid>
                     </Grid>
                 </Grid>
-                <SwaggerUI accessTokenProvider={this.accessTokenProvider} spec={swagger} />
+                <SwaggerUI accessTokenProvider={this.accessTokenProvider} spec={swagger} 
+                authorizationHeader={authorizationHeader}/>
             </React.Fragment>
         );
     }
