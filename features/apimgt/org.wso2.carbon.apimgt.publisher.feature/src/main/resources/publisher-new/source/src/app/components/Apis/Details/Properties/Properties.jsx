@@ -22,6 +22,7 @@ import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import cloneDeep from 'lodash.clonedeep';
+import isEmpty from 'lodash.isEmpty';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -39,15 +40,16 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import API from 'AppData/api.js';
 import APIContext, { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import AuthManager from 'AppData/AuthManager';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 
 const useStyles = makeStyles(theme => ({
     root: {
         paddingTop: 0,
         paddingLeft: 0,
+        maxWidth: theme.custom.contentAreaWidth,
     },
     titleWrapper: {
         display: 'flex',
@@ -104,6 +106,19 @@ const useStyles = makeStyles(theme => ({
     },
     link: {
         cursor: 'pointer',
+    },
+    messageBox: {
+        marginTop: 20,
+    },
+    actions: {
+        padding: '20px 0',
+        '& button': {
+            marginLeft: 0,
+        },
+    },
+    head: {
+        fontWeight: 200,
+        marginBottom: 20,
     },
 }));
 
@@ -240,7 +255,7 @@ function Properties(props) {
      * @param {*} props properties
      */
     const { api, updateAPI, isAPIProduct } = useContext(APIContext);
-    const apiCopy = cloneDeep(api);//JSON.parse(JSON.stringify(api));
+    const apiCopy = cloneDeep(api);
 
     const [additionalProperties, setAdditionalProperties] = useState(apiCopy.additionalProperties);
     const [showAddProperty, setShowAddProperty] = useState(false);
@@ -393,7 +408,6 @@ function Properties(props) {
         }
         return items;
     };
-    
 
     /**
      *
@@ -426,163 +440,210 @@ function Properties(props) {
                     />
                 </Button>
             </div>
-            <Grid container spacing={7}>
-                <Grid item xs={12}>
-                    <Paper className={classes.paperRoot} elevation={1}>
-                        <Table className={classes.table}>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>
-                                        <FormattedMessage
-                                            id='Apis.Details.Properties.Properties.add.new.property.table'
-                                            defaultMessage='Add New Property'
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <FormattedMessage
-                                            id='Apis.Details.Properties.Properties.add.new.property.value'
-                                            defaultMessage='Property Value'
-                                        />
-                                    </TableCell>
-                                    <TableCell />
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {showAddProperty && (
+            {isEmpty(additionalProperties) && !showAddProperty && (
+                <div className={classes.messageBox}>
+                    <InlineMessage type='info' height={140}>
+                        <div className={classes.contentWrapper}>
+                            <Typography variant='h5' component='h3' className={classes.head}>
+                                <FormattedMessage
+                                    id='Apis.Details.Properties.Properties.add.new.property.message.title'
+                                    defaultMessage='Create Additional Properties'
+                                />
+                            </Typography>
+                            <Typography component='p' className={classes.content}>
+                                <FormattedMessage
+                                    id='Apis.Details.Properties.Properties.add.new.property.message.content'
+                                    defaultMessage={'If you want to add specific custom properties to your' +
+                                    'API you can add them here.'}
+                                />
+                            </Typography>
+                            <div className={classes.actions}>
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                    className={classes.button}
+                                    onClick={toggleAddProperty}
+                                >
+                                    <FormattedMessage
+                                        id='Apis.Details.Properties.Properties.add.new.property'
+                                        defaultMessage='Add New Property'
+                                    />
+                                </Button>
+                            </div>
+                        </div>
+                    </InlineMessage>
+                </div>
+            )}
+            {(!isEmpty(additionalProperties) || showAddProperty) && (
+                <Grid container spacing={7}>
+                    <Grid item xs={12}>
+                        <Paper className={classes.paperRoot} elevation={1}>
+                            <Table className={classes.table}>
+                                <TableHead>
                                     <TableRow>
                                         <TableCell>
-                                            <TextField
-                                                required
-                                                id='outlined-required'
-                                                label={intl.formatMessage({
-                                                    id: `Apis.Details.Properties.Properties.
-                                                                show.add.property.property.name`,
-                                                    defaultMessage: 'Property Name',
-                                                })}
-                                                margin='normal'
-                                                variant='outlined'
-                                                className={classes.addProperty}
-                                                value={propertyKey === null ? '' : propertyKey}
-                                                onChange={handleChange('propertyKey')}
-                                                onKeyDown={handleKeyDown('propertyKey')}
-                                                error={validateEmpty(propertyKey)}
-                                                disabled={isNotCreator && isNotPublisher}
+                                            <FormattedMessage
+                                                id='Apis.Details.Properties.Properties.add.new.property.table'
+                                                defaultMessage='Add New Property'
                                             />
                                         </TableCell>
                                         <TableCell>
-                                            <TextField
-                                                required
-                                                id='outlined-required'
-                                                label={intl.formatMessage({
-                                                    id: 'Apis.Details.Properties.Properties.property.value',
-                                                    defaultMessage: 'Property Value',
-                                                })}
-                                                margin='normal'
-                                                variant='outlined'
-                                                className={classes.addProperty}
-                                                value={propertyValue === null ? '' : propertyValue}
-                                                onChange={handleChange('propertyValue')}
-                                                onKeyDown={handleKeyDown('propertyValue')}
-                                                error={validateEmpty(propertyValue)}
-                                                disabled={isNotCreator && isNotPublisher}
-                                            />
-                                        </TableCell>
-                                        <TableCell align='right'>
-                                            <Button
-                                                variant='contained'
-                                                color='primary'
-                                                disabled={
-                                                    !propertyValue || !propertyKey || (isNotCreator && isNotPublisher)
-                                                }
-                                                onClick={handleAddToList}
-                                            >
-                                                <FormattedMessage
-                                                    id='Apis.Details.Properties.Properties.add'
-                                                    defaultMessage='Add'
-                                                />
-                                            </Button>
-                                            <Link
-                                                to={
-                                                    (api.apiType === API.CONSTS.APIProduct
-                                                        ? '/api-products/'
-                                                        : '/apis/') +
-                                                    api.id +
-                                                    '/overview'
-                                                }
-                                            >
-                                                <Button onClick={toggleAddProperty}>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Properties.Properties.cancel'
-                                                        defaultMessage='Cancel'
-                                                    />
-                                                </Button>
-                                            </Link>
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                                {renderAdditionalProperties()}
-                            </TableBody>
-                        </Table>
-                    </Paper>
-                    <div className={classes.buttonWrapper}>
-                        <Grid
-                            container
-                            direction='row'
-                            alignItems='flex-start'
-                            spacing={4}
-                            className={classes.buttonSection}
-                        >
-                            <Grid item>
-                                <div>
-                                    <Button
-                                        variant='contained'
-                                        color='primary'
-                                        onClick={handleSubmit}
-                                        disabled={updating || (isNotCreator && isNotPublisher)}
-                                    >
-                                        {updating && (
-                                            <React.Fragment>
-                                                <CircularProgress size={20} />
-                                                <FormattedMessage
-                                                    id='Apis.Details.Properties.Properties.updating'
-                                                    defaultMessage='Updating ...'
-                                                />
-                                            </React.Fragment>
-                                        )}
-                                        {!updating && (
                                             <FormattedMessage
-                                                id='Apis.Details.Properties.Properties.save'
-                                                defaultMessage='Save'
+                                                id='Apis.Details.Properties.Properties.add.new.property.value'
+                                                defaultMessage='Property Value'
                                             />
-                                        )}
-                                    </Button>
-                                </div>
-                            </Grid>
-                            <Grid item>
-                                <Link to={'/apis/' + api.id + '/overview'}>
-                                    <Button>
-                                        <FormattedMessage
-                                            id='Apis.Details.Properties.Properties.cancel'
-                                            defaultMessage='Cancel'
-                                        />
-                                    </Button>
-                                </Link>
-                            </Grid>
-                            {isNotCreator && isNotPublisher && (
-                                <Grid item xs={12}>
-                                    <Typography variant='body2' color='primary'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Properties.Properties.update.not.allowed'
-                                            defaultMessage='*You are not authorized to update properties of
-                                                    the API due to insufficient permissions'
-                                        />
-                                    </Typography>
+                                        </TableCell>
+                                        <TableCell />
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {showAddProperty && (
+                                        <React.Fragment>
+                                            <TableRow>
+                                                <TableCell>
+                                                    <TextField
+                                                        required
+                                                        id='outlined-required'
+                                                        label={intl.formatMessage({
+                                                            id: `Apis.Details.Properties.Properties.
+                                                                show.add.property.property.name`,
+                                                            defaultMessage: 'Property Name',
+                                                        })}
+                                                        margin='normal'
+                                                        variant='outlined'
+                                                        className={classes.addProperty}
+                                                        value={propertyKey === null ? '' : propertyKey}
+                                                        onChange={handleChange('propertyKey')}
+                                                        onKeyDown={handleKeyDown('propertyKey')}
+                                                        error={validateEmpty(propertyKey)}
+                                                        disabled={isNotCreator && isNotPublisher}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <TextField
+                                                        required
+                                                        id='outlined-required'
+                                                        label={intl.formatMessage({
+                                                            id: 'Apis.Details.Properties.Properties.property.value',
+                                                            defaultMessage: 'Property Value',
+                                                        })}
+                                                        margin='normal'
+                                                        variant='outlined'
+                                                        className={classes.addProperty}
+                                                        value={propertyValue === null ? '' : propertyValue}
+                                                        onChange={handleChange('propertyValue')}
+                                                        onKeyDown={handleKeyDown('propertyValue')}
+                                                        error={validateEmpty(propertyValue)}
+                                                        disabled={isNotCreator && isNotPublisher}
+                                                    />
+                                                </TableCell>
+                                                <TableCell align='right'>
+                                                    <Button
+                                                        variant='contained'
+                                                        color='primary'
+                                                        disabled={
+                                                            !propertyValue ||
+                                                            !propertyKey ||
+                                                            (isNotCreator && isNotPublisher)
+                                                        }
+                                                        onClick={handleAddToList}
+                                                    >
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Properties.Properties.add'
+                                                            defaultMessage='Add'
+                                                        />
+                                                    </Button>
+
+                                                    <Button onClick={toggleAddProperty}>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Properties.Properties.cancel'
+                                                            defaultMessage='Cancel'
+                                                        />
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell colSpan={3}>
+                                                    <Typography variant='caption'>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Properties.Properties.help'
+                                                            defaultMessage={
+                                                                'Property name should be unique, should not contain' +
+                                                                'spaces, cannot be case-sensitive, cannot be any ' +
+                                                                'of the following as they are reserved keywords:' +
+                                                                'provider, version, context, status, description, ' +
+                                                                'subcontext, doc, lcState, name, tags.'
+                                                            }
+                                                        />
+                                                    </Typography>
+                                                </TableCell>
+                                            </TableRow>
+                                        </React.Fragment>
+                                    )}
+                                    {renderAdditionalProperties()}
+                                </TableBody>
+                            </Table>
+                        </Paper>
+                        <div className={classes.buttonWrapper}>
+                            <Grid
+                                container
+                                direction='row'
+                                alignItems='flex-start'
+                                spacing={4}
+                                className={classes.buttonSection}
+                            >
+                                <Grid item>
+                                    <div>
+                                        <Button
+                                            variant='contained'
+                                            color='primary'
+                                            onClick={handleSubmit}
+                                            disabled={updating || (isNotCreator && isNotPublisher)}
+                                        >
+                                            {updating && (
+                                                <React.Fragment>
+                                                    <CircularProgress size={20} />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Properties.Properties.updating'
+                                                        defaultMessage='Updating ...'
+                                                    />
+                                                </React.Fragment>
+                                            )}
+                                            {!updating && (
+                                                <FormattedMessage
+                                                    id='Apis.Details.Properties.Properties.save'
+                                                    defaultMessage='Save'
+                                                />
+                                            )}
+                                        </Button>
+                                    </div>
                                 </Grid>
-                            )}
-                        </Grid>
-                    </div>
+                                <Grid item>
+                                    <Link to={'/apis/' + api.id + '/overview'}>
+                                        <Button>
+                                            <FormattedMessage
+                                                id='Apis.Details.Properties.Properties.cancel'
+                                                defaultMessage='Cancel'
+                                            />
+                                        </Button>
+                                    </Link>
+                                </Grid>
+                                {isNotCreator && isNotPublisher && (
+                                    <Grid item xs={12}>
+                                        <Typography variant='body2' color='primary'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Properties.Properties.update.not.allowed'
+                                                defaultMessage='*You are not authorized to update properties of
+                                                    the API due to insufficient permissions'
+                                            />
+                                        </Typography>
+                                    </Grid>
+                                )}
+                            </Grid>
+                        </div>
+                    </Grid>
                 </Grid>
-            </Grid>
+            )}
         </div>
     );
 }

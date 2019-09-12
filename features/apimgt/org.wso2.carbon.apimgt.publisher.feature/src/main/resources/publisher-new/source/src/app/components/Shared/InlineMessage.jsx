@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
-import InfoOutlined from '@material-ui/icons/InfoOutlined';
+import Icon from '@material-ui/core/Icon';
 import VerticalDivider from './VerticalDivider';
 
 const styles = theme => ({
@@ -12,10 +12,10 @@ const styles = theme => ({
         paddingLeft: theme.spacing.unit * 2,
         borderRadius: theme.shape.borderRadius,
         border: 'solid 1px ' + theme.palette.secondary.main,
-    },
-    iconItem: {
-        paddingRight: theme.spacing.unit * 2,
-        fontSize: 40,
+        '& span.material-icons': {
+            fontSize: 80,
+            color: theme.palette.primary.main,
+        },
     },
     button: {
         marginTop: theme.spacing.unit,
@@ -37,8 +37,7 @@ class InlineMessage extends React.Component {
         const { classes, height, type } = this.props;
         return (
             <Paper className={classes.root} elevation={1} {...this.props}>
-                {type === 'info' && <InfoOutlined className={classes.iconItem} />}
-                {type === 'warn' && <InfoOutlined className={classes.iconItem} />}
+                {type === 'info' && <Icon>{type}</Icon>}
                 <VerticalDivider height={height} />
                 <div className={classes.content}>{this.props.children}</div>
             </Paper>
