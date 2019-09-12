@@ -22,7 +22,7 @@ import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import cloneDeep from 'lodash.clonedeep';
-import isEmpty from 'lodash.isEmpty';
+import isEmpty from 'lodash.isempty';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -303,6 +303,7 @@ function Properties(props) {
     const handleSubmit = () => {
         apiCopy.additionalProperties = additionalProperties;
         setUpdating(true);
+        if (apiCopy.type && isAPIProduct) delete apiCopy.type;
         const updatePromise = updateAPI(apiCopy, isAPIProduct);
         updatePromise
             .then(() => {
@@ -453,8 +454,10 @@ function Properties(props) {
                             <Typography component='p' className={classes.content}>
                                 <FormattedMessage
                                     id='Apis.Details.Properties.Properties.add.new.property.message.content'
-                                    defaultMessage={'If you want to add specific custom properties to your' +
-                                    'API you can add them here.'}
+                                    defaultMessage={
+                                        'If you want to add specific custom properties to your' +
+                                        'API you can add them here.'
+                                    }
                                 />
                             </Typography>
                             <div className={classes.actions}>
