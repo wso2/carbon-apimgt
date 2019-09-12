@@ -60,7 +60,7 @@ SettingsApiService delegate = new SettingsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retreive store settings", notes = "Retreive store settings ", response = SettingsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:store_setting", description = "Retrieve store settings")
+            @AuthorizationScope(scope = "apim:store_settings", description = "Retrieve store settings")
         })
     }, tags={ "Settings" })
     @ApiResponses(value = { 

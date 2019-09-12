@@ -80,7 +80,7 @@ securityDefinitions:
       apim:sub_manage: Manage subscriptions
       apim:self-signup: Self Sign-up
       apim:dedicated_gateway: Updating dedicated Gateway
-      apim:store_setting: Retrieve store settings
+      apim:store_settings: Retrieve store settings
 
 ######################################################
 # The "API Collection" resource APIs
@@ -2842,7 +2842,7 @@ paths:
       summary: Retreive store settings
       security:
         - OAuth2Security:
-          - apim:store_setting
+          - apim:store_settings
       description: |
         Retreive store settings
       tags:

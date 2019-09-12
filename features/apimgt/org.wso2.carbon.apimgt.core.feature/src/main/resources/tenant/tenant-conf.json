@@ -121,6 +121,10 @@
         "Roles": "admin,Internal/creator,Internal/publisher"
       },
       {
+        "Name": "apim:store_settings",
+        "Roles": "admin,Internal/subscriber"
+      },
+      {
         "Name": "apim:client_certificates_view",
         "Roles": "admin,Internal/creator"
       },
