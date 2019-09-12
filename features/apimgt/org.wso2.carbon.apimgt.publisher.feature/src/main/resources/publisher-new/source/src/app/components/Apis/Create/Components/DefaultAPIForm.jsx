@@ -83,8 +83,8 @@ export default function DefaultAPIForm(props) {
      */
     function validate(field, value) {
         switch (field) {
-            // eslint-disable-next-line no-case-declarations
             case 'name':
+            {
                 const nameValidity = APIValidation.apiName.required().validate(value).error;
                 if (nameValidity === null) {
                     APIValidation.apiParameter.validate(field + ':' + value).then((isValid) => {
@@ -99,8 +99,8 @@ export default function DefaultAPIForm(props) {
                     setValidity({ ...validity, name: nameValidity });
                 }
                 break;
-            // eslint-disable-next-line no-case-declarations
-            case 'context':
+            }
+            case 'context': {
                 const contextValidity = APIValidation.apiContext.required().validate(value).error;
                 if (contextValidity === null) {
                     const apiContext = value.includes('/') ?
@@ -117,8 +117,8 @@ export default function DefaultAPIForm(props) {
                     setValidity({ ...validity, context: contextValidity });
                 }
                 break;
-            // eslint-disable-next-line no-case-declarations
-            case 'version':
+            }
+            case 'version': {
                 const versionValidity = APIValidation.apiVersion.required().validate(value).error;
                 if (versionValidity === null) {
                     const apiVersion = api.context.includes('/') ?
@@ -135,12 +135,13 @@ export default function DefaultAPIForm(props) {
                     setValidity({ ...validity, version: versionValidity });
                 }
                 break;
-            // eslint-disable-next-line no-case-declarations
-            default:
+            }
+            default: {
                 // url
                 const urlValidity = value ? APIValidation.url.validate(value).error : null;
                 setValidity({ ...validity, endpointURL: urlValidity });
                 break;
+            }
         }
     }
 
