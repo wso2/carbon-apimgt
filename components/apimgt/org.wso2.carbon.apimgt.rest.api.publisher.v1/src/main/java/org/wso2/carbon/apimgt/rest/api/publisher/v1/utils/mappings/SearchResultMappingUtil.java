@@ -79,7 +79,6 @@ public class SearchResultMappingUtil {
         apiProductResultDTO.setId(apiProduct.getUuid());
         APIProductIdentifier apiproductId = apiProduct.getId();
         apiProductResultDTO.setName(apiproductId.getName());
-        apiProductResultDTO.setVersion(APIConstants.API_PRODUCT_VERSION);
         apiProductResultDTO.setProvider(apiproductId.getProviderName());
         String context = apiProduct.getContextTemplate();
         if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
