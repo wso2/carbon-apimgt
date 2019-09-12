@@ -1452,6 +1452,16 @@ class API extends Resource {
     }
 
     /**
+     * Get all active Tenants
+     * @param state state of the tenant
+     */
+    getTenantsByState(state) {
+        return this.client.then((client) => {
+            return client.apis['Tenants'].getTenantsByState({ state });
+        });
+    }
+
+    /**
      *
      * Static method for get all APIs for current environment user.
      * @static
