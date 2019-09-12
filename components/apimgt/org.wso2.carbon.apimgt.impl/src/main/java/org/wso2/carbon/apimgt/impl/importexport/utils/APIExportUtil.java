@@ -67,6 +67,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -542,10 +543,7 @@ public class APIExportUtil {
                 JsonParser parser = new JsonParser();
                 JsonObject json = parser.parse(swaggerDefinition).getAsJsonObject();
                 String formattedSwaggerJson = gson.toJson(json);
-               Optional<APIDefinition> optional = OASParserUtil.getOASParser(swaggerDefinition);
-               APIDefinition apiDefinition = optional.get();
-               Set<Scope> scopes = apiDefinition.getScopes(swaggerDefinition);
-               apiToReturn.setScopes(scopes);
+                apiToReturn.setUriTemplates(Collections.EMPTY_SET);
                 switch (exportFormat) {
                     case YAML:
                         String swaggerInYaml = CommonUtil.jsonToYaml(formattedSwaggerJson);
