@@ -53,7 +53,7 @@ const APIDetailsTopMenu = (props) => {
     const {
         classes, theme, api, isAPIProduct,
     } = props;
-    const isVisibleInStore = ['PROTOTYPED' ,'PUBLISHED'].includes(api.lifeCycleStatus);
+    const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
     // todo: need to support rev proxy ~tmkb
     return (
         <div className={classes.root}>
