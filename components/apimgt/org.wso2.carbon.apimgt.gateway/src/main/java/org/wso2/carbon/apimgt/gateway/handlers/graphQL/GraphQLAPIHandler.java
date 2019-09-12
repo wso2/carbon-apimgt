@@ -17,8 +17,22 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
+import graphql.language.Definition;
+import graphql.language.Document;
+import graphql.language.Field;
+import graphql.language.OperationDefinition;
+import graphql.language.OperationDefinition.Operation;
+import graphql.language.Selection;
 import graphql.parser.InvalidSyntaxException;
+import graphql.parser.Parser;
+import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
+import graphql.schema.idl.SchemaParser;
+import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.schema.idl.UnExecutableSchemaGenerator;
+import graphql.validation.ValidationError;
+import graphql.validation.Validator;
+
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -34,19 +48,6 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
-import graphql.language.Definition;
-import graphql.language.Document;
-import graphql.language.Field;
-import graphql.language.OperationDefinition;
-import graphql.language.OperationDefinition.Operation;
-import graphql.language.Selection;
-import graphql.parser.Parser;
-import graphql.schema.GraphQLSchema;
-import graphql.schema.idl.SchemaParser;
-import graphql.schema.idl.TypeDefinitionRegistry;
-import graphql.schema.idl.UnExecutableSchemaGenerator;
-import graphql.validation.ValidationError;
-import graphql.validation.Validator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.IOException;
@@ -109,15 +110,16 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 String[] queryParams = ((Axis2MessageContext) messageContext).getProperties().
                         get(REST_SUB_REQUEST_PATH).toString().split(QUERY_PATH_STRING);
                 if (queryParams.length > 1) {
-                    String queryURLValue = queryParams[1];
-                    payload = URLDecoder.decode(queryURLValue, UNICODE_TRANSFORMATION_FORMAT);
+                    payload = URLDecoder.decode(queryParams[1], UNICODE_TRANSFORMATION_FORMAT);
                 } else {
                     RelayUtils.buildMessage(axis2MC);
                     OMElement body = axis2MC.getEnvelope().getBody().getFirstElement();
                     if (body != null && body.getFirstElement() != null) {
                         payload = body.getFirstElement().getText();
                     } else {
-                        log.debug("Invalid query parameter " + queryParams[0]);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Invalid query parameter " + queryParams[0]);
+                        }
                         handleFailure(messageContext, "Invalid query parameter");
                         return false;
                     }
@@ -147,16 +149,22 @@ public class GraphQLAPIHandler extends AbstractHandler {
                                     if (selection instanceof Field) {
                                         Field field = (Field) selection;
                                         operationArray.add(field.getName());
-                                        log.debug("Operation - Query " + field.getName());
+                                        if (log.isDebugEnabled()) {
+                                            log.debug("Operation - Query " + field.getName());
+                                        }
                                     }
                                 }
                                 operationList = String.join(",", operationArray);
                             } else if (operation.getOperation().equals(Operation.MUTATION)) {
                                 operationList = operation.getName();
-                                log.debug("Operation - Mutation " + operation.getName());
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Operation - Mutation " + operation.getName());
+                                }
                             } else if (operation.getOperation().equals(Operation.SUBSCRIPTION)) {
                                 operationList = operation.getName();
-                                log.debug("Operation - Subscription " + operation.getName());
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Operation - Subscription " + operation.getName());
+                                }
                             }
                             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, operationList);
                             return true;

@@ -448,8 +448,8 @@ class API extends Resource {
 
     /**
      * Get the graphQL schema of an API
-     * @param id {String} UUID of the API in which the swagger is needed
-     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @param id {String} UUID of the API in which the schema is needed
+     * @param callback {function} Function which needs to be called upon success of the retrieving schema
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSchema(id, callback = null) {
@@ -645,7 +645,6 @@ class API extends Resource {
      * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
      * @param apiId {Object} Updated graphQL schema which needs to be updated
      * @param graphQLSchema
-     * @deprecated
      */
     updateGraphQLAPIDefinition(apiId, graphQLSchema) {
         const promised_updateSchema = this.client.then(client => {
