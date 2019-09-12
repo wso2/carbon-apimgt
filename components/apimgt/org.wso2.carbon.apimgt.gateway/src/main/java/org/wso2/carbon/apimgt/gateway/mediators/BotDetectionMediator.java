@@ -67,6 +67,9 @@ public class BotDetectionMediator extends APIMgtCommonExecutionPublisher {
         log.info(String.format("MessageId : %s | Request Method : %s | Message Body : %s | client Ip : %s | " +
                 "Headers set : %s", messageId, apiMethod, messageBody, clientIP, headerSet));
 
+        /**
+         * check whether analytics enabled or not
+         */
         if (!enabled) {
             return true;
         }
