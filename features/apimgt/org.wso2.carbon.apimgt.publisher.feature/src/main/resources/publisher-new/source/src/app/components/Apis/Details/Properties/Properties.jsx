@@ -21,6 +21,7 @@
 import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import cloneDeep from 'lodash.clonedeep';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -239,7 +240,7 @@ function Properties(props) {
      * @param {*} props properties
      */
     const { api, updateAPI, isAPIProduct } = useContext(APIContext);
-    const apiCopy = JSON.parse(JSON.stringify(api));
+    const apiCopy = cloneDeep(api);//JSON.parse(JSON.stringify(api));
 
     const [additionalProperties, setAdditionalProperties] = useState(apiCopy.additionalProperties);
     const [showAddProperty, setShowAddProperty] = useState(false);
@@ -392,6 +393,7 @@ function Properties(props) {
         }
         return items;
     };
+    
 
     /**
      *
