@@ -1,4 +1,5 @@
 const APP_CONTEXT = '/publisher-new';
+const STORE_APP_CONTEXT = '/store-new';
 const Configurations = {
     themes: {
         light: {
@@ -92,6 +93,7 @@ const Configurations = {
     },
     app: {
         context: APP_CONTEXT,
+        storeContext: STORE_APP_CONTEXT,
     },
 };
 if (typeof module !== 'undefined') {

@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Tooltip from '@material-ui/core/Tooltip';
+import Configuration from 'Config';
 import { FormattedMessage } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
@@ -90,7 +91,7 @@ const APIDetailsTopMenu = (props) => {
                 <a
                     target='_blank'
                     rel='noopener noreferrer'
-                    href={`${window.location.origin}/store-new/apis/${api.id}/overview`}
+                    href={`${window.location.origin}${Configuration.app.storeContext}/apis/${api.id}/overview`}
                     className={classes.viewInStoreLauncher}
                 >
                     <div>
