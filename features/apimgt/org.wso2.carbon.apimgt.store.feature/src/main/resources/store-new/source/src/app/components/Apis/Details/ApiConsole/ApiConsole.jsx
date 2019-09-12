@@ -508,7 +508,7 @@ class ApiConsole extends React.Component {
                     </Grid>
                 </Grid>
                 <SwaggerUI accessTokenProvider={this.accessTokenProvider} spec={swagger} 
-                authorizationHeader={authorizationHeader}/>
+                authorizationHeader={authorizationHeader} />
             </React.Fragment>
         );
     }
