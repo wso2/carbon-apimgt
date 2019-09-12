@@ -293,7 +293,7 @@ public class APIMappingUtil {
         if (obj != null) {
             ratingDTO.setApiId(String.valueOf(obj.get(APIConstants.API_ID)));
             ratingDTO.setRatingId(String.valueOf(obj.get(APIConstants.RATING_ID)));
-            ratingDTO.setUsername((String) obj.get(APIConstants.USERNAME));
+            ratingDTO.setRatedBy((String) obj.get(APIConstants.USERNAME));
             ratingDTO.setRating((Integer) obj.get(APIConstants.RATING));
         }
         return ratingDTO;
