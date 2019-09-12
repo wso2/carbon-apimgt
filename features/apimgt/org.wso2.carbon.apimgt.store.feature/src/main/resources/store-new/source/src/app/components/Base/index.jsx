@@ -39,6 +39,7 @@ import { FormattedMessage } from 'react-intl';
 import Drawer from '@material-ui/core/Drawer';
 import HeaderSearch from 'AppComponents/Base/Header/Search/HeaderSearch';
 import Settings from 'AppComponents/Shared/SettingsContext';
+import Configurations from 'Config';
 import AuthManager from '../../data/AuthManager';
 import ConfigManager from '../../data/ConfigManager';
 import EnvironmentMenu from './Header/EnvironmentMenu';
@@ -222,7 +223,8 @@ class Layout extends React.Component {
     render() {
         const { classes, theme } = this.props;
         const { openNavBar } = this.state;
-        const { setTenantDomain, tenantDomain } = this.context;
+        const { tenantDomain } = this.context;
+        const { app: { context } } = Configurations;
         const user = AuthManager.getUser();
         // TODO: Refer to fix: https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810 ~tmkb
         const commonStyle = {
@@ -284,7 +286,7 @@ class Layout extends React.Component {
                                         color: '#ffffff',
                                     }}
                                     to='/'
-                                    onClick={() => setTenantDomain('INVALID')}
+                                    onClick={() => window.location.replace(context)}
                                 >
                                     <Button className={classes.publicStore}>
                                         <Icon>public</Icon>

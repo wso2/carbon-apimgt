@@ -19,6 +19,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import Loadable from 'react-loadable';
+import Configurations from 'Config';
 import Login from './app/components/Login/Login';
 import Logout from './app/components/Logout';
 import SignUp from './app/components/AnonymousView/SignUp';
@@ -88,11 +89,11 @@ class Store extends React.Component {
      */
     render() {
         const { settings, tenantDomain } = this.state;
-
+        const { app: { context } } = Configurations;
         return (
             settings && (
                 <SettingsProvider value={{ settings, tenantDomain, setTenantDomain: this.setTenantDomain }}>
-                    <BrowserRouter basename='/store-new'>
+                    <BrowserRouter basename={context}>
                         <Switch>
                             <Route path='/login' render={() => <Login appName='store-new' appLabel='STORE' />} />
                             <Route path='/logout' component={Logout} />
