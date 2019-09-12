@@ -78,21 +78,84 @@ export default function DefaultAPIForm(props) {
     /**
      * Trigger the provided onValidate call back on each input validation run
      * Do the validation state aggregation and call the onValidate method with aggregated value
-     * @param {Object} state Validation state object
+     * @param {string} field The input field.
+     * @param {string} value Validation state object
      */
-    function validate(state) {
-        setValidity(state);
-        // Map the validation entries to booleans
-        let isFormValid = Object.entries(state)
-            .map(([key, value]) =>
+    function validate(field, value) {
+        switch (field) {
+            case 'name':
+            {
+                const nameValidity = APIValidation.apiName.required().validate(value).error;
+                if (nameValidity === null) {
+                    APIValidation.apiParameter.validate(field + ':' + value).then((isValid) => {
+                        setValidity(() => {
+                            if (isValid) {
+                                return { ...validity, name: { message: 'API with name ' + value + ' exists' } };
+                            }
+                            return { ...validity, name: nameValidity };
+                        });
+                    });
+                } else {
+                    setValidity({ ...validity, name: nameValidity });
+                }
+                break;
+            }
+            case 'context': {
+                const contextValidity = APIValidation.apiContext.required().validate(value).error;
+                if (contextValidity === null) {
+                    const apiContext = value.includes('/') ?
+                        value + '/' + api.version : '/' + value + '/' + api.version;
+                    APIValidation.apiParameter.validate(field + ':' + apiContext).then((isValid) => {
+                        setValidity(() => {
+                            if (isValid) {
+                                return { ...validity, context: { message: 'API context with version exists' } };
+                            }
+                            return { ...validity, context: contextValidity, version: null };
+                        });
+                    });
+                } else {
+                    setValidity({ ...validity, context: contextValidity });
+                }
+                break;
+            }
+            case 'version': {
+                const versionValidity = APIValidation.apiVersion.required().validate(value).error;
+                if (versionValidity === null) {
+                    const apiVersion = api.context.includes('/') ?
+                        api.context + '/' + value : '/' + api.context + '/' + value;
+                    APIValidation.apiParameter.validate(field + ':' + apiVersion).then((isValid) => {
+                        setValidity(() => {
+                            if (isValid) {
+                                return { ...validity, version: { message: 'API context with version exists' } };
+                            }
+                            return { ...validity, version: versionValidity, context: null };
+                        });
+                    });
+                } else {
+                    setValidity({ ...validity, version: versionValidity });
+                }
+                break;
+            }
+            default: {
+                // url
+                const urlValidity = value ? APIValidation.url.validate(value).error : null;
+                setValidity({ ...validity, endpointURL: urlValidity });
+                break;
+            }
+        }
+    }
+
+    useEffect(() => {
+        let isFormValid = Object.entries(validity).length > 0 &&
+            Object.entries(validity).map(([key, value]) =>
                 value === null || value === undefined || (isAPIProduct && ['version', 'endpoints'].includes(key)))
-            .reduce((acc, cVal) => acc && cVal); // Aggregate the individual validation states
+                .reduce((acc, cVal) => acc && cVal); // Aggregate the individual validation states
         // API Name , Version & Context is a must that's why `&&` chain
         // if isAPIProduct gets true version validation has been skipped
         isFormValid =
             isFormValid && Boolean(api.name) && (isAPIProduct || Boolean(api.version)) && Boolean(api.context);
-        onValidate(isFormValid, state);
-    }
+        onValidate(isFormValid, validity);
+    }, [validity]);
 
     return (
         <Grid item md={9}>
@@ -117,10 +180,7 @@ export default function DefaultAPIForm(props) {
                     onChange={onChange}
                     InputProps={{
                         onBlur: ({ target: { value } }) => {
-                            validate({
-                                ...validity,
-                                name: APIValidation.apiName.required().validate(value).error,
-                            });
+                            validate('name', value);
                         },
                     }}
                     margin='normal'
@@ -129,36 +189,6 @@ export default function DefaultAPIForm(props) {
                 <Grid container spacing={2}>
                     {!isAPIProduct ? (
                         <React.Fragment>
-                            <Grid item md={4}>
-                                <TextField
-                                    fullWidth
-                                    error={validity.version}
-                                    id='outlined-name'
-                                    label={
-                                        <React.Fragment>
-                                            <sup className={classes.mandatoryStar}>*</sup>{' '}
-                                            <FormattedMessage
-                                                id='Apis.Create.WSDL.Steps.DefaultAPIForm.version'
-                                                defaultMessage='Version'
-                                            />
-                                        </React.Fragment>
-                                    }
-                                    name='version'
-                                    value={api.version}
-                                    onChange={onChange}
-                                    InputProps={{
-                                        onBlur: ({ target: { value } }) => {
-                                            validate({
-                                                ...validity,
-                                                version: APIValidation.apiVersion.required().validate(value).error,
-                                            });
-                                        },
-                                    }}
-                                    helperText={validity.version && validity.version.message}
-                                    margin='normal'
-                                    variant='outlined'
-                                />
-                            </Grid>
                             <Grid item md={8}>
                                 <TextField
                                     fullWidth
@@ -178,16 +208,40 @@ export default function DefaultAPIForm(props) {
                                     onChange={onChange}
                                     InputProps={{
                                         onBlur: ({ target: { value } }) => {
-                                            validate({
-                                                ...validity,
-                                                context: APIValidation.apiContext.required().validate(value).error,
-                                            });
+                                            validate('context', value);
                                         },
                                     }}
                                     helperText={
                                         (validity.context && validity.context.message) ||
                                         `API will be exposed in ${actualContext(api)} context at the gateway`
                                     }
+                                    margin='normal'
+                                    variant='outlined'
+                                />
+                            </Grid>
+                            <Grid item md={4}>
+                                <TextField
+                                    fullWidth
+                                    error={validity.version}
+                                    id='outlined-name'
+                                    label={
+                                        <React.Fragment>
+                                            <sup className={classes.mandatoryStar}>*</sup>{' '}
+                                            <FormattedMessage
+                                                id='Apis.Create.WSDL.Steps.DefaultAPIForm.version'
+                                                defaultMessage='Version'
+                                            />
+                                        </React.Fragment>
+                                    }
+                                    name='version'
+                                    value={api.version}
+                                    onChange={onChange}
+                                    InputProps={{
+                                        onBlur: ({ target: { value } }) => {
+                                            validate('version', value);
+                                        },
+                                    }}
+                                    helperText={validity.version && validity.version.message}
                                     margin='normal'
                                     variant='outlined'
                                 />
@@ -215,10 +269,7 @@ export default function DefaultAPIForm(props) {
                                     onChange={onChange}
                                     InputProps={{
                                         onBlur: ({ target: { value } }) => {
-                                            validate({
-                                                ...validity,
-                                                context: APIValidation.apiContext.required().validate(value).error,
-                                            });
+                                            validate('url', value);
                                         },
                                     }}
                                     helperText={

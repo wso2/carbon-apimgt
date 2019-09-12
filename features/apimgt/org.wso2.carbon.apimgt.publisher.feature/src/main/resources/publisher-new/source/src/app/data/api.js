@@ -400,6 +400,41 @@ class API extends Resource {
     }
 
     /**
+     * Validate the api parameters for existence. (api name, context)
+     * @param {string} query The parameters that should be validated.
+     * @return {promise}
+     * */
+    validateAPI(query) {
+        return this.client.then((client) => {
+            return client.apis.Validation.validateAPI({ query: query }).then((resp) => {
+                console.log(resp);
+                return resp.ok;
+            }).catch((err) => {
+                console.log(err);
+                return false;
+            });
+        });
+    }
+
+    /**
+     * Validate the given document name exists
+     * @param {string} id The api id.
+     * @param {string} name The document name
+     * @return {promise}
+     * */
+    validateDocument(id, name) {
+        return this.client.then((client) => {
+            return client.apis['API Documents'].validateDocument({apiId: id},{name: name }).then((resp) => {
+                console.log(resp);
+                return resp.ok;
+            }).catch((err) => {
+                console.log(err);
+                return false;
+            });
+        });
+    }
+
+    /**
      * Create a new version of a given API
      * @param version {string} new API version.
      * @param isDefaultVersion specifies whether new API version is set as default version

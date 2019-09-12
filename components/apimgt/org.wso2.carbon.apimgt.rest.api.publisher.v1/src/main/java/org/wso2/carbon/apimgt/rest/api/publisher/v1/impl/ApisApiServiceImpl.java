@@ -2413,27 +2413,50 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response validateAPI(String query, String ifNoneMatch, MessageContext messageContext) {
+
+        boolean isSearchArtifactExists = false;
         if (StringUtils.isEmpty(query)) {
             RestApiUtil.handleBadRequest("The query should not be empty", log);
         }
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
 
-            // Set default offset and limit for the search.
-            int limit = RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-            int offset = RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-            StringBuilder searchQueryBuilder = new StringBuilder();
-            if (!query.contains("=")) {
-                searchQueryBuilder.append("name=").append(query);
-            } else {
-                searchQueryBuilder.append(query);
+            if (query.contains(":")) {
+                String[] queryTokens = query.split(":");
+                switch (queryTokens[0]) {
+                case "name":
+                    isSearchArtifactExists = apiProvider.isApiNameExist(queryTokens[1]) ||
+                            apiProvider.isApiNameWithDifferentCaseExist(queryTokens[1]);
+                    break;
+                case "context":
+                default: // API version validation.
+                    isSearchArtifactExists = apiProvider.isContextExist(queryTokens[1]);
+                    break;
+                }
+
+            } else { // consider the query as api name
+                isSearchArtifactExists =
+                        apiProvider.isApiNameExist(query) || apiProvider.isApiNameWithDifferentCaseExist(query);
             }
-            Map<String, Object> result = apiProvider.searchPaginatedAPIs(searchQueryBuilder.toString(), tenantDomain,
-                    offset, limit, false);
-            if ((Integer)result.get("length") > 0) {
-                return Response.status(Response.Status.OK).build();
-            }
+        } catch(APIManagementException e){
+            RestApiUtil.handleInternalServerError("Error while checking the api existence", e, log);
+        }
+        return isSearchArtifactExists ? Response.status(Response.Status.OK).build() :
+                Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    @Override
+    public Response validateDocument(String apiId, String name, String ifMatch, MessageContext messageContext) {
+        if (StringUtils.isEmpty(name) || StringUtils.isEmpty(apiId)) {
+            RestApiUtil.handleBadRequest("API Id and/ or document name should not be empty", log);
+        }
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
+            return apiProvider.isDocumentationExist(apiIdentifier, name) ? Response.status(Response.Status.OK).build() :
+                    Response.status(Response.Status.NOT_FOUND).build();
+
         } catch(APIManagementException e){
             RestApiUtil.handleInternalServerError("Error while checking the api existence", e, log);
         }
