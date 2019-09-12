@@ -120,6 +120,34 @@
             <h4 class="section-heading">
                 Examples
             </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-validateAPI">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-validateAPI"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate?query&#x3D;name:PizzaShackAPI HTTP/1.1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-validateAPI">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-validateAPI" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 0</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -X POST -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot;
+https://localhost:9443/api/am/publisher/v1.0/apis/validate?query&#x3D;name:PizzaShackAPI
+</code></div>
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -160,9 +188,9 @@
 You can search in attributes by using an **&quot;&lt;attribute&gt;:&quot;** modifier.
 
 Eg.
-&quot;apiName:wso2&quot; will match an API if the provider of the API is exactly &quot;wso2&quot;.
+&quot;name:wso2&quot; will match an API if the provider of the API is exactly &quot;wso2&quot;.
 
-Supported attribute modifiers are [** version, context, apiName **]
+Supported attribute modifiers are [** version, context, name **]
 
 If no advanced attribute modifier has been specified, search will match the
 given query string against API Name.

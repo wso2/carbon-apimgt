@@ -1669,14 +1669,8 @@ paths:
 
   /apis/validate:
     post:
-      x-wso2-curl: "curl -I -k -X POST \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\"
-      https://localhost:9443/api/am/publisher/v1.0/apis/validate?query=name%3AapiName"
-      x-wso2-request: |
-          POST https://localhost:9443/api/am/publisher/v1.0/apis/validate?query=name%3AapiName HTTP/1.1
-          Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK
-                        Connection: keep-alive
-                        Content-Length: 0"
+      x-examples:
+        $ref: docs/examples/apis/apis_validate.yaml
       security:
         - OAuth2Security:
             - apim:api_create
@@ -2587,9 +2581,8 @@ paths:
   #----------------------------------------------------------------------------
   /apis/{apiId}/documents/validate:
     post:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/validate?name=docName\""
-      x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/validate?name=docName\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n"
-      x-wso2-response: "HTTP/1.1 200 OK \n"
+      x-examples:
+        $ref: docs/examples/apis/apis_id_document_validate.yaml
       security:
         - OAuth2Security:
             - apim:document_create
