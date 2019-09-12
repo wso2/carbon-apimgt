@@ -8,8 +8,16 @@ import ApplicationCreate from './components/Shared/AppsAndKeys/ApplicationCreate
 import { PageNotFound, ScopeNotFound } from './components/Base/Errors';
 import EditApp from './components/Applications/Edit/EditApp';
 
+/**
+ * Handle routes
+ * @param {*} props properties
+ * @returns {*}
+ */
 function AppRouts(props) {
-    const { isAuthenticated, isUserFound, theme } = props;
+    const {
+        isAuthenticated, isUserFound, theme,
+    } = props;
+
     return (
         <Switch>
             <Redirect exact from='/' to={theme.custom.landingPage.active ? '/home' : '/apis'} />

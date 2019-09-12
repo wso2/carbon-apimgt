@@ -15,8 +15,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, useState, } from 'react';
-import { Link, withRouter, } from 'react-router-dom';
+import React, { useEffect, useState, useContext } from 'react';
+import { Link, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
 import classNames from 'classnames';
@@ -25,6 +25,7 @@ import {
     ListItemIcon, List, withStyles, ListItem, ListItemText,
 } from '@material-ui/core';
 import CustomIcon from '../../Shared/CustomIcon';
+
 /**
  *
  *

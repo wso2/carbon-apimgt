@@ -17,8 +17,7 @@
  */
 
 import React from 'react';
-
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import Loadable from 'react-loadable';
 import Login from './app/components/Login/Login';
 import Logout from './app/components/Logout';
@@ -26,6 +25,7 @@ import SignUp from './app/components/AnonymousView/SignUp';
 import Progress from './app/components/Shared/Progress';
 import { SettingsProvider } from './app/components/Shared/SettingsContext';
 import AuthManager from './app/data/AuthManager';
+import BrowserRouter from './app/components/Base/CustomRouter/BrowserRouter';
 
 const LoadableProtectedApp = Loadable({
     loader: () => import(// eslint-disable-line function-paren-newline
@@ -38,7 +38,7 @@ const LoadableProtectedApp = Loadable({
 
 
 /**
- *Root Store component
+ * Root Store component
  *
  * @class Store
  * @extends {React.Component}
@@ -54,6 +54,7 @@ class Store extends React.Component {
         LoadableProtectedApp.preload();
         this.state = {
             settings: null,
+            tenantDomain: null,
         };
     }
 
@@ -72,24 +73,33 @@ class Store extends React.Component {
     }
 
     /**
-     *Reners the Store component
-     *
+     * Set the tenant domain to state
+     * @param {String} tenantDomain tenant domain
+     * @memberof Store
+     */
+    setTenantDomain = (tenantDomain) => {
+        this.setState({ tenantDomain });
+    }
+
+    /**
+     * Reners the Store component
      * @returns {JSX} this is the description
      * @memberof Store
      */
     render() {
-        const { settings } = this.state;
+        const { settings, tenantDomain } = this.state;
+
         return (
             settings && (
-                <SettingsProvider value={{ settings }}>
-                    <Router basename='/store-new'>
+                <SettingsProvider value={{ settings, tenantDomain, setTenantDomain: this.setTenantDomain }}>
+                    <BrowserRouter basename='/store-new'>
                         <Switch>
                             <Route path='/login' render={() => <Login appName='store-new' appLabel='STORE' />} />
                             <Route path='/logout' component={Logout} />
                             <Route path='/sign-up' component={SignUp} />
                             <Route component={LoadableProtectedApp} />
                         </Switch>
-                    </Router>
+                    </BrowserRouter>
                 </SettingsProvider>
             )
         );

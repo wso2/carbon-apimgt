@@ -104,9 +104,7 @@ class CommonListing extends React.Component {
                 }
             })
             .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
+                console.log(error);
             });
     }
 
@@ -129,7 +127,7 @@ class CommonListing extends React.Component {
      */
     render() {
         const {
-            apis, apiType, theme, classes, location: { search }
+            apis, apiType, theme, classes, location: { search },
         } = this.props;
         const { listType, allTags } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
@@ -174,7 +172,7 @@ class CommonListing extends React.Component {
                             {listType === 'list'
                             && (
                                 <ApiContext.Provider value={{ apiType }}>
-                                    <ApiTableView gridView={false} query={search}/>
+                                    <ApiTableView gridView={false} query={search} />
                                 </ApiContext.Provider>
                             )}
                         </div>
@@ -199,6 +197,6 @@ CommonListing.defaultProps = {
     location: PropTypes.shape({
         search: '',
     }),
-}
+};
 
-export default  withStyles(styles, { withTheme: true })(CommonListing);
+export default withStyles(styles, { withTheme: true })(CommonListing);

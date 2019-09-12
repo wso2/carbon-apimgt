@@ -483,6 +483,10 @@
     <RESTAPI>
         <!--Configure white-listed URIs of REST API. Accessing white-listed URIs does not require credentials (does not require Authorization header). -->
         <WhiteListedURIs>
+             <WhiteListedURI>
+                <URI>/api/am/store/{version}/tenants</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+             </WhiteListedURI>
             <WhiteListedURI>
                 <URI>/api/am/publisher/{version}/swagger.json</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>

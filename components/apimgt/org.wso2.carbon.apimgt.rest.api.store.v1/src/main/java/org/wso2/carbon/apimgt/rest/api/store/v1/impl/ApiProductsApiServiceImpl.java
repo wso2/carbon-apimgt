@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.ApiProductsApiServiceImpl;
@@ -103,7 +104,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
 
             if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
+                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
 
             APIProduct product = apiConsumer.getAPIProductbyUUID(apiProductId, requestedTenantDomain);
@@ -153,7 +155,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             }
 
             if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
+                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
 
             APIProduct product = apiConsumer.getAPIProductbyUUID(apiProductId, requestedTenantDomain);
@@ -216,7 +219,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
 
             if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
+                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
             Map<String, Object> result = apiConsumer.searchPaginatedAPIProducts(searchQuery, requestedTenantDomain, offset, limit);
             Set<APIProduct> apiProducts = (Set<APIProduct>) result.get("products");

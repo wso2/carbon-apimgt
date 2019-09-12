@@ -37,11 +37,12 @@ import Paper from '@material-ui/core/Paper';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import { FormattedMessage } from 'react-intl';
 import Drawer from '@material-ui/core/Drawer';
+import HeaderSearch from 'AppComponents/Base/Header/Search/HeaderSearch';
+import Settings from 'AppComponents/Shared/SettingsContext';
 import AuthManager from '../../data/AuthManager';
 import ConfigManager from '../../data/ConfigManager';
 import EnvironmentMenu from './Header/EnvironmentMenu';
 import GlobalNavBar from './Header/GlobalNavbar';
-import HeaderSearch from 'AppComponents/Base/Header/Search/HeaderSearch';
 import Utils from '../../data/Utils';
 import VerticalDivider from '../Shared/VerticalDivider';
 
@@ -58,6 +59,9 @@ const styles = theme => ({
         fontSize: 35,
     },
     userLink: {
+        color: theme.palette.getContrastText(theme.palette.background.appBar),
+    },
+    publicStore: {
         color: theme.palette.getContrastText(theme.palette.background.appBar),
     },
     // Page layout styles
@@ -105,11 +109,23 @@ const styles = theme => ({
         '& ul': {
             display: 'flex',
             flexDirection: 'row',
-        }
-    }
+        },
+    },
 });
 
+/**
+ *
+ * @class Layout
+ * @extends {React.Component}
+ */
 class Layout extends React.Component {
+    static contextType = Settings
+
+    /**
+     * @inheritdoc
+     * @param {*} props
+     * @memberof Layout
+     */
     constructor(props) {
         super(props);
         this.toggleGlobalNavBar = this.toggleGlobalNavBar.bind(this);
@@ -198,19 +214,15 @@ class Layout extends React.Component {
         this.setState({ openUserMenu: false });
     };
 
-    componentWillMount() {
-        document.body.style.height = '100%';
-        document.body.style.margin = '0';
-    }
-
-    componentWillUnmount() {
-        document.body.style.height = null;
-        document.body.style.margin = null;
-    }
-
+    /**
+     * @inheritdoc
+     * @returns {Component}
+     * @memberof Layout
+     */
     render() {
         const { classes, theme } = this.props;
         const { openNavBar } = this.state;
+        const { setTenantDomain, tenantDomain } = this.context;
         const user = AuthManager.getUser();
         // TODO: Refer to fix: https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810 ~tmkb
         const commonStyle = {
@@ -238,7 +250,7 @@ class Layout extends React.Component {
                             <Hidden smDown>
                                 <VerticalDivider height={32} />
                                 <div className={classes.listInline}>
-                                    <GlobalNavBar smallView={true} />
+                                    <GlobalNavBar smallView />
                                 </div>
                             </Hidden>
                             <Hidden mdUp>
@@ -265,6 +277,24 @@ class Layout extends React.Component {
                             </Hidden>
                             <VerticalDivider height={32} />
                             <HeaderSearch />
+                            {tenantDomain && (
+                                <Link
+                                    style={{
+                                        textDecoration: 'none',
+                                        color: '#ffffff',
+                                    }}
+                                    to='/'
+                                    onClick={() => setTenantDomain('INVALID')}
+                                >
+                                    <Button className={classes.publicStore}>
+                                        <Icon>public</Icon>
+                                        <FormattedMessage
+                                            id='Base.index.go.to.public.store'
+                                            defaultMessage='Go to public store'
+                                        />
+                                    </Button>
+                                </Link>
+                            )}
                             <VerticalDivider height={72} />
                             {/* Environment menu */}
                             <EnvironmentMenu
