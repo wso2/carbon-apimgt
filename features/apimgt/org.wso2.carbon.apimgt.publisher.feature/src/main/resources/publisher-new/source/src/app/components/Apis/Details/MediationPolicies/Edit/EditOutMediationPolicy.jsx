@@ -135,7 +135,6 @@ function EditOutMediationPolicy(props) {
         type: selectedPolicy !== (null || undefined) ? selectedPolicy.type : '',
         content: {},
     });
-    const [fileToUpload, setFileToUpload] = useState('');
     useEffect(() => {
         if (globalOutMediationPolicies.length <= 0) {
             API.getGlobalMediationPolicies()
@@ -174,7 +173,6 @@ function EditOutMediationPolicy(props) {
                 defaultMessage: 'Mediation policy added successfully',
             }));
         }).catch((errorResponse) => {
-            setFileToUpload('');
             console.log(errorResponse);
             Alert.error(JSON.stringify(errorResponse));
         });
@@ -186,7 +184,6 @@ function EditOutMediationPolicy(props) {
     const onDrop = (policy) => {
         const policyFile = policy[0];
         if (policyFile) {
-            setFileToUpload(policyFile.name);
             saveMediationPolicy(policyFile);
             setSelectedPolicyFile({ name: policyFile.name, content: policyFile });
         }
@@ -277,23 +274,16 @@ function EditOutMediationPolicy(props) {
                     {({ getRootProps, getInputProps }) => (
                         <div {...getRootProps({ style: dropzoneStyles })}>
                             <input {...getInputProps()} />
-                            {fileToUpload === '' ? (
-                                <div className={classes.dropZoneWrapper}>
-                                    <Icon className={classes.dropIcon}>cloud_upload</Icon>
-                                    <Typography>
-                                        <FormattedMessage
-                                            id={'Apis.Details.MediationPolicies.Edit.EditOutMediationPolicy.'
+                            <div className={classes.dropZoneWrapper}>
+                                <Icon className={classes.dropIcon}>cloud_upload</Icon>
+                                <Typography>
+                                    <FormattedMessage
+                                        id={'Apis.Details.MediationPolicies.Edit.EditOutMediationPolicy.'
                                             + 'click.or.drop.to.upload.file'}
-                                            defaultMessage='Click or drag the mediation file to upload.'
-                                        />
-                                    </Typography>
-                                </div>
-                            ) : (
-                                <div className={classes.uploadedFile}>
-                                    <Icon style={{ fontSize: 56 }}>insert_drive_file</Icon>
-                                    {fileToUpload}
-                                </div>
-                            )}
+                                        defaultMessage='Click or drag the mediation file to upload.'
+                                    />
+                                </Typography>
+                            </div>
                         </div>
                     )}
                 </Dropzone>

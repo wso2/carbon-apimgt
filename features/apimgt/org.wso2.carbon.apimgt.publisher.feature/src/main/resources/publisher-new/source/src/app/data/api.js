@@ -1707,7 +1707,7 @@ class API extends Resource {
             return client.apis["API Mediation Policies"].apisApiIdMediationPoliciesPost({
                 apiId: apiId,
                 type: type.toLowerCase(),
-                file: policyFile
+                mediationPolicyFile: policyFile
             },
             this._requestMetaData({
                 'Content-Type': 'multipart/form-data'

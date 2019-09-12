@@ -130,12 +130,11 @@ function EditInMediationPolicy(props) {
     const type = 'IN';
     const selectedPolicy = api.mediationPolicies.filter(seq => seq.type === type)[0];
     const [selectedPolicyFile, setSelectedPolicyFile] = useState({
-        id: selectedPolicy !== (null || undefined) ? selectedPolicy.id : '',
-        name: selectedPolicy !== (null || undefined) ? selectedPolicy.name : '',
-        type: selectedPolicy !== (null || undefined) ? selectedPolicy.type : '',
+        id: selectedPolicy ? selectedPolicy.id : '',
+        name: selectedPolicy ? selectedPolicy.name : '',
+        type: selectedPolicy ? selectedPolicy.type : '',
         content: {},
     });
-    const [fileToUpload, setFileToUpload] = useState('');
     useEffect(() => {
         if (globalInMediationPolicies.length <= 0) {
             API.getGlobalMediationPolicies()
@@ -175,7 +174,6 @@ function EditInMediationPolicy(props) {
                 defaultMessage: 'Mediation policy added successfully',
             }));
         }).catch((errorResponse) => {
-            setFileToUpload('');
             console.log(errorResponse);
             Alert.error(JSON.stringify(errorResponse));
         });
@@ -184,32 +182,11 @@ function EditInMediationPolicy(props) {
      * Handled the file upload action of the dropzone.
      * @param {file} policy The accepted file list by the dropzone.
      * */
-    // const onDrop = (policy) => {
-    //     const policyFile = policy[0];
-    //     saveMediationPolicy(policyFile);
-    //     if (policyFile) {
-    //         setSelectedPolicyFile({ name: policyFile.name, content: policyFile });
-    //     }
-    // };
-    const onDrop = (acceptedFiles) => {
-        const reader = new FileReader();
-
-        reader.onabort = () => console.log('file reading was aborted');
-        reader.onerror = () => console.log('file reading has failed');
-        reader.onload = () => {
-            // Do whatever you want with the file contents
-            const binaryStr = reader.result;
-            console.log(binaryStr);
-        };
-
-        acceptedFiles.forEach(file => reader.readAsBinaryString(file));
-        const policyFile = acceptedFiles[0];
+    const onDrop = (policy) => {
+        const policyFile = policy[0];
         if (policyFile) {
-            setFileToUpload(policyFile.name);
             saveMediationPolicy(policyFile);
-            setSelectedPolicyFile({
-                id: '', name: policyFile.name, type, content: policyFile,
-            });
+            setSelectedPolicyFile({ name: policyFile.name, content: policyFile });
         }
     };
     /**
@@ -297,23 +274,16 @@ function EditInMediationPolicy(props) {
                     {({ getRootProps, getInputProps }) => (
                         <div {...getRootProps({ style: dropzoneStyles })}>
                             <input {...getInputProps()} />
-                            {fileToUpload === '' ? (
-                                <div className={classes.dropZoneWrapper}>
-                                    <Icon className={classes.dropIcon}>cloud_upload</Icon>
-                                    <Typography>
-                                        <FormattedMessage
-                                            id={'Apis.Details.MediationPolicies.Edit.EditInMediationPolicy.'
+                            <div className={classes.dropZoneWrapper}>
+                                <Icon className={classes.dropIcon}>cloud_upload</Icon>
+                                <Typography>
+                                    <FormattedMessage
+                                        id={'Apis.Details.MediationPolicies.Edit.EditInMediationPolicy.'
                                             + 'click.or.drop.to.upload.file'}
-                                            defaultMessage='Click or drag the mediation file to upload.'
-                                        />
-                                    </Typography>
-                                </div>
-                            ) : (
-                                <div className={classes.uploadedFile}>
-                                    <Icon style={{ fontSize: 56 }}>insert_drive_file</Icon>
-                                    {fileToUpload}
-                                </div>
-                            )}
+                                        defaultMessage='Click or drag the mediation file to upload.'
+                                    />
+                                </Typography>
+                            </div>
                         </div>
                     )}
                 </Dropzone>
