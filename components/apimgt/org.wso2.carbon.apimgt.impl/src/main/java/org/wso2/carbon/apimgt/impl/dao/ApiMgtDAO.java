@@ -6117,11 +6117,13 @@ public class ApiMgtDAO {
                 if (uriTemplate.getScope() != null) {
                     scopePrepStmt.setString(1, APIUtil.getResourceKey(api, uriTemplate));
 
-                    String scopeKey = uriTemplate.getScope().getKey();
-                    Scope scopeByKey = APIUtil.findScopeByKey(api.getScopes(), scopeKey);
-                    if (scopeByKey != null) {
-                        if (scopeByKey.getId() > 0) {
-                            uriTemplate.getScopes().setId(scopeByKey.getId());
+                    if (uriTemplate.getScope().getId() == 0) {
+                        String scopeKey = uriTemplate.getScope().getKey();
+                        Scope scopeByKey = APIUtil.findScopeByKey(api.getScopes(), scopeKey);
+                        if (scopeByKey != null) {
+                            if (scopeByKey.getId() > 0) {
+                                uriTemplate.getScopes().setId(scopeByKey.getId());
+                            }
                         }
                     }
 
