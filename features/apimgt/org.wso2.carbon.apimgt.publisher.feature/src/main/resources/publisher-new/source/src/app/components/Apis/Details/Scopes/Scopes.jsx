@@ -36,16 +36,16 @@ import AuthManager from 'AppData/AuthManager';
 import Delete from './Delete';
 
 const styles = theme => ({
+    root: {
+        paddingTop: 0,
+        paddingLeft: 0,
+        maxWidth: theme.custom.contentAreaWidth,
+    },
     buttonProgress: {
         position: 'relative',
         margin: theme.spacing.unit,
     },
     headline: { paddingTop: theme.spacing.unit * 1.25, paddingLeft: theme.spacing.unit * 2.5 },
-    root: {
-        width: '100%',
-        maxWidth: 800,
-        backgroundColor: theme.palette.background.paper,
-    },
     heading: {
         flexGrow: 1,
         marginTop: 10,
@@ -172,7 +172,8 @@ class Scopes extends React.Component {
                                                         state: {
                                                             scopeName,
                                                         },
-                                                    }}
+                                                    }
+                                                }
                                             >
                                                 <Button disabled={this.isNotCreator && this.isNotPublisher}>
                                                     <Icon>edit</Icon>
@@ -184,11 +185,7 @@ class Scopes extends React.Component {
                                             </Link>
                                         </td>
                                         <td>
-                                            <Delete
-                                                scopeName={scopeName}
-                                                apiId={this.apiId}
-                                                api={api}
-                                            />
+                                            <Delete scopeName={scopeName} apiId={this.apiId} api={api} />
                                         </td>
                                     </tr>
                                 </table>
@@ -209,6 +206,12 @@ class Scopes extends React.Component {
         const options = {
             filterType: 'multiselect',
             selectableRows: false,
+            title: false,
+            filter: false,
+            print: false,
+            download: false,
+            viewColumns: false,
+            customToolbar: false,
         };
         const scopesList = api.scopes.map((scope) => {
             const aScope = [];
@@ -232,35 +235,58 @@ class Scopes extends React.Component {
 
         if (scopes.length === 0) {
             return (
-                <InlineMessage type='info' height={140}>
-                    <div className={classes.contentWrapper}>
-                        <Typography variant='h5' component='h3' className={classes.head}>
+                <div className={classes.root}>
+                    <div className={classes.titleWrapper}>
+                        <Typography variant='h4' align='left' className={classes.mainTitle}>
                             <FormattedMessage
-                                id='Apis.Details.Scopes.Scopes.create.scopes.title'
-                                defaultMessage='Create Scopes'
+                                id='Apis.Details.Scopes.Scopes.heading.scope.heading'
+                                defaultMessage='Scopes'
                             />
                         </Typography>
-                        <Typography component='p' className={classes.content}>
-                            <FormattedMessage
-                                id='Apis.Details.Scopes.Scopes.scopes.enable.fine.gained.access.control'
-                                defaultMessage={
-                                    'Scopes enable fine-grained access control to API resources'
-                                    + ' based on user roles.'
-                                }
-                            />
-                        </Typography>
-                        <div className={classes.actions}>
-                            <Link to={url}>
-                                <Button variant='contained' color='primary' className={classes.button}>
-                                    <FormattedMessage
-                                        id='Apis.Details.Scopes.Scopes.create.scopes.button'
-                                        defaultMessage='Create Scopes'
-                                    />
-                                </Button>
-                            </Link>
-                        </div>
+                        <Link to={url}>
+                            <Button
+                                size='small'
+                                className={classes.button}
+                                disabled={this.isNotCreator && this.isNotPublisher}
+                            >
+                                <AddCircle className={classes.buttonIcon} />
+                                <FormattedMessage
+                                    id='Apis.Details.Scopes.Scopes.heading.scope.add_new'
+                                    defaultMessage='Add New Scope'
+                                />
+                            </Button>
+                        </Link>
                     </div>
-                </InlineMessage>
+                    <InlineMessage type='info' height={140}>
+                        <div className={classes.contentWrapper}>
+                            <Typography variant='h5' component='h3' className={classes.head}>
+                                <FormattedMessage
+                                    id='Apis.Details.Scopes.Scopes.create.scopes.title'
+                                    defaultMessage='Create Scopes'
+                                />
+                            </Typography>
+                            <Typography component='p' className={classes.content}>
+                                <FormattedMessage
+                                    id='Apis.Details.Scopes.Scopes.scopes.enable.fine.gained.access.control'
+                                    defaultMessage={
+                                        'Scopes enable fine-grained access control to API resources' +
+                                        ' based on user roles.'
+                                    }
+                                />
+                            </Typography>
+                            <div className={classes.actions}>
+                                <Link to={url}>
+                                    <Button variant='contained' color='primary' className={classes.button}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Scopes.Scopes.create.scopes.button'
+                                            defaultMessage='Create Scopes'
+                                        />
+                                    </Button>
+                                </Link>
+                            </div>
+                        </div>
+                    </InlineMessage>
+                </div>
             );
         }
 
@@ -282,30 +308,22 @@ class Scopes extends React.Component {
                             />
                         </Button>
                     </Link>
-                    {this.isNotCreator
-                        && (
-                            <Grid item>
-                                <Typography variant='body2' color='primary'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Scopes.Scopes.update.not.allowed'
-                                        defaultMessage={'*You are not authorized to update Scopes of' +
-                                        ' the API due to insufficient permissions'}
-                                    />
-                                </Typography>
-                            </Grid>
-                        )
-                    }
+                    {this.isNotCreator && (
+                        <Grid item>
+                            <Typography variant='body2' color='primary'>
+                                <FormattedMessage
+                                    id='Apis.Details.Scopes.Scopes.update.not.allowed'
+                                    defaultMessage={
+                                        '*You are not authorized to update Scopes of' +
+                                        ' the API due to insufficient permissions'
+                                    }
+                                />
+                            </Typography>
+                        </Grid>
+                    )}
                 </div>
 
-                <MUIDataTable
-                    title={intl.formatMessage({
-                        id: 'Apis.Details.Scopes.Scopes.table.scope.name',
-                        defaultMessage: 'Scopes',
-                    })}
-                    data={scopesList}
-                    columns={columns}
-                    options={options}
-                />
+                <MUIDataTable title={false} data={scopesList} columns={columns} options={options} />
             </div>
         );
     }

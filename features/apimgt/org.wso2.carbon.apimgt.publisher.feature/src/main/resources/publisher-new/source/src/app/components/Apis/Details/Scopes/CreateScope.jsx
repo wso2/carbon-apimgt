@@ -38,6 +38,7 @@ import base64url from 'base64url';
 import Error from '@material-ui/icons/Error';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Chip from '@material-ui/core/Chip';
+import Icon from '@material-ui/core/Icon';
 import { red } from '@material-ui/core/colors/';
 
 const styles = theme => ({
@@ -49,6 +50,9 @@ const styles = theme => ({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
+    },
+    titleLink: {
+        color: theme.palette.primary.main,
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
@@ -127,9 +131,7 @@ class CreateScope extends React.Component {
      * @memberof Scopes
      */
     addScope() {
-        const {
-            intl, api, history,
-        } = this.props;
+        const { intl, api, history } = this.props;
         if (this.validateScopeName('name', this.state.apiScope.name)) {
             // return status of the validation
             return;
@@ -139,7 +141,9 @@ class CreateScope extends React.Component {
             type: 'role',
             values: this.state.validRoles,
         };
-        const scopes = api.scopes.map((aScope) => { return aScope; });
+        const scopes = api.scopes.map((aScope) => {
+            return aScope;
+        });
         scopes.push(scope);
         const updateProperties = { scopes };
         const promisedApiUpdate = api.update(updateProperties);
@@ -216,22 +220,24 @@ class CreateScope extends React.Component {
     handleRoleAddition(role) {
         const { validRoles, invalidRoles } = this.state;
         const promise = APIValidation.role.validate(base64url.encode(role));
-        promise.then(() => {
-            this.setState({
-                roleValidity: true,
-                validRoles: [...validRoles, role],
-            });
-        }).catch((error) => {
-            if (error.status === 404) {
+        promise
+            .then(() => {
                 this.setState({
-                    roleValidity: false,
-                    invalidRoles: [...invalidRoles, role],
+                    roleValidity: true,
+                    validRoles: [...validRoles, role],
                 });
-            } else {
-                Alert.error('Error when validating role: ' + role);
-                console.error('Error when validating role ' + error);
-            }
-        });
+            })
+            .catch((error) => {
+                if (error.status === 404) {
+                    this.setState({
+                        roleValidity: false,
+                        invalidRoles: [...invalidRoles, role],
+                    });
+                } else {
+                    Alert.error('Error when validating role: ' + role);
+                    console.error('Error when validating role ' + error);
+                }
+            });
     }
 
     handleRoleDeletion = (role) => {
@@ -261,6 +267,15 @@ class CreateScope extends React.Component {
         return (
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
+                    <Link to={url} className={classes.titleLink}>
+                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                            <FormattedMessage
+                                id='Apis.Details.Scopes.Scopes.heading.scope.heading'
+                                defaultMessage='Scopes'
+                            />
+                        </Typography>
+                    </Link>
+                    <Icon>keyboard_arrow_right</Icon>
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
                         <FormattedMessage
                             id='Apis.Details.Scopes.CreateScope.create.new.scope'
@@ -378,7 +393,7 @@ class CreateScope extends React.Component {
                                 variant='contained'
                                 color='primary'
                                 onClick={this.addScope}
-                                disabled={this.state.valid.name.invalid || (invalidRoles.length !== 0)}
+                                disabled={this.state.valid.name.invalid || invalidRoles.length !== 0}
                                 className={classes.saveButton}
                             >
                                 <FormattedMessage id='Apis.Details.Scopes.CreateScope.save' defaultMessage='Save' />
