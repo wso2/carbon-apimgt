@@ -137,11 +137,11 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
         String[] scopes = null;
         Set<String> scopesSet = apiKeyValidationInfoDTO.getScopes();
+        StringBuilder scopeList = new StringBuilder();
 
         if (scopesSet != null && !scopesSet.isEmpty()) {
             scopes = scopesSet.toArray(new String[scopesSet.size()]);
             if (log.isDebugEnabled() && scopes != null) {
-                StringBuilder scopeList = new StringBuilder();
                 for (String scope : scopes) {
                     scopeList.append(scope);
                     scopeList.append(",");
@@ -191,7 +191,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 getOAuth2ScopeValidators());
         //validate scope for filtered validators from db
         String[] scopeValidators;
-        OAuthAppDO appInfo;
+        OAuthAppDO appInfo = new OAuthAppDO();
         try {
             OAuthAppDAO oAuthAppDAO = new OAuthAppDAO();
             appInfo = oAuthAppDAO.getAppInformation(clientId);
@@ -216,7 +216,8 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                             appScopeValidators.remove(validator.getValidatorName());
                         }
                         if (!isValid) {
-                            log.debug(String.format("Scope validation failed for %s", validator.getValidatorName()));
+                            log.debug(String.format("Scope validation of token %s using %s failed for %s",
+                                    accessTokenDO.getTokenId(), validator.getValidatorName(), scopeList.toString()));
                             apiKeyValidationInfoDTO.setAuthorized(false);
                             apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
                             return false;
@@ -242,7 +243,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
             return false;
         } catch (IdentityOAuth2Exception e) {
-            log.error("Error while retrieving the app information");
+            log.error(String.format("Error while retrieving the app information of %s", appInfo.getApplicationName()));
             apiKeyValidationInfoDTO.setAuthorized(false);
             apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
             return false;
