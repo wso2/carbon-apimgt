@@ -32,7 +32,6 @@ import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { makeStyles } from '@material-ui/core/styles';
 import Switch from '@material-ui/core/Switch';
-import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import LinearProgress from '@material-ui/core/LinearProgress';
@@ -47,7 +46,7 @@ import Alert from 'AppComponents/Shared/Alert';
  * @returns {React.Component} @inheritdoc
  */
 export default function Operation(props) {
-    const { operation: initOperation, updateOpenAPI, api } = props;
+    const { operation: initOperation, updateOpenAPI } = props;
     const [isSaving, setIsSaving] = useState(false); // Use to show the loader and disable button
     const [isNotSaved, setIsNotSaved] = useState(false);
     // Use to show a badge if there are/is unsaved changes in the operation
@@ -211,13 +210,13 @@ export default function Operation(props) {
                             <Divider variant='middle' />
                         </Typography>
                     </Grid>
-                    <Grid md={1} />
+                    <Grid item md={1} />
                     <Grid item md={11}>
                         <FormControl component='fieldset'>
                             <FormControlLabel
                                 control={
                                     <Switch
-                                        checked={operation.authType.toLowerCase() === 'any'}
+                                        checked={operation.authType.toLowerCase() !== 'none'}
                                         onChange={({ target: { checked } }) =>
                                             operationActionsDispatcher({
                                                 action: 'authType',
@@ -248,7 +247,7 @@ export default function Operation(props) {
                         setIsNotSaved(false);
                     }}
                 >
-                    Cancel
+                    Reset
                 </Button>
             </ExpansionPanelActions>
             {isSaving && <LinearProgress classes={{ root: classes.linearProgress }} />}

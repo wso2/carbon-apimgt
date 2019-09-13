@@ -16,17 +16,20 @@
  * under the License.
  */
 
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, useState } from 'react';
 import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import cloneDeep from 'lodash.clonedeep';
+import Swagger from 'swagger-client';
 import isEmpty from 'lodash/isEmpty';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Alert from 'AppComponents/Shared/Alert';
 
 import Operation from './components/Operation';
 import GroupOfOperations from './components/GroupOfOperations';
-import Alert from 'AppComponents/Shared/Alert';
-
+import SpecErrors from './components/SpecErrors';
+import AddOperation from './components/AddOperation';
 /**
  * This component handles the Resource page in API details though it's written in a sharable way
  * that anyone could use this to render resources in anywhere else if needed.
@@ -38,11 +41,11 @@ export default function Resources() {
     /**
      *
      * Reducer to handle actions related to OpenAPI specification
-     * @param {Object} currentState Contains the /apis/{apiId}/swagger response body
+     * @param {Object} openAPISpec Contains the /apis/{apiId}/swagger response body
      * @param {Object} triggeredAction action triggered by
      * @returns {Object} Next state
      */
-    function openAPIActionsReducer(currentState, triggeredAction) {
+    function openAPIActionsReducer(openAPISpec, triggeredAction) {
         const { action, event } = triggeredAction;
         switch (action) {
             case 'initState':
@@ -50,19 +53,65 @@ export default function Resources() {
             default:
                 break;
         }
-        return currentState;
+        return openAPISpec;
     }
     const [api, updateAPI] = useAPI();
+    const [specErrors, setSpecErrors] = useState([]);
     const [openAPI, openAPIActionsDispatcher] = useReducer(openAPIActionsReducer, {});
+
+    /**
+     *
+     *
+     * @param {*} response
+     * @returns
+     */
+    function resolveAndUpdateSpec(response) {
+        return Swagger.resolve({ spec: response.body }).then(({ spec, errors }) => {
+            openAPIActionsDispatcher({ action: 'initState', event: { value: spec } });
+            setSpecErrors(errors);
+        });
+    }
     useEffect(() => {
         // Update the Swagger spec object when API object gets changed
-        api.getSwagger().then(response =>
-            openAPIActionsDispatcher({ action: 'initState', event: { value: response.body } }));
+        api.getSwagger().then(response => resolveAndUpdateSpec(response));
     }, [api]);
 
     // We don't give a * If openAPI object is null
     if (isEmpty(openAPI)) {
         return <CircularProgress />;
+    }
+
+    /**
+     *
+     *
+     * @param {*} data
+     */
+    function updateSwagger(targetOperation, spec) {
+        return api
+            .updateSwagger(spec)
+            .then(response => resolveAndUpdateSpec(response))
+            .then(() => updateAPI())
+            .catch((error) => {
+                console.error(error);
+                Alert.error('Error while updating the operation with ' +
+                        `path ${targetOperation.target} verb ${targetOperation.verb} `);
+            });
+    }
+
+    /**
+     *
+     *
+     * @param {*} data
+     */
+    function updateAPIOperations(targetOperation, apiOperation) {
+        const updatedOperations = api.operations.map((operation) => {
+            if (operation.target === data.target && operation.verb === data.verb) {
+                return apiOperation;
+            } else {
+                return operation;
+            }
+        });
+        updateAPI({ operations: updatedOperations });
     }
     /**
      *
@@ -80,31 +129,18 @@ export default function Resources() {
         switch (type) {
             case 'operation':
                 copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()] = spec;
-                return api
-                    .updateSwagger(copyOfOpenAPI)
-                    .then((response) => {
-                        const { body: value } = response; // Rename response body as value (updated swagger)
-                        openAPIActionsDispatcher({ action: 'initState', event: { value } });
-                        return value;
-                    })
-                    .catch((error) => {
-                        console.error(error);
-                        Alert.error(`Error while updating the operation with path ${data.target} verb ${data.verb} `);
-                    })
-                    .then((openAPIResponse) => {
-                        const updatedOperations = api.operations.map((operation) => {
-                            if (operation.target === data.target && operation.verb === data.verb) {
-                                return apiOperation;
-                            } else {
-                                return operation;
-                            }
-                        });
-                        updateAPI({ operations: updatedOperations });
-                    });
+                return updateSwagger(data, copyOfOpenAPI).then(() => updateAPIOperations(data, apiOperation));
+            case 'add':
+                if (copyOfOpenAPI.paths[data.target] && copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()]) {
+                    Alert.error('Operation already exist !!');
+                } else {
+                    copyOfOpenAPI.paths[data.target] = {};
+                }
+                copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()] = {};
+                return updateSwagger(data, copyOfOpenAPI);
             default:
                 break;
         }
-        return null;
     }
 
     const taggedOperations = { Default: [] };
@@ -129,30 +165,21 @@ export default function Resources() {
         }
         return operationInfo; // Just to satisfy an es-lint rule
     });
-    // if (openAPI.paths) {
-    //     for (const [path, verbs] of Object.entries(openAPI.paths)) {
-    //         for (const [verb, operationInfo] of Object.entries(verbs)) {
-    //             const operation = { path, verb, operationInfo };
-    //             if (operationInfo.tags) {
-    //                 operationInfo.tags.map((tag) => {
-    //                     if (!taggedOperations[tag]) {
-    //                         taggedOperations[tag] = [];
-    //                     }
-    //                     taggedOperations[tag].push(operation);
-    //                     return operation; // Just to satisfy an es-lint rule
-    //                 });
-    //             } else {
-    //                 taggedOperations.Default.push(operation);
-    //             }
-    //         }
-    //     }
-    // }
 
     return (
-        <Grid container direction='column' justify='flex-start' spacing={2} alignItems='stretch'>
+        <Grid container direction='row' justify='flex-start' spacing={2} alignItems='stretch'>
+            <Grid item md={12}>
+                <Typography variant='h4' gutterBottom>
+                    Resources
+                    <SpecErrors specErrors={specErrors} />
+                </Typography>
+            </Grid>
+            <Grid item md={12}>
+                <AddOperation updateOpenAPI={updateOpenAPI} />
+            </Grid>
             {Object.entries(taggedOperations).map(([tag, operations]) =>
                 !!operations.length && (
-                    <Grid item>
+                    <Grid key={tag} item md={12}>
                         <GroupOfOperations updateOpenAPI={updateOpenAPI} openAPI={openAPI} tag={tag}>
                             <Grid
                                 container
@@ -162,7 +189,7 @@ export default function Resources() {
                                 alignItems='stretch'
                             >
                                 {operations.map(operation => (
-                                    <Grid item>
+                                    <Grid key={`${operation.target}/${operation.verb}`} item>
                                         <Operation
                                             updateOpenAPI={updateOpenAPI}
                                             openAPI={openAPI}

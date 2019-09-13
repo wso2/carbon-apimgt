@@ -53,8 +53,8 @@ import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
 import Operations from './Operations/Operations';
 import Resources from './Resources/Resources';
-import ProductResourcesView from './Resources/Resources';
-import ProductResourcesEdit from './Resources/Resources';
+// import ProductResourcesView from './Resources/Resources';
+// import ProductResourcesEdit from './Resources/Resources';
 import Endpoints from './Endpoints/Endpoints';
 import Environments from './Environments/Environments';
 import Subscriptions from './Subscriptions/Subscriptions';
@@ -554,6 +554,7 @@ class Details extends Component {
                                 <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
                                 <Route
                                     path={Details.subPaths.OVERVIEW_PRODUCT}
+                                    key={Details.subPaths.OVERVIEW_PRODUCT}
                                     component={() => <Overview api={api} />}
                                 />
                                 <Route path={Details.subPaths.OVERVIEW} component={() => <Overview api={api} />} />
@@ -584,7 +585,7 @@ class Details extends Component {
                                     component={() => <Environments api={api} />}
                                 />
                                 <Route path={Details.subPaths.OPERATIONS} component={() => <Operations api={api} />} />
-                                <Route
+                                {/* <Route
                                     exact
                                     path={Details.subPaths.RESOURCES_PRODUCT}
                                     component={() => <ProductResourcesView api={api} />}
@@ -592,9 +593,13 @@ class Details extends Component {
                                 <Route
                                     path={Details.subPaths.RESOURCES_PRODUCT_EDIT}
                                     component={() => <ProductResourcesEdit />}
-                                />
+                                /> */}
 
-                                <Route path={Details.subPaths.RESOURCES} component={() => <Resources api={api} />} />
+                                <Route
+                                    path={Details.subPaths.RESOURCES}
+                                    key={Details.subPaths.RESOURCES}
+                                    component={Resources}
+                                />
 
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
                                 <Route
