@@ -7094,7 +7094,7 @@ public final class APIUtil {
      *
      * @return access control expose headers string
      */
-    public static String getExposedHeaders() {
+    public static String getAccessControlExposedHeaders() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_EXPOSE_HEADERS);
     }
@@ -7112,7 +7112,7 @@ public final class APIUtil {
     }
 
     /**
-     * Used to get CORS Configuration enabled from api-manager.xml
+     * Used to get CORS Configuration enabled from api-managgetExposedHeaderser.xml
      *
      * @return true if CORS-Configuration is enabled in api-manager.xml
      */
