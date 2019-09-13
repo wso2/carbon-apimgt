@@ -1798,7 +1798,7 @@ class API extends Resource {
     /**
      * Update the available mediation policies by the mediation policy uuid and api.
      * @param {String} seqId mediation policy uuid
-     * @param {String} apiId uuid 
+     * @param {String} apiId uuid
      * @returns {Promise}
      *
      */
@@ -1866,6 +1866,55 @@ class API extends Resource {
                 mediationPolicyId: mediationPolicyId,
             },
                 this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * @static
+     * Get all the external stores configured for the current environment
+     * @returns {Promise}
+     */
+    static getAllExternalStores() {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['External Stores'].getAllExternalStores(
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * @static
+     * Get published external stores for the given API
+     * @param {String} apiId uuid
+     * @returns {Promise}
+     */
+    static getPublishedExternalStores(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['External Stores'].getAllPublishedExternalStoresByAPI(
+                { apiId: apiId },
+                this._requestMetaData,
+            );
+        });
+    }
+
+    /**
+     * @static
+     * Publish the given API to given set of external stores and remove from others which are not specified
+     * @param {String} apiId uuid
+     * @param {Array} externalStoreIds 
+     */
+    static publishAPIToExternalStores(apiId, externalStoreIds) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['External Stores'].publishAPIToExternalStores(
+                {
+                    apiId: apiId,
+                    externalStoreIds: externalStoreIds
+                }
+                , this._requestMetaData,
             );
         });
     }

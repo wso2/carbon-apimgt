@@ -31,6 +31,7 @@ import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
 import SubscriptionsIcon from '@material-ui/icons/RssFeed';
 import MonetizationIcon from '@material-ui/icons/LocalAtm';
+import StoreIcon from '@material-ui/icons/Store';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl, defineMessages } from 'react-intl';
 import { Redirect, Route, Switch, Link, matchPath } from 'react-router-dom';
@@ -45,6 +46,7 @@ import APIProduct from 'AppData/APIProduct';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
+import AppContext from 'AppComponents/Shared/AppContext';
 import Overview from './NewOverview/Overview';
 import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
@@ -65,6 +67,7 @@ import MediationPoliciesOverview from './MediationPolicies/Overview';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
 import Monetization from './Monetization';
+import ExternalStores from './ExternalStores/ExternalStores';
 import { APIProvider } from './components/ApiContext';
 import CreateNewVersion from './NewVersion/NewVersion';
 
@@ -366,6 +369,8 @@ class Details extends Component {
             location: { pathname }, // nested destructuring
         } = this.props;
 
+        const settingsContext = this.context.settings;
+
         // pageLocation renaming is to prevent es-lint errors saying can't use global name location
         if (!Details.isValidURL(pathname)) {
             return <PageNotFound location={pageLocation} />;
@@ -522,6 +527,16 @@ class Details extends Component {
                                 to={pathPrefix + 'monetization'}
                                 Icon={<MonetizationIcon />}
                             />)}
+                        {settingsContext.externalStoresEnabled &&
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.external-stores',
+                                    defaultMessage: 'external stores',
+                                })}
+                                to={pathPrefix + 'external-stores'}
+                                Icon={<StoreIcon />}
+                            />
+                        }
                     </div>
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} />
@@ -609,6 +624,10 @@ class Details extends Component {
                                     component={() => <Monetization api={api} />}
                                 />
                                 <Route
+                                    path={Details.subPaths.EXTERNAL_STORES}
+                                    component={() => <ExternalStores api={api} />}
+                                />
+                                <Route
                                     path={Details.subPaths.MEDIATION_POLICIES}
                                     component={() => <MediationPoliciesOverview api={api} />}
                                 />
@@ -621,6 +640,7 @@ class Details extends Component {
     }
 }
 
+Details.contextType = AppContext;
 // Add your path here and refer it in above <Route/> component,
 // Paths that are not defined here will be returned with Not Found error
 // key name doesn't matter here, Use an appropriate name as the key
@@ -655,6 +675,7 @@ Details.subPaths = {
     NEW_VERSION: '/apis/:api_uuid/new_version',
     MONETIZATION: '/apis/:api_uuid/monetization',
     MEDIATION_POLICIES: '/apis/:api_uuid/Mediation Policies',
+    EXTERNAL_STORES: '/apis/:api_uuid/external-stores',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum
