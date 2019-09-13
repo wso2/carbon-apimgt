@@ -33,6 +33,7 @@ import Icon from '@material-ui/core/Icon';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Grid from '@material-ui/core/Grid';
 import AuthManager from 'AppData/AuthManager';
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import Delete from './Delete';
 
 const styles = theme => ({
@@ -100,10 +101,13 @@ class Scopes extends React.Component {
      * @memberof Scopes
      */
     render() {
-        const { intl, classes, api } = this.props;
+        const {
+            intl, classes, isAPIProduct, api,
+        } = this.props;
+        const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
         const { scopes } = api;
-        const url = `/apis/${api.id}/scopes/create`;
-        const editUrl = `/apis/${api.id}/scopes/edit`;
+        const url = `/${urlPrefix}/${api.id}/scopes/create`;
+        const editUrl = `/${urlPrefix}/${api.id}/scopes/edit`;
         const columns = [
             intl.formatMessage({
                 id: 'Apis.Details.Scopes.Scopes.table.header.name',
@@ -336,10 +340,11 @@ Scopes.propTypes = {
     api: PropTypes.instanceOf(Object).isRequired,
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
+    isAPIProduct: PropTypes.bool.isRequired,
 };
 
 Scopes.defaultProps = {
     match: { params: {} },
 };
 
-export default injectIntl(withStyles(styles)(Scopes));
+export default injectIntl(withAPI(withStyles(styles)(Scopes)));

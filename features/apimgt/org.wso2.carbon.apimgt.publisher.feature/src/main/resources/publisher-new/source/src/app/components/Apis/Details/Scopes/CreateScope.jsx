@@ -31,7 +31,6 @@ import Grid from '@material-ui/core/Grid';
 import classNames from 'classnames';
 import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
-import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import ChipInput from 'material-ui-chip-input';
 import APIValidation from 'AppData/APIValidation';
 import base64url from 'base64url';
@@ -40,6 +39,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import Chip from '@material-ui/core/Chip';
 import Icon from '@material-ui/core/Icon';
 import { red } from '@material-ui/core/colors/';
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = theme => ({
     root: {
@@ -131,7 +131,10 @@ class CreateScope extends React.Component {
      * @memberof Scopes
      */
     addScope() {
-        const { intl, api, history } = this.props;
+        const {
+            intl, api, history, isAPIProduct,
+        } = this.props;
+        const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
         if (this.validateScopeName('name', this.state.apiScope.name)) {
             // return status of the validation
             return;
@@ -153,7 +156,7 @@ class CreateScope extends React.Component {
                 defaultMessage: 'Scope added successfully',
             }));
             const { apiScopes } = this.state;
-            const redirectURL = '/apis/' + api.id + '/scopes/';
+            const redirectURL = '/' + urlPrefix + '/' + api.id + '/scopes/';
             history.push(redirectURL);
             this.setState({
                 apiScopes,
@@ -260,8 +263,9 @@ class CreateScope extends React.Component {
      * @memberof CreateScope
      */
     render() {
-        const { classes } = this.props;
-        const url = `/apis/${this.props.api.id}/scopes`;
+        const { classes, isAPIProduct, api } = this.props;
+        const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
+        const url = `/${urlPrefix}/${api.id}/scopes`;
         const { roleValidity, validRoles, invalidRoles } = this.state;
 
         return (
@@ -424,6 +428,7 @@ CreateScope.propTypes = {
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
+    isAPIProduct: PropTypes.bool.isRequired,
 };
 
 CreateScope.defaultProps = {
