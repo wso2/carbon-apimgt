@@ -41,6 +41,7 @@ import yaml from 'js-yaml';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api.js';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
+import { withRouter } from 'react-router';
 
 import Dropzone from 'react-dropzone';
 import json2yaml from 'json2yaml';
@@ -344,13 +345,15 @@ class APIDefinition extends React.Component {
     closeEditor() {
         window.localStorage.setItem('swagger-editor-content', '');
         this.setState({ openEditor: false });
-        const { intl } = this.props;
+        const { intl, api, history } = this.props;
         const { isAuditApiClicked } = this.state;
         if (isAuditApiClicked === true) {
             Alert.info(intl.formatMessage({
                 id: 'Apis.Details.APIDefinition.info.updating.auditapi',
-                defaultMessage: 'To reflect the changes made you need to click Audit API',
+                defaultMessage: 'To reflect the changes made, you need to click Audit API',
             }));
+            const redirectUrl = '/apis/' + api.id + '/api definition';
+            history.push(redirectUrl);
         }
     }
 
@@ -685,4 +688,4 @@ APIDefinition.propTypes = {
         formatMessage: PropTypes.func,
     }).isRequired,
 };
-export default injectIntl(withStyles(styles, { withTheme: true })(APIDefinition));
+export default withRouter(injectIntl(withStyles(styles, { withTheme: true })(APIDefinition)));

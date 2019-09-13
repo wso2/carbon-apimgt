@@ -79,27 +79,29 @@ public class SettingsDTO   {
   /**
    **/
   public SettingsDTO securityAuditProperties(Object securityAuditProperties) {
-      this.securityAuditProperties = securityAuditProperties;
-      return this;
-  }
-
-   /* Is External Stores configuration enabled
-   **/
-  public SettingsDTO externalStoresEnabled(Boolean externalStoresEnabled) {
-    this.externalStoresEnabled = externalStoresEnabled;
+    this.securityAuditProperties = securityAuditProperties;
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
   @JsonProperty("securityAuditProperties")
   public Object getSecurityAuditProperties() {
     return securityAuditProperties;
   }
   public void setSecurityAuditProperties(Object securityAuditProperties) {
-      this.securityAuditProperties = securityAuditProperties;
+    this.securityAuditProperties = securityAuditProperties;
   }
 
+  /**
+   * Is External Stores configuration enabled 
+   **/
+  public SettingsDTO externalStoresEnabled(Boolean externalStoresEnabled) {
+    this.externalStoresEnabled = externalStoresEnabled;
+    return this;
+  }
+
+  
   @ApiModelProperty(example = "true", value = "Is External Stores configuration enabled ")
   @JsonProperty("externalStoresEnabled")
   public Boolean isExternalStoresEnabled() {

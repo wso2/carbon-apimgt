@@ -75,9 +75,11 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The Security Audit Report has been returned. ", response = AuditReportDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The Security Audit Report was not found. ", response = ErrorDTO.class) })
-    public Response apisApiIdAuditapiGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException {
+    public Response apisApiIdAuditapiGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
         return delegate.apisApiIdAuditapiGet(apiId, accept, securityContext);
     }
+
+    @GET
     @Path("/{apiId}/client-certificates/{alias}/content")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
