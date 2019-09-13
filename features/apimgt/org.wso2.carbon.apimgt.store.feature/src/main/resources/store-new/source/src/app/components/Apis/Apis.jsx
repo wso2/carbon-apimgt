@@ -18,7 +18,6 @@
 
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-
 import CONSTS from 'AppData/Constants';
 import CommonListing from './Listing/CommonListing';
 import Details from './Details/index';

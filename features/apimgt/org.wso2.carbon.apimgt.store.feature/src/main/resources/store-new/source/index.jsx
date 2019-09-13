@@ -24,7 +24,7 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import Config from 'Config';
 import Store from './src/App';
 
-const theme = createMuiTheme(Config);
+const theme = createMuiTheme(Config.themes.light);
 
 ReactDOM.render(
     <MuiThemeProvider theme={theme}>

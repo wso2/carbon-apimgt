@@ -32,6 +32,7 @@ import ProvideOAuthKeys from 'AppComponents/Shared/AppsAndKeys/ProvideOAuthKeys'
 import Application from 'AppData/Application';
 import AuthManager from 'AppData/AuthManager';
 import Settings from 'AppComponents/Shared/SettingsContext';
+import API from 'AppData/api';
 import KeyConfiguration from './KeyConfiguration';
 import ViewKeys from './ViewKeys';
 import WaitingForApproval from './WaitingForApproval';
@@ -87,8 +88,9 @@ class TokenManager extends React.Component {
             isKeyJWT: false,
             keyRequest: {
                 keyType,
-                supportedGrantTypes: ['client_credentials'],
-                callbackUrl: 'https://wso2.am.com',
+                serverSupportedGrantTypes: [],
+                supportedGrantTypes: [],
+                callbackUrl: '',
             },
             providedConsumerKey: '',
             providedConsumerSecret: '',
@@ -117,6 +119,7 @@ class TokenManager extends React.Component {
      * @memberof TokenManager
      */
     componentDidMount() {
+        this.getserverSupportedGrantTypes();
         this.checkOwner();
         if (this.appId) {
             this.application
@@ -126,7 +129,9 @@ class TokenManager extends React.Component {
                     const { keyRequest } = this.state;
                     if (keys.size > 0 && keys.get(keyType)) {
                         const { callbackUrl, supportedGrantTypes } = keys.get(keyType);
-                        const newRequest = { ...keyRequest, callbackUrl, supportedGrantTypes };
+                        const newRequest = {
+                            ...keyRequest, callbackUrl, supportedGrantTypes,
+                        };
                         this.setState({ keys, keyRequest: newRequest });
                     } else {
                         this.setState({ keys });
@@ -142,6 +147,32 @@ class TokenManager extends React.Component {
                 });
         }
     }
+
+    /**
+     * get supported grant types from the settings api
+     */
+    getserverSupportedGrantTypes = () => {
+        const api = new API();
+        const promisedSettings = api.getSettings();
+        promisedSettings
+            .then((response) => {
+                let { keyRequest } = this.state;
+                keyRequest = { ...keyRequest };
+                keyRequest.serverSupportedGrantTypes = response.obj.grantTypes;
+                keyRequest.supportedGrantTypes = response.obj.grantTypes.filter(item => item !== 'authorization_code'
+                    && item !== 'implicit');
+                this.setState({ keyRequest });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
+    };
 
     /**
      * Check if the current user is the owner of the application
@@ -495,9 +526,12 @@ class TokenManager extends React.Component {
 }
 
 TokenManager.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.instanceOf(Object).isRequired,
     selectedApp: PropTypes.shape({
         tokenType: PropTypes.string.isRequired,
+        appId: PropTypes.string,
+        value: PropTypes.string,
+        owner: PropTypes.string,
     }).isRequired,
     keyType: PropTypes.string.isRequired,
     updateSubscriptionData: PropTypes.func.isRequired,

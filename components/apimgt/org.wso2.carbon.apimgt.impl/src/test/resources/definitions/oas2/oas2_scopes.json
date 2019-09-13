@@ -1,0 +1,206 @@
+{
+  "scopesOnlyInSecurity": {
+    "swagger": "2.0",
+    "paths": {
+      "/pets": {
+        "get": {
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "parameters": [
+            {
+              "name": "op",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "consumes": [
+            "application/json"
+          ],
+          "x-auth-type": "Application & Application User",
+          "x-throttling-tier": "Unlimited",
+          "security": [
+            {
+              "default": [
+                "sample"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "info": {
+      "title": "sampleApi",
+      "version": "1.0.0"
+    },
+    "securityDefinitions": {
+      "default": {
+        "type": "oauth2",
+        "authorizationUrl": "https://192.168.60.1:8243/authorize",
+        "flow": "implicit",
+        "scopes": {
+          "sample": "sample description",
+          "extensionScope": "extensionScope description"
+        },
+        "x-scopes-bindings": {
+          "sample": "admin",
+          "extensionScope": "admin"
+        }
+      }
+    },
+    "basePath": "/sampleContext/1.0.0",
+    "host": "192.168.60.1:8243",
+    "schemes": [
+      "https",
+      "http"
+    ]
+  },
+
+  "scopesOnlyInExtension": {
+    "swagger": "2.0",
+    "paths": {
+      "/pets": {
+        "get": {
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "parameters": [
+            {
+              "name": "op",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "consumes": [
+            "application/json"
+          ],
+          "x-auth-type": "Application & Application User",
+          "x-throttling-tier": "Unlimited",
+          "x-scope": "extensionScope"
+        }
+      }
+    },
+    "info": {
+      "title": "sampleApi",
+      "version": "1.0.0"
+    },
+    "x-wso2-security": {
+      "apim": {
+        "x-wso2-scopes": [
+          {
+            "name": "sample",
+            "description": "sample description",
+            "key": "sample",
+            "roles": "admin"
+          },
+          {
+            "name": "extensionScope",
+            "description": "extensionScope description",
+            "key": "extensionScope",
+            "roles": "admin"
+          }
+        ]
+      }
+    },
+    "basePath": "/sampleContext/1.0.0",
+    "host": "192.168.60.1:8243",
+    "schemes": [
+      "https",
+      "http"
+    ]
+  },
+
+  "scopesInExtensionAndSec": {
+    "swagger": "2.0",
+    "paths": {
+      "/pets": {
+        "get": {
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "parameters": [
+            {
+              "name": "op",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "consumes": [
+            "application/json"
+          ],
+          "x-auth-type": "Application & Application User",
+          "x-throttling-tier": "Unlimited",
+          "x-scope": "sample",
+          "security": [
+            {
+              "default": [
+                "sample"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "info": {
+      "title": "sampleApi",
+      "version": "1.0.0"
+    },
+    "x-wso2-security": {
+      "apim": {
+        "x-wso2-scopes": [
+          {
+            "name": "sample",
+            "description": "sample description",
+            "key": "sample",
+            "roles": "admin"
+          },
+          {
+            "name": "extensionScope",
+            "description": "extensionScope description",
+            "key": "extensionScope",
+            "roles": "admin"
+          }
+        ]
+      }
+    },
+    "securityDefinitions": {
+      "default": {
+        "type": "oauth2",
+        "authorizationUrl": "https://192.168.60.1:8243/authorize",
+        "flow": "implicit",
+        "scopes": {
+          "sample": "sample description",
+          "extensionScope": "extensionScope description"
+        },
+        "x-scopes-bindings": {
+          "sample": "admin",
+          "extensionScope": "admin"
+        }
+      }
+    },
+    "basePath": "/sampleContext/1.0.0",
+    "host": "192.168.60.1:8243",
+    "schemes": [
+      "https",
+      "http"
+    ]
+  }
+}

@@ -56,6 +56,7 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -2603,8 +2604,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public JSONArray getScopesForApplicationSubscription(String username, int applicationId)
             throws APIManagementException {
-        Set<Scope> scopeSet = new LinkedHashSet<Scope>();
-        JSONObject scopeList = new JSONObject();
+        Set<Scope> scopeSet;
         JSONArray scopeArray = new JSONArray();
 
         Subscriber subscriber = new Subscriber(username);
@@ -4948,6 +4948,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return criteria;
     }
 
+    @Deprecated // Remove this method once the jaggery store app is removed.
     @Override
     public String getWSDLDocument(String username, String tenantDomain, String resourceUrl,
             Map environmentDetails, Map apiDetails) throws APIManagementException {
@@ -5029,6 +5030,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     data.toJSONString());
         }
         return data.toJSONString();
+    }
+
+    @Override
+    public ResourceFile getWSDL(APIIdentifier apiIdentifier, String environmentName, String environmentType) throws APIManagementException {
+        return null;
     }
 
     @Override
@@ -5176,7 +5182,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     private byte[] getUpdatedWSDLByEnvironment(String wsdlResourcePath, byte[] wsdlContent, String environmentName,
-            String environmentType, String apiName, String apiVersion, String apiProvider) throws APIManagementException {
+            String environmentType, String apiName, String apiVersion, String apiProvider)
+            throws APIManagementException {
         APIMWSDLReader apimwsdlReader = new APIMWSDLReader(wsdlResourcePath);
         Definition definition = apimwsdlReader.getWSDLDefinitionFromByteContent(wsdlContent, false);
 

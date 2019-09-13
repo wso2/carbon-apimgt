@@ -30,14 +30,21 @@ class APIProduct extends Resource {
             properties = name;
         } else {
             this.name = name;
-            this.version = '1.0.0';
+            this.version = version;
             this.context = context;
+            this.isDefaultVersion = false;
             this.gatewayEnvironments = ['Production and Sandbox'];
-            this.transport = [
-                'http',
-                'https',
-            ];
+            this.transport = ['http', 'https'];
             this.visibility = 'PUBLIC';
+            this.endpointConfig = {
+                endpoint_type: 'http',
+                sandbox_endpoints: {
+                    url: '',
+                },
+                production_endpoints: {
+                    url: '',
+                },
+            };
         }
         this._data = properties;
         for (const key in properties) {
@@ -68,20 +75,52 @@ class APIProduct extends Resource {
      * @param {Object} api_product_data - APIProduct data which need to fill the placeholder values in the @get_template
      * @returns {Promise} Promise after creating API Product
      */
-    create(apiProductData) {
-        const payload = {
-            body: apiProductData,
-            'Content-Type': 'application/json',
-        };
-        const promiseCreate = this.client.then((client) => {
-            client.apis['API Products'].post_api_products(payload, this._requestMetaData());
-        }).catch((error) => {
-            console.error(error);
-        });
+    saveProduct() {
+        const promisedAPIResponse = this.client.then(client => {
+            const properties = client.spec.definitions.APIProduct.properties;
+            const data = {};
 
-        promiseCreate.then((response) => {
-            return new APIProduct(response.body);
+            Object.keys(this).forEach(apiAttribute => {
+                if (apiAttribute in properties) {
+                    if (apiAttribute != 'apiType') {
+                    data[apiAttribute] = this[apiAttribute];
+                    }
+                }
+            });
+            const payload = {
+                body: data,
+                'Content-Type': 'application/json',
+            };
+            return client.apis['API Products'].post_api_products(payload, this._requestMetaData());
         });
+        return promisedAPIResponse.then(response => {
+            return new API(response.body);
+        });
+    }
+    /**
+     *
+     * Instance method of the API class to provide raw JSON object
+     * which is API body friendly to use with REST api requests
+     * Use this method instead of accessing the private _data object for
+     * converting to a JSON representation of an API object.
+     * Note: This is shallow coping
+     * Basically this is the revers operation in constructor.
+     * This method simply iterate through all the object properties
+     * and copy their values to new object excluding the properties in excludes list.
+     * So use this method sparingly!!
+     * @memberof API
+     * @param {Array} [userExcludes=[]] List of properties that are need to be excluded from the generated JSON object
+     * @returns {JSON} JSON representation of the API
+     */
+    toJSON(resource = this, userExcludes = []) {
+        var copy = {},
+            excludes = ['_data', 'client', 'apiType', ...userExcludes];
+        for (var prop in resource) {
+            if (!excludes.includes(prop)) {
+                copy[prop] = resource[prop];
+            }
+        }
+        return copy;
     }
 
 
@@ -134,11 +173,12 @@ class APIProduct extends Resource {
      * Update an api Product via PUT HTTP method, Need to give the updated API Product object as the argument.
      * @param apiProduct {Object} Updated API Product object(JSON) which needs to be updated
      */
-    update(apiProduct) {
+    update(updatedProperties) {
+        const updatedAPI = { ...this.toJSON(), ...this.toJSON(updatedProperties) };
         const promisedUpdate = this.client.then((client) => {
             const payload = {
-                apiProductId: apiProduct.id,
-                body: apiProduct
+                apiProductId: updatedAPI.id,
+                body: updatedAPI
             };
             return client.apis['API Products'].put_api_products__apiProductId_(payload);
         });

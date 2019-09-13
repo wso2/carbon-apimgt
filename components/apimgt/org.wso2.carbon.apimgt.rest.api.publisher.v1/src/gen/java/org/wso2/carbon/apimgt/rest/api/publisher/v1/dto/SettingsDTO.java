@@ -23,6 +23,7 @@ public class SettingsDTO   {
     private List<String> scopes = new ArrayList<>();
     private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<>();
     private Object securityAuditProperties = null;
+    private Boolean externalStoresEnabled = null;
 
   /**
    **/
@@ -78,18 +79,34 @@ public class SettingsDTO   {
   /**
    **/
   public SettingsDTO securityAuditProperties(Object securityAuditProperties) {
-    this.securityAuditProperties = securityAuditProperties;
+      this.securityAuditProperties = securityAuditProperties;
+      return this;
+  }
+
+   /* Is External Stores configuration enabled
+   **/
+  public SettingsDTO externalStoresEnabled(Boolean externalStoresEnabled) {
+    this.externalStoresEnabled = externalStoresEnabled;
     return this;
   }
 
-  
+
   @ApiModelProperty(value = "")
   @JsonProperty("securityAuditProperties")
   public Object getSecurityAuditProperties() {
     return securityAuditProperties;
   }
   public void setSecurityAuditProperties(Object securityAuditProperties) {
-    this.securityAuditProperties = securityAuditProperties;
+      this.securityAuditProperties = securityAuditProperties;
+  }
+
+  @ApiModelProperty(example = "true", value = "Is External Stores configuration enabled ")
+  @JsonProperty("externalStoresEnabled")
+  public Boolean isExternalStoresEnabled() {
+    return externalStoresEnabled;
+  }
+  public void setExternalStoresEnabled(Boolean externalStoresEnabled) {
+    this.externalStoresEnabled = externalStoresEnabled;
   }
 
 
@@ -105,12 +122,13 @@ public class SettingsDTO   {
     return Objects.equals(environment, settings.environment) &&
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(monetizationAttributes, settings.monetizationAttributes) &&
-        Objects.equals(securityAuditProperties, settings.securityAuditProperties);
+        Objects.equals(securityAuditProperties, settings.securityAuditProperties) &&
+        Objects.equals(externalStoresEnabled, settings.externalStoresEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environment, scopes, monetizationAttributes, securityAuditProperties);
+    return Objects.hash(environment, scopes, monetizationAttributes, securityAuditProperties, externalStoresEnabled);
   }
 
   @Override
@@ -122,6 +140,7 @@ public class SettingsDTO   {
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");
     sb.append("    securityAuditProperties: ").append(toIndentedString(securityAuditProperties)).append("\n");
+    sb.append("    externalStoresEnabled: ").append(toIndentedString(externalStoresEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -412,6 +412,41 @@ class API extends Resource {
     }
 
     /**
+     * Validate the api parameters for existence. (api name, context)
+     * @param {string} query The parameters that should be validated.
+     * @return {promise}
+     * */
+    validateAPI(query) {
+        return this.client.then((client) => {
+            return client.apis.Validation.validateAPI({ query: query }).then((resp) => {
+                console.log(resp);
+                return resp.ok;
+            }).catch((err) => {
+                console.log(err);
+                return false;
+            });
+        });
+    }
+
+    /**
+     * Validate the given document name exists
+     * @param {string} id The api id.
+     * @param {string} name The document name
+     * @return {promise}
+     * */
+    validateDocument(id, name) {
+        return this.client.then((client) => {
+            return client.apis['API Documents'].validateDocument({apiId: id},{name: name }).then((resp) => {
+                console.log(resp);
+                return resp.ok;
+            }).catch((err) => {
+                console.log(err);
+                return false;
+            });
+        });
+    }
+
+    /**
      * Create a new version of a given API
      * @param version {string} new API version.
      * @param isDefaultVersion specifies whether new API version is set as default version
@@ -460,8 +495,8 @@ class API extends Resource {
 
     /**
      * Get the graphQL schema of an API
-     * @param id {String} UUID of the API in which the swagger is needed
-     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @param id {String} UUID of the API in which the schema is needed
+     * @param callback {function} Function which needs to be called upon success of the retrieving schema
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSchema(id, callback = null) {
@@ -657,7 +692,6 @@ class API extends Resource {
      * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
      * @param apiId {Object} Updated graphQL schema which needs to be updated
      * @param graphQLSchema
-     * @deprecated
      */
     updateGraphQLAPIDefinition(apiId, graphQLSchema) {
         const promised_updateSchema = this.client.then(client => {
@@ -1314,22 +1348,14 @@ class API extends Resource {
 
     validateSystemRole(role) {
         const promise = this.client.then((client) => {
-            return client.apis.Roles.validateSystemRole({ roleId: role }).then((resp) => {
-                return resp.ok;
-            }).catch(() => {
-                    return false;
-            });
+            return client.apis.Roles.validateSystemRole({ roleId: role })
         });
         return promise;
     }
 
     validateUSerRole(role) {
         const promise = this.client.then((client) => {
-            return client.apis.Roles.validateUserRole({ roleId: role }).then((resp) => {
-                return resp.ok;
-            }).catch(() => {
-                return false;
-            });
+            return client.apis.Roles.validateUserRole({ roleId: role })
         });
         return promise;
     }
@@ -1696,6 +1722,157 @@ class API extends Resource {
                 alias,
             });
         }, this._requestMetaData());
+    }
+
+    /**
+     * Get the available mediation policies by the api uuid.
+     * @param {String} apiId uuid
+     * @returns {Promise}
+     *
+     */
+    static getMediationPolicies(apiId) {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return restApiClient.then((client) => {
+            return client.apis["API Mediation Policies"].apisApiIdMediationPoliciesGet({
+                    apiId: apiId
+                },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Add a mediation policy to a given api.
+     * @param {String} apiId uuid
+     * @returns {Promise}
+     *
+     */
+    static addMediationPolicy(policyFile, apiId, type) {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return restApiClient.then((client) => {
+            return client.apis["API Mediation Policies"].apisApiIdMediationPoliciesPost({
+                apiId: apiId,
+                type: type.toLowerCase(),
+                mediationPolicyFile: policyFile
+            },
+            this._requestMetaData({
+                'Content-Type': 'multipart/form-data'
+            }),
+            )
+        });
+    }
+
+    /**
+     * Get the available mediation policies by the mediation policy uuid and api.
+     * @param {String} seqId mediation policy uuid
+     * @param {String} apiId uuid
+     * @returns {Promise}
+     *
+     */
+    static getMediationPolicy(seqId, apiId) {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return restApiClient.then((client) => {
+            return client.apis["API Mediation Policy"].apisApiIdMediationPoliciesMediationPolicyIdGet({
+                    mediationPolicyId: seqId,
+                    apiId: apiId
+                },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Delete the available mediation policies by the mediation policy uuid and api.
+     * @param {String} seqId mediation policy uuid
+     * @param {String} apiId uuid
+     * @returns {Promise}
+     *
+     */
+    static deleteMediationPolicy(seqId, apiId) {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return restApiClient.then((client) => {
+            return client.apis["API Mediation Policy"].apisApiIdMediationPoliciesMediationPolicyIdDelete({
+                    mediationPolicyId: seqId,
+                    apiId: apiId
+                },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Update the available mediation policies by the mediation policy uuid and api.
+     * @param {String} seqId mediation policy uuid
+     * @param {String} apiId uuid 
+     * @returns {Promise}
+     *
+     */
+    static updateMediationPolicyContent(seqId, apiId) {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return restApiClient.then((client) => {
+            return client.apis["API Mediation Policy"].apisApiIdMediationPoliciesMediationPolicyIdContentPut({
+                    mediationPolicyId: seqId,
+                    apiId: apiId,
+                    type: 'in',
+                },
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        });
+    }
+
+    /**
+     * Get the content of a mediation policy.
+     * @param {String} mediationPolicyId mediation policy uuid
+     * @param {String} apiId uuid of the api
+     * @returns {Promise}
+     *
+     */
+    static getMediationPolicyContent(mediationPolicyId, apiId) {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return restApiClient.then((client) => {
+            return client.apis["API Mediation Policy"].apisApiIdMediationPoliciesMediationPolicyIdContentGet({
+                mediationPolicyId: mediationPolicyId,
+                apiId: apiId,
+                },
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        });
+    }
+
+    /**
+     * Get global mediation policies.
+     * @returns {Promise}
+     *
+     */
+    static getGlobalMediationPolicies() {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return restApiClient.then((client) => {
+            return client.apis["Global Mediation Policies"].getAllGlobalMediationPolicies({},
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Get the content of a mediation policy.
+     * @param {String} mediationPolicyId mediation policy uuid
+     * @param {String} apiId uuid of the api
+     * @returns {Promise}
+     *
+     */
+    static getGlobalMediationPolicyContent(mediationPolicyId) {
+        const restApiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return restApiClient.then((client) => {
+            return client.apis["Global Mediation Policy"].getGlobalMediationPolicyContent({
+                mediationPolicyId: mediationPolicyId,
+            },
+                this._requestMetaData(),
+            );
+        });
     }
 }
 

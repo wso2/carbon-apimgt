@@ -1097,7 +1097,7 @@ public class ApiMgtDAO {
             SubscribedAPI subscribedAPI = null;
             if (resultSet.next()) {
                 int applicationId = resultSet.getInt("APPLICATION_ID");
-                Application application = getApplicationById(applicationId);
+                Application application = getLightweightApplicationById(applicationId);
                 if(!StringUtils.isEmpty(resultSet.getString("API_NAME"))) {
                     APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(resultSet.getString
                             ("API_PROVIDER")), resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
@@ -1502,7 +1502,7 @@ public class ApiMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve scopes ", e);
+            handleException("Failed to retrieve scopes for application subscription ", e);
         }
         return populateScopeSet(scopeHashMap);
     }
@@ -3434,18 +3434,20 @@ public class ApiMgtDAO {
             }
 
             String sqlAddQuery;
+            String ratingId = UUID.randomUUID().toString();
             if (!userRatingExists) {
                 //This query to update the AM_API_RATINGS table
-                sqlAddQuery = SQLConstants.APP_API_RATING_SQL;
+                sqlAddQuery = SQLConstants.ADD_API_RATING_SQL;
             } else {
                 //This query to insert into the AM_API_RATINGS table
                 sqlAddQuery = SQLConstants.UPDATE_API_RATING_SQL;
             }
             // Adding data to the AM_API_RATINGS  table
             ps = conn.prepareStatement(sqlAddQuery);
-            ps.setInt(1, rating);
-            ps.setInt(2, apiId);
-            ps.setInt(3, subscriber.getId());
+            ps.setString(1, ratingId);
+            ps.setInt(2, rating);
+            ps.setInt(3, apiId);
+            ps.setInt(4, subscriber.getId());
             ps.executeUpdate();
 
         } catch (SQLException e) {
@@ -3492,7 +3494,7 @@ public class ApiMgtDAO {
 
         try {
             int tenantId;
-            int rateId = -1;
+            String rateId = null;
             tenantId = APIUtil.getTenantId(userId);
             //Get subscriber Id
             Subscriber subscriber = getSubscriber(userId, tenantId, conn);
@@ -3519,15 +3521,15 @@ public class ApiMgtDAO {
             rs = psSelect.executeQuery();
 
             while (rs.next()) {
-                rateId = rs.getInt("RATING_ID");
+                rateId = rs.getString("RATING_ID");
             }
-            String sqlAddQuery;
-            if (rateId != -1) {
+            String sqlDeleteQuery;
+            if (rateId != null) {
                 //This query to delete the specific rate row from the AM_API_RATINGS table
-                sqlAddQuery = SQLConstants.REMOVE_RATING_SQL;
+                sqlDeleteQuery = SQLConstants.REMOVE_RATING_SQL;
                 // Adding data to the AM_API_RATINGS  table
-                ps = conn.prepareStatement(sqlAddQuery);
-                ps.setInt(1, rateId);
+                ps = conn.prepareStatement(sqlDeleteQuery);
+                ps.setString(1, rateId);
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
@@ -3654,7 +3656,7 @@ public class ApiMgtDAO {
         JSONObject ratingObj = new JSONObject();
         int userRating = 0;
         int apiId = -1;
-        int ratingId = -1;
+        String ratingId = null;
         try {
             int tenantId;
             tenantId = APIUtil.getTenantId(userId);
@@ -3681,10 +3683,10 @@ public class ApiMgtDAO {
 
             while (rs.next()) {
                 apiId = rs.getInt("API_ID");
-                ratingId = rs.getInt("RATING_ID");
+                ratingId = rs.getString("RATING_ID");
                 userRating = rs.getInt("RATING");
             }
-            if (ratingId != -1) {
+            if (ratingId != null) {
                 // A rating record exists
                 ratingObj.put(APIConstants.API_ID, apiId);
                 ratingObj.put(APIConstants.RATING_ID, ratingId);
@@ -3741,7 +3743,7 @@ public class ApiMgtDAO {
         ResultSet rsSubscriber = null;
         JSONArray ratingArray = new JSONArray();
         int userRating = 0;
-        int ratingId = -1;
+        String ratingId = null;
         int apiId = -1;
         int subscriberId = -1;
         try {
@@ -3762,7 +3764,7 @@ public class ApiMgtDAO {
                 JSONObject ratingObj = new JSONObject();
                 String subscriberName = null;
                 apiId = rs.getInt("API_ID");
-                ratingId = rs.getInt("RATING_ID");
+                ratingId = rs.getString("RATING_ID");
                 subscriberId = rs.getInt("SUBSCRIBER_ID");
                 userRating = rs.getInt("RATING");
                 ratingObj.put(APIConstants.API_ID, apiId);
@@ -6438,6 +6440,55 @@ public class ApiMgtDAO {
         return application;
     }
 
+    public Application getLightweightApplicationById(int applicationId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        Application application = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            String query = SQLConstants.GET_APPLICATION_BY_ID_SQL;
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setInt(1, applicationId);
+
+            rs = prepStmt.executeQuery();
+            if (rs.next()) {
+                String applicationName = rs.getString("NAME");
+                String subscriberId = rs.getString("SUBSCRIBER_ID");
+                String subscriberName = rs.getString("USER_ID");
+
+                Subscriber subscriber = new Subscriber(subscriberName);
+                subscriber.setId(Integer.parseInt(subscriberId));
+                application = new Application(applicationName, subscriber);
+
+                application.setOwner(rs.getString("CREATED_BY"));
+                application.setDescription(rs.getString("DESCRIPTION"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setCallbackUrl(rs.getString("CALLBACK_URL"));
+                application.setId(rs.getInt("APPLICATION_ID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
+                application.setUUID(rs.getString("UUID"));
+                application.setTier(rs.getString("APPLICATION_TIER"));
+                application.setTokenType(rs.getString("TOKEN_TYPE"));
+                subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+
+                if (multiGroupAppSharingEnabled) {
+                    if (application.getGroupId() == null || application.getGroupId().isEmpty()) {
+                        application.setGroupId(getGroupId(applicationId));
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while obtaining details of the Application : " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return application;
+    }
+
     public Application getApplicationById(int applicationId, String userId, String groupId) throws APIManagementException {
 
         Connection connection = null;
@@ -8356,6 +8407,7 @@ public class ApiMgtDAO {
                 ps.setString(3, store.getDisplayName());
                 ps.setString(4, store.getEndpoint());
                 ps.setString(5, store.getType());
+                ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
                 ps.addBatch();
             }
 
@@ -8489,8 +8541,9 @@ public class ApiMgtDAO {
                 APIStore store = (APIStore) storeObject;
                 ps.setString(1, store.getEndpoint());
                 ps.setString(2, store.getType());
-                ps.setInt(3, apiId);
-                ps.setString(4, store.getName());
+                ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+                ps.setInt(4, apiId);
+                ps.setString(5, store.getName());
                 ps.addBatch();
             }
 
@@ -8571,6 +8624,7 @@ public class ApiMgtDAO {
                 store.setDisplayName(rs.getString("STORE_DISPLAY_NAME"));
                 store.setEndpoint(rs.getString("STORE_ENDPOINT"));
                 store.setType(rs.getString("STORE_TYPE"));
+                store.setLastUpdated(rs.getTimestamp("LAST_UPDATED_TIME"));
                 store.setPublished(true);
                 storesSet.add(store);
             }

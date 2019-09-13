@@ -108,6 +108,180 @@
                 </tbody>
             </table>
             <hr/>
+            <h4 class="operation-heading"><a name="validateAPI"></a>Check given API attibute name is already exist.</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/validate</code>
+            <p class="marked"></p>
+
+            <p class="marked">Using this operation, you can check a given API context is already used. You need to provide the context name you want to check.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_create</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-validateAPI">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-validateAPI"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate?query&#x3D;name:PizzaShackAPI HTTP/1.1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-validateAPI">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-validateAPI" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 0</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -X POST -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot;
+https://localhost:9443/api/am/publisher/v1.0/apis/validate?query&#x3D;name:PizzaShackAPI
+</code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>query</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**Search condition**.
+
+You can search in attributes by using an **&quot;&lt;attribute&gt;:&quot;** modifier.
+
+Eg.
+&quot;name:wso2&quot; will match an API if the provider of the API is exactly &quot;wso2&quot;.
+
+Supported attribute modifiers are [** version, context, name **]
+
+If no advanced attribute modifier has been specified, search will match the
+given query string against API Name.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resource.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. API definition validation information is returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Workflow for the given reference in not found. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
             <h4 class="operation-heading"><a name="validateOpenAPIDefinition"></a>Validate an OpenAPI Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/validate-openapi</code>
             <p class="marked"></p>
 
@@ -527,6 +701,281 @@ or &#x60;file&#x60; to specify the definition.
             <h4 class="section-heading">
                 Examples
             </h4>
+            <h4 class="section-heading">
+                <u>Validate a WSDL URL</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl HTTP/1.1
+Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_3_453576421.1568033260795&quot;
+MIME-Version: 1.0
+Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
+Content-Length: 253
+
+  ------&#x3D;_Part_3_453576421.1568033260795
+Content-Type: text/plain; charset&#x3D;us-ascii
+Content-Transfer-Encoding: 7bit
+Content-Disposition: form-data; name&#x3D;&quot;url&quot;
+
+  https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl
+  ------&#x3D;_Part_3_453576421.1568033260795--
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-validateWSDLDefinition" class="pre collapse in"><code class="json">HTTP 1/1 200 Ok
+Content-Type: application/json
+
+{
+  &quot;isValid&quot; : true,
+  &quot;errors&quot; : [ ],
+  &quot;wsdlInfo&quot; : {
+    &quot;version&quot; : &quot;1.1&quot;,
+    &quot;endpoints&quot; : [ {
+      &quot;name&quot; : &quot;IP2GeoSoap&quot;,
+      &quot;location&quot; : &quot;https://ws.cdyne.com/ip2geo/ip2geo.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;IP2GeoSoap12&quot;,
+      &quot;location&quot; : &quot;https://ws.cdyne.com/ip2geo/ip2geo.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;IP2GeoHttpGet&quot;,
+      &quot;location&quot; : &quot;https://ws.cdyne.com/ip2geo/ip2geo.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;IP2GeoHttpPost&quot;,
+      &quot;location&quot; : &quot;https://ws.cdyne.com/ip2geo/ip2geo.asmx&quot;
+    } ]
+  }
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F url&#x3D;&#39;https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl&#39; -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl
+</code></div>
+
+            <h4 class="section-heading">
+                <u>Validate a WSDL File</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl HTTP/1.1
+Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_5_1281400982.1568033585941&quot;
+MIME-Version: 1.0
+Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
+Content-Length: 5695
+
+
+------&#x3D;_Part_5_1281400982.1568033585941
+Content-Type: text/xml; charset&#x3D;UTF-8; name&#x3D;stockQuote.wsdl
+Content-Transfer-Encoding: binary
+Content-Disposition: form-data; name&#x3D;&quot;file&quot;; filename&#x3D;&quot;stockQuote.wsdl&quot;
+
+&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;utf-8&quot;?&gt;
+&lt;wsdl:definitions xmlns:tm&#x3D;&quot;http://microsoft.com/wsdl/mime/textMatching/&quot; xmlns:soapenc&#x3D;&quot;http://schemas.xmlsoap.org/soap/encoding/&quot; xmlns:mime&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/mime/&quot; xmlns:tns&#x3D;&quot;http://www.webserviceX.NET/&quot; xmlns:soap&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/soap/&quot; xmlns:s&#x3D;&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:soap12&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/soap12/&quot; xmlns:http&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/http/&quot; targetNamespace&#x3D;&quot;http://www.webserviceX.NET/&quot; xmlns:wsdl&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/&quot;&gt;
+  &lt;wsdl:types&gt;
+    &lt;s:schema elementFormDefault&#x3D;&quot;qualified&quot; targetNamespace&#x3D;&quot;http://www.webserviceX.NET/&quot;&gt;
+      &lt;s:element name&#x3D;&quot;GetQuote&quot;&gt;
+        &lt;s:complexType&gt;
+          &lt;s:sequence&gt;
+            &lt;s:element minOccurs&#x3D;&quot;0&quot; maxOccurs&#x3D;&quot;1&quot; name&#x3D;&quot;symbol&quot; type&#x3D;&quot;s:string&quot; /&gt;
+          &lt;/s:sequence&gt;
+        &lt;/s:complexType&gt;
+      &lt;/s:element&gt;
+      &lt;s:element name&#x3D;&quot;GetQuoteResponse&quot;&gt;
+        &lt;s:complexType&gt;
+          &lt;s:sequence&gt;
+            &lt;s:element minOccurs&#x3D;&quot;0&quot; maxOccurs&#x3D;&quot;1&quot; name&#x3D;&quot;GetQuoteResult&quot; type&#x3D;&quot;s:string&quot; /&gt;
+          &lt;/s:sequence&gt;
+        &lt;/s:complexType&gt;
+      &lt;/s:element&gt;
+      &lt;s:element name&#x3D;&quot;string&quot; nillable&#x3D;&quot;true&quot; type&#x3D;&quot;s:string&quot; /&gt;
+    &lt;/s:schema&gt;
+  ...
+  ...
+  ...
+  &lt;/wsdl:binding&gt;
+  &lt;wsdl:service name&#x3D;&quot;StockQuote&quot;&gt;
+    &lt;wsdl:port name&#x3D;&quot;StockQuoteSoap&quot; binding&#x3D;&quot;tns:StockQuoteSoap&quot;&gt;
+      &lt;soap:address location&#x3D;&quot;http://www.webservicex.net/stockquote.asmx&quot; /&gt;
+    &lt;/wsdl:port&gt;
+    &lt;wsdl:port name&#x3D;&quot;StockQuoteSoap12&quot; binding&#x3D;&quot;tns:StockQuoteSoap12&quot;&gt;
+      &lt;soap12:address location&#x3D;&quot;http://www.webservicex.net/stockquote.asmx&quot; /&gt;
+    &lt;/wsdl:port&gt;
+    &lt;wsdl:port name&#x3D;&quot;StockQuoteHttpGet&quot; binding&#x3D;&quot;tns:StockQuoteHttpGet&quot;&gt;
+      &lt;http:address location&#x3D;&quot;http://www.webservicex.net/stockquote.asmx&quot; /&gt;
+    &lt;/wsdl:port&gt;
+    &lt;wsdl:port name&#x3D;&quot;StockQuoteHttpPost&quot; binding&#x3D;&quot;tns:StockQuoteHttpPost&quot;&gt;
+      &lt;http:address location&#x3D;&quot;http://www.webservicex.net/stockquote.asmx&quot; /&gt;
+    &lt;/wsdl:port&gt;
+  &lt;/wsdl:service&gt;
+&lt;/wsdl:definitions&gt;
+
+------&#x3D;_Part_5_1281400982.1568033585941--
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-validateWSDLDefinition" class="pre collapse in"><code class="json">HTTP 1/1 200 Ok
+Content-Type: application/json
+
+{
+  &quot;isValid&quot; : true,
+  &quot;errors&quot; : [ ],
+  &quot;wsdlInfo&quot; : {
+    &quot;version&quot; : &quot;1.1&quot;,
+    &quot;endpoints&quot; : [ {
+      &quot;name&quot; : &quot;StockQuoteSoap12&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;StockQuoteHttpGet&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;StockQuoteSoap&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;StockQuoteHttpPost&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    } ]
+  }
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockquote.wsdl -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl
+</code></div>
+
+            <h4 class="section-heading">
+                <u>Validate a WSDL Archive</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl HTTP/1.1
+Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_10_60710863.1568033977152&quot;
+MIME-Version: 1.0
+Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
+Content-Length: 1897
+
+
+------&#x3D;_Part_10_60710863.1568033977152
+Content-Type: application/zip; name&#x3D;stockQuote1xsd.zip
+Content-Transfer-Encoding: binary
+Content-Disposition: form-data; name&#x3D;&quot;file&quot;; filename&#x3D;&quot;stockQuote1xsd.zip&quot;
+
+...
+&lt;binary-data&gt;
+...
+
+------&#x3D;_Part_10_60710863.1568033977152--
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-validateWSDLDefinition" class="pre collapse in"><code class="json">HTTP 1/1 200 Ok
+Content-Type: application/json
+
+{
+  &quot;isValid&quot; : true,
+  &quot;errors&quot; : [ ],
+  &quot;wsdlInfo&quot; : {
+    &quot;version&quot; : &quot;1.1&quot;,
+    &quot;endpoints&quot; : [ {
+      &quot;name&quot; : &quot;StockQuoteSoap12&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;StockQuoteHttpGet&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;StockQuoteSoap&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;StockQuoteHttpPost&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    } ]
+  }
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockquote.zip -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl
+</code></div>
+
+            <h4 class="section-heading">
+                <u>Trying to validate an invalid WSDL</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl HTTP/1.1
+Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_17_807981233.1568034538839&quot;
+MIME-Version: 1.0
+Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
+Content-Length: 5699
+
+
+------&#x3D;_Part_17_807981233.1568034538839
+Content-Type: text/xml; charset&#x3D;UTF-8; name&#x3D;stockQuote-invalid.wsdl
+Content-Transfer-Encoding: binary
+Content-Disposition: form-data; name&#x3D;&quot;file&quot;; filename&#x3D;&quot;stockQuote-invalid.wsdl&quot;
+
+&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;utf-8&quot;?&gt;
+&lt;wsdl:definitions xmlns:tm&#x3D;&quot;http://microsoft.com/wsdl/mime/textMatching/&quot; xmlns:soapenc&#x3D;&quot;http://schemas.xmlsoap.org/soap/encoding/&quot; xmlns:mime&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/mime/&quot; xmlns:tns&#x3D;&quot;http://www.webserviceX.NET/&quot; xmlns:soap&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/soap/&quot; xmlns:s&#x3D;&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:soap12&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/soap12/&quot; xmlns:http&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/http/&quot; targetNamespace&#x3D;&quot;http://www.webserviceX.NET/&quot; xmlns:wsdl&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/&quot;&gt;
+  &lt;wsdl:types1&gt;
+    &lt;s:schema elementFormDefault&#x3D;&quot;qualified&quot; targetNamespace&#x3D;&quot;http://www.webserviceX.NET/&quot;&gt;
+      &lt;s:element&gt;
+...
+...
+&lt;/wsdl:port&gt;
+  &lt;/wsdl:service&gt;
+&lt;/wsdl:definitions&gt;
+
+------&#x3D;_Part_17_807981233.1568034538839--
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-validateWSDLDefinition" class="pre collapse in"><code class="json">HTTP 1/1 200 Ok
+Content-Type: application/json
+
+{
+  &quot;isValid&quot; : false,
+  &quot;errors&quot; : [ {
+    &quot;code&quot; : &quot;900676&quot;,
+    &quot;message&quot; : &quot;Invalid WSDL&quot;,
+    &quot;description&quot; : &quot;WSDLException (at /wsdl:definitions/wsdl:types1): faultCode&#x3D;INVALID_WSDL: Encountered illegal extension element &#39;{http://schemas.xmlsoap.org/wsdl/}types1&#39; in the context of a &#39;javax.wsdl.Definition&#39;. Extension elements must be in a namespace other than WSDL&#39;s.&quot;
+  } ]
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockQuote-invalid.wsdl -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl
+</code></div>
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">

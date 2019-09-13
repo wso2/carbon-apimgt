@@ -9,6 +9,7 @@ import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import javax.validation.constraints.*;
@@ -40,7 +41,7 @@ public class APIDTO   {
     private String authorizationHeader = null;
     private List<String> securityScheme = new ArrayList<>();
     private List<String> tags = new ArrayList<>();
-    private List<String> tiers = new ArrayList<>();
+    private List<APITiersDTO> tiers = new ArrayList<>();
     private Boolean hasThumbnail = false;
     private Map<String, String> additionalProperties = new HashMap<>();
     private List<APIEndpointURLsDTO> endpointURLs = new ArrayList<>();
@@ -343,18 +344,18 @@ public class APIDTO   {
   /**
    * The subscription tiers selected for the particular API
    **/
-  public APIDTO tiers(List<String> tiers) {
+  public APIDTO tiers(List<APITiersDTO> tiers) {
     this.tiers = tiers;
     return this;
   }
 
   
-  @ApiModelProperty(example = "[\"Unlimited\"]", value = "The subscription tiers selected for the particular API")
+  @ApiModelProperty(value = "The subscription tiers selected for the particular API")
   @JsonProperty("tiers")
-  public List<String> getTiers() {
+  public List<APITiersDTO> getTiers() {
     return tiers;
   }
-  public void setTiers(List<String> tiers) {
+  public void setTiers(List<APITiersDTO> tiers) {
     this.tiers = tiers;
   }
 

@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIWsdlInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
@@ -36,7 +37,7 @@ public class APIDTO   {
     private String version = null;
     private String provider = null;
     private String lifeCycleStatus = null;
-    private String wsdlUri = null;
+    private APIWsdlInfoDTO wsdlInfo = null;
     private Boolean responseCachingEnabled = null;
     private Integer cacheTimeout = null;
     private String destinationStatsEnabled = null;
@@ -48,7 +49,7 @@ public class APIDTO   {
 @XmlEnum(String.class)
 public enum TypeEnum {
 
-    @XmlEnumValue("HTTP") HTTP(String.valueOf("HTTP")), @XmlEnumValue("WS") WS(String.valueOf("WS")), @XmlEnumValue("SOAPTOREST") SOAPTOREST(String.valueOf("SOAPTOREST")), @XmlEnumValue("GRAPHQL") GRAPHQL(String.valueOf("GRAPHQL"));
+    @XmlEnumValue("HTTP") HTTP(String.valueOf("HTTP")), @XmlEnumValue("WS") WS(String.valueOf("WS")), @XmlEnumValue("SOAPTOREST") SOAPTOREST(String.valueOf("SOAPTOREST")), @XmlEnumValue("SOAP") SOAP(String.valueOf("SOAP")), @XmlEnumValue("GRAPHQL") GRAPHQL(String.valueOf("GRAPHQL"));
 
 
     private String value;
@@ -374,21 +375,20 @@ public enum EndpointImplementationTypeEnum {
   }
 
   /**
-   * WSDL URL if the API is based on a WSDL endpoint 
    **/
-  public APIDTO wsdlUri(String wsdlUri) {
-    this.wsdlUri = wsdlUri;
+  public APIDTO wsdlInfo(APIWsdlInfoDTO wsdlInfo) {
+    this.wsdlInfo = wsdlInfo;
     return this;
   }
 
   
-  @ApiModelProperty(example = "http://www.webservicex.com/globalweather.asmx?wsdl", value = "WSDL URL if the API is based on a WSDL endpoint ")
-  @JsonProperty("wsdlUri")
-  public String getWsdlUri() {
-    return wsdlUri;
+  @ApiModelProperty(value = "")
+  @JsonProperty("wsdlInfo")
+  public APIWsdlInfoDTO getWsdlInfo() {
+    return wsdlInfo;
   }
-  public void setWsdlUri(String wsdlUri) {
-    this.wsdlUri = wsdlUri;
+  public void setWsdlInfo(APIWsdlInfoDTO wsdlInfo) {
+    this.wsdlInfo = wsdlInfo;
   }
 
   /**
@@ -748,7 +748,7 @@ public enum EndpointImplementationTypeEnum {
   }
 
   
-  @ApiModelProperty(example = "\"\\\"sequences\\\": [ {\\\"name\\\": \\\"json_to_xml_in_message\\\",\\\"config\\\": null,\\\"type\\\": \\\"in\\\"}, {\\\"name\\\": \\\"xml_to_json_out_message\\\",\\\"config\\\": null,\\\"type\\\": \\\"out\\\"}, {\\\"name\\\": \\\"json_fault\\\",\\\"config\\\": null,\\\"type\\\": \\\"fault\\\"} ],\"", value = "")
+  @ApiModelProperty(example = "\"\\\"mediationPolicies\\\": [ {\\\"name\\\": \\\"json_to_xml_in_message\\\",\\\"type\\\": \\\"in\\\"}, {\\\"name\\\": \\\"xml_to_json_out_message\\\",\\\"type\\\": \\\"out\\\"}, {\\\"name\\\": \\\"json_fault\\\",\\\"type\\\": \\\"fault\\\"} ],\"", value = "")
   @JsonProperty("mediationPolicies")
   public List<MediationPolicyDTO> getMediationPolicies() {
     return mediationPolicies;
@@ -1051,7 +1051,7 @@ public enum EndpointImplementationTypeEnum {
         Objects.equals(version, API.version) &&
         Objects.equals(provider, API.provider) &&
         Objects.equals(lifeCycleStatus, API.lifeCycleStatus) &&
-        Objects.equals(wsdlUri, API.wsdlUri) &&
+        Objects.equals(wsdlInfo, API.wsdlInfo) &&
         Objects.equals(responseCachingEnabled, API.responseCachingEnabled) &&
         Objects.equals(cacheTimeout, API.cacheTimeout) &&
         Objects.equals(destinationStatsEnabled, API.destinationStatsEnabled) &&
@@ -1093,7 +1093,7 @@ public enum EndpointImplementationTypeEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlUri, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies);
   }
 
   @Override
@@ -1108,7 +1108,7 @@ public enum EndpointImplementationTypeEnum {
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
-    sb.append("    wsdlUri: ").append(toIndentedString(wsdlUri)).append("\n");
+    sb.append("    wsdlInfo: ").append(toIndentedString(wsdlInfo)).append("\n");
     sb.append("    responseCachingEnabled: ").append(toIndentedString(responseCachingEnabled)).append("\n");
     sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");
     sb.append("    destinationStatsEnabled: ").append(toIndentedString(destinationStatsEnabled)).append("\n");

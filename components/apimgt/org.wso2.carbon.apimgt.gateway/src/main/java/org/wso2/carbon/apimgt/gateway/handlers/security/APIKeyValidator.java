@@ -495,8 +495,7 @@ public class APIKeyValidator {
         ArrayList<String> resourceArray = null;
 
         if (electedResource != null) {
-            resourceArray = new ArrayList<>
-                    (Arrays.asList(electedResource.split(",")));
+            resourceArray = new ArrayList<>(Arrays.asList(electedResource.split(",")));
         }
 
         String requestPath = getRequestPath(synCtx, apiContext, apiVersion, fullRequestPath);

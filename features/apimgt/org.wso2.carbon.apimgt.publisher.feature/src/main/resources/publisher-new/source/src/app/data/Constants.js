@@ -18,6 +18,11 @@ const CONSTS = {
     API: 'API',
     APIProduct: 'APIProduct',
     HTTP_METHODS: ['get', 'put', 'post', 'delete', 'patch', 'head'],
+    errorCodes: {
+        INSUFFICIENT_PREVILEGES: '900403: Insufficient privileges to login',
+        INVALID_TOKEN: '900401: Invalid token',
+        NO_TOKEN_FOUND: '901401: No partial token found!',
+    },
 };
 
 export default CONSTS;

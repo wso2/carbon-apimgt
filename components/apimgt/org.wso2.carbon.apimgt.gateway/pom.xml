@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.5.86-SNAPSHOT</version>
+        <version>6.5.100-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -226,6 +226,7 @@
         <dependency>
             <groupId>org.wso2.orbit.re2j</groupId>
             <artifactId>re2j</artifactId>
+            <version>${re2j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>
@@ -402,7 +403,7 @@
                             org.wso2.carbon.context,
                             org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",
                             org.wso2.carbon.apimgt.tracing.*; version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.orbit.re2j.*; version="1.2.wso2v1",
+                            org.wso2.orbit.re2j.*; version="${re2j.version}",
                             graphql.*; version="${graphql.java.version}",
                             *;resolution:=optional
                         </Import-Package>

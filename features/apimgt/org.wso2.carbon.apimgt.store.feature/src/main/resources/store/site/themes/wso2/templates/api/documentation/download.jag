@@ -72,10 +72,8 @@ if (resourceUrl.indexOf("/documentation/files") != -1 ||
 if (object == null) {
     response.status = 500;
 } else {
-    var name = object.name;
-    name = name.split('--');
     response.contentType = "application/force-download";
-    response.addHeader("Content-Disposition", "attachment; filename = \"" + name[1] + "\"");
+    response.addHeader("Content-Disposition", "attachment; filename = \"" + object.name.split('--')[1] + "\"");
     if (resourceUrl.indexOf("wsdls/archives") != -1) {
         var file = new File("file:///" + object.Data);
         file.open("r");

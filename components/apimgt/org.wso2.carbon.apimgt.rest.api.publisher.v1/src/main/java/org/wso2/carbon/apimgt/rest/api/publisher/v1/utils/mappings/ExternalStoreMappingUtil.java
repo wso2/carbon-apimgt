@@ -19,10 +19,14 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExternalStoreDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExternalStoreListDTO;
 
+import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -46,6 +50,7 @@ public class ExternalStoreMappingUtil {
         externalStoreDTO.setDisplayName(apiStore.getDisplayName());
         externalStoreDTO.setId(apiStore.getName());
         externalStoreDTO.setType(apiStore.getType());
+        externalStoreDTO.setEndpoint(apiStore.getEndpoint());
         return externalStoreDTO;
     }
 
@@ -67,5 +72,43 @@ public class ExternalStoreMappingUtil {
         externalStoreListDTO.setList(externalStoreDTOS);
         externalStoreListDTO.setCount(externalStoreDTOS.size());
         return externalStoreListDTO;
+    }
+
+    /**
+     * Converts list of APIStore object into APIExternalStoreListDTO object.
+     *
+     * @param externalStoreCollection a collection of APIStore objects
+     * @return APIExternalStoreListDTO object containing APIExternalStoreDTOs
+     */
+    public static APIExternalStoreListDTO fromAPIExternalStoreCollectionToDTO(
+            Collection<APIStore> externalStoreCollection) {
+        APIExternalStoreListDTO apiExternalStoreListDTO = new APIExternalStoreListDTO();
+        List<APIExternalStoreDTO> apiExternalStoreDTOS = apiExternalStoreListDTO.getList();
+        if (externalStoreCollection == null) {
+            externalStoreCollection = new HashSet<>();
+        }
+        for (APIStore externalStore : externalStoreCollection) {
+            apiExternalStoreDTOS.add(fromAPIExternalStoreToDTO(externalStore));
+        }
+        apiExternalStoreListDTO.setList(apiExternalStoreDTOS);
+        apiExternalStoreListDTO.setCount(apiExternalStoreDTOS.size());
+        return apiExternalStoreListDTO;
+    }
+
+    /**
+     * Converts APIStore object to APIExternalStoreDTO object.
+     *
+     * @param apiStore API Store
+     * @return APIExternalStoreDTO
+     */
+    public static APIExternalStoreDTO fromAPIExternalStoreToDTO(APIStore apiStore) {
+        APIExternalStoreDTO apiExternalStoreDTO = new APIExternalStoreDTO();
+        apiExternalStoreDTO.setId(apiStore.getName());
+        if (apiStore.getLastUpdated() != null) {
+            Date lastUpdateDate = apiStore.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
+            apiExternalStoreDTO.setLastUpdatedTime(String.valueOf(timeStamp));
+        }
+        return apiExternalStoreDTO;
     }
 }

@@ -20,6 +20,8 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import java.util.Arrays;
+
 /**
  * This enum class holds error codes that we need to pass to upper level. For example, to the UI.
  * You have to define your custom error codes here.
@@ -157,6 +159,7 @@ public enum ExceptionCodes implements ErrorHandler {
     NO_WSDL_FOUND_IN_WSDL_ARCHIVE(900681, "Invalid WSDL Archive", 400, "No valid WSDLs found in the provided WSDL archive"),
     CONTENT_NOT_RECOGNIZED_AS_WSDL(900682, "Invalid WSDL Content", 400, "Provided content is not recognized as a WSDL"),
     URL_NOT_RECOGNIZED_AS_WSDL(900683, "Invalid WSDL URL", 400, "Provided URL is not recognized as a WSDL"),
+    NO_WSDL_AVAILABLE_FOR_API(900684, "WSDL Not Found", 404, "No WSDL Available for the API %s:%s"),
 
 
     //OpenAPI/Swagger related codes [900750 900???)
@@ -273,9 +276,14 @@ public enum ExceptionCodes implements ErrorHandler {
     NEED_ADMIN_PERMISSION(901100, "Admin permission needed", 403,
             "This user is not an admin"),
 
-    //External Stores related codes
+        //External Stores related codes
     EXTERNAL_STORE_ID_NOT_FOUND(901200,"External Store Not Found", 404, "Error while publishing to external stores. " +
-            "External Store Not Found");
+            "External Store Not Found"),
+
+
+    // Tenant related
+    INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found");
+
 
     private final long errorCode;
     private final String errorMessage;
@@ -316,4 +324,32 @@ public enum ExceptionCodes implements ErrorHandler {
         return this.errorDescription;
     }
 
+    /**
+     * Create an ErrorHandler instance with the provided ExceptionCode filled with some dynamic input values
+     *
+     * @param errorHandler ErrorHandler or ExceptionCode object
+     * @param params dynamic values to be filled
+     * @return ErrorHandler instance with the provided ExceptionCode filled with some dynamic input values
+     */
+    public static ErrorHandler from(ErrorHandler errorHandler, String... params) {
+        String message = errorHandler.getErrorMessage();
+        String description = errorHandler.getErrorDescription();
+
+        if (params != null && params.length > 0) {
+            int placesToFormatInMessage = message.length() - message.replace("%", "").length();
+            int placesToFormatInDescription = description.length() - description.replace("%", "").length();
+
+            String[] part1 = Arrays.copyOfRange(params, 0, placesToFormatInMessage);
+            String[] part2 = Arrays.copyOfRange(params, placesToFormatInMessage,
+                    placesToFormatInMessage + placesToFormatInDescription);
+
+            if (placesToFormatInMessage > 0) {
+                message = String.format(message, part1);
+            }
+            if (placesToFormatInDescription > 0) {
+                description = String.format(description, part2);
+            }
+        }
+        return new ErrorItem(message, description, errorHandler.getErrorCode(), errorHandler.getHttpStatusCode());
+    }
 }

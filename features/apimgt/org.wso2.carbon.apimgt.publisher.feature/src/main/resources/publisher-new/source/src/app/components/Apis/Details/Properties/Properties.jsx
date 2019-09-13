@@ -18,10 +18,12 @@
 /* eslint no-param-reassign: ["error", { "props": false }] */
 /* eslint-disable react/jsx-no-bind */
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
+import cloneDeep from 'lodash.clonedeep';
+import isEmpty from 'lodash.isempty';
+import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
@@ -37,14 +39,17 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import API from 'AppData/api.js';
-import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import APIContext, { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import AuthManager from 'AppData/AuthManager';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 
-const styles = theme => ({
+const useStyles = makeStyles(theme => ({
     root: {
         paddingTop: 0,
         paddingLeft: 0,
+        maxWidth: theme.custom.contentAreaWidth,
     },
     titleWrapper: {
         display: 'flex',
@@ -102,7 +107,20 @@ const styles = theme => ({
     link: {
         cursor: 'pointer',
     },
-});
+    messageBox: {
+        marginTop: 20,
+    },
+    actions: {
+        padding: '20px 0',
+        '& button': {
+            marginLeft: 0,
+        },
+    },
+    head: {
+        fontWeight: 200,
+        marginBottom: 20,
+    },
+}));
 
 /**
  *
@@ -110,11 +128,12 @@ const styles = theme => ({
  */
 function EditableRow(props) {
     const {
-        oldKey, oldValue, classes, handleUpdateList, handleDelete, apiAdditionalProperties, intl,
+        oldKey, oldValue, handleUpdateList, handleDelete, apiAdditionalProperties, intl,
     } = props;
     const [newKey, setKey] = useState(null);
     const [newValue, setValue] = useState(null);
     const [editMode, setEditMode] = useState(false);
+
     const updateEditMode = function () {
         setEditMode(!editMode);
     };
@@ -138,7 +157,7 @@ function EditableRow(props) {
     const saveRow = function () {
         const oldRow = { oldKey, oldValue };
         const newRow = { newKey: newKey || oldKey, newValue: newValue || oldValue };
-        handleUpdateList(apiAdditionalProperties, oldRow, newRow);
+        handleUpdateList(oldRow, newRow);
         setEditMode(false);
     };
     const deleteRow = function () {
@@ -149,6 +168,8 @@ function EditableRow(props) {
             saveRow();
         }
     };
+    const classes = useStyles();
+
     return (
         <TableRow>
             {editMode ? (
@@ -228,38 +249,31 @@ EditableRow.propTypes = {
  * @class Properties
  * @extends {React.Component}
  */
-class Properties extends React.Component {
+function Properties(props) {
     /**
      * @inheritdoc
      * @param {*} props properties
      */
-    constructor(props) {
-        super(props);
-        this.state = {
-            additionalProperties: {},
-            showAddProperty: false,
-            propertyKey: null,
-            propertyValue: null,
-        };
-        this.handleUpdateList = this.handleUpdateList.bind(this);
-        this.handleDelete = this.handleDelete.bind(this);
-        this.isNotCreator = AuthManager.isNotCreator();
-        this.isNotPublisher = AuthManager.isNotPublisher();
-    }
+    const { api, updateAPI, isAPIProduct } = useContext(APIContext);
+    const apiCopy = cloneDeep(api);
 
-    toggleAddProperty = () => {
-        this.setState((oldState) => {
-            const { showAddProperty } = oldState;
-            return { showAddProperty: !showAddProperty };
-        });
+    const [additionalProperties, setAdditionalProperties] = useState(apiCopy.additionalProperties);
+    const [showAddProperty, setShowAddProperty] = useState(false);
+    const [propertyKey, setPropertyKey] = useState(null);
+    const [propertyValue, setPropertyValue] = useState(null);
+    const [updating, setUpdating] = useState(false);
+    const isNotCreator = AuthManager.isNotCreator();
+    const isNotPublisher = AuthManager.isNotPublisher();
+    const toggleAddProperty = () => {
+        setShowAddProperty(!showAddProperty);
     };
-
-    handleChange = name => (event) => {
+    const handleChange = name => (event) => {
         const { value } = event.target;
-
-        this.setState({
-            [name]: value,
-        });
+        if (name === 'propertyKey') {
+            setPropertyKey(value);
+        } else if (name === 'propertyValue') {
+            setPropertyValue(value);
+        }
     };
 
     /**
@@ -269,7 +283,7 @@ class Properties extends React.Component {
      * @returns
      * @memberof Properties
      */
-    validateEmpty(itemValue) {
+    const validateEmpty = (itemValue) => {
         if (itemValue === null) {
             return false;
         } else if (itemValue === '') {
@@ -277,7 +291,7 @@ class Properties extends React.Component {
         } else {
             return false;
         }
-    }
+    };
 
     /**
      *
@@ -286,14 +300,24 @@ class Properties extends React.Component {
      * @param {*} updateAPI
      * @memberof Properties
      */
-    handleSubmit(oldAPI, updateAPI) {
-        const { additionalProperties } = this.state;
-
-        if (additionalProperties) {
-            oldAPI.additionalProperties = additionalProperties;
-        }
-        updateAPI(oldAPI);
-    }
+    const handleSubmit = () => {
+        apiCopy.additionalProperties = additionalProperties;
+        setUpdating(true);
+        if (apiCopy.type && isAPIProduct) delete apiCopy.type;
+        const updatePromise = updateAPI(apiCopy, isAPIProduct);
+        updatePromise
+            .then(() => {
+                setUpdating(false);
+            })
+            .catch((error) => {
+                setUpdating(false);
+                if (process.env.NODE_ENV !== 'production') console.log(error);
+                const { status } = error;
+                if (status === 401) {
+                    doRedirectToLogin();
+                }
+            });
+    };
 
     /**
      *
@@ -302,18 +326,14 @@ class Properties extends React.Component {
      * @param {*} oldKey
      * @memberof Properties
      */
-    handleDelete(apiAdditionalProperties, oldKey) {
-        this.setState((oldState) => {
-            let { additionalProperties } = oldState;
-            if (!additionalProperties) {
-                additionalProperties = apiAdditionalProperties;
-            }
-            if (Object.prototype.hasOwnProperty.call(additionalProperties, oldKey)) {
-                delete additionalProperties[oldKey];
-            }
-            return { additionalProperties };
-        });
-    }
+    const handleDelete = (apiAdditionalProperties, oldKey) => {
+        const additionalPropertiesCopy = JSON.parse(JSON.stringify(additionalProperties));
+
+        if (Object.prototype.hasOwnProperty.call(additionalPropertiesCopy, oldKey)) {
+            delete additionalPropertiesCopy[oldKey];
+        }
+        setAdditionalProperties(additionalPropertiesCopy);
+    };
 
     /**
      *
@@ -323,27 +343,23 @@ class Properties extends React.Component {
      * @param {*} newRow
      * @memberof Properties
      */
-    handleUpdateList(apiAdditionalProperties, oldRow, newRow) {
-        this.setState((oldState) => {
-            let { additionalProperties } = oldState;
-            if (!additionalProperties) {
-                additionalProperties = apiAdditionalProperties;
-            }
-            const { oldKey, oldValue } = oldRow;
-            const { newKey, newValue } = newRow;
+    const handleUpdateList = (oldRow, newRow) => {
+        const additionalPropertiesCopy = JSON.parse(JSON.stringify(additionalProperties));
 
-            if (Object.prototype.hasOwnProperty.call(additionalProperties, newKey) && oldKey === newKey) {
-                // Only the value is updated
-                if (newValue && oldValue !== newValue) {
-                    additionalProperties[oldKey] = newValue;
-                }
-            } else {
-                delete additionalProperties[oldKey];
-                additionalProperties[newKey] = newValue;
+        const { oldKey, oldValue } = oldRow;
+        const { newKey, newValue } = newRow;
+
+        if (Object.prototype.hasOwnProperty.call(additionalPropertiesCopy, newKey) && oldKey === newKey) {
+            // Only the value is updated
+            if (newValue && oldValue !== newValue) {
+                additionalPropertiesCopy[oldKey] = newValue;
             }
-            return { additionalProperties };
-        });
-    }
+        } else {
+            delete additionalPropertiesCopy[oldKey];
+            additionalPropertiesCopy[newKey] = newValue;
+        }
+        setAdditionalProperties(additionalPropertiesCopy);
+    };
 
     /**
      *
@@ -351,26 +367,21 @@ class Properties extends React.Component {
      * @param {*} apiAdditionalProperties
      * @memberof Properties
      */
-    handleAddToList(apiAdditionalProperties) {
-        this.setState((oldState) => {
-            const { propertyKey, propertyValue } = oldState;
-            let { additionalProperties } = oldState;
-            if (!additionalProperties) {
-                additionalProperties = apiAdditionalProperties;
-            }
-            additionalProperties[propertyKey] = propertyValue;
-            return { additionalProperties };
-        });
-    }
+    const handleAddToList = () => {
+        const additionalPropertiesCopy = JSON.parse(JSON.stringify(additionalProperties));
+
+        additionalPropertiesCopy[propertyKey] = propertyValue;
+        setAdditionalProperties(additionalPropertiesCopy);
+    };
 
     /**
      *
      *
      * @memberof Properties
      */
-    handleKeyDown = apiAdditionalProperties => (event) => {
+    const handleKeyDown = (event) => {
         if (event.key === 'Enter') {
-            this.handleAddToList(apiAdditionalProperties);
+            handleAddToList();
         }
     };
 
@@ -382,28 +393,22 @@ class Properties extends React.Component {
      * @returns
      * @memberof Properties
      */
-    renderAdditionalProperties(additionalProperties, apiAdditionalProperties) {
-        let data = additionalProperties;
-        if (data === null) {
-            data = apiAdditionalProperties;
-        }
-        const { classes } = this.props;
+    const renderAdditionalProperties = () => {
         const items = [];
-        for (const key in data) {
-            if (Object.prototype.hasOwnProperty.call(data, key)) {
+        for (const key in additionalProperties) {
+            if (Object.prototype.hasOwnProperty.call(additionalProperties, key)) {
                 items.push(<EditableRow
                     oldKey={key}
-                    oldValue={data[key]}
-                    classes={classes}
-                    handleUpdateList={this.handleUpdateList}
-                    handleDelete={this.handleDelete}
-                    apiAdditionalProperties={data}
-                    {...this.props}
+                    oldValue={additionalProperties[key]}
+                    handleUpdateList={handleUpdateList}
+                    handleDelete={handleDelete}
+                    apiAdditionalProperties={additionalProperties}
+                    {...props}
                 />);
             }
         }
         return items;
-    }
+    };
 
     /**
      *
@@ -411,35 +416,68 @@ class Properties extends React.Component {
      * @returns
      * @memberof Properties
      */
-    render() {
-        const {
-            classes, intl, api, updateAPI,
-        } = this.props;
-        const {
-            additionalProperties, showAddProperty, propertyKey, propertyValue,
-        } = this.state;
-        return (
-            <div className={classes.root}>
-                <div className={classes.titleWrapper}>
-                    <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        <FormattedMessage
-                            id='Apis.Details.Properties.Properties.api.properties'
-                            defaultMessage='API Properties'
-                        />
-                    </Typography>
-                    <Button
-                        size='small'
-                        className={classes.button}
-                        onClick={this.toggleAddProperty}
-                        disabled={this.isNotCreator && this.isNotPublisher}
-                    >
-                        <AddCircle className={classes.buttonIcon} />
-                        <FormattedMessage
-                            id='Apis.Details.Properties.Properties.add.new.property'
-                            defaultMessage='Add New Property'
-                        />
-                    </Button>
+    const { intl } = props;
+    const classes = useStyles();
+
+    return (
+        <div className={classes.root}>
+            <div className={classes.titleWrapper}>
+                <Typography variant='h4' align='left' className={classes.mainTitle}>
+                    <FormattedMessage
+                        id='Apis.Details.Properties.Properties.api.properties'
+                        defaultMessage='API Properties'
+                    />
+                </Typography>
+                <Button
+                    size='small'
+                    className={classes.button}
+                    onClick={toggleAddProperty}
+                    disabled={isNotCreator && isNotPublisher}
+                >
+                    <AddCircle className={classes.buttonIcon} />
+                    <FormattedMessage
+                        id='Apis.Details.Properties.Properties.add.new.property'
+                        defaultMessage='Add New Property'
+                    />
+                </Button>
+            </div>
+            {isEmpty(additionalProperties) && !showAddProperty && (
+                <div className={classes.messageBox}>
+                    <InlineMessage type='info' height={140}>
+                        <div className={classes.contentWrapper}>
+                            <Typography variant='h5' component='h3' className={classes.head}>
+                                <FormattedMessage
+                                    id='Apis.Details.Properties.Properties.add.new.property.message.title'
+                                    defaultMessage='Create Additional Properties'
+                                />
+                            </Typography>
+                            <Typography component='p' className={classes.content}>
+                                <FormattedMessage
+                                    id='Apis.Details.Properties.Properties.add.new.property.message.content'
+                                    defaultMessage={
+                                        'If you want to add specific custom properties to your' +
+                                        'API you can add them here.'
+                                    }
+                                />
+                            </Typography>
+                            <div className={classes.actions}>
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                    className={classes.button}
+                                    onClick={toggleAddProperty}
+                                >
+                                    <FormattedMessage
+                                        id='Apis.Details.Properties.Properties.add.new.property'
+                                        defaultMessage='Add New Property'
+                                    />
+                                </Button>
+                            </div>
+                        </div>
+                    </InlineMessage>
                 </div>
+            )}
+            {(!isEmpty(additionalProperties) || showAddProperty) && (
                 <Grid container spacing={7}>
                     <Grid item xs={12}>
                         <Paper className={classes.paperRoot} elevation={1}>
@@ -463,79 +501,89 @@ class Properties extends React.Component {
                                 </TableHead>
                                 <TableBody>
                                     {showAddProperty && (
-                                        <TableRow>
-                                            <TableCell>
-                                                <TextField
-                                                    disabled={this.isNotCreator
-                                                    && this.isNotPublisher}
-                                                    required
-                                                    id='outlined-required'
-                                                    label={intl.formatMessage({
-                                                        id: 'Apis.Details.Properties.Properties.show.add.property.' +
-                                                            'property.name',
-                                                        defaultMessage: 'Property Name',
-                                                    })}
-                                                    margin='normal'
-                                                    variant='outlined'
-                                                    className={classes.addProperty}
-                                                    value={propertyKey === null ? '' : propertyKey}
-                                                    onChange={this.handleChange('propertyKey')}
-                                                    onKeyDown={this.handleKeyDown(api.additionalProperties)}
-                                                    error={this.validateEmpty(propertyKey)}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <TextField
-                                                    disabled={this.isNotCreator
-                                                    && this.isNotPublisher}
-                                                    required
-                                                    id='outlined-required'
-                                                    label={intl.formatMessage({
-                                                        id: 'Apis.Details.Properties.Properties.property.value',
-                                                        defaultMessage: 'Property Value',
-                                                    })}
-                                                    margin='normal'
-                                                    variant='outlined'
-                                                    className={classes.addProperty}
-                                                    value={propertyValue === null ? '' : propertyValue}
-                                                    onChange={this.handleChange('propertyValue')}
-                                                    onKeyDown={this.handleKeyDown(api.additionalProperties)}
-                                                    error={this.validateEmpty(propertyValue)}
-                                                />
-                                            </TableCell>
-                                            <TableCell align='right'>
-                                                <Button
-                                                    variant='contained'
-                                                    color='primary'
-                                                    disabled={!propertyValue || !propertyKey
-                                                    || (this.isNotCreator && this.isNotPublisher)}
-                                                    onClick={() => this.handleAddToList(api.additionalProperties)}
-                                                >
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Properties.Properties.add'
-                                                        defaultMessage='Add'
+                                        <React.Fragment>
+                                            <TableRow>
+                                                <TableCell>
+                                                    <TextField
+                                                        required
+                                                        id='outlined-required'
+                                                        label={intl.formatMessage({
+                                                            id: `Apis.Details.Properties.Properties.
+                                                                show.add.property.property.name`,
+                                                            defaultMessage: 'Property Name',
+                                                        })}
+                                                        margin='normal'
+                                                        variant='outlined'
+                                                        className={classes.addProperty}
+                                                        value={propertyKey === null ? '' : propertyKey}
+                                                        onChange={handleChange('propertyKey')}
+                                                        onKeyDown={handleKeyDown('propertyKey')}
+                                                        error={validateEmpty(propertyKey)}
+                                                        disabled={isNotCreator && isNotPublisher}
                                                     />
-                                                </Button>
-                                                <Link
-                                                    to={
-                                                        (api.apiType === API.CONSTS.APIProduct
-                                                            ? '/api-products/'
-                                                            : '/apis/')
-                                                        + api.id
-                                                        + '/overview'
-                                                    }
-                                                >
-                                                    <Button onClick={this.toggleAddProperty}>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <TextField
+                                                        required
+                                                        id='outlined-required'
+                                                        label={intl.formatMessage({
+                                                            id: 'Apis.Details.Properties.Properties.property.value',
+                                                            defaultMessage: 'Property Value',
+                                                        })}
+                                                        margin='normal'
+                                                        variant='outlined'
+                                                        className={classes.addProperty}
+                                                        value={propertyValue === null ? '' : propertyValue}
+                                                        onChange={handleChange('propertyValue')}
+                                                        onKeyDown={handleKeyDown('propertyValue')}
+                                                        error={validateEmpty(propertyValue)}
+                                                        disabled={isNotCreator && isNotPublisher}
+                                                    />
+                                                </TableCell>
+                                                <TableCell align='right'>
+                                                    <Button
+                                                        variant='contained'
+                                                        color='primary'
+                                                        disabled={
+                                                            !propertyValue ||
+                                                            !propertyKey ||
+                                                            (isNotCreator && isNotPublisher)
+                                                        }
+                                                        onClick={handleAddToList}
+                                                    >
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Properties.Properties.add'
+                                                            defaultMessage='Add'
+                                                        />
+                                                    </Button>
+
+                                                    <Button onClick={toggleAddProperty}>
                                                         <FormattedMessage
                                                             id='Apis.Details.Properties.Properties.cancel'
                                                             defaultMessage='Cancel'
                                                         />
                                                     </Button>
-                                                </Link>
-                                            </TableCell>
-                                        </TableRow>
+                                                </TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell colSpan={3}>
+                                                    <Typography variant='caption'>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Properties.Properties.help'
+                                                            defaultMessage={
+                                                                'Property name should be unique, should not contain' +
+                                                                'spaces, cannot be case-sensitive, cannot be any ' +
+                                                                'of the following as they are reserved keywords:' +
+                                                                'provider, version, context, status, description, ' +
+                                                                'subcontext, doc, lcState, name, tags.'
+                                                            }
+                                                        />
+                                                    </Typography>
+                                                </TableCell>
+                                            </TableRow>
+                                        </React.Fragment>
                                     )}
-                                    {this.renderAdditionalProperties(additionalProperties, api.additionalProperties)}
+                                    {renderAdditionalProperties()}
                                 </TableBody>
                             </Table>
                         </Paper>
@@ -543,7 +591,7 @@ class Properties extends React.Component {
                             <Grid
                                 container
                                 direction='row'
-                                alignItems='center'
+                                alignItems='flex-start'
                                 spacing={4}
                                 className={classes.buttonSection}
                             >
@@ -552,13 +600,24 @@ class Properties extends React.Component {
                                         <Button
                                             variant='contained'
                                             color='primary'
-                                            onClick={() => this.handleSubmit(api, updateAPI)}
-                                            disabled={this.isNotCreator && this.isNotPublisher}
+                                            onClick={handleSubmit}
+                                            disabled={updating || (isNotCreator && isNotPublisher)}
                                         >
-                                            <FormattedMessage
-                                                id='Apis.Details.Properties.Properties.save'
-                                                defaultMessage='Save'
-                                            />
+                                            {updating && (
+                                                <React.Fragment>
+                                                    <CircularProgress size={20} />
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Properties.Properties.updating'
+                                                        defaultMessage='Updating ...'
+                                                    />
+                                                </React.Fragment>
+                                            )}
+                                            {!updating && (
+                                                <FormattedMessage
+                                                    id='Apis.Details.Properties.Properties.save'
+                                                    defaultMessage='Save'
+                                                />
+                                            )}
                                         </Button>
                                     </div>
                                 </Grid>
@@ -572,37 +631,28 @@ class Properties extends React.Component {
                                         </Button>
                                     </Link>
                                 </Grid>
-                                {(this.isNotCreator && this.isNotPublisher)
-                                    && (
-                                        <Grid item>
-                                            <Typography variant='body2' color='primary'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Properties.Properties.update.not.allowed'
-                                                    defaultMessage={'*You are not authorized to update properties of' +
-                                                    ' the API due to insufficient permissions'}
-                                                />
-                                            </Typography>
-                                        </Grid>
-                                    )
-                                }
+                                {isNotCreator && isNotPublisher && (
+                                    <Grid item xs={12}>
+                                        <Typography variant='body2' color='primary'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Properties.Properties.update.not.allowed'
+                                                defaultMessage='*You are not authorized to update properties of
+                                                    the API due to insufficient permissions'
+                                            />
+                                        </Typography>
+                                    </Grid>
+                                )}
                             </Grid>
                         </div>
                     </Grid>
                 </Grid>
-            </div>
-        );
-    }
+            )}
+        </div>
+    );
 }
 
 Properties.propTypes = {
     state: PropTypes.shape({}).isRequired,
-    classes: PropTypes.shape({}).isRequired,
-    api: PropTypes.shape({
-        id: PropTypes.string,
-        apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]),
-    }).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
-    updateAPI: PropTypes.func.isRequired,
 };
-
-export default withAPI(injectIntl(withStyles(styles)(Properties)));
+export default withAPI(injectIntl(Properties));

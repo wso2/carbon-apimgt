@@ -18,6 +18,7 @@
 
 import axios from 'axios';
 import qs from 'qs';
+import CONSTS from 'AppData/Constants';
 import Configurations from 'Config';
 import Utils from './Utils';
 import User from './User';
@@ -113,9 +114,10 @@ class AuthManager {
     static getUserFromToken() {
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
         if (!partialToken) {
-            return new Promise((resolve, reject) => reject(new Error('No partial token found!')));
+            return new Promise((resolve, reject) => reject(new Error(CONSTS.errorCodes.NO_TOKEN_FOUND)));
         }
-        const promisedResponse = fetch('/publisher-new/services/auth/introspect', { credentials: 'same-origin' });
+        const introspectUrl = Configurations.app.context + Utils.CONST.INTROSPECT;
+        const promisedResponse = fetch(introspectUrl, { credentials: 'same-origin' });
         return promisedResponse
             .then(response => response.json())
             .then((data) => {
@@ -123,10 +125,17 @@ class AuthManager {
                 if (data.active) {
                     const currentEnv = Utils.getCurrentEnvironment();
                     user = new User(currentEnv.label, data.username);
-                    user.scopes = data.scope.split(' ');
-                    AuthManager.setUser(user, currentEnv.label);
+                    const scopes = data.scope.split(' ');
+                    if (this.hasBasicLoginPermission(scopes)) {
+                        user.scopes = scopes;
+                        AuthManager.setUser(user, currentEnv.label);
+                    } else {
+                        console.warn('The user with ' + partialToken + ' doesn\'t enough have permission!');
+                        throw new Error(CONSTS.errorCodes.INSUFFICIENT_PREVILEGES);
+                    }
                 } else {
-                    console.warn('User with ' + partialToken + ' is not active!');
+                    console.warn('The user with ' + partialToken + ' is not active!');
+                    throw new Error(CONSTS.errorCodes.INVALID_TOKEN);
                 }
                 return user;
             });
@@ -181,6 +190,10 @@ class AuthManager {
 
     static isNotPublisher() {
         return !AuthManager.getUser().scopes.includes('apim:api_publish');
+    }
+
+    static hasBasicLoginPermission(scopes) {
+        return scopes.includes('apim:api_view');
     }
 
     /**

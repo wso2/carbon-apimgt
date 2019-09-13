@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tag;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.TagsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TagListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.TagMappingUtil;
@@ -62,7 +63,7 @@ public class TagsApiServiceImpl extends TagsApiService {
         Set<Tag> tagSet;
         List<Tag> tagList = new ArrayList<>();
         try {
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 

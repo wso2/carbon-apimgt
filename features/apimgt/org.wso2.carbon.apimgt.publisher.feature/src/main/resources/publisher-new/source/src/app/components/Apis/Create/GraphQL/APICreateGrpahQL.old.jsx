@@ -165,14 +165,12 @@ class APICreateGraphQL extends React.Component {
             } else {
                 changes[name] = value;
             }
-
             // Checking validity.
             const validUpdated = valid;
             validUpdated.name.empty = !api.name;
             validUpdated.context.empty = !api.context;
             validUpdated.version.empty = !api.version;
             validUpdated.endpointConfig.empty = !api.endpointConfig;
-
             return { api: changes, valid: validUpdated };
         });
     }

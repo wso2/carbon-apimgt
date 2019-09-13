@@ -168,8 +168,7 @@ public class APIMappingUtil {
         if (dto.getApiDefinition() != null) {
             String apiSwaggerDefinition = dto.getApiDefinition();
             //URI Templates
-            SwaggerData swaggerData = new SwaggerData(model);
-            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(swaggerData, apiSwaggerDefinition);
+            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(apiSwaggerDefinition);
             model.setUriTemplates(uriTemplates);
 
             // scopes

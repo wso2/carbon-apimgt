@@ -50,7 +50,8 @@ function RenderMethodBase(props) {
 }
 
 RenderMethodBase.propTypes = {
-    classes: PropTypes.object.isRequired,
+    theme: PropTypes.object.isRequired,
+    method: PropTypes.object.isRequired,
 };
 
 const RenderMethod = withTheme()(RenderMethodBase);
@@ -109,7 +110,12 @@ class Operations extends React.Component {
     render() {
         const { operations } = this.state;
         if (!operations) {
-            return <div>operations Not found</div>;
+            return <div>
+                <FormattedMessage
+                    id='Apis.Details.Operations.notFound'
+                    defaultMessage='operations Not found'
+                />
+            </div>;
         }
         const { classes } = this.props;
 
@@ -136,6 +142,7 @@ Operations.propTypes = {
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,
+   
 };
 
 export default injectIntl(withStyles(styles)(Operations));

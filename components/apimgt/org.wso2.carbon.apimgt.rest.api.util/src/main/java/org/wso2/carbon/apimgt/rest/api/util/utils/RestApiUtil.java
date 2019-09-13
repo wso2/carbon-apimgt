@@ -488,6 +488,18 @@ public class RestApiUtil {
      * Returns a new BadRequestException
      *
      * @param description description of the exception
+     * @param code error code
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException buildBadRequestException(String description, Long code) {
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, code, description);
+        return new BadRequestException(errorDTO);
+    }
+
+    /**
+     * Returns a new BadRequestException
+     *
+     * @param description description of the exception
      * @return a new BadRequestException with the specified details as a response DTO
      */
     public static BadRequestException buildBadRequestException(String description, Throwable e) {
@@ -652,6 +664,20 @@ public class RestApiUtil {
      */
     public static void handleBadRequest(String msg, Log log) throws BadRequestException {
         BadRequestException badRequestException = buildBadRequestException(msg);
+        log.error(msg);
+        throw badRequestException;
+    }
+
+    /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     *
+     * @param msg error message
+     * @param log Log instance
+     * @param code error code
+     * @throws BadRequestException
+     */
+    public static void handleBadRequest(String msg, Long code, Log log) throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(msg, code);
         log.error(msg);
         throw badRequestException;
     }
@@ -920,19 +946,6 @@ public class RestApiUtil {
         InternalServerErrorException internalServerErrorException = buildInternalServerErrorException();
         log.error(msg);
         throw internalServerErrorException;
-    }
-
-    /**
-     * Checks whether the specified tenant domain is available
-     *
-     * @param tenantDomain tenant domain
-     * @return true if tenant domain available
-     * @throws UserStoreException
-     */
-    public static boolean isTenantAvailable(String tenantDomain) throws UserStoreException {
-        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                .getTenantId(tenantDomain);
-        return tenantId != -1;
     }
 
     /**
@@ -1232,8 +1245,7 @@ public class RestApiUtil {
 
         Set<URITemplate> uriTemplates = null;
         try {
-            SwaggerData swaggerData = new SwaggerData(api);
-            uriTemplates = oasParser.getURITemplates(swaggerData, swagger);
+            uriTemplates = oasParser.getURITemplates(swagger);
         } catch (APIManagementException e) {
             log.error("Error while parsing swagger content to get URI Templates", e);
         }
@@ -1326,9 +1338,8 @@ public class RestApiUtil {
                     log.error("Error occurred while parsing swagger definition");
                     return Collections.EMPTY_SET;
                 }
-                SwaggerData swaggerData = new SwaggerData(api);
                 //Get URL templates from swagger content w created
-                storeResourceMappings = oasParser.getURITemplates(swaggerData, definition);
+                storeResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
@@ -1370,9 +1381,8 @@ public class RestApiUtil {
                     log.error("Error occurred while parsing swagger definition");
                     return Collections.EMPTY_SET;
                 }
-                SwaggerData swaggerData = new SwaggerData(api);
                 //Get URL templates from swagger content we created
-                publisherResourceMappings = oasParser.getURITemplates(swaggerData, definition);
+                publisherResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
@@ -1408,9 +1418,8 @@ public class RestApiUtil {
                     log.error("Error occurred while parsing swagger definition");
                     return Collections.EMPTY_SET;
                 }
-                SwaggerData swaggerData = new SwaggerData(api);
                 //Get URL templates from swagger content we created
-                adminAPIResourceMappings = oasParser.getURITemplates(swaggerData, definition);
+                adminAPIResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {

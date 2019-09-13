@@ -16,10 +16,12 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
-import qs from 'qs';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import { injectIntl } from 'react-intl';
+import Alert from 'AppComponents/Shared/Alert';
+import Settings from 'AppComponents/Shared/SettingsContext';
 import ResourceNotFound from '../Base/Errors/ResourceNotFound';
 import API from '../../data/api';
 import ApiThumb from '../Apis/Listing/ApiThumb';
@@ -37,19 +39,36 @@ const styles = theme => ({
     },
 });
 
+/**
+ *
+ *
+ * @param {*} props
+ * @returns
+ */
 function ApisWithTag(props) {
     const [apis, setApis] = useState(null);
     const [notFound, setNotFound] = useState(false);
-    const { tag, classes, maxCount } = props;
+    const {
+        tag, classes, maxCount, intl,
+    } = props;
+    const settingsContext = useContext(Settings);
     useEffect(() => {
         const restApi = new API();
-        const promised_apis = restApi.getAllAPIs({ query: 'tag:' + tag, limit: maxCount });
-        promised_apis
+        const promisedApis = restApi.getAllAPIs({ query: 'tag:' + tag, limit: maxCount });
+        promisedApis
             .then((response) => {
                 setApis(response.obj);
             })
             .catch((error) => {
-                const status = error.status;
+                const { status, response } = error;
+                const message = intl.formatMessage({
+                    defaultMessage: 'Invalid tenant domain',
+                    id: 'LandingPage.ApisWithTag.invalid.tenant.domain',
+                });
+                if (response && response.body.code === 901300) {
+                    settingsContext.setTenantDomain('INVALID');
+                    Alert.error(message);
+                }
                 if (status === 404) {
                     setNotFound(true);
                 }
@@ -82,4 +101,4 @@ ApisWithTag.propTypes = {
     tag: PropTypes.object.isRequired,
     maxCount: PropTypes.object.isRequired,
 };
-export default withStyles(styles)(ApisWithTag);
+export default injectIntl(withStyles(styles)(ApisWithTag));

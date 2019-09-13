@@ -27,7 +27,6 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
@@ -60,13 +59,12 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
     /**
      * This method returns URI templates according to the given swagger file
      *
-     * @param swaggerData                 API
      * @param resourceConfigsJSON swaggerJSON
      * @return URI Templates
      * @throws APIManagementException
      */
     @Override
-    public Set<URITemplate> getURITemplates(SwaggerData swaggerData, String resourceConfigsJSON) throws APIManagementException {
+    public Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException {
         JSONParser parser = new JSONParser();
         JSONObject swagger;
         Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
@@ -85,8 +83,7 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                     // Following code check is done to handle $ref objects supported by swagger spec
                     // See field types supported by "Path Item Object" in swagger spec.
                     if (path.containsKey("$ref")) {
-                        log.info("Reference " + uriTempVal + " path object was ignored when generating URL template " +
-                                "for api \"" + swaggerData.getTitle() + '\"');
+                        log.info("Reference " + uriTempVal + " path object was ignored when generating URL template");
                         continue;
                     }
 
@@ -288,7 +285,7 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
     }
 
     @Override
-    public String generateAPIDefinition(SwaggerData swaggerData, String swagger, boolean syncOperations)
+    public String generateAPIDefinition(SwaggerData swaggerData, String swagger)
 throws APIManagementException {
         JSONParser parser = new JSONParser();
         try {
@@ -298,12 +295,7 @@ throws APIManagementException {
                 //Generates below model using the API's URI template
                 // path -> [verb1 -> template1, verb2 -> template2, ..]
                 Map<String, Map<String, SwaggerData.Resource>> resourceMap = getResourceMap(swaggerData);
-
-                if (syncOperations) {
-                    syncAPIDefinitionWithURITemplates(swaggerObj, resourceMap);
-                } else {
-                    setDefaultManagedInfoToAPIDefinition(swaggerData, swaggerObj);
-                }
+                syncAPIDefinitionWithURITemplates(swaggerObj, resourceMap);
             }
 
             // add scope in the API object to swagger

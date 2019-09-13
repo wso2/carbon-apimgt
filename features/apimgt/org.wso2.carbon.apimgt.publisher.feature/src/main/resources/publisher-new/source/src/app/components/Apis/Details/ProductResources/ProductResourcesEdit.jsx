@@ -36,6 +36,7 @@ import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
+import cloneDeep from 'lodash.clonedeep';
 
 import API from 'AppData/api';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
@@ -159,7 +160,7 @@ function ProductResourcesEdit() {
 
     // Get the current api product object from the context
     const { api, updateAPI } = useContext(APIContext);
-    const apiCopy = JSON.parse(JSON.stringify(api));
+    const apiCopy = cloneDeep(api);
     const { apis } = apiCopy;
 
     // Define states
@@ -209,25 +210,27 @@ function ProductResourcesEdit() {
                 const target = key;
                 const verb = innerKey;
                 let resourceFound = false;
-                Object.keys(latestApiResources).map((resourcekey) => {
-                    const apiResource = latestApiResources[resourcekey];
+                if (latestApiResources) {
+                    Object.keys(latestApiResources).map((resourcekey) => {
+                        const apiResource = latestApiResources[resourcekey];
 
-                    // Check if the the api slected from UI is same as the operation api id checking
-                    if (apiResource && apiId === apiResource.apiId) {
-                        // API is the same
-                        Object.keys(apiResource.operations).map((operationKey) => {
-                            const operation = apiResource.operations[operationKey];
-                            if (
-                                operation &&
-                                operation.target === target &&
-                                operation.verb.toLowerCase() === verb.toLowerCase()
-                            ) {
-                                // Operation is already there
-                                resourceFound = true;
-                            }
-                        });
-                    }
-                });
+                        // Check if the the api slected from UI is same as the operation api id checking
+                        if (apiResource && apiId === apiResource.apiId) {
+                            // API is the same
+                            Object.keys(apiResource.operations).map((operationKey) => {
+                                const operation = apiResource.operations[operationKey];
+                                if (
+                                    operation &&
+                                    operation.target === target &&
+                                    operation.verb.toLowerCase() === verb.toLowerCase()
+                                ) {
+                                    // Operation is already there
+                                    resourceFound = true;
+                                }
+                            });
+                        }
+                    });
+                }
                 if (resourceFound) {
                     methodObj[innerKey].allreadyAdded = true;
                 } else {
@@ -288,7 +291,7 @@ function ProductResourcesEdit() {
         if (!inputApiResources) {
             // If a copy of the state variable is not passed from the calling method we
             // have to make a copy inside here before doing modifications to that
-            newApiResources = JSON.parse(JSON.stringify(apiResources));
+            newApiResources = cloneDeep(apiResources);
             updateStateHere = true;
         } else {
             newApiResources = inputApiResources;
@@ -352,7 +355,7 @@ function ProductResourcesEdit() {
             setApiResources(newApiResources);
             // We need to call this in order to set other properties
             if (apiId === selectedApi.id) {
-                addPropsToSelectedApiPaths(JSON.parse(JSON.stringify(selectedApiPaths)), apiId, newApiResources);
+                addPropsToSelectedApiPaths(cloneDeep(selectedApiPaths), apiId, newApiResources);
             }
         }
         return newApiResources;
@@ -381,6 +384,7 @@ function ProductResourcesEdit() {
                 setUpdating(false);
             })
             .catch((error) => {
+                setUpdating(false);
                 if (process.env.NODE_ENV !== 'production') console.log(error);
                 const { status } = error;
                 if (status === 401) {
@@ -400,7 +404,7 @@ function ProductResourcesEdit() {
     };
     const addSelectedResourcesToTree = (addAll = false) => {
         /* Add checked field to each resource object */
-        const newApiResources = JSON.parse(JSON.stringify(apiResources));
+        const newApiResources = cloneDeep(apiResources);
         Object.keys(selectedApiPaths).map((key) => {
             const methodObj = selectedApiPaths[key];
             Object.keys(methodObj).map((innerKey) => {
@@ -422,7 +426,7 @@ function ProductResourcesEdit() {
             });
         });
         setApiResources(newApiResources);
-        addPropsToSelectedApiPaths(JSON.parse(JSON.stringify(selectedApiPaths)), selectedApi.id, newApiResources);
+        addPropsToSelectedApiPaths(cloneDeep(selectedApiPaths), selectedApi.id, newApiResources);
     };
     useEffect(() => {
         // Get all apis

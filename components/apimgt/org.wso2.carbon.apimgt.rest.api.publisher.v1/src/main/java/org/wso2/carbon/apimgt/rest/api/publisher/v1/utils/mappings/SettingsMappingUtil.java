@@ -62,6 +62,8 @@ public class SettingsMappingUtil {
             settingsDTO.setEnvironment(environmentListDTO.getList());
             settingsDTO.setMonetizationAttributes(getMonetizationAttributes());
             settingsDTO.setSecurityAuditProperties(getSecurityAuditProperties());
+            settingsDTO.setExternalStoresEnabled(
+                    APIUtil.isExternalStoresEnabled(RestApiUtil.getLoggedInUserTenantDomain()));
         }
         settingsDTO.setScopes(GetScopeList());
         return settingsDTO;

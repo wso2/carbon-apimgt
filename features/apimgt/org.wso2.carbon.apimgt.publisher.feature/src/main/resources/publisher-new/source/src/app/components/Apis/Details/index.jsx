@@ -57,10 +57,12 @@ import Endpoints from './Endpoints/Endpoints';
 import Environments from './Environments/Environments';
 import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
-import Scope from './Scopes';
+import Scope from './Scopes/Scopes';
 import Security from './Security';
 import APIDefinition from './APIDefinition/APIDefinition';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
+import MediationPoliciesOverview from './MediationPolicies/Overview';
+import MediationPolicyComponent from './MediationPolicies/MediationPolicyComponent';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
 import Monetization from './Monetization';
@@ -270,7 +272,14 @@ class Details extends Component {
                             to={pathPrefix + 'schema definition'}
                             Icon={<CodeIcon />}
                         />
-                        <LeftMenuItem text='operations' to={pathPrefix + 'operations'} Icon={<ResourcesIcon />} />
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.operations',
+                                defaultMessage: 'operations',
+                            })}
+                            to={pathPrefix + 'operations'}
+                            Icon={<ResourcesIcon />}
+                        />
                     </React.Fragment>
                 );
             default:
@@ -303,23 +312,16 @@ class Details extends Component {
      * @param {*} isAPIProduct
      * @memberof Details
      */
-    updateAPI(updatedProperties = {}, isAPIProduct) {
+    updateAPI(updatedProperties = {}) {
         const { api } = this.state;
+        let isAPIProduct = false;
+        if (api.apiType === 'APIProduct') {
+            isAPIProduct = true;
+        }
         let promisedUpdate;
         // TODO: Ideally, The state should hold the corresponding API object
         // which we could call it's `update` method safely ~tmkb
-        if (isAPIProduct) {
-            const productClient = new APIProduct();
-
-            // api product put is failing when it has the following properties
-            const apiProductCopy = JSON.parse(JSON.stringify(updatedProperties));
-            if (apiProductCopy.client) delete apiProductCopy.client;
-            if (apiProductCopy._data) delete apiProductCopy._data;
-            if (apiProductCopy.apiType) delete apiProductCopy.apiType;
-            if (apiProductCopy.type) delete apiProductCopy.type;
-
-            promisedUpdate = productClient.update(apiProductCopy);
-        } else if (!isEmpty(updatedProperties)) {
+        if (!isEmpty(updatedProperties)) {
             // newApi object has to be provided as the updatedProperties. Then api will be updated.
             promisedUpdate = api.update(updatedProperties);
         } else {
@@ -454,14 +456,15 @@ class Details extends Component {
                             />
                         )}
                         {this.getLeftMenuItemForAPIType(api.type)}
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.lifecycle',
-                                defaultMessage: 'lifecycle',
-                            })}
-                            to={pathPrefix + 'lifecycle'}
-                            Icon={<LifeCycleIcon />}
-                        />
+                        {!isAPIProduct && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.lifecycle',
+                                    defaultMessage: 'lifecycle',
+                                })}
+                                to={pathPrefix + 'lifecycle'}
+                                Icon={<LifeCycleIcon />}
+                            />)}
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.left.menu.scope',
@@ -502,14 +505,24 @@ class Details extends Component {
                             to={pathPrefix + 'subscriptions'}
                             Icon={<SubscriptionsIcon />}
                         />
+
                         <LeftMenuItem
                             text={intl.formatMessage({
-                                id: 'Apis.Details.index.monetization',
-                                defaultMessage: 'monetization',
+                                id: 'Apis.Details.index.left.menu.mediation.policy',
+                                defaultMessage: 'Mediation Policies',
                             })}
-                            to={pathPrefix + 'monetization'}
-                            Icon={<MonetizationIcon />}
+                            to={pathPrefix + 'mediation policies'}
+                            Icon={<ScopesIcon />}
                         />
+                        {!isAPIProduct && (
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.monetization',
+                                    defaultMessage: 'monetization',
+                                })}
+                                to={pathPrefix + 'monetization'}
+                                Icon={<MonetizationIcon />}
+                            />)}
                     </div>
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} />
@@ -523,6 +536,10 @@ class Details extends Component {
                                 <Route path={Details.subPaths.OVERVIEW} component={() => <Overview api={api} />} />
                                 <Route
                                     path={Details.subPaths.API_DEFINITION}
+                                    component={() => <APIDefinition api={api} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.API_DEFINITION_PRODUCT}
                                     component={() => <APIDefinition api={api} />}
                                 />
                                 <Route
@@ -557,7 +574,11 @@ class Details extends Component {
                                 <Route path={Details.subPaths.RESOURCES} component={() => <Resources api={api} />} />
 
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
-                                <Route path={Details.subPaths.SCOPES_PRODUCT} component={() => <Scope api={api} />} />
+                                <Route
+                                    path={Details.subPaths.SCOPES_PRODUCT}
+                                    component={() =>
+                                        <Scope api={api} />}
+                                />
                                 <Route path={Details.subPaths.DOCUMENTS} component={() => <Documents api={api} />} />
                                 <Route
                                     path={Details.subPaths.DOCUMENTS_PRODUCT}
@@ -587,6 +608,14 @@ class Details extends Component {
                                 <Route
                                     path={Details.subPaths.MONETIZATION}
                                     component={() => <Monetization api={api} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.MEDIATION_POLICIES}
+                                    component={() => <MediationPoliciesOverview api={api} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.MEDIATION_POLICY}
+                                    component={() => <MediationPolicyComponent api={api} />}
                                 />
                             </Switch>
                         </div>
@@ -630,6 +659,7 @@ Details.subPaths = {
     PROPERTIES_PRODUCT: '/api-products/:apiprod_uuid/properties',
     NEW_VERSION: '/apis/:api_uuid/new_version',
     MONETIZATION: '/apis/:api_uuid/monetization',
+    MEDIATION_POLICIES: '/apis/:api_uuid/Mediation Policies',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum

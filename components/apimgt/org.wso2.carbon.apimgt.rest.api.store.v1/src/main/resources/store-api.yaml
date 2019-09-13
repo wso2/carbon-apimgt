@@ -80,7 +80,7 @@ securityDefinitions:
       apim:sub_manage: Manage subscriptions
       apim:self-signup: Self Sign-up
       apim:dedicated_gateway: Updating dedicated Gateway
-      apim:store_setting: Retrieve store settings
+      apim:store_settings: Retrieve store settings
 
 ######################################################
 # The "API Collection" resource APIs
@@ -733,21 +733,19 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "API Rating" resource APIs
-######################################################
+  ######################################################
+  # The "Ratings Collection" resource APIs
+  ######################################################
   '/apis/{apiId}/ratings':
-
-#-----------------------------------------------------
-# Retrieve the Ratings of a certain API
-#-----------------------------------------------------
+    #-----------------------------------------------------
+    # Retrieve the list of ratings of a certain API
+    #-----------------------------------------------------
     get:
       security:
-        - OAuth2Security:
-          - apim:subscribe
-      summary: Get API ratings
+        - OAuth2Security: []
+      summary: Retrieve API ratings
       description: |
-        This operation can be used to get the list of ratings of an API.
+        This operation can be used to retrieve the list of ratings of an API.
 
         `X-WSO2-Tenant` header can be used to retrieve ratings of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
       x-examples:
@@ -763,15 +761,9 @@ paths:
         200:
           description: |
             OK.
-            Rating returned.
+            Rating list returned.
           schema:
             $ref: '#/definitions/RatingList'
-        404:
-          description: |
-            Not Found.
-            Requested rating does not exist.
-          schema:
-            $ref: '#/definitions/Error'
         406:
           description: |
             Not Acceptable.
@@ -779,12 +771,10 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "User API Rating" resource APIs
-######################################################
-
+  ######################################################
+  # The "Individual User API Rating" resource APIs
+  ######################################################
   '/apis/{apiId}/user-rating':
-
     #-----------------------------------------------------
     # Retrieve user rating of an API
     #-----------------------------------------------------
@@ -792,7 +782,7 @@ paths:
       security:
         - OAuth2Security:
           - apim:subscribe
-      summary: Get user API rating
+      summary: Retrieve API rating of user
       description: |
         This operation can be used to get the user rating of an API.
 
@@ -917,12 +907,6 @@ paths:
           description: |
             OK.
             Resource successfully deleted.
-        404:
-          description: |
-            Not Found.
-            Resource to be deleted does not exist.
-          schema:
-            $ref: '#/definitions/Error'
 
 ######################################################
 # The "Comments Collection" resource API
@@ -2842,7 +2826,7 @@ paths:
       summary: Retreive store settings
       security:
         - OAuth2Security:
-          - apim:store_setting
+          - apim:store_settings
       description: |
         Retreive store settings
       tags:
@@ -4344,8 +4328,27 @@ definitions:
         type: array
         description: The subscription tiers selected for the particular API
         items:
-          type: string
-        example: ["Unlimited"]
+          properties:
+            tierName:
+              type: string
+              example: Gold
+            tierPlan:
+              type: string
+              example: COMMERCIAL
+            monetizationAttributes:
+              properties:
+                fixedPrice:
+                  type: string
+                  example: "10"
+                pricePerRequest:
+                  type: string
+                  example: "1"
+                currencyType:
+                  type: string
+                  example: "USD"
+                billingCycle:
+                  type: string
+                  example: "month"
       hasThumbnail:
         type: boolean
         example: true
@@ -4979,7 +4982,7 @@ definitions:
         type: string
       apiId:
         type: string
-      username:
+      ratedBy:
         type: string
       rating:
         type: integer

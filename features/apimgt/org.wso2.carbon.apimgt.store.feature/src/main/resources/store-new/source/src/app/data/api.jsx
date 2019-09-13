@@ -143,8 +143,8 @@ export default class API extends Resource {
 
     /**
      * Get the schema of an GraphQL API
-     * @param apiId {String} UUID of the API in which the swagger is needed
-     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @param apiId {String} UUID of the API in which the schema is needed
+     * @param callback {function} Function which needs to be called upon success of the retrieving schema
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getGraphQLSchemaByAPIId(apiId, callback = null) {
@@ -623,6 +623,17 @@ export default class API extends Resource {
     search(params) {
         return this.client.then((client) => {
             return client.apis['Unified Search'].get_search(params, Resource._requestMetaData());
+        });
+    }
+
+    /**
+     * method to get store settings such as grant types, scopes, application sharing settings etc
+     * @returns {Promise} promise object return from SwaggerClient-js
+     * @memberof API
+     */
+    getSettings(){
+        return this.client.then((client) => {
+            return client.apis.Settings.get_settings(this._requestMetaData());
         });
     }
 }

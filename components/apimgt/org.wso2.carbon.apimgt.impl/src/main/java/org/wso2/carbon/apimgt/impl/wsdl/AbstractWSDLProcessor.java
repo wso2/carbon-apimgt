@@ -133,4 +133,27 @@ abstract class AbstractWSDLProcessor implements WSDLProcessor {
         dbf.setAttribute(Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY, securityManager);
         return dbf;
     }
+
+    /**
+     * If the provided comma separated "transports" include both http,https, then return the provided scheme. Otherwise,
+     * return the transport available at "transports"
+     *
+     * @param scheme http or https
+     * @param transports available transports as comma separated values.
+     * @return return the supported transport compared to the "scheme" and available "transports"
+     */
+    String determineURLTransport(String scheme, String transports) {
+        // If transports is defined as "http,https" consider the actual transport
+        // protocol of the url, else give priority to the transport defined at API level
+        if ("http,https".equals(transports) || "https,http".equals(transports)) {
+            if ("http".equals(scheme)) {
+                return "http";
+            }
+            else if (scheme.startsWith("https")) {
+                return "https";
+            }
+        }
+
+        return transports;
+    }
 }

@@ -18,7 +18,6 @@
             <!-- Generated -->
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApi"/>
 	        <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiProductsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ClientCertificatesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.MediationPoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.SearchApi"/>
@@ -31,6 +30,7 @@
 
             <!-- Manually Added -->
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.SwaggerYamlApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.TenantsApi"/>
 
         </jaxrs:serviceBeans>
         <jaxrs:providers>

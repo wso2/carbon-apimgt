@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.Date;
 
 public class APIStore {
 
@@ -27,6 +28,7 @@ public class APIStore {
     private String password;
     private boolean published;
     private APIPublisher publisher;
+    private Date lastUpdated;
 
     public void setType(String type) {
         this.type = type;
@@ -107,6 +109,14 @@ public class APIStore {
     @Override
     public int hashCode() {
         return name != null ? name.hashCode() : 0;
+    }
+
+    public Date getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(Date lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 }
 
