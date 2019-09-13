@@ -404,10 +404,9 @@ class API extends Resource {
      * @param {string} query The parameters that should be validated.
      * @return {promise}
      * */
-    validateAPI(query) {
+    validateAPIParameter(query) {
         return this.client.then((client) => {
             return client.apis.Validation.validateAPI({ query: query }).then((resp) => {
-                console.log(resp);
                 return resp.ok;
             }).catch((err) => {
                 console.log(err);
@@ -422,10 +421,9 @@ class API extends Resource {
      * @param {string} name The document name
      * @return {promise}
      * */
-    validateDocument(id, name) {
+    validateDocumentExists(id, name) {
         return this.client.then((client) => {
-            return client.apis['API Documents'].validateDocument({apiId: id},{name: name }).then((resp) => {
-                console.log(resp);
+            return client.apis['API Documents'].validateDocument({ apiId: id, name: name }).then((resp) => {
                 return resp.ok;
             }).catch((err) => {
                 console.log(err);

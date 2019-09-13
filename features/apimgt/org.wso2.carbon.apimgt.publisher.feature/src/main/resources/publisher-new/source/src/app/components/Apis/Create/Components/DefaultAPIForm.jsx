@@ -291,14 +291,6 @@ export default function DefaultAPIForm(props) {
                         name='endpoint'
                         value={api.endpoint}
                         onChange={onChange}
-                        InputProps={{
-                            onBlur: ({ target: { value } }) => {
-                                validate({
-                                    ...validity,
-                                    endpointURL: value ? APIValidation.url.validate(value).error : null,
-                                });
-                            },
-                        }}
                         helperText={
                             validity.endpointURL && (
                                 <span>
