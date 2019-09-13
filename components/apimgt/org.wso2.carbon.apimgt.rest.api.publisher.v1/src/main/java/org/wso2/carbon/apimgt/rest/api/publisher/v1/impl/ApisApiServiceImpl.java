@@ -640,8 +640,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 // POST Request - Create new Audit API
 
-                final String boundary = "X-WSO2-BOUNDARY";
-                final String LINE_FEED = "\r\n";
                 HttpURLConnection httpConn;
                 OutputStream outputStream;
                 PrintWriter writer;
@@ -653,41 +651,47 @@ public class ApisApiServiceImpl implements ApisApiService {
                 httpConn.setUseCaches(false);
                 httpConn.setDoOutput(true); // indicates POST method
                 httpConn.setDoInput(true);
-                httpConn.setRequestProperty("Content-Type",
-                        "multipart/form-data; boundary=" + boundary);
-                httpConn.setRequestProperty("Accept", "application/json");
-                httpConn.setRequestProperty("x-api-key", "b57973cf-b74c-4ade-921d-ece83251eceb");
+                httpConn.setRequestProperty(APIConstants.HEADER_CONTENT_TYPE,
+                        "multipart/form-data; boundary=" + APIConstants.MULTIPART_FORM_BOUNDARY);
+                httpConn.setRequestProperty(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                httpConn.setRequestProperty(APIConstants.HEADER_API_TOKEN, apiToken);
                 outputStream = httpConn.getOutputStream();
                 writer = new PrintWriter(new OutputStreamWriter(outputStream),
                         true);
 
                 // Name property
-                writer.append("--" + boundary).append(LINE_FEED);
-                writer.append("Content-Disposition: form-data; name=\"name\"")
-                        .append(LINE_FEED);
-                writer.append(LINE_FEED);
-                writer.append(apiIdentifier.getApiName()).append(LINE_FEED);
+                writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY)
+                        .append(APIConstants.MULTIPART_LINE_FEED)
+                        .append("Content-Disposition: form-data; name=\"name\"")
+                        .append(APIConstants.MULTIPART_LINE_FEED)
+                        .append(APIConstants.MULTIPART_LINE_FEED)
+                        .append(apiIdentifier.getApiName())
+                        .append(APIConstants.MULTIPART_LINE_FEED);
                 writer.flush();
 
                 // Specfile property
-                writer.append("--" + boundary).append(LINE_FEED);
-                writer.append("Content-Disposition: form-data; name=\"specfile\"; filename=\"swagger.json\"")
-                        .append(LINE_FEED);
-                writer.append("Content-Type: application/json").append(
-                        LINE_FEED);
-                writer.append(LINE_FEED);
-                writer.append(apiDefinition).append(LINE_FEED);
+                writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY)
+                        .append(APIConstants.MULTIPART_LINE_FEED)
+                        .append("Content-Disposition: form-data; name=\"specfile\"; filename=\"swagger.json\"")
+                        .append(APIConstants.MULTIPART_LINE_FEED)
+                        .append(APIConstants.HEADER_CONTENT_TYPE + ": " + APIConstants.APPLICATION_JSON_MEDIA_TYPE)
+                        .append(APIConstants.MULTIPART_LINE_FEED)
+                        .append(APIConstants.MULTIPART_LINE_FEED)
+                        .append(apiDefinition)
+                        .append(APIConstants.MULTIPART_LINE_FEED);
                 writer.flush();
 
                 // CollectionID property
-                writer.append("--" + boundary).append(LINE_FEED);
-                writer.append("Content-Disposition: form-data; name=\"cid\"")
-                        .append(LINE_FEED);
-                writer.append(LINE_FEED);
-                writer.append(collectionId).append(LINE_FEED);
+                writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY)
+                        .append(APIConstants.MULTIPART_LINE_FEED)
+                        .append("Content-Disposition: form-data; name=\"cid\"")
+                        .append(APIConstants.MULTIPART_LINE_FEED)
+                        .append(APIConstants.MULTIPART_LINE_FEED)
+                        .append(collectionId)
+                        .append(APIConstants.MULTIPART_LINE_FEED);
                 writer.flush();
 
-                writer.append("--" + boundary + "--").append(LINE_FEED);
+                writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY + "--").append(APIConstants.MULTIPART_LINE_FEED);
                 writer.close();
 
                 // Checks server's status code first
@@ -698,7 +702,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                     BufferedReader reader = new BufferedReader(new InputStreamReader(
                             httpConn.getInputStream()));
-                    String inputLine = null;
+                    String inputLine;
                     StringBuilder responseString = new StringBuilder();
 
                     while((inputLine = reader.readLine()) != null) {

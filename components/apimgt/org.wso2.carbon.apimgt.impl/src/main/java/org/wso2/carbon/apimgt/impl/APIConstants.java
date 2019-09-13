@@ -215,6 +215,8 @@ public final class APIConstants {
     public static final String HEADER_ACCEPT = "Accept";
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
     public static final String HEADER_API_TOKEN = "X-API-KEY";
+    public static final String MULTIPART_FORM_BOUNDARY = "X-WSO2-BOUNDARY";
+    public static final String MULTIPART_LINE_FEED = "\r\n";
 
     //registry resource containing the self signup user config
     public static final String SELF_SIGN_UP_CONFIG_LOCATION = API_APPLICATION_DATA_LOCATION + "/sign-up-config.xml";
