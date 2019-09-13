@@ -28,7 +28,6 @@ import Icon from '@material-ui/core/Icon';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import SearchOutlined from '@material-ui/icons/SearchOutlined';
 import { Link } from 'react-router-dom';
-import { useTheme } from '@material-ui/styles';
 import APIsIcon from '@material-ui/icons/SettingsApplicationsOutlined';
 import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
