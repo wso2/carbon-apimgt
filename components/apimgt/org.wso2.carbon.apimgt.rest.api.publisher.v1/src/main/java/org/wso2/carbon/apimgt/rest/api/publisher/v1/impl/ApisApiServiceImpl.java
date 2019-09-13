@@ -656,7 +656,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 httpConn.setRequestProperty(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                 httpConn.setRequestProperty(APIConstants.HEADER_API_TOKEN, apiToken);
                 outputStream = httpConn.getOutputStream();
-                writer = new PrintWriter(new OutputStreamWriter(outputStream),
+                writer = new PrintWriter(new OutputStreamWriter(outputStream, "UTF-8"),
                         true);
 
                 // Name property
@@ -701,7 +701,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         log.debug("HTTP status " + status);
                     }
                     BufferedReader reader = new BufferedReader(new InputStreamReader(
-                            httpConn.getInputStream()));
+                            httpConn.getInputStream(), "UTF-8"));
                     String inputLine;
                     StringBuilder responseString = new StringBuilder();
 
@@ -734,7 +734,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                     if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                         BufferedReader reader = new BufferedReader(
-                                new InputStreamReader(response.getEntity().getContent()));
+                                new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
                         String inputLine;
                         StringBuilder responseString = new StringBuilder();
 
@@ -745,7 +745,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         String report = responseJson.get("data").toString();
                         String grade = (String) ((JSONObject) ((JSONObject) responseJson.get("attr")).get("data")).get("grade");
                         Integer numErrors = Integer.valueOf((String) ((JSONObject) ((JSONObject) responseJson.get("attr")).get("data")).get("numErrors"));
-                        String decodedReport = new String(Base64Utils.decode(report));
+                        String decodedReport = new String(Base64Utils.decode(report), "UTF-8");
                         AuditReportDTO auditReportDTO = new AuditReportDTO();
                         auditReportDTO.setReport(decodedReport);
                         auditReportDTO.setGrade(grade);
