@@ -1,0 +1,39 @@
+get:
+  - request:
+      method: GET
+      url: https://localhost:9443/api/am/store/v1.0/alerts/
+      headers: |
+          Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
+    response:
+      status:
+        code: 200
+        msg: OK
+      headers: |
+          Content-Type: application/json
+      body:
+        {
+          "count": 1,
+          "alerts": [
+            {
+              "id": 1,
+              "name": "AbnormalRequestsPerMin",
+              "isConfigurable": true
+            }
+          ]
+        }
+  - rawRequest: |
+        GET https://localhost:9443/api/am/store/v1.0/alerts HTTP/1.1
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+    curl: |
+        curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/store/v1.0/alerts
+    rawResponse: |
+        {
+          "count": 3,
+          "alerts": [
+            {
+              "id": 1,
+              "name": "AbnormalRequestsPerMin",
+              "isConfigurable": true
+            }
+          ]
+        }

@@ -3910,6 +3910,327 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ####################################################
+  # Store Alerts management REST API
+  ####################################################
+  '/alerts':
+    #--------------------------------------------------
+    # Retrieve the list of api store alert types.
+    #--------------------------------------------------
+    get:
+      security:
+        - OAuth2Security: []
+      x-examples:
+        $ref: docs/examples/alerts/alerts.yaml#/get
+      operationId: getStoreAlertTypes
+      summary: |
+        Get the list of API Store alert types.
+      description: |
+        This operation is used to get the list of supportd alert types for the 'subscriber' agent.
+      tags:
+        - Alerts
+      responses:
+        200:
+          description: |
+            OK.
+            The list of subscriber alert types are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertTypesList'
+        500:
+          description: |
+            Internal Server Error.
+            An internal server error occurred while retrieving the alert types.
+          schema:
+            $ref: '#/definitions/Error'
+
+  '/alerts/{userName}':
+    #--------------------------------------------------
+    # Retrieve the list of alerts subscribed by the user.
+    #--------------------------------------------------
+    get:
+      security:
+        - OAuth2Security: []
+      x-examples:
+        $ref: docs/examples/alerts/alerts_user.yaml#/get
+      summary: |
+        Get the list of API Store alert types subscribed by the user.
+      operationId: getSubscribedAlertTypesByUser
+      description: |
+        This operation is used to get the list of subscribed alert types by the user.
+      parameters:
+        - $ref: '#/parameters/userName'
+      tags:
+        - Alerts
+      responses:
+        200:
+          description: |
+            OK.
+            The list of subscribed alert types are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertsInfo'
+        404:
+          description: |
+            Not Found.
+            The user does not exist in the system.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error
+            An error occurred while retrieving subscribed alert types by user.
+          schema:
+            $ref: '#/definitions/Error'
+
+    #--------------------------------------------------
+    # Subscribe to the selected alert types by the user.
+    #--------------------------------------------------
+    post:
+      security:
+        - OAuth2Security: []
+      x-examples:
+        $ref: docs/examples/alerts/alerts_user.yaml#/post
+      summary: |
+        Subscribe to the selected alert types by the user.
+      operationId: subscribeToAlertsByUser
+      description: |
+        This operation is used to get the list of subscribed alert types by the user.
+      parameters:
+        - $ref: '#/parameters/userName'
+        - in: body
+          name: body
+          description:
+            The alerts list and the email list to subscribe.
+          required: true
+          schema:
+            $ref: '#/definitions/AlertsInfo'
+      tags:
+        - Alerts
+      responses:
+        201:
+          description: |
+            OK.
+            Successful response with the newly subscribed alerts.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertsInfo'
+        404:
+          description: |
+            Not Found.
+            The user not found.
+          schema:
+            $ref: '#/definitions/Error'
+        400:
+          description: |
+            Bad Request.
+            Invalid Request or request validation failure.
+        500:
+          description: |
+            Internal Server Error
+            An internal server error occurred while subscribing to alerts.
+          schema:
+            $ref: '#/definitions/Error'
+    #--------------------------------------------------
+    # Unsubscribe the user from all the alerts types
+    #--------------------------------------------------
+    delete:
+      security:
+        - OAuth2Security: []
+      x-examples:
+        $ref: docs/examples/alerts/alerts_user.yaml#/delete
+      summary: |
+        Unsubscribe user from all the alert types.
+      operationId: unsubscribeAllAlerts
+      description: |
+        This operation is used to unsubscribe the respective user from all the alert types.
+      parameters:
+        - $ref: '#/parameters/userName'
+      tags:
+        - Alerts
+      responses:
+        200:
+          description: |
+            OK.
+            The user is unsubscribed from the alerts successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        404:
+          description: |
+            Not Found.
+            Requested user is not found in the system.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+  ##################################################
+  # Alert configuration api
+  #################################################
+  '/alerts/{userName}/config':
+    #----------------------------------------------
+    # Get the alert configs
+    #----------------------------------------------
+    get:
+      security:
+        - OAuth2Security: []
+      x-examples:
+        $ref: docs/examples/alerts/alerts_user_config.yaml#/get
+      summary: |
+        Get the AbnormalRequestsPerMin alert configurations
+      operationId: getAlertConfigsUser
+      description: |
+        This operation is used to get configurations of the AbnormalRequestsPerMin alert type.
+      parameters:
+        - $ref: '#/parameters/userName'
+      tags:
+        - Alerts
+      responses:
+        200:
+          description: |
+            OK.
+            The store alert configuration.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertConfigList'
+        404:
+          description: |
+            Not Found.
+            The user does not exist in the system.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error
+            An error occurred while retrieving subscribed alert types by user.
+          schema:
+            $ref: '#/definitions/Error'
+    #----------------------------------------------
+    # Add alert config
+    #----------------------------------------------
+    post:
+      security:
+        - OAuth2Security: []
+      x-examples:
+        $ref: docs/examples/alerts/alerts_user_config.yaml#/post
+      summary: |
+        Add AbnormalRequestsPerMin alert configurations.
+      operationId: configureAlertUser
+      description: |
+        This operation is used to add configuration for the AbnormalRequestsPerMin alert type.
+      parameters:
+        - $ref: '#/parameters/userName'
+        - in: body
+          name: body
+          description:
+            Configuration for AbnormalRequestCount alert type
+          required: true
+          schema:
+            $ref: '#/definitions/AlertConfig'
+      tags:
+        - Alerts
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with newly created object as entity.
+            Location header contains URL of newly created entity.
+          headers:
+            Location:
+              description: |
+                The location of the newly created entity.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertConfig'
+        400:
+          description: |
+            Bad Request
+            The request parameters validation failed.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The user does not exist in the system.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error
+            An error occurred while retrieving subscribed alert types by user.
+          schema:
+            $ref: '#/definitions/Error'
+
+    #----------------------------------------------
+    # Delete alert configuration
+    #----------------------------------------------
+    delete:
+      security:
+        - OAuth2Security: []
+      x-examples:
+        $ref: docs/examples/alerts/alerts_user_config.yaml#/delete
+      summary: |
+        Delete the selected configuration from AbnormalRequestsPerMin alert type.
+      operationId: deleteAlertConfigUser
+      description: |
+        This operation is used to delete configuration from the AbnormalRequestsPerMin alert type.
+      parameters:
+        - $ref: '#/parameters/userName'
+        - in: body
+          name: body
+          description:
+            The AbnormalRequestCount configurations that should be deleted
+          required: true
+          schema:
+            $ref: '#/definitions/AlertConfig'
+      tags:
+        - Alerts
+      responses:
+        200:
+          description: |
+            OK.
+            The alert config is deleted successfully.
+        400:
+          description: |
+            Bad Request
+            The request parameters validation failed.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The user does not exist in the system.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error
+            An error occurred while retrieving subscribed alert types by user.
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -5672,7 +5993,108 @@ definitions:
       apiOwner:
         type: string
         example: admin
+  #----------------------------------------------
+  # The Alert list resource.
+  #----------------------------------------------
+  AlertTypesList:
+    title: Alert Types List
+    properties:
+      count:
+        type: integer
+        description: The number of alerts
+        example: 3
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/AlertType'
 
+  #----------------------------------------------
+  # The AlertType resource.
+  #----------------------------------------------
+  AlertType:
+    title: Alert Type
+    properties:
+      id:
+        type: integer
+        description: The alert Id
+        example: 1
+      name:
+        type: string
+        description: The name of the alert.
+        example: "AbnormalRequestsPerMin"
+      isConfigurable:
+        type: string
+        description: Whether the alert can be configured.
+        example: true
+
+  #----------------------------------------------
+  # The Alert resource.
+  #----------------------------------------------
+  Alert:
+    title: Alert
+    properties:
+      id:
+        type: integer
+        description: The alert Id
+        example: 1
+      name:
+        type: string
+        description: The name of the alert.
+        example: "AbnormalRequestsPerMin"
+      configuration:
+        type: array
+        description: Optional configuration for alert.
+        items:
+          $ref: "#/definitions/AlertConfig"
+
+  #-----------------------------------------------
+  # The Alert Info resource definition.
+  #-----------------------------------------------
+  AlertsInfo:
+    title: Alerts Info
+    properties:
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/Alert'
+      emailList:
+        type: array
+        items:
+          type: string
+
+  #-----------------------------------------------
+  # The Alert Config List resource definition.
+  #-----------------------------------------------
+  AlertConfigList:
+    title: Alert Configuration List
+    properties:
+      config:
+        type: array
+        items:
+          $ref: '#/definitions/AlertConfig'
+
+  #-----------------------------------------------
+  # The Alert Config resource definition.
+  #-----------------------------------------------
+  AlertConfig:
+    title: Alert Configuration
+    properties:
+      apiName:
+        type: string
+        description: The name of the api.
+        example: PizzaShackAPI
+      apiVersion:
+        type: string
+        description: The version of the api.
+        example: 1.0.0
+      applicationId:
+        type: string
+        description: The id of the application
+        example: 1
+      requestCount:
+        type: integer
+        description: The abnormal request count per minute.
+        example: 20
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------
