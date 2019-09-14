@@ -72,6 +72,8 @@ public class GraphQLAPIHandler extends AbstractHandler {
     private static final String INVALID_QUERY = "INVALID QUERY";
     private static final String SCOPE_ROLE_MAPPING = "ScopeRoleMapping";
     private static final String SCOPE_OPERATION_MAPPING = "ScopeOperationMapping";
+    private static final String OPERATION_THROTTLING_MAPPING = "OperationThrottlingMapping";
+    private static final String OPERATION_AUTH_SCHEME_MAPPING = "OperationAuthSchemeMapping";
     private static final String GRAPHQL_IDENTIFIER = "_graphQL";
     private static final String CLASS_NAME_AND_METHOD = "_GraphQLAPIHandler_handleRequest";
     private static final Log log = LogFactory.getLog(GraphQLAPIHandler.class);
@@ -193,14 +195,18 @@ public class GraphQLAPIHandler extends AbstractHandler {
      */
     private void supportForBasicAndAuthentication(MessageContext messageContext) {
         ArrayList<String> roleArrayList = new ArrayList<>();
+        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+        HashMap<String, String> operationThrottlingMappingList = new HashMap<>();
+        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+        HashMap<String, String> operationAuthSchemeMappingList = new HashMap<>();
         HashMap<String, String> operationScopeMappingList = new HashMap<>();
         HashMap<String, ArrayList<String>> scopeRoleMappingList = new HashMap<>();
 
         if (schema != null) {
             Set<GraphQLType> additionalTypes = schema.getAdditionalTypes();
             for (GraphQLType additionalType : additionalTypes) {
-                String base64DecodedAdditionalType = new String(Base64.getUrlDecoder().decode(additionalType.getName().
-                        split("_", 2)[1]));
+                String additionalTypeName = additionalType.getName().split("_", 2)[1];
+                String base64DecodedAdditionalType = new String(Base64.getUrlDecoder().decode(additionalTypeName));
                 for (GraphQLType type : additionalType.getChildren()) {
                     if (additionalType.getName().contains(SCOPE_ROLE_MAPPING)) {
                         String base64DecodedURLRole = new String(Base64.getUrlDecoder().decode(type.getName()));
@@ -209,6 +215,10 @@ public class GraphQLAPIHandler extends AbstractHandler {
                     } else if (additionalType.getName().contains(SCOPE_OPERATION_MAPPING)) {
                         String base64DecodedURLScope = new String(Base64.getUrlDecoder().decode(type.getName()));
                         operationScopeMappingList.put(base64DecodedAdditionalType, base64DecodedURLScope);
+                    } else if (additionalType.getName().contains(OPERATION_THROTTLING_MAPPING)) {
+                        operationThrottlingMappingList.put(additionalTypeName, type.getName());
+                    } else if (additionalType.getName().contains(OPERATION_AUTH_SCHEME_MAPPING)) {
+                        operationAuthSchemeMappingList.put(additionalTypeName, type.getName());
                     }
                 }
                 if (!roleArrayList.isEmpty()) {
