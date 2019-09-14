@@ -214,6 +214,12 @@ public final class APIConstants {
     public static final String HEADER_API_TOKEN = "X-API-KEY";
     public static final String MULTIPART_FORM_BOUNDARY = "X-WSO2-BOUNDARY";
     public static final String MULTIPART_LINE_FEED = "\r\n";
+    public static final String BASE_AUDIT_URL = "https://platform.42crunch.com/api/v1/apis";
+    public static final String MULTIPART_CONTENT_TYPE = "multipart/form-data; boundary=";
+    public static final String DATA = "data";
+    public static final String ATTR = "attr";
+    public static final String GRADE = "grade";
+    public static final String NUM_ERRORS = "numErrors";
 
     //registry resource containing the self signup user config
     public static final String SELF_SIGN_UP_CONFIG_LOCATION = API_APPLICATION_DATA_LOCATION + "/sign-up-config.xml";

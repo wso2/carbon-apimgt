@@ -14118,10 +14118,10 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Add the mapping of APIM API ID and Security Audit UUID
+     * Add new Audit API ID
      *
      * @param apiIdentifier APIIdentifier object to retrieve API ID
-     * @param uuid UUID of Security Audit API
+     * @param uuid Audit API ID
      * @throws APIManagementException
      */
     public void addAuditApiMapping(APIIdentifier apiIdentifier, String uuid) throws APIManagementException {
@@ -14129,20 +14129,15 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         PreparedStatement ps = null;
         int apiId = -1;
-
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-
             apiId = getAPIID(apiIdentifier, conn);
-
             String query = SQLConstants.ADD_SECURITY_AUDIT_MAP_SQL;
-
             ps = conn.prepareStatement(query);
             ps.setInt(1, apiId);
             ps.setString(2, uuid);
             ps.executeUpdate();
-
             conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
@@ -14159,9 +14154,9 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get the Security Audit UUID from the APIM API ID
+     * Get new Audit API ID
      *
-     * @param apiIdentifier API ID in APIM
+     * @param apiIdentifier APIIdentifier object to retrieve API ID
      * @throws APIManagementException
      */
     public String getAuditApiId(APIIdentifier apiIdentifier) throws APIManagementException {
@@ -14170,26 +14165,21 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         int apiId = -1;
         String uuid = null;
-
         try {
             conn = APIMgtDBUtil.getConnection();
             String getUuidQuery = SQLConstants.GET_AUDIT_UUID_SQL;
             ps = conn.prepareStatement(getUuidQuery);
-
             apiId = getAPIID(apiIdentifier, conn);
-
             if (ps != null) {
                 ps.setInt(1, apiId);
                 rs = ps.executeQuery();
             }
-
             if (rs.next()) {
                 uuid = rs.getString("AUDIT_UUID");
             }
             return uuid;
         } catch (SQLException e) {
-//            handleException("Failed to retrieve Security Audit UUID : ", e);
-            log.error("Failed to retrieve Security Audit UUID");
+            log.error("Failed to retrieve API Security Audit UUID");
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }

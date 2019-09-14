@@ -304,7 +304,7 @@ class APISecurityAudit extends Component {
                 }
 
                 return (
-                    <TableRow>
+                    <TableRow style={{ 'background-color': '#d3d3d3' }}>
                         <TableCell colSpan='2'>
                             <MonacoEditor
                                 width='85%'

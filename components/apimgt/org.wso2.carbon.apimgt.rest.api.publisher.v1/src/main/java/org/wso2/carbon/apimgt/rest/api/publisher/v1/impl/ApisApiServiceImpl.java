@@ -102,9 +102,16 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.net.*;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -615,7 +622,6 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdAuditapiGet(String apiId, String accept, MessageContext messageContext) {
         boolean isDebugEnabled = log.isDebugEnabled();
-
         try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -623,45 +629,42 @@ public class ApisApiServiceImpl implements ApisApiService {
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = api.getId();
             String apiDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
-
             // Get configuration file and retrieve API token
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
             String apiToken = config.getFirstProperty(APIConstants.API_SECURITY_AUDIT_API_TOKEN);
-
             // Retrieve the uuid from the database
             String uuid = ApiMgtDAO.getInstance().getAuditApiId(apiIdentifier);
-
             if (uuid != null) {
                 // PUT Request - Sync API Definition with Audit API
-
                 // Set the property to be attached in the body of the request
                 // Attach API Definition to property called specfile to be sent in the request
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append("{\n");
-                stringBuilder.append("  \"specfile\":   \"").append(Base64Utils.encode(apiDefinition.getBytes("UTF-8"))).append("\" \n");
+                stringBuilder.append("  \"specfile\":   \"")
+                        .append(Base64Utils.encode(apiDefinition.getBytes("UTF-8")))
+                        .append("\" \n");
                 stringBuilder.append("}");
-
                 // Logic for HTTP Request
-                String putUrl = "https://platform.42crunch.com/api/v1/apis/" + uuid;
+                String putUrl = APIConstants.BASE_AUDIT_URL + "/" + uuid;
                 org.apache.axis2.util.URL updateApiUrl = new org.apache.axis2.util.URL(putUrl);
-                try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil.getHttpClient(updateApiUrl.getPort(), updateApiUrl.getProtocol())) {
+                try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil
+                        .getHttpClient(updateApiUrl.getPort(), updateApiUrl.getProtocol())) {
                     HttpPut httpPut = new HttpPut(putUrl);
-
                     // Set the header properties of the request
                     httpPut.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                     httpPut.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                     httpPut.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
                     httpPut.setEntity(new StringEntity(stringBuilder.toString()));
-
                     // Code block for processing the response
                     try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
                         if (isDebugEnabled) {
                             log.debug("HTTP status " + response.getStatusLine().getStatusCode());
                         }
                         if (!(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)) {
-                            throw new APIManagementException("Error while sending data to " + putUrl +
-                                    ". Found http status " + response.getStatusLine());
+                            throw new APIManagementException(
+                                    "Error while sending data to " + putUrl + ". Found http status " + response
+                                            .getStatusLine());
                         }
                     } finally {
                         httpPut.releaseConnection();
@@ -669,73 +672,56 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             } else {
                 // POST Request - Create new Audit API
-
                 HttpURLConnection httpConn;
                 OutputStream outputStream;
                 PrintWriter writer;
-                String postUrl = "https://platform.42crunch.com/api/v1/apis";
                 String collectionId = config.getFirstProperty(APIConstants.API_SECURITY_AUDIT_CID);
-
-                URL url = new URL (postUrl);
+                URL url = new URL(APIConstants.BASE_AUDIT_URL);
                 httpConn = (HttpURLConnection) url.openConnection();
                 httpConn.setUseCaches(false);
                 httpConn.setDoOutput(true); // indicates POST method
                 httpConn.setDoInput(true);
                 httpConn.setRequestProperty(APIConstants.HEADER_CONTENT_TYPE,
-                        "multipart/form-data; boundary=" + APIConstants.MULTIPART_FORM_BOUNDARY);
+                        APIConstants.MULTIPART_CONTENT_TYPE + APIConstants.MULTIPART_FORM_BOUNDARY);
                 httpConn.setRequestProperty(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                 httpConn.setRequestProperty(APIConstants.HEADER_API_TOKEN, apiToken);
                 outputStream = httpConn.getOutputStream();
-                writer = new PrintWriter(new OutputStreamWriter(outputStream, "UTF-8"),
-                        true);
-
+                writer = new PrintWriter(new OutputStreamWriter(outputStream, "UTF-8"), true);
                 // Name property
-                writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY)
-                        .append(APIConstants.MULTIPART_LINE_FEED)
+                writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY).append(APIConstants.MULTIPART_LINE_FEED)
                         .append("Content-Disposition: form-data; name=\"name\"")
-                        .append(APIConstants.MULTIPART_LINE_FEED)
-                        .append(APIConstants.MULTIPART_LINE_FEED)
-                        .append(apiIdentifier.getApiName())
-                        .append(APIConstants.MULTIPART_LINE_FEED);
+                        .append(APIConstants.MULTIPART_LINE_FEED).append(APIConstants.MULTIPART_LINE_FEED)
+                        .append(apiIdentifier.getApiName()).append(APIConstants.MULTIPART_LINE_FEED);
                 writer.flush();
-
                 // Specfile property
-                writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY)
-                        .append(APIConstants.MULTIPART_LINE_FEED)
+                writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY).append(APIConstants.MULTIPART_LINE_FEED)
                         .append("Content-Disposition: form-data; name=\"specfile\"; filename=\"swagger.json\"")
                         .append(APIConstants.MULTIPART_LINE_FEED)
                         .append(APIConstants.HEADER_CONTENT_TYPE + ": " + APIConstants.APPLICATION_JSON_MEDIA_TYPE)
-                        .append(APIConstants.MULTIPART_LINE_FEED)
-                        .append(APIConstants.MULTIPART_LINE_FEED)
-                        .append(apiDefinition)
-                        .append(APIConstants.MULTIPART_LINE_FEED);
+                        .append(APIConstants.MULTIPART_LINE_FEED).append(APIConstants.MULTIPART_LINE_FEED)
+                        .append(apiDefinition).append(APIConstants.MULTIPART_LINE_FEED);
                 writer.flush();
-
                 // CollectionID property
-                writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY)
-                        .append(APIConstants.MULTIPART_LINE_FEED)
-                        .append("Content-Disposition: form-data; name=\"cid\"")
-                        .append(APIConstants.MULTIPART_LINE_FEED)
-                        .append(APIConstants.MULTIPART_LINE_FEED)
-                        .append(collectionId)
+                writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY).append(APIConstants.MULTIPART_LINE_FEED)
+                        .append("Content-Disposition: form-data; name=\"cid\"").append(APIConstants.MULTIPART_LINE_FEED)
+                        .append(APIConstants.MULTIPART_LINE_FEED).append(collectionId)
                         .append(APIConstants.MULTIPART_LINE_FEED);
                 writer.flush();
-
-                writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY + "--").append(APIConstants.MULTIPART_LINE_FEED);
+                writer.append("--" + APIConstants.MULTIPART_FORM_BOUNDARY + "--")
+                        .append(APIConstants.MULTIPART_LINE_FEED);
                 writer.close();
-
                 // Checks server's status code first
                 int status = httpConn.getResponseCode();
                 if (status == HttpURLConnection.HTTP_OK) {
-                    if(isDebugEnabled) {
+                    if (isDebugEnabled) {
                         log.debug("HTTP status " + status);
                     }
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(
-                            httpConn.getInputStream(), "UTF-8"));
+                    BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(httpConn.getInputStream(), "UTF-8"));
                     String inputLine;
                     StringBuilder responseString = new StringBuilder();
 
-                    while((inputLine = reader.readLine()) != null) {
+                    while ((inputLine = reader.readLine()) != null) {
                         responseString.append(inputLine);
                     }
                     reader.close();
@@ -745,18 +731,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                     ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, uuid);
                 }
             }
-
             // GET Request - Retrieve the API Security Audit Report for the Audit API
             // Logic for the HTTP request
             String getUrl = "https://platform.42crunch.com/api/v1/apis/" + uuid + "/assessmentreport";
             org.apache.axis2.util.URL getReportUrl = new org.apache.axis2.util.URL(getUrl);
-            try (CloseableHttpClient getHttpClient = (CloseableHttpClient) APIUtil.getHttpClient(getReportUrl.getPort(), getReportUrl.getProtocol())) {
+            try (CloseableHttpClient getHttpClient = (CloseableHttpClient) APIUtil
+                    .getHttpClient(getReportUrl.getPort(), getReportUrl.getProtocol())) {
                 HttpGet httpGet = new HttpGet(getUrl);
-
                 // Set the header properties of the request
                 httpGet.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                 httpGet.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
-
                 // Code block for the processing of the response
                 try (CloseableHttpResponse response = getHttpClient.execute(httpGet)) {
                     if (isDebugEnabled) {
@@ -772,9 +756,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                             responseString.append(inputLine);
                         }
                         JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
-                        String report = responseJson.get("data").toString();
-                        String grade = (String) ((JSONObject) ((JSONObject) responseJson.get("attr")).get("data")).get("grade");
-                        Integer numErrors = Integer.valueOf((String) ((JSONObject) ((JSONObject) responseJson.get("attr")).get("data")).get("numErrors"));
+                        String report = responseJson.get(APIConstants.DATA).toString();
+                        String grade = (String) ((JSONObject) ((JSONObject) responseJson.get("")).get(APIConstants.DATA))
+                                .get(APIConstants.GRADE);
+                        Integer numErrors = Integer.valueOf(
+                                (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR)).get(APIConstants.DATA))
+                                        .get(APIConstants.NUM_ERRORS));
                         String decodedReport = new String(Base64Utils.decode(report), "UTF-8");
                         AuditReportDTO auditReportDTO = new AuditReportDTO();
                         auditReportDTO.setReport(decodedReport);
