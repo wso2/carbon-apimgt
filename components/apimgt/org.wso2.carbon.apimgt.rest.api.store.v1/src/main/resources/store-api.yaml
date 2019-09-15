@@ -3913,7 +3913,7 @@ paths:
   ####################################################
   # Store Alerts management REST API
   ####################################################
-  '/alerts':
+  '/alerts/types':
     #--------------------------------------------------
     # Retrieve the list of api store alert types.
     #--------------------------------------------------
@@ -3948,7 +3948,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  '/alerts/{userName}':
+  '/alerts':
     #--------------------------------------------------
     # Retrieve the list of alerts subscribed by the user.
     #--------------------------------------------------
@@ -3959,11 +3959,9 @@ paths:
         $ref: docs/examples/alerts/alerts_user.yaml#/get
       summary: |
         Get the list of API Store alert types subscribed by the user.
-      operationId: getSubscribedAlertTypesByUser
+      operationId: getSubscribedAlertTypes
       description: |
         This operation is used to get the list of subscribed alert types by the user.
-      parameters:
-        - $ref: '#/parameters/userName'
       tags:
         - Alerts
       responses:
@@ -3978,12 +3976,6 @@ paths:
               type: string
           schema:
             $ref: '#/definitions/AlertsInfo'
-        404:
-          description: |
-            Not Found.
-            The user does not exist in the system.
-          schema:
-            $ref: '#/definitions/Error'
         500:
           description: |
             Internal Server Error
@@ -3996,16 +3988,15 @@ paths:
     #--------------------------------------------------
     post:
       security:
-        - OAuth2Security: []
+       - OAuth2Security: []
       x-examples:
         $ref: docs/examples/alerts/alerts_user.yaml#/post
       summary: |
         Subscribe to the selected alert types by the user.
-      operationId: subscribeToAlertsByUser
+      operationId: subscribeToAlerts
       description: |
         This operation is used to get the list of subscribed alert types by the user.
       parameters:
-        - $ref: '#/parameters/userName'
         - in: body
           name: body
           description:
@@ -4027,12 +4018,6 @@ paths:
               type: string
           schema:
             $ref: '#/definitions/AlertsInfo'
-        404:
-          description: |
-            Not Found.
-            The user not found.
-          schema:
-            $ref: '#/definitions/Error'
         400:
           description: |
             Bad Request.
@@ -4056,8 +4041,6 @@ paths:
       operationId: unsubscribeAllAlerts
       description: |
         This operation is used to unsubscribe the respective user from all the alert types.
-      parameters:
-        - $ref: '#/parameters/userName'
       tags:
         - Alerts
       responses:
@@ -4070,22 +4053,16 @@ paths:
               description: |
                 The content type of the body.
               type: string
-        404:
-          description: |
-            Not Found.
-            Requested user is not found in the system.
-          schema:
-            $ref: '#/definitions/Error'
         500:
           description: |
             Internal Server Error
           schema:
-            $ref: '#/definitions/Error'
+           $ref: '#/definitions/Error'
 
   ##################################################
   # Alert configuration api
   #################################################
-  '/alerts/{userName}/config':
+  '/alerts/config':
     #----------------------------------------------
     # Get the alert configs
     #----------------------------------------------
@@ -4096,11 +4073,9 @@ paths:
         $ref: docs/examples/alerts/alerts_user_config.yaml#/get
       summary: |
         Get the AbnormalRequestsPerMin alert configurations
-      operationId: getAlertConfigsUser
+      operationId: getAlertConfigs
       description: |
         This operation is used to get configurations of the AbnormalRequestsPerMin alert type.
-      parameters:
-        - $ref: '#/parameters/userName'
       tags:
         - Alerts
       responses:
@@ -4115,12 +4090,6 @@ paths:
               type: string
           schema:
             $ref: '#/definitions/AlertConfigList'
-        404:
-          description: |
-            Not Found.
-            The user does not exist in the system.
-          schema:
-            $ref: '#/definitions/Error'
         500:
           description: |
             Internal Server Error
@@ -4134,21 +4103,20 @@ paths:
       security:
         - OAuth2Security: []
       x-examples:
-        $ref: docs/examples/alerts/alerts_user_config.yaml#/post
+      $ref: docs/examples/alerts/alerts_user_config.yaml#/post
       summary: |
         Add AbnormalRequestsPerMin alert configurations.
-      operationId: configureAlertUser
+      operationId: addAlertConfig
       description: |
         This operation is used to add configuration for the AbnormalRequestsPerMin alert type.
       parameters:
-        - $ref: '#/parameters/userName'
         - in: body
           name: body
           description:
             Configuration for AbnormalRequestCount alert type
           required: true
           schema:
-            $ref: '#/definitions/AlertConfig'
+            $ref: '#/definitions/AlertConfigList'
       tags:
         - Alerts
       responses:
@@ -4156,24 +4124,17 @@ paths:
           description: |
             Created.
             Successful response with newly created object as entity.
-            Location header contains URL of newly created entity.
           headers:
             Location:
               description: |
                 The location of the newly created entity.
               type: string
           schema:
-            $ref: '#/definitions/AlertConfig'
+            $ref: '#/definitions/AlertConfigList'
         400:
           description: |
             Bad Request
             The request parameters validation failed.
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: |
-            Not Found.
-            The user does not exist in the system.
           schema:
             $ref: '#/definitions/Error'
         500:
@@ -4193,18 +4154,17 @@ paths:
         $ref: docs/examples/alerts/alerts_user_config.yaml#/delete
       summary: |
         Delete the selected configuration from AbnormalRequestsPerMin alert type.
-      operationId: deleteAlertConfigUser
+      operationId: deleteAlertConfig
       description: |
         This operation is used to delete configuration from the AbnormalRequestsPerMin alert type.
       parameters:
-        - $ref: '#/parameters/userName'
         - in: body
           name: body
           description:
             The AbnormalRequestCount configurations that should be deleted
           required: true
           schema:
-            $ref: '#/definitions/AlertConfig'
+            $ref: '#/definitions/AlertConfigList'
       tags:
         - Alerts
       responses:
@@ -4221,7 +4181,7 @@ paths:
         404:
           description: |
             Not Found.
-            The user does not exist in the system.
+            The provided alert configuration is not found.
           schema:
             $ref: '#/definitions/Error'
         500:

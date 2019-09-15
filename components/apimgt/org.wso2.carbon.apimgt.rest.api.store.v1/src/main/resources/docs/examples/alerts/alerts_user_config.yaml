@@ -2,7 +2,7 @@ get:
   - id: GetAlertConfigurations
     request:
       method: GET
-      url: https://localhost:9443/api/am/store/v1.0/alerts/john/config
+      url: https://localhost:9443/api/am/store/v1.0/alerts/config
       headers: |
         Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
     response:
@@ -19,22 +19,23 @@ get:
               "apiVersion": "1.0.0",
               "applicationId": 1,
               "requestCount": 20
-            }]
+            }
+          ]
         }
   - rawRequest: |
-      GET https://localhost:9443/api/am/store/v1.0/alerts/john/config HTTP/1.1
+      GET https://localhost:9443/api/am/store/v1.0/alerts/config HTTP/1.1
       Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     curl: |
-      curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/store/v1.0/alerts/john/config
+      curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/store/v1.0/alerts/config
     rawResponse: |
                 {
                   "config": [
-                  {
-                    "apiName": "PizzaShackAPI",
-                    "apiVersion": "1.0.0",
-                    "applicationId": 1,
-                    "requestCount": 20
-                  }
+                    {
+                      "apiName": "PizzaShackAPI",
+                      "apiVersion": "1.0.0",
+                      "applicationId": 1,
+                      "requestCount": 20
+                    }
                   ]
                 }
 
@@ -42,15 +43,20 @@ post:
   - id: AddAlertConfiguration
     request:
       method: POST
-      url: https://localhost:9443/api/am/store/v1.0/alerts/john/config
+      url: https://localhost:9443/api/am/store/v1.0/alerts/config
       headers: |
         Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
+        Content-Type: application/json
       body:
         {
-          "apiName": "PizzaShackAPI",
-          "apiVersion": "1.0.0",
-          "applicationId": 1,
-          "requestCount": 20
+          "config": [
+            {
+              "apiName": "PizzaShackAPI",
+              "apiVersion": "1.0.0",
+              "applicationId": 1,
+              "requestCount": 20
+            }
+          ]
         }
     response:
       status:
@@ -60,37 +66,49 @@ post:
           Content-Type: application/json
       body:
         {
-          "apiName": "PizzaShackAPI",
-          "apiVersion": "1.0.0",
-          "applicationId": 1,
-          "requestCount": 20
+          "config": [
+            {
+              "apiName": "PizzaShackAPI",
+              "apiVersion": "1.0.0",
+              "applicationId": 1,
+              "requestCount": 20
+            }
+          ]
         }
 
   - rawRequest: |
-      POST https://localhost:9443/api/am/store/v1.0/alerts/john/config HTTP/1.1
+      POST https://localhost:9443/api/am/store/v1.0/alerts/config HTTP/1.1
       Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      Content-Type: application/json
     curl: |
-      curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/store/v1.0/alerts/john/config
+      curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" https://localhost:9443/api/am/store/v1.0/alerts/config
     rawResponse: |
-                {
-                  "apiName": "PizzaShackAPI",
-                  "apiVersion": "1.0.0",
-                  "applicationId": 1,
-                  "requestCount": 20
-                }
+        {
+          "config": [
+            {
+              "apiName": "PizzaShackAPI",
+              "apiVersion": "1.0.0",
+              "applicationId": 1,
+              "requestCount": 20
+            }
+          ]
+        }
 delete:
   - id: RemoveAlertConfiguration
     request:
       method: DELETE
-      url: https://localhost:9443/api/am/store/v1.0/alerts/john/config
+      url: https://localhost:9443/api/am/store/v1.0/alerts/config
       headers: |
         Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
+        Content-Type: application/json
       body:
-        {
-          "apiName": "PizzaShackAPI",
-          "apiVersion": "1.0.0",
-          "applicationId": 1,
-          "requestCount": 20
+        {"config":[
+          {
+              "apiName": "PizzaShackAPI",
+              "apiVersion": "1.0.0",
+              "applicationId": 1,
+              "requestCount": 20
+          }]
         }
       response:
         status:
@@ -99,7 +117,8 @@ delete:
         headers: |
           Content-Type: application/json
   - rawRequest: |
-      DELETE https://localhost:9443/api/am/store/v1.0/alerts/john/config HTTP/1.1
+      DELETE https://localhost:9443/api/am/store/v1.0/alerts/config HTTP/1.1
       Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      Content-Type: application/json
     curl: |
-      curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/store/v1.0/alerts/john/config
+      curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" https://localhost:9443/api/am/store/v1.0/alerts/config

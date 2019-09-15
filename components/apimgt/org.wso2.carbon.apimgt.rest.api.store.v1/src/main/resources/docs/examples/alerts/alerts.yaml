@@ -1,7 +1,7 @@
 get:
   - request:
       method: GET
-      url: https://localhost:9443/api/am/store/v1.0/alerts/
+      url: https://localhost:9443/api/am/store/v1.0/alerts/types
       headers: |
           Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
     response:
@@ -22,10 +22,10 @@ get:
           ]
         }
   - rawRequest: |
-        GET https://localhost:9443/api/am/store/v1.0/alerts HTTP/1.1
+        GET https://localhost:9443/api/am/store/v1.0/alerts/types HTTP/1.1
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     curl: |
-        curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/store/v1.0/alerts
+        curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/store/v1.0/alerts/types
     rawResponse: |
         {
           "count": 3,

@@ -9,7 +9,6 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertConfigListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertTypesListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertsInfoDTO;
@@ -24,11 +23,11 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface AlertsApiService {
-      public Response configureAlertUser(String userName, AlertConfigDTO body, MessageContext messageContext) throws APIManagementException;
-      public Response deleteAlertConfigUser(String userName, AlertConfigDTO body, MessageContext messageContext) throws APIManagementException;
-      public Response getAlertConfigsUser(String userName, MessageContext messageContext) throws APIManagementException;
+      public Response addAlertConfig(AlertConfigListDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response deleteAlertConfig(AlertConfigListDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response getAlertConfigs(MessageContext messageContext) throws APIManagementException;
       public Response getStoreAlertTypes(MessageContext messageContext) throws APIManagementException;
-      public Response getSubscribedAlertTypesByUser(String userName, MessageContext messageContext) throws APIManagementException;
-      public Response subscribeToAlertsByUser(String userName, AlertsInfoDTO body, MessageContext messageContext) throws APIManagementException;
-      public Response unsubscribeAllAlerts(String userName, MessageContext messageContext) throws APIManagementException;
+      public Response getSubscribedAlertTypes(MessageContext messageContext) throws APIManagementException;
+      public Response subscribeToAlerts(AlertsInfoDTO body, MessageContext messageContext) throws APIManagementException;
+      public Response unsubscribeAllAlerts(MessageContext messageContext) throws APIManagementException;
 }

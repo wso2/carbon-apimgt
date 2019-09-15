@@ -26,6 +26,7 @@ import java.sql.SQLException;
  * This is class will be called from jaggery layer and has methods to persist and publish alert types data to the its
  * stream.
  */
+@Deprecated
 public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
 
     public AlertTypesPublisher() {
@@ -44,41 +45,36 @@ public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
     public void saveAndPublishAlertTypesEvent(String checkedAlertList, String emailList, String userName, String agent,
             String checkedAlertListValues) throws APIManagementException {
 
-        try {
-            if (!enabled) {
-                throw new APIManagementException("Data publisher is not enabled");
-            }
-
-            if (publisher == null) {
-                this.initializeDataPublisher();
-            }
-
-            ApiMgtDAO apiMgtDAO = getApiMgtdao();
-            //data persist in the database.
-            apiMgtDAO.addAlertTypesConfigInfo(userName, emailList, checkedAlertList, agent);
-            //set DTO
-            AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
-            alertTypeDTO.setAlertTypes(checkedAlertListValues);
-            alertTypeDTO.setEmails(emailList);
-            alertTypeDTO.setUserName(userName);
-            if ("publisher".equals(agent)) {
-                alertTypeDTO.setPublisher(true);
-                alertTypeDTO.setSubscriber(false);
-                alertTypeDTO.setAdmin(false);
-            } else if ("subscriber".equals(agent)) {
-                alertTypeDTO.setSubscriber(true);
-                alertTypeDTO.setPublisher(false);
-                alertTypeDTO.setAdmin(false);
-            } else if ("admin-dashboard".equals(agent)) {
-                alertTypeDTO.setSubscriber(false);
-                alertTypeDTO.setPublisher(false);
-                alertTypeDTO.setAdmin(true);
-            }
-            publisher.publishEvent(alertTypeDTO);
-
-        } catch (SQLException e) {
-            handleException("Error while saving alert types", e);
+        if (!enabled) {
+            throw new APIManagementException("Data publisher is not enabled");
         }
+
+        if (publisher == null) {
+            this.initializeDataPublisher();
+        }
+
+        ApiMgtDAO apiMgtDAO = getApiMgtdao();
+        //data persist in the database.
+        apiMgtDAO.addAlertTypesConfigInfo(userName, emailList, checkedAlertList, agent);
+        //set DTO
+        AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
+        alertTypeDTO.setAlertTypes(checkedAlertListValues);
+        alertTypeDTO.setEmails(emailList);
+        alertTypeDTO.setUserName(userName);
+        if ("publisher".equals(agent)) {
+            alertTypeDTO.setPublisher(true);
+            alertTypeDTO.setSubscriber(false);
+            alertTypeDTO.setAdmin(false);
+        } else if ("subscriber".equals(agent)) {
+            alertTypeDTO.setSubscriber(true);
+            alertTypeDTO.setPublisher(false);
+            alertTypeDTO.setAdmin(false);
+        } else if ("admin-dashboard".equals(agent)) {
+            alertTypeDTO.setSubscriber(false);
+            alertTypeDTO.setPublisher(false);
+            alertTypeDTO.setAdmin(true);
+        }
+        publisher.publishEvent(alertTypeDTO);
 
     }
 
@@ -90,43 +86,38 @@ public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
      * This method will delete all the data relating to the alert subscription by given user Name.
      * @param userName logged in users name.
      */
-    public void unSubscribe(String userName,String agent) throws APIManagementException {
+    public void unSubscribe(String userName, String agent) throws APIManagementException {
 
-        try {
-            if (!enabled) {
-                throw new APIManagementException("Data publisher is not enabled");
-            }
-
-            if (publisher == null) {
-                this.initializeDataPublisher();
-            }
-
-            ApiMgtDAO apiMgtDAO = getApiMgtdao();
-            //data persist in the database.
-            apiMgtDAO.unSubscribeAlerts(userName,agent);
-            //set DTO
-            AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
-            alertTypeDTO.setAlertTypes("");
-            alertTypeDTO.setEmails("");
-            alertTypeDTO.setUserName(userName);
-            if ("publisher".equals(agent)) {
-                alertTypeDTO.setPublisher(true);
-                alertTypeDTO.setSubscriber(false);
-                alertTypeDTO.setAdmin(false);
-            } else if ("subscriber".equals(agent)) {
-                alertTypeDTO.setSubscriber(true);
-                alertTypeDTO.setPublisher(false);
-                alertTypeDTO.setAdmin(false);
-            } else if ("admin-dashboard".equals(agent)) {
-                alertTypeDTO.setSubscriber(false);
-                alertTypeDTO.setPublisher(false);
-                alertTypeDTO.setAdmin(true);
-            }
-            publisher.publishEvent(alertTypeDTO);
-
-        } catch (SQLException e) {
-            handleException("Error while saving alert types", e);
+        if (!enabled) {
+            throw new APIManagementException("Data publisher is not enabled");
         }
+
+        if (publisher == null) {
+            this.initializeDataPublisher();
+        }
+
+        ApiMgtDAO apiMgtDAO = getApiMgtdao();
+        //data persist in the database.
+        apiMgtDAO.unSubscribeAlerts(userName, agent);
+        //set DTO
+        AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
+        alertTypeDTO.setAlertTypes("");
+        alertTypeDTO.setEmails("");
+        alertTypeDTO.setUserName(userName);
+        if ("publisher".equals(agent)) {
+            alertTypeDTO.setPublisher(true);
+            alertTypeDTO.setSubscriber(false);
+            alertTypeDTO.setAdmin(false);
+        } else if ("subscriber".equals(agent)) {
+            alertTypeDTO.setSubscriber(true);
+            alertTypeDTO.setPublisher(false);
+            alertTypeDTO.setAdmin(false);
+        } else if ("admin-dashboard".equals(agent)) {
+            alertTypeDTO.setSubscriber(false);
+            alertTypeDTO.setPublisher(false);
+            alertTypeDTO.setAdmin(true);
+        }
+        publisher.publishEvent(alertTypeDTO);
 
     }
 
