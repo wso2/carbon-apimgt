@@ -19,6 +19,10 @@ import Typography from '@material-ui/core/Typography';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import Alert from 'AppComponents/Shared/Alert';
+import Tooltip from '@material-ui/core/Tooltip';
+import Button from '@material-ui/core/Button';
+import HelpOutline from '@material-ui/icons/HelpOutline';
+import { FormattedMessage } from 'react-intl';
 import { CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import VisibilitySensor from 'react-visibility-sensor';
@@ -44,6 +48,24 @@ const styles = theme => ({
     },
     contentLine: {
         background: '#add8e6',
+    },
+    htmlToolTip: {
+        backgroundColor: '#f5f5f9',
+        color: 'rgba(0, 0, 0, 0.87)',
+        maxWidth: 220,
+        fontSize: theme.typography.pxToRem(14),
+        border: '1px solid #dadde9',
+        '& b': {
+            fontWeight: theme.typography.fontWeightMedium,
+        },
+    },
+    helpButton: {
+        padding: 0,
+        minWidth: 20,
+        'margin-left': 10,
+    },
+    helpIcon: {
+        fontSize: 16,
     },
 });
 
@@ -388,9 +410,32 @@ class APISecurityAudit extends Component {
                                                     Total Number of Errors:
                                                 </strong> {numErrors}
                                             </Typography>
-                                            <Typography variant='body1'>
-                                                <strong>Overall Criticality:</strong> {reportObject.criticality}
-                                            </Typography>
+                                            <React.Fragment>
+                                                <Typography variant='body1'>
+                                                    <strong>Overall Criticality:</strong> {reportObject.criticality}
+                                                    <Tooltip
+                                                        placement='right'
+                                                        classes={{
+                                                            tooltip: classes.htmlTooltip,
+                                                        }}
+                                                        title={
+                                                            <React.Fragment>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.APIDefinition.AuditApi.tooltip'
+                                                                    defaultMessage={
+                                                                        'Criticality ranges from 1 to 5, with 1 being' +
+                                                                    ' low vulnerability and 5 being high vulnerability'
+                                                                    }
+                                                                />
+                                                            </React.Fragment>
+                                                        }
+                                                    >
+                                                        <Button className={classes.helpButton}>
+                                                            <HelpOutline className={classes.helpIcon} />
+                                                        </Button>
+                                                    </Tooltip>
+                                                </Typography>
+                                            </React.Fragment>
                                             <hr />
                                             <Typography variant='body1'>
                                                 <strong>OpenAPI Format
@@ -464,6 +509,32 @@ class APISecurityAudit extends Component {
                                 </Typography>
                                 <Typography variant='body1'>
                                     <strong>Criticality:</strong> {reportObject.validation.criticality}
+                                    <React.Fragment>
+                                        <Typography variant='body1'>
+                                            <strong>Overall Criticality:</strong> {reportObject.criticality}
+                                            <Tooltip
+                                                placement='right'
+                                                classes={{
+                                                    tooltip: classes.htmlTooltip,
+                                                }}
+                                                title={
+                                                    <React.Fragment>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.APIDefinition.AuditApi.tooltip'
+                                                            defaultMessage={
+                                                                'Criticality ranges from 1 to 5, with 1 being' +
+                                                                    ' low vulnerability and 5 being high vulnerability'
+                                                            }
+                                                        />
+                                                    </React.Fragment>
+                                                }
+                                            >
+                                                <Button className={classes.helpButton}>
+                                                    <HelpOutline className={classes.helpIcon} />
+                                                </Button>
+                                            </Tooltip>
+                                        </Typography>
+                                    </React.Fragment>
                                 </Typography>
                                 {(reportObject.validation.issueCounter !== 0) &&
                                     <div>
@@ -497,6 +568,32 @@ class APISecurityAudit extends Component {
                                 </Typography>
                                 <Typography variant='body1'>
                                     <strong>Criticality:</strong> {reportObject.security.criticality}
+                                    <React.Fragment>
+                                        <Typography variant='body1'>
+                                            <strong>Overall Criticality:</strong> {reportObject.criticality}
+                                            <Tooltip
+                                                placement='right'
+                                                classes={{
+                                                    tooltip: classes.htmlTooltip,
+                                                }}
+                                                title={
+                                                    <React.Fragment>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.APIDefinition.AuditApi.tooltip'
+                                                            defaultMessage={
+                                                                'Criticality ranges from 1 to 5, with 1 being' +
+                                                                    ' low vulnerability and 5 being high vulnerability'
+                                                            }
+                                                        />
+                                                    </React.Fragment>
+                                                }
+                                            >
+                                                <Button className={classes.helpButton}>
+                                                    <HelpOutline className={classes.helpIcon} />
+                                                </Button>
+                                            </Tooltip>
+                                        </Typography>
+                                    </React.Fragment>
                                 </Typography>
                                 {(reportObject.security.issueCounter !== 0) &&
                                     <div>
@@ -526,6 +623,32 @@ class APISecurityAudit extends Component {
                                 </Typography>
                                 <Typography variant='body1'>
                                     <strong>Criticality:</strong> {reportObject.data.criticality}
+                                    <React.Fragment>
+                                        <Typography variant='body1'>
+                                            <strong>Overall Criticality:</strong> {reportObject.criticality}
+                                            <Tooltip
+                                                placement='right'
+                                                classes={{
+                                                    tooltip: classes.htmlTooltip,
+                                                }}
+                                                title={
+                                                    <React.Fragment>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.APIDefinition.AuditApi.tooltip'
+                                                            defaultMessage={
+                                                                'Criticality ranges from 1 to 5, with 1 being' +
+                                                                    ' low vulnerability and 5 being high vulnerability'
+                                                            }
+                                                        />
+                                                    </React.Fragment>
+                                                }
+                                            >
+                                                <Button className={classes.helpButton}>
+                                                    <HelpOutline className={classes.helpIcon} />
+                                                </Button>
+                                            </Tooltip>
+                                        </Typography>
+                                    </React.Fragment>
                                 </Typography>
                                 {(reportObject.data.issueCounter !== 0) &&
                                     <div>
@@ -558,6 +681,7 @@ APISecurityAudit.propTypes = {
     history: PropTypes.shape({
         push: PropTypes.func.isRequired,
     }).isRequired,
+    parentClasses: PropTypes.shape({}).isRequired,
 };
 
 export default withRouter(withStyles(styles)(APISecurityAudit));
