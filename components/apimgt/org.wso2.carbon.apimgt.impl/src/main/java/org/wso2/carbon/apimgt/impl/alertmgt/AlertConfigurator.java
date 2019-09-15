@@ -44,7 +44,15 @@ public interface AlertConfigurator {
      * @param userName : The username of the user who has subscribed.
      * @return A list of alertTypes subscribed by the user.
      * */
-    public List<AlertTypeDTO> getSubscribedAlerts(String userName) throws APIManagementException;
+    public List<Integer> getSubscribedAlerts(String userName) throws APIManagementException;
+
+    /**
+     * Get the list of subscribed email addresses types by a user through an agent.
+     *
+     * @param userName : The username of the user who has subscribed.
+     * @return The list of email addresses subscribed by the user.
+     * */
+    public List<String> getSubscribedEmailAddresses(String userName) throws APIManagementException;
 
     /**
      * Method to add subscription to the provided alert types.
@@ -53,23 +61,25 @@ public interface AlertConfigurator {
      * @param emailsList : The list of emails which needs to be subscribed.
      * @param alertTypeDTOList: The list of Alert types which needs to be subscribed.
      * */
-    public void subscribe(String userName, List<String> emailsList, List<AlertTypeDTO> alertTypeDTOList);
+    public void subscribe(String userName, List<String> emailsList, List<AlertTypeDTO> alertTypeDTOList)
+            throws APIManagementException;
 
     /**
      * Unsubscribe a particular user from all the alert types.
      *
      * @param userName : The name of the user who needs to be unsubscribed.
      * */
-    public void unsubscribe(String userName);
+    public void unsubscribe(String userName) throws APIManagementException;
 
     /**
      * Add configuration to the provided Alert type.
      *
      * @param userName: The name of the user
      * @param alertName: The name of the alert type.
-     * @param configProperties: The configuration properties list.
+     * @param configProperties: The configuration properties.
      * */
-    public void addAlertConfiguration(String userName, String alertName, List<Properties> configProperties);
+    void addAlertConfiguration(String userName, String alertName, Properties configProperties)
+            throws APIManagementException;
 
     /**
      * Get the existing configurations of the provided alert type.
@@ -78,7 +88,7 @@ public interface AlertConfigurator {
      * @param alertName: The alert type name.
      * @return The list of configuration properties of the alert.
      * */
-    public List<Properties> getAlertConfiguration(String userName, String alertName);
+    public List<Properties> getAlertConfiguration(String userName, String alertName) throws APIManagementException;
 
     /**
      * Remove provided configuration from the alert type.
@@ -87,6 +97,6 @@ public interface AlertConfigurator {
      * @param alertName: The alert type name
      * @param configProperties: The properties that should be removed from the alert config.
      * */
-    public void removeAlertConfiguration(String userName, String alertName, List<Properties> configProperties);
-
+    void removeAlertConfiguration(String userName, String alertName, Properties configProperties)
+            throws APIManagementException;
 }
