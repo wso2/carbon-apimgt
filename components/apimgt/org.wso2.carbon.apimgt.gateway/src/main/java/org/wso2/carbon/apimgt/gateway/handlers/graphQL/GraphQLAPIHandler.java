@@ -229,6 +229,8 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
         messageContext.setProperty(SCOPE_ROLE_MAPPING, scopeRoleMappingList);
         messageContext.setProperty(SCOPE_OPERATION_MAPPING, operationScopeMappingList);
+        messageContext.setProperty(OPERATION_THROTTLING_MAPPING, operationThrottlingMappingList);
+        messageContext.setProperty(OPERATION_AUTH_SCHEME_MAPPING, operationAuthSchemeMappingList);
         messageContext.setProperty(API_TYPE, GRAPHQL_API);
     }
 
