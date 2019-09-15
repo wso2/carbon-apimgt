@@ -89,21 +89,4 @@ public class OASParserUtilTest {
     @Test
     public void testValidateAPIDefinitionByURL() {
     }
-
-    @Test
-    public void test() throws Exception {
-        String oas3 = IOUtils
-                .toString(getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "petstore_v3.yaml"),
-                        "UTF-8");
-        String oas2 = IOUtils
-                .toString(getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "petstore_v2.yaml"),
-                        "UTF-8");
-
-        ObjectMapper mapper;
-        mapper = ObjectMapperFactory.createYaml();
-        JsonNode rootNode = mapper.readTree(oas3.getBytes());
-        ObjectNode node = (ObjectNode)rootNode;
-        JsonNode v = node.get("openapi");
-        System.out.println(v!=null && v.asText().startsWith("3."));
-    }
 }
