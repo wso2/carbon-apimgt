@@ -176,15 +176,15 @@ public class GraphQLSchemaDefinition {
 
             if (operationAuthSchemeMap.size() > 0) {
                 String operationAuthSchemeType;
-                String isSecurityEnabled;
+                boolean isSecurityEnabled;
                 for (Map.Entry<String, String> entry : operationAuthSchemeMap.entrySet()) {
                     if (entry.getValue().equalsIgnoreCase(APIConstants.AUTH_NO_AUTHENTICATION)) {
-                        isSecurityEnabled = "securityEnabled";
+                        isSecurityEnabled = false;
                     } else {
-                        isSecurityEnabled = "securityDisabled";
+                        isSecurityEnabled = true;
                     }
                     operationAuthSchemeType = "type OperationAuthSchemeMapping_" +
-                            entry.getKey() + "{\n" + isSecurityEnabled + ": String\n}\n";
+                            entry.getKey() + "{\n" + isSecurityEnabled + ": Boolean\n}\n";
                     operationAuthSchemeMappingBuilder.append(operationAuthSchemeType);
                 }
                 schemaDefinitionBuilder.append(operationAuthSchemeMappingBuilder.toString());

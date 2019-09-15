@@ -70,10 +70,6 @@ public class GraphQLAPIHandler extends AbstractHandler {
     private static final String HTTP_VERB = "HTTP_VERB";
     private static final String UNICODE_TRANSFORMATION_FORMAT = "UTF-8";
     private static final String INVALID_QUERY = "INVALID QUERY";
-    private static final String SCOPE_ROLE_MAPPING = "ScopeRoleMapping";
-    private static final String SCOPE_OPERATION_MAPPING = "ScopeOperationMapping";
-    private static final String OPERATION_THROTTLING_MAPPING = "OperationThrottlingMapping";
-    private static final String OPERATION_AUTH_SCHEME_MAPPING = "OperationAuthSchemeMapping";
     private static final String GRAPHQL_IDENTIFIER = "_graphQL";
     private static final String CLASS_NAME_AND_METHOD = "_GraphQLAPIHandler_handleRequest";
     private static final Log log = LogFactory.getLog(GraphQLAPIHandler.class);
@@ -208,16 +204,16 @@ public class GraphQLAPIHandler extends AbstractHandler {
                 String additionalTypeName = additionalType.getName().split("_", 2)[1];
                 String base64DecodedAdditionalType = new String(Base64.getUrlDecoder().decode(additionalTypeName));
                 for (GraphQLType type : additionalType.getChildren()) {
-                    if (additionalType.getName().contains(SCOPE_ROLE_MAPPING)) {
+                    if (additionalType.getName().contains(APIConstants.SCOPE_ROLE_MAPPING)) {
                         String base64DecodedURLRole = new String(Base64.getUrlDecoder().decode(type.getName()));
                         roleArrayList = new ArrayList<>();
                         roleArrayList.add(base64DecodedURLRole);
-                    } else if (additionalType.getName().contains(SCOPE_OPERATION_MAPPING)) {
+                    } else if (additionalType.getName().contains(APIConstants.SCOPE_OPERATION_MAPPING)) {
                         String base64DecodedURLScope = new String(Base64.getUrlDecoder().decode(type.getName()));
                         operationScopeMappingList.put(base64DecodedAdditionalType, base64DecodedURLScope);
-                    } else if (additionalType.getName().contains(OPERATION_THROTTLING_MAPPING)) {
+                    } else if (additionalType.getName().contains(APIConstants.OPERATION_THROTTLING_MAPPING)) {
                         operationThrottlingMappingList.put(additionalTypeName, type.getName());
-                    } else if (additionalType.getName().contains(OPERATION_AUTH_SCHEME_MAPPING)) {
+                    } else if (additionalType.getName().contains(APIConstants.OPERATION_AUTH_SCHEME_MAPPING)) {
                         operationAuthSchemeMappingList.put(additionalTypeName, type.getName());
                     }
                 }
@@ -227,10 +223,10 @@ public class GraphQLAPIHandler extends AbstractHandler {
             }
         }
 
-        messageContext.setProperty(SCOPE_ROLE_MAPPING, scopeRoleMappingList);
-        messageContext.setProperty(SCOPE_OPERATION_MAPPING, operationScopeMappingList);
-        messageContext.setProperty(OPERATION_THROTTLING_MAPPING, operationThrottlingMappingList);
-        messageContext.setProperty(OPERATION_AUTH_SCHEME_MAPPING, operationAuthSchemeMappingList);
+        messageContext.setProperty(APIConstants.SCOPE_ROLE_MAPPING, scopeRoleMappingList);
+        messageContext.setProperty(APIConstants.SCOPE_OPERATION_MAPPING, operationScopeMappingList);
+        messageContext.setProperty(APIConstants.OPERATION_THROTTLING_MAPPING, operationThrottlingMappingList);
+        messageContext.setProperty(APIConstants.OPERATION_AUTH_SCHEME_MAPPING, operationAuthSchemeMappingList);
         messageContext.setProperty(API_TYPE, GRAPHQL_API);
     }
 
