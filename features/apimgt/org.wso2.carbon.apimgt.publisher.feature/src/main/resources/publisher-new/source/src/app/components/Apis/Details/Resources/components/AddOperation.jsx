@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, Fragment, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -35,6 +35,8 @@ import IconButton from '@material-ui/core/IconButton';
 import ClearIcon from '@material-ui/icons/Clear';
 import Tooltip from '@material-ui/core/Tooltip';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import APIValidation from 'AppData/APIValidation';
+import Alert from 'AppComponents/Shared/Alert';
 
 const useStyles = makeStyles(theme => ({
     formControl: {
@@ -112,11 +114,17 @@ export default function AddOperation(props) {
      *
      */
     function addOperation() {
+        if (
+            APIValidation.operationTarget.validate(operation.target).error !== null ||
+            APIValidation.operationVerb.validate(operation.verb).error !== null
+        ) {
+            Alert.warning("Operation target or operation verb can't be empty");
+            return;
+        }
         setIsAdding(true);
-        updateOpenAPI('add', operation).then(() => {
-            clearInputs();
-            setIsAdding(false);
-        });
+        updateOpenAPI('add', operation)
+            .then(clearInputs)
+            .finally(() => setIsAdding(false));
     }
     return (
         <Paper>
@@ -150,7 +158,9 @@ export default function AddOperation(props) {
                         autoFocus
                         name='target'
                         value={operation.target}
-                        onChange={({ target: { name, value } }) => setOperation({ ...operation, [name]: value })}
+                        onChange={({ target: { name, value } }) =>
+                            setOperation({ ...operation, [name]: value.startsWith('/') ? value : `/${value}` })
+                        }
                         placeholder='Enter the URI pattern'
                         helperText='Enter URI pattern'
                         fullWidth
@@ -185,7 +195,6 @@ export default function AddOperation(props) {
                             {isAdding && <CircularProgress size={24} />}
                         </Fab>
                     </Tooltip>
-
 
                     <sup>
                         <Tooltip

@@ -105,7 +105,7 @@ export default function Resources() {
      */
     function updateAPIOperations(targetOperation, apiOperation) {
         const updatedOperations = api.operations.map((operation) => {
-            if (operation.target === data.target && operation.verb === data.verb) {
+            if (operation.target === targetOperation.target && operation.verb === targetOperation.verb) {
                 return apiOperation;
             } else {
                 return operation;
@@ -132,11 +132,20 @@ export default function Resources() {
                 return updateSwagger(data, copyOfOpenAPI).then(() => updateAPIOperations(data, apiOperation));
             case 'add':
                 if (copyOfOpenAPI.paths[data.target] && copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()]) {
-                    Alert.error('Operation already exist !!');
-                } else {
+                    const message = 'Operation already exist !!';
+                    Alert.error(message);
+                    return Promise.reject(new Error(message));
+                } else if (!copyOfOpenAPI.paths[data.target]) {
+                    // If target is not there add an empty object
                     copyOfOpenAPI.paths[data.target] = {};
                 }
                 copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()] = {};
+                return updateSwagger(data, copyOfOpenAPI);
+            case 'delete':
+                delete copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()];
+                if (isEmpty(copyOfOpenAPI.paths[data.target])) {
+                    delete copyOfOpenAPI.paths[data.target];
+                }
                 return updateSwagger(data, copyOfOpenAPI);
             default:
                 break;
@@ -146,10 +155,12 @@ export default function Resources() {
     const taggedOperations = { Default: [] };
     api.operations.map((apiOperation) => {
         const { target, verb } = apiOperation;
-        const openAPIOperation = openAPI.paths[target][verb.toLowerCase()];
+        const openAPIOperation = openAPI.paths[target] && openAPI.paths[target][verb.toLowerCase()];
         if (!openAPIOperation) {
             console.warn(`Could not find target = ${target} ` +
                     `verb (lower cased) = ${verb.toLowerCase()} operation in OpenAPI definition`);
+            // Skipping not found operations
+            return null;
         }
         const operationInfo = { spec: openAPIOperation, ...apiOperation };
         if (openAPIOperation.tags) {
@@ -191,6 +202,7 @@ export default function Resources() {
                                 {operations.map(operation => (
                                     <Grid key={`${operation.target}/${operation.verb}`} item>
                                         <Operation
+                                            highlight
                                             updateOpenAPI={updateOpenAPI}
                                             openAPI={openAPI}
                                             operation={operation}

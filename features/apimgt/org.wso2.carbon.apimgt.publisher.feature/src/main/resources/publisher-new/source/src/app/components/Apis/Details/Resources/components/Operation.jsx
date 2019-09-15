@@ -37,6 +37,9 @@ import FormControl from '@material-ui/core/FormControl';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import cloneDeep from 'lodash.clonedeep';
 import Alert from 'AppComponents/Shared/Alert';
+import Utils from 'AppData/Utils';
+import DeleteIcon from '@material-ui/icons/Delete';
+import IconButton from '@material-ui/core/IconButton';
 
 /**
  *
@@ -46,8 +49,9 @@ import Alert from 'AppComponents/Shared/Alert';
  * @returns {React.Component} @inheritdoc
  */
 export default function Operation(props) {
-    const { operation: initOperation, updateOpenAPI } = props;
+    const { operation: initOperation, updateOpenAPI, highlight } = props;
     const [isSaving, setIsSaving] = useState(false); // Use to show the loader and disable button
+    const [isDeleting, setIsDeleting] = useState(false); // Use to disable the expansion panel
     const [isNotSaved, setIsNotSaved] = useState(false);
     // Use to show a badge if there are/is unsaved changes in the operation
 
@@ -110,6 +114,12 @@ export default function Operation(props) {
             linearProgress: {
                 height: '2px',
             },
+            highlightSelected: {
+                backgroundColor: Utils.hexToRGBA(backgroundColor, 0.1),
+            },
+            contentNoMargin: {
+                margin: '0px',
+            },
         };
     });
 
@@ -122,6 +132,17 @@ export default function Operation(props) {
         updateOpenAPI('operation', operation)
             .then(() => setIsNotSaved(false))
             .finally(() => setIsSaving(false));
+    }
+
+    /**
+     *
+     *
+     * @param {*} params
+     */
+    function deleteOperation(event) {
+        event.stopPropagation();
+        setIsDeleting(true);
+        updateOpenAPI('delete', operation).then(() => Alert.info('Operation deleted successfully'));
     }
     const classes = useStyles();
     const closedWithUnsavedChanges = !isCollapsed && isNotSaved;
@@ -139,33 +160,56 @@ export default function Operation(props) {
         setIsCollapsed(expanded);
     }
     return (
-        <ExpansionPanel onChange={handleCollapse} className={classes.paperStyles}>
+        <ExpansionPanel disabled={isDeleting} onChange={handleCollapse} className={classes.paperStyles}>
             <ExpansionPanelSummary
+                className={highlight ? classes.highlightSelected : ''}
                 disableRipple
                 disableTouchRipple
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls='panel2a-content'
                 id='panel2a-header'
+                classes={{ content: classes.contentNoMargin }}
             >
-                {closedWithUnsavedChanges ? (
-                    <Badge color='primary' variant='dot'>
-                        <Button disableFocusRipple variant='contained' size='small' className={classes.customButton}>
-                            {operation.verb}
-                        </Button>
-                    </Badge>
-                ) : (
-                    <Button disableFocusRipple variant='contained' size='small' className={classes.customButton}>
-                        {operation.verb}
-                    </Button>
-                )}
+                <Grid container direction='row' justify='space-between' alignItems='center' spacing={0}>
+                    <Grid item md={10}>
+                        {closedWithUnsavedChanges ? (
+                            <Badge color='primary' variant='dot'>
+                                <Button
+                                    disableFocusRipple
+                                    variant='contained'
+                                    size='small'
+                                    className={classes.customButton}
+                                >
+                                    {operation.verb}
+                                </Button>
+                            </Badge>
+                        ) : (
+                            <Button
+                                disableFocusRipple
+                                variant='contained'
+                                size='small'
+                                className={classes.customButton}
+                            >
+                                {operation.verb}
+                            </Button>
+                        )}
 
-                <Typography style={{ margin: '0px 30px' }} variant='h6' gutterBottom>
-                    {operation.target}
+                        <Typography display='inline' style={{ margin: '0px 30px' }} variant='h6' gutterBottom>
+                            {operation.target}
 
-                    <Typography style={{ margin: '0px 30px' }} variant='caption' gutterBottom>
-                        {operation.spec.summary}
-                    </Typography>
-                </Typography>
+                            <Typography display='inline' style={{ margin: '0px 30px' }} variant='caption' gutterBottom>
+                                {operation.spec.summary}
+                            </Typography>
+                        </Typography>
+                    </Grid>
+
+                    <Grid item md={1}>
+                        <IconButton onClick={deleteOperation} aria-label='delete'>
+                            <DeleteIcon fontSize='small' />
+                            {isDeleting && <CircularProgress size={24} />}
+                        </IconButton>
+                    </Grid>
+                </Grid>
             </ExpansionPanelSummary>
             <Divider light className={classes.customDivider} />
             <ExpansionPanelDetails>

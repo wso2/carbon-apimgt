@@ -320,7 +320,7 @@ class Details extends Component {
      * @param {Boolean} isAPIProduct Whether the update operation should execute on an API or API Product
      * @returns {Promise} promise object that resolve to update (/apis PUT operation) response
      */
-    updateAPI(updatedProperties = {}) {
+    updateAPI(_updatedProperties = {}) {
         const { api } = this.state;
         let isAPIProduct = false;
         if (api.apiType === 'APIProduct') {

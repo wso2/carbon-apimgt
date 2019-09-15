@@ -243,7 +243,6 @@ class Utils {
         };
     }
 
-
     /**
      * Recursivly freez and object properties.
      * Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze
@@ -264,6 +263,27 @@ class Utils {
         }
 
         return Object.freeze(object);
+    }
+
+    /**
+     *
+     *
+     * @static
+     * @param {*} hex Color value in hex
+     * @param {*} alpha alpha channel intensity (0.0 to 1.0)
+     * @returns {String} CSS friendly RGBA string
+     * @memberof Utils
+     */
+    static hexToRGBA(hex, alpha) {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+
+        if (alpha) {
+            return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
+        } else {
+            return 'rgb(' + r + ', ' + g + ', ' + b + ')';
+        }
     }
 }
 
