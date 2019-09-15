@@ -32,12 +32,11 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
@@ -66,6 +65,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class APIMappingUtil {
@@ -396,8 +396,6 @@ public class APIMappingUtil {
 
     public static API fromDTOtoAPI(APIDetailedDTO dto, String provider) throws APIManagementException {
 
-        APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-
         String providerEmailDomainReplaced = APIUtil.replaceEmailDomain(provider);
 
         // The provider name that is coming from the body is not honored for now.
@@ -471,12 +469,14 @@ public class APIMappingUtil {
 
         if (dto.getApiDefinition() != null) {
             String apiSwaggerDefinition = dto.getApiDefinition();
+            APIDefinition parser = OASParserUtil.getOASParser(apiSwaggerDefinition);
+
             //URI Templates
-            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(apiSwaggerDefinition);
+            Set<URITemplate> uriTemplates = parser.getURITemplates(apiSwaggerDefinition);
             model.setUriTemplates(uriTemplates);
 
             // scopes
-            Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiSwaggerDefinition);
+            Set<Scope> scopes = parser.getScopes(apiSwaggerDefinition);
             model.setScopes(scopes);
 
         }
