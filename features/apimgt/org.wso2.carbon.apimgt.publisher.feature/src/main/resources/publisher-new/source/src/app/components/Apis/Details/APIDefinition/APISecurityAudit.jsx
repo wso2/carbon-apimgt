@@ -507,35 +507,32 @@ class APISecurityAudit extends Component {
                                 <Typography variant='body1'>
                                     <strong>Score:</strong> {Math.round(reportObject.validation.grade)} / 25
                                 </Typography>
-                                <Typography variant='body1'>
-                                    <strong>Criticality:</strong> {reportObject.validation.criticality}
-                                    <React.Fragment>
-                                        <Typography variant='body1'>
-                                            <strong>Overall Criticality:</strong> {reportObject.criticality}
-                                            <Tooltip
-                                                placement='right'
-                                                classes={{
-                                                    tooltip: classes.htmlTooltip,
-                                                }}
-                                                title={
-                                                    <React.Fragment>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.APIDefinition.AuditApi.tooltip'
-                                                            defaultMessage={
-                                                                'Criticality ranges from 1 to 5, with 1 being' +
+                                <React.Fragment>
+                                    <Typography variant='body1'>
+                                        <strong>Criticality:</strong> {reportObject.validation.criticality}
+                                        <Tooltip
+                                            placement='right'
+                                            classes={{
+                                                tooltip: classes.htmlTooltip,
+                                            }}
+                                            title={
+                                                <React.Fragment>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.APIDefinition.AuditApi.tooltip'
+                                                        defaultMessage={
+                                                            'Criticality ranges from 1 to 5, with 1 being' +
                                                                     ' low vulnerability and 5 being high vulnerability'
-                                                            }
-                                                        />
-                                                    </React.Fragment>
-                                                }
-                                            >
-                                                <Button className={classes.helpButton}>
-                                                    <HelpOutline className={classes.helpIcon} />
-                                                </Button>
-                                            </Tooltip>
-                                        </Typography>
-                                    </React.Fragment>
-                                </Typography>
+                                                        }
+                                                    />
+                                                </React.Fragment>
+                                            }
+                                        >
+                                            <Button className={classes.helpButton}>
+                                                <HelpOutline className={classes.helpIcon} />
+                                            </Button>
+                                        </Tooltip>
+                                    </Typography>
+                                </React.Fragment>
                                 {(reportObject.validation.issueCounter !== 0) &&
                                     <div>
                                         <hr />
@@ -566,35 +563,32 @@ class APISecurityAudit extends Component {
                                 <Typography variant='body1'>
                                     <strong>Score:</strong> {Math.round(reportObject.security.grade)} / 25
                                 </Typography>
-                                <Typography variant='body1'>
-                                    <strong>Criticality:</strong> {reportObject.security.criticality}
-                                    <React.Fragment>
-                                        <Typography variant='body1'>
-                                            <strong>Overall Criticality:</strong> {reportObject.criticality}
-                                            <Tooltip
-                                                placement='right'
-                                                classes={{
-                                                    tooltip: classes.htmlTooltip,
-                                                }}
-                                                title={
-                                                    <React.Fragment>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.APIDefinition.AuditApi.tooltip'
-                                                            defaultMessage={
-                                                                'Criticality ranges from 1 to 5, with 1 being' +
+                                <React.Fragment>
+                                    <Typography variant='body1'>
+                                        <strong>Criticality:</strong> {reportObject.security.criticality}
+                                        <Tooltip
+                                            placement='right'
+                                            classes={{
+                                                tooltip: classes.htmlTooltip,
+                                            }}
+                                            title={
+                                                <React.Fragment>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.APIDefinition.AuditApi.tooltip'
+                                                        defaultMessage={
+                                                            'Criticality ranges from 1 to 5, with 1 being' +
                                                                     ' low vulnerability and 5 being high vulnerability'
-                                                            }
-                                                        />
-                                                    </React.Fragment>
-                                                }
-                                            >
-                                                <Button className={classes.helpButton}>
-                                                    <HelpOutline className={classes.helpIcon} />
-                                                </Button>
-                                            </Tooltip>
-                                        </Typography>
-                                    </React.Fragment>
-                                </Typography>
+                                                        }
+                                                    />
+                                                </React.Fragment>
+                                            }
+                                        >
+                                            <Button className={classes.helpButton}>
+                                                <HelpOutline className={classes.helpIcon} />
+                                            </Button>
+                                        </Tooltip>
+                                    </Typography>
+                                </React.Fragment>
                                 {(reportObject.security.issueCounter !== 0) &&
                                     <div>
                                         <hr />
@@ -621,35 +615,32 @@ class APISecurityAudit extends Component {
                                 <Typography variant='body1'>
                                     <strong>Score:</strong> {Math.round(reportObject.data.grade)} / 50
                                 </Typography>
-                                <Typography variant='body1'>
-                                    <strong>Criticality:</strong> {reportObject.data.criticality}
-                                    <React.Fragment>
-                                        <Typography variant='body1'>
-                                            <strong>Overall Criticality:</strong> {reportObject.criticality}
-                                            <Tooltip
-                                                placement='right'
-                                                classes={{
-                                                    tooltip: classes.htmlTooltip,
-                                                }}
-                                                title={
-                                                    <React.Fragment>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.APIDefinition.AuditApi.tooltip'
-                                                            defaultMessage={
-                                                                'Criticality ranges from 1 to 5, with 1 being' +
+                                <React.Fragment>
+                                    <Typography variant='body1'>
+                                        <strong>Criticality:</strong> {reportObject.data.criticality}
+                                        <Tooltip
+                                            placement='right'
+                                            classes={{
+                                                tooltip: classes.htmlTooltip,
+                                            }}
+                                            title={
+                                                <React.Fragment>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.APIDefinition.AuditApi.tooltip'
+                                                        defaultMessage={
+                                                            'Criticality ranges from 1 to 5, with 1 being' +
                                                                     ' low vulnerability and 5 being high vulnerability'
-                                                            }
-                                                        />
-                                                    </React.Fragment>
-                                                }
-                                            >
-                                                <Button className={classes.helpButton}>
-                                                    <HelpOutline className={classes.helpIcon} />
-                                                </Button>
-                                            </Tooltip>
-                                        </Typography>
-                                    </React.Fragment>
-                                </Typography>
+                                                        }
+                                                    />
+                                                </React.Fragment>
+                                            }
+                                        >
+                                            <Button className={classes.helpButton}>
+                                                <HelpOutline className={classes.helpIcon} />
+                                            </Button>
+                                        </Tooltip>
+                                    </Typography>
+                                </React.Fragment>
                                 {(reportObject.data.issueCounter !== 0) &&
                                     <div>
                                         <hr />
