@@ -6790,14 +6790,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
 
-        Map<String, String> failedToPublishEnvironments = publishToGateway(product);
-        if (!failedToPublishEnvironments.isEmpty()) {
-            Set<String> publishedEnvironments =
-                    new HashSet<String>(product.getEnvironments());
-            publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
-            product.setEnvironments(publishedEnvironments);
-            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-            failedGateways.put("UNPUBLISHED", Collections.<String,String>emptyMap());
+        if (resources.size() > 0) {
+            Map<String, String> failedToPublishEnvironments = publishToGateway(product);
+            if (!failedToPublishEnvironments.isEmpty()) {
+                Set<String> publishedEnvironments =
+                        new HashSet<String>(product.getEnvironments());
+                publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
+                product.setEnvironments(publishedEnvironments);
+                failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+                failedGateways.put("UNPUBLISHED", Collections.<String, String>emptyMap());
+            }
         }
 
         //todo : check whether permissions need to be updated and pass it along

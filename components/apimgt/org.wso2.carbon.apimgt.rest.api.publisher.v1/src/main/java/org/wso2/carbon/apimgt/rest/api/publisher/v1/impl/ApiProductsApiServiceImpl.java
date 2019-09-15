@@ -486,7 +486,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 }
             }
 
-
             APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(body, username);
             //We do not allow to modify provider,name,version  and uuid. Set the origial value
             APIProductIdentifier productIdentifier = retrievedProduct.getId();
