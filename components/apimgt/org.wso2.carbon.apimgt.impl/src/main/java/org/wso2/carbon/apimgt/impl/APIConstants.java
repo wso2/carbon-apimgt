@@ -209,6 +209,11 @@ public final class APIConstants {
     public static final String WORKFLOW_MEDIA_TYPE = "workflow-config";
 
     // Constants used in API Security Audit feature
+    // For configs
+    public static final String API_SECURITY_AUDIT = "APISecurityAudit.";
+    public static final String API_SECURITY_AUDIT_API_TOKEN = API_SECURITY_AUDIT + "APIToken";
+    public static final String API_SECURITY_AUDIT_CID = API_SECURITY_AUDIT + "CollectionID";
+    // For HTTP requests
     public static final String HEADER_ACCEPT = "Accept";
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
     public static final String HEADER_API_TOKEN = "X-API-KEY";
@@ -637,11 +642,6 @@ public final class APIConstants {
             + "EnableAccessControl";
     public static final String API_PUBLISHER_APIS_PER_PAGE = API_PUBLISHER + "APIsPerPage";
     public static final String WSO2_API_STORE_TYPE = "wso2";
-
-    // Constants needed for API Security Audit
-    public static final String API_SECURITY_AUDIT = "APISecurityAudit.";
-    public static final String API_SECURITY_AUDIT_API_TOKEN = API_SECURITY_AUDIT + "APIToken";
-    public static final String API_SECURITY_AUDIT_CID = API_SECURITY_AUDIT + "CollectionID";
 
     public static final String EXTERNAL_API_STORES = "ExternalAPIStores";
     public static final String LOGIN_CONFIGS = "LoginConfig";
