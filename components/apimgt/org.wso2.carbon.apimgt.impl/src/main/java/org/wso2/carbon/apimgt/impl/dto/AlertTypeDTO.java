@@ -38,13 +38,16 @@ public class AlertTypeDTO {
 
     public void setName(String name) {
         this.name = name;
+        this.setConfigurable("AbnormalRequestsPerMin".equals(name) ||
+                "AbnormalResponseTime".equals(name) ||
+                "AbnormalBackendTime".equals(name));
     }
 
     public boolean isConfigurable() {
         return isConfigurable;
     }
 
-    public void setConfigurable(boolean configurable) {
+    private void setConfigurable(boolean configurable) {
         isConfigurable = configurable;
     }
 }

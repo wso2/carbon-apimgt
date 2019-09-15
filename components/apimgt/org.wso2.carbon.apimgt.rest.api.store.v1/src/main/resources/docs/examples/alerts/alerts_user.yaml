@@ -2,7 +2,7 @@ get:
   - id: GetSubscribedAlertTypes
     request:
       method: GET
-      curl: https://localhost:9443/api/am/store/v1.0/alerts/john
+      curl: https://localhost:9443/api/am/store/v1.0/alerts
       headers: |
           Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
     response:
@@ -32,10 +32,10 @@ get:
           ]
         }
   - rawRequest: |
-          GET https://localhost:9443/api/am/store/v1.0/alerts/john HTTP/1.1
+          GET https://localhost:9443/api/am/store/v1.0/alerts HTTP/1.1
           Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     curl: |
-          curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/store/v1.0/alerts/john
+          curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/store/v1.0/alerts
     rawResponse: |
       {
         "alerts": [
@@ -60,9 +60,10 @@ post:
   - id: PostAlertTypeUser
     request:
       method: POST
-      url: https://localhost:9443/api/am/store/v1.0/alerts/john
+      url: https://localhost:9443/api/am/store/v1.0/alerts
       headers: |
           Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
+          Content-Type: application/json
       body:
         {
           "alerts": [
@@ -109,10 +110,11 @@ post:
           ]
         }
   - rawRequest: |
-          POST https://localhost:9443/api/am/store/v1.0/alerts/john HTTP/1.1
+          POST https://localhost:9443/api/am/store/v1.0/alerts HTTP/1.1
           Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+          Content-Type: application/json
     curl: |
-          curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/store/v1.0/alerts/john
+          curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" https://localhost:9443/api/am/store/v1.0/alerts
     rawResponse: |
           {
             "alerts": [
@@ -126,9 +128,10 @@ delete:
   - id: UnsubscribeFromAlerts
     request:
       method: DELETE
-      url: https://localhost:9443/api/am/store/v1.0/alerts/john
+      url: https://localhost:9443/api/am/store/v1.0/alerts
       headers: |
         Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
+        Content-Type: application/json
     response:
       status:
         code: 200
@@ -138,5 +141,6 @@ delete:
   - rawRequest: |
       DELETE https://localhost:9443/api/am/store/v1.0/alerts/john HTTP/1.1
       Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      Content-Type: application/json
     curl: |
-      curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/store/v1.0/alerts/john
+      curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" https://localhost:9443/api/am/store/v1.0/alerts

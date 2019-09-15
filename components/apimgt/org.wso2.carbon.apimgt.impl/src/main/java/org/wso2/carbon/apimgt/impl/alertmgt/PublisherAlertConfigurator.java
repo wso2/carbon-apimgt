@@ -18,47 +18,47 @@
 
 package org.wso2.carbon.apimgt.impl.alertmgt;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 public class PublisherAlertConfigurator implements AlertConfigurator {
 
-    @Override
-    public List<AlertTypeDTO> getSupportedAlertTypes() {
+    @Override public List<AlertTypeDTO> getSupportedAlertTypes() throws APIManagementException {
         return null;
     }
 
-    @Override
-    public List<AlertTypeDTO> getSubscribedAlerts(String userName) {
+    @Override public List<Integer> getSubscribedAlerts(String userName) throws APIManagementException {
         return null;
     }
 
-    @Override
-    public void subscribe(String userName, List<String> emailsList, List<AlertTypeDTO> alertTypeDTOList) {
-
-    }
-
-    @Override
-    public void unsubscribe(String userName) {
-
-    }
-
-    @Override
-    public void addAlertConfiguration(String userName, String alertName, List<Properties> configProperties) {
-
-    }
-
-    @Override
-    public List<Properties> getAlertConfiguration(String userName, String alertName) {
+    @Override public List<String> getSubscribedEmailAddresses(String userName) throws APIManagementException {
         return null;
     }
 
-    @Override
-    public void removeAlertConfiguration(String userName, String alertName,
-            List<Properties> configProperties) {
+    @Override public void subscribe(String userName, List<String> emailsList, List<AlertTypeDTO> alertTypeDTOList)
+            throws APIManagementException {
+
+    }
+
+    @Override public void unsubscribe(String userName) throws APIManagementException {
+
+    }
+
+    @Override public void addAlertConfiguration(String userName, String alertName, Properties configProperties)
+            throws APIManagementException {
+
+    }
+
+    @Override public List<Properties> getAlertConfiguration(String userName, String alertName)
+            throws APIManagementException {
+        return null;
+    }
+
+    @Override public void removeAlertConfiguration(String userName, String alertName, Properties configProperties)
+            throws APIManagementException {
 
     }
 }

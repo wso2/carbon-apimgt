@@ -47,43 +47,37 @@ public class AlertTypesPublisher {
     public void saveAndPublishAlertTypesEvent(String checkedAlertList, String emailList, String userName, String agent,
             String checkedAlertListValues) throws APIManagementException {
 
-        try {
-            if (!enabled || skipEventReceiverConnection) {
-                throw new APIManagementException("Data publisher is not enabled");
-            }
-
-            String conditionClause = "";
-            //data persist in the database.
-            apiMgtDAO.addAlertTypesConfigInfo(userName, emailList, checkedAlertList, agent);
-
-            if ("publisher".equals(agent)) {
-                conditionClause = "ApimAlertStakeholderInfo.isPublisher == isPublisher";
-                isPublisher = true;
-            } else if ("subscriber".equals(agent)) {
-                conditionClause = "ApimAlertStakeholderInfo.isSubscriber == isSubscriber";
-                isSubscriber = true;
-            } else if ("admin-dashboard".equals(agent)) {
-                conditionClause = "ApimAlertStakeholderInfo.isAdmin == isAdmin";
-                isAdmin = true;
-            }
-            String appName = "APIM_ALERT_STAKEHOLDER";
-            String query =
-                    "select '" + userName + "' as userId, '" + checkedAlertListValues + "' as alertTypes, '" + emailList
-                            + "' as emails, " + isSubscriber + " as isSubscriber, " + isPublisher + " as isPublisher, "
-                            + isAdmin + " as isAdmin update or insert into ApimAlertStakeholderInfo "
-                            + "set ApimAlertStakeholderInfo.userId = userId, "
-                            + "ApimAlertStakeholderInfo.alertTypes = alertTypes , "
-                            + "ApimAlertStakeholderInfo.emails = emails ,"
-                            + " ApimAlertStakeholderInfo.isSubscriber = isSubscriber, "
-                            + "ApimAlertStakeholderInfo.isPublisher = isPublisher, "
-                            + "ApimAlertStakeholderInfo.isAdmin = isAdmin on "
-                            + "ApimAlertStakeholderInfo.userId == userId and "
-                            + conditionClause;
-            APIUtil.executeQueryOnStreamProcessor(appName, query);
-
-        } catch (SQLException e) {
-            log.error("Error while saving alert types", e);
+        if (!enabled || skipEventReceiverConnection) {
+            throw new APIManagementException("Data publisher is not enabled");
         }
+
+        String conditionClause = "";
+        //data persist in the database.
+        apiMgtDAO.addAlertTypesConfigInfo(userName, emailList, checkedAlertList, agent);
+
+        if ("publisher".equals(agent)) {
+            conditionClause = "ApimAlertStakeholderInfo.isPublisher == isPublisher";
+            isPublisher = true;
+        } else if ("subscriber".equals(agent)) {
+            conditionClause = "ApimAlertStakeholderInfo.isSubscriber == isSubscriber";
+            isSubscriber = true;
+        } else if ("admin-dashboard".equals(agent)) {
+            conditionClause = "ApimAlertStakeholderInfo.isAdmin == isAdmin";
+            isAdmin = true;
+        }
+        String appName = "APIM_ALERT_STAKEHOLDER";
+        String query =
+                "select '" + userName + "' as userId, '" + checkedAlertListValues + "' as alertTypes, '" + emailList
+                        + "' as emails, " + isSubscriber + " as isSubscriber, " + isPublisher + " as isPublisher, "
+                        + isAdmin + " as isAdmin update or insert into ApimAlertStakeholderInfo "
+                        + "set ApimAlertStakeholderInfo.userId = userId, "
+                        + "ApimAlertStakeholderInfo.alertTypes = alertTypes , "
+                        + "ApimAlertStakeholderInfo.emails = emails ,"
+                        + " ApimAlertStakeholderInfo.isSubscriber = isSubscriber, "
+                        + "ApimAlertStakeholderInfo.isPublisher = isPublisher, "
+                        + "ApimAlertStakeholderInfo.isAdmin = isAdmin on "
+                        + "ApimAlertStakeholderInfo.userId == userId and " + conditionClause;
+        APIUtil.executeQueryOnStreamProcessor(appName, query);
 
     }
 
@@ -94,37 +88,30 @@ public class AlertTypesPublisher {
      */
     public void unSubscribe(String userName, String agent) throws APIManagementException {
 
-        try {
-
-            if (!enabled || skipEventReceiverConnection) {
-                throw new APIManagementException("Data publisher is not enabled");
-            }
-
-            String conditionClause = "";
-            //data persist in the database.
-            apiMgtDAO.unSubscribeAlerts(userName, agent);
-            //set DTO
-
-            if ("publisher".equals(agent)) {
-                conditionClause = "ApimAlertStakeholderInfo.isPublisher == true";
-                isPublisher = true;
-            } else if ("subscriber".equals(agent)) {
-                conditionClause = "ApimAlertStakeholderInfo.isSubscriber == true";
-                isSubscriber = true;
-            } else if ("admin-dashboard".equals(agent)) {
-                conditionClause = "ApimAlertStakeholderInfo.isAdmin == true";
-                isAdmin = true;
-            }
-            String appName = "APIM_ALERT_STAKEHOLDER";
-            String query =
-                    "delete ApimAlertStakeholderInfo  on ApimAlertStakeholderInfo.userId == '" + userName + "' and "
-                            + conditionClause;
-            APIUtil.executeQueryOnStreamProcessor(appName, query);
-
-        } catch (SQLException e) {
-            log.error("Error while un-subscribing from alert types", e);
+        if (!enabled || skipEventReceiverConnection) {
+            throw new APIManagementException("Data publisher is not enabled");
         }
-    }
 
+        String conditionClause = "";
+        //data persist in the database.
+        apiMgtDAO.unSubscribeAlerts(userName, agent);
+        //set DTO
+
+        if ("publisher".equals(agent)) {
+            conditionClause = "ApimAlertStakeholderInfo.isPublisher == true";
+            isPublisher = true;
+        } else if ("subscriber".equals(agent)) {
+            conditionClause = "ApimAlertStakeholderInfo.isSubscriber == true";
+            isSubscriber = true;
+        } else if ("admin-dashboard".equals(agent)) {
+            conditionClause = "ApimAlertStakeholderInfo.isAdmin == true";
+            isAdmin = true;
+        }
+        String appName = "APIM_ALERT_STAKEHOLDER";
+        String query = "delete ApimAlertStakeholderInfo  on ApimAlertStakeholderInfo.userId == '" + userName + "' and "
+                + conditionClause;
+        APIUtil.executeQueryOnStreamProcessor(appName, query);
+
+    }
 
 }

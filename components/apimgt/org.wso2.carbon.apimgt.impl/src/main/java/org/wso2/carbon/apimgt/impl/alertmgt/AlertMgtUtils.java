@@ -18,9 +18,11 @@
 
 package org.wso2.carbon.apimgt.impl.alertmgt;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,22 +37,32 @@ public class AlertMgtUtils {
      * @param alertTypes: The alert types map.
      * @return A list of AlertTypeDTOs.
      * */
-    public static List<AlertTypeDTO> toAlertTypeDTO(Map<Integer, String> alertTypes) {
-        List<AlertTypeDTO> alertTypeDTOS = new ArrayList<>();
-        for (Map.Entry entry : alertTypes.entrySet()) {
-            AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
-            alertTypeDTO.setId((Integer)entry.getKey());
-            alertTypeDTO.setName(entry.getValue().toString());
-
-            // Set the configurable alert types.
-            alertTypeDTO.setConfigurable(
-                    "thresholdRequestCountPerMin".equals(entry.getValue().toString()) ||
-                    "AbnormalResponseTime".equals(entry.getValue().toString()) ||
-                    "AbnormalBackendTime".equals(entry.getValue().toString())
-            );
-            alertTypeDTOS.add(alertTypeDTO);
+    static List<AlertTypeDTO> toAlertTypeDTO(Map<Integer, String> alertTypes) {
+        List<AlertTypeDTO> alertTypeDTOList = new ArrayList<>();
+        if (alertTypes != null) {
+            for (Map.Entry entry : alertTypes.entrySet()) {
+                AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
+                alertTypeDTO.setId((Integer)entry.getKey());
+                alertTypeDTO.setName(entry.getValue().toString());
+                alertTypeDTOList.add(alertTypeDTO);
+            }
         }
-        return alertTypeDTOS;
+        return alertTypeDTOList;
+    }
+
+    static Map<String, String> alertTypesToMap(List<AlertTypeDTO> alertTypes) {
+        List<Integer> alertTypeIds = new ArrayList<>();
+        List<String> alertTypeNames = new ArrayList<>();
+        Map<String, String> alertTypesMap = new HashMap<>();
+
+        for (AlertTypeDTO alertTypeDTO : alertTypes) {
+            alertTypeIds.add(alertTypeDTO.getId());
+            alertTypeNames.add(alertTypeDTO.getName());
+        }
+
+        alertTypesMap.put("ids", StringUtils.join(alertTypeIds, ","));
+        alertTypesMap.put("names", StringUtils.join(alertTypeNames, ","));
+        return alertTypesMap;
     }
 
 }

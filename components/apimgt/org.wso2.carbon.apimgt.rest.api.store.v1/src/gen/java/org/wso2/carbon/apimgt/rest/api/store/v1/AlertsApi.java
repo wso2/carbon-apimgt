@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertConfigListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertTypesListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertsInfoDTO;
@@ -40,25 +39,24 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
 
 
     @POST
-    @Path("/{userName}/config")
+    @Path("/config")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add AbnormalRequestsPerMin alert configurations. ", notes = "This operation is used to add configuration for the AbnormalRequestsPerMin alert type. ", response = AlertConfigDTO.class, authorizations = {
+    @ApiOperation(value = "Add AbnormalRequestsPerMin alert configurations. ", notes = "This operation is used to add configuration for the AbnormalRequestsPerMin alert type. ", response = AlertConfigListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
     }, tags={ "Alerts",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "Created. Successful response with newly created object as entity. Location header contains URL of newly created entity. ", response = AlertConfigDTO.class),
+        @ApiResponse(code = 201, message = "Created. Successful response with newly created object as entity. ", response = AlertConfigListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request The request parameters validation failed. ", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The user does not exist in the system. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error An error occurred while retrieving subscribed alert types by user. ", response = ErrorDTO.class) })
-    public Response configureAlertUser(@ApiParam(value = "The name of the user. ",required=true) @PathParam("userName") String userName, @ApiParam(value = "Configuration for AbnormalRequestCount alert type" ,required=true) AlertConfigDTO body) throws APIManagementException{
-        return delegate.configureAlertUser(userName, body, securityContext);
+    public Response addAlertConfig(@ApiParam(value = "Configuration for AbnormalRequestCount alert type" ,required=true) AlertConfigListDTO body) throws APIManagementException{
+        return delegate.addAlertConfig(body, securityContext);
     }
 
     @DELETE
-    @Path("/{userName}/config")
+    @Path("/config")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete the selected configuration from AbnormalRequestsPerMin alert type. ", notes = "This operation is used to delete configuration from the AbnormalRequestsPerMin alert type. ", response = Void.class, authorizations = {
@@ -69,14 +67,14 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The alert config is deleted successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request The request parameters validation failed. ", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The user does not exist in the system. ", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The provided alert configuration is not found. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error An error occurred while retrieving subscribed alert types by user. ", response = ErrorDTO.class) })
-    public Response deleteAlertConfigUser(@ApiParam(value = "The name of the user. ",required=true) @PathParam("userName") String userName, @ApiParam(value = "The AbnormalRequestCount configurations that should be deleted" ,required=true) AlertConfigDTO body) throws APIManagementException{
-        return delegate.deleteAlertConfigUser(userName, body, securityContext);
+    public Response deleteAlertConfig(@ApiParam(value = "The AbnormalRequestCount configurations that should be deleted" ,required=true) AlertConfigListDTO body) throws APIManagementException{
+        return delegate.deleteAlertConfig(body, securityContext);
     }
 
     @GET
-    @Path("/{userName}/config")
+    @Path("/config")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the AbnormalRequestsPerMin alert configurations ", notes = "This operation is used to get configurations of the AbnormalRequestsPerMin alert type. ", response = AlertConfigListDTO.class, authorizations = {
@@ -86,14 +84,13 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
     }, tags={ "Alerts",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The store alert configuration. ", response = AlertConfigListDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The user does not exist in the system. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error An error occurred while retrieving subscribed alert types by user. ", response = ErrorDTO.class) })
-    public Response getAlertConfigsUser(@ApiParam(value = "The name of the user. ",required=true) @PathParam("userName") String userName) throws APIManagementException{
-        return delegate.getAlertConfigsUser(userName, securityContext);
+    public Response getAlertConfigs() throws APIManagementException{
+        return delegate.getAlertConfigs(securityContext);
     }
 
     @GET
-    
+    @Path("/types")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the list of API Store alert types. ", notes = "This operation is used to get the list of supportd alert types for the 'subscriber' agent. ", response = AlertTypesListDTO.class, authorizations = {
@@ -109,7 +106,7 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
     }
 
     @GET
-    @Path("/{userName}")
+    
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the list of API Store alert types subscribed by the user. ", notes = "This operation is used to get the list of subscribed alert types by the user. ", response = AlertsInfoDTO.class, authorizations = {
@@ -119,14 +116,13 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
     }, tags={ "Alerts",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The list of subscribed alert types are returned. ", response = AlertsInfoDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The user does not exist in the system. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error An error occurred while retrieving subscribed alert types by user. ", response = ErrorDTO.class) })
-    public Response getSubscribedAlertTypesByUser(@ApiParam(value = "The name of the user. ",required=true) @PathParam("userName") String userName) throws APIManagementException{
-        return delegate.getSubscribedAlertTypesByUser(userName, securityContext);
+    public Response getSubscribedAlertTypes() throws APIManagementException{
+        return delegate.getSubscribedAlertTypes(securityContext);
     }
 
     @POST
-    @Path("/{userName}")
+    
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Subscribe to the selected alert types by the user. ", notes = "This operation is used to get the list of subscribed alert types by the user. ", response = AlertsInfoDTO.class, authorizations = {
@@ -137,14 +133,13 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "OK. Successful response with the newly subscribed alerts. ", response = AlertsInfoDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid Request or request validation failure. ", response = Void.class),
-        @ApiResponse(code = 404, message = "Not Found. The user not found. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error An internal server error occurred while subscribing to alerts. ", response = ErrorDTO.class) })
-    public Response subscribeToAlertsByUser(@ApiParam(value = "The name of the user. ",required=true) @PathParam("userName") String userName, @ApiParam(value = "The alerts list and the email list to subscribe." ,required=true) AlertsInfoDTO body) throws APIManagementException{
-        return delegate.subscribeToAlertsByUser(userName, body, securityContext);
+    public Response subscribeToAlerts(@ApiParam(value = "The alerts list and the email list to subscribe." ,required=true) AlertsInfoDTO body) throws APIManagementException{
+        return delegate.subscribeToAlerts(body, securityContext);
     }
 
     @DELETE
-    @Path("/{userName}")
+    
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Unsubscribe user from all the alert types. ", notes = "This operation is used to unsubscribe the respective user from all the alert types. ", response = Void.class, authorizations = {
@@ -154,9 +149,8 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
     }, tags={ "Alerts" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The user is unsubscribed from the alerts successfully. ", response = Void.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested user is not found in the system. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
-    public Response unsubscribeAllAlerts(@ApiParam(value = "The name of the user. ",required=true) @PathParam("userName") String userName) throws APIManagementException{
-        return delegate.unsubscribeAllAlerts(userName, securityContext);
+    public Response unsubscribeAllAlerts() throws APIManagementException{
+        return delegate.unsubscribeAllAlerts(securityContext);
     }
 }

@@ -9891,15 +9891,15 @@ public class ApiMgtDAO {
      * @param userName
      * @param agent    whether its publisher or store or admin dash board.
      */
-    public void unSubscribeAlerts(String userName, String agent) throws APIManagementException, SQLException {
+    public void unSubscribeAlerts(String userName, String agent) throws APIManagementException {
 
-        Connection connection;
+        Connection connection = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        connection = APIMgtDBUtil.getConnection();
-        connection.setAutoCommit(false);
 
         try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             connection.setAutoCommit(false);
             String alertTypesQuery = SQLConstants.ADD_ALERT_TYPES_VALUES;
 
@@ -9949,14 +9949,14 @@ public class ApiMgtDAO {
      * @throws SQLException
      */
     public void addAlertTypesConfigInfo(String userName, String emailList, String alertTypesIDList, String stakeHolder)
-            throws APIManagementException, SQLException {
+            throws APIManagementException {
 
-        Connection connection;
+        Connection connection = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        connection = APIMgtDBUtil.getConnection();
-        connection.setAutoCommit(false);
         try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
 
             String alertTypesQuery = SQLConstants.ADD_ALERT_TYPES_VALUES;
 
