@@ -194,7 +194,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
         @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         HashMap<String, String> operationThrottlingMappingList = new HashMap<>();
         @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-        HashMap<String, String> operationAuthSchemeMappingList = new HashMap<>();
+        HashMap<String, Boolean> operationAuthSchemeMappingList = new HashMap<>();
         HashMap<String, String> operationScopeMappingList = new HashMap<>();
         HashMap<String, ArrayList<String>> scopeRoleMappingList = new HashMap<>();
 
@@ -214,7 +214,11 @@ public class GraphQLAPIHandler extends AbstractHandler {
                     } else if (additionalType.getName().contains(APIConstants.OPERATION_THROTTLING_MAPPING)) {
                         operationThrottlingMappingList.put(additionalTypeName, type.getName());
                     } else if (additionalType.getName().contains(APIConstants.OPERATION_AUTH_SCHEME_MAPPING)) {
-                        operationAuthSchemeMappingList.put(additionalTypeName, type.getName());
+                        boolean isSecurityEnabled = true;
+                        if (APIConstants.OPERATION_SECURITY_DISABLED.equalsIgnoreCase(type.getName())) {
+                            isSecurityEnabled = false;
+                        }
+                        operationAuthSchemeMappingList.put(additionalTypeName, isSecurityEnabled);
                     }
                 }
                 if (!roleArrayList.isEmpty()) {
