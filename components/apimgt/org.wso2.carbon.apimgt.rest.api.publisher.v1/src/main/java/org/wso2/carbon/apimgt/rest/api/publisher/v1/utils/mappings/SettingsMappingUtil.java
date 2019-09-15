@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
@@ -82,8 +82,8 @@ public class SettingsMappingUtil {
         } catch (IOException e) {
             log.error("Error while reading the swagger definition", e);
         }
-        APIDefinition apiDefinitionUsingOASParser = new APIDefinitionUsingOASParser();
-        Set<Scope> scopeSet = apiDefinitionUsingOASParser.getScopes(definition);
+        APIDefinition parser = OASParserUtil.getOASParser(definition);
+        Set<Scope> scopeSet = parser.getScopes(definition);
         List<String> scopeList = new ArrayList<>();
         for (Scope entry : scopeSet) {
             scopeList.add(entry.getKey());

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -30,8 +31,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
@@ -725,9 +725,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             apiProvider.addAPIProduct(productToBeAdded);
             APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
 
-            APIDefinitionFromOpenAPISpec apiDefinitionUsingOASParser = new APIDefinitionFromOpenAPISpec();
+            APIDefinition parser = new OAS3Parser();
             SwaggerData swaggerData = new SwaggerData(productToBeAdded);
-            String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(swaggerData);
+            String apiDefinition = parser.generateAPIDefinition(swaggerData);
             apiProvider.saveSwagger20Definition(productToBeAdded.getId(), apiDefinition);
 
             APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);

@@ -350,8 +350,7 @@ public final class APIImportUtil {
                 addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider);
 
                 //Load required properties from swagger to the API
-                Optional<APIDefinition> optional = OASParserUtil.getOASParser(swaggerContent);
-                APIDefinition apiDefinition = optional.get();
+                APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerContent);
                 Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerContent);
                 for (URITemplate uriTemplate : uriTemplates) {
                     Scope scope = uriTemplate.getScope();
