@@ -20,13 +20,9 @@ import React from 'react';
 import { withStyles, withTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
-import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 
-import classNames from 'classnames';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 import Api from 'AppData/api';
 import CONSTS from 'AppData/Constants';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
@@ -41,7 +37,14 @@ function RenderMethodBase(props) {
     } else {
         chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[method]);
     }
-    return <Chip label={method} style={{ backgroundColor: chipColor, color: chipTextColor, height: 20 }} />;
+    return (
+        <Chip
+            label={method}
+            style={{
+                backgroundColor: chipColor, color: chipTextColor, height: 20, marginRight: 5,
+            }}
+        />
+    );
 }
 
 RenderMethodBase.propTypes = {
@@ -115,9 +118,8 @@ class Resources extends React.Component {
         }
         const { classes, parentClasses, api } = this.props;
         return (
-            <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
-                {console.info('api....', api)}
-                <div className={parentClasses.titleWrapper}>
+            <React.Fragment>
+                <div className={parentClasses.titleWrapper} style={{ margin: '20px 0 10px' }}>
                     { api.type === 'GraphQL' ? (
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
                             <FormattedMessage
@@ -133,14 +135,6 @@ class Resources extends React.Component {
                                 />
                             </Typography>
                         )}
-                    <Link to={'/apis/' + api.id + '/resources'}>
-                        <Button variant='contained' color='default'>
-                            <FormattedMessage
-                                id='Apis.Details.NewOverview.Resources.edit'
-                                defaultMessage='Edit'
-                            />
-                        </Button>
-                    </Link>
                 </div>
                 <div className={classes.root}>
                     <div className={classes.contentWrapper}>
@@ -160,7 +154,7 @@ class Resources extends React.Component {
                         })}
                     </div>
                 </div>
-            </Paper>
+            </React.Fragment>
         );
     }
 }
