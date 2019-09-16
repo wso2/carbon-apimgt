@@ -192,6 +192,24 @@ class AuthManager {
         return !AuthManager.getUser().scopes.includes('apim:api_publish');
     }
 
+    static isRestricted(scopesAllowedToEdit, api) {
+        // determines whether the user is a publisher or creator (based on what is passed from the element)
+        // if (scopesAllowedToEdit.filter(element => AuthManager.getUser().scopes.includes(element)).length > 0) {
+        if (scopesAllowedToEdit.find(element => AuthManager.getUser().scopes.includes(element))) {
+            // if the user has publisher role, no need to consider the api LifeCycleStatus
+            if (AuthManager.getUser().scopes.includes('apim:api_publish')) {
+                return false;
+            } else if (
+                // if the user has creator role, but not the publisher role
+                api.lifeCycleStatus === 'CREATED') {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        return true;
+    }
+
     static hasBasicLoginPermission(scopes) {
         return scopes.includes('apim:api_view');
     }
@@ -371,4 +389,8 @@ AuthManager.CONST = {
     USER_SCOPES: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
         + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
 };
+const { isRestricted } = AuthManager;
+
+export { isRestricted };
+
 export default AuthManager;

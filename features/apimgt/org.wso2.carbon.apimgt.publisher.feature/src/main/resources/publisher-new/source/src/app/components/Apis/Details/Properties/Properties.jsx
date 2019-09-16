@@ -39,7 +39,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import APIContext, { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import EditableRow from './EditableRow';
 
@@ -139,8 +139,6 @@ function Properties(props) {
     const [propertyKey, setPropertyKey] = useState(null);
     const [propertyValue, setPropertyValue] = useState(null);
     const [updating, setUpdating] = useState(false);
-    const isNotCreator = AuthManager.isNotCreator();
-    const isNotPublisher = AuthManager.isNotPublisher();
     const toggleAddProperty = () => {
         setShowAddProperty(!showAddProperty);
     };
@@ -307,7 +305,7 @@ function Properties(props) {
                     size='small'
                     className={classes.button}
                     onClick={toggleAddProperty}
-                    disabled={isNotCreator && isNotPublisher}
+                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                 >
                     <AddCircle className={classes.buttonIcon} />
                     <FormattedMessage
@@ -394,7 +392,10 @@ function Properties(props) {
                                                         onChange={handleChange('propertyKey')}
                                                         onKeyDown={handleKeyDown('propertyKey')}
                                                         error={validateEmpty(propertyKey)}
-                                                        disabled={isNotCreator && isNotPublisher}
+                                                        disabled={isRestricted(
+                                                            ['apim:api_create', 'apim:api_publish'],
+                                                            api,
+                                                        )}
                                                     />
                                                 </TableCell>
                                                 <TableCell>
@@ -412,7 +413,10 @@ function Properties(props) {
                                                         onChange={handleChange('propertyValue')}
                                                         onKeyDown={handleKeyDown('propertyValue')}
                                                         error={validateEmpty(propertyValue)}
-                                                        disabled={isNotCreator && isNotPublisher}
+                                                        disabled={isRestricted(
+                                                            ['apim:api_create', 'apim:api_publish'],
+                                                            api,
+                                                        )}
                                                     />
                                                 </TableCell>
                                                 <TableCell align='right'>
@@ -422,7 +426,7 @@ function Properties(props) {
                                                         disabled={
                                                             !propertyValue ||
                                                             !propertyKey ||
-                                                            (isNotCreator && isNotPublisher)
+                                                            isRestricted(['apim:api_create', 'apim:api_publish'], api)
                                                         }
                                                         onClick={handleAddToList}
                                                     >
@@ -476,7 +480,9 @@ function Properties(props) {
                                             variant='contained'
                                             color='primary'
                                             onClick={handleSubmit}
-                                            disabled={updating || (isNotCreator && isNotPublisher)}
+                                            disabled={
+                                                updating || isRestricted(['apim:api_create', 'apim:api_publish'], api)
+                                            }
                                         >
                                             {updating && (
                                                 <React.Fragment>
@@ -506,7 +512,7 @@ function Properties(props) {
                                         </Button>
                                     </Link>
                                 </Grid>
-                                {isNotCreator && isNotPublisher && (
+                                {isRestricted(['apim:api_create', 'apim:api_publish'], api) && (
                                     <Grid item xs={12}>
                                         <Typography variant='body2' color='primary'>
                                             <FormattedMessage

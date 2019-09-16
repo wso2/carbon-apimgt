@@ -10,7 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 
 import BusinessPlans from './BusinessPlans';
 
@@ -53,8 +53,6 @@ class Monetization extends Component {
         this.handleChange = this.handleChange.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
-        this.isNotCreator = AuthManager.isNotCreator();
-        this.isNotPublisher = AuthManager.isNotPublisher();
     }
 
     componentDidMount() {
@@ -139,7 +137,7 @@ class Monetization extends Component {
                     <FormControlLabel
                         control={
                             <Checkbox
-                                disabled={this.isNotCreator && this.isNotPublisher}
+                                disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                 id='monStatus'
                                 name='monStatus'
                                 checked={monStatus}
@@ -162,7 +160,7 @@ class Monetization extends Component {
                                     (monetizationAttributes.length > 0) ?
                                         (monetizationAttributes.map((monetizationAttribute, i) => (
                                             <TextField
-                                                disabled={this.isNotCreator && this.isNotPublisher}
+                                                disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                                 fullWidth
                                                 id={'attribute' + i}
                                                 label={monetizationAttribute.name}

@@ -35,7 +35,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Checkbox from '@material-ui/core/Checkbox';
 import Alert from 'AppComponents/Shared/Alert';
 import Paper from '@material-ui/core/Paper';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 
 /**
  * Renders an Environments list
@@ -46,8 +46,8 @@ export default function Environments() {
     const { api, updateAPI } = useContext(APIContext);
     const { settings } = useAppContext();
     const [gatewayEnvironments, setGatewayEnvironments] = useState([...api.gatewayEnvironments]);
-    const isNotCreator = AuthManager.isNotCreator();
-    const isNotPublisher = AuthManager.isNotPublisher();
+
+
     const [isUpdating, setUpdating] = useState(false);
 
     /**
@@ -95,7 +95,7 @@ export default function Environments() {
                             <TableRow key={row.name}>
                                 <TableCell padding='checkbox'>
                                     <Checkbox
-                                        disabled={isNotCreator && isNotPublisher}
+                                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                         checked={gatewayEnvironments.includes(row.name)}
                                         onChange={
                                             (event) => {
@@ -131,7 +131,7 @@ export default function Environments() {
             >
                 <Grid item>
                     <Button
-                        disabled={isNotCreator && isNotPublisher && isUpdating}
+                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api) && isUpdating}
                         type='submit'
                         variant='contained'
                         color='primary'
