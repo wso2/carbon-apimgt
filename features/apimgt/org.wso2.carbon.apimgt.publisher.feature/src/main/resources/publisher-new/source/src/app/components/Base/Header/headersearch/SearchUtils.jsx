@@ -28,9 +28,7 @@ import Icon from '@material-ui/core/Icon';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import SearchOutlined from '@material-ui/icons/SearchOutlined';
 import { Link } from 'react-router-dom';
-import APIsIcon from '@material-ui/icons/SettingsApplicationsOutlined';
-import DocumentsIcon from '@material-ui/icons/LibraryBooks';
-import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import ProductIcon from 'AppComponents/Shared/CustomIcon';
 
 import API from 'AppData/api';
 import SearchParser from './SearchParser';
@@ -97,7 +95,7 @@ function getIcon(type) {
         case 'API':
             return <Icon style={{ fontSize: 30 }}>settings_applications</Icon>;
         case 'APIPRODUCT':
-            return (<CustomIcon
+            return (<ProductIcon
                 width={16}
                 height={16}
                 icon='api-product'
