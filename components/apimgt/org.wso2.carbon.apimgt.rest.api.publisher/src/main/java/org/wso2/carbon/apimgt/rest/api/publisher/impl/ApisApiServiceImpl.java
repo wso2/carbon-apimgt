@@ -46,15 +46,13 @@ import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
@@ -1686,12 +1684,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             //for multiple http methods
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(api.getId());
             if (!StringUtils.isEmpty(apiSwaggerDefinition)) {
-                APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-                Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(apiSwaggerDefinition);
+                APIDefinition parser = OASParserUtil.getOASParser(apiSwaggerDefinition);
+                Set<URITemplate> uriTemplates = parser.getURITemplates(apiSwaggerDefinition);
                 api.setUriTemplates(uriTemplates);
 
                 // scopes
-                Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiSwaggerDefinition);
+                Set<Scope> scopes = parser.getScopes(apiSwaggerDefinition);
                 api.setScopes(scopes);
             }
 
@@ -1839,8 +1837,8 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String contentType, String ifMatch,
                                         String ifUnmodifiedSince) {
         try {
-            APIDefinitionValidationResponse response = new APIDefinitionUsingOASParser()
-                    .validateAPIDefinition(apiDefinition, false);
+            APIDefinition parser = OASParserUtil.getOASParser(apiDefinition);
+            APIDefinitionValidationResponse response = parser.validateAPIDefinition(apiDefinition, false);
             if (!response.isValid()) {
                 RestApiUtil.handleBadRequest(response.getErrorItems(), log);
             }
@@ -1848,9 +1846,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             API existingAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
-            APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(apiDefinition);
-            Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiDefinition);
+
+            Set<URITemplate> uriTemplates = parser.getURITemplates(apiDefinition);
+            Set<Scope> scopes = parser.getScopes(apiDefinition);
             existingAPI.setUriTemplates(uriTemplates);
             existingAPI.setScopes(scopes);
 

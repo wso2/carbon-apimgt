@@ -78,6 +78,7 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -88,7 +89,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -157,9 +157,6 @@ public class APIProviderHostObject extends ScriptableObject {
     public String getClassName() {
         return "APIProvider";
     }
-
-    // API definitions from swagger v2.0
-    static APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
 
     // The zero-argument constructor used for create instances for runtime
     public APIProviderHostObject() throws APIManagementException {
@@ -548,13 +545,14 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (!apiData.get("swagger", apiData).equals("null")) {
 
+            String apiDefinition = String.valueOf(apiData.get("swagger", apiData));
+            APIDefinition parser = OASParserUtil.getOASParser(apiDefinition);
             //Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates =
-                    definitionFromOpenAPISpec.getURITemplates(String.valueOf(apiData.get("swagger", apiData)));
+            Set<URITemplate> uriTemplates = parser.getURITemplates(apiDefinition);
             api.setUriTemplates(uriTemplates);
 
             //scopes
-            Set<Scope> scopes = definitionFromOpenAPISpec.getScopes(String.valueOf(apiData.get("swagger", apiData)));
+            Set<Scope> scopes = parser.getScopes(apiDefinition);
             api.setScopes(scopes);
 
             try {
@@ -698,11 +696,11 @@ public class APIProviderHostObject extends ScriptableObject {
         if (!apiData.get("swagger", apiData).equals("null")) {
             //Read swagger from the registry todo: check why was this done
             //String swaggerFromRegistry = apiProvider.getOpenAPIDefinition(api.getId());
-
+            String apiDefinition = String.valueOf(apiData.get("swagger", apiData));
+            APIDefinition parser = OASParserUtil.getOASParser(apiDefinition);
             SwaggerData swaggerData = new SwaggerData(api);
             //Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates =
-                    definitionFromOpenAPISpec.getURITemplates((String) apiData.get("swagger", apiData));
+            Set<URITemplate> uriTemplates = parser.getURITemplates(apiDefinition);
             api.setUriTemplates(uriTemplates);
 
             apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
@@ -1023,9 +1021,10 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (apiData.get("swagger", apiData) != null) {
             SwaggerData swaggerData = new SwaggerData(api);
-            // Read URI Templates from swagger resource and set it to api object
-            Set<URITemplate> uriTemplates =
-                    definitionFromOpenAPISpec.getURITemplates((String) apiData.get("swagger", apiData));
+            String apiDefinition = String.valueOf(apiData.get("swagger", apiData));
+            APIDefinition parser = OASParserUtil.getOASParser(apiDefinition);
+            //Read URI Templates from swagger resource and set to api object
+            Set<URITemplate> uriTemplates = parser.getURITemplates(apiDefinition);
             api.setUriTemplates(uriTemplates);
             apiProvider.validateResourceThrottlingTiers(api, tenantDomain);
             // Save the swagger definition in the registry
@@ -1726,13 +1725,14 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (apiData.get("swagger", apiData) != null) {
             SwaggerData swaggerData = new SwaggerData(api);
-            // Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates =
-                    definitionFromOpenAPISpec.getURITemplates(String.valueOf(apiData.get("swagger", apiData)));
+            String apiDefinition = String.valueOf(apiData.get("swagger", apiData));
+            APIDefinition parser = OASParserUtil.getOASParser(apiDefinition);
+            //Read URI Templates from swagger resource and set to api object
+            Set<URITemplate> uriTemplates = parser.getURITemplates(apiDefinition);
             api.setUriTemplates(uriTemplates);
 
             // scopes
-            Set<Scope> scopes = definitionFromOpenAPISpec.getScopes(String.valueOf(apiData.get("swagger", apiData)));
+            Set<Scope> scopes = parser.getScopes(apiDefinition);
             api.setScopes(scopes);
 
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
@@ -1756,7 +1756,8 @@ public class APIProviderHostObject extends ScriptableObject {
             saveAPI(apiProvider, api, null, false);
         } else {
             SwaggerData swaggerData = new SwaggerData(api);
-            String apiDefinitionJSON = definitionFromOpenAPISpec.generateAPIDefinition(swaggerData);
+            APIDefinition parser = new OAS3Parser();
+            String apiDefinitionJSON = parser.generateAPIDefinition(swaggerData);
             apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
         }
         return success;
@@ -2232,13 +2233,14 @@ public class APIProviderHostObject extends ScriptableObject {
 
             if (apiData.get("swagger", apiData) != null) {
                 SwaggerData swaggerData = new SwaggerData(api);
-                // Read URI Templates from swagger resource and set to api object
-                Set<URITemplate> uriTemplates =
-                        definitionFromOpenAPISpec.getURITemplates(String.valueOf(apiData.get("swagger", apiData)));
+                String apiDefinition = String.valueOf(apiData.get("swagger", apiData));
+                APIDefinition parser = OASParserUtil.getOASParser(apiDefinition);
+                //Read URI Templates from swagger resource and set to api object
+                Set<URITemplate> uriTemplates = parser.getURITemplates(apiDefinition);
                 api.setUriTemplates(uriTemplates);
 
                 // scopes
-                Set<Scope> scopes = definitionFromOpenAPISpec.getScopes(String.valueOf(apiData.get("swagger", apiData)));
+                Set<Scope> scopes = parser.getScopes(apiDefinition);
                 api.setScopes(scopes);
 
                 try {
@@ -2261,7 +2263,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 saveAPI(apiProvider, api, null, false);
             } else {
                 SwaggerData swaggerData = new SwaggerData(api);
-                String apiDefinitionJSON = definitionFromOpenAPISpec.generateAPIDefinition(swaggerData);
+                APIDefinition parser = new OAS3Parser();
+                String apiDefinitionJSON = parser.generateAPIDefinition(swaggerData);
                 apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
                 apiProvider.updateAPI(api);
             }

@@ -127,18 +127,18 @@ class CreateEditForm extends React.Component {
         };
     }
 
-    changeType = e => {
+    changeType = (e) => {
         const { value } = e.target;
         if (value === 'PUBLIC_FORUM' || value === 'SUPPORT_FORUM') {
             this.setState({ type: 'URL' });
         }
         this.setState({ type: value });
     };
-    changeSource = e => {
+    changeSource = (e) => {
         const { value } = e.target;
         this.setState({ sourceType: value });
     };
-    setDisable = item => {
+    setDisable = (item) => {
         const { type } = this.state;
         if (item === 'INLINE' || item === 'MARKDOWN' || item === 'FILE') {
             if (type === 'PUBLIC_FORUM' || type === 'SUPPORT_FORUM') {
@@ -146,7 +146,7 @@ class CreateEditForm extends React.Component {
             }
         }
     };
-    handleChange = name => e => {
+    handleChange = name => (e) => {
         const { value } = e.target;
         if (name === 'name') {
             this.setState({ name: value });
@@ -159,14 +159,16 @@ class CreateEditForm extends React.Component {
         }
     };
 
-    onDrop = acceptedFile => {
+    onDrop = (acceptedFile) => {
         this.setState({ file: acceptedFile });
     };
 
-    addDocument = apiId => {
+    addDocument = (apiId) => {
         const { apiType } = this.props;
         const restAPI = apiType === Api.CONSTS.APIProduct ? new APIProduct() : new Api();
-        const { name, type, summary, sourceType, sourceUrl, file, otherTypeName } = this.state;
+        const {
+            name, type, summary, sourceType, sourceUrl, file, otherTypeName,
+        } = this.state;
         const docPromise = restAPI.addDocument(apiId, {
             name,
             type,
@@ -179,9 +181,11 @@ class CreateEditForm extends React.Component {
         });
         return { docPromise, file };
     };
-    updateDocument = apiId => {
+    updateDocument = (apiId) => {
         const restAPI = new Api();
-        const { name, type, summary, sourceType, sourceUrl, file, otherTypeName } = this.state;
+        const {
+            name, type, summary, sourceType, sourceUrl, file, otherTypeName,
+        } = this.state;
         const { docId } = this.props;
         const docPromise = restAPI.updateDocument(apiId, docId, {
             name,
@@ -201,8 +205,10 @@ class CreateEditForm extends React.Component {
         if (docId && apiId) {
             const docPromise = restAPI.getDocument(apiId, docId);
             docPromise
-                .then(doc => {
-                    const { name, type, summary, sourceType, sourceUrl, otherTypeName } = doc.body;
+                .then((doc) => {
+                    const {
+                        name, type, summary, sourceType, sourceUrl, otherTypeName,
+                    } = doc.body;
                     this.setState({
                         name,
                         type,
@@ -212,7 +218,7 @@ class CreateEditForm extends React.Component {
                         otherTypeName,
                     });
                 })
-                .catch(error => {
+                .catch((error) => {
                     if (process.env.NODE_ENV !== 'production') {
                         console.log(error);
                     }
@@ -231,28 +237,31 @@ class CreateEditForm extends React.Component {
         }
     }
     render() {
-        const { name, type, summary, sourceType, sourceUrl, file, disableName, otherTypeName } = this.state;
+        const {
+            name, type, summary, sourceType, sourceUrl, file, disableName, otherTypeName,
+        } = this.state;
         const { classes } = this.props;
         return (
             <div className={classes.addNewOther}>
-                <FormControl margin="normal" className={classes.FormControlOdd}>
+                <FormControl margin='normal' className={classes.FormControlOdd}>
                     <TextField
                         fullWidth
                         label={
                             <FormattedMessage
-                                id="Apis.Details.Documents.CreateEditForm.document.name"
-                                defaultMessage="Name *"
+                                id='Apis.Details.Documents.CreateEditForm.document.name'
+                                defaultMessage='Name *'
                             />
                         }
                         helperText={
                             <FormattedMessage
-                                id="Apis.Details.Documents.CreateEditForm.document.name.helper.text"
-                                defaultMessage="Provide the name for the document"
+                                id='Apis.Details.Documents.CreateEditForm.document.name.helper.text'
+                                defaultMessage='Provide the name for the document'
                             />
                         }
-                        type="text"
-                        name="name"
-                        margin="normal"
+                        type='text'
+                        variant='outlined'
+                        name='name'
+                        margin='normal'
                         value={name}
                         onChange={this.handleChange('name')}
                         InputLabelProps={{
@@ -262,27 +271,27 @@ class CreateEditForm extends React.Component {
                         disabled={disableName}
                     />
                 </FormControl>
-                <FormControl margin="normal" className={classes.FormControlOdd}>
+                <FormControl margin='normal' className={classes.FormControlOdd}>
                     <TextField
                         fullWidth
                         multiline
-                        margin="normal"
-                        variant="outlined"
+                        margin='normal'
+                        variant='outlined'
                         label={
                             <FormattedMessage
-                                id="Apis.Details.Documents.CreateEditForm.document.summary"
-                                defaultMessage="Summary *"
+                                id='Apis.Details.Documents.CreateEditForm.document.summary'
+                                defaultMessage='Summary *'
                             />
                         }
                         helperText={
                             <FormattedMessage
-                                id="Apis.Details.Documents.CreateEditForm.document.summary.helper.text"
-                                defaultMessage="Provide a brief description for the document"
+                                id='Apis.Details.Documents.CreateEditForm.document.summary.helper.text'
+                                defaultMessage='Provide a brief description for the document'
                             />
                         }
-                        type="text"
-                        name="summary"
-                        margin="normal"
+                        type='text'
+                        name='summary'
+                        margin='normal'
                         value={summary}
                         onChange={this.handleChange('summary')}
                         InputLabelProps={{
@@ -290,31 +299,31 @@ class CreateEditForm extends React.Component {
                         }}
                     />
                 </FormControl>
-                <FormControl component="fieldset" className={classes.formControlFirst}>
-                    <FormLabel component="legend">
+                <FormControl component='fieldset' className={classes.formControlFirst}>
+                    <FormLabel component='legend'>
                         <FormattedMessage
-                            id="Apis.Details.Documents.CreateEditForm.document.create.type"
-                            defaultMessage="Type"
+                            id='Apis.Details.Documents.CreateEditForm.document.create.type'
+                            defaultMessage='Type'
                         />
                     </FormLabel>
                     <RadioGroup
-                        aria-label="Type"
-                        name="type"
+                        aria-label='Type'
+                        name='type'
                         className={classes.group}
                         value={type}
                         onChange={this.changeType}
                     >
                         <FormControlLabel
                             className={classes.formControlLabel}
-                            value="HOWTO"
+                            value='HOWTO'
                             control={<Radio />}
                             label={
                                 <div className={classes.typeTextWrapper}>
                                     <Icon>help_outline</Icon>
                                     <div>
                                         <FormattedMessage
-                                            id="Apis.Details.Documents.CreateEditForm.document.create.type.how.to"
-                                            defaultMessage="How To"
+                                            id='Apis.Details.Documents.CreateEditForm.document.create.type.how.to'
+                                            defaultMessage='How To'
                                         />
                                     </div>
                                 </div>
@@ -322,15 +331,15 @@ class CreateEditForm extends React.Component {
                         />
                         <FormControlLabel
                             className={classes.formControlLabel}
-                            value="SAMPLES"
+                            value='SAMPLES'
                             control={<Radio />}
                             label={
                                 <div className={classes.typeTextWrapper}>
                                     <Icon>code</Icon>
                                     <div>
                                         <FormattedMessage
-                                            id="Apis.Details.Documents.CreateEditForm.document.create.type.sample"
-                                            defaultMessage="Sample &amp; SDK"
+                                            id='Apis.Details.Documents.CreateEditForm.document.create.type.sample'
+                                            defaultMessage='Sample &amp; SDK'
                                         />
                                     </div>
                                 </div>
@@ -338,15 +347,15 @@ class CreateEditForm extends React.Component {
                         />
                         <FormControlLabel
                             className={classes.formControlLabel}
-                            value="PUBLIC_FORUM"
+                            value='PUBLIC_FORUM'
                             control={<Radio />}
                             label={
                                 <div className={classes.typeTextWrapper}>
                                     <Icon>forum</Icon>
                                     <div>
                                         <FormattedMessage
-                                            id="Apis.Details.Documents.CreateEditForm.document.create.type.public.forum"
-                                            defaultMessage="Public Forum"
+                                            id='Apis.Details.Documents.CreateEditForm.document.create.type.public.forum'
+                                            defaultMessage='Public Forum'
                                         />
                                     </div>
                                 </div>
@@ -354,7 +363,7 @@ class CreateEditForm extends React.Component {
                         />
                         <FormControlLabel
                             className={classes.formControlLabel}
-                            value="SUPPORT_FORUM"
+                            value='SUPPORT_FORUM'
                             control={<Radio />}
                             label={
                                 <div className={classes.typeTextWrapper}>
@@ -365,7 +374,7 @@ class CreateEditForm extends React.Component {
                                                 'Apis.Details.Documents.CreateEditForm.document.create.type.support.' +
                                                 'forum'
                                             }
-                                            defaultMessage="Support Forum"
+                                            defaultMessage='Support Forum'
                                         />
                                     </div>
                                 </div>
@@ -373,15 +382,15 @@ class CreateEditForm extends React.Component {
                         />
                         <FormControlLabel
                             className={classes.formControlLabel}
-                            value="OTHER"
+                            value='OTHER'
                             control={<Radio />}
                             label={
                                 <div className={classes.typeTextWrapper}>
                                     <Icon>video_label</Icon>
                                     <div>
                                         <FormattedMessage
-                                            id="Apis.Details.Documents.CreateEditForm.document.create.type.other"
-                                            defaultMessage="Other"
+                                            id='Apis.Details.Documents.CreateEditForm.document.create.type.other'
+                                            defaultMessage='Other'
                                         />
                                     </div>
                                 </div>
@@ -390,7 +399,7 @@ class CreateEditForm extends React.Component {
                     </RadioGroup>
                 </FormControl>
                 {type === 'OTHER' && (
-                    <FormControl margin="normal" className={classes.FormControlOdd}>
+                    <FormControl margin='normal' className={classes.FormControlOdd}>
                         <TextField
                             fullWidth
                             label={
@@ -399,7 +408,7 @@ class CreateEditForm extends React.Component {
                                         'Apis.Details.Documents.CreateEditForm.document.create.type.other.document.' +
                                         'category'
                                     }
-                                    defaultMessage="Other Document Category *"
+                                    defaultMessage='Other Document Category *'
                                 />
                             }
                             helperText={
@@ -408,13 +417,14 @@ class CreateEditForm extends React.Component {
                                         'Apis.Details.Documents.CreateEditForm.document.create.type.other.document.' +
                                         'category.helper.text'
                                     }
-                                    defaultMessage="Provide the document category"
+                                    defaultMessage='Provide the document category'
                                 />
                             }
-                            type="text"
-                            name="otherTypeName"
-                            margin="normal"
+                            type='text'
+                            name='otherTypeName'
+                            margin='normal'
                             value={otherTypeName}
+                            variant='outlined'
                             onChange={this.handleChange('otherTypeName')}
                             InputLabelProps={{
                                 shrink: true,
@@ -422,83 +432,83 @@ class CreateEditForm extends React.Component {
                         />
                     </FormControl>
                 )}
-                <FormControl component="fieldset" className={classes.formControl}>
-                    <FormLabel component="legend">
-                        <FormattedMessage id="Apis.Details.Documents.CreateEditForm.source" defaultMessage="Source" />
+                <FormControl component='fieldset' className={classes.formControl}>
+                    <FormLabel component='legend'>
+                        <FormattedMessage id='Apis.Details.Documents.CreateEditForm.source' defaultMessage='Source' />
                     </FormLabel>
                     <RadioGroup
-                        aria-label="Source"
-                        name="sourceType"
+                        aria-label='Source'
+                        name='sourceType'
                         className={classes.group}
                         value={sourceType}
                         onChange={this.changeSource}
                     >
                         <FormControlLabel
                             disabled={this.setDisable('INLINE')}
-                            value="INLINE"
+                            value='INLINE'
                             control={<Radio />}
                             label={
                                 <FormattedMessage
-                                    id="Apis.Details.Documents.CreateEditForm.source.inline"
-                                    defaultMessage="Inline"
+                                    id='Apis.Details.Documents.CreateEditForm.source.inline'
+                                    defaultMessage='Inline'
                                 />
                             }
                         />
                         <FormControlLabel
                             disabled={this.setDisable('MARKDOWN')}
-                            value="MARKDOWN"
+                            value='MARKDOWN'
                             control={<Radio />}
                             label={
                                 <FormattedMessage
-                                    id="Apis.Details.Documents.CreateEditForm.source.markdown"
-                                    defaultMessage="Markdown"
+                                    id='Apis.Details.Documents.CreateEditForm.source.markdown'
+                                    defaultMessage='Markdown'
                                 />
                             }
                         />
                         <FormControlLabel
                             disabled={this.setDisable('URL')}
-                            value="URL"
+                            value='URL'
                             control={<Radio />}
                             label={
                                 <FormattedMessage
-                                    id="Apis.Details.Documents.CreateEditForm.source.url"
-                                    defaultMessage="URL"
+                                    id='Apis.Details.Documents.CreateEditForm.source.url'
+                                    defaultMessage='URL'
                                 />
                             }
                         />
                         <FormControlLabel
                             disabled={this.setDisable('FILE')}
-                            value="FILE"
+                            value='FILE'
                             control={<Radio />}
                             label={
                                 <FormattedMessage
-                                    id="Apis.Details.Documents.CreateEditForm.source.file"
-                                    defaultMessage="File"
+                                    id='Apis.Details.Documents.CreateEditForm.source.file'
+                                    defaultMessage='File'
                                 />
                             }
                         />
                     </RadioGroup>
                 </FormControl>
                 {sourceType === 'URL' && (
-                    <FormControl margin="normal" className={classes.FormControlOdd}>
+                    <FormControl margin='normal' className={classes.FormControlOdd}>
                         <TextField
                             fullWidth
-                            margin="normal"
+                            margin='normal'
                             label={
                                 <FormattedMessage
-                                    id="Apis.Details.Documents.CreateEditForm.source.url.url"
-                                    defaultMessage="URL"
+                                    id='Apis.Details.Documents.CreateEditForm.source.url.url'
+                                    defaultMessage='URL'
                                 />
                             }
                             helperText={
                                 <FormattedMessage
-                                    id="Apis.Details.Documents.CreateEditForm.source.url.helper.text"
-                                    defaultMessage="Provide the URL to the source"
+                                    id='Apis.Details.Documents.CreateEditForm.source.url.helper.text'
+                                    defaultMessage='Provide the URL to the source'
                                 />
                             }
-                            type="text"
-                            name="sourceUrl"
-                            margin="normal"
+                            type='text'
+                            name='sourceUrl'
+                            margin='normal'
                             value={sourceUrl}
                             onChange={this.handleChange('sourceUrl')}
                             InputLabelProps={{
@@ -510,11 +520,11 @@ class CreateEditForm extends React.Component {
                 {sourceType === 'FILE' && (
                     <Dropzone
                         multiple={false}
-                        accept="application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/pdf"
+                        accept='application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/pdf'
                         className={classes.dropzone}
                         activeClassName={classes.acceptDrop}
                         rejectClassName={classes.rejectDrop}
-                        onDrop={dropFile => {
+                        onDrop={(dropFile) => {
                             this.onDrop(dropFile);
                         }}
                     >
@@ -536,11 +546,11 @@ class CreateEditForm extends React.Component {
                     </Dropzone>
                 )}
                 {(sourceType === 'INLINE' || sourceType === 'MARKDOWN') && (
-                    <InlineMessage type="info" height={60}>
+                    <InlineMessage type='info' height={60}>
                         <div className={classes.contentWrapper}>
-                            <Typography component="p" className={classes.content}>
+                            <Typography component='p' className={classes.content}>
                                 <FormattedMessage
-                                    id="Apis.Details.Documents.CreateEditForm.document.content.info"
+                                    id='Apis.Details.Documents.CreateEditForm.document.content.info'
                                     defaultMessage={
                                         'Please save the document. The content can be edited in the next ' + 'step.'
                                     }

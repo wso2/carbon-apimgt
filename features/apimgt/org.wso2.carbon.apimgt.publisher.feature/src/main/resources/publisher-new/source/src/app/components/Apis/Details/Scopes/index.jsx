@@ -15,20 +15,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useContext } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 import CreateScope from './CreateScope';
 import EditScope from './EditScope';
 import Scopes from './Scopes';
 import { PageNotFound } from '../../../Base/Errors';
 
-const Scope = ({ api }) => {
+const Scope = () => {
+    const { isAPIProduct } = useContext(APIContext);
+    const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
     return (
         <Switch>
-            <Route exact path='/apis/:api_uuid/scopes/' component={() => <Scopes api={api} />} />
-            <Route exact path='/apis/:api_uuid/scopes/create' component={() => <CreateScope api={api} />} />
-            <Route exact path='/apis/:api_uuid/scopes/edit' component={() => <EditScope api={api} />} />
+            <Route exact path={'/' + urlPrefix + '/:api_uuid/scopes/'} component={() => <Scopes />} />
+            <Route exact path={'/' + urlPrefix + '/:api_uuid/scopes/create'} component={() => <CreateScope />} />
+            <Route exact path={'/' + urlPrefix + '/:api_uuid/scopes/edit'} component={() => <EditScope />} />
             <Route component={PageNotFound} />
         </Switch>
     );

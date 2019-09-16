@@ -57,7 +57,7 @@ const styles = {
 };
 
 function Transition(props) {
-    return <Slide direction="up" {...props} />;
+    return <Slide direction='up' {...props} />;
 }
 
 function Edit(props) {
@@ -75,22 +75,20 @@ function Edit(props) {
         const { apiId } = props;
         const promiseWrapper = createEditForm.updateDocument(apiId);
         promiseWrapper.docPromise
-            .then(doc => {
+            .then((doc) => {
                 const { documentId, name } = doc.body;
                 if (promiseWrapper.file && documentId) {
                     const filePromise = restAPI.addFileToDocument(apiId, documentId, promiseWrapper.file[0]);
                     filePromise
-                        .then(doc => {
-                            Alert.info(
-                                `${name} ${intl.formatMessage({
-                                    id: 'Apis.Details.Documents.Edit.markdown.editor.upload.success.message',
-                                    defaultMessage: 'File uploaded successfully.',
-                                })}`,
-                            );
+                        .then((doc) => {
+                            Alert.info(`${name} ${intl.formatMessage({
+                                id: 'Apis.Details.Documents.Edit.markdown.editor.upload.success.message',
+                                defaultMessage: 'File uploaded successfully.',
+                            })}`);
                             props.getDocumentsList();
-                            toggleAddDocs();
+                            toggleOpen();
                         })
-                        .catch(error => {
+                        .catch((error) => {
                             if (process.env.NODE_ENV !== 'production') {
                                 console.log(error);
                                 Alert.error(intl.formatMessage({
@@ -100,17 +98,15 @@ function Edit(props) {
                             }
                         });
                 } else {
-                    Alert.info(
-                        `${doc.name} ${intl.formatMessage({
-                            id: 'Apis.Details.Documents.Edit.markdown.editor.update.success.message',
-                            defaultMessage: 'Updated successfully.',
-                        })}`,
-                    );
+                    Alert.info(`${doc.name} ${intl.formatMessage({
+                        id: 'Apis.Details.Documents.Edit.markdown.editor.update.success.message',
+                        defaultMessage: 'Updated successfully.',
+                    })}`);
                     props.getDocumentsList();
-                    toggleAddDocs();
+                    toggleOpen();
                 }
             })
-            .catch(error => {
+            .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                     Alert.error(intl.formatMessage({
@@ -121,7 +117,6 @@ function Edit(props) {
             });
     };
 
-    
     const { classes, docId, apiId } = props;
     return (
         <div>
@@ -129,37 +124,37 @@ function Edit(props) {
                 <Icon>edit</Icon>
                 <FormattedMessage
                     id='Apis.Details.Documents.Edit.documents.text.editor.edit'
-                    defaultMessage='Edit'
+                    defaultMessage='Edit Meta Data'
                 />
             </Button>
             <Dialog open={open} onClose={toggleOpen} TransitionComponent={Transition} fullScreen>
                 <Paper square className={classes.popupHeader}>
-                    <IconButton color="inherit" onClick={toggleOpen} aria-label="Close">
+                    <IconButton color='inherit' onClick={toggleOpen} aria-label='Close'>
                         <Icon>close</Icon>
                     </IconButton>
-                    <Typography variant="h4" className={classes.docName}>
+                    <Typography variant='h4' className={classes.docName}>
                         <FormattedMessage
                             id='Apis.Details.Documents.Edit.documents.text.editor.edit.content'
-                            defaultMessage="Edit "
-                        />"
-                        {props.docName}"
+                            defaultMessage='Edit '
+                        />
+                        "{props.docName}"
                     </Typography>
-                    <Button className={classes.button} variant="contained" color="primary" onClick={updateDoc}>
+                    <Button className={classes.button} variant='contained' color='primary' onClick={updateDoc}>
                         <FormattedMessage
                             id='Apis.Details.Documents.Edit.documents.text.editor.update.content'
-                            defaultMessage="Save"
+                            defaultMessage='Save'
                         />
                     </Button>
                     <Button className={classes.button} onClick={toggleOpen}>
                         <FormattedMessage
                             id='Apis.Details.Documents.Edit.documents.text.editor.cancel'
-                            defaultMessage="Cancel"
+                            defaultMessage='Cancel'
                         />
                     </Button>
                 </Paper>
                 <div className={classes.splitWrapper}>
                     <CreateEditForm
-                        innerRef={node => {
+                        innerRef={(node) => {
                             createEditForm = node;
                         }}
                         docId={docId}

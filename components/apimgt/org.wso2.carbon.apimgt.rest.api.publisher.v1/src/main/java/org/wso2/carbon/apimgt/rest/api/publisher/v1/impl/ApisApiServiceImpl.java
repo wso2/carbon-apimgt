@@ -77,12 +77,10 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -114,10 +112,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
@@ -146,12 +142,10 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.MediationMapp
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.Optional;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -572,12 +566,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             if (!isWSAPI) {
                 String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
-                Optional<APIDefinition> definitionOptional = OASParserUtil.getOASParser(oldDefinition);
-                if(!definitionOptional.isPresent()) {
-                    RestApiUtil.handleInternalServerError("Error occurred while getting swagger parser.", log);
-                    return null;
-                }
-                APIDefinition apiDefinition = definitionOptional.get();
+                APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
                 SwaggerData swaggerData = new SwaggerData(apiToUpdate);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
                 apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
@@ -2366,12 +2355,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //for multiple http methods
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(api.getId());
             if (!org.apache.commons.lang3.StringUtils.isEmpty(apiSwaggerDefinition)) {
-                Optional<APIDefinition> definitionOptional = OASParserUtil.getOASParser(apiSwaggerDefinition);
-                if(!definitionOptional.isPresent()) {
-                    RestApiUtil.handleInternalServerError("Error occurred while getting swagger parser.", log);
-                    return null;
-                }
-                APIDefinition apiDefinition = definitionOptional.get();
+                APIDefinition apiDefinition = OASParserUtil.getOASParser(apiSwaggerDefinition);
                 Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(apiSwaggerDefinition);
                 api.setUriTemplates(uriTemplates);
 
@@ -3031,9 +3015,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiProvider.addAPI(apiToAdd);
 
             //Save swagger definition of graphQL
-            APIDefinitionFromOpenAPISpec apiDefinitionUsingOASParser = new APIDefinitionFromOpenAPISpec();
+            APIDefinition parser = new OAS3Parser();
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
-            String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(swaggerData);
+            String apiDefinition = parser.generateAPIDefinition(swaggerData);
             apiProvider.saveSwagger20Definition(apiToAdd.getId(), apiDefinition);
 
             APIIdentifier createdApiId = apiToAdd.getId();
