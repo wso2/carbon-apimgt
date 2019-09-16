@@ -58,6 +58,9 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
+/**
+ * Renders the input component
+ */
 function renderInput(inputProps) {
     const {
         InputProps, classes, ref, ...other
@@ -79,9 +82,6 @@ function renderInput(inputProps) {
 }
 
 renderInput.propTypes = {
-    /**
-   * Override or extend the styles applied to the component.
-   */
     classes: PropTypes.shape({
         type: PropTypes.string,
         inputType: PropTypes.string,
@@ -92,6 +92,9 @@ renderInput.propTypes = {
     }).isRequired,
 };
 
+/**
+ * Renders the suggestion component
+ */
 function renderSuggestion(suggestionProps) {
     const {
         suggestion, index, itemProps, highlightedIndex, selectedItem,
@@ -125,6 +128,9 @@ renderSuggestion.propTypes = {
     suggestion: PropTypes.string.isRequired,
 };
 
+/**
+ * Gets suggestion list
+ */
 function getSuggestions(value, suggestions, { showEmpty = false } = {}) {
     const inputValue = deburr(value.trim()).toLowerCase();
     const inputLength = inputValue.length;
@@ -142,6 +148,9 @@ function getSuggestions(value, suggestions, { showEmpty = false } = {}) {
         });
 }
 
+/**
+ * Downshift selection component
+ */
 function DownshiftMultiple(props) {
     const { setTenantList } = props;
     const { classes, suggestions } = props;
@@ -261,6 +270,9 @@ DownshiftMultiple.propTypes = {
     }).isRequired,
 };
 
+/**
+ * Gets tenant list in order to populate suggestions list
+ */
 export default function IntegrationDownshift(props) {
     const classes = useStyles();
     const [suggestions, setsuggestions] = useState({});

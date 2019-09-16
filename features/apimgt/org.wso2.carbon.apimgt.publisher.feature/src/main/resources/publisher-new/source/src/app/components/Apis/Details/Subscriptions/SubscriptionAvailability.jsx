@@ -92,10 +92,8 @@ export default function SimpleSelect(props) {
         if (updateAPI) {
             if (values.availability === 'currentTenant') {
                 availabilityValue = 'CURRENT_TENANT';
-                availableTenantsList = [];
             } else if (values.availability === 'allTenants') {
                 availabilityValue = 'ALL_TENANTS';
-                availableTenantsList = [];
             } else if (values.availability === 'specificTenants') {
                 availabilityValue = 'SPECIFIC_TENANTS';
                 availableTenantsList = tenantList;
@@ -108,9 +106,7 @@ export default function SimpleSelect(props) {
                     Alert.info('Tenant availability updated successfully');
                 })
                 .catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.error(error);
-                    }
+                    console.error(error);
                     Alert.error('Error occurred while updating tenant availability');
                 });
         }
