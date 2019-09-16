@@ -20,8 +20,14 @@ import React from 'react';
 import Redirecting from '../Shared/Redirecting';
 
 const RedirectToLogin = () => {
+    window.location = '/store-new/services/configs';
     return (
-        window.location = '/store-new/services/configs'
+        <Redirecting
+            message={intl.formatMessage({
+                defaultMessage: 'You are now being redirected to Identity Provider.',
+                id: 'Base.Login.Login.you.are.now.being.redirected.to.identity.provider',
+            })}
+        />  
     );
 };
 
