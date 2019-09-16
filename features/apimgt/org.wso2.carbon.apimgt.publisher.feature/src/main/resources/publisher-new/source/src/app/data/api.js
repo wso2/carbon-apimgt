@@ -424,13 +424,10 @@ class API extends Resource {
      * */
     validateDocument(id, name) {
         return this.client.then((client) => {
-            return client.apis['API Documents'].validateDocument({apiId: id},{name: name }).then((resp) => {
-                console.log(resp);
-                return resp.ok;
-            }).catch((err) => {
-                console.log(err);
-                return false;
-            });
+            return client.apis['API Documents'].validateDocument({
+                apiId: id,
+                name: name
+            })
         });
     }
 
