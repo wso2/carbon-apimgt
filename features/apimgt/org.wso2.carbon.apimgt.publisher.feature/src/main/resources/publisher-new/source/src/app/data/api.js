@@ -502,7 +502,7 @@ class API extends Resource {
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getScopes(id, callback = null) {
+    getScopes(id = this.id, callback = null) {
         const promise_get = this.client.then(client => {
             return client.apis['API Scopes'].get_apis__apiId__scopes(
                 {

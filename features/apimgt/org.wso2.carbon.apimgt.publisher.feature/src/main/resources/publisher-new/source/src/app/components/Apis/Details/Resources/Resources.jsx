@@ -25,6 +25,7 @@ import Swagger from 'swagger-client';
 import isEmpty from 'lodash/isEmpty';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Alert from 'AppComponents/Shared/Alert';
+import API from 'AppData/api';
 
 import Operation from './components/Operation';
 import GroupOfOperations from './components/GroupOfOperations';
@@ -56,6 +57,7 @@ export default function Resources() {
         return openAPISpec;
     }
     const [api, updateAPI] = useAPI();
+    const [operationRateLimits, setOperationRateLimits] = useState([]);
     const [specErrors, setSpecErrors] = useState([]);
     const [openAPI, openAPIActionsDispatcher] = useReducer(openAPIActionsReducer, {});
 
@@ -74,6 +76,16 @@ export default function Resources() {
     useEffect(() => {
         // Update the Swagger spec object when API object gets changed
         api.getSwagger().then(response => resolveAndUpdateSpec(response));
+        // TODO: need to handle the error cases through catch ~tmkb
+
+        // Fetch API level throttling policies only when the page get mounted for the first time `componentDidMount`
+        API.policies('api').then((response) => {
+            setOperationRateLimits(response.body.list);
+        });
+        // TODO: need to handle the error cases through catch ~tmkb
+        api.getScopes().then((response) => {
+            console.log(response);
+        });
     }, [api]);
 
     // We don't give a * If openAPI object is null
@@ -150,6 +162,7 @@ export default function Resources() {
             default:
                 break;
         }
+        return Promise.reject(new Error());
     }
 
     const taggedOperations = { Default: [] };
@@ -206,6 +219,7 @@ export default function Resources() {
                                             updateOpenAPI={updateOpenAPI}
                                             openAPI={openAPI}
                                             operation={operation}
+                                            operationRateLimits={operationRateLimits}
                                         />
                                     </Grid>
                                 ))}

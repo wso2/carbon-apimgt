@@ -34,11 +34,12 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import ClearIcon from '@material-ui/icons/Clear';
 import Tooltip from '@material-ui/core/Tooltip';
+import Badge from '@material-ui/core/Badge';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import APIValidation from 'AppData/APIValidation';
 import Alert from 'AppComponents/Shared/Alert';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
     formControl: {
         minWidth: 120,
     },
@@ -107,7 +108,7 @@ export default function AddOperation(props) {
      *
      */
     function clearInputs() {
-        setOperation({ target: '', verb: null });
+        setOperation({ target: '', verb: '' });
     }
     /**
      *
@@ -134,6 +135,7 @@ export default function AddOperation(props) {
                         <InputLabel ref={inputLabel} htmlFor='outlined-age-simple'>
                             HTTP Verb
                         </InputLabel>
+
                         <Select
                             renderValue={verb => <VerbElement isButton verb={verb} />}
                             value={operation.verb}
@@ -148,7 +150,26 @@ export default function AddOperation(props) {
                                 <VerbElement value={verb.toLowerCase()} verb={verb} />
                             ))}
                         </Select>
-                        <FormHelperText id='my-helper-text'>Select a Verb</FormHelperText>
+
+                        <FormHelperText id='my-helper-text'>
+                            {operation.verb && operation.verb.toLowerCase() === 'option' ? (
+                                // TODO: Add i18n to tooltip text ~tmkb
+                                <Tooltip
+                                    title={
+                                        'Select the OPTIONS method to send OPTIONS calls to the backend.' +
+                                        ' If the OPTIONS method is not selected, OPTIONS calls will be returned ' +
+                                        'from the Gateway with allowed methods.'
+                                    }
+                                    placement='bottom'
+                                >
+                                    <Badge color='error' variant='dot'>
+                                        Select a Verb
+                                    </Badge>
+                                </Tooltip>
+                            ) : (
+                                'Select a Verb'
+                            )}
+                        </FormHelperText>
                     </FormControl>
                 </Grid>
                 <Grid item md={6}>
@@ -220,5 +241,5 @@ export default function AddOperation(props) {
 }
 
 AddOperation.propTypes = {
-    specErrors: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+    updateOpenAPI: PropTypes.func.isRequired,
 };

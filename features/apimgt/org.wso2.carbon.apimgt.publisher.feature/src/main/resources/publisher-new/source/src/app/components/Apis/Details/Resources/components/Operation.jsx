@@ -24,22 +24,23 @@ import Divider from '@material-ui/core/Divider';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button';
 import Badge from '@material-ui/core/Badge';
-import TextField from '@material-ui/core/TextField';
 import ExpansionPanelActions from '@material-ui/core/ExpansionPanelActions';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { makeStyles } from '@material-ui/core/styles';
-import Switch from '@material-ui/core/Switch';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import cloneDeep from 'lodash.clonedeep';
 import Alert from 'AppComponents/Shared/Alert';
 import Utils from 'AppData/Utils';
 import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from '@material-ui/core/IconButton';
+
+// splitted operation components
+
+import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
+import OperationGovernance from './operationComponents/OperationGovernance';
 
 /**
  *
@@ -49,7 +50,9 @@ import IconButton from '@material-ui/core/IconButton';
  * @returns {React.Component} @inheritdoc
  */
 export default function Operation(props) {
-    const { operation: initOperation, updateOpenAPI, highlight } = props;
+    const {
+        operation: initOperation, updateOpenAPI, highlight, operationRateLimits,
+    } = props;
     const [isSaving, setIsSaving] = useState(false); // Use to show the loader and disable button
     const [isDeleting, setIsDeleting] = useState(false); // Use to disable the expansion panel
     const [isNotSaved, setIsNotSaved] = useState(false);
@@ -79,6 +82,10 @@ export default function Operation(props) {
                 nextState[action] = event.value ? 'Any' : 'None';
                 nextState.spec['x-auth-type'] = event.value ? 'Any' : 'None';
                 return nextState;
+            case 'throttlingPolicy':
+                nextState[action] = event.value;
+                return nextState;
+
             default:
                 break;
         }
@@ -214,68 +221,15 @@ export default function Operation(props) {
             <Divider light className={classes.customDivider} />
             <ExpansionPanelDetails>
                 <Grid spacing={2} container direction='row' justify='flex-start' alignItems='flex-start'>
-                    <Grid item md={12}>
-                        <Typography variant='subtitle1'>
-                            Summary {'&'} Description
-                            <Divider variant='middle' />
-                        </Typography>
-                    </Grid>
-                    <Grid item md={1} />
-                    <Grid item md={6}>
-                        <TextField
-                            margin='dense'
-                            fullWidth
-                            label='Description'
-                            multiline
-                            rows='4'
-                            value={operation.spec.description}
-                            variant='outlined'
-                            onChange={({ target: { value } }) =>
-                                operationActionsDispatcher({ action: 'description', event: { operation, value } })
-                            }
-                        />
-                    </Grid>
-                    <Grid item md={5}>
-                        <TextField
-                            id='outlined-dense'
-                            label='Summary'
-                            margin='dense'
-                            variant='outlined'
-                            fullWidth
-                            value={operation.spec.summary}
-                            onChange={({ target: { value } }) =>
-                                operationActionsDispatcher({ action: 'summary', event: { operation, value } })
-                            }
-                        />
-                    </Grid>
-                    <Grid item md={12}>
-                        <Typography variant='subtitle1'>
-                            Security
-                            <Divider variant='middle' />
-                        </Typography>
-                    </Grid>
-                    <Grid item md={1} />
-                    <Grid item md={11}>
-                        <FormControl component='fieldset'>
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={operation.authType.toLowerCase() !== 'none'}
-                                        onChange={({ target: { checked } }) =>
-                                            operationActionsDispatcher({
-                                                action: 'authType',
-                                                event: { value: checked },
-                                            })
-                                        }
-                                        size='small'
-                                        color='primary'
-                                    />
-                                }
-                                label='Enabled'
-                                labelPlacement='start'
-                            />
-                        </FormControl>
-                    </Grid>
+                    <DescriptionAndSummary
+                        operation={operation}
+                        operationActionsDispatcher={operationActionsDispatcher}
+                    />
+                    <OperationGovernance
+                        operation={operation}
+                        operationActionsDispatcher={operationActionsDispatcher}
+                        operationRateLimits={operationRateLimits}
+                    />
                 </Grid>
             </ExpansionPanelDetails>
             <Divider className={classes.customDivider} />
@@ -298,7 +252,10 @@ export default function Operation(props) {
         </ExpansionPanel>
     );
 }
-
+Operation.defaultProps = {
+    highlight: false,
+    operationRateLimits: [], // Response body.list from apis policies for `api` throttling policies type
+};
 Operation.propTypes = {
     api: PropTypes.shape({}).isRequired,
     updateOpenAPI: PropTypes.func.isRequired,
@@ -307,4 +264,6 @@ Operation.propTypes = {
         verb: PropTypes.string.isRequired,
         spec: PropTypes.shape({}).isRequired,
     }).isRequired,
+    highlight: PropTypes.bool,
+    operationRateLimits: PropTypes.arrayOf(PropTypes.shape({})),
 };
