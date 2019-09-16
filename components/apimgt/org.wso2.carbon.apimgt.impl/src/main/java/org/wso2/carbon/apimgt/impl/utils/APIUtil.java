@@ -650,6 +650,7 @@ public final class APIUtil {
                 resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
                 Scope scope = findScopeByKey(scopes, resourceScopes.get(resourceScopeKey));
                 uriTemplate.setScope(scope);
+                uriTemplate.setScopes(scope);
                 //Checking for duplicate uri template names
 
                 if (uriTemplateNames.contains(uTemplate)) {
