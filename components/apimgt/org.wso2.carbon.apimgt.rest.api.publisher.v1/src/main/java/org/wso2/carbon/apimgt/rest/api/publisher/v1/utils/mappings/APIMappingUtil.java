@@ -1495,8 +1495,7 @@ public class APIMappingUtil {
      */
     private static List<APIOperationsDTO> getOperationsFromSwaggerDef(API api, String swaggerDefinition)
             throws APIManagementException {
-        Optional<APIDefinition> apiDefinitionOptional = OASParserUtil.getOASParser(swaggerDefinition);
-        APIDefinition apiDefinition = apiDefinitionOptional.get();
+        APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerDefinition);
         Set<URITemplate> uriTemplates;
         if (APIConstants.GRAPHQL_API.equals(api.getType())) {
             uriTemplates = api.getUriTemplates();
@@ -2104,11 +2103,7 @@ public class APIMappingUtil {
      * @throws APIManagementException throw if parsing exception occur
      */
     private static List<ScopeDTO> getScopesFromSwagger(String swagger) throws APIManagementException {
-        Optional<APIDefinition> apiDefinitionOptional = OASParserUtil.getOASParser(swagger);
-        if (!apiDefinitionOptional.isPresent()) {
-            throw new APIManagementException("Error occurred while parsing swagger definition");
-        }
-        APIDefinition apiDefinition = apiDefinitionOptional.get();
+        APIDefinition apiDefinition = OASParserUtil.getOASParser(swagger);
         Set<Scope> scopes = apiDefinition.getScopes(swagger);
         List<ScopeDTO> scopeDTOS = new ArrayList<>();
         for (Scope aScope : scopes) {

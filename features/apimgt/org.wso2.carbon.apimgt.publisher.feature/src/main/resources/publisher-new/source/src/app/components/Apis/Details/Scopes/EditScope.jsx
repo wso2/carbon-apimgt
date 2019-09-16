@@ -28,6 +28,7 @@ import { withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Alert from 'AppComponents/Shared/Alert';
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = theme => ({
     buttonSave: {
@@ -73,7 +74,10 @@ class EditScope extends React.Component {
      */
     updateScope() {
         const { apiScope } = this.state;
-        const { intl, api, history } = this.props;
+        const {
+            intl, api, history, isAPIProduct,
+        } = this.props;
+        const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
         const scopes = api.scopes.map((scope) => {
             if (scope.name === apiScope.name) {
                 return apiScope;
@@ -88,7 +92,7 @@ class EditScope extends React.Component {
                 id: 'Apis.Details.Scopes.CreateScope.scope.updated.successfully',
                 defaultMessage: 'Scope updated successfully',
             }));
-            const redirectURL = '/apis/' + api.id + '/scopes/';
+            const redirectURL = '/' + urlPrefix + '/' + api.id + '/scopes/';
             history.push(redirectURL);
         });
         promisedApiUpdate.catch((error) => {
@@ -123,21 +127,14 @@ class EditScope extends React.Component {
     }
 
     render() {
-        const { classes, api } = this.props;
+        const { classes, api, isAPIProduct } = this.props;
         const { apiScope } = this.state;
-        const url = `/apis/${api.id}/scopes`;
+        const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
+        const url = `/${urlPrefix}/${api.id}/scopes`;
         return (
             <Grid container>
-                <Typography
-                    className={classes.headline}
-                    gutterBottom
-                    variant='h5'
-                    component='h2'
-                >
-                    <FormattedMessage
-                        id='Apis.Details.Scopes.EditScope.update.scope'
-                        defaultMessage='Update Scope'
-                    />
+                <Typography className={classes.headline} gutterBottom variant='h5' component='h2'>
+                    <FormattedMessage id='Apis.Details.Scopes.EditScope.update.scope' defaultMessage='Update Scope' />
                 </Typography>
                 <Grid item lg={5} className={classes.topics}>
                     <APIPropertyField name='Name'>
@@ -158,10 +155,12 @@ class EditScope extends React.Component {
                             }}
                             id='description'
                             name='description'
-                            helperText={<FormattedMessage
-                                id='Apis.Details.Scopes.CreateScope.short.description.about.the.scope'
-                                defaultMessage='Short description about the scope'
-                            />}
+                            helperText={
+                                <FormattedMessage
+                                    id='Apis.Details.Scopes.CreateScope.short.description.about.the.scope'
+                                    defaultMessage='Short description about the scope'
+                                />
+                            }
                             margin='normal'
                             type='text'
                             onChange={this.handleInputs}
@@ -181,21 +180,11 @@ class EditScope extends React.Component {
                         onClick={this.updateScope}
                         className={classes.buttonSave}
                     >
-                        <FormattedMessage
-                            id='Apis.Details.Scopes.CreateScope.save'
-                            defaultMessage='Save'
-                        />
+                        <FormattedMessage id='Apis.Details.Scopes.CreateScope.save' defaultMessage='Save' />
                     </Button>
                     <Link to={url}>
-                        <Button
-                            variant='contained'
-                            color='primary'
-                            className={classes.buttonCancel}
-                        >
-                            <FormattedMessage
-                                id='Apis.Details.Scopes.CreateScope.cancel'
-                                defaultMessage='Cancel'
-                            />
+                        <Button variant='contained' color='primary' className={classes.buttonCancel}>
+                            <FormattedMessage id='Apis.Details.Scopes.CreateScope.cancel' defaultMessage='Cancel' />
                         </Button>
                     </Link>
                 </Grid>
@@ -219,10 +208,11 @@ EditScope.propTypes = {
         }),
     }).isRequired,
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
+    isAPIProduct: PropTypes.bool.isRequired,
 };
 
 EditScope.defaultProps = {
     match: { params: {} },
 };
 
-export default injectIntl(withRouter(withStyles(styles)(EditScope)));
+export default injectIntl(withAPI(withRouter(withStyles(styles)(EditScope))));

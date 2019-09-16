@@ -30,9 +30,6 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import AddCircle from '@material-ui/icons/AddCircle';
-import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
-import EditIcon from '@material-ui/icons/Edit';
-import SaveIcon from '@material-ui/icons/Save';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -44,6 +41,7 @@ import APIContext, { withAPI } from 'AppComponents/Apis/Details/components/ApiCo
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import AuthManager from 'AppData/AuthManager';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import EditableRow from './EditableRow';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -124,127 +122,6 @@ const useStyles = makeStyles(theme => ({
 
 /**
  *
- * @param {*} props properties
- */
-function EditableRow(props) {
-    const {
-        oldKey, oldValue, handleUpdateList, handleDelete, apiAdditionalProperties, intl,
-    } = props;
-    const [newKey, setKey] = useState(null);
-    const [newValue, setValue] = useState(null);
-    const [editMode, setEditMode] = useState(false);
-
-    const updateEditMode = function () {
-        setEditMode(!editMode);
-    };
-    const handleKeyChange = (event) => {
-        const { value } = event.target;
-        setKey(value);
-    };
-    const handleValueChange = (event) => {
-        const { value } = event.target;
-        setValue(value);
-    };
-    const validateEmpty = function (itemValue) {
-        if (itemValue === null) {
-            return false;
-        } else if (itemValue === '') {
-            return true;
-        } else {
-            return false;
-        }
-    };
-    const saveRow = function () {
-        const oldRow = { oldKey, oldValue };
-        const newRow = { newKey: newKey || oldKey, newValue: newValue || oldValue };
-        handleUpdateList(oldRow, newRow);
-        setEditMode(false);
-    };
-    const deleteRow = function () {
-        handleDelete(apiAdditionalProperties, oldKey);
-    };
-    const handleKeyDown = function (e) {
-        if (e.key === 'Enter') {
-            saveRow();
-        }
-    };
-    const classes = useStyles();
-
-    return (
-        <TableRow>
-            {editMode ? (
-                <TableCell>
-                    <TextField
-                        required
-                        id='outlined-required'
-                        label={intl.formatMessage({
-                            id: 'Apis.Details.Properties.Properties.editable.row.property.name',
-                            defaultMessage: 'Property Name',
-                        })}
-                        margin='normal'
-                        variant='outlined'
-                        className={classes.addProperty}
-                        value={newKey || oldKey}
-                        onChange={handleKeyChange}
-                        onKeyDown={handleKeyDown}
-                        error={validateEmpty(newKey)}
-                    />
-                </TableCell>
-            ) : (
-                <TableCell>{oldKey}</TableCell>
-            )}
-            {editMode ? (
-                <TableCell>
-                    <TextField
-                        required
-                        id='outlined-required'
-                        label={intl.formatMessage({
-                            id: 'Apis.Details.Properties.Properties.editable.row.edit.mode.property.name',
-                            defaultMessage: 'Property Name',
-                        })}
-                        margin='normal'
-                        variant='outlined'
-                        className={classes.addProperty}
-                        value={newValue || oldValue}
-                        onChange={handleValueChange}
-                        onKeyDown={handleKeyDown}
-                        error={validateEmpty(newValue)}
-                    />
-                </TableCell>
-            ) : (
-                <TableCell>{oldValue}</TableCell>
-            )}
-            <TableCell align='right'>
-                {editMode ? (
-                    <React.Fragment>
-                        <a className={classes.link} onClick={saveRow} onKeyDown={() => {}}>
-                            <SaveIcon className={classes.buttonIcon} />
-                        </a>
-                    </React.Fragment>
-                ) : (
-                    <a className={classes.link} onClick={updateEditMode} onKeyDown={() => {}}>
-                        <EditIcon className={classes.buttonIcon} />
-                    </a>
-                )}
-                <a className={classes.link} onClick={deleteRow} onKeyDown={() => {}}>
-                    <DeleteForeverIcon className={classes.buttonIcon} />
-                </a>
-            </TableCell>
-        </TableRow>
-    );
-}
-EditableRow.propTypes = {
-    oldKey: PropTypes.shape({}).isRequired,
-    oldValue: PropTypes.shape({}).isRequired,
-    classes: PropTypes.shape({}).isRequired,
-    handleUpdateList: PropTypes.shape({}).isRequired,
-    handleDelete: PropTypes.shape({}).isRequired,
-    apiAdditionalProperties: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
-};
-
-/**
- *
  *
  * @class Properties
  * @extends {React.Component}
@@ -254,10 +131,10 @@ function Properties(props) {
      * @inheritdoc
      * @param {*} props properties
      */
-    const { api, updateAPI, isAPIProduct } = useContext(APIContext);
-    const apiCopy = cloneDeep(api);
+    const { api, updateAPI } = useContext(APIContext);
+    const additionalPropertiesTemp = cloneDeep(api.additionalProperties);
 
-    const [additionalProperties, setAdditionalProperties] = useState(apiCopy.additionalProperties);
+    const [additionalProperties, setAdditionalProperties] = useState(additionalPropertiesTemp);
     const [showAddProperty, setShowAddProperty] = useState(false);
     const [propertyKey, setPropertyKey] = useState(null);
     const [propertyValue, setPropertyValue] = useState(null);
@@ -301,10 +178,8 @@ function Properties(props) {
      * @memberof Properties
      */
     const handleSubmit = () => {
-        apiCopy.additionalProperties = additionalProperties;
         setUpdating(true);
-        if (apiCopy.type && isAPIProduct) delete apiCopy.type;
-        const updatePromise = updateAPI(apiCopy, isAPIProduct);
+        const updatePromise = updateAPI({ additionalProperties });
         updatePromise
             .then(() => {
                 setUpdating(false);

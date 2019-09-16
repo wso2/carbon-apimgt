@@ -16,8 +16,9 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
-import intl, { FormattedMessage, injectIntl } from 'react-intl';
+import React, { useState, useContext } from 'react';
+import { withRouter } from 'react-router-dom';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -32,6 +33,7 @@ import ReactMarkdown from 'react-markdown';
 import MonacoEditor from 'react-monaco-editor';
 import Api from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = {
     appBar: {
@@ -67,14 +69,21 @@ function Transition(props) {
 }
 
 function MarkdownEditor(props) {
-    const { intl } = props;
-    const [open, setOpen] = useState(false);
+    const { intl, showAtOnce, history } = props;
+    const { api, isAPIProduct } = useContext(APIContext);
+
+    const [open, setOpen] = useState(showAtOnce);
     const [code, setCode] = useState(intl.formatMessage({
         id: 'documents.markdown.editor.default',
         defaultMessage: '#Enter your markdown content',
     }));
     const toggleOpen = () => {
         if (!open) updateDoc();
+        if (open && showAtOnce) {
+            const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
+            const listingPath = `/${urlPrefix}/${api.id}/documents`;
+            history.push(listingPath);
+        }
         setOpen(!open);
     };
     const updateCode = (newCode) => {
@@ -85,7 +94,7 @@ function MarkdownEditor(props) {
     };
     const addContentToDoc = () => {
         const restAPI = new Api();
-        const docPromise = restAPI.addInlineContentToDocument(props.apiId, props.docId, 'MARKDOWN', code);
+        const docPromise = restAPI.addInlineContentToDocument(api.id, props.docId, 'MARKDOWN', code);
         docPromise
             .then((doc) => {
                 Alert.info(`${doc.name} ${intl.formatMessage({
@@ -107,7 +116,7 @@ function MarkdownEditor(props) {
     const updateDoc = () => {
         const restAPI = new Api();
 
-        const docPromise = restAPI.getInlineContentOfDocument(props.apiId, props.docId);
+        const docPromise = restAPI.getInlineContentOfDocument(api.id, props.docId);
         docPromise
             .then((doc) => {
                 setCode(doc.text);
@@ -189,4 +198,4 @@ MarkdownEditor.propTypes = {
     intl: PropTypes.shape({}).isRequired,
 };
 
-export default injectIntl(withStyles(styles)(MarkdownEditor));
+export default injectIntl(withRouter(withStyles(styles)(MarkdownEditor)));
