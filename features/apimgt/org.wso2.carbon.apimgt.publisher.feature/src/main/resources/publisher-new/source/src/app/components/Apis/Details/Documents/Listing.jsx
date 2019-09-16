@@ -17,9 +17,9 @@
  */
 
 import React from 'react';
-import intl, { FormattedMessage, injectIntl } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
 import API from 'AppData/api.js';
@@ -29,6 +29,8 @@ import Typography from '@material-ui/core/Typography';
 import AddCircle from '@material-ui/icons/AddCircle';
 import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Create from './Create';
 import MarkdownEditor from './MarkdownEditor';
 import TextEditor from './TextEditor';
@@ -79,11 +81,26 @@ const styles = theme => ({
             width: 130,
         },
     },
+    messageBox: {
+        marginTop: 20,
+    },
+    actions: {
+        padding: '20px 0',
+        '& button': {
+            marginLeft: 0,
+        },
+    },
+    head: {
+        fontWeight: 200,
+        marginBottom: 20,
+    },
 });
 function LinkGenerator(props) {
-    return props.apiType === API.CONSTS.APIProduct ?
-        <Link to={'/api-products/' + props.apiId + '/documents/' + props.docId + '/details'}>{props.docName}</Link> :
-        <Link to={'/apis/' + props.apiId + '/documents/' + props.docId + '/details'}>{props.docName}</Link>;
+    return props.apiType === API.CONSTS.APIProduct ? (
+        <Link to={'/api-products/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
+    ) : (
+        <Link to={'/apis/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
+    );
 }
 class Listing extends React.Component {
     constructor(props) {
@@ -148,8 +165,20 @@ class Listing extends React.Component {
         });
     }
     render() {
-        const { classes, api } = this.props;
+        const { classes, api, isAPIProduct } = this.props;
         const { docs, showAddDocs } = this.state;
+        const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
+        const url = `/${urlPrefix}/${api.id}/documents/create`;
+        const options = {
+            selectableRows: false,
+            title: false,
+            filter: false,
+            print: false,
+            download: false,
+            viewColumns: false,
+            customToolbar: false,
+            search: false,
+        };
         const columns = [
             {
                 name: 'documentId',
@@ -165,37 +194,49 @@ class Listing extends React.Component {
                         if (tableMeta.rowData) {
                             const docName = tableMeta.rowData[1];
                             const docId = tableMeta.rowData[0];
-                            return <LinkGenerator docName={docName} docId={docId} apiId={this.apiId} apiType={api.apiType} />;
+                            return (
+                                <LinkGenerator
+                                    docName={docName}
+                                    docId={docId}
+                                    apiId={this.apiId}
+                                    apiType={api.apiType}
+                                />
+                            );
                         }
                         return null;
                     },
                     filter: false,
-                    label: <FormattedMessage
-                        id='Apis.Details.Documents.Listing.column.header.name'
-                        defaultMessage='name'
-                    />,
+                    label: (
+                        <FormattedMessage
+                            id='Apis.Details.Documents.Listing.column.header.name'
+                            defaultMessage='name'
+                        />
+                    ),
                 },
             },
             {
                 name: 'sourceType',
-                label: <FormattedMessage
-                    id='Apis.Details.Documents.Listing.column.header.source.type'
-                    defaultMessage='sourceType'
-                />,
+                label: (
+                    <FormattedMessage
+                        id='Apis.Details.Documents.Listing.column.header.source.type'
+                        defaultMessage='sourceType'
+                    />
+                ),
             },
             {
                 name: 'type',
-                label: <FormattedMessage
-                    id='Apis.Details.Documents.Listing.column.header.type'
-                    defaultMessage='type'
-                />,
+                label: (
+                    <FormattedMessage id='Apis.Details.Documents.Listing.column.header.type' defaultMessage='type' />
+                ),
             },
             {
                 name: 'action',
-                label: <FormattedMessage
-                    id='Apis.Details.Documents.Listing.column.header.action'
-                    defaultMessage='action'
-                />,
+                label: (
+                    <FormattedMessage
+                        id='Apis.Details.Documents.Listing.column.header.action'
+                        defaultMessage='action'
+                    />
+                ),
                 options: {
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
@@ -210,7 +251,12 @@ class Listing extends React.Component {
                                                 <MarkdownEditor docName={docName} docId={docId} apiId={this.apiId} />
                                             </td>
                                             <td>
-                                                <Edit docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                                <Edit
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                />
                                             </td>
                                             <td>
                                                 <Delete
@@ -229,10 +275,20 @@ class Listing extends React.Component {
                                     <table className={classes.actionTable}>
                                         <tr>
                                             <td>
-                                                <TextEditor docName={docName} docId={docId} apiId={this.apiId} apiType={api.apiType} />
+                                                <TextEditor
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    apiType={api.apiType}
+                                                />
                                             </td>
                                             <td>
-                                                <Edit docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                                <Edit
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                />
                                             </td>
                                             <td>
                                                 <Delete
@@ -260,7 +316,12 @@ class Listing extends React.Component {
                                                 </Button>
                                             </td>
                                             <td>
-                                                <Edit docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                                <Edit
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                />
                                             </td>
                                             <td>
                                                 <Delete
@@ -282,7 +343,12 @@ class Listing extends React.Component {
                                                 <Download docId={docId} apiId={this.apiId} />
                                             </td>
                                             <td>
-                                                <Edit docName={docName} docId={docId} apiId={this.apiId} getDocumentsList={this.getDocumentsList} />
+                                                <Edit
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                />
                                             </td>
                                             <td>
                                                 <Delete
@@ -315,13 +381,15 @@ class Listing extends React.Component {
                             defaultMessage='Documents'
                         />
                     </Typography>
-                    <Button size='small' className={classes.button} onClick={this.toggleAddDocs}>
-                        <AddCircle className={classes.buttonIcon} />
-                        <FormattedMessage
-                            id='Apis.Details.Documents.Listing.add.new.document.button'
-                            defaultMessage='Add New Document'
-                        />
-                    </Button>
+                    <Link to={url}>
+                        <Button size='small' className={classes.button}>
+                            <AddCircle className={classes.buttonIcon} />
+                            <FormattedMessage
+                                id='Apis.Details.Documents.Listing.add.new.document.button'
+                                defaultMessage='Add New Document'
+                            />
+                        </Button>
+                    </Link>
                 </div>
                 <div className={classes.contentWrapper}>
                     {showAddDocs && (
@@ -332,8 +400,39 @@ class Listing extends React.Component {
                         />
                     )}
 
-                    {docs && (
-                        <MUIDataTable title='' data={docs} columns={columns} options={{ selectableRows: false }} />
+                    {docs && docs.length > 0 ? (
+                        <MUIDataTable title='' data={docs} columns={columns} options={options} />
+                    ) : (
+                        <InlineMessage type='info' height={140}>
+                            <div className={classes.contentWrapper}>
+                                <Typography variant='h5' component='h3' className={classes.head}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Documents.Listing.add.new.msg.title'
+                                        defaultMessage='Create Documents'
+                                    />
+                                </Typography>
+                                <Typography component='p' className={classes.content}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Documents.Listing.add.new.msg.content'
+                                        defaultMessage={
+                                            'You can add different types of documents to an API.' +
+                                            ' Proper documentation helps API publishers to market their ' +
+                                            ' APIs better and sustain competition. '
+                                        }
+                                    />
+                                </Typography>
+                                <div className={classes.actions}>
+                                    <Link to={url}>
+                                        <Button variant='contained' color='primary' className={classes.button}>
+                                            <FormattedMessage
+                                                id='Apis.Details.Documents.Listing.add.new.msg.button'
+                                                defaultMessage='Add New Document'
+                                            />
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </div>
+                        </InlineMessage>
                     )}
                 </div>
             </div>
@@ -350,4 +449,4 @@ Listing.propTypes = {
     }).isRequired,
 };
 
-export default injectIntl(withStyles(styles)(Listing));
+export default injectIntl(withAPI(withStyles(styles)(Listing)));
