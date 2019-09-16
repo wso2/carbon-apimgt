@@ -3517,6 +3517,8 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+      x-examples:
+        $ref: "docs/examples/apis/apis_id_auditapi_get.yaml"
       summary: Retrieve the Security Audit Report of the Audit API
       description: |
         Retrieve the Security Audit Report of the Audit API
@@ -6931,28 +6933,6 @@ definitions:
                   type: string
                 priority:
                   type: integer
-
-  #-----------------------------------------------------
-  # The API Security Audit Info resource
-  #-----------------------------------------------------
-  APISecurityAuditInfo:
-    title: Resource for API Security Audit
-    properties:
-      specfile:
-        type: object
-        description: |
-          The swagger definition of the API.
-        example: swagger.json
-      cid:
-        type: string
-        description: |
-          The ID of the API collection.
-        example: 395df257-3f79-495f-23f3-0827947bdc6e
-      name:
-        type: string
-        description: |
-          The name of the API.
-        example: Swagger-Petstore
 
   #-----------------------------------------------------
   # The Audit Report resource

@@ -14,6 +14,273 @@
             <h4 class="section-heading">
                 Examples
             </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdAuditapiGet">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-apisApiIdAuditapiGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d/auditapi HTTP 1/1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdAuditapiGet">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-apisApiIdAuditapiGet" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+Content-Type: application/json
+
+{
+  &quot;report&quot; : {
+    &quot;error&quot; : false,
+    &quot;grade&quot; : 27.25,
+    &quot;valid&quot; : true,
+    &quot;swaggerState&quot; : &quot;valid&quot;,
+    &quot;criticality&quot; : 4,
+    &quot;issueCounter&quot; : 30,
+    &quot;validation&quot; : {
+      &quot;issueCounter&quot; : 0,
+      &quot;grade&quot; : 25,
+      &quot;issues&quot; : [ ],
+      &quot;criticality&quot; : 1
+    },
+    &quot;security&quot; : {
+      &quot;issueCounter&quot; : 9,
+      &quot;grade&quot; : 2.25,
+      &quot;issues&quot; : [ {
+        &quot;pointer&quot; : &quot;&quot;,
+        &quot;type&quot; : &quot;global.security&quot;,
+        &quot;message&quot; : &quot;The security section is undefined&quot;,
+        &quot;pointerImpacted&quot; : [ &quot;/paths/~1*/put&quot;, &quot;/paths/~1*/post&quot;, &quot;/paths/~1*/delete&quot;, &quot;/paths/~1*/patch&quot;, &quot;/paths/~1*/get&quot; ],
+        &quot;configScore&quot; : -10,
+        &quot;criticality&quot; : 4,
+        &quot;score&quot; : -18.75
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/put&quot;,
+        &quot;type&quot; : &quot;operation.consumes&quot;,
+        &quot;message&quot; : &quot;Operation &#39;put&#39; does not have the &#39;consumes&#39; field defined&quot;,
+        &quot;configScore&quot; : -0.5,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -0.5
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/put&quot;,
+        &quot;type&quot; : &quot;operation.produces&quot;,
+        &quot;message&quot; : &quot;Operation &#39;put&#39; does not have the &#39;produces&#39; field defined&quot;,
+        &quot;configScore&quot; : -0.5,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -0.5
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/post&quot;,
+        &quot;type&quot; : &quot;operation.consumes&quot;,
+        &quot;message&quot; : &quot;Operation &#39;post&#39; does not have the &#39;consumes&#39; field defined&quot;,
+        &quot;configScore&quot; : -0.5,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -0.5
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/post&quot;,
+        &quot;type&quot; : &quot;operation.produces&quot;,
+        &quot;message&quot; : &quot;Operation &#39;post&#39; does not have the &#39;produces&#39; field defined&quot;,
+        &quot;configScore&quot; : -0.5,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -0.5
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/delete&quot;,
+        &quot;type&quot; : &quot;operation.produces&quot;,
+        &quot;message&quot; : &quot;Operation &#39;delete&#39; does not have the &#39;produces&#39; field defined&quot;,
+        &quot;configScore&quot; : -0.5,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -0.5
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/patch&quot;,
+        &quot;type&quot; : &quot;operation.consumes&quot;,
+        &quot;message&quot; : &quot;Operation &#39;patch&#39; does not have the &#39;consumes&#39; field defined&quot;,
+        &quot;configScore&quot; : -0.5,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -0.5
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/patch&quot;,
+        &quot;type&quot; : &quot;operation.produces&quot;,
+        &quot;message&quot; : &quot;Operation &#39;patch&#39; does not have the &#39;produces&#39; field defined&quot;,
+        &quot;configScore&quot; : -0.5,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -0.5
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/get&quot;,
+        &quot;type&quot; : &quot;operation.produces&quot;,
+        &quot;message&quot; : &quot;Operation &#39;get&#39; does not have the &#39;produces&#39; field defined&quot;,
+        &quot;configScore&quot; : -0.5,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -0.5
+      } ],
+      &quot;criticality&quot; : 4
+    },
+    &quot;data&quot; : {
+      &quot;issueCounter&quot; : 21,
+      &quot;grade&quot; : 0,
+      &quot;issues&quot; : [ {
+        &quot;pointer&quot; : &quot;/paths/~1*/put/responses&quot;,
+        &quot;type&quot; : &quot;response.default.undefined&quot;,
+        &quot;message&quot; : &quot;No default response defined for the operation&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -0.8333333333333333
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/put/responses&quot;,
+        &quot;type&quot; : &quot;response.404&quot;,
+        &quot;message&quot; : &quot;404 response should be defined for all GET, PUT, HEAD, and DELETE operations&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -0.8333333333333333
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/put/responses&quot;,
+        &quot;type&quot; : &quot;response.415&quot;,
+        &quot;message&quot; : &quot;415 response should be defined for operations receiving a body (POST, PUT, PATCH)&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -0.8333333333333333
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/put/responses&quot;,
+        &quot;type&quot; : &quot;response.429&quot;,
+        &quot;message&quot; : &quot;429 response should be defined for all operations&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -0.8333333333333333
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/put/responses/200&quot;,
+        &quot;type&quot; : &quot;response.schema.undefined&quot;,
+        &quot;message&quot; : &quot;Response that should contain a body has no schema defined&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -6.666666666666666
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/post/responses&quot;,
+        &quot;type&quot; : &quot;response.default.undefined&quot;,
+        &quot;message&quot; : &quot;No default response defined for the operation&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -1.1111111111111112
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/post/responses&quot;,
+        &quot;type&quot; : &quot;response.415&quot;,
+        &quot;message&quot; : &quot;415 response should be defined for operations receiving a body (POST, PUT, PATCH)&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -1.1111111111111112
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/post/responses&quot;,
+        &quot;type&quot; : &quot;response.429&quot;,
+        &quot;message&quot; : &quot;429 response should be defined for all operations&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -1.1111111111111112
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/post/responses/200&quot;,
+        &quot;type&quot; : &quot;response.schema.undefined&quot;,
+        &quot;message&quot; : &quot;Response that should contain a body has no schema defined&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -6.666666666666666
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/delete/responses&quot;,
+        &quot;type&quot; : &quot;response.default.undefined&quot;,
+        &quot;message&quot; : &quot;No default response defined for the operation&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -1.1111111111111112
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/delete/responses&quot;,
+        &quot;type&quot; : &quot;response.404&quot;,
+        &quot;message&quot; : &quot;404 response should be defined for all GET, PUT, HEAD, and DELETE operations&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -1.1111111111111112
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/delete/responses&quot;,
+        &quot;type&quot; : &quot;response.429&quot;,
+        &quot;message&quot; : &quot;429 response should be defined for all operations&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -1.1111111111111112
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/delete/responses/200&quot;,
+        &quot;type&quot; : &quot;response.schema.undefined&quot;,
+        &quot;message&quot; : &quot;Response that should contain a body has no schema defined&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -6.666666666666666
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/patch/responses&quot;,
+        &quot;type&quot; : &quot;response.default.undefined&quot;,
+        &quot;message&quot; : &quot;No default response defined for the operation&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -1.1111111111111112
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/patch/responses&quot;,
+        &quot;type&quot; : &quot;response.415&quot;,
+        &quot;message&quot; : &quot;415 response should be defined for operations receiving a body (POST, PUT, PATCH)&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -1.1111111111111112
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/patch/responses&quot;,
+        &quot;type&quot; : &quot;response.429&quot;,
+        &quot;message&quot; : &quot;429 response should be defined for all operations&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -1.1111111111111112
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/patch/responses/200&quot;,
+        &quot;type&quot; : &quot;response.schema.undefined&quot;,
+        &quot;message&quot; : &quot;Response that should contain a body has no schema defined&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -6.666666666666666
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/get/responses&quot;,
+        &quot;type&quot; : &quot;response.default.undefined&quot;,
+        &quot;message&quot; : &quot;No default response defined for the operation&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -1.1111111111111112
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/get/responses&quot;,
+        &quot;type&quot; : &quot;response.404&quot;,
+        &quot;message&quot; : &quot;404 response should be defined for all GET, PUT, HEAD, and DELETE operations&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -1.1111111111111112
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/get/responses&quot;,
+        &quot;type&quot; : &quot;response.429&quot;,
+        &quot;message&quot; : &quot;429 response should be defined for all operations&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -1.1111111111111112
+      }, {
+        &quot;pointer&quot; : &quot;/paths/~1*/get/responses/200&quot;,
+        &quot;type&quot; : &quot;response.schema.undefined&quot;,
+        &quot;message&quot; : &quot;Response that should contain a body has no schema defined&quot;,
+        &quot;configScore&quot; : -1,
+        &quot;criticality&quot; : 1,
+        &quot;score&quot; : -6.666666666666666
+      } ],
+      &quot;criticality&quot; : 1
+    }
+  },
+  &quot;grade&quot; : &quot;27.25&quot;,
+  &quot;numErrors&quot; : 30
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d/auditapi&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
+
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">

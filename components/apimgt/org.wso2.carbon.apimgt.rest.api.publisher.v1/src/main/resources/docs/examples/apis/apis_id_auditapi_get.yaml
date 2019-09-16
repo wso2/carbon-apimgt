@@ -1,0 +1,295 @@
+- id: auditApiGet
+  request:
+    method: GET
+    url: https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d/auditapi
+    headers: |
+      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+  response:
+    status:
+      code: 200
+      msg: OK
+    headers: |
+      Content-Type: application/json
+    body:
+      {
+        "report":
+          {
+            "error":false,
+            "grade":27.25,
+            "valid":true,
+            "swaggerState":"valid",
+            "criticality":4,
+            "issueCounter":30,
+            "validation":{
+              "issueCounter":0,
+              "grade":25,
+              "issues":[
+
+              ],
+              "criticality":1
+            },
+            "security":{
+              "issueCounter":9,
+              "grade":2.25,
+              "issues":[
+              {
+                "pointer":"",
+                "type":"global.security",
+                "message":"The security section is undefined",
+                "pointerImpacted":[
+                  "/paths/~1*/put",
+                  "/paths/~1*/post",
+                  "/paths/~1*/delete",
+                  "/paths/~1*/patch",
+                  "/paths/~1*/get"
+                ],
+                "configScore":-10,
+                "criticality":4,
+                "score":-18.75
+              },
+              {
+                "pointer":"/paths/~1*/put",
+                "type":"operation.consumes",
+                "message":"Operation 'put' does not have the 'consumes' field defined",
+                "configScore":-0.5,
+                "criticality":1,
+                "score":-0.5
+              },
+              {
+                "pointer":"/paths/~1*/put",
+                "type":"operation.produces",
+                "message":"Operation 'put' does not have the 'produces' field defined",
+                "configScore":-0.5,
+                "criticality":1,
+                "score":-0.5
+              },
+              {
+                "pointer":"/paths/~1*/post",
+                "type":"operation.consumes",
+                "message":"Operation 'post' does not have the 'consumes' field defined",
+                "configScore":-0.5,
+                "criticality":1,
+                "score":-0.5
+              },
+              {
+                "pointer":"/paths/~1*/post",
+                "type":"operation.produces",
+                "message":"Operation 'post' does not have the 'produces' field defined",
+                "configScore":-0.5,
+                "criticality":1,
+                "score":-0.5
+              },
+              {
+                "pointer":"/paths/~1*/delete",
+                "type":"operation.produces",
+                "message":"Operation 'delete' does not have the 'produces' field defined",
+                "configScore":-0.5,
+                "criticality":1,
+                "score":-0.5
+              },
+              {
+                "pointer":"/paths/~1*/patch",
+                "type":"operation.consumes",
+                "message":"Operation 'patch' does not have the 'consumes' field defined",
+                "configScore":-0.5,
+                "criticality":1,
+                "score":-0.5
+              },
+              {
+                "pointer":"/paths/~1*/patch",
+                "type":"operation.produces",
+                "message":"Operation 'patch' does not have the 'produces' field defined",
+                "configScore":-0.5,
+                "criticality":1,
+                "score":-0.5
+              },
+              {
+                "pointer":"/paths/~1*/get",
+                "type":"operation.produces",
+                "message":"Operation 'get' does not have the 'produces' field defined",
+                "configScore":-0.5,
+                "criticality":1,
+                "score":-0.5
+              }
+              ],
+              "criticality":4
+            },
+            "data":{
+              "issueCounter":21,
+              "grade":0,
+              "issues":[
+              {
+                "pointer":"/paths/~1*/put/responses",
+                "type":"response.default.undefined",
+                "message":"No default response defined for the operation",
+                "configScore":-1,
+                "criticality":1,
+                "score":-0.8333333333333333
+              },
+              {
+                "pointer":"/paths/~1*/put/responses",
+                "type":"response.404",
+                "message":"404 response should be defined for all GET, PUT, HEAD, and DELETE operations",
+                "configScore":-1,
+                "criticality":1,
+                "score":-0.8333333333333333
+              },
+              {
+                "pointer":"/paths/~1*/put/responses",
+                "type":"response.415",
+                "message":"415 response should be defined for operations receiving a body (POST, PUT, PATCH)",
+                "configScore":-1,
+                "criticality":1,
+                "score":-0.8333333333333333
+              },
+              {
+                "pointer":"/paths/~1*/put/responses",
+                "type":"response.429",
+                "message":"429 response should be defined for all operations",
+                "configScore":-1,
+                "criticality":1,
+                "score":-0.8333333333333333
+              },
+              {
+                "pointer":"/paths/~1*/put/responses/200",
+                "type":"response.schema.undefined",
+                "message":"Response that should contain a body has no schema defined",
+                "configScore":-1,
+                "criticality":1,
+                "score":-6.666666666666666
+              },
+              {
+                "pointer":"/paths/~1*/post/responses",
+                "type":"response.default.undefined",
+                "message":"No default response defined for the operation",
+                "configScore":-1,
+                "criticality":1,
+                "score":-1.1111111111111112
+              },
+              {
+                "pointer":"/paths/~1*/post/responses",
+                "type":"response.415",
+                "message":"415 response should be defined for operations receiving a body (POST, PUT, PATCH)",
+                "configScore":-1,
+                "criticality":1,
+                "score":-1.1111111111111112
+              },
+              {
+                "pointer":"/paths/~1*/post/responses",
+                "type":"response.429",
+                "message":"429 response should be defined for all operations",
+                "configScore":-1,
+                "criticality":1,
+                "score":-1.1111111111111112
+              },
+              {
+                "pointer":"/paths/~1*/post/responses/200",
+                "type":"response.schema.undefined",
+                "message":"Response that should contain a body has no schema defined",
+                "configScore":-1,
+                "criticality":1,
+                "score":-6.666666666666666
+              },
+              {
+                "pointer":"/paths/~1*/delete/responses",
+                "type":"response.default.undefined",
+                "message":"No default response defined for the operation",
+                "configScore":-1,
+                "criticality":1,
+                "score":-1.1111111111111112
+              },
+              {
+                "pointer":"/paths/~1*/delete/responses",
+                "type":"response.404",
+                "message":"404 response should be defined for all GET, PUT, HEAD, and DELETE operations",
+                "configScore":-1,
+                "criticality":1,
+                "score":-1.1111111111111112
+              },
+              {
+                "pointer":"/paths/~1*/delete/responses",
+                "type":"response.429",
+                "message":"429 response should be defined for all operations",
+                "configScore":-1,
+                "criticality":1,
+                "score":-1.1111111111111112
+              },
+              {
+                "pointer":"/paths/~1*/delete/responses/200",
+                "type":"response.schema.undefined",
+                "message":"Response that should contain a body has no schema defined",
+                "configScore":-1,
+                "criticality":1,
+                "score":-6.666666666666666
+              },
+              {
+                "pointer":"/paths/~1*/patch/responses",
+                "type":"response.default.undefined",
+                "message":"No default response defined for the operation",
+                "configScore":-1,
+                "criticality":1,
+                "score":-1.1111111111111112
+              },
+              {
+                "pointer":"/paths/~1*/patch/responses",
+                "type":"response.415",
+                "message":"415 response should be defined for operations receiving a body (POST, PUT, PATCH)",
+                "configScore":-1,
+                "criticality":1,
+                "score":-1.1111111111111112
+              },
+              {
+                "pointer":"/paths/~1*/patch/responses",
+                "type":"response.429",
+                "message":"429 response should be defined for all operations",
+                "configScore":-1,
+                "criticality":1,
+                "score":-1.1111111111111112
+              },
+              {
+                "pointer":"/paths/~1*/patch/responses/200",
+                "type":"response.schema.undefined",
+                "message":"Response that should contain a body has no schema defined",
+                "configScore":-1,
+                "criticality":1,
+                "score":-6.666666666666666
+              },
+              {
+                "pointer":"/paths/~1*/get/responses",
+                "type":"response.default.undefined",
+                "message":"No default response defined for the operation",
+                "configScore":-1,
+                "criticality":1,
+                "score":-1.1111111111111112
+              },
+              {
+                "pointer":"/paths/~1*/get/responses",
+                "type":"response.404",
+                "message":"404 response should be defined for all GET, PUT, HEAD, and DELETE operations",
+                "configScore":-1,
+                "criticality":1,
+                "score":-1.1111111111111112
+              },
+              {
+                "pointer":"/paths/~1*/get/responses",
+                "type":"response.429",
+                "message":"429 response should be defined for all operations",
+                "configScore":-1,
+                "criticality":1,
+                "score":-1.1111111111111112
+              },
+              {
+                "pointer":"/paths/~1*/get/responses/200",
+                "type":"response.schema.undefined",
+                "message":"Response that should contain a body has no schema defined",
+                "configScore":-1,
+                "criticality":1,
+                "score":-6.666666666666666
+              }
+              ],
+              "criticality":1
+            }
+          },
+        "grade":"27.25",
+        "numErrors":30
+      }
