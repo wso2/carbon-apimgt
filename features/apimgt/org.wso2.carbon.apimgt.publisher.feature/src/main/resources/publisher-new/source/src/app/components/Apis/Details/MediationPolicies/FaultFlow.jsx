@@ -23,7 +23,7 @@ import PropTypes from 'prop-types';
 import API from 'AppData/api.js';
 import Alert from 'AppComponents/Shared/Alert';
 import EngagedFaultMediationPolicy from './Engaged/EngagedFaultMediationPolicy';
-import EditFaultMediationPolicy from './Edit/EditfaultMediationPolicy';
+import EditFaultMediationPolicy from './Edit/EditFaultMediationPolicy';
 
 const styles = {
     content: {
