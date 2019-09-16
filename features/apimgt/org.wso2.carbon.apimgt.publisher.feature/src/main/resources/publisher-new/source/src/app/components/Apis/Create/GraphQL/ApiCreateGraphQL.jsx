@@ -188,7 +188,8 @@ export default function ApiCreateGraphQL(props) {
                         <FormattedMessage
                             id='Apis.Create.GraphQL.ApiCreateGraphQL.sub.heading'
                             defaultMessage={
-                                'Use an existing GraphQL SDL definition file' + ' to create an API in WSO2 API Manager.'
+                                'Use an existing GraphQL SDL definition file' +
+                                ' to create an API in WSO2 API Manager.'
                             }
                         />
                     </Typography>
