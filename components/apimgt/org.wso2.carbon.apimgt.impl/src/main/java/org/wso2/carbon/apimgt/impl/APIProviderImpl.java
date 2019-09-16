@@ -3407,14 +3407,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                String resourcePath = identifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
-                        identifier.getApiName() + identifier.getVersion() +
-                        APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
-                resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
-                registry.delete(resourcePath);
-            }
-
             cleanUpPendingAPIStateChangeTask(apiId);
             //Run cleanup task for workflow
             /*
@@ -6790,14 +6782,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
 
-        Map<String, String> failedToPublishEnvironments = publishToGateway(product);
-        if (!failedToPublishEnvironments.isEmpty()) {
-            Set<String> publishedEnvironments =
-                    new HashSet<String>(product.getEnvironments());
-            publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
-            product.setEnvironments(publishedEnvironments);
-            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-            failedGateways.put("UNPUBLISHED", Collections.<String,String>emptyMap());
+        if (resources.size() > 0) {
+            Map<String, String> failedToPublishEnvironments = publishToGateway(product);
+            if (!failedToPublishEnvironments.isEmpty()) {
+                Set<String> publishedEnvironments = new HashSet<String>(product.getEnvironments());
+                publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
+                product.setEnvironments(publishedEnvironments);
+                failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+                failedGateways.put("UNPUBLISHED", Collections.<String, String>emptyMap());
+            }
         }
 
         //todo : check whether permissions need to be updated and pass it along

@@ -1802,6 +1802,10 @@ public class APIMappingUtil {
         context = checkAndSetVersionParam(context);
         product.setContextTemplate(context);
 
+        List<String> apiProductTags = dto.getTags();
+        Set<String> tagsToReturn = new HashSet<>(apiProductTags);
+        product.addTags(tagsToReturn);
+
         if(dto.getBusinessInformation() != null) {
             product.setBusinessOwner(dto.getBusinessInformation().getBusinessOwner());
             product.setBusinessOwnerEmail(dto.getBusinessInformation().getBusinessOwnerEmail());
