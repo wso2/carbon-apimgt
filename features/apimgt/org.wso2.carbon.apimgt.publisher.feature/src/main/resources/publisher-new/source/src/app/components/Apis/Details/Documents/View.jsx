@@ -16,22 +16,38 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
+import Paper from '@material-ui/core/Paper';
 import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
 import ReactMarkdown from 'react-markdown';
 import ReactSafeHtml from 'react-safe-html';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import API from 'AppData/api.js';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
 import Alert from 'AppComponents/Shared/Alert';
+import API from 'AppData/api';
+import APIProduct from 'AppData/APIProduct';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = theme => ({
     root: {
-        paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
+        flexGrow: 1,
+        marginTop: 10,
+    },
+    titleWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    titleLink: {
+        color: theme.palette.primary.main,
     },
     docTitle: {
         fontWeight: 100,
@@ -60,6 +76,14 @@ const styles = theme => ({
     displayURLLink: {
         paddingLeft: theme.spacing.unit * 2,
     },
+    paper: {
+        marginTop: 20,
+        padding: theme.spacing.unit * 2,
+        height: '100%',
+    },
+    leftCell: {
+        width: 150,
+    },
 });
 /**
  *
@@ -69,17 +93,36 @@ const styles = theme => ({
  */
 function View(props) {
     const {
-        classes, doc, apiId, fullScreen, intl,
+        classes,
+        fullScreen,
+        intl,
+        match: {
+            params: { documentId },
+        },
     } = props;
+    const { api, isAPIProduct } = useContext(APIContext);
+
     const [code, setCode] = useState('');
-    const restAPI = new API();
+    const [doc, setDoc] = useState(null);
+    const restAPI = isAPIProduct ? new APIProduct() : new API();
 
     useEffect(() => {
-        if (doc.sourceType === 'MARKDOWN' || doc.sourceType === 'INLINE') loadContentForDoc();
-    }, [props.doc]);
+        const docPromise = restAPI.getDocument(api.id, documentId);
+        docPromise
+            .then((doc) => {
+                const { body } = doc;
+                setDoc(body);
+                if (body.sourceType === 'MARKDOWN' || body.sourceType === 'INLINE') loadContentForDoc();
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+            });
+    }, [documentId]);
 
     const loadContentForDoc = () => {
-        const docPromise = restAPI.getInlineContentOfDocument(apiId, doc.documentId);
+        const docPromise = restAPI.getInlineContentOfDocument(api.id, documentId);
         docPromise
             .then((doc) => {
                 setCode(doc.text);
@@ -133,7 +176,7 @@ function View(props) {
         }
     };
     const handleDownload = () => {
-        const promised_get_content = restAPI.getFileForDocument(apiId, doc.documentId);
+        const promised_get_content = restAPI.getFileForDocument(api.id, documentId);
         promised_get_content
             .then((done) => {
                 downloadFile(done, document);
@@ -141,38 +184,117 @@ function View(props) {
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
-                    Alert.error(
-                        intl.formatMessage({
-                            id: 'Apis.Details.Documents.View.error.downloading',
-                            defaultMessage: 'Error downloading the file',
-                        }),
-                    );
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Documents.View.error.downloading',
+                        defaultMessage: 'Error downloading the file',
+                    }));
                 }
             });
     };
+    const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
+    const listingPath = `/${urlPrefix}/${api.id}/documents`;
     return (
-        <React.Fragment>
-            {!fullScreen && <div className={classes.docBadge}>{doc.type}</div>}
-            <Typography variant='h5' component='h3' className={classes.docTitle}>
-                {doc.name}
-            </Typography>
-            <Typography variant='caption'>{doc.summary}</Typography>
-            {doc.sourceType === 'MARKDOWN' && <ReactMarkdown source={code} />}
-            {doc.sourceType === 'INLINE' && <ReactSafeHtml html={code} />}
-            {doc.sourceType === 'URL' && (
-                <a className={classes.displayURL} href={doc.sourceUrl} target='_blank'>
-                    {doc.sourceUrl}
-                    <Icon className={classes.displayURLLink}>open_in_new</Icon>
-                </a>
-            )}
-            {doc.sourceType === 'FILE' && (
-                <Button variant='contained' color='default' className={classes.button} onClick={handleDownload}>
-                    <FormattedMessage id='Apis.Details.Documents.View.btn.download' defaultMessage='Download' />
+        doc && (
+            <React.Fragment>
+                <div className={classes.root}>
+                    <div className={classes.titleWrapper}>
+                        <Link to={listingPath} className={classes.titleLink}>
+                            <Typography variant='h5' align='left' className={classes.mainTitle}>
+                                <FormattedMessage id='Apis.Details.Documents.View.heading' defaultMessage='Documents' />
+                            </Typography>
+                        </Link>
+                        <Icon>keyboard_arrow_right</Icon>
+                        <Typography variant='h5'>{doc.name}</Typography>
+                    </div>
+                    <Paper className={classes.paper}>
+                        <Table className={classes.table}>
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell className={classes.leftCell}>
+                                        <Typography variant='body1'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Documents.View.meta.summary'
+                                                defaultMessage='Name'
+                                            />
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant='body1'>{doc.name}</Typography>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>
+                                        <Typography variant='body1'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Documents.View.meta.summary'
+                                                defaultMessage='Summary'
+                                            />
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant='body1'>{doc.summary}</Typography>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>
+                                        <Typography variant='body1'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Documents.View.meta.catogery'
+                                                defaultMessage='Catogoriezed as'
+                                            />
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant='body1'>
+                                            {doc.type === 'OTHER' ? doc.otherTypeName : doc.type}
+                                        </Typography>{' '}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>
+                                        <Typography variant='body1'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Documents.View.meta.source'
+                                                defaultMessage='Source Type'
+                                            />
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant='body1'>{doc.sourceType}</Typography>{' '}
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </Paper>
 
-                    <Icon>arrow_downward</Icon>
-                </Button>
-            )}
-        </React.Fragment>
+                    <Paper className={classes.paper}>
+                        {doc.sourceType === 'MARKDOWN' && <ReactMarkdown source={code} />}
+                        {doc.sourceType === 'INLINE' && <ReactSafeHtml html={code} />}
+                        {doc.sourceType === 'URL' && (
+                            <a className={classes.displayURL} href={doc.sourceUrl} target='_blank'>
+                                {doc.sourceUrl}
+                                <Icon className={classes.displayURLLink}>open_in_new</Icon>
+                            </a>
+                        )}
+                        {doc.sourceType === 'FILE' && (
+                            <Button
+                                variant='contained'
+                                color='default'
+                                className={classes.button}
+                                onClick={handleDownload}
+                            >
+                                <FormattedMessage
+                                    id='Apis.Details.Documents.View.btn.download'
+                                    defaultMessage='Download'
+                                />
+
+                                <Icon>arrow_downward</Icon>
+                            </Button>
+                        )}
+                    </Paper>
+                </div>
+            </React.Fragment>
+        )
     );
 }
 

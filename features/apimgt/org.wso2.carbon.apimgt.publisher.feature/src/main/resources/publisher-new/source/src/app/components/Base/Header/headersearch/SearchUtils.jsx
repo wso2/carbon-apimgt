@@ -21,12 +21,13 @@ import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
+import Icon from '@material-ui/core/Icon';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import SearchOutlined from '@material-ui/icons/SearchOutlined';
 import { Link } from 'react-router-dom';
-import APIsIcon from '@material-ui/icons/SettingsApplicationsOutlined';
-import DocumentsIcon from '@material-ui/icons/LibraryBooks';
 
 import API from 'AppData/api';
 import SearchParser from './SearchParser';
@@ -75,29 +76,35 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
     const path =
         suggestion.type === 'API'
             ? `/apis/${suggestion.id}/overview`
-            : `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/details`;
+            : `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/view`;
     // TODO: Style the version ( and apiName if docs) apearing in the menu item
     const suffix = suggestion.type === 'API' ? suggestion.version : suggestion.apiName + ' ' + suggestion.apiVersion;
     return (
         <React.Fragment>
-            <Link to={path}>
-                <MenuItem selected={isHighlighted} component='div'>
-                    {suggestion.type === 'API' ? <APIsIcon /> : <DocumentsIcon />}
-
-                    {parts.map((part, index) => {
-                        return part.highlight ? (
-                            <span key={String(index)} style={{ fontWeight: 500 }}>
-                                {part.text}
-                            </span>
+            <Link to={path} style={{ color: 'black' }}>
+                <MenuItem selected={isHighlighted}>
+                    <ListItemIcon>
+                        {suggestion.type === 'API' ? (
+                            <Icon style={{ fontSize: 30 }}>settings_applications</Icon>
                         ) : (
-                            <strong key={String(index)} style={{ fontWeight: 300 }}>
-                                {part.text}
-                            </strong>
-                        );
-                    })}
-                    <pre />
-                    <pre />
-                    {suffix}
+                            <Icon style={{ fontSize: 30 }}>library_books</Icon>
+                        )}
+                    </ListItemIcon>
+
+                    <ListItemText
+                        primary={parts.map((part, index) => {
+                            return part.highlight ? (
+                                <span key={String(index)} style={{ fontWeight: 500 }}>
+                                    {part.text}
+                                </span>
+                            ) : (
+                                <strong key={String(index)} style={{ fontWeight: 300 }}>
+                                    {part.text}
+                                </strong>
+                            );
+                        })}
+                        secondary={suffix}
+                    />
                 </MenuItem>
             </Link>
             <Divider />
