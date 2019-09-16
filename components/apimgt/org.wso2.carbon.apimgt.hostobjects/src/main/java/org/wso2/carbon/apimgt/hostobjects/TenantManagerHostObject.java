@@ -57,7 +57,7 @@ public class TenantManagerHostObject extends ScriptableObject {
     public String getClassName() {
         return "APIManager";
     }
-components/apimgt/org.wso2.carbon.apimgt.hostobjects/src/main/java/org/wso2/carbon/apimgt/hostobjects/TenantManagerHostObject.java
+
     public static Scriptable jsConstructor(Context cx, Object[] args, Function ctorObj, boolean inNewExpr)
             throws ScriptException {
         return new TenantManagerHostObject();
