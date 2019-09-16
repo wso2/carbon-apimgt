@@ -165,8 +165,8 @@ class Monetization extends Component {
                                                 disabled={this.isNotCreator && this.isNotPublisher}
                                                 fullWidth
                                                 id={'attribute' + i}
-                                                label={monetizationAttribute.name}
-                                                name={monetizationAttribute.displayName}
+                                                label={monetizationAttribute.displayName}
+                                                name={monetizationAttribute.name}
                                                 type='text'
                                                 margin='normal'
                                                 required={monetizationAttribute.required}
