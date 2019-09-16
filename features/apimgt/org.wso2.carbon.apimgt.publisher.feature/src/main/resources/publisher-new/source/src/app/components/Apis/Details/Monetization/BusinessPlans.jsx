@@ -100,11 +100,49 @@ class BusinessPlans extends Component {
                 {
                     Object.keys(policy.monetizationAttributes).map((key) => {
                         if (policy.monetizationAttributes[key] !== null) {
-                            return (
-                                <Typography component='p' variant='body1'>
-                                    { key } : {policy.monetizationAttributes[key] }
-                                </Typography>
-                            );
+                            if (key === 'currencyType') {
+                                return (
+                                    <Typography component='p' variant='body1'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Monetization.BusinessPlans.currencyType'
+                                            defaultMessage='Currency Type'
+                                        /> : {policy.monetizationAttributes[key]}
+                                    </Typography>
+                                );
+                            } else if (key === 'billingCycle') {
+                                return (
+                                    <Typography component='p' variant='body1'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Monetization.BusinessPlans.billingCycle'
+                                            defaultMessage='Billing Cycle'
+                                        /> : {policy.monetizationAttributes[key]}
+                                    </Typography>
+                                );
+                            } else if (key === 'fixedPrice') {
+                                return (
+                                    <Typography component='p' variant='body1'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Monetization.BusinessPlans.fixedPrice'
+                                            defaultMessage='Fixed Price'
+                                        /> : {policy.monetizationAttributes[key]}
+                                    </Typography>
+                                );
+                            } else if (key === 'pricePerRequest') {
+                                return (
+                                    <Typography component='p' variant='body1'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Monetization.BusinessPlans.pricePerRequest'
+                                            defaultMessage='Price per Request'
+                                        /> : {policy.monetizationAttributes[key]}
+                                    </Typography>
+                                );
+                            } else {
+                                return (
+                                    <Typography component='p' variant='body1'>
+                                        { key } : {policy.monetizationAttributes[key]}
+                                    </Typography>
+                                );
+                            }
                         } else {
                             return false;
                         }
