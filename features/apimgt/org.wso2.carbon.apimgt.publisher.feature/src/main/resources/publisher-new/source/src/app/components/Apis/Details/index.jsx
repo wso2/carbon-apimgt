@@ -62,7 +62,6 @@ import Security from './Security';
 import APIDefinition from './APIDefinition/APIDefinition';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
 import MediationPoliciesOverview from './MediationPolicies/Overview';
-import MediationPolicyComponent from './MediationPolicies/MediationPolicyComponent';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
 import Monetization from './Monetization';
@@ -612,10 +611,6 @@ class Details extends Component {
                                 <Route
                                     path={Details.subPaths.MEDIATION_POLICIES}
                                     component={() => <MediationPoliciesOverview api={api} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.MEDIATION_POLICY}
-                                    component={() => <MediationPolicyComponent api={api} />}
                                 />
                             </Switch>
                         </div>

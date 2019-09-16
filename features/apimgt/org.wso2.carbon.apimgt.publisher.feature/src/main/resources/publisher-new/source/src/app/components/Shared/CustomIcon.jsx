@@ -161,12 +161,13 @@ export default function CustomIcon(props) {
                 width={width}
                 height={height}
                 className={className}
+                stroke={strokeColor}
                 viewBox='0 0 8.467 8.467'
                 id='prefix__svg8'
                 {...props}
             >
-                <g id='prefix__layer2' transform='translate(82.262 -41.963)'>
-                    <g id='prefix__g994'>
+                <g id='prefix__layer2' transform='translate(82.262 -41.963)' stroke={strokeColor}>
+                    <g id='prefix__g994' stroke={strokeColor}>
                         <g
                             transform='matrix(.76623 0 0 .76623 171.718 7.386)'
                             id='prefix__g5764'
@@ -258,7 +259,6 @@ export default function CustomIcon(props) {
                             fill='#fff'
                             fillOpacity={0.535}
                             fillRule='nonzero'
-                            stroke='#8b8e95'
                             strokeWidth={0.499}
                             strokeLinecap='round'
                             strokeLinejoin='round'
@@ -270,42 +270,7 @@ export default function CustomIcon(props) {
                         />
                     </g>
                 </g>
-                <style type='text/css' id='style4833' />
-                <style type='text/css' id='style4833-0' />
-                <style id='style4833-9' type='text/css' />
-                <style id='style4833-0-6' type='text/css' />
-                <style id='style4833-1' type='text/css' />
-                <style id='style4833-0-0' type='text/css' />
-                <style type='text/css' id='style4833-9-3' />
-                <style type='text/css' id='style4833-0-6-0' />
-                <style type='text/css' id='style4833-2' />
-                <style type='text/css' id='style4833-0-2' />
-                <style id='style4833-9-2' type='text/css' />
-                <style id='style4833-0-6-8' type='text/css' />
-                <style type='text/css' id='style4833-94' />
-                <style type='text/css' id='style4833-0-67' />
-                <style id='style4833-9-20' type='text/css' />
-                <style id='style4833-0-6-6' type='text/css' />
-                <style type='text/css' id='style4833-4' />
-                <style type='text/css' id='style4833-0-25' />
-                <style id='style4833-9-4' type='text/css' />
-                <style id='style4833-0-6-3' type='text/css' />
-                <style type='text/css' id='style4833-5' />
-                <style type='text/css' id='style4833-0-9' />
-                <style id='style4833-9-0' type='text/css' />
-                <style id='style4833-0-6-80' type='text/css' />
-                <style type='text/css' id='style4833-00' />
-                <style type='text/css' id='style4833-0-3' />
-                <style id='style4833-9-27' type='text/css' />
-                <style id='style4833-0-6-5' type='text/css' />
-                <style type='text/css' id='style4833-53' />
-                <style type='text/css' id='style4833-0-24' />
-                <style id='style4833-9-26' type='text/css' />
-                <style id='style4833-0-6-2' type='text/css' />
-                <style type='text/css' id='style4833-44' />
-                <style type='text/css' id='style4833-0-38' />
-                <style id='style4833-9-22' type='text/css' />
-                <style id='style4833-0-6-64' type='text/css' />
+
             </svg>
         );
     }
