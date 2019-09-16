@@ -625,7 +625,7 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.EXTERNAL_STORES}
-                                    component={() => <ExternalStores api={api} />}
+                                    component={ExternalStores}
                                 />
                                 <Route
                                     path={Details.subPaths.MEDIATION_POLICIES}
