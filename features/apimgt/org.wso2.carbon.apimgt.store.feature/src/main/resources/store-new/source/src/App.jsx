@@ -20,6 +20,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import Loadable from 'react-loadable';
 import Configurations from 'Config';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import Login from './app/components/Login/Login';
 import Logout from './app/components/Logout';
 import SignUp from './app/components/AnonymousView/SignUp';
@@ -56,7 +57,9 @@ class Store extends React.Component {
         this.state = {
             settings: null,
             tenantDomain: null,
+            theme: null,
         };
+        this.SetTenantTheme = this.SetTenantTheme.bind(this);
     }
 
     /**
@@ -71,6 +74,12 @@ class Store extends React.Component {
                 error,
             );
         });
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('tenant') === null || urlParams.get('tenant') === 'carbon.super') {
+            this.setState({ theme: Configurations.themes.light });
+        } else {
+            this.SetTenantTheme(urlParams.get('tenant'));
+        }
     }
 
     /**
@@ -80,6 +89,28 @@ class Store extends React.Component {
      */
     setTenantDomain = (tenantDomain) => {
         this.setState({ tenantDomain });
+        if (tenantDomain === 'carbon.super') {
+            this.setState({ theme: Configurations.themes.light });
+        } else {
+            this.SetTenantTheme(tenantDomain);
+        }
+    }
+
+    /**
+     * Load Theme file.
+     *
+     * @param {string} tenant tenant name
+     */
+    SetTenantTheme(tenant) {
+        fetch(`${Configurations.app.context}/site/public/tenant_themes/${tenant}/defaultTheme.json`)
+            .then(resp => resp.json())
+            .then((data) => {
+                this.setState({ theme: data.themes.light });
+            })
+            .catch(() => {
+                console.log('ddd');
+                this.setState({ theme: Configurations.themes.light });
+            });
     }
 
     /**
@@ -88,19 +119,21 @@ class Store extends React.Component {
      * @memberof Store
      */
     render() {
-        const { settings, tenantDomain } = this.state;
+        const { settings, tenantDomain, theme } = this.state;
         const { app: { context } } = Configurations;
         return (
-            settings && (
+            settings && theme && (
                 <SettingsProvider value={{ settings, tenantDomain, setTenantDomain: this.setTenantDomain }}>
-                    <BrowserRouter basename={context}>
-                        <Switch>
-                            <Route path='/login' render={() => <Login appName='store-new' appLabel='STORE' />} />
-                            <Route path='/logout' component={Logout} />
-                            <Route path='/sign-up' component={SignUp} />
-                            <Route component={LoadableProtectedApp} />
-                        </Switch>
-                    </BrowserRouter>
+                    <MuiThemeProvider theme={createMuiTheme(theme)}>
+                        <BrowserRouter basename={context}>
+                            <Switch>
+                                <Route path='/login' render={() => <Login appName='store-new' appLabel='STORE' />} />
+                                <Route path='/logout' component={Logout} />
+                                <Route path='/sign-up' component={SignUp} />
+                                <Route component={LoadableProtectedApp} />
+                            </Switch>
+                        </BrowserRouter>
+                    </MuiThemeProvider>
                 </SettingsProvider>
             )
         );
