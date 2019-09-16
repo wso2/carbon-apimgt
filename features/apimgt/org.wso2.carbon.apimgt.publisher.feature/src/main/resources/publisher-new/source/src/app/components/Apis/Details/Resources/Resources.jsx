@@ -83,9 +83,6 @@ export default function Resources() {
             setOperationRateLimits(response.body.list);
         });
         // TODO: need to handle the error cases through catch ~tmkb
-        api.getScopes().then((response) => {
-            console.log(response);
-        });
     }, [api]);
 
     // We don't give a * If openAPI object is null
@@ -220,6 +217,7 @@ export default function Resources() {
                                             openAPI={openAPI}
                                             operation={operation}
                                             operationRateLimits={operationRateLimits}
+                                            api={api}
                                         />
                                     </Grid>
                                 ))}

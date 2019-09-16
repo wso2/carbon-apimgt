@@ -51,10 +51,12 @@ import OperationGovernance from './operationComponents/OperationGovernance';
  */
 export default function Operation(props) {
     const {
-        operation: initOperation, updateOpenAPI, highlight, operationRateLimits,
+        operation: initOperation, updateOpenAPI, highlight, operationRateLimits, api,
     } = props;
     const [isSaving, setIsSaving] = useState(false); // Use to show the loader and disable button
     const [isDeleting, setIsDeleting] = useState(false); // Use to disable the expansion panel
+    // TODO: could combine above state into `isDoingSomething` like state,
+    // because both can't happen simultaneously ~tmkb
     const [isNotSaved, setIsNotSaved] = useState(false);
     // Use to show a badge if there are/is unsaved changes in the operation
 
@@ -83,6 +85,7 @@ export default function Operation(props) {
                 nextState.spec['x-auth-type'] = event.value ? 'Any' : 'None';
                 return nextState;
             case 'throttlingPolicy':
+            case 'scopes':
                 nextState[action] = event.value;
                 return nextState;
 
@@ -229,6 +232,7 @@ export default function Operation(props) {
                         operation={operation}
                         operationActionsDispatcher={operationActionsDispatcher}
                         operationRateLimits={operationRateLimits}
+                        api={api}
                     />
                 </Grid>
             </ExpansionPanelDetails>
@@ -257,7 +261,7 @@ Operation.defaultProps = {
     operationRateLimits: [], // Response body.list from apis policies for `api` throttling policies type
 };
 Operation.propTypes = {
-    api: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({ scopes: PropTypes.arrayOf(PropTypes.shape({})) }).isRequired,
     updateOpenAPI: PropTypes.func.isRequired,
     operation: PropTypes.shape({
         target: PropTypes.string.isRequired,

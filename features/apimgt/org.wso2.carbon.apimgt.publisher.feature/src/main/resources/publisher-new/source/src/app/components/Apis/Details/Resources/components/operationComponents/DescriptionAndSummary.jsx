@@ -25,7 +25,7 @@ import Typography from '@material-ui/core/Typography';
 
 /**
  *
- *
+ * Renders the operation summary and description sections
  * @export
  * @param {*} props
  * @returns

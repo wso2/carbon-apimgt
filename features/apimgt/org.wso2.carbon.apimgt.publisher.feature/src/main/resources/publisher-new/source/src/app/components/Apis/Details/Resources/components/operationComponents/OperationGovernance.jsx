@@ -26,21 +26,30 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
+import Tooltip from '@material-ui/core/Tooltip';
+import HelpOutline from '@material-ui/icons/HelpOutline';
+import LaunchIcon from '@material-ui/icons/Launch';
+import { Link } from 'react-router-dom';
 
 /**
  *
- *
+ * Renders the security , throttling policies and scopes selection section in the operation collapsed page
  * @export
  * @param {*} props
  * @returns
  */
 export default function OperationGovernance(props) {
-    const { operation, operationActionsDispatcher, operationRateLimits } = props;
+    const {
+        operation, operationActionsDispatcher, operationRateLimits, api,
+    } = props;
     return (
         <Fragment>
             <Grid item md={12}>
-                <Typography variant='subtitle1'>
-                    Security
+                <Typography gutterBottom variant='subtitle1'>
+                    Operation Governance
+                    <Typography style={{ marginLeft: '10px' }} gutterBottom variant='caption'>
+                        {'(Security, Rate Limiting & Scopes)'}
+                    </Typography>
                     <Divider variant='middle' />
                 </Typography>
             </Grid>
@@ -61,19 +70,28 @@ export default function OperationGovernance(props) {
                                 color='primary'
                             />
                         }
-                        label='Enabled'
+                        label='Security'
                         labelPlacement='start'
                     />
                 </FormControl>
-
+                <sup style={{ marginLeft: '10px' }}>
+                    <Tooltip
+                        fontSize='small'
+                        title='If enabled, Users will need an access token with valid scopes to use the operation'
+                        aria-label='Operation security'
+                        placement='right-end'
+                        interactive
+                    >
+                        <HelpOutline />
+                    </Tooltip>
+                </sup>
             </Grid>
             <Grid item md={1} />
             <Grid item md={11}>
                 <TextField
-                    id='outlined-select-currency'
+                    id='operation_throttling_policy'
                     select
                     label='Throttling policy'
-                    // className={classes.textField}
                     value={operation.throttlingPolicy}
                     onChange={({ target: { value } }) =>
                         operationActionsDispatcher({
@@ -81,11 +99,6 @@ export default function OperationGovernance(props) {
                             event: { value },
                         })
                     }
-                    // SelectProps={{
-                    //     MenuProps: {
-                    //         className: classes.menu,
-                    //     },
-                    // }}
                     helperText='Select a rate limit policy for this operation'
                     margin='dense'
                     variant='outlined'
@@ -96,6 +109,36 @@ export default function OperationGovernance(props) {
                         </MenuItem>
                     ))}
                 </TextField>
+            </Grid>
+            <Grid item md={1} />
+            <Grid item md={11}>
+                <TextField
+                    id='operation_scope'
+                    select
+                    label='Operation scope'
+                    value={operation.scopes[0]}
+                    onChange={({ target: { value } }) =>
+                        operationActionsDispatcher({
+                            action: 'scopes',
+                            event: { value: [value] },
+                        })
+                    }
+                    helperText='Select a scopes to control permissions to this operation'
+                    margin='dense'
+                    variant='outlined'
+                >
+                    {api.scopes.map(scope => (
+                        <MenuItem key={scope.name} value={scope.name}>
+                            {scope.name}
+                        </MenuItem>
+                    ))}
+                </TextField>
+                <Link to={`/apis/${api.id}/scopes/create`} target='_blank'>
+                    <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>
+                        Create new scope
+                        <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                    </Typography>
+                </Link>
             </Grid>
         </Fragment>
     );
@@ -109,8 +152,10 @@ OperationGovernance.propTypes = {
     }).isRequired,
     operationActionsDispatcher: PropTypes.func.isRequired,
     operationRateLimits: PropTypes.arrayOf(PropTypes.shape({})),
+    api: PropTypes.shape({ scopes: PropTypes.arrayOf(PropTypes.shape({})) }),
 };
 
 OperationGovernance.defaultProps = {
     operationRateLimits: [],
+    api: { scopes: [] },
 };
