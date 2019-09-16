@@ -47,6 +47,10 @@ const useStyles = makeStyles(theme => ({
     table: {
         minWidth: 650,
     },
+    viewInExStoreLink: {
+        color: 'black',
+        textDecoration: 'underline',
+    },
 }));
 
 const StyledTableCell = withStyles(() => ({
@@ -183,6 +187,7 @@ export default function ExternalStores() {
                                             target='_blank'
                                             rel='noopener noreferrer'
                                             href={row.endpoint}
+                                            className={classes.viewInExStoreLink}
                                         >{row.endpoint}
                                         </a>
                                     </StyledTableCell>
