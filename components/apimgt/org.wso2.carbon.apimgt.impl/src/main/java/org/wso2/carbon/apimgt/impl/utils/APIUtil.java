@@ -7112,7 +7112,7 @@ public final class APIUtil {
     }
 
     /**
-     * Used to get CORS Configuration enabled from api-managgetExposedHeaderser.xml
+     * Used to get CORS Configuration enabled from api-manager.xml
      *
      * @return true if CORS-Configuration is enabled in api-manager.xml
      */
