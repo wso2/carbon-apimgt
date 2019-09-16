@@ -28,6 +28,7 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Grade from '@material-ui/icons/Grade';
+import LaunchIcon from '@material-ui/icons/Launch';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
@@ -240,6 +241,16 @@ const styles = theme => ({
     contentToTop: {
         verticlaAlign: 'top',
     },
+    viewInPubStoreLauncher: {
+        display: 'flex',
+        flexDirection: 'column',
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+        textAlign: 'center',
+        textDecoration: 'none',
+    },
+    linkText: {
+        fontSize: theme.typography.fontSize,
+    },
 });
 
 /**
@@ -343,6 +354,23 @@ class InfoBar extends React.Component {
                             </div>
                             <VerticalDivider height={70} />
                             {user && <StarRatingBar apiId={api.id} isEditable={false} showSummary />}
+                            {api.advertiseInfo.advertised && (
+                                <React.Fragment>
+                                    {user && <VerticalDivider height={70} />}
+                                    <a
+                                        target='_blank'
+                                        rel='noopener noreferrer'
+                                        href={api.advertiseInfo.originalStoreUrl}
+                                        className={classes.viewInPubStoreLauncher}
+                                    >
+                                        <div>
+                                            <LaunchIcon />
+                                        </div>
+                                        <div className={classes.linkText}>Visit Publisher Store</div>
+                                    </a>
+                                    <VerticalDivider height={70} />
+                                </React.Fragment>
+                            )}
                         </div>
 
                         {showOverview && (
@@ -424,7 +452,11 @@ class InfoBar extends React.Component {
                                                             </div>
                                                         </TableCell>
                                                         <TableCell>
-                                                            <StarRatingBar apiId={api.id} isEditable showSummary={false} />
+                                                            <StarRatingBar
+                                                                apiId={api.id}
+                                                                isEditable={!api.advertiseInfo.advertised}
+                                                                showSummary={false}
+                                                            />
                                                         </TableCell>
                                                     </TableRow>
                                                 )}
@@ -457,22 +489,45 @@ class InfoBar extends React.Component {
                                                         </TableCell>
                                                     </TableRow>
                                                 )}
-                                                <TableRow>
-                                                    <TableCell component='th' scope='row' className={classes.contentToTop}>
-                                                        <div className={classes.iconAligner}>
-                                                            <Icon className={classes.iconEven}>desktop_windows</Icon>
-                                                            <span className={classes.iconTextWrapper}>
-                                                                <FormattedMessage
-                                                                    id='Apis.Details.InfoBar.available.environments'
-                                                                    defaultMessage='Available Environments'
-                                                                />
-                                                            </span>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Environments />
-                                                    </TableCell>
-                                                </TableRow>
+                                                {!api.advertiseInfo.advertised ? (
+                                                    <TableRow>
+                                                        <TableCell
+                                                            component='th'
+                                                            scope='row'
+                                                            className={classes.contentToTop}
+                                                        >
+                                                            <div className={classes.iconAligner}>
+                                                                <Icon className={classes.iconEven}>
+                                                                    desktop_windows
+                                                                </Icon>
+                                                                <span className={classes.iconTextWrapper}>
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.InfoBar.available.environments'
+                                                                        defaultMessage='Available Environments'
+                                                                    />
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Environments />
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ) : (
+                                                    <TableRow>
+                                                        <TableCell component='th' scope='row'>
+                                                            <div className={classes.iconAligner}>
+                                                                <Icon className={classes.iconOdd}>account_circle</Icon>
+                                                                <span className={classes.iconTextWrapper}>
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.InfoBar.owner'
+                                                                        defaultMessage='Owner'
+                                                                    />
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell>{api.advertiseInfo.apiOwner}</TableCell>
+                                                    </TableRow>
+                                                )}
                                             </TableBody>
                                         </Table>
                                     </div>
