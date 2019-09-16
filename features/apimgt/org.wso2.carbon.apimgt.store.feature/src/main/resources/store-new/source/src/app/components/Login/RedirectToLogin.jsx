@@ -17,17 +17,12 @@
  */
 
 import React from 'react';
-import Redirecting from '../Shared/Redirecting';
+import { Redirect } from 'react-router'
 
+const redirectURL = '/services/configs';
 const RedirectToLogin = () => {
-    window.location = '/store-new/services/configs';
     return (
-        <Redirecting
-            message={intl.formatMessage({
-                defaultMessage: 'You are now being redirected to Identity Provider.',
-                id: 'Base.Login.Login.you.are.now.being.redirected.to.identity.provider',
-            })}
-        />  
+        <Redirect to={redirectURL} />
     );
 };
 
