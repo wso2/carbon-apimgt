@@ -757,11 +757,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                         }
                         JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
                         String report = responseJson.get(APIConstants.DATA).toString();
-                        String grade = (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR)).get(APIConstants.DATA))
-                                .get(APIConstants.GRADE);
+                        String grade = (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
+                                .get(APIConstants.DATA)).get(APIConstants.GRADE);
                         Integer numErrors = Integer.valueOf(
-                                (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR)).get(APIConstants.DATA))
-                                        .get(APIConstants.NUM_ERRORS));
+                                (String) ((JSONObject) ((JSONObject) responseJson.get(APIConstants.ATTR))
+                                        .get(APIConstants.DATA)).get(APIConstants.NUM_ERRORS));
                         String decodedReport = new String(Base64Utils.decode(report), "UTF-8");
                         AuditReportDTO auditReportDTO = new AuditReportDTO();
                         auditReportDTO.setReport(decodedReport);
