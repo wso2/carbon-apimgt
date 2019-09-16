@@ -108,7 +108,6 @@ class Store extends React.Component {
                 this.setState({ theme: data.themes.light });
             })
             .catch(() => {
-                console.log('ddd');
                 this.setState({ theme: Configurations.themes.light });
             });
     }
