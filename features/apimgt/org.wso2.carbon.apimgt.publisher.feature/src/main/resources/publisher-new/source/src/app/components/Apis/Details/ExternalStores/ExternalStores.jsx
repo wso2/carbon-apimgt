@@ -18,6 +18,7 @@
 
 import React, { useContext, useState, useEffect } from 'react';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
 
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage } from 'react-intl';
@@ -48,24 +49,14 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-const StyledTableCell = withStyles(theme => ({
+const StyledTableCell = withStyles(() => ({
     head: {
-        backgroundColor: theme.palette.background.leftMenu,
-        color: theme.palette.common.white,
-        fontSize: 14,
+        fontSize: 13,
     },
     body: {
         fontSize: 14,
     },
 }))(TableCell);
-
-const StyledTableRow = withStyles(theme => ({
-    root: {
-        '&:nth-of-type(odd)': {
-            backgroundColor: theme.palette.background.default,
-        },
-    },
-}))(TableRow);
 
 /**
  * Renders an External Store list
@@ -74,11 +65,24 @@ const StyledTableRow = withStyles(theme => ({
  */
 export default function ExternalStores() {
     const { api } = useContext(APIContext);
+    const { settings } = useAppContext();
     const [allExternalStores, setAllExternalStores] = useState([]);
     const [publishedExternalStores, setPublishedExternalStores] = useState([]);
     const [isUpdating, setUpdating] = useState(false);
     const classes = useStyles();
-
+    if (!settings.externalStoresEnabled) {
+        return (
+            <div className='message message-warning'>
+                <h4>
+                    <FormattedMessage
+                        id='ExternalStores.Errors.StoresNotFound.header'
+                        defaultMessage='External Stores not found for api: '
+                    />
+                    <span style={{ color: 'green' }}> {api.id} </span>
+                </h4>
+            </div>
+        );
+    }
     /**
      * Gets published external stores
      */
@@ -129,102 +133,100 @@ export default function ExternalStores() {
 
     return (
         <div>
-            {allExternalStores.length > 0 &&
-                <div>
-                    <Typography variant='h4' align='left' >
-                        <FormattedMessage
-                            id='Apis.Details.Environments.Environments.External-Stores'
-                            defaultMessage='External Stores'
-                        />
-                    </Typography>
-                    <Paper className={classes.root}>
-                        <Table className={classes.table}>
-                            <TableHead>
-                                <TableRow>
-                                    <StyledTableCell />
-                                    <StyledTableCell>Name</StyledTableCell>
-                                    <StyledTableCell align='right'>Type</StyledTableCell>
-                                    <StyledTableCell align='right'>Endpoint</StyledTableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {allExternalStores.map(row => (
-                                    <StyledTableRow key={row.id}>
-                                        <StyledTableCell padding='checkbox'>
-                                            <Checkbox
-                                                checked={publishedExternalStores.includes(row.id)}
-                                                disabled={api.lifeCycleStatus !== 'PUBLISHED'}
-                                                onChange={
-                                                    (event) => {
-                                                        const { checked, name } = event.target;
-                                                        if (checked) {
-                                                            if (!publishedExternalStores.includes(name)) {
-                                                                setPublishedExternalStores([
-                                                                    ...publishedExternalStores, name]);
-                                                            }
-                                                        } else {
-                                                            setPublishedExternalStores(publishedExternalStores
-                                                                .filter(store => store !== name));
+            <div>
+                <Typography variant='h4' align='left' >
+                    <FormattedMessage
+                        id='Apis.Details.Environments.Environments.External-Stores'
+                        defaultMessage='External Stores'
+                    />
+                </Typography>
+                <Paper className={classes.root}>
+                    <Table className={classes.table}>
+                        <TableHead>
+                            <TableRow>
+                                <StyledTableCell />
+                                <StyledTableCell>Name</StyledTableCell>
+                                <StyledTableCell align='right'>Type</StyledTableCell>
+                                <StyledTableCell align='right'>Endpoint</StyledTableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {allExternalStores.map(row => (
+                                <TableRow key={row.id}>
+                                    <StyledTableCell padding='checkbox'>
+                                        <Checkbox
+                                            checked={publishedExternalStores.includes(row.id)}
+                                            disabled={api.lifeCycleStatus !== 'PUBLISHED'}
+                                            onChange={
+                                                (event) => {
+                                                    const { checked, name } = event.target;
+                                                    if (checked) {
+                                                        if (!publishedExternalStores.includes(name)) {
+                                                            setPublishedExternalStores([
+                                                                ...publishedExternalStores, name]);
                                                         }
+                                                    } else {
+                                                        setPublishedExternalStores(publishedExternalStores
+                                                            .filter(store => store !== name));
                                                     }
                                                 }
-                                                name={row.id}
-                                            />
-                                        </StyledTableCell>
-                                        <StyledTableCell component='th' scope='row'>
-                                            {row.displayName}
-                                        </StyledTableCell>
-                                        <StyledTableCell align='right'>{row.type}</StyledTableCell>
-                                        <StyledTableCell align='right'>
-                                            <a
-                                                target='_blank'
-                                                rel='noopener noreferrer'
-                                                href={row.endpoint}
-                                            >{row.endpoint}
-                                            </a>
-                                        </StyledTableCell>
-                                    </StyledTableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </Paper>
-                    <Grid container>
-                        <Grid
-                            container
-                            direction='row'
-                            alignItems='center'
-                            spacing={4}
-                            style={{ marginTop: 20 }}
-                        >
-                            <Grid item>
-                                <Button
-                                    type='submit'
-                                    variant='contained'
-                                    color='primary'
-                                    disabled={isUpdating || api.lifeCycleStatus !== 'PUBLISHED'}
-                                    onClick={updateStores}
-                                >
-                                    <FormattedMessage
-                                        id='Apis.Details.Environments.ExternalStores.save'
-                                        defaultMessage='Save'
-                                    />
-                                    {isUpdating && <CircularProgress size={20} />}
-                                </Button>
-                            </Grid>
-                            <Grid item>
-                                <Link to={'/apis/' + api.id + '/overview'}>
-                                    <Button>
-                                        <FormattedMessage
-                                            id='Apis.Details.Environments.ExternalStores.cancel'
-                                            defaultMessage='Cancel'
+                                            }
+                                            name={row.id}
                                         />
-                                    </Button>
-                                </Link>
-                            </Grid>
+                                    </StyledTableCell>
+                                    <StyledTableCell component='th' scope='row'>
+                                        {row.displayName}
+                                    </StyledTableCell>
+                                    <StyledTableCell align='right'>{row.type}</StyledTableCell>
+                                    <StyledTableCell align='right'>
+                                        <a
+                                            target='_blank'
+                                            rel='noopener noreferrer'
+                                            href={row.endpoint}
+                                        >{row.endpoint}
+                                        </a>
+                                    </StyledTableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </Paper>
+                <Grid container>
+                    <Grid
+                        container
+                        direction='row'
+                        alignItems='center'
+                        spacing={4}
+                        style={{ marginTop: 20 }}
+                    >
+                        <Grid item>
+                            <Button
+                                type='submit'
+                                variant='contained'
+                                color='primary'
+                                disabled={isUpdating || api.lifeCycleStatus !== 'PUBLISHED'}
+                                onClick={updateStores}
+                            >
+                                <FormattedMessage
+                                    id='Apis.Details.Environments.ExternalStores.save'
+                                    defaultMessage='Save'
+                                />
+                                {isUpdating && <CircularProgress size={20} />}
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <Link to={'/apis/' + api.id + '/overview'}>
+                                <Button>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.ExternalStores.cancel'
+                                        defaultMessage='Cancel'
+                                    />
+                                </Button>
+                            </Link>
                         </Grid>
                     </Grid>
-                </div>
-            }
+                </Grid>
+            </div>
         </div>
     );
 }
