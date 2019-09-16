@@ -6785,8 +6785,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (resources.size() > 0) {
             Map<String, String> failedToPublishEnvironments = publishToGateway(product);
             if (!failedToPublishEnvironments.isEmpty()) {
-                Set<String> publishedEnvironments =
-                        new HashSet<String>(product.getEnvironments());
+                Set<String> publishedEnvironments = new HashSet<String>(product.getEnvironments());
                 publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
                 product.setEnvironments(publishedEnvironments);
                 failedGateways.put("PUBLISHED", failedToPublishEnvironments);
