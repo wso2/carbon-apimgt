@@ -369,6 +369,7 @@ class TableView extends React.Component {
                     if (artifact.type === 'DOC') {
                         return (<DocThumb doc={artifact} />);
                     } else if (artifact.type === 'APIPRODUCT') {
+                        artifact.state = 'PUBLISHED';
                         return (<ApiThumb
                             api={artifact}
                             isAPIProduct

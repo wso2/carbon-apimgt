@@ -124,15 +124,13 @@ class APIThumb extends Component {
     render() {
         const { classes, api, isAPIProduct } = this.props;
         const { isHover, loading } = this.state;
-        if (api.type === 'APIPRODUCT') {
-            api.state = 'PUBLISHED';
+
+        if (isAPIProduct) {
+            api.apiType = API.CONSTS.APIProduct;
         } else {
             api.apiType = API.CONSTS.API;
         }
 
-        if (isAPIProduct) {
-            api.apiType = API.CONSTS.APIProduct;
-        }
         if (!api.lifeCycleStatus) {
             api.lifeCycleStatus = api.status;
         }
