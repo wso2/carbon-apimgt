@@ -3407,14 +3407,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                String resourcePath = identifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
-                        identifier.getApiName() + identifier.getVersion() +
-                        APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
-                resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
-                registry.delete(resourcePath);
-            }
-
             cleanUpPendingAPIStateChangeTask(apiId);
             //Run cleanup task for workflow
             /*
