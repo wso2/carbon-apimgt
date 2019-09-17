@@ -166,6 +166,7 @@ function Create(props) {
                                         createEditForm = node;
                                     }}
                                     apiType={apiType}
+                                    apiId={api.id}
                                 />
                                 <Divider />
 
