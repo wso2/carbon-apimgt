@@ -17,9 +17,10 @@
  */
 
 import React from 'react';
+import Configurations from 'Config';
 import { FormattedMessage } from 'react-intl';
 
-const page = '/store-new/services/configs';
+const page = Configurations.app.context + '/services/configs';
 
 /**
  *
@@ -63,7 +64,7 @@ class RedirectToLogin extends React.Component {
     render() {
         return (
             <FormattedMessage
-                id='Apis.Shared.RedirectToLogin.you.will.be.redirected.to'
+                id='Login.RedirectToLogin.you.will.be.redirected.to'
                 defaultMessage='You will be redirected to {page}'
                 values={{ page }}
             />
