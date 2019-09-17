@@ -99,11 +99,11 @@ export default function ExternalStores() {
             })
             .catch((error) => {
                 const response = error.response && error.response.obj;
+                const reason = response && ('[' + response.message + '] ' + response.description);
                 Alert.error(intl.formatMessage({
                     id: 'Apis.Details.ExternalStores.ExternalStores.error.getting.published.external.stores',
-                    defaultMessage: 'Error while getting published external stores!! '
-                        + (response && ('[' + response.message + '] ' + response.description)),
-                }));
+                    defaultMessage: 'Error while getting published external stores!! {reason}',
+                }, { reason }));
             });
     }
 
@@ -121,19 +121,19 @@ export default function ExternalStores() {
         setUpdating(true);
         API.publishAPIToExternalStores(api.id, publishedExternalStores)
             .then((response) => {
+                const successfulStores = response.body.list.map(store => store.id);
                 Alert.success(intl.formatMessage({
                     id: 'Apis.Details.ExternalStores.ExternalStores.successfully.published.to.external.stores',
-                    defaultMessage: 'Successfully Published to external stores: '
-                        + response.body.list.map(store => store.id),
-                }));
+                    defaultMessage: 'Successfully Published to external stores: ',
+                }, { successfulStores }));
             })
             .catch((error) => {
                 const response = error.response && error.response.obj;
+                const reason = response && ('[' + response.message + '] ' + response.description);
                 Alert.error(intl.formatMessage({
                     id: 'Apis.Details.ExternalStores.ExternalStores.error.while.updating.external.stores',
-                    defaultMessage: 'Error while updating external stores!! '
-                        + (response && ('[' + response.message + '] ' + response.description)),
-                }));
+                    defaultMessage: 'Error while updating external stores!! {reason}',
+                }, { reason }));
             })
             .finally(() => {
                 setUpdating(false);
