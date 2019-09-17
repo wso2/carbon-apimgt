@@ -16,13 +16,14 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import KeyConfiguration from 'AppComponents/Shared/AppsAndKeys/KeyConfiguration';
 import Application from 'AppData/Application';
 import { injectIntl } from 'react-intl';
 import ButtonPanel from './ButtonPanel';
+import API from "AppData/api";
 
 const generateKeysStep = (props) => {
     const keyStates = {
@@ -33,12 +34,13 @@ const generateKeysStep = (props) => {
     };
     const [tab, setTab] = useState(0);
     const [notFound, setNotFound] = useState(false);
+    const [isUserOwner, setIsUserOwner] = useState(false);
 
     const [keyRequest, setKeyRequest] = useState({
         keyType: 'PRODUCTION',
         serverSupportedGrantTypes: [],
         supportedGrantTypes: [],
-        callbackUrl: 'https://wso2.am.com',
+        callbackUrl: '',
     });
 
     const {
@@ -65,6 +67,30 @@ const generateKeysStep = (props) => {
         setTab(currentTab);
         setKeyRequest(newRequest);
     };
+
+    useEffect(() => {
+        setIsUserOwner(true);
+        const api = new API();
+        const promisedSettings = api.getSettings();
+        promisedSettings
+            .then((response) => {
+                const newRequest = { ...keyRequest };
+                newRequest.serverSupportedGrantTypes = response.obj.grantTypes;
+                newRequest.supportedGrantTypes = response.obj.grantTypes.filter(item => item !== 'authorization_code'
+                    && item !== 'implicit');
+                setKeyRequest(newRequest);
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
+    }, []);
+
     const generateKeys = () => {
         Application.get(createdApp.value).then((application) => {
             return application.generateKeys(keyRequest.keyType, keyRequest.supportedGrantTypes,
@@ -109,6 +135,7 @@ const generateKeysStep = (props) => {
                         updateKeyRequest={setKeyRequest}
                         keyRequest={keyRequest}
                         keyType='PRODUCTION'
+                        isUserOwner={isUserOwner}
                     />
                 </div>
             )}
@@ -118,6 +145,7 @@ const generateKeysStep = (props) => {
                         updateKeyRequest={setKeyRequest}
                         keyRequest={keyRequest}
                         keyType='SANDBOX'
+                        isUserOwner={isUserOwner}
                     />
                 </div>
             )}

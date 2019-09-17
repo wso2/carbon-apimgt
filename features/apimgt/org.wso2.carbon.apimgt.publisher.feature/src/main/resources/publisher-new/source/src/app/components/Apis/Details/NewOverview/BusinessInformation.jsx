@@ -17,15 +17,11 @@
  */
 
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-
 
 /**
  *
@@ -36,109 +32,59 @@ import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 function BusinessInformation(props) {
     const { parentClasses, api } = props;
     return (
-        <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
-            <div className={parentClasses.titleWrapper}>
-                <Typography variant='h5' component='h3' className={parentClasses.title}>
+        <React.Fragment>
+            <Grid item xs={12} md={6} lg={4}>
+                {/* Business Owner */}
+                <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
                     <FormattedMessage
-                        id='Apis.Details.NewOverview.BusinessInformation.business.information'
-                        defaultMessage='Business Information'
+                        id='Apis.Details.NewOverview.BusinessInformation.business.owner'
+                        defaultMessage='Business Owner'
                     />
                 </Typography>
-                <Link to={'/apis/' + api.id + '/business info'}>
-                    <Button variant='contained' color='default'>
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.BusinessInformation.edit'
-                            defaultMessage='Edit'
-                        />
-                    </Button>
-                </Link>
-            </div>
-
-            {/* Business Owner */}
-            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                <FormattedMessage
-                    id='Apis.Details.NewOverview.BusinessInformation.business.owner'
-                    defaultMessage='Business Owner'
-                />
-            </Typography>
-            <Typography component='p' variant='body1'>
-                {api.businessInformation.businessOwner && (
-                    <React.Fragment>{api.businessInformation.businessOwner}</React.Fragment>
-                )}
-                {!api.businessInformation.businessOwner && (
-                    <React.Fragment>&lt;
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.BusinessInformation.business.owner.not.configured'
-                            defaultMessage='Not Configured'
-                        />&gt;
-                    </React.Fragment>
-                )}
-            </Typography>
-            {/* Business Email */}
-            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                <FormattedMessage
-                    id='Apis.Details.NewOverview.BusinessInformation.business.owner.email'
-                    defaultMessage='Business Owner Email'
-                />
-            </Typography>
-            <Typography component='p' variant='body1'>
-                {api.businessInformation.businessOwnerEmail && (
-                    <React.Fragment>{api.businessInformation.businessOwnerEmail}</React.Fragment>
-                )}
-                {!api.businessInformation.businessOwnerEmail && (
-                    <React.Fragment>
-                                &lt;
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.BusinessInformation.business.email.not.configured'
-                            defaultMessage='Not Configured'
-                        />
-                                &gt;
-                    </React.Fragment>
-                )}
-            </Typography>
-            {/* Technical Owner */}
-            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                <FormattedMessage
-                    id='Apis.Details.NewOverview.BusinessInformation.technical.owner'
-                    defaultMessage='Technical Owner'
-                />
-            </Typography>
-            <Typography component='p' variant='body1'>
-                {api.businessInformation.technicalOwner && (
-                    <React.Fragment>{api.businessInformation.technicalOwner}</React.Fragment>
-                )}
-                {!api.businessInformation.technicalOwner && (
-                    <React.Fragment>&lt;
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.BusinessInformation.technical.owner.not.configured'
-                            defaultMessage='Not Configured'
-                        />&gt;
-                    </React.Fragment>
-                )}
-            </Typography>
-            {/* Technical Owner */}
-            <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
-                <FormattedMessage
-                    id='Apis.Details.NewOverview.BusinessInformation.technical.owner.email'
-                    defaultMessage='Technical Owner Email'
-                />
-            </Typography>
-            <Typography component='p' variant='body1'>
-                {api.businessInformation.technicalOwnerEmail && (
-                    <React.Fragment>{api.businessInformation.technicalOwnerEmail}</React.Fragment>
-                )}
-                {!api.businessInformation.technicalOwnerEmail && (
-                    <React.Fragment>
-                                &lt;
-                        <FormattedMessage
-                            id='Apis.Details.NewOverview.BusinessInformation.technical.email.not.configured'
-                            defaultMessage='Not Configured'
-                        />
-                                &gt;
-                    </React.Fragment>
-                )}
-            </Typography>
-        </Paper>
+            </Grid>
+            <Grid item xs={12} md={6} lg={8}>
+                <Typography component='p' variant='body1'>
+                    {api.businessInformation.businessOwner && (
+                        <React.Fragment>{api.businessInformation.businessOwner}</React.Fragment>
+                    )}
+                </Typography>
+                <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
+                    {!api.businessInformation.businessOwner && (
+                        <React.Fragment>&lt;
+                            <FormattedMessage
+                                id='Apis.Details.NewOverview.BusinessInformation.business.owner.not.configured'
+                                defaultMessage='Not Configured'
+                            />&gt;
+                        </React.Fragment>
+                    )}
+                </Typography>
+            </Grid>
+            <Grid item xs={12} md={6} lg={4}>
+                {/* Technical Owner */}
+                <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                    <FormattedMessage
+                        id='Apis.Details.NewOverview.BusinessInformation.technical.owner'
+                        defaultMessage='Technical Owner'
+                    />
+                </Typography>
+            </Grid>
+            <Grid item xs={12} md={6} lg={8}>
+                <Typography component='p' variant='body1'>
+                    {api.businessInformation.technicalOwner &&
+                        <React.Fragment>{api.businessInformation.technicalOwner}</React.Fragment>}
+                </Typography>
+                <Typography component='p' variant='body1' className={parentClasses.notConfigured}>
+                    {!api.businessInformation.technicalOwner && (
+                        <React.Fragment>&lt;
+                            <FormattedMessage
+                                id='Apis.Details.NewOverview.BusinessInformation.technical.owner.not.configured'
+                                defaultMessage='Not Configured'
+                            />&gt;
+                        </React.Fragment>
+                    )}
+                </Typography>
+            </Grid>
+        </React.Fragment>
     );
 }
 

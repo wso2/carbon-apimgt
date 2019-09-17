@@ -23,6 +23,7 @@ const CONSTS = {
         INVALID_TOKEN: '900401: Invalid token',
         NO_TOKEN_FOUND: '901401: No partial token found!',
     },
+    TENANT_STATE_ACTIVE: 'ACTIVE',
 };
 
 export default CONSTS;

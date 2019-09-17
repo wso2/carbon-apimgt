@@ -8444,6 +8444,7 @@ definitions:
         enum:
           - DOC
           - API
+          - APIProduct
         example: API
 
   APISearchResult:
@@ -8475,6 +8476,34 @@ definitions:
           thumbnailUri:
             type: string
             example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+
+  APIProductSearchResult:
+    title: API Result
+    allOf:
+    - $ref: '#/definitions/SearchResult'
+    - properties:
+        description:
+          type: string
+          description: A brief description about the API
+          example: A calculator API that supports basic operations
+        context:
+          type: string
+          description: A string that represents the context of the user's request
+          example: CalculatorAPI
+        provider:
+          description: |
+            If the provider value is not given, the user invoking the API will be used as the provider.
+          type: string
+          example: admin
+        status:
+          type: string
+          description: This describes in which status of the lifecycle the APIPRODUCT is
+          example: PUBLISHED
+        thumbnailUri:
+          type: string
+          example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+
+
 
   #-----------------------------------------------------
   # The API monetization resource
@@ -8545,6 +8574,8 @@ definitions:
             type: string
             example: admin
           apiUUID:
+              type: string
+          associatedType:
               type: string
   #-----------------------------------------------------
   # The Resource policy List resource

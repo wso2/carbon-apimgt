@@ -33,6 +33,8 @@ import Dropzone from 'react-dropzone';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Api from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
+import APIValidation from 'AppData/APIValidation';
+import Alert from 'AppComponents/Shared/Alert';
 
 const styles = theme => ({
     button: {
@@ -124,6 +126,8 @@ class CreateEditForm extends React.Component {
             file: null,
             disableName: false,
             otherTypeName: null,
+            nameValidity: true,
+            urlValidity: null,
         };
     }
 
@@ -229,6 +233,27 @@ class CreateEditForm extends React.Component {
                 });
         }
     }
+    validate(field, value) {
+        if (field === 'url') {
+            const urlValidity = value ? APIValidation.url.validate(value).error : null;
+            this.setState({ urlValidity : urlValidity });
+        } else if (field === 'name') {
+            if (value) {
+                const promise = APIValidation.apiDocument.validate({id: this.props.apiId, name: value});
+                promise.then(() => {
+                    this.setState({ nameValidity: false })
+                }).catch(error => {
+                    if (error.status === 404) {
+                        this.setState({ nameValidity: true });
+                    } else {
+                        Alert.error('Error when validating document name');
+                    }
+                })
+            } else {
+                this.setState({ nameValidity: true })
+            }
+        }
+    }
     componentDidMount() {
         this.getDocument();
         const { apiId, docId } = this.props;
@@ -238,7 +263,7 @@ class CreateEditForm extends React.Component {
     }
     render() {
         const {
-            name, type, summary, sourceType, sourceUrl, file, disableName, otherTypeName,
+            name, type, summary, sourceType, sourceUrl, file, disableName, otherTypeName, urlValidity, nameValidity
         } = this.state;
         const { classes } = this.props;
         return (
@@ -246,16 +271,26 @@ class CreateEditForm extends React.Component {
                 <FormControl margin='normal' className={classes.FormControlOdd}>
                     <TextField
                         fullWidth
+                        InputProps={{
+                            onBlur: ({ target: { value } }) => {
+                                this.validate("name", value);
+                            },
+                        }}
                         label={
                             <FormattedMessage
                                 id='Apis.Details.Documents.CreateEditForm.document.name'
                                 defaultMessage='Name *'
                             />
                         }
-                        helperText={
+                        helperText={ nameValidity ?
                             <FormattedMessage
                                 id='Apis.Details.Documents.CreateEditForm.document.name.helper.text'
                                 defaultMessage='Provide the name for the document'
+                            />
+                            :
+                            <FormattedMessage
+                                id='Apis.Details.Documents.CreateEditForm.duplicate.document.name.helper.text'
+                                defaultMessage='Duplicate document name'
                             />
                         }
                         type='text'
@@ -269,6 +304,7 @@ class CreateEditForm extends React.Component {
                         }}
                         autoFocus
                         disabled={disableName}
+                        error={!nameValidity}
                     />
                 </FormControl>
                 <FormControl margin='normal' className={classes.FormControlOdd}>
@@ -493,6 +529,11 @@ class CreateEditForm extends React.Component {
                     <FormControl margin='normal' className={classes.FormControlOdd}>
                         <TextField
                             fullWidth
+                            InputProps={{
+                                onBlur: ({ target: { value } }) => {
+                                    this.validate('url', value);
+                                },
+                            }}
                             margin='normal'
                             label={
                                 <FormattedMessage
@@ -500,7 +541,12 @@ class CreateEditForm extends React.Component {
                                     defaultMessage='URL'
                                 />
                             }
-                            helperText={
+                            helperText={ urlValidity ?
+                                <FormattedMessage
+                                    id='Apis.Details.Documents.CreateEditForm.source.url.helper.text.error'
+                                    defaultMessage='Enter a valid URL to the source'
+                                />
+                                :
                                 <FormattedMessage
                                     id='Apis.Details.Documents.CreateEditForm.source.url.helper.text'
                                     defaultMessage='Provide the URL to the source'
@@ -514,6 +560,7 @@ class CreateEditForm extends React.Component {
                             InputLabelProps={{
                                 shrink: true,
                             }}
+                            error={urlValidity}
                         />
                     </FormControl>
                 )}

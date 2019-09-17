@@ -2653,7 +2653,9 @@ public abstract class AbstractAPIManager implements APIManager {
             boolean limitAttributes) throws APIManagementException {
 
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
+        SortedSet<APIProduct> apiProductSet = new TreeSet<APIProduct>(new APIProductNameComparator());
         Map<Documentation, API> docMap = new HashMap<Documentation, API>();
+        Map<Documentation, APIProduct> productDocMap = new HashMap<Documentation, APIProduct>();
         Map<String, Object> result = new HashMap<String, Object>();
         int totalLength = 0;
         boolean isMore = false;
@@ -2789,6 +2791,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     Association[] docAssociations = registry
                             .getAssociations(resourcePath, APIConstants.DOCUMENTATION_ASSOCIATION);
                     API associatedAPI = null;
+                    APIProduct associatedAPIProduct = null;
                     if (docAssociations.length > 0) { // a content can have one api association at most
                         String apiPath = docAssociations[0].getSourcePath();
 
@@ -2796,7 +2799,12 @@ public abstract class AbstractAPIManager implements APIManager {
                         String apiArtifactId = apiResource.getUUID();
                         if (apiArtifactId != null) {
                             GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
-                            associatedAPI = APIUtil.getAPI(apiArtifact, registry);
+                            if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
+                                    equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
+                                associatedAPIProduct = APIUtil.getAPIProduct(apiArtifact, registry);
+                            } else {
+                                associatedAPI = APIUtil.getAPI(apiArtifact, registry);
+                            }
                         } else {
                             throw new GovernanceException("artifact id is null for " + apiPath);
                         }
@@ -2804,14 +2812,24 @@ public abstract class AbstractAPIManager implements APIManager {
                         if (associatedAPI != null && doc != null) {
                             docMap.put(doc, associatedAPI);
                         }
+                        if (associatedAPIProduct != null && doc != null) {
+                            productDocMap.put(doc, associatedAPIProduct);
+                        }
                     }
                 } else {
                     String apiArtifactId = resource.getUUID();
                     API api;
+                    APIProduct apiProduct;
                     if (apiArtifactId != null) {
                         GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
-                         api = APIUtil.getAPI(apiArtifact, registry);
-                         apiSet.add(api);
+                        if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
+                                equals(APIConstants.API_PRODUCT)) {
+                            apiProduct = APIUtil.getAPIProduct(apiArtifact, registry);
+                            apiProductSet.add(apiProduct);
+                        } else {
+                            api = APIUtil.getAPI(apiArtifact, registry);
+                            apiSet.add(api);
+                        }
                     } else {
                         throw new GovernanceException("artifact id is null for " + resourcePath);
                     }
@@ -2819,7 +2837,9 @@ public abstract class AbstractAPIManager implements APIManager {
             }
 
             compoundResult.addAll(apiSet);
+            compoundResult.addAll(apiProductSet);
             compoundResult.addAll(docMap.entrySet());
+            compoundResult.addAll(productDocMap.entrySet());
             compoundResult.sort(new ContentSearchResultNameComparator());
         } catch (RegistryException e) {
             handleException("Failed to search APIs by content", e);
