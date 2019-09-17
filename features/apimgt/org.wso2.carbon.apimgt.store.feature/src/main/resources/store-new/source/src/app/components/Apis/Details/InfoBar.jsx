@@ -353,10 +353,10 @@ class InfoBar extends React.Component {
                                 </Typography>
                             </div>
                             <VerticalDivider height={70} />
-                            {user && <StarRatingBar apiId={api.id} isEditable={false} showSummary />}
+                            {(!api.advertiseInfo.advertised && user)
+                                && <StarRatingBar apiId={api.id} isEditable={false} showSummary />}
                             {api.advertiseInfo.advertised && (
                                 <React.Fragment>
-                                    {user && <VerticalDivider height={70} />}
                                     <a
                                         target='_blank'
                                         rel='noopener noreferrer'
@@ -438,7 +438,7 @@ class InfoBar extends React.Component {
                                                     </TableCell>
                                                     <TableCell>21 May 2018</TableCell>
                                                 </TableRow> */}
-                                                {user && (
+                                                {(user && !api.advertiseInfo.advertised) && (
                                                     <TableRow>
                                                         <TableCell component='th' scope='row'>
                                                             <div className={classes.iconAligner}>
@@ -454,7 +454,7 @@ class InfoBar extends React.Component {
                                                         <TableCell>
                                                             <StarRatingBar
                                                                 apiId={api.id}
-                                                                isEditable={!api.advertiseInfo.advertised}
+                                                                isEditable
                                                                 showSummary={false}
                                                             />
                                                         </TableCell>
