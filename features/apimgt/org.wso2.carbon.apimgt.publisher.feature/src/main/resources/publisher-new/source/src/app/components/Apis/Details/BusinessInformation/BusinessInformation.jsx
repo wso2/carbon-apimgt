@@ -290,7 +290,7 @@ class BusinessInformation extends React.Component {
                                             variant='contained'
                                             color='primary'
                                             onClick={() => this.handleSubmit(updateAPI)}
-                                            disabled={this.isNotCreator && this.isNotPublisher}
+                                            disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                         >
                                             <FormattedMessage id='save' defaultMessage='Save' />
                                         </Button>
