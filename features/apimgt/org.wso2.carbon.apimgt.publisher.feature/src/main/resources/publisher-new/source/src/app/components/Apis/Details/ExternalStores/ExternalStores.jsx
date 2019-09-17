@@ -19,6 +19,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
+import { isRestricted } from 'AppData/AuthManager';
 
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage, useIntl } from 'react-intl';
@@ -166,7 +167,8 @@ export default function ExternalStores() {
                                     <StyledTableCell padding='checkbox'>
                                         <Checkbox
                                             checked={publishedExternalStores.includes(row.id)}
-                                            disabled={api.lifeCycleStatus !== 'PUBLISHED'}
+                                            disabled={api.lifeCycleStatus !== 'PUBLISHED'
+                                            || isRestricted(['apim:api_publish'], api)}
                                             onChange={
                                                 (event) => {
                                                     const { checked, name } = event.target;
@@ -215,7 +217,8 @@ export default function ExternalStores() {
                                 type='submit'
                                 variant='contained'
                                 color='primary'
-                                disabled={isUpdating || api.lifeCycleStatus !== 'PUBLISHED'}
+                                disabled={isUpdating || api.lifeCycleStatus !== 'PUBLISHED'
+                                    || isRestricted(['apim:api_publish'], api)}
                                 onClick={updateStores}
                             >
                                 <FormattedMessage
