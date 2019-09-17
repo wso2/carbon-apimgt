@@ -44,7 +44,6 @@ import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
@@ -79,7 +78,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -88,14 +86,12 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.validation.ConstraintViolation;
-import javax.ws.rs.core.Response;
 
 public class RestApiUtil {
 
@@ -1230,13 +1226,7 @@ public class RestApiUtil {
 
         APIDefinition oasParser;
         try {
-            Optional<APIDefinition> optional = OASParserUtil.getOASParser(swagger);
-            if (optional.isPresent()) {
-                oasParser = optional.get();
-            } else {
-                log.error("Error occurred while parsing swagger definition");
-                return false;
-            }
+            oasParser = OASParserUtil.getOASParser(swagger);
         } catch (APIManagementException e) {
             log.error("Error occurred while parsing swagger definition");
             return false;
@@ -1330,14 +1320,7 @@ public class RestApiUtil {
                     definition = IOUtils
                             .toString(RestApiUtil.class.getResourceAsStream("/store-api.yaml"), "UTF-8");
                 }
-                Optional<APIDefinition> optional = OASParserUtil.getOASParser(definition);
-                APIDefinition oasParser;
-                if(optional.isPresent()){
-                    oasParser = optional.get();
-                } else {
-                    log.error("Error occurred while parsing swagger definition");
-                    return Collections.EMPTY_SET;
-                }
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content w created
                 storeResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {
@@ -1373,14 +1356,7 @@ public class RestApiUtil {
                     definition = IOUtils
                             .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.yaml"), "UTF-8");
                 }
-                Optional<APIDefinition> optional = OASParserUtil.getOASParser(definition);
-                APIDefinition oasParser;
-                if(optional.isPresent()){
-                    oasParser = optional.get();
-                } else {
-                    log.error("Error occurred while parsing swagger definition");
-                    return Collections.EMPTY_SET;
-                }
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content we created
                 publisherResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {
@@ -1410,14 +1386,7 @@ public class RestApiUtil {
             try {
                 String definition = IOUtils
                         .toString(RestApiUtil.class.getResourceAsStream("/admin-api.json"), "UTF-8");
-                Optional<APIDefinition> optional = OASParserUtil.getOASParser(definition);
-                APIDefinition oasParser;
-                if(optional.isPresent()){
-                    oasParser = optional.get();
-                } else {
-                    log.error("Error occurred while parsing swagger definition");
-                    return Collections.EMPTY_SET;
-                }
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content we created
                 adminAPIResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {

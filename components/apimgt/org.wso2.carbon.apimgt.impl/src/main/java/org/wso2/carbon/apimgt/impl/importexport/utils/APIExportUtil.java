@@ -33,16 +33,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
@@ -528,7 +525,6 @@ public class APIExportUtil {
     private static void exportMetaInformation(String archivePath, API apiToReturn, Registry registry,
                                               ExportFormat exportFormat) throws APIImportExportException {
 
-        APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
         CommonUtil.createDirectory(archivePath + File.separator + APIImportExportConstants.META_INFO_DIRECTORY);
         //Remove unnecessary data from exported Api
         cleanApiDataToExport(apiToReturn);

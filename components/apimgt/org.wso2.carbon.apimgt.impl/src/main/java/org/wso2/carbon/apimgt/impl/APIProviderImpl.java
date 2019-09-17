@@ -90,7 +90,6 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -3406,14 +3405,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                     registry.delete(apiProviderPath);
                 }
-            }
-
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                String resourcePath = identifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
-                        identifier.getApiName() + identifier.getVersion() +
-                        APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
-                resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
-                registry.delete(resourcePath);
             }
 
             cleanUpPendingAPIStateChangeTask(apiId);
@@ -6791,14 +6782,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
 
-        Map<String, String> failedToPublishEnvironments = publishToGateway(product);
-        if (!failedToPublishEnvironments.isEmpty()) {
-            Set<String> publishedEnvironments =
-                    new HashSet<String>(product.getEnvironments());
-            publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
-            product.setEnvironments(publishedEnvironments);
-            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-            failedGateways.put("UNPUBLISHED", Collections.<String,String>emptyMap());
+        if (resources.size() > 0) {
+            Map<String, String> failedToPublishEnvironments = publishToGateway(product);
+            if (!failedToPublishEnvironments.isEmpty()) {
+                Set<String> publishedEnvironments = new HashSet<String>(product.getEnvironments());
+                publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
+                product.setEnvironments(publishedEnvironments);
+                failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+                failedGateways.put("UNPUBLISHED", Collections.<String, String>emptyMap());
+            }
         }
 
         //todo : check whether permissions need to be updated and pass it along

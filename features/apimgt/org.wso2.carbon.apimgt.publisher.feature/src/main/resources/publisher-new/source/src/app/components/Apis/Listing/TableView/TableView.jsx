@@ -78,7 +78,26 @@ class TableView extends React.Component {
             this.getData();
         }
     }
-
+    componentWillUnmount() {
+        // The foollowing is resetting the styles for the mui-datatables
+        const { theme } = this.props;
+        const themeAdditions = {
+            overrides: {
+                MUIDataTable: {
+                    tableRoot: {
+                        display: 'table',
+                        '& tbody': {
+                            display: 'table-row-group',
+                        },
+                        '& thead': {
+                            display: 'table-header-group',
+                        },
+                    },
+                },
+            },
+        };
+        Object.assign(theme, themeAdditions);
+    }
     getMuiTheme = () => {
         const { listType } = this.state;
         const { theme } = this.props;
@@ -211,7 +230,6 @@ class TableView extends React.Component {
             return API.all({ limit: this.rowsPerPage, offset: page * rowsPerPage });
         }
     };
-
 
     /**
      *
@@ -350,6 +368,13 @@ class TableView extends React.Component {
                 if (artifact) {
                     if (artifact.type === 'DOC') {
                         return (<DocThumb doc={artifact} />);
+                    } else if (artifact.type === 'APIPRODUCT') {
+                        artifact.state = 'PUBLISHED';
+                        return (<ApiThumb
+                            api={artifact}
+                            isAPIProduct
+                            updateData={tableViewObj.updateData}
+                        />);
                     } else {
                         return (<ApiThumb
                             api={artifact}

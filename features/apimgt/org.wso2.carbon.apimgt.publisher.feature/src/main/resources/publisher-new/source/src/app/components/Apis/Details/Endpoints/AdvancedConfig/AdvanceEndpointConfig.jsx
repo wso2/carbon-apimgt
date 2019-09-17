@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
     Divider,
     FormControl,
@@ -30,7 +30,8 @@ import {
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 const itemHeight = 48;
 const itemPaddingTop = 8;
@@ -75,6 +76,7 @@ const styles = theme => ({
  * @returns {any} The HTML representation of the compoenent.
  */
 function AdvanceEndpointConfig(props) {
+    const { api } = useContext(APIContext);
     const {
         classes,
         intl,
@@ -278,8 +280,6 @@ function AdvanceEndpointConfig(props) {
         const di = { ...advanceConfigObj, [field]: event.target.value };
         setAdvanceConfig(di);
     };
-
-    const isNotCreator = AuthManager.isNotCreator();
 
     return (
         <Grid container direction='column' className={classes.configContainer}>
@@ -505,7 +505,7 @@ function AdvanceEndpointConfig(props) {
                     onClick={() => onSaveAdvanceConfig(advanceConfigObj)}
                     color='primary'
                     autoFocus
-                    disabled={isNotCreator}
+                    disabled={isRestricted(['apim:api_create'], api)}
                 >
                     <FormattedMessage
                         id='Apis.Details.Endpoints.AdvancedConfig.AdvanceEndpointConfig.config.save.button'

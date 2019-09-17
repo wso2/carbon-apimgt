@@ -31,7 +31,7 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 import AuthorizationHeader from './components/AuthorizationHeader';
 import DefaultVersion from './components/DefaultVersion';
 import ResponseCaching from './components/ResponseCaching';
@@ -242,7 +242,6 @@ export default function Configuration() {
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
     const classes = useStyles();
     const paperHeight = window.innerHeight - 200;
-    const isNotCreator = AuthManager.isNotCreator();
     /**
      *
      * Handle the configuration view save button action
@@ -418,7 +417,7 @@ export default function Configuration() {
                                 </Button>
                             </Link>
                         </Grid>
-                        {(isNotCreator)
+                        {(isRestricted(['apim:api_create'], api))
                             && (
                                 <Grid item>
                                     <Typography variant='body2' color='primary'>

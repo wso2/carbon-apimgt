@@ -26,7 +26,7 @@ import FormLabel from '@material-ui/core/FormLabel';
 import { FormattedMessage } from 'react-intl';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 
 /**
  *
@@ -37,7 +37,7 @@ import AuthManager from 'AppData/AuthManager';
  */
 export default function ResponseCaching(props) {
     const { api, configDispatcher } = props;
-    const isNotCreator = AuthManager.isNotCreator();
+
 
     return (
         <Grid container spacing={1} alignItems='flex-start'>
@@ -52,7 +52,7 @@ export default function ResponseCaching(props) {
                     <FormControlLabel
                         control={(
                             <Switch
-                                disabled={isNotCreator}
+                                disabled={isRestricted(['apim:api_create'], api)}
                                 checked={api.responseCachingEnabled}
                                 onChange={({ target: { checked } }) => configDispatcher({
                                     action: 'responseCachingEnabled',

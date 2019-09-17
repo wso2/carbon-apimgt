@@ -28,27 +28,35 @@ import { withStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 import Grid from '@material-ui/core/Grid';
-import classNames from 'classnames';
-import Alert from 'AppComponents/Shared/Alert';
-import Api from 'AppData/api';
-import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import ChipInput from 'material-ui-chip-input';
 import APIValidation from 'AppData/APIValidation';
 import base64url from 'base64url';
 import Error from '@material-ui/icons/Error';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Chip from '@material-ui/core/Chip';
+import Icon from '@material-ui/core/Icon';
+import Paper from '@material-ui/core/Paper';
 import { red } from '@material-ui/core/colors/';
+import Divider from '@material-ui/core/Divider';
+import Alert from 'AppComponents/Shared/Alert';
+import Api from 'AppData/api';
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = theme => ({
     root: {
         flexGrow: 1,
         marginTop: 10,
+        display: 'flex',
+        flexDirection: 'column',
+        padding: 20,
     },
     titleWrapper: {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
+    },
+    titleLink: {
+        color: theme.palette.primary.main,
     },
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
@@ -84,6 +92,15 @@ const styles = theme => ({
     },
     extraPadding: {
         paddingLeft: theme.spacing.unit * 2,
+    },
+    addNewOther: {
+        paddingTop: 40,
+    },
+    titleGrid: {
+        ' & .MuiGrid-item': {
+            padding: 0,
+            margin: 0,
+        },
     },
 });
 
@@ -128,8 +145,9 @@ class CreateScope extends React.Component {
      */
     addScope() {
         const {
-            intl, api, history,
+            intl, api, history, isAPIProduct,
         } = this.props;
+        const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
         if (this.validateScopeName('name', this.state.apiScope.name)) {
             // return status of the validation
             return;
@@ -139,7 +157,9 @@ class CreateScope extends React.Component {
             type: 'role',
             values: this.state.validRoles,
         };
-        const scopes = api.scopes.map((aScope) => { return aScope; });
+        const scopes = api.scopes.map((aScope) => {
+            return aScope;
+        });
         scopes.push(scope);
         const updateProperties = { scopes };
         const promisedApiUpdate = api.update(updateProperties);
@@ -149,7 +169,7 @@ class CreateScope extends React.Component {
                 defaultMessage: 'Scope added successfully',
             }));
             const { apiScopes } = this.state;
-            const redirectURL = '/apis/' + api.id + '/scopes/';
+            const redirectURL = '/' + urlPrefix + '/' + api.id + '/scopes/';
             history.push(redirectURL);
             this.setState({
                 apiScopes,
@@ -216,22 +236,24 @@ class CreateScope extends React.Component {
     handleRoleAddition(role) {
         const { validRoles, invalidRoles } = this.state;
         const promise = APIValidation.role.validate(base64url.encode(role));
-        promise.then(() => {
-            this.setState({
-                roleValidity: true,
-                validRoles: [...validRoles, role],
-            });
-        }).catch((error) => {
-            if (error.status === 404) {
+        promise
+            .then(() => {
                 this.setState({
-                    roleValidity: false,
-                    invalidRoles: [...invalidRoles, role],
+                    roleValidity: true,
+                    validRoles: [...validRoles, role],
                 });
-            } else {
-                Alert.error('Error when validating role: ' + role);
-                console.error('Error when validating role ' + error);
-            }
-        });
+            })
+            .catch((error) => {
+                if (error.status === 404) {
+                    this.setState({
+                        roleValidity: false,
+                        invalidRoles: [...invalidRoles, role],
+                    });
+                } else {
+                    Alert.error('Error when validating role: ' + role);
+                    console.error('Error when validating role ' + error);
+                }
+            });
     }
 
     handleRoleDeletion = (role) => {
@@ -254,147 +276,168 @@ class CreateScope extends React.Component {
      * @memberof CreateScope
      */
     render() {
-        const { classes } = this.props;
-        const url = `/apis/${this.props.api.id}/scopes`;
+        const { classes, isAPIProduct, api } = this.props;
+        const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
+        const url = `/${urlPrefix}/${api.id}/scopes`;
         const { roleValidity, validRoles, invalidRoles } = this.state;
 
         return (
-            <div className={classes.root}>
-                <div className={classes.titleWrapper}>
-                    <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        <FormattedMessage
-                            id='Apis.Details.Scopes.CreateScope.create.new.scope'
-                            defaultMessage='Create New Scope'
-                        />
-                    </Typography>
-                </div>
-                <div className={classes.contentWrapper}>
-                    <FormControl margin='normal' className={classes.FormControl}>
-                        <TextField
-                            id='name'
-                            label='Name'
-                            style={{ margin: 8 }}
-                            placeholder='Scope Name'
-                            error={this.state.valid.name.invalid}
-                            helperText={
-                                this.state.valid.name.invalid ? (
-                                    this.state.valid.name.error
-                                ) : (
+            <Grid container spacing={3}>
+                <Grid item sm={12} md={12} />
+                {/*
+            Following two grids control the placement of whole create page
+            For centering the content better use `container` props, but instead used an empty grid item for flexibility
+             */}
+                <Grid item sm={0} md={0} lg={2} />
+                <Grid item sm={12} md={12} lg={8}>
+                    <Grid container spacing={5} className={classes.titleGrid}>
+                        <Grid item md={12}>
+                            <div className={classes.titleWrapper}>
+                                <Link to={url} className={classes.titleLink}>
+                                    <Typography variant='h4' align='left' className={classes.mainTitle}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Scopes.Scopes.heading.scope.heading'
+                                            defaultMessage='Scopes'
+                                        />
+                                    </Typography>
+                                </Link>
+                                <Icon>keyboard_arrow_right</Icon>
+                                <Typography variant='h4' align='left' className={classes.mainTitle}>
                                     <FormattedMessage
-                                        id='Apis.Details.Scopes.CreateScope.short.description.name'
-                                        defaultMessage='Enter Scope Name ( Ex: creator )'
+                                        id='Apis.Details.Scopes.CreateScope.create.new.scope'
+                                        defaultMessage='Create New Scope'
                                     />
-                                )
-                            }
-                            fullWidth
-                            margin='normal'
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            value={this.state.apiScope.name || ''}
-                            onChange={this.handleScopeNameInput}
-                        />
-                    </FormControl>
-                    <FormControl margin='normal' className={classes.FormControlOdd}>
-                        <TextField
-                            id='description'
-                            label='Description'
-                            style={{ margin: 8 }}
-                            placeholder='Short description about the scope'
-                            helperText={
-                                <FormattedMessage
-                                    id='Apis.Details.Scopes.CreateScope.short.description.about.the.scope'
-                                    defaultMessage='Short description about the scope'
-                                />
-                            }
-                            margin='normal'
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            onChange={this.validateScopeDescription}
-                            value={this.state.apiScope.description || ''}
-                            multiline
-                        />
-                    </FormControl>
-                    <FormControl
-                        margin='normal'
-                        className={classNames({ [classes.FormControl]: true, [classes.extraPadding]: true })}
-                    >
-                        <FormLabel component='legend' className={classes.FormControlLabel}>
-                            <FormattedMessage id='Apis.Details.Scopes.CreateScope.roles' defaultMessage='Roles' />
-                        </FormLabel>
-                        <ChipInput
-                            value={validRoles.concat(invalidRoles)}
-                            alwaysShowPlaceholder={false}
-                            placeholder='Enter roles and press Enter'
-                            blurBehavior='clear'
-                            InputProps={{
-                                endAdornment: !roleValidity && (
-                                    <InputAdornment position='end'>
-                                        <Error color='error' />
-                                    </InputAdornment>
-                                ),
-                            }}
-                            onAdd={this.handleRoleAddition}
-                            error={!roleValidity}
-                            helperText={
-                                !roleValidity ? (
-                                    <FormattedMessage
-                                        id='Apis.Details.Scopes.Roles.Invalid'
-                                        defaultMessage='Role is invalid'
+                                </Typography>
+                            </div>
+                        </Grid>
+                        <Grid item md={12}>
+                            <Paper elevation={0} className={classes.root}>
+                                <FormControl margin='normal'>
+                                    <TextField
+                                        id='name'
+                                        label='Name'
+                                        placeholder='Scope Name'
+                                        error={this.state.valid.name.invalid}
+                                        helperText={
+                                            this.state.valid.name.invalid ? (
+                                                this.state.valid.name.error
+                                            ) : (
+                                                <FormattedMessage
+                                                    id='Apis.Details.Scopes.CreateScope.short.description.name'
+                                                    defaultMessage='Enter Scope Name ( Ex: creator )'
+                                                />
+                                            )
+                                        }
+                                        fullWidth
+                                        margin='normal'
+                                        variant='outlined'
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        value={this.state.apiScope.name || ''}
+                                        onChange={this.handleScopeNameInput}
                                     />
-                                ) : (
-                                    <FormattedMessage
-                                        id='Apis.Details.Scopes.CreateScope.roles.help'
-                                        defaultMessage='Enter valid role and press enter'
+                                </FormControl>
+                                <FormControl margin='normal'>
+                                    <TextField
+                                        id='description'
+                                        label='Description'
+                                        variant='outlined'
+                                        placeholder='Short description about the scope'
+                                        helperText={
+                                            <FormattedMessage
+                                                id='Apis.Details.Scopes.CreateScope.short.description.about.the.scope'
+                                                defaultMessage='Short description about the scope'
+                                            />
+                                        }
+                                        margin='normal'
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        onChange={this.validateScopeDescription}
+                                        value={this.state.apiScope.description || ''}
+                                        multiline
                                     />
-                                )
-                            }
-                            chipRenderer={({ value }, key) => (
-                                <Chip
-                                    key={key}
-                                    label={value}
-                                    onDelete={() => {
-                                        this.handleRoleDeletion(value);
-                                    }}
-                                    style={{
-                                        backgroundColor: invalidRoles.includes(value) ? red[300] : null,
-                                        margin: '8px 8px 8px 0',
-                                        float: 'left',
-                                    }}
-                                />
-                            )}
-                        />
-                    </FormControl>
-                    <Grid
-                        container
-                        direction='row'
-                        alignItems='flex-start'
-                        spacing={4}
-                        className={classes.buttonSection}
-                    >
-                        <Grid item>
-                            <Button
-                                variant='contained'
-                                color='primary'
-                                onClick={this.addScope}
-                                disabled={this.state.valid.name.invalid || (invalidRoles.length !== 0)}
-                                className={classes.saveButton}
-                            >
-                                <FormattedMessage id='Apis.Details.Scopes.CreateScope.save' defaultMessage='Save' />
-                            </Button>
-                            <Link to={url}>
-                                <Button variant='contained'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Scopes.CreateScope.cancel'
-                                        defaultMessage='Cancel'
+                                </FormControl>
+                                <FormControl margin='normal'>
+                                    <FormLabel component='legend' className={classes.FormControlLabel}>
+                                        <FormattedMessage
+                                            id='Apis.Details.Scopes.CreateScope.roles'
+                                            defaultMessage='Roles'
+                                        />
+                                    </FormLabel>
+                                    <ChipInput
+                                        variant='outlined'
+                                        value={validRoles.concat(invalidRoles)}
+                                        alwaysShowPlaceholder={false}
+                                        placeholder='Enter roles and press Enter'
+                                        blurBehavior='clear'
+                                        InputProps={{
+                                            endAdornment: !roleValidity && (
+                                                <InputAdornment position='end'>
+                                                    <Error color='error' />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        onAdd={this.handleRoleAddition}
+                                        error={!roleValidity}
+                                        helperText={
+                                            !roleValidity ? (
+                                                <FormattedMessage
+                                                    id='Apis.Details.Scopes.Roles.Invalid'
+                                                    defaultMessage='Role is invalid'
+                                                />
+                                            ) : (
+                                                <FormattedMessage
+                                                    id='Apis.Details.Scopes.CreateScope.roles.help'
+                                                    defaultMessage='Enter valid role and press enter'
+                                                />
+                                            )
+                                        }
+                                        chipRenderer={({ value }, key) => (
+                                            <Chip
+                                                key={key}
+                                                label={value}
+                                                onDelete={() => {
+                                                    this.handleRoleDeletion(value);
+                                                }}
+                                                style={{
+                                                    backgroundColor: invalidRoles.includes(value) ? red[300] : null,
+                                                    margin: '8px 8px 8px 0',
+                                                    float: 'left',
+                                                }}
+                                            />
+                                        )}
                                     />
-                                </Button>
-                            </Link>
+                                </FormControl>
+                                <Divider />
+                                <div className={classes.addNewOther}>
+                                    <Button
+                                        variant='contained'
+                                        color='primary'
+                                        onClick={this.addScope}
+                                        disabled={this.state.valid.name.invalid || invalidRoles.length !== 0}
+                                        className={classes.saveButton}
+                                    >
+                                        <FormattedMessage
+                                            id='Apis.Details.Scopes.CreateScope.save'
+                                            defaultMessage='Save'
+                                        />
+                                    </Button>
+                                    <Link to={url}>
+                                        <Button variant='contained'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Scopes.CreateScope.cancel'
+                                                defaultMessage='Cancel'
+                                            />
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </Paper>
                         </Grid>
                     </Grid>
-                </div>
-            </div>
+                </Grid>
+            </Grid>
         );
     }
 }
@@ -409,6 +452,7 @@ CreateScope.propTypes = {
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
+    isAPIProduct: PropTypes.bool.isRequired,
 };
 
 CreateScope.defaultProps = {

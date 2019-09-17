@@ -2643,7 +2643,7 @@ paths:
         - OAuth2Security:
           - apim:mediation_policy_view
       x-examples:
-          $ref: docs/examples/apis/apis_id_mediationpolicies_get.yaml
+          $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_get.yaml
       summary: |
         Get all mediation policies of an API
       operationId:  apisApiIdMediationPoliciesGet
@@ -2696,7 +2696,7 @@ paths:
         - OAuth2Security:
           - apim:mediation_policy_create
       x-examples:
-        $ref: docs/examples/apis/apis_id_mediationpolicies_post.yaml
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_post.yaml
       summary: Add an API specific mediation policy
       operationId: apisApiIdMediationPoliciesPost
       description: |
@@ -2779,7 +2779,7 @@ paths:
         - OAuth2Security:
           - apim:api_view
       x-examples:
-        $ref: docs/examples/apis/apis_id_mediationpolicies_id_get.yaml
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_get.yaml
       summary: Get an API specific mediation policy
       operationId:  apisApiIdMediationPoliciesMediationPolicyIdGet
       description: |
@@ -2837,7 +2837,7 @@ paths:
         - OAuth2Security:
           - apim:mediation_policy_manage
       x-examples:
-        $ref: docs/examples/apis/apis_id_mediationpolicies_id_delete.yaml
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_delete.yaml
       summary: Delete an API specific mediation policy
       operationId:  apisApiIdMediationPoliciesMediationPolicyIdDelete
       description: |
@@ -2884,7 +2884,7 @@ paths:
       - OAuth2Security:
         - apim:api_view
       x-examples:
-        $ref: docs/examples/apis/apis_id_mediationpolicies_id_content_get.yaml
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_content_get.yaml
       summary: Download an API specific mediation policy
       operationId:  apisApiIdMediationPoliciesMediationPolicyIdContentGet
       description: |
@@ -2935,7 +2935,7 @@ paths:
       - OAuth2Security:
         - apim:mediation_policy_manage
       x-examples:
-        $ref: docs/examples/apis/apis_id_mediationpolicies_id_content_put.yaml
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_content_put.yaml
       summary: Update an API specific mediation policy
       operationId:  apisApiIdMediationPoliciesMediationPolicyIdContentPut
       description: |
@@ -3997,6 +3997,8 @@ paths:
         GET https://localhost:9443/api/am/publisher/v0.14/mediation-policies
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\": 10,\r\n   \"next\": null,\r\n   \"previous\": null,\r\n   \"list\":    [\r\n            {\r\n         \"name\": \"debug_json_fault\",\r\n         \"id\": \"563de8f3-dd1d-4ec7-afc2-d158c663ed34\",\r\n         \"type\": \"fault\"\r\n      },\r\n            {\r\n         \"name\": \"json_fault\",\r\n         \"id\": \"f9c36f4d-a2b6-41e7-b311-d358a47916be\",\r\n         \"type\": \"fault\"\r\n      },\r\n            {\r\n         \"name\": \"json_to_xml_in_message\",\r\n         \"id\": \"3921225b-7918-4b95-a851-22c4e4e3e911\",\r\n         \"type\": \"in\"\r\n      },\r\n            {\r\n         \"name\": \"debug_in_flow\",\r\n         \"id\": \"2bc15f93-4455-4763-89b8-83600fb9d731\",\r\n         \"type\": \"in\"\r\n      },\r\n            {\r\n         \"name\": \"log_in_message\",\r\n         \"id\": \"4d287cca-76ab-44ca-b22e-919fc27c50e3\",\r\n         \"type\": \"in\"\r\n      },\r\n            {\r\n         \"name\": \"preserve_accept_header\",\r\n         \"id\": \"3776b215-b3bc-40b6-bdcb-06efa7de64be\",\r\n         \"type\": \"in\"\r\n      },\r\n            {\r\n         \"name\": \"xml_to_json_in_message\",\r\n         \"id\": \"50ac2002-769e-4f90-8549-6d0248dff7d2\",\r\n         \"type\": \"in\"\r\n      },\r\n            {\r\n         \"name\": \"xml_to_json_out_message\",\r\n         \"id\": \"2af75853-ed75-4d25-81aa-0ebbeca691ea\",\r\n         \"type\": \"out\"\r\n      },\r\n            {\r\n         \"name\": \"json_to_xml_out_message\",\r\n         \"id\": \"d9fa3ffc-f6b6-4171-ab97-eb44196cb66e\",\r\n         \"type\": \"out\"\r\n      },\r\n            {\r\n         \"name\": \"debug_out_flow\",\r\n         \"id\": \"260b7701-4071-46bd-9b66-900ac6fffed6\",\r\n         \"type\": \"out\"\r\n      },\r\n            {\r\n         \"name\": \"apply_accept_header\",\r\n         \"id\": \"15c17c2f-33e3-4c37-a262-04dfa49983a4\",\r\n         \"type\": \"out\"\r\n      },\r\n            {\r\n         \"name\": \"log_out_message\",\r\n         \"id\": \"d37dca41-c048-492a-82cf-9a2292c6fff0\",\r\n         \"type\": \"out\"\r\n      }\r\n   ]\r\n}"
+      x-examples:
+        $ref: docs/examples/mediation-policies/mediation_policies_get.yaml
       summary: |
         Get all global level mediation policies
       operationId: getAllGlobalMediationPolicies
@@ -8442,6 +8444,7 @@ definitions:
         enum:
           - DOC
           - API
+          - APIProduct
         example: API
 
   APISearchResult:
@@ -8473,6 +8476,34 @@ definitions:
           thumbnailUri:
             type: string
             example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+
+  APIProductSearchResult:
+    title: API Result
+    allOf:
+    - $ref: '#/definitions/SearchResult'
+    - properties:
+        description:
+          type: string
+          description: A brief description about the API
+          example: A calculator API that supports basic operations
+        context:
+          type: string
+          description: A string that represents the context of the user's request
+          example: CalculatorAPI
+        provider:
+          description: |
+            If the provider value is not given, the user invoking the API will be used as the provider.
+          type: string
+          example: admin
+        status:
+          type: string
+          description: This describes in which status of the lifecycle the APIPRODUCT is
+          example: PUBLISHED
+        thumbnailUri:
+          type: string
+          example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+
+
 
   #-----------------------------------------------------
   # The API monetization resource
@@ -8543,6 +8574,8 @@ definitions:
             type: string
             example: admin
           apiUUID:
+              type: string
+          associatedType:
               type: string
   #-----------------------------------------------------
   # The Resource policy List resource

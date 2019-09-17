@@ -454,6 +454,7 @@ public final class APIConstants {
     public static final String ORGANIZATION_CLAIM_ATTRIBUTE = "OrganizationClaimAttribute";
     public static final String DEFAULT_ORGANIZATION_CLAIM_NAME = "http://wso2.org/claims/organization";
     public static final String DEFAULT_TOKEN_TYPE = "DEFAULT";
+    public static final String TOKEN_TYPE_JWT = "JWT";
 
     public static final String PASSWORD_RESOLVER_IMPL_CLASS = "PasswordResolverImpl";
 
@@ -1441,6 +1442,7 @@ public final class APIConstants {
     public static final String MULTI_ATTRIBUTE_SEPARATOR_DEFAULT = ",";
     public static final String MULTI_ATTRIBUTE_SEPARATOR = "MultiAttributeSeparator";
     public static final String CUSTOM_URL = "customUrl";
+    public static final String API_PRODUCT = "APIProduct";
 
     public static class AuditLogConstants {
         public static final String CREATED = "created";

@@ -114,7 +114,7 @@ class APIProduct extends Resource {
      */
     toJSON(resource = this, userExcludes = []) {
         var copy = {},
-            excludes = ['_data', 'client', 'apiType', ...userExcludes];
+            excludes = ['_data', 'client', 'type', ...userExcludes];
         for (var prop in resource) {
             if (!excludes.includes(prop)) {
                 copy[prop] = resource[prop];
@@ -177,7 +177,7 @@ class APIProduct extends Resource {
         const updatedAPI = { ...this.toJSON(), ...this.toJSON(updatedProperties) };
         const promisedUpdate = this.client.then((client) => {
             const payload = {
-                apiProdPuctId: updatedAPI.id,
+                apiProductId: updatedAPI.id,
                 body: updatedAPI
             };
             return client.apis['API Products'].put_api_products__apiProductId_(payload);

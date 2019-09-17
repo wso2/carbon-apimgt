@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { withStyles, withTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import { Progress } from 'AppComponents/Shared';
@@ -186,13 +187,15 @@ class ProductResourcesView extends React.Component {
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
                         <FormattedMessage id='Apis.Details.Resources.Resources.resources' defaultMessage='Resources' />
                     </Typography>
-                    <Button size='small' className={classes.button}>
-                        <Icon className={classes.buttonIcon}>edit</Icon>
-                        <FormattedMessage
-                            id='Apis.Details.Resources.Resources.edit.resources.button'
-                            defaultMessage='Edit Resources'
-                        />
-                    </Button>
+                    <Link to={'/api-products/' + api.id + '/resources/edit'}>
+                        <Button size='small' className={classes.button}>
+                            <Icon className={classes.buttonIcon}>edit</Icon>
+                            <FormattedMessage
+                                id='Apis.Details.Resources.Resources.edit.resources.button'
+                                defaultMessage='Edit Resources'
+                            />
+                        </Button>
+                    </Link>
                 </div>
                 <div className={classes.contentWrapper}>
                     <List>

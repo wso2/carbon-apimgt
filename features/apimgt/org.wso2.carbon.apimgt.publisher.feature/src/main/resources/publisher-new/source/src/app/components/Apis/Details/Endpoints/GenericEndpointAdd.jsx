@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+
 import {
     Icon,
     IconButton,
@@ -24,7 +25,8 @@ import {
 } from '@material-ui/core';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = theme => ({
     endpointInputWrapper: {
@@ -57,6 +59,7 @@ function GenericEndpointAdd(props) {
     } = props;
     const [serviceUrl, setServiceUrl] = useState('');
     const [isError, setError] = useState(false);
+    const { api } = useContext(APIContext);
 
     /**
      * The method to handle endpoint add button click action.
@@ -65,7 +68,6 @@ function GenericEndpointAdd(props) {
         setServiceUrl('');
         addEndpoint(serviceUrl);
     };
-    const isNotCreator = AuthManager.isNotCreator();
 
     return (
         <React.Fragment className={classes.endpointInputWrapper}>
@@ -74,7 +76,7 @@ function GenericEndpointAdd(props) {
                     id='Apis.Details.Endpoints.GenericEndpoint.service.url.input'
                     defaultMessage='Service URL'
                 />}
-                disabled={isNotCreator}
+                disabled={isRestricted(['apim:api_create'], api)}
                 className={classes.textField}
                 value={serviceUrl}
                 onChange={event => setServiceUrl(event.target.value)}

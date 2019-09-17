@@ -28,7 +28,7 @@ import FormLabel from '@material-ui/core/FormLabel';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 
 const useStyles = makeStyles(theme => ({
     error: {
@@ -56,7 +56,6 @@ export default function Transports(props) {
         }
         return null; // No errors :-)
     };
-    const isNotCreator = AuthManager.isNotCreator();
     return (
         <Grid container spacing={1} alignItems='flex-start'>
             <Grid item>
@@ -71,7 +70,7 @@ export default function Transports(props) {
                         <FormControlLabel
                             control={(
                                 <Checkbox
-                                    disabled={isNotCreator}
+                                    disabled={isRestricted(['apim:api_create'], api)}
                                     checked={api.transport.includes('http')}
                                     onChange={({ target: { checked } }) => configDispatcher({
                                         action: 'transport',
@@ -86,7 +85,7 @@ export default function Transports(props) {
                         <FormControlLabel
                             control={(
                                 <Checkbox
-                                    disabled={isNotCreator}
+                                    disabled={isRestricted(['apim:api_create'], api)}
                                     checked={api.transport.includes('https')}
                                     onChange={({ target: { checked } }) => configDispatcher({
                                         action: 'transport',

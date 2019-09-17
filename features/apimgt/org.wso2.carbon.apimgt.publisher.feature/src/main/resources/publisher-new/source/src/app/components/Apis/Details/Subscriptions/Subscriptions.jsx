@@ -22,6 +22,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 
 import SubscriptionsTable from './SubscriptionsTable';
 import SubscriptionPoliciesManage from './SubscriptionPoliciesManage';
+import SubscriptionAvailability from './SubscriptionAvailability';
 
 const styles = theme => ({
     button: {
@@ -42,6 +43,7 @@ function Subscriptions(props) {
         <div>
             <SubscriptionsTable api={api} />
             <SubscriptionPoliciesManage api={api} updateAPI={updateAPI} />
+            <SubscriptionAvailability api={api} updateAPI={updateAPI} />
         </div>
     );
 }
