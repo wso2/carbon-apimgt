@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-<<<<<<< HEAD
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -75,11 +74,7 @@ import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-=======
-import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectedData;
-import org.wso2.carbon.apimgt.api.model.policy.*;
->>>>>>> 6a2cb72309... added local part of UI
+import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIType;
@@ -89,14 +84,10 @@ import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-<<<<<<< HEAD
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.RemoteUserManagerClient;
-=======
-import org.wso2.carbon.apimgt.impl.utils.*;
->>>>>>> 6a2cb72309... added local part of UI
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
@@ -108,13 +99,11 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.DBUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
-<<<<<<< HEAD
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -137,10 +126,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
-=======
-import java.sql.*;
-import java.util.*;
->>>>>>> 6a2cb72309... added local part of UI
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13917,61 +13902,7 @@ public class ApiMgtDAO {
             handleException("Failed to get product resources of api product : " + productIdentifier, e);
         }
         return productResourceList;
-
-    /**
-     * Get Honey API update list
-     *
-     * @return HoneyPotAPIAlertdata ArrayList
-     */
-//    public List<BotDetectedData> getAlerts() throws APIManagementException {
-//        List<BotDetectedData> alertData = new ArrayList<>();
-//        Connection conn = null;
-//        PreparedStatement ps = null;
-//        ResultSet rs = null;
-//        String getHoneypotApiAlertsQuery = SQLConstants.BotDataConstants.GET_HONEYPOT_API_ALERTS;
-//        try {
-//            conn = APIMgtDBUtil.getConnection();
-//            ps = conn.prepareStatement(getHoneypotApiAlertsQuery);
-//            rs = ps.executeQuery();
-//            while (rs.next()) {
-//                BotDetectedData honeyPotAPIAlertData = new BotDetectedData();
-//                honeyPotAPIAlertData.setCurrentTime(rs.getLong("REQUEST_TIME"));
-//                honeyPotAPIAlertData.setMessageID(rs.getString("MESSAGE_ID"));
-//                honeyPotAPIAlertData.setApiMethod(rs.getString("HTTP_METHOD"));
-//                honeyPotAPIAlertData.setHeaderSet(rs.getString("HEADERS"));
-//                honeyPotAPIAlertData.setMessageBody(rs.getString("MESSAGE_BODY"));
-//                honeyPotAPIAlertData.setClientIp(rs.getString("CLIENT_IP"));
-//                alertData.add(honeyPotAPIAlertData);
-//            }
-//        } catch (SQLException e) {
-//            handleException("Error while executing SQL", e);
-//        } finally {
-//            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-//        }
-//        return alertData;
-//    }
-
-    /**
-     * Delete Honey Pot API alert basd on message ID from the DB
-     */
-//    public void deleteHoneyPotAlert(String messageID) throws SQLException, APIManagementException {
-//
-//        Connection connection = APIMgtDBUtil.getConnection();
-//        try {
-//            PreparedStatement statement = connection.prepareStatement(SQLConstants.BotDataConstants.DELETE_HONEYPOT_API_ALERT_SQL);
-//            initialAutoCommit = connection.getAutoCommit();
-//            connection.setAutoCommit(false);
-//            statement.setString(1, messageID);
-//            statement.executeUpdate();
-//            connection.commit();
-//        } catch (SQLException e) {
-//            connection.rollback();
-//            handleException("Failed to delete alert message : " + messageID, e);
-//        } finally {
-//            APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
-//        }
-//
-//    }
+    }
 
     /**
      * Configure email list
@@ -13984,18 +13915,17 @@ public class ApiMgtDAO {
         connection = APIMgtDBUtil.getConnection();
         connection.setAutoCommit(false);
         try {
-                String emailListSaveQuery = SQLConstants.BotDataConstants.ADD_NOTIFICATION;
-                ps = connection.prepareStatement(emailListSaveQuery);
-                UUID uuid = UUID.randomUUID();
-                String randomUUIDString = uuid.toString();
-                String category = "Bot-Detection";
-                String notificationType = "email";
-                //BotDetectedData botDetectedData = new BotDetectedData();
-                ps.setString(1,randomUUIDString);
-                ps.setString(2,category);
-                ps.setString(3, notificationType);
-                ps.setString(4, email);
-                ps.execute();
+            String emailListSaveQuery = SQLConstants.BotDataConstants.ADD_NOTIFICATION;
+            ps = connection.prepareStatement(emailListSaveQuery);
+            UUID uuid = UUID.randomUUID();
+            String randomUUIDString = uuid.toString();
+            String category = "Bot-Detection";
+            String notificationType = "email";
+            ps.setString(1, randomUUIDString);
+            ps.setString(2, category);
+            ps.setString(3, notificationType);
+            ps.setString(4, email);
+            ps.execute();
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while save email list.", e);
@@ -14007,23 +13937,22 @@ public class ApiMgtDAO {
     /**
      * retrieve email list which configured for BotDetectedData Api alert
      */
-    public List<BotDetectedData> retrieveSavedBotDataEmailList()
+    public List<BotDetectionData> retrieveSavedBotDataEmailList()
             throws APIManagementException {
 
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        List<BotDetectedData> list = new ArrayList<>();
+        List<BotDetectionData> list = new ArrayList<>();
 
         try {
             String sqlQuery;
             conn = APIMgtDBUtil.getConnection();
             sqlQuery = SQLConstants.BotDataConstants.GET_SAVED_ALERT_EMAILS;
             ps = conn.prepareStatement(sqlQuery);
-            //ps.setString(1, tenantDomain);
             resultSet = ps.executeQuery();
             while (resultSet.next()) {
-                BotDetectedData botDetectedData = new BotDetectedData();
+                BotDetectionData botDetectedData = new BotDetectionData();
                 botDetectedData.setUuid(resultSet.getString("UUID"));
                 botDetectedData.setEmail(resultSet.getString("SUBSCRIBER_ADDRESS"));
                 list.add(botDetectedData);
@@ -14062,6 +13991,5 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
 
         }
-
     }
 }

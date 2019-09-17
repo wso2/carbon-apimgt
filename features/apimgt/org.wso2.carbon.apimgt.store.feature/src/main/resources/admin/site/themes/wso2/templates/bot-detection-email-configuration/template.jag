@@ -33,7 +33,7 @@
         <%
          var ArrayList = Packages.java.util.ArrayList;
          var notificationInfo = outputs.notificationData;
-         var NotificationData =  Packages.org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectedData;
+         var NotificationData =  Packages.org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
          var notificationData = new NotificationData();
 
         var i;

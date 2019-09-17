@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.api.model.botDataAPI;
 
-public class BotDetectedData {
+public class BotDetectionData {
 
     private long currentTime;
     private String messageID;

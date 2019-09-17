@@ -1,7 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectedData;
+import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.rest.api.admin.BotDataApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.EmailDTO;
@@ -25,7 +25,7 @@ public class BotDataApiServiceImpl extends BotDataApiService {
     }
     @Override
     public Response botDataGetEmailListGet(String tenantDomain) throws APIManagementException {
-        List<BotDetectedData> emailList = APIAdminImpl.retrieveSavedBotDataEmailList();
+        List<BotDetectionData> emailList = APIAdminImpl.retrieveSavedBotDataEmailList();
         return Response.ok().entity(emailList).build();
 
     }

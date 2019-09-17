@@ -3359,6 +3359,16 @@ public class SQLConstants {
                 /*+ " GROUP BY AUM.HTTP_METHOD,AUM.URL_PATTERN, AUM.URL_MAPPING_ID"*/
                 + " ORDER BY AUM.URL_MAPPING_ID";
 
+        public static final String GET_CONDITION_GROUPS_FOR_POLICIES_IN_PRODUCTS_SQL = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, AUM.URL_PATTERN, AUM.THROTTLING_TIER, " +
+                "AUM.MEDIATION_SCRIPT, AUM.URL_MAPPING_ID, POL.APPLICABLE_LEVEL, GRP.CONDITION_GROUP_ID " +
+                "FROM AM_API_URL_MAPPING AUM, AM_API_PRODUCT_MAPPING APM, AM_API_PRODUCT API, AM_API_THROTTLE_POLICY POL " +
+                "LEFT OUTER JOIN AM_CONDITION_GROUP GRP ON POL.POLICY_ID  = GRP.POLICY_ID " +
+                "WHERE APM.API_PRODUCT_ID = API.API_PRODUCT_ID " +
+                "AND API.API_PRODUCT_CONTEXT = ? AND API. API_PRODUCT_VERSION = ? AND POL.TENANT_ID = ? " +
+                "AND APM.URL_MAPPING_ID = AUM.URL_MAPPING_ID AND AUM.THROTTLING_TIER = POL.NAME " +
+                "ORDER BY AUM.URL_MAPPING_ID";
+
+
         public static final String ADD_BLOCK_CONDITIONS_SQL =
                 "INSERT INTO AM_BLOCK_CONDITIONS (TYPE, VALUE,ENABLED,DOMAIN,UUID) VALUES (?,?,?,?,?)";
         public static final String GET_BLOCK_CONDITIONS_SQL =
@@ -3475,10 +3485,8 @@ public class SQLConstants {
 
         public static final String CHECK_CLIENT_CREDENTIALS_EXISTS = "SELECT CONSUMER_KEY,CONSUMER_SECRET " +
                 "FROM AM_SYSTEM_APPS WHERE NAME = ?";
+    }
 
-    public static class HoneyPotAPIDataConstants{
-        public static final String GET_HONEYPOT_API_ALERTS = " SELECT " + " * " + "FROM " + " AM_BOT_DATA " +
-                "ORDER BY REQUEST_TIME DESC";
     public static class BotDataConstants {
 
         public static final String ADD_NOTIFICATION = "INSERT INTO AM_NOTIFICATION_SUBSCRIBER (UUID, CATEGORY," +
