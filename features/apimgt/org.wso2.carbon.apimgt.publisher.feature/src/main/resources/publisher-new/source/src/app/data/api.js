@@ -1692,6 +1692,83 @@ class API extends Resource {
     }
 
     /**
+     * Upload endpoint certificate.
+     *
+     * @param {string} apiId API UUID
+     * @param {any} certificateFile The certificate file to be uploaded.
+     * @param {string} tier The tier the certificate needs to be associated.
+     * @param {string} alias The certificate alias.
+     * */
+    static addClientCertificate(apiId, certificateFile, tier, alias) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(
+            client => {
+                return client.apis['Client Certificates'].post_apis__apiId__client_certificates({
+                    certificate: certificateFile,
+                    alias,
+                    apiId,
+                    tier,
+                });
+            },
+            this._requestMetaData({
+                'Content-Type': 'multipart/form-data',
+            }),
+        );
+    }
+
+     /**
+     * Get all certificates for a particular API.
+     *
+     * @param apiId api id of the api to which the certificate is added
+     */
+    static getAllClientCertificates(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(
+            client => {
+                return client.apis['Client Certificates'].get_apis__apiId__client_certificates(
+                    { apiId: apiId },
+                    this._requestMetaData(),
+                );
+            },
+            this._requestMetaData({
+                'Content-Type': 'multipart/form-data',
+            }),
+        );
+    }
+
+    /**
+     * Get the status of the client certificate which matches the given alias.
+     *
+     * @param {string} alias The alias of the certificate which the information required.
+     * @param apiId api id of the api of which the certificate is retrieved.
+     * */
+    static getClientCertificateStatus(alias, apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['Client Certificates'].get_apis__apiId__client_certificates__alias_({
+                alias,
+                apiId,
+            });
+        }, this._requestMetaData());
+    }
+
+    /**
+     * Delete the endpoint certificate which represented by the given alias.
+     *
+     * @param {string} alias The alias of the certificate.
+     * @param apiId api id of the api of which the certificate is deleted.
+     * */
+    static deleteClientCertificate(alias, apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['Client Certificates'].delete_apis__apiId__client_certificates__alias_({
+                alias,
+                apiId,
+            });
+        }, this._requestMetaData());
+    }
+
+    /**
      * Get the status of the endpoint certificate which matches the given alias.
      *
      * @param {string} alias The alias of the certificate which the information required.
