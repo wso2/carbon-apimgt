@@ -17,13 +17,58 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router'
+import { FormattedMessage } from 'react-intl';
 
-const redirectURL = '/services/configs';
-const RedirectToLogin = () => {
-    return (
-        <Redirect to={redirectURL} />
-    );
-};
+const page = '/store-new/services/configs';
+
+/**
+ *
+ * Just doing the redirection, If you want to trigger redirection to login page , Import this util method and use.
+ * Note: Don't use this method inside a render method. It will cause to cancel the initial request in Chrome
+ * and re-trigger same request
+ * Sample usage:
+ * import { doRedirectToLogin } from 'AppComponents/Applications/Login/RedirectToLogin'
+ *
+ * componentDidMount() {
+ *      doRedirectToLogin();
+ * }
+ * @export
+ */
+export function doRedirectToLogin() {
+    window.location = page;
+}
+
+/**
+ * This component is created to unify the login process from react UI.
+ * If we need to change the login process in the future, Changing here will reflect
+ * all the login redirection done in other places of the code
+ * @class RedirectToLogin
+ */
+class RedirectToLogin extends React.Component {
+    /**
+     *
+     * @inheritdoc
+     * @memberof RedirectToLogin
+     */
+    componentDidMount() {
+        doRedirectToLogin();
+    }
+
+    /**
+     *
+     * @inheritdoc
+     * @returns {React.Component}
+     * @memberof RedirectToLogin
+     */
+    render() {
+        return (
+            <FormattedMessage
+                id='Apis.Shared.RedirectToLogin.you.will.be.redirected.to'
+                defaultMessage='You will be redirected to {page}'
+                values={{ page }}
+            />
+        );
+    }
+}
 
 export default RedirectToLogin;
