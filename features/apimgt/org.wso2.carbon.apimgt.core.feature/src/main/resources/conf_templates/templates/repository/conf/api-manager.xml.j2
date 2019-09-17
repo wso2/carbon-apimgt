@@ -880,9 +880,11 @@
         </LogTracer>
     </OpenTracer>
 
-    <APISecurityAudit>
-        <APIToken>{{security_audit.api_token}}</APIToken>
-        <CollectionID>{{security_audit.collection_id}}</CollectionID>
-    </APISecurityAudit>
+    {% if security_audit is defined %}
+        <APISecurityAudit>
+            <APIToken>{{security_audit.api_token}}</APIToken>
+            <CollectionID>{{security_audit.collection_id}}</CollectionID>
+        </APISecurityAudit>
+    {% endif %}
 
 </APIManager>
