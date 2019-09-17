@@ -163,8 +163,8 @@ class Monetization extends Component {
                                                 disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                                 fullWidth
                                                 id={'attribute' + i}
-                                                label={monetizationAttribute.name}
-                                                name={monetizationAttribute.displayName}
+                                                label={monetizationAttribute.displayName}
+                                                name={monetizationAttribute.name}
                                                 type='text'
                                                 margin='normal'
                                                 required={monetizationAttribute.required}
