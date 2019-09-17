@@ -83,16 +83,11 @@ class ProductResources extends React.PureComponent {
         const { classes, parentClasses, api } = this.props;
         const apiResources = api.apis;
         return (
-            <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
-                <div className={parentClasses.titleWrapper}>
+            <React.Fragment>
+                <div className={parentClasses.titleWrapper} style={{ margin: '20px 0 0' }}>
                     <Typography variant='h5' component='h3' className={parentClasses.title}>
-                        API Resources
+                        Resources
                     </Typography>
-                    <Link to={'/api-products/' + api.id + '/resources/edit'}>
-                        <Button variant='contained' color='default'>
-                            Edit
-                        </Button>
-                    </Link>
                 </div>
                 <div className={classes.root}>
                     <div className={classes.contentWrapper}>
@@ -121,7 +116,7 @@ class ProductResources extends React.PureComponent {
                         })}
                     </div>
                 </div>
-            </Paper>
+            </React.Fragment>
         );
     }
 }
