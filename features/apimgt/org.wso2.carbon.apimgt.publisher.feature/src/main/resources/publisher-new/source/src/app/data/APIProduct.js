@@ -83,7 +83,7 @@ class APIProduct extends Resource {
             Object.keys(this).forEach(apiAttribute => {
                 if (apiAttribute in properties) {
                     if (apiAttribute != 'apiType') {
-                    data[apiAttribute] = this[apiAttribute];
+                        data[apiAttribute] = this[apiAttribute];
                     }
                 }
             });
@@ -96,6 +96,25 @@ class APIProduct extends Resource {
         return promisedAPIResponse.then(response => {
             return new API(response.body);
         });
+    }
+    /**
+     * Create an API Product with the given parameters in template and call the callback method given optional.
+     * @param {Object} apiData - API data which need to fill the placeholder values in the @get_template
+     * @returns {Promise} Promise after creating and optionally calling the callback method.
+     */
+    create(apiData) {
+        let payload;
+        let promise_create;
+
+        payload = {
+            body: apiData,
+            'Content-Type': 'application/json',
+        };
+        promise_create = this.client.then(client => {
+            return client.apis['API Products'].post_api_products(payload, this._requestMetaData());
+        });
+
+        return promise_create;
     }
     /**
      *
@@ -123,7 +142,6 @@ class APIProduct extends Resource {
         return copy;
     }
 
-
     /**
      * Get details of a given APIProduct
      * @param id {string} UUID of the api-product.
@@ -131,14 +149,19 @@ class APIProduct extends Resource {
      */
     static get(id) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-        const promisedAPIProduct = apiClient.then((client) => {
-            return client.apis['API Products'].get_api_products__apiProductId_({
-                apiProductId: id,
-            }, this._requestMetaData());
-        }).catch((error) => {
-            console.error(error);
-        });
-        return promisedAPIProduct.then((response) => {
+        const promisedAPIProduct = apiClient
+            .then(client => {
+                return client.apis['API Products'].get_api_products__apiProductId_(
+                    {
+                        apiProductId: id,
+                    },
+                    this._requestMetaData(),
+                );
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        return promisedAPIProduct.then(response => {
             return new APIProduct(response.body);
         });
     }
@@ -158,12 +181,14 @@ class APIProduct extends Resource {
             params.query = query;
         }
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-        const promisedProducts = apiClient.then((client) => {
-            return client.apis['API Products'].get_api_products(params, Resource._requestMetaData());
-        }).catch((error) => {
-            console.error(error);
-        });
-        return promisedProducts.then((response) => {
+        const promisedProducts = apiClient
+            .then(client => {
+                return client.apis['API Products'].get_api_products(params, Resource._requestMetaData());
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        return promisedProducts.then(response => {
             response.obj.apiType = API.CONSTS.APIProduct;
             return response;
         });
@@ -175,10 +200,10 @@ class APIProduct extends Resource {
      */
     update(updatedProperties) {
         const updatedAPI = { ...this.toJSON(), ...this.toJSON(updatedProperties) };
-        const promisedUpdate = this.client.then((client) => {
+        const promisedUpdate = this.client.then(client => {
             const payload = {
                 apiProductId: updatedAPI.id,
-                body: updatedAPI
+                body: updatedAPI,
             };
             return client.apis['API Products'].put_api_products__apiProductId_(payload);
         });
@@ -191,16 +216,18 @@ class APIProduct extends Resource {
      * @param id {string} UUID of the api product
      */
     getAPIProductThumbnail(id) {
-        const promisedAPIThumbnail = this.client.then((client) => {
-            return client.apis['API Products'].get_api_products__apiProductId__thumbnail(
-                {
-                    apiProductId: id,
-                },
-                this._requestMetaData(),
-            );
-        }).catch((error) => {
-            console.error(error);
-        });
+        const promisedAPIThumbnail = this.client
+            .then(client => {
+                return client.apis['API Products'].get_api_products__apiProductId__thumbnail(
+                    {
+                        apiProductId: id,
+                    },
+                    this._requestMetaData(),
+                );
+            })
+            .catch(error => {
+                console.error(error);
+            });
 
         return promisedAPIThumbnail;
     }
@@ -212,21 +239,23 @@ class APIProduct extends Resource {
      * @param {File} imageFile thumbnail image to be uploaded
      */
     addAPIProductThumbnail(id, imageFile) {
-        const promisedAddAPIThumbnail = this.client.then((client) => {
-            const payload = {
-                apiProductId: id,
-                file: imageFile,
-                'Content-Type': imageFile.type,
-            };
-            return client.apis['API Products'].put_api_products__apiProductId__thumbnail(
-                payload,
-                this._requestMetaData({
-                    'Content-Type': 'multipart/form-data',
-                }),
-            );
-        }).catch((error) => {
-            console.error(error);
-        });
+        const promisedAddAPIThumbnail = this.client
+            .then(client => {
+                const payload = {
+                    apiProductId: id,
+                    file: imageFile,
+                    'Content-Type': imageFile.type,
+                };
+                return client.apis['API Products'].put_api_products__apiProductId__thumbnail(
+                    payload,
+                    this._requestMetaData({
+                        'Content-Type': 'multipart/form-data',
+                    }),
+                );
+            })
+            .catch(error => {
+                console.error(error);
+            });
 
         return promisedAddAPIThumbnail;
     }
@@ -239,13 +268,18 @@ class APIProduct extends Resource {
      */
     static delete(id) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
-        return apiClient.then((client) => {
-            return client.apis['API Products'].delete_api_products__apiProductId_({
-                apiProductId: id,
-            }, this._requestMetaData());
-        }).catch((error) => {
-            console.error(error);
-        });
+        return apiClient
+            .then(client => {
+                return client.apis['API Products'].delete_api_products__apiProductId_(
+                    {
+                        apiProductId: id,
+                    },
+                    this._requestMetaData(),
+                );
+            })
+            .catch(error => {
+                console.error(error);
+            });
     }
 
     /**
@@ -254,19 +288,21 @@ class APIProduct extends Resource {
      * @param {*} body
      */
     addDocument(id, body) {
-        const promisedAddDocument = this.client.then((client) => {
-            const payload = {
-                apiProductId: id,
-                body,
-                'Content-Type': 'application/json',
-            };
-            return client.apis['API Product Documents'].post_api_products__apiProductId__documents(
-                payload,
-                this._requestMetaData(),
-            );
-        }).catch((error) => {
-            console.error(error);
-        });
+        const promisedAddDocument = this.client
+            .then(client => {
+                const payload = {
+                    apiProductId: id,
+                    body,
+                    'Content-Type': 'application/json',
+                };
+                return client.apis['API Product Documents'].post_api_products__apiProductId__documents(
+                    payload,
+                    this._requestMetaData(),
+                );
+            })
+            .catch(error => {
+                console.error(error);
+            });
         return promisedAddDocument;
     }
 
@@ -276,16 +312,18 @@ class APIProduct extends Resource {
      * @param {String} id API Product UUID
      */
     getDocuments(id) {
-        const promisedDocuments = this.client.then((client) => {
-            return client.apis['API Product Documents'].get_api_products__apiProductId__documents(
-                {
-                    apiProductId: id,
-                },
-                this._requestMetaData(),
-            );
-        }).catch((error) => {
-            console.error(error);
-        });
+        const promisedDocuments = this.client
+            .then(client => {
+                return client.apis['API Product Documents'].get_api_products__apiProductId__documents(
+                    {
+                        apiProductId: id,
+                    },
+                    this._requestMetaData(),
+                );
+            })
+            .catch(error => {
+                console.error(error);
+            });
         return promisedDocuments;
     }
 
@@ -296,23 +334,21 @@ class APIProduct extends Resource {
      * @param {*} body
      */
     updateDocument(productId, docId, body) {
-        const promisedUpdateDocument = this.client.then((client) => {
+        const promisedUpdateDocument = this.client.then(client => {
             const payload = {
                 apiProductId: productId,
                 body,
                 documentId: docId,
                 'Content-Type': 'application/json',
             };
-            return client.apis['API Product Documents'].put_api_products__apiProductId__documents__documentId_(
-                payload,
-                this._requestMetaData(),
-            ).catch((error) => {
-                console.error(error);
-            });
+            return client.apis['API Product Documents']
+                .put_api_products__apiProductId__documents__documentId_(payload, this._requestMetaData())
+                .catch(error => {
+                    console.error(error);
+                });
         });
         return promisedUpdateDocument;
     }
-
 
     /**
      * Get specified document attached to specified product
@@ -320,17 +356,19 @@ class APIProduct extends Resource {
      * @param {*} docId
      */
     getDocument(productId, docId) {
-        const promisedDocument = this.client.then((client) => {
-            return client.apis['API Product Documents'].get_api_products__apiProductId__documents__documentId_(
-                {
-                    apiProductId: productId,
-                    documentId: docId,
-                },
-                this._requestMetaData(),
-            );
-        }).catch((error) => {
-            console.error(error);
-        });
+        const promisedDocument = this.client
+            .then(client => {
+                return client.apis['API Product Documents'].get_api_products__apiProductId__documents__documentId_(
+                    {
+                        apiProductId: productId,
+                        documentId: docId,
+                    },
+                    this._requestMetaData(),
+                );
+            })
+            .catch(error => {
+                console.error(error);
+            });
         return promisedDocument;
     }
 
@@ -342,23 +380,27 @@ class APIProduct extends Resource {
      * @param {*} inlineContent Content to be added to document
      */
     addInlineContentToDocument(apiProductId, documentId, sourceType, inlineContent) {
-        const promise = this.client.then((client) => {
-            const payload = {
-                apiProductId,
-                documentId,
-                sourceType,
-                inlineContent,
-                'Content-Type': 'application/json',
-            };
-            return client.apis['API Product Documents'].post_api_products__apiProductId__documents__documentId__content(
-                payload,
-                this._requestMetaData({
-                    'Content-Type': 'multipart/form-data',
-                }),
-            );
-        }).catch((error) => {
-            console.error(error);
-        });
+        const promise = this.client
+            .then(client => {
+                const payload = {
+                    apiProductId,
+                    documentId,
+                    sourceType,
+                    inlineContent,
+                    'Content-Type': 'application/json',
+                };
+                return client.apis[
+                    'API Product Documents'
+                ].post_api_products__apiProductId__documents__documentId__content(
+                    payload,
+                    this._requestMetaData({
+                        'Content-Type': 'multipart/form-data',
+                    }),
+                );
+            })
+            .catch(error => {
+                console.error(error);
+            });
         return promise;
     }
 
@@ -368,16 +410,19 @@ class APIProduct extends Resource {
      * @param {*} docId
      */
     getInlineContentOfDocument(apiProductId, docId) {
-        const promisedDocContent = this.client.then((client) => {
-            const payload = {
-                apiProductId,
-                documentId: docId,
-            };
-            return client.apis['API Product Documents']
-                .get_api_products__apiProductId__documents__documentId__content(payload);
-        }).catch((error) => {
-            console.error(error);
-        });
+        const promisedDocContent = this.client
+            .then(client => {
+                const payload = {
+                    apiProductId,
+                    documentId: docId,
+                };
+                return client.apis[
+                    'API Product Documents'
+                ].get_api_products__apiProductId__documents__documentId__content(payload);
+            })
+            .catch(error => {
+                console.error(error);
+            });
         return promisedDocContent;
     }
 
@@ -387,17 +432,19 @@ class APIProduct extends Resource {
      * @param {*} docId
      */
     deleteDocument(productId, docId) {
-        const promiseDeleteDocument = this.client.then((client) => {
-            return client.apis['API Product Documents'].delete_api_products__apiProductId__documents__documentId_(
-                {
-                    apiProductId: productId,
-                    documentId: docId,
-                },
-                this._requestMetaData(),
-            );
-        }).catch((error) => {
-            console.error(error);
-        });
+        const promiseDeleteDocument = this.client
+            .then(client => {
+                return client.apis['API Product Documents'].delete_api_products__apiProductId__documents__documentId_(
+                    {
+                        apiProductId: productId,
+                        documentId: docId,
+                    },
+                    this._requestMetaData(),
+                );
+            })
+            .catch(error => {
+                console.error(error);
+            });
         return promiseDeleteDocument;
     }
 
@@ -408,7 +455,7 @@ class APIProduct extends Resource {
      * @param {*} fileToDocument
      */
     addFileToDocument(productId, docId, fileToDocument) {
-        const promiseAddFileToDocument = this.client.then((client) => {
+        const promiseAddFileToDocument = this.client.then(client => {
             const payload = {
                 apiProductId: productId,
                 documentId: docId,
@@ -428,23 +475,25 @@ class APIProduct extends Resource {
 
     /**
      * Update an api swagger via PUT HTTP method
-     * @param {*} swagger 
+     * @param {*} swagger
      */
     updateSwagger(swagger) {
-        const promisedUpdate = this.client.then((client) => {
+        const promisedUpdate = this.client.then(client => {
             const payload = {
                 apiProductId: this.id,
                 apiDefinition: JSON.stringify(swagger),
                 'Content-Type': 'multipart/form-data',
             };
-            return client.apis['API Products'].put_api_products__apiProductId__swagger(
-                payload,
-                this._requestMetaData({
-                    'Content-Type': 'multipart/form-data'
-                }),
-            ).catch((error) => {
-                console.error(error);
-            });
+            return client.apis['API Products']
+                .put_api_products__apiProductId__swagger(
+                    payload,
+                    this._requestMetaData({
+                        'Content-Type': 'multipart/form-data',
+                    }),
+                )
+                .catch(error => {
+                    console.error(error);
+                });
         });
         return promisedUpdate.then(response => {
             return this;
@@ -456,13 +505,18 @@ class APIProduct extends Resource {
      * @param id {String} UUID of the API Product in which the swagger is needed
      */
     getSwagger(id) {
-        const promiseGet = this.client.then((client) => {
-            return client.apis['API Products'].get_api_products__apiProductId__swagger({
-                apiProductId: id
-            }, this._requestMetaData());
-        }).catch((error) => {
-            console.error(error);
-        });
+        const promiseGet = this.client
+            .then(client => {
+                return client.apis['API Products'].get_api_products__apiProductId__swagger(
+                    {
+                        apiProductId: id,
+                    },
+                    this._requestMetaData(),
+                );
+            })
+            .catch(error => {
+                console.error(error);
+            });
         return promiseGet;
     }
 }

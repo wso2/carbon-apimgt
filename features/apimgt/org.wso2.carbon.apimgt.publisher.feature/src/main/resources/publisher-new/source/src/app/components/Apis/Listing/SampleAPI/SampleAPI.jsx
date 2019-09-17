@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -45,10 +45,11 @@ const styles = theme => ({
         paddingLeft: theme.spacing.unit * 2.5,
     },
     head: {
-        paddingBottom: theme.spacing.unit,
+        paddingBottom: theme.spacing.unit * 2,
+        fontWeight: 200,
     },
     content: {
-        paddingBottom: theme.spacing.unit,
+        paddingBottom: theme.spacing.unit * 2,
     },
     buttonLeft: {
         marginRight: theme.spacing.unit,
@@ -251,8 +252,8 @@ class SampleAPI extends Component {
                         >
                             <GetApp />
                             <FormattedMessage id='deploy.sample.api' defaultMessage='Deploy Sample API' />
+                            {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
                         </Button>
-                        {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
                     </div>
                 </div>
             </InlineMessage>
