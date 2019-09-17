@@ -156,8 +156,8 @@ export default function ExternalStores() {
                             <TableRow>
                                 <StyledTableCell />
                                 <StyledTableCell>Name</StyledTableCell>
-                                <StyledTableCell align='right'>Type</StyledTableCell>
-                                <StyledTableCell align='right'>Endpoint</StyledTableCell>
+                                <StyledTableCell>Type</StyledTableCell>
+                                <StyledTableCell>Endpoint</StyledTableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -187,8 +187,8 @@ export default function ExternalStores() {
                                     <StyledTableCell component='th' scope='row'>
                                         {row.displayName}
                                     </StyledTableCell>
-                                    <StyledTableCell align='right'>{row.type}</StyledTableCell>
-                                    <StyledTableCell align='right'>
+                                    <StyledTableCell>{row.type}</StyledTableCell>
+                                    <StyledTableCell>
                                         <a
                                             target='_blank'
                                             rel='noopener noreferrer'
