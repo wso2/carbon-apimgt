@@ -521,7 +521,7 @@ class APIDefinition extends React.Component {
                             </Button>
                         </a>
 
-                        {(securityAuditProperties.apiToken && securityAuditProperties.collectionId) ?
+                        {(securityAuditProperties.apiToken && securityAuditProperties.collectionId) &&
                             (
                                 <Button size='small' className={classes.button} onClick={this.onAuditApiClick}>
                                     <LockRounded className={classes.buttonIcon} />
@@ -530,7 +530,7 @@ class APIDefinition extends React.Component {
                                         defaultMessage='Audit API'
                                     />
                                 </Button>
-                            ) : (null)
+                            )
                         }
 
                         {this.isNotCreator

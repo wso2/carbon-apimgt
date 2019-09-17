@@ -67,6 +67,45 @@ const styles = theme => ({
     helpIcon: {
         fontSize: 16,
     },
+    tableRow: {
+        'background-color': '#d3d3d3',
+    },
+    referenceTypography: {
+        width: '70%',
+    },
+    subheadingTypography: {
+        paddingTop: 30,
+        paddingLeft: 20,
+    },
+    paperDiv: {
+        marginTop: 30,
+    },
+    sectionHeadingTypography: {
+        marginBottom: 18,
+    },
+    auditSummaryDiv: {
+        display: 'flex',
+        marginTop: 25,
+    },
+    auditSummarySubDiv: {
+        width: 250,
+        marginLeft: 40,
+        marginRight: 40,
+    },
+    circularProgressBarScore: {
+        fontSize: 70,
+        color: '#3d98c7',
+        marginTop: 18,
+    },
+    circularProgressBarScoreFooter: {
+        fontSize: 18,
+        marginTop: 10,
+    },
+    auditSummaryDivRight: {
+        flexGrow: 1,
+        marginLeft: 200,
+        marginTop: 10,
+    },
 });
 
 
@@ -88,11 +127,7 @@ class APISecurityAudit extends Component {
             loading: false,
             apiDefinition: null,
         };
-        this.keyCount = 0;
-        this.dataArray = [];
-        this.securityArray = [];
-        this.validationArray = [];
-        this.criticalityMap = {
+        this.criticalityObject = {
             1: 'INFO',
             2: 'LOW',
             3: 'MEDIUM',
@@ -108,15 +143,18 @@ class APISecurityAudit extends Component {
     componentDidMount() {
         this.setState({ loading: true });
         const { apiId, history } = this.props;
-        const newApi = new API();
-        const promisedDefinition = newApi.getSwagger(apiId);
+        const currentApi = new API();
+        const promisedDefinition = currentApi.getSwagger(apiId);
         promisedDefinition.then((response) => {
             this.setState({
                 apiDefinition: JSON.stringify(response.obj, null, 1),
             });
-        });
+        })
+            .catch((error) => {
+                console.log(error);
+            });
 
-        newApi.getSecurityAuditReport(apiId)
+        currentApi.getSecurityAuditReport(apiId)
             .then((response) => {
                 this.setState({
                     report: response.body.report,
@@ -126,21 +164,12 @@ class APISecurityAudit extends Component {
                 });
             })
             .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
+                console.log(error);
                 this.setState({ loading: false });
                 Alert.error('Something went wrong while retrieving the API Security Report');
                 const redirectUrl = '/apis/' + apiId + '/api definition';
                 history.push(redirectUrl);
             });
-    }
-
-    /**
-     * @inheritdoc
-     */
-    getKey() {
-        return this.keyCount++;
     }
 
     getMuiTheme = () => createMuiTheme({
@@ -167,19 +196,19 @@ class APISecurityAudit extends Component {
      * Get Row data for MUI Table
      * @param {*} issues Issues array
      * @param {String} category The category of the issue
-     * @return {*} dataArray array
+     * @return {*} dataObject array
      */
     getRowData(issues, category) {
-        const dataArray = [];
+        const dataObject = [];
         issues.forEach((issue) => {
             const rowData = [];
             rowData.push(
-                this.criticalityMap[issue.criticality],
-                issue.message, Math.round(issue.score), issue.pointer, category,
+                this.criticalityObject[issue.criticality],
+                issue.message, (Math.round(issue.score * 100) / 100), issue.pointer, category,
             );
-            dataArray.push(rowData);
+            dataObject.push(rowData);
         });
-        return dataArray;
+        return dataObject;
     }
 
     /**
@@ -326,7 +355,7 @@ class APISecurityAudit extends Component {
                 }
 
                 return (
-                    <TableRow style={{ 'background-color': '#d3d3d3' }}>
+                    <TableRow className={classes.tableRow}>
                         <TableCell colSpan='2'>
                             <MonacoEditor
                                 width='85%'
@@ -338,7 +367,7 @@ class APISecurityAudit extends Component {
                             />
                         </TableCell>
                         <TableCell>
-                            <Typography variant='body1' style={{ width: '70%' }}>
+                            <Typography variant='body1' className={classes.referenceTypography}>
                                 Visit this
                                 <strong>
                                     <a
@@ -363,17 +392,17 @@ class APISecurityAudit extends Component {
                         width='100%'
                         height='calc(100vh - 51px)'
                     >
-                        <Typography variant='h4' style={{ paddingTop: 30, paddingLeft: 20 }}>
+                        <Typography variant='h4' className={classes.subheadingTypography}>
                             API Security Audit Report
                         </Typography>
-                        <div style={{ marginTop: 30 }}>
+                        <div className={classes.paperDiv}>
                             <Paper elevation={1} className={classes.rootPaper}>
                                 <div>
-                                    <Typography variant='h5' styles={{ marginLeft: '40px' }}>
+                                    <Typography variant='h5' className={classes.sectionHeadingTypography}>
                                         Audit Score and Summary
                                     </Typography>
-                                    <div style={{ display: 'flex', marginTop: 25 }}>
-                                        <div style={{ width: 250, marginLeft: 40, marginRight: 40 }}>
+                                    <div className={classes.auditSummaryDiv}>
+                                        <div className={classes.auditSummarySubDiv}>
                                             <VisibilitySensor>
                                                 {({ isVisible }) => {
                                                     const gradeProgressScore = isVisible ? overallGrade : 0;
@@ -383,17 +412,13 @@ class APISecurityAudit extends Component {
                                                         >
                                                             <Typography
                                                                 variant='body1'
-                                                                style={{
-                                                                    fontSize: 70,
-                                                                    color: '#3d98c7',
-                                                                    marginTop: 18,
-                                                                }}
+                                                                className={classes.circularProgressBarScore}
                                                             >
                                                                 <strong>{Math.round(overallGrade)}</strong>
                                                             </Typography>
                                                             <Typography
                                                                 variant='body1'
-                                                                style={{ fontSize: 18, marginTop: 10 }}
+                                                                className={classes.circularProgressBarScoreFooter}
                                                             >out of 100
                                                             </Typography>
                                                         </CircularProgressbarWithChildren>
@@ -401,7 +426,7 @@ class APISecurityAudit extends Component {
                                                 }}
                                             </VisibilitySensor>
                                         </div>
-                                        <div style={{ flexGrow: 1, marginLeft: 200, marginTop: 10 }}>
+                                        <div className={classes.auditSummaryDivRight}>
                                             <Typography variant='body1'>
                                                 <strong>Overall Grade:</strong> {Math.round(overallGrade)} / 100
                                             </Typography>
@@ -439,13 +464,15 @@ class APISecurityAudit extends Component {
                                             <hr />
                                             <Typography variant='body1'>
                                                 <strong>OpenAPI Format
-                                                 Requirements - ({Math.round(reportObject.validation.grade)} / 25)
+                                                 Requirements -
+                                                  ({(Math.round(reportObject.validation.grade * 100) / 100)} / 25)
                                                 </strong>
                                             </Typography>
                                             <VisibilitySensor>
                                                 {({ isVisible }) => {
                                                     const gradeProgressScore = isVisible ?
-                                                        (((Math.round(reportObject.validation.grade)) / 25) * 100) : 0;
+                                                        (((Math.round(reportObject.validation.grade * 100) / 100) / 25
+                                                        ) * 100) : 0;
                                                     return (
                                                         <Line
                                                             percent={gradeProgressScore}
@@ -457,13 +484,15 @@ class APISecurityAudit extends Component {
                                             </VisibilitySensor>
                                             <Typography variant='body1'>
                                                 <strong>
-                                                    Security - ({Math.round(reportObject.security.grade)} / 25)
+                                                    Security - ({(Math.round(reportObject.security.grade * 100) / 100
+                                                    )} / 25)
                                                 </strong>
                                             </Typography>
                                             <VisibilitySensor>
                                                 {({ isVisible }) => {
                                                     const gradeProgressScore = isVisible ?
-                                                        (((Math.round(reportObject.security.grade)) / 25) * 100) : 0;
+                                                        (((Math.round(reportObject.security.grade * 100) / 100) / 25
+                                                        ) * 100) : 0;
                                                     return (
                                                         <Line
                                                             percent={gradeProgressScore}
@@ -475,13 +504,15 @@ class APISecurityAudit extends Component {
                                             </VisibilitySensor>
                                             <Typography variant='body1'>
                                                 <strong>
-                                                    Data Validation - ({Math.round(reportObject.data.grade)} / 50)
+                                                    Data Validation - ({(Math.round(reportObject.data.grade * 100) / 100
+                                                    )} / 50)
                                                 </strong>
                                             </Typography>
                                             <VisibilitySensor>
                                                 {({ isVisible }) => {
                                                     const gradeProgressScore = isVisible ?
-                                                        (((Math.round(reportObject.data.grade)) / 25) * 100) : 0;
+                                                        (((Math.round(reportObject.data.grade * 100) / 100) / 25
+                                                        ) * 100) : 0;
                                                     return (
                                                         <Line
                                                             percent={gradeProgressScore}
@@ -498,14 +529,15 @@ class APISecurityAudit extends Component {
                         </div>
                         <Paper elevation={1} className={classes.rootPaper}>
                             <div>
-                                <Typography variant='h5' style={{ marginBottom: 18 }}>
+                                <Typography variant='h5' className={classes.sectionHeadingTypography}>
                                         OpenAPI Format Requirements
                                 </Typography>
                                 <Typography variant='body1'>
                                     <strong>Number of Issues:</strong> {reportObject.validation.issueCounter}
                                 </Typography>
                                 <Typography variant='body1'>
-                                    <strong>Score:</strong> {Math.round(reportObject.validation.grade)} / 25
+                                    <strong>Score:</strong> {(Math.round(reportObject.validation.grade * 100) / 100)
+                                    } / 25
                                 </Typography>
                                 <React.Fragment>
                                     <Typography variant='body1'>
@@ -556,12 +588,14 @@ class APISecurityAudit extends Component {
 
                         <Paper elevation={1} className={classes.rootPaper}>
                             <div>
-                                <Typography variant='h5' style={{ marginBottom: 18 }}>Security</Typography>
+                                <Typography variant='h5' className={classes.sectionHeadingTypography}>
+                                    Security
+                                </Typography>
                                 <Typography variant='body1'>
                                     <strong>Number of Issues:</strong> {reportObject.security.issueCounter}
                                 </Typography>
                                 <Typography variant='body1'>
-                                    <strong>Score:</strong> {Math.round(reportObject.security.grade)} / 25
+                                    <strong>Score:</strong> {(Math.round(reportObject.security.grade * 100) / 100)} / 25
                                 </Typography>
                                 <React.Fragment>
                                     <Typography variant='body1'>
@@ -608,12 +642,14 @@ class APISecurityAudit extends Component {
                         </Paper>
                         <Paper elevation={1} className={classes.rootPaper}>
                             <div>
-                                <Typography variant='h5' style={{ marginBottom: 18 }}>Data Validation</Typography>
+                                <Typography variant='h5' className={classes.sectionHeadingTypography}>
+                                    Data Validation
+                                </Typography>
                                 <Typography variant='body1'>
                                     <strong>Number of Issues:</strong> {reportObject.data.issueCounter}
                                 </Typography>
                                 <Typography variant='body1'>
-                                    <strong>Score:</strong> {Math.round(reportObject.data.grade)} / 50
+                                    <strong>Score:</strong> {(Math.round(reportObject.data.grade * 100) / 100)} / 50
                                 </Typography>
                                 <React.Fragment>
                                     <Typography variant='body1'>
@@ -672,7 +708,6 @@ APISecurityAudit.propTypes = {
     history: PropTypes.shape({
         push: PropTypes.func.isRequired,
     }).isRequired,
-    parentClasses: PropTypes.shape({}).isRequired,
 };
 
 export default withRouter(withStyles(styles)(APISecurityAudit));
