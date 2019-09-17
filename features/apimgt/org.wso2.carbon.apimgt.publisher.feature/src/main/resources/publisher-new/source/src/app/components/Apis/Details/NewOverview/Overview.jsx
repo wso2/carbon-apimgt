@@ -20,27 +20,25 @@ import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import green from '@material-ui/core/colors/green';
 import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import { FormattedMessage } from 'react-intl';
+import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import API from 'AppData/api';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import Resources from './Resources';
 import Operations from './Operations';
 import ProductResources from './ProductResources';
-import Policies from './Policies';
 import Configuration from './Configuration';
-import Endpoints from './Endpoints';
-import BusinessInformation from './BusinessInformation';
-import Scopes from './Scopes';
-import Documents from './Documents';
-import AdditionalProperties from './AdditionalProperties';
-import MediationPolicies from './MediationPolicies';
-import Lifecycle from './Lifecycle';
 
 const styles = theme => ({
     root: {
         ...theme.mixins.gutters(),
-        paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
+    },
+    contentWrapper: {
+        marginTop: theme.spacing(2),
     },
     buttonSuccess: {
         backgroundColor: green[500],
@@ -56,7 +54,7 @@ const styles = theme => ({
         marginBottom: 20,
     },
     chip: {
-        margin: theme.spacing.unit / 2,
+        margin: theme.spacing(0.5),
         padding: 0,
         height: 'auto',
         '& span': {
@@ -67,16 +65,16 @@ const styles = theme => ({
         display: 'flex',
     },
     imageWrapper: {
-        marginRight: theme.spacing.unit * 3,
+        marginRight: theme.spacing(3),
     },
     subtitle: {
-        marginTop: theme.spacing.unit,
+        marginTop: theme.spacing(0),
     },
     specialGap: {
-        marginTop: theme.spacing.unit * 3,
+        marginTop: theme.spacing(3),
     },
     resourceTitle: {
-        marginBottom: theme.spacing.unit * 3,
+        marginBottom: theme.spacing(3),
     },
     ListRoot: {
         padding: 0,
@@ -112,10 +110,13 @@ const styles = theme => ({
     lifecycleIcon: {
         fontSize: 36,
         color: 'green',
-        marginRight: theme.spacing.unit,
+        marginRight: theme.spacing(1),
     },
     leftSideWrapper: {
-        paddingRight: theme.spacing.unit * 2,
+        paddingRight: theme.spacing(2),
+    },
+    notConfigured: {
+        color: 'rgba(0, 0, 0, 0.40)',
     },
 });
 
@@ -128,11 +129,6 @@ const styles = theme => ({
 function Overview(props) {
     const { classes, api: newApi } = props;
     const { api } = useContext(ApiContext);
-    let loadScopes;
-    let loadEndpoints;
-    if (newApi.type !== 'WS') {
-        loadScopes = <Scopes parentClasses={classes} />;
-    }
     function getResourcesClassForAPIs(apiType) {
         switch (apiType) {
             case 'GRAPHQL':
@@ -144,30 +140,32 @@ function Overview(props) {
         }
     }
 
-    if (newApi.apiType === API.CONSTS.API) {
-        loadEndpoints = <Endpoints parentClasses={classes} api={newApi} />;
-    }
-
     if (newApi.apiType === API.CONSTS.APIProduct) {
         api.type = API.CONSTS.APIProduct;
     }
     return (
-        <Grid container spacing={24}>
-            <Grid item xs={12} md={6} lg={6} className={classes.leftSideWrapper}>
-                <Configuration parentClasses={classes} />
-                {getResourcesClassForAPIs(api.type)}
-                <AdditionalProperties parentClasses={classes} />
-                <MediationPolicies parentClasses={classes} />
-            </Grid>
-            <Grid item xs={12} md={6} lg={6}>
-                <Lifecycle parentClasses={classes} />
-                {loadEndpoints}
-                <BusinessInformation parentClasses={classes} />
-                {loadScopes}
-                <Documents parentClasses={classes} api={api} />
-                <Policies parentClasses={classes} />
-            </Grid>
-        </Grid>
+        <React.Fragment>
+            <div className={classes.titleWrapper}>
+                <Typography variant='h4' align='left' className={classes.mainTitle}>
+                    <FormattedMessage
+                        id='Apis.Details.Overview.Overview.topic.header'
+                        defaultMessage='Overview'
+                    />
+                </Typography>
+            </div>
+            <div className={classes.contentWrapper}>
+                <Paper className={classes.root} elevation={1}>
+                    <Grid container spacing={24}>
+                        <Grid item xs={12} md={12} lg={12} className={classes.leftSideWrapper}>
+                            <Configuration parentClasses={classes} />
+                        </Grid>
+                        <Grid item xs={12} md={12} lg={12}>
+                            {getResourcesClassForAPIs(api.type)}
+                        </Grid>
+                    </Grid>
+                </Paper>
+            </div>
+        </React.Fragment>
     );
 }
 
