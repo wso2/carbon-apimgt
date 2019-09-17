@@ -74,7 +74,6 @@ public class ImportApi  {
     @ApiParam(value = "Update if application exists\n") @QueryParam("update")  Boolean update)
     {
     return delegate.importApplicationsPost(fileInputStream,fileDetail,preserveOwner,skipSubscriptions,appOwner,skipApplicationKeys,update);
-
     }
 }
 
