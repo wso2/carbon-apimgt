@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
@@ -1884,7 +1885,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public int getUserRating(APIIdentifier apiId, String user) throws APIManagementException {
+    public int getUserRating(Identifier apiId, String user) throws APIManagementException {
         return apiMgtDAO.getUserRating(apiId, user);
     }
 
@@ -1900,12 +1901,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public JSONArray getAPIRatings(APIIdentifier apiId) throws APIManagementException {
+    public JSONArray getAPIRatings(Identifier apiId) throws APIManagementException {
         return apiMgtDAO.getAPIRatings(apiId);
     }
 
     @Override
-    public float getAverageAPIRating(APIIdentifier apiId) throws APIManagementException {
+    public float getAverageAPIRating(Identifier apiId) throws APIManagementException {
         return apiMgtDAO.getAverageRating(apiId);
     }
 
@@ -2754,31 +2755,32 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public SubscriptionResponse addSubscription(Identifier identifier, String userId, int applicationId)
+    public SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, int applicationId)
             throws APIManagementException {
 
         API api = null;
         APIProduct product = null;
-        APIIdentifier apiIdentifier = null;
-        APIProductIdentifier apiProdIdentifier = null;
+        Identifier identifier = null;
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
         String tenantDomain = MultitenantUtils.getTenantDomain(tenantAwareUsername);
-        String state = "";
-        if (identifier instanceof APIIdentifier) {
-            apiIdentifier = (APIIdentifier) identifier;
-            api = getAPI(apiIdentifier);
-            state = api.getStatus();
-        }
-        if (identifier instanceof APIProductIdentifier) {
-            apiProdIdentifier = (APIProductIdentifier) identifier;
-            product = getAPIProductbyUUID(apiProdIdentifier.getUUID(), tenantDomain);
+        final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
+        String state;
+
+        if (isApiProduct) {
+            product = apiTypeWrapper.getApiProduct();
             state = product.getState();
+            identifier = product.getId();
+        } else {
+            api = apiTypeWrapper.getApi();
+            state = api.getStatus();
+            identifier = api.getId();
         }
+
         WorkflowResponse workflowResponse = null;
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state)) {
-            subscriptionId = apiMgtDAO.addSubscription(identifier, "", applicationId,
-                    APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
+            subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, applicationId,
+                    APIConstants.SubscriptionStatus.ON_HOLD);
 
             boolean isTenantFlowStarted = false;
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -2799,31 +2801,30 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setWorkflowReference(String.valueOf(subscriptionId));
                 workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
                 workflowDTO.setCallbackUrl(addSubscriptionWFExecutor.getCallbackURL());
-                if (apiIdentifier != null) {
-                    workflowDTO.setApiName(apiIdentifier.getApiName());
+                if (!isApiProduct) {
+                    workflowDTO.setApiName(identifier.getName());
                     workflowDTO.setApiContext(api.getContext());
-                    workflowDTO.setApiVersion(apiIdentifier.getVersion());
-                } else if (apiProdIdentifier != null) {
-                    workflowDTO.setProductIdentifier(apiProdIdentifier);
+                    workflowDTO.setApiVersion(api.getId().getVersion());
+                    workflowDTO.setApiProvider(identifier.getProviderName());
+                    workflowDTO.setTierName(identifier.getTier());
+                } else {
+                    workflowDTO.setProductIdentifier(product.getId());
+                    workflowDTO.setApiProvider(identifier.getProviderName());
+                    workflowDTO.setTierName(identifier.getTier());
                 }
-                workflowDTO.setApiProvider(identifier.getProviderName());
-                workflowDTO.setTierName(identifier.getTier());
                 workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
                 workflowDTO.setApplicationId(applicationId);
                 workflowDTO.setSubscriber(userId);
 
                 Tier tier = null;
                 Set<Tier> policies = Collections.emptySet();
-                if (api != null) {
+                if (!isApiProduct) {
                     policies = api.getAvailableTiers();
-                } else if (product != null) {
+                } else {
                     policies = product.getAvailableTiers();
                 }
 
-                Iterator<Tier> iterator = policies.iterator();
-                boolean isPolicyAllowed = false;
-                while (iterator.hasNext()) {
-                    Tier policy = iterator.next();
+                for (Tier policy : policies) {
                     if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
                         tier = policy;
                     }
@@ -2880,10 +2881,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 subscriptionUUID = addedSubscription.getUUID();
 
                 JSONObject subsLogObject = new JSONObject();
-                if (apiIdentifier != null) {
-                    subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, apiIdentifier.getApiName());
-                } else if (apiProdIdentifier != null) {
-                    subsLogObject.put(APIConstants.AuditLogConstants.API_PRODUCT_NAME, apiProdIdentifier.getName());
+                if (!isApiProduct) {
+                    subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
+                } else {
+                    subsLogObject.put(APIConstants.AuditLogConstants.API_PRODUCT_NAME, identifier.getName());
                 }
                 subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
                 subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
@@ -2913,7 +2914,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public SubscriptionResponse addSubscription(APIIdentifier identifier, String userId, int applicationId,
+    public SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, int applicationId,
                                                 String groupId) throws APIManagementException {
 
         boolean isValid = validateApplication(userId, applicationId, groupId);
@@ -2921,7 +2922,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             log.error("Application " + applicationId + " is not accessible to user " + userId);
             throw new APIManagementException("Application is not accessible to user " + userId);
         }
-        return addSubscription(identifier, userId, applicationId);
+        return addSubscription(apiTypeWrapper, userId, applicationId);
     }
 
     /**
@@ -3137,7 +3138,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public void updateSubscriptions(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
         API api = getAPI(identifier);
-        apiMgtDAO.updateSubscriptions(identifier, api.getContext(), applicationId, userId);
+        apiMgtDAO.updateSubscriptions(new ApiTypeWrapper(api), applicationId);
     }
 
     /**

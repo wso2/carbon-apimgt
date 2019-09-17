@@ -28,12 +28,13 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
@@ -42,7 +43,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -53,6 +53,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.DocumentationMappingUtil;
@@ -111,8 +121,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             Map allMatchedApisMap = apiConsumer
                     .searchPaginatedAPIs(newSearchQuery, requestedTenantDomain, offset, limit, false);
-            Set<API> sortedSet = (Set<API>) allMatchedApisMap.get("apis"); // This is a SortedSet
-            ArrayList<API> allMatchedApis = new ArrayList<>(sortedSet);
+            Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
+            ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
 
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
             //Add pagination section in the response
@@ -447,15 +457,22 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
-            APIIdentifier apiIdentifier = api.getId();
-            float avgRating = apiConsumer.getAverageAPIRating(apiIdentifier);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
+
+            float avgRating = apiConsumer.getAverageAPIRating(identifier);
             int userRating = 0;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equals(username)) {
-                userRating = apiConsumer.getUserRating(apiIdentifier, username);
+                userRating = apiConsumer.getUserRating(identifier, username);
             }
             List<RatingDTO> ratingDTOList = new ArrayList<>();
-            JSONArray array = apiConsumer.getAPIRatings(apiIdentifier);
+            JSONArray array = apiConsumer.getAPIRatings(identifier);
             for (int i = 0; i < array.size(); i++) {
                 JSONObject obj = (JSONObject) array.get(i);
                 RatingDTO ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
@@ -795,7 +812,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
 
-            API api = apiConsumer.getAPIbyUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
             if (APIConstants.PUBLISHED.equals(api.getStatus()) || APIConstants.PROTOTYPED.equals(api.getStatus())
                             || APIConstants.DEPRECATED.equals(api.getStatus())) {
                 return APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);

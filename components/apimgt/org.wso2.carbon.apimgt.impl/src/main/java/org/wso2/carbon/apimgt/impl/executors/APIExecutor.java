@@ -24,15 +24,18 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.util.CheckListItemBean;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
@@ -106,108 +109,19 @@ public class APIExecutor implements Execution {
             Resource apiResource = context.getResource();
             String artifactId = apiResource.getUUID();
             if (artifactId == null) {
-                return executed;
+                return false;
             }
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-            API api = APIUtil.getAPI(apiArtifact);
+
+            String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userWithDomain);
 
-            String oldStatus = APIUtil.getLcStateFromArtifact(apiArtifact);
-            String newStatus = (targetState != null)? targetState.toUpperCase(): targetState;
-
-            if(newStatus != null){ //only allow the executor to be used with default LC states transition
-                                   //check only the newStatus so this executor can be used for LC state change from 
-                                   //custom state to default api state
-                if ((APIConstants.CREATED.equals(oldStatus) || APIConstants.PROTOTYPED.equals(oldStatus))
-                        && APIConstants.PUBLISHED.equals(newStatus)) {
-                    Set<Tier> tiers = api.getAvailableTiers();
-                    String endPoint = api.getEndpointConfig();
-                    String apiSecurity = api.getApiSecurity();
-                    boolean isOauthProtected =
-                            apiSecurity == null || apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
-                    if (endPoint != null && endPoint.trim().length() > 0) {
-                        if (isOauthProtected && (tiers == null || tiers.size() <= 0)) {
-                                throw new APIManagementException("Failed to publish service to API store while executing " +
-                                                                 "APIExecutor. No Tiers selected");
-                        }
-                    } else {
-                        throw new APIManagementException("Failed to publish service to API store while executing"
-                                + " APIExecutor. No endpoint selected");
-                    }
-                }
-            
-                //push the state change to gateway
-                Map<String, String> failedGateways = apiProvider.propergateAPIStatusChangeToGateways(api.getId(), newStatus);
-
-                if (log.isDebugEnabled()) {
-                    String logMessage = "Publish changed status to the Gateway. API Name: " + api.getId().getApiName()
-                            + ", API Version " + api.getId().getVersion() + ", API Context: " + api.getContext()
-                            + ", New Status : " + newStatus;
-                    log.debug(logMessage);
-                }
-
-                //update api related information for state change
-                executed = apiProvider.updateAPIforStateChange(api.getId(), newStatus, failedGateways);
-
-                // Setting resource again to the context as it's updated within updateAPIStatus method
-                String apiPath = APIUtil.getAPIPath(api.getId());
-
-                apiResource = registry.get(apiPath);
-                context.setResource(apiResource);
-
-                if (log.isDebugEnabled()) {
-                    String logMessage =
-                            "API related information successfully updated. API Name: " + api.getId().getApiName()
-                                    + ", API Version " + api.getId().getVersion() + ", API Context: " + api.getContext()
-                                    + ", New Status : " + newStatus;
-                    log.debug(logMessage);
-                }
+            if (APIConstants.API_PRODUCT.equals(type)) {
+                executed = true;
             } else {
-                throw new APIManagementException("Invalid Lifecycle status for default APIExecutor :" + targetState);
-            }
-           
-            
-            boolean deprecateOldVersions = false;
-            boolean makeKeysForwardCompatible = false;
-            int deprecateOldVersionsCheckListOrder = 0, makeKeysForwardCompatibleCheckListOrder = 1;
-            //If the API status is CREATED/PROTOTYPED ,check for check list items of lifecycle
-            if (APIConstants.CREATED.equals(oldStatus) || APIConstants.PROTOTYPED.equals(oldStatus)) {
-                CheckListItemBean[] checkListItemBeans = GovernanceUtils
-                        .getAllCheckListItemBeans(apiResource, apiArtifact, APIConstants.API_LIFE_CYCLE);
-                if (checkListItemBeans != null) {
-                    for (CheckListItemBean checkListItemBean : checkListItemBeans) {
-                        if (APIConstants.DEPRECATE_CHECK_LIST_ITEM.equals(checkListItemBean.getName())) {
-                            deprecateOldVersionsCheckListOrder = checkListItemBean.getOrder();
-                        } else if (APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM.equals(checkListItemBean.getName())) {
-                            makeKeysForwardCompatibleCheckListOrder = checkListItemBean.getOrder();
-                        }
-                    }
-                }
-                deprecateOldVersions = apiArtifact
-                        .isLCItemChecked(deprecateOldVersionsCheckListOrder, APIConstants.API_LIFE_CYCLE);
-                makeKeysForwardCompatible = !(apiArtifact
-                        .isLCItemChecked(makeKeysForwardCompatibleCheckListOrder, APIConstants.API_LIFE_CYCLE));
-            }
-            
-            if ((APIConstants.CREATED.equals(oldStatus) || APIConstants.PROTOTYPED.equals(oldStatus))
-                    && APIConstants.PUBLISHED.equals(newStatus)) {
-                if (makeKeysForwardCompatible) {
-                    apiProvider.makeAPIKeysForwardCompatible(api);
-                }                
-                if(deprecateOldVersions) {
-                    String provider = APIUtil.replaceEmailDomain(api.getId().getProviderName());
-
-                    List<API> apiList = apiProvider.getAPIsByProvider(provider);
-                    APIVersionComparator versionComparator = new APIVersionComparator();
-                    for (API oldAPI : apiList) {
-                        if (oldAPI.getId().getApiName().equals(api.getId().getApiName()) &&
-                                versionComparator.compare(oldAPI, api) < 0 &&
-                                (APIConstants.PUBLISHED.equals(oldAPI.getStatus()))) {
-                            apiProvider.changeLifeCycleStatus(oldAPI.getId(), APIConstants.API_LC_ACTION_DEPRECATE);
-                            
-                        }
-                    }            
-                }            
+                API api = APIUtil.getAPI(apiArtifact);
+                return changeLifeCycle(context, api, apiResource, registry, apiProvider, apiArtifact, targetState);
             }
         } catch (RegistryException e) {
             log.error("Failed to get the generic artifact while executing APIExecutor. ", e);
@@ -229,5 +143,110 @@ public class APIExecutor implements Execution {
         return executed;
     }
     
-   
+    private boolean changeLifeCycle(RequestContext context, API api, Resource apiResource, Registry registry,
+                                    APIProvider apiProvider, GenericArtifact apiArtifact, String targetState)
+            throws APIManagementException, FaultGatewaysException, RegistryException {
+        boolean executed;
+
+        String oldStatus = APIUtil.getLcStateFromArtifact(apiArtifact);
+        String newStatus = (targetState != null)? targetState.toUpperCase(): targetState;
+
+        boolean isCurrentCreatedOrPrototyped = APIConstants.CREATED.equals(oldStatus) ||
+                APIConstants.PROTOTYPED.equals(oldStatus);
+        boolean isStateTransitionToPublished = isCurrentCreatedOrPrototyped && APIConstants.PUBLISHED.equals(newStatus);
+        if(newStatus != null){ //only allow the executor to be used with default LC states transition
+            //check only the newStatus so this executor can be used for LC state change from
+            //custom state to default api state
+            if (isStateTransitionToPublished) {
+                Set<Tier> tiers = api.getAvailableTiers();
+                String endPoint = api.getEndpointConfig();
+                String apiSecurity = api.getApiSecurity();
+                boolean isOauthProtected =
+                        apiSecurity == null || apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+                if (endPoint != null && endPoint.trim().length() > 0) {
+                    if (isOauthProtected && (tiers == null || tiers.size() <= 0)) {
+                        throw new APIManagementException("Failed to publish service to API store while executing " +
+                                "APIExecutor. No Tiers selected");
+                    }
+                } else {
+                    throw new APIManagementException("Failed to publish service to API store while executing"
+                            + " APIExecutor. No endpoint selected");
+                }
+            }
+
+            //push the state change to gateway
+            Map<String, String> failedGateways = apiProvider.propergateAPIStatusChangeToGateways(api.getId(), newStatus);
+
+            if (log.isDebugEnabled()) {
+                String logMessage = "Publish changed status to the Gateway. API Name: " + api.getId().getApiName()
+                        + ", API Version " + api.getId().getVersion() + ", API Context: " + api.getContext()
+                        + ", New Status : " + newStatus;
+                log.debug(logMessage);
+            }
+
+            //update api related information for state change
+            executed = apiProvider.updateAPIforStateChange(api.getId(), newStatus, failedGateways);
+
+            // Setting resource again to the context as it's updated within updateAPIStatus method
+            String apiPath = APIUtil.getAPIPath(api.getId());
+
+            apiResource = registry.get(apiPath);
+            context.setResource(apiResource);
+
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "API related information successfully updated. API Name: " + api.getId().getApiName()
+                                + ", API Version " + api.getId().getVersion() + ", API Context: " + api.getContext()
+                                + ", New Status : " + newStatus;
+                log.debug(logMessage);
+            }
+        } else {
+            throw new APIManagementException("Invalid Lifecycle status for default APIExecutor :" + targetState);
+        }
+
+
+        boolean deprecateOldVersions = false;
+        boolean makeKeysForwardCompatible = false;
+        int deprecateOldVersionsCheckListOrder = 0, makeKeysForwardCompatibleCheckListOrder = 1;
+        //If the API status is CREATED/PROTOTYPED ,check for check list items of lifecycle
+        if (isCurrentCreatedOrPrototyped) {
+            CheckListItemBean[] checkListItemBeans = GovernanceUtils
+                    .getAllCheckListItemBeans(apiResource, apiArtifact, APIConstants.API_LIFE_CYCLE);
+            if (checkListItemBeans != null) {
+                for (CheckListItemBean checkListItemBean : checkListItemBeans) {
+                    if (APIConstants.DEPRECATE_CHECK_LIST_ITEM.equals(checkListItemBean.getName())) {
+                        deprecateOldVersionsCheckListOrder = checkListItemBean.getOrder();
+                    } else if (APIConstants.RESUBSCRIBE_CHECK_LIST_ITEM.equals(checkListItemBean.getName())) {
+                        makeKeysForwardCompatibleCheckListOrder = checkListItemBean.getOrder();
+                    }
+                }
+            }
+            deprecateOldVersions = apiArtifact
+                    .isLCItemChecked(deprecateOldVersionsCheckListOrder, APIConstants.API_LIFE_CYCLE);
+            makeKeysForwardCompatible = !(apiArtifact
+                    .isLCItemChecked(makeKeysForwardCompatibleCheckListOrder, APIConstants.API_LIFE_CYCLE));
+        }
+
+        if (isStateTransitionToPublished) {
+            if (makeKeysForwardCompatible) {
+                apiProvider.makeAPIKeysForwardCompatible(api);
+            }
+            if(deprecateOldVersions) {
+                String provider = APIUtil.replaceEmailDomain(api.getId().getProviderName());
+
+                List<API> apiList = apiProvider.getAPIsByProvider(provider);
+                APIVersionComparator versionComparator = new APIVersionComparator();
+                for (API oldAPI : apiList) {
+                    if (oldAPI.getId().getApiName().equals(api.getId().getApiName()) &&
+                            versionComparator.compare(oldAPI, api) < 0 &&
+                            (APIConstants.PUBLISHED.equals(oldAPI.getStatus()))) {
+                        apiProvider.changeLifeCycleStatus(oldAPI.getId(), APIConstants.API_LC_ACTION_DEPRECATE);
+
+                    }
+                }
+            }
+        }
+
+        return executed;
+    }
 }

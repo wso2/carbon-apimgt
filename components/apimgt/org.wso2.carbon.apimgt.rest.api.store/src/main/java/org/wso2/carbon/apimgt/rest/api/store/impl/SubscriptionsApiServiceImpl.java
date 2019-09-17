@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -199,13 +200,16 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
 
+                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(subscriptionDTO.getApiIdentifier(),
+                        tenantDomain);
+
                 //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
                 //  throw an APIMgtAuthorizationFailedException with the reason as the message
-                RestAPIStoreUtils.checkSubscriptionAllowed(apiIdentifier, subscriptionDTO.getTier());
+                RestAPIStoreUtils.checkSubscriptionAllowed(apiTypeWrapper, subscriptionDTO.getTier());
 
                 apiIdentifier.setTier(subscriptionDTO.getTier());
                 SubscriptionResponse subscriptionResponse = apiConsumer
-                        .addSubscription(apiIdentifier, username, application.getId());
+                        .addSubscription(apiTypeWrapper, username, application.getId());
                 SubscribedAPI addedSubscribedAPI = apiConsumer
                         .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
                 SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);
@@ -274,13 +278,15 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
 
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiIdentifier(), tenantDomain);
+
             //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
             //  throw an APIMgtAuthorizationFailedException with the reason as the message
-            RestAPIStoreUtils.checkSubscriptionAllowed(apiIdentifier, body.getTier());
+            RestAPIStoreUtils.checkSubscriptionAllowed(apiTypeWrapper, body.getTier());
 
             apiIdentifier.setTier(body.getTier());
             SubscriptionResponse subscriptionResponse = apiConsumer
-                    .addSubscription(apiIdentifier, username, application.getId());
+                    .addSubscription(apiTypeWrapper, username, application.getId());
             SubscribedAPI addedSubscribedAPI = apiConsumer
                     .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
             SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);

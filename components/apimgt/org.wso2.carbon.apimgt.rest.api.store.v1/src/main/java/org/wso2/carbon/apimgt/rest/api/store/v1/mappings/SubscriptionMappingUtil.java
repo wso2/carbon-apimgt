@@ -62,6 +62,7 @@ public class SubscriptionMappingUtil {
         }
         if (apiProdId != null) {
             APIProduct apiProduct = apiConsumer.getAPIProduct(apiProdId);
+            subscriptionDTO.setApiId(apiProduct.getUuid());
             APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(apiProduct);
             subscriptionDTO.setApiInfo(apiInfo);
             subscriptionDTO.setType(SubscriptionDTO.TypeEnum.API_PRODUCT);

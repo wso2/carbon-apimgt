@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -200,6 +201,106 @@ public class APIMappingUtil {
             dto.setSecurityScheme(Arrays.asList(model.getApiSecurity().split(",")));
         }
         return dto;
+    }
+
+    public static APIDTO fromAPItoDTO(APIProduct model, String tenantDomain) throws APIManagementException {
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        APIDTO dto = new APIDTO();
+        dto.setName(model.getId().getName());
+        dto.setVersion(model.getId().getVersion());
+        String providerName = model.getId().getProviderName();
+        dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+        dto.setId(model.getUuid());
+        dto.setContext(model.getContext());
+        dto.setDescription(model.getDescription());
+        dto.setLifeCycleStatus(model.getState());
+        dto.setType(model.getType());
+        dto.setAvgRating(String.valueOf(model.getRating()));
+
+        /* todo: created and last updated times
+        if (null != model.getLastUpdated()) {
+            Date lastUpdateDate = model.getLastUpdated();
+            Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
+            dto.setLastUpdatedTime(String.valueOf(timeStamp));
+        }
+
+        String createdTimeStamp = model.getCreatedTime();
+        if (null != createdTimeStamp) {
+            Date date = new Date(Long.valueOf(createdTimeStamp));
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            String dateFormatted = formatter.format(date);
+            dto.setCreatedTime(dateFormatted);
+        } */
+
+        //Get Swagger definition which has URL templates, scopes and resource details
+        String apiSwaggerDefinition = null;
+
+        if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
+            apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
+        }
+        dto.setApiDefinition(apiSwaggerDefinition);
+
+        Set<String> apiTags = model.getTags();
+        List<String> tagsToReturn = new ArrayList<>();
+        tagsToReturn.addAll(apiTags);
+        dto.setTags(tagsToReturn);
+
+        Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = model.getAvailableTiers();
+        List<String> tiersToReturn = new ArrayList<>();
+        for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
+            tiersToReturn.add(tier.getName());
+        }
+        dto.setTiers(tiersToReturn);
+
+        dto.setTransport(Arrays.asList(model.getTransports().split(",")));
+
+        dto.setEndpointURLs(extractEndpointURLs(model, tenantDomain));
+
+        APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
+        apiBusinessInformationDTO.setBusinessOwner(model.getBusinessOwner());
+        apiBusinessInformationDTO.setBusinessOwnerEmail(model.getBusinessOwnerEmail());
+        apiBusinessInformationDTO.setTechnicalOwner(model.getTechnicalOwner());
+        apiBusinessInformationDTO.setTechnicalOwnerEmail(model.getTechnicalOwnerEmail());
+        dto.setBusinessInformation(apiBusinessInformationDTO);
+
+        if (!StringUtils.isBlank(model.getThumbnailUrl())) {
+            dto.setHasThumbnail(true);
+        }
+
+        if (model.getAdditionalProperties() != null) {
+            JSONObject additionalProperties = model.getAdditionalProperties();
+            Map<String, String> additionalPropertiesMap = new HashMap<>();
+            for (Object propertyKey : additionalProperties.keySet()) {
+                String key = (String) propertyKey;
+                additionalPropertiesMap.put(key, (String) additionalProperties.get(key));
+            }
+            dto.setAdditionalProperties(additionalPropertiesMap);
+        }
+
+
+        if (model.getGatewayLabels() != null) {
+            dto.setLabels(getLabelDetails(model.getGatewayLabels(), model.getContext()));
+        }
+
+        if (model.getEnvironments() != null) {
+            List<String> environmentListToReturn = new ArrayList<>(model.getEnvironments());
+            dto.setEnvironmentList(environmentListToReturn);
+        }
+
+        dto.setAuthorizationHeader(model.getAuthorizationHeader());
+        if (model.getApiSecurity() != null) {
+            dto.setSecurityScheme(Arrays.asList(model.getApiSecurity().split(",")));
+        }
+        return dto;
+    }
+
+
+    public static APIDTO fromAPItoDTO(ApiTypeWrapper model, String tenantDomain) throws APIManagementException {
+        if (model.isAPIProduct()) {
+            return fromAPItoDTO(model.getApiProduct(), tenantDomain);
+        } else {
+            return fromAPItoDTO(model.getApi(), tenantDomain);
+        }
     }
 
     /**
@@ -391,12 +492,16 @@ public class APIMappingUtil {
      * @param apiList List of APIs
      * @return APIListDTO object containing APIDTOs
      */
-    public static APIListDTO fromAPIListToDTO(List<API> apiList) {
+    public static APIListDTO fromAPIListToDTO(List<Object> apiList) {
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
         if (apiList != null) {
-            for (API api : apiList) {
-                apiInfoDTOs.add(fromAPIToInfoDTO(api));
+            for (Object api : apiList) {
+                if (api instanceof API) {
+                    apiInfoDTOs.add(fromAPIToInfoDTO((API) api));
+                } else if (api instanceof APIProduct) {
+                    apiInfoDTOs.add(fromAPIToInfoDTO((APIProduct) api));
+                }
             }
         }
         apiListDTO.setCount(apiInfoDTOs.size());
@@ -562,6 +667,8 @@ public class APIMappingUtil {
         return apiEndpointsList;
     }
 
+
+
     /**
      * Extracts the API environment details with access url for each endpoint
      *
@@ -570,9 +677,9 @@ public class APIMappingUtil {
      * @return the API environment details
      * @throws APIManagementException error while extracting the information
      */
-    private static List<APIProductEndpointURLsDTO> extractEndpointURLs(APIProduct apiProduct, String tenantDomain)
+    private static List<APIEndpointURLsDTO> extractEndpointURLs(APIProduct apiProduct, String tenantDomain)
             throws APIManagementException {
-        List<APIProductEndpointURLsDTO> apiEndpointsList = new ArrayList<>();
+        List<APIEndpointURLsDTO> apiEndpointsList = new ArrayList<>();
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
@@ -587,7 +694,7 @@ public class APIMappingUtil {
         for (String environmentName : environmentsPublishedByAPI) {
             Environment environment = environments.get(environmentName);
             if (environment != null) {
-                APIProductURLsDTO apiURLsDTO = new APIProductURLsDTO();
+                APIURLsDTO apiURLsDTO = new APIURLsDTO();
                 String[] gwEndpoints = null;
                 gwEndpoints = environment.getApiGatewayEndpoint().split(",");
 
@@ -620,7 +727,7 @@ public class APIMappingUtil {
                     }
                 }
 
-                APIProductEndpointURLsDTO apiEndpointURLsDTO = new APIProductEndpointURLsDTO();
+                APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
                 apiEndpointURLsDTO.setUrLs(apiURLsDTO);
                 apiEndpointURLsDTO.setEnvironmentName(environment.getName());
                 apiEndpointURLsDTO.setEnvironmentType(environment.getType());
@@ -705,34 +812,7 @@ public class APIMappingUtil {
         return listDto;
     }
     
-    public static APIProductDTO fromAPIProductToDTO(APIProduct product, String tenantDomain)
-            throws APIManagementException {
-        APIProductDTO dto = new APIProductDTO();
-        dto.setId(product.getUuid());
-        dto.setName(product.getId().getName());
-        dto.setDescription(product.getDescription());
-        dto.setProvider(product.getId().getProviderName());
-        dto.setContext(product.getContext());
-        dto.setApiDefinition(product.getDefinition());
-        dto.setThumbnailUrl(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
-                .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
-        APIProductBusinessInformationDTO businessInformation = new APIProductBusinessInformationDTO();
-        businessInformation.setBusinessOwner(product.getBusinessOwner());
-        businessInformation.setBusinessOwnerEmail(product.getBusinessOwnerEmail());
-        dto.setBusinessInformation(businessInformation);
-        dto.setEnvironmentList(new ArrayList<>(product.getEnvironments()));
 
-        dto.setEndpointURLs(extractEndpointURLs(product, tenantDomain));
-
-        Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = product.getAvailableTiers();
-        List<String> tiersToReturn = new ArrayList<>();
-        for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
-            tiersToReturn.add(tier.getName());
-        }
-        dto.setTiers(tiersToReturn);
-
-        return dto;
-    }
 
     /**
      * Sets pagination urls for a APIProductListDTO object given pagination parameters and url parameters
