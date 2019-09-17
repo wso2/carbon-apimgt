@@ -393,13 +393,19 @@ class APISecurityAudit extends Component {
                         height='calc(100vh - 51px)'
                     >
                         <Typography variant='h4' className={classes.subheadingTypography}>
-                            API Security Audit Report
+                            <FormattedMessage
+                                id='Apis.Details.APIDefinition.AuditApi.ApiSecurityAuditReport'
+                                defaultMessage='API Security Audit Report'
+                            />
                         </Typography>
                         <div className={classes.paperDiv}>
                             <Paper elevation={1} className={classes.rootPaper}>
                                 <div>
                                     <Typography variant='h5' className={classes.sectionHeadingTypography}>
-                                        Audit Score and Summary
+                                        <FormattedMessage
+                                            id='Apis.Details.APIDefinition.AuditApi.AuditScoreSummary'
+                                            defaultMessage='Audit Score and Summary'
+                                        />
                                     </Typography>
                                     <div className={classes.auditSummaryDiv}>
                                         <div className={classes.auditSummarySubDiv}>
@@ -419,7 +425,11 @@ class APISecurityAudit extends Component {
                                                             <Typography
                                                                 variant='body1'
                                                                 className={classes.circularProgressBarScoreFooter}
-                                                            >out of 100
+                                                            >
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.APIDefinition.AuditApi.ScoreFooter'
+                                                                    defaultMessage='out of 100'
+                                                                />
                                                             </Typography>
                                                         </CircularProgressbarWithChildren>
                                                     );
@@ -530,7 +540,10 @@ class APISecurityAudit extends Component {
                         <Paper elevation={1} className={classes.rootPaper}>
                             <div>
                                 <Typography variant='h5' className={classes.sectionHeadingTypography}>
-                                        OpenAPI Format Requirements
+                                    <FormattedMessage
+                                        id='Apis.Details.APIDefinition.AuditApi.OpenApiFormatRequirements'
+                                        defaultMessage='OpenAPI Format Requirements'
+                                    />
                                 </Typography>
                                 <Typography variant='body1'>
                                     <strong>Number of Issues:</strong> {reportObject.validation.issueCounter}
@@ -589,7 +602,10 @@ class APISecurityAudit extends Component {
                         <Paper elevation={1} className={classes.rootPaper}>
                             <div>
                                 <Typography variant='h5' className={classes.sectionHeadingTypography}>
-                                    Security
+                                    <FormattedMessage
+                                        id='Apis.Details.APIDefinition.AuditApi.Security'
+                                        defaultMessage='Security'
+                                    />
                                 </Typography>
                                 <Typography variant='body1'>
                                     <strong>Number of Issues:</strong> {reportObject.security.issueCounter}
@@ -643,7 +659,10 @@ class APISecurityAudit extends Component {
                         <Paper elevation={1} className={classes.rootPaper}>
                             <div>
                                 <Typography variant='h5' className={classes.sectionHeadingTypography}>
-                                    Data Validation
+                                    <FormattedMessage
+                                        id='Apis.Details.APIDefinition.AuditApi.DataValidation'
+                                        defaultMessage='Data Validation'
+                                    />
                                 </Typography>
                                 <Typography variant='body1'>
                                     <strong>Number of Issues:</strong> {reportObject.data.issueCounter}
