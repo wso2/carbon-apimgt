@@ -21,7 +21,7 @@ import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 
 import 'react-tagsinput/react-tagsinput.css';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -48,7 +48,7 @@ const useStyles = makeStyles(theme => ({
         minWidth: 650,
     },
     viewInExStoreLink: {
-        color: 'black',
+        color: theme.palette.common.black,
         textDecoration: 'underline',
     },
 }));
@@ -74,12 +74,13 @@ export default function ExternalStores() {
     const [publishedExternalStores, setPublishedExternalStores] = useState([]);
     const [isUpdating, setUpdating] = useState(false);
     const classes = useStyles();
+    const intl = useIntl();
     if (!settings.externalStoresEnabled) {
         return (
             <div className='message message-warning'>
                 <h4>
                     <FormattedMessage
-                        id='ExternalStores.Errors.StoresNotFound.header'
+                        id='Apis.Details.ExternalStores.ExternalStores.external.stores.not.found.for.api'
                         defaultMessage='External Stores not found for api: '
                     />
                     <span style={{ color: 'green' }}> {api.id} </span>
@@ -97,11 +98,12 @@ export default function ExternalStores() {
                 setPublishedExternalStores(publishedStoreIds);
             })
             .catch((error) => {
-                if (error.response) {
-                    Alert.error(error.response.body.description);
-                } else {
-                    Alert.error('Something went wrong while getting published external stores');
-                }
+                const response = error.response && error.response.obj;
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.ExternalStores.ExternalStores.error.getting.published.external.stores',
+                    defaultMessage: 'Error while getting published external stores!! '
+                        + (response && ('[' + response.message + '] ' + response.description)),
+                }));
             });
     }
 
@@ -119,15 +121,19 @@ export default function ExternalStores() {
         setUpdating(true);
         API.publishAPIToExternalStores(api.id, publishedExternalStores)
             .then((response) => {
-                Alert.success('Successfully Published to external stores: '
-                    + response.body.list.map(store => store.id));
+                Alert.success(intl.formatMessage({
+                    id: 'Apis.Details.ExternalStores.ExternalStores.successfully.published.to.external.stores',
+                    defaultMessage: 'Successfully Published to external stores: '
+                        + response.body.list.map(store => store.id),
+                }));
             })
             .catch((error) => {
-                if (error.response) {
-                    Alert.error(error.response.body.description);
-                } else {
-                    Alert.error('Something went wrong while updating the external stores');
-                }
+                const response = error.response && error.response.obj;
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.ExternalStores.ExternalStores.error.while.updating.external.stores',
+                    defaultMessage: 'Error while updating external stores!! '
+                        + (response && ('[' + response.message + '] ' + response.description)),
+                }));
             })
             .finally(() => {
                 setUpdating(false);
@@ -140,7 +146,7 @@ export default function ExternalStores() {
             <div>
                 <Typography variant='h4' align='left' >
                     <FormattedMessage
-                        id='Apis.Details.Environments.Environments.External-Stores'
+                        id='Apis.Details.ExternalStores.ExternalStores.external-stores'
                         defaultMessage='External Stores'
                     />
                 </Typography>
@@ -213,7 +219,7 @@ export default function ExternalStores() {
                                 onClick={updateStores}
                             >
                                 <FormattedMessage
-                                    id='Apis.Details.Environments.ExternalStores.save'
+                                    id='Apis.Details.ExternalStores.ExternalStores.save'
                                     defaultMessage='Save'
                                 />
                                 {isUpdating && <CircularProgress size={20} />}
@@ -223,7 +229,7 @@ export default function ExternalStores() {
                             <Link to={'/apis/' + api.id + '/overview'}>
                                 <Button>
                                     <FormattedMessage
-                                        id='Apis.Details.Environments.ExternalStores.cancel'
+                                        id='Apis.Details.ExternalStores.ExternalStores.cancel'
                                         defaultMessage='Cancel'
                                     />
                                 </Button>
