@@ -1569,7 +1569,7 @@
         <carbon.apimgt.version>6.5.108-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <carbon.analytics.common.version>5.2.8</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.2.10</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.5.0-m4</carbon.kernel.version>
         <carbon.kernel.feature.version>4.5.0</carbon.kernel.feature.version>
