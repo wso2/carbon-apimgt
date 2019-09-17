@@ -104,24 +104,14 @@ class BusinessInformation extends React.Component {
      * @param {*} updateAPI
      * @memberof BusinessInformation
      */
-    handleSubmit(oldAPI, updateAPI) {
+    handleSubmit(updateAPI) {
         const {
             businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail,
         } = this.state;
-
-        if (businessOwner) {
-            oldAPI.businessInformation.businessOwner = businessOwner;
-        }
-        if (businessOwnerEmail) {
-            oldAPI.businessInformation.businessOwnerEmail = businessOwnerEmail;
-        }
-        if (technicalOwner) {
-            oldAPI.businessInformation.technicalOwner = technicalOwner;
-        }
-        if (technicalOwnerEmail) {
-            oldAPI.businessInformation.technicalOwnerEmail = technicalOwnerEmail;
-        }
-        updateAPI(oldAPI);
+        const businessInformation = {
+            businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail,
+        };
+        updateAPI({ businessInformation });
     }
 
     /**
@@ -299,7 +289,7 @@ class BusinessInformation extends React.Component {
                                         <Button
                                             variant='contained'
                                             color='primary'
-                                            onClick={() => this.handleSubmit(api, updateAPI)}
+                                            onClick={() => this.handleSubmit(updateAPI)}
                                             disabled={this.isNotCreator && this.isNotPublisher}
                                         >
                                             <FormattedMessage id='save' defaultMessage='Save' />
