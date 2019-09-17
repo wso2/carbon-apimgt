@@ -246,9 +246,12 @@ public class APIMappingUtil {
         dto.setTags(tagsToReturn);
 
         Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = model.getAvailableTiers();
-        List<String> tiersToReturn = new ArrayList<>();
+        List<APITiersDTO> tiersToReturn = new ArrayList<>();
         for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
-            tiersToReturn.add(tier.getName());
+            APITiersDTO apiTiersDTO = new APITiersDTO();
+            apiTiersDTO.setTierName(tier.getName());
+            apiTiersDTO.setTierPlan(tier.getTierPlan());
+            tiersToReturn.add(apiTiersDTO);
         }
         dto.setTiers(tiersToReturn);
 

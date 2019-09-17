@@ -7070,6 +7070,10 @@ public class ApiMgtDAO {
         int id = -1;
         String getAPIQuery = SQLConstants.GET_API_ID_SQL;
 
+        if (apiId instanceof APIProductIdentifier) {
+            getAPIQuery = SQLConstants.GET_API_PRODUCT_ID_SQL;
+        }
+
         try {
             if (connection == null) {
 
@@ -7133,7 +7137,7 @@ public class ApiMgtDAO {
             prepStmt.setString(3, identifier.getVersion());
             rs = prepStmt.executeQuery();
             if (rs.next()) {
-                id = rs.getInt("API_PRODUCT_ID");
+                id = rs.getInt("API_ID");
             }
             if (id == -1) {
                 String msg = "Unable to find the API Product : " + identifier.getName() + "-" +

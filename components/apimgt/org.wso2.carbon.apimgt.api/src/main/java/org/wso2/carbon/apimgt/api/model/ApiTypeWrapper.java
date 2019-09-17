@@ -35,6 +35,14 @@ public class ApiTypeWrapper {
         }
     }
 
+    public String getStatus() {
+        if (isAPIProduct) {
+            return apiProduct.getState();
+        } else {
+            return api.getStatus();
+        }
+    }
+
     public void setTier(String tier) {
         if (isAPIProduct) {
             apiProduct.getId().setTier(tier);
