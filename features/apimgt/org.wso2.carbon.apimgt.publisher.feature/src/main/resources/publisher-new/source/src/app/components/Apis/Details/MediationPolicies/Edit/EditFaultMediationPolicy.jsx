@@ -222,7 +222,7 @@ function EditFaultMediationPolicy(props) {
             .then(() => {
                 setFaultSeqCustom(faultSeqCustom.filter(seq => seq.id !== policyToDelete));
                 Alert.info(<FormattedMessage
-                    id='Apis.Details.MediationPolicies.Edit.EditInMediationPolicy.delete.success'
+                    id='Apis.Details.MediationPolicies.Edit.EditFaultMediationPolicy.delete.success'
                     defaultMessage='Mediation policy deleted successfully.'
                 />);
             })
@@ -230,7 +230,7 @@ function EditFaultMediationPolicy(props) {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                     Alert.error(<FormattedMessage
-                        id='Apis.Details.MediationPolicies.Edit.EditInMediationPolicy.delete.error'
+                        id='Apis.Details.MediationPolicies.Edit.EditFaultMediationPolicy.delete.error'
                         defaultMessage='Error deleting the file'
                     />);
                 }
@@ -250,7 +250,7 @@ function EditFaultMediationPolicy(props) {
             .length > 0;
         if (isGlobalMediationPolicy) {
             Alert.error(<FormattedMessage
-                id='Apis.Details.MediationPolicies.Edit.EditInMediationPolicy.global.delete'
+                id='Apis.Details.MediationPolicies.Edit.EditFaultMediationPolicy.global.delete'
                 defaultMessage='Cannot delete Global mediation policies.'
             />);
         } else {
@@ -294,7 +294,7 @@ function EditFaultMediationPolicy(props) {
                 >
                     <FormLabel component='customPolicies'>
                         <FormattedMessage
-                            id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.custom.fault.policies'
+                            id='Apis.Details.Edit.MediationPolicies.EditFaultMediationPolicies.custom.fault.policies'
                             defaultMessage='Custom Fault Mediation Policies'
                         />
                     </FormLabel>
@@ -311,7 +311,8 @@ function EditFaultMediationPolicy(props) {
                                 type={seq.type}
                                 control={<Radio />}
                                 label={<FormattedMessage
-                                    id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.custom.fault.policy'
+                                    id={'Apis.Details.Edit.MediationPolicies.EditFaultMediationPolicies.custom' +
+                                    '.fault.policy'}
                                     defaultMessage={seq.name}
                                 />}
                                 value={seq.name}
@@ -332,7 +333,7 @@ function EditFaultMediationPolicy(props) {
                     />
                     <FormLabel component='globalPolicies'>
                         <FormattedMessage
-                            id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.global.fault.policies'
+                            id='Apis.Details.Edit.MediationPolicies.EditFaultMediationPolicies.global.fault.policies'
                             defaultMessage='Global FAULT Mediation Policies'
                         />
                     </FormLabel>
@@ -346,7 +347,8 @@ function EditFaultMediationPolicy(props) {
                                 type={seq.type}
                                 control={<Radio />}
                                 label={<FormattedMessage
-                                    id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.global.fault.policy'
+                                    id={'Apis.Details.Edit.MediationPolicies.EditFaultMediationPolicies.global' +
+                                        '.fault.policy'}
                                     defaultMessage={seq.name}
                                 />}
                                 value={seq.name}

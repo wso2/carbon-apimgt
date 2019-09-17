@@ -221,7 +221,7 @@ function EditOutMediationPolicy(props) {
         promisedGetContent
             .then(() => {
                 Alert.info(<FormattedMessage
-                    id='Apis.Details.MediationPolicies.Edit.EditInMediationPolicy.delete.success'
+                    id='Apis.Details.MediationPolicies.Edit.EditOutMediationPolicy.delete.success'
                     defaultMessage='Mediation policy deleted successfully.'
                 />);
             })
@@ -229,7 +229,7 @@ function EditOutMediationPolicy(props) {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                     Alert.error(<FormattedMessage
-                        id='Apis.Details.MediationPolicies.Edit.EditInMediationPolicy.delete.error'
+                        id='Apis.Details.MediationPolicies.Edit.EditOutMediationPolicy.delete.error'
                         defaultMessage='Error deleting the file'
                     />);
                 }
@@ -250,7 +250,7 @@ function EditOutMediationPolicy(props) {
         if (isGlobalMediationPolicy) {
             setOutSeqCustom(outSeqCustom.filter(seq => seq.id !== policyToDelete));
             Alert.error(<FormattedMessage
-                id='Apis.Details.MediationPolicies.Edit.EditInMediationPolicy.global.delete'
+                id='Apis.Details.MediationPolicies.Edit.EditOutMediationPolicy.global.delete'
                 defaultMessage='Cannot delete Global mediation policies.'
             />);
         } else {
@@ -294,7 +294,7 @@ function EditOutMediationPolicy(props) {
                 >
                     <FormLabel component='customPolicies'>
                         <FormattedMessage
-                            id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.custom.out.policies'
+                            id='Apis.Details.Edit.MediationPolicies.EditOutMediationPolicies.custom.out.policies'
                             defaultMessage='Custom OUT Mediation Policies'
                         />
                     </FormLabel>
@@ -311,7 +311,7 @@ function EditOutMediationPolicy(props) {
                                 type={seq.type}
                                 control={<Radio />}
                                 label={<FormattedMessage
-                                    id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.custom.out.policy'
+                                    id='Apis.Details.Edit.MediationPolicies.EditOutMediationPolicies.custom.out.policy'
                                     defaultMessage={seq.name}
                                 />}
                                 value={seq.name}
@@ -332,7 +332,7 @@ function EditOutMediationPolicy(props) {
                     />
                     <FormLabel component='globalPolicies'>
                         <FormattedMessage
-                            id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.global.out.policies'
+                            id='Apis.Details.Edit.MediationPolicies.EditOutMediationPolicies.global.out.policies'
                             defaultMessage='Global OUT Mediation Policies'
                         />
                     </FormLabel>
@@ -346,7 +346,7 @@ function EditOutMediationPolicy(props) {
                                 type={seq.type}
                                 control={<Radio />}
                                 label={<FormattedMessage
-                                    id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.global.out.policy'
+                                    id='Apis.Details.Edit.MediationPolicies.EditOutMediationPolicies.global.out.policy'
                                     defaultMessage={seq.name}
                                 />}
                                 value={seq.name}

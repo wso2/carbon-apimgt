@@ -98,15 +98,6 @@ function Overview(props) {
                 const apiData = getResponse.body;
                 apiData.mediationPolicies = mediationPolicies;
                 updateAPI(apiData);
-                // const promisedUpdate = api.update(apiData);
-                // promisedUpdate
-                //     .then(() => {
-                //         Alert.info('Mediation Policies updated successfully.');
-                //     })
-                //     .catch((errorResponse) => {
-                //         console.error(errorResponse);
-                //         Alert.error('Error occurred while updating API mediation policies');
-                //     });
             })
             .catch((errorResponse) => {
                 console.error(errorResponse);
