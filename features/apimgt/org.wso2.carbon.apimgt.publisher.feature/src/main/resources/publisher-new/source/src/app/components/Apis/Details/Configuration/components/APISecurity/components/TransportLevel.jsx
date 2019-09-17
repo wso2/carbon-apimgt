@@ -118,7 +118,7 @@ export default function TransportLevel(props) {
                         </RadioGroup>
                         <FormHelperText>
                             <FormattedMessage
-                                id='Apis.Details.Configuration.components.APISecurity.http.mandatory'
+                                id='Apis.Details.Configuration.components.APISecurity.components.TransportLevel'
                                 defaultMessage='Choose whether Transport level security is mandatory or optional'
                             />
                         </FormHelperText>
