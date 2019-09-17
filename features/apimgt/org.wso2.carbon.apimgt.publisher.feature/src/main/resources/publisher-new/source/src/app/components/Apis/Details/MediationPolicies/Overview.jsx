@@ -90,8 +90,6 @@ function Overview(props) {
      * @param {function} updateAPI The api update function.
      */
     const saveAPI = (updateAPI) => {
-        // oldAPI.mediationPolicies = mediationPolicies;
-        // updateAPI(oldAPI);
         const promisedApi = api.get(api.id);
         promisedApi
             .then((getResponse) => {
@@ -105,41 +103,14 @@ function Overview(props) {
             });
     };
     const updateInMediationPolicy = (policies) => {
-        // if (policies.name !== NONE) {
         setInPolicyName({ id: policies.id, name: policies.name, type: policies.type });
-        // }
     };
     const updateOutMediationPolicy = (policies) => {
-        // if (policies.name !== NONE) {
         setOutPolicyName({ id: policies.id, name: policies.name, type: policies.type });
-        // }
     };
     const updateFaultMediationPolicy = (policies) => {
-        // if (policies.name !== NONE) {
         setFaultPolicyName({ id: policies.id, name: policies.name, type: policies.type });
-        // }
     };
-    // useEffect(() => {
-    //     if (inPolicyName !== 'none') {
-    //         setInPolicyName(inPolicyName);
-    //     } else {
-    //         setInPolicyName(null);
-    //     }
-    // }, [inPolicyName]);
-    // useEffect(() => {
-    //     if (inPolicyName !== 'none') {
-    //         setOutPolicyName(outPolicyName);
-    //     } else {
-    //         setOutPolicyName(null);
-    //     }
-    // }, [outPolicyName]);
-    // useEffect(() => {
-    //     if (inPolicyName !== 'none') {
-    //         setFaultPolicyName(faultPolicyName);
-    //     } else {
-    //         setFaultPolicyName(null);
-    //     }
-    // }, [faultPolicyName]);
     return (
         <div >
             <div className={classes.titleWrapper}>
