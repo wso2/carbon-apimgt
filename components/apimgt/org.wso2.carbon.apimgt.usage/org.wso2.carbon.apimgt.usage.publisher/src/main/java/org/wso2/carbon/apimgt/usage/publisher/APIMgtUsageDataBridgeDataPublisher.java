@@ -31,9 +31,9 @@ import org.wso2.carbon.databridge.commons.exception.TransportException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublisher {
+public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublisher{
 
-    private static final Log log = LogFactory.getLog(APIMgtUsageDataBridgeDataPublisher.class);
+    private static final Log log  = LogFactory.getLog(APIMgtUsageDataBridgeDataPublisher.class);
 
     protected DataPublisher dataPublisher;
     private static DataPublisher dataPublisherStatics;
@@ -118,7 +118,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
                                 serverPassword);
                     }
                 }
-            } catch (DataEndpointConfigurationException e) {
+            }  catch (DataEndpointConfigurationException e) {
                 log.error("Error while creating data publisher", e);
             } catch (DataEndpointException e) {
                 log.error("Error while creating data publisher", e);
@@ -136,7 +136,6 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
 
     /**
      * This method will publish event for alert types configurations.
-     *
      * @param alertTypeDTO DTO object.
      * @throws APIManagementException
      */
@@ -149,9 +148,9 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getAlertTypeStreamName() + ":" +
                     DataPublisherUtil.getApiManagerAnalyticsConfiguration().getAlertTypeStreamVersion();
 
-            dataPublisher.tryPublish(streamID, System.currentTimeMillis(), null, null,
+            dataPublisher.tryPublish(streamID,System.currentTimeMillis(), null, null,
                     (Object[]) dataBridgeAlertTypesPublisherDTO.createPayload());
-        } catch (Exception e) {
+        } catch(Exception e){
             log.error("Error while publishing alert types events.", e);
             throw new APIManagementException("Error while publishing alert types events");
         }

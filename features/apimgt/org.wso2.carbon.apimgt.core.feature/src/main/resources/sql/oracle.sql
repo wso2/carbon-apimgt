@@ -2632,6 +2632,7 @@ CREATE TABLE AM_NOTIFICATION_SUBSCRIBER (
 )
 /
 -- End of API-MGT Tables --
+
 --permance indexes start--
 /
 create index IDX_ITS_LMT on IDN_THRIFT_SESSION (LAST_MODIFIED_TIME)

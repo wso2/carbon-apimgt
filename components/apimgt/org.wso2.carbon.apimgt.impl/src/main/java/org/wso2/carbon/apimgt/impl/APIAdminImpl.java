@@ -43,7 +43,6 @@ public class APIAdminImpl implements APIAdmin {
 
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
     ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-
     /**
      * Returns all labels associated with given tenant domain.
      *
