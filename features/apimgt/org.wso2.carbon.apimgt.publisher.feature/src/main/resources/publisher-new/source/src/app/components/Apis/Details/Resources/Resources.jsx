@@ -24,6 +24,7 @@ import cloneDeep from 'lodash.clonedeep';
 import Swagger from 'swagger-client';
 import isEmpty from 'lodash/isEmpty';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Paper from '@material-ui/core/Paper';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
 
@@ -31,6 +32,7 @@ import Operation from './components/Operation';
 import GroupOfOperations from './components/GroupOfOperations';
 import SpecErrors from './components/SpecErrors';
 import AddOperation from './components/AddOperation';
+import GoToDefinitionLink from './components/GoToDefinitionLink';
 /**
  * This component handles the Resource page in API details though it's written in a sharable way
  * that anyone could use this to render resources in anywhere else if needed.
@@ -198,33 +200,40 @@ export default function Resources() {
             <Grid item md={12}>
                 <AddOperation updateOpenAPI={updateOpenAPI} />
             </Grid>
-            {Object.entries(taggedOperations).map(([tag, operations]) =>
-                !!operations.length && (
-                    <Grid key={tag} item md={12}>
-                        <GroupOfOperations updateOpenAPI={updateOpenAPI} openAPI={openAPI} tag={tag}>
-                            <Grid
-                                container
-                                direction='column'
-                                justify='flex-start'
-                                spacing={1}
-                                alignItems='stretch'
-                            >
-                                {operations.map(operation => (
-                                    <Grid key={`${operation.target}/${operation.verb}`} item>
-                                        <Operation
-                                            highlight
-                                            updateOpenAPI={updateOpenAPI}
-                                            openAPI={openAPI}
-                                            operation={operation}
-                                            operationRateLimits={operationRateLimits}
-                                            api={api}
-                                        />
+            <Grid item md={12}>
+                <Paper elevation={0}>
+                    <AddOperation updateOpenAPI={updateOpenAPI} />
+                    {Object.entries(taggedOperations).map(([tag, operations]) =>
+                        !!operations.length && (
+                            <Grid key={tag} item md={12}>
+                                <GroupOfOperations updateOpenAPI={updateOpenAPI} openAPI={openAPI} tag={tag}>
+                                    <Grid
+                                        container
+                                        direction='column'
+                                        justify='flex-start'
+                                        spacing={1}
+                                        alignItems='stretch'
+                                    >
+                                        {operations.map(operation => (
+                                            <Grid key={`${operation.target}/${operation.verb}`} item>
+                                                <Operation
+                                                    highlight
+                                                    updateOpenAPI={updateOpenAPI}
+                                                    openAPI={openAPI}
+                                                    operation={operation}
+                                                    operationRateLimits={operationRateLimits}
+                                                    api={api}
+                                                />
+                                            </Grid>
+                                        ))}
                                     </Grid>
-                                ))}
+                                </GroupOfOperations>
                             </Grid>
-                        </GroupOfOperations>
-                    </Grid>
-                ))}
+                        ))}
+                </Paper>
+            </Grid>
+
+            <GoToDefinitionLink api={api} />
         </Grid>
     );
 }

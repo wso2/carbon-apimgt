@@ -41,6 +41,7 @@ import IconButton from '@material-ui/core/IconButton';
 
 import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
 import OperationGovernance from './operationComponents/OperationGovernance';
+import Parameters from './operationComponents/Parameters';
 
 /**
  *
@@ -229,6 +230,12 @@ export default function Operation(props) {
                         operationActionsDispatcher={operationActionsDispatcher}
                     />
                     <OperationGovernance
+                        operation={operation}
+                        operationActionsDispatcher={operationActionsDispatcher}
+                        operationRateLimits={operationRateLimits}
+                        api={api}
+                    />
+                    <Parameters
                         operation={operation}
                         operationActionsDispatcher={operationActionsDispatcher}
                         operationRateLimits={operationRateLimits}
