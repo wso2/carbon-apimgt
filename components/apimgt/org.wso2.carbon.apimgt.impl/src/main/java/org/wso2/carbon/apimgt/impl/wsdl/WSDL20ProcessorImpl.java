@@ -41,8 +41,12 @@ import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -50,6 +54,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The class that processes WSDL 2.0 documents
+ */
 public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
 
     private static final String WSDL20_NAMESPACE = "http://www.w3.org/ns/wsdl";
@@ -191,13 +198,28 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
     }
 
     @Override
-    public byte[] getWSDL() throws APIMgtWSDLException {
+    public InputStream getWSDL() throws APIMgtWSDLException {
+        if (wsdlDescription != null) {
+            return getSingleWSDL();
+        } else {
+            return getWSDLArchive(wsdlArchiveExtractedPath);
+        }
+    }
+
+    /**
+     * Retrieves an InputStream representing the WSDL (single WSDL scenario) attached to the processor
+     *
+     * @return Retrieves an InputStream representing the WSDL
+     * @throws APIMgtWSDLException when error occurred while getting the InputStream
+     */
+    private InputStream getSingleWSDL() throws APIMgtWSDLException {
         WSDLWriter writer;
         try {
             writer = getWsdlFactoryInstance().newWSDLWriter();
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             writer.writeWSDL(wsdlDescription.toElement(), byteArrayOutputStream);
-            return byteArrayOutputStream.toByteArray();
+            byte[] bytes = byteArrayOutputStream.toByteArray();
+            return new ByteArrayInputStream(bytes);
         } catch (WSDLException e) {
             throw new APIMgtWSDLException("Error while stringifying WSDL definition", e,
                     ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
@@ -230,7 +252,71 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
     }
 
     @Override
-    public byte[] updateEndpoints(API api, String environmentName, String environmentType) throws APIMgtWSDLException {
+    public void updateEndpoints(API api, String environmentName, String environmentType) throws APIMgtWSDLException {
+        if (wsdlDescription != null) {
+            updateEndpointsOfSingleWSDL(api, environmentName, environmentType);
+        } else {
+            updateEndpointsOfWSDLArchive(api, environmentName, environmentType);
+        }
+    }
+
+    /**
+     * Update the endpoint information of the WSDL (WSDL archive scenario) when an API and the environment details are
+     * provided
+     *
+     * @param api API
+     * @param environmentName name of the gateway environment
+     * @param environmentType type of the gateway environment
+     * @throws APIMgtWSDLException when error occurred while updating the endpoints
+     */
+    private void updateEndpointsOfWSDLArchive(API api, String environmentName, String environmentType)
+            throws APIMgtWSDLException {
+        for (Map.Entry<String, Description> entry : pathToDescriptionMap.entrySet()) {
+            Description description = entry.getValue();
+            if (log.isDebugEnabled()) {
+                log.debug("Updating endpoints of WSDL: " + entry.getKey());
+            }
+            updateEndpointsOfSingleWSDL(api, environmentName, environmentType, description);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated endpoints of WSDL: " + entry.getKey());
+            }
+            try (FileOutputStream wsdlFileOutputStream = new FileOutputStream(new File(entry.getKey()))) {
+                WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
+                writer.writeWSDL(description.toElement(), wsdlFileOutputStream);
+            } catch (IOException | WSDLException e) {
+                throw new APIMgtWSDLException("Failed to create WSDL archive for API:" + api.getId().getName() + ":"
+                        + api.getId().getVersion() + " for environment " + environmentName,
+                        ExceptionCodes.ERROR_WHILE_CREATING_WSDL_ARCHIVE);
+            }
+        }
+    }
+
+    /**
+     * Update the endpoint information of the WSDL (single WSDL scenario) when an API and the environment details are
+     * provided
+     *
+     * @param api API
+     * @param environmentName name of the gateway environment
+     * @param environmentType type of the gateway environment
+     * @throws APIMgtWSDLException when error occurred while updating the endpoints
+     */
+    private void updateEndpointsOfSingleWSDL(API api, String environmentName, String environmentType)
+            throws APIMgtWSDLException {
+        updateEndpointsOfSingleWSDL(api, environmentName, environmentType, wsdlDescription);
+    }
+
+    /**
+     * Update the endpoint information of the provided WSDL definition when an API and the environment details are
+     * provided
+     *
+     * @param api API
+     * @param environmentName name of the gateway environment
+     * @param environmentType type of the gateway environment
+     * @param wsdlDescription WSDL 2.0 definition
+     * @throws APIMgtWSDLException when error occurred while updating the endpoints
+     */
+    private void updateEndpointsOfSingleWSDL(API api, String environmentName, String environmentType,
+                Description wsdlDescription) throws APIMgtWSDLException {
         Service[] serviceMap = wsdlDescription.getServices();
         try {
             for (Service svc : serviceMap) {
@@ -246,7 +332,6 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
         } catch (URISyntaxException | APIManagementException e) {
             throw new APIMgtWSDLException("Error while setting gateway access URLs in the WSDL", e);
         }
-        return getWSDL();
     }
 
     /**

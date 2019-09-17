@@ -17,13 +17,18 @@
  */
 package org.wso2.carbon.apimgt.impl.wsdl;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.util.SecurityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.ZIPUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 import org.xml.sax.SAXException;
@@ -34,6 +39,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collection;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -155,5 +161,24 @@ abstract class AbstractWSDLProcessor implements WSDLProcessor {
         }
 
         return transports;
+    }
+
+    /**
+     * Creates a zip for from the files of the provided path and returns an InputStream for the created zip file.
+     *
+     * @param wsdlArchiveFilePath file path where the WSDL archive is extracted
+     * @return InputStream object of the WSDL archive zip file
+     * @throws APIMgtWSDLException when error occurred when creating the zip and returning the InputStream
+     */
+    InputStream getWSDLArchive(String wsdlArchiveFilePath) throws APIMgtWSDLException {
+        try {
+            Collection<File> allFiles = FileUtils.listFiles(new File(wsdlArchiveFilePath), null, true);
+            String outputZipFile = wsdlArchiveFilePath + File.separator + APIConstants.WSDL_ARCHIVE_UPDATED_ZIP_FILE;
+            ZIPUtils.zipFiles(outputZipFile, allFiles);
+            return new FileInputStream(outputZipFile);
+        } catch (APIManagementException | IOException e) {
+            throw new APIMgtWSDLException("General error occurred while creating WSDL archive", e,
+                    ExceptionCodes.ERROR_WHILE_CREATING_WSDL_ARCHIVE);
+        }
     }
 }
