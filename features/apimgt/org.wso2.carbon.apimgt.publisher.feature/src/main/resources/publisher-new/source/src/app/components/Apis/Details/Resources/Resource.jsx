@@ -302,8 +302,8 @@ class Resource extends React.Component {
                         <InlineEditableField
                         saveFieldCallback={this.saveFieldCallback}
                         initText={intl.formatMessage({
-                            id: 'Apis.Details.Resources.Resource.click.here.to.add.summery',
-                            defaultMessage: 'Click here to add summery',
+                            id: 'Apis.Details.Resources.Resource.click.here.to.add.summary',
+                            defaultMessage: 'Click here to add summary',
                         })}
                         fieldValue={resource.summery}
                         type='textarea'

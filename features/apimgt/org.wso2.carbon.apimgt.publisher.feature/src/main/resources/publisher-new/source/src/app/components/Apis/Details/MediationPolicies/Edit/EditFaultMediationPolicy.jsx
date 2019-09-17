@@ -25,11 +25,13 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
+import IconButton from '@material-ui/core/IconButton';
 import Dropzone from 'react-dropzone';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
+import Download from 'AppComponents/Shared/Download.js';
 import API from 'AppData/api.js';
 
 const dropzoneStyles = {
@@ -72,49 +74,6 @@ const styles = theme => ({
     },
 });
 /**
-* Download the mediation policy related file
-* @param {any} response Response of download file
-*/
-const downloadFile = (response) => {
-    let fileName = '';
-    const contentDisposition = response.headers['content-disposition'];
-
-    if (contentDisposition && contentDisposition.indexOf('attachment') !== -1) {
-        const fileNameReg = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-        const matches = fileNameReg.exec(contentDisposition);
-        if (matches != null && matches[1]) fileName = matches[1].replace(/['"]/g, '');
-    }
-    const contentType = response.headers['content-type'];
-    const blob = new Blob([response.data], {
-        type: contentType,
-    });
-    if (typeof window.navigator.msSaveBlob !== 'undefined') {
-        window.navigator.msSaveBlob(blob, fileName);
-    } else {
-        const URL = window.URL || window.webkitURL;
-        const downloadUrl = URL.createObjectURL(blob);
-
-        if (fileName) {
-            const aTag = document.createElement('a');
-            if (typeof aTag.download === 'undefined') {
-                window.location = downloadUrl;
-            } else {
-                aTag.href = downloadUrl;
-                aTag.download = fileName;
-                document.body.appendChild(aTag);
-                aTag.click();
-            }
-        } else {
-            window.location = downloadUrl;
-        }
-
-        setTimeout(() => {
-            URL.revokeObjectURL(downloadUrl);
-        }, 100);
-    }
-};
-
-/**
  * The component to manage IN mediation policies.
  * @param {any} props The props passed to the layout
  * @returns {any} HTML representation.
@@ -128,6 +87,7 @@ function EditFaultMediationPolicy(props) {
     const [faultSeqCustom, setFaultSeqCustom] = useState([]);
     const { id } = api;
     const type = 'FAULT';
+    const NONE = 'none';
     const selectedPolicy = api.mediationPolicies.filter(seq => seq.type === type)[0];
     const [selectedPolicyFile, setSelectedPolicyFile] = useState({
         id: selectedPolicy ? selectedPolicy.id : '',
@@ -195,7 +155,7 @@ function EditFaultMediationPolicy(props) {
     */
     function handleChange(event) {
         const policy = event.target;
-        if (policy.name !== 'none') {
+        if (policy.name !== NONE) {
             setSelectedPolicyFile({
                 id: policy.name, name: policy.value, type, content: '',
             });
@@ -204,21 +164,22 @@ function EditFaultMediationPolicy(props) {
             });
         } else {
             setSelectedPolicyFile({
-                id: 'none', name: policy.value, type, content: '',
+                id: NONE, name: policy.value, type, content: '',
             });
             updateMediationPolicy({
-                id: 'none', name: policy.value, type, content: '',
+                id: NONE, name: policy.value, type, content: '',
             });
         }
     }
     /**
     * Handles the Global mediation policy download.
+    * @param {any} policyToDownload policy file id that is to be downloaded.
     */
-    function downloadGlobalMediationPolicyContent() {
-        const promisedGetContent = API.getGlobalMediationPolicyContent(selectedPolicyFile.id, api.id);
+    function downloadGlobalMediationPolicyContent(policyToDownload) {
+        const promisedGetContent = API.getGlobalMediationPolicyContent(policyToDownload, api.id);
         promisedGetContent
             .then((done) => {
-                downloadFile(done, document);
+                Download.downloadFile(done, document);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -233,12 +194,13 @@ function EditFaultMediationPolicy(props) {
 
     /**
     * Handles the custom mediation policy download.
+    * @param {any} policyToDownload policy file id that is to be downloaded.
     */
-    function downloadCustomMediationPolicyContent() {
-        const promisedGetContent = API.getMediationPolicyContent(selectedPolicyFile.id, api.id);
+    function downloadCustomMediationPolicyContent(policyToDownload) {
+        const promisedGetContent = API.getMediationPolicyContent(policyToDownload, api.id);
         promisedGetContent
             .then((done) => {
-                downloadFile(done, document);
+                Download.downloadFile(done, document);
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -250,13 +212,49 @@ function EditFaultMediationPolicy(props) {
                 }
             });
     }
-    const handleDownload = () => {
+    /**
+    * Handles the custom mediation policy delete.
+    * @param {any} policyToDelete policy file id that is to be deleted.
+    */
+    function deleteCustomMediationPolicy(policyToDelete) {
+        const promisedGetContent = API.deleteMediationPolicy(policyToDelete, api.id);
+        promisedGetContent
+            .then(() => {
+                setFaultSeqCustom(faultSeqCustom.filter(seq => seq.id !== policyToDelete));
+                Alert.info(<FormattedMessage
+                    id='Apis.Details.MediationPolicies.Edit.EditInMediationPolicy.delete.success'
+                    defaultMessage='Mediation policy deleted successfully.'
+                />);
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                    Alert.error(<FormattedMessage
+                        id='Apis.Details.MediationPolicies.Edit.EditInMediationPolicy.delete.error'
+                        defaultMessage='Error deleting the file'
+                    />);
+                }
+            });
+    }
+    const handleDownload = (policyToDownload) => {
         const isGlobalMediationPolicy =
-        globalFaultMediationPolicies.filter(policy => policy.id === selectedPolicyFile.id).length > 0;
+        globalFaultMediationPolicies.filter(policy => policy.id === policyToDownload).length > 0;
         if (isGlobalMediationPolicy) {
-            downloadGlobalMediationPolicyContent();
+            downloadGlobalMediationPolicyContent(policyToDownload);
         } else {
-            downloadCustomMediationPolicyContent();
+            downloadCustomMediationPolicyContent(policyToDownload);
+        }
+    };
+    const handleDelete = (policyToDelete) => {
+        const isGlobalMediationPolicy = globalFaultMediationPolicies.filter(policy => policy.id === policyToDelete)
+            .length > 0;
+        if (isGlobalMediationPolicy) {
+            Alert.error(<FormattedMessage
+                id='Apis.Details.MediationPolicies.Edit.EditInMediationPolicy.global.delete'
+                defaultMessage='Cannot delete Global mediation policies.'
+            />);
+        } else {
+            deleteCustomMediationPolicy(policyToDelete);
         }
     };
     return (
@@ -301,27 +299,36 @@ function EditFaultMediationPolicy(props) {
                         />
                     </FormLabel>
                     {faultSeqCustom.map(seq => (
-                        <FormControlLabel
-                            name={seq.id}
-                            type={seq.type}
-                            control={<Radio />}
-                            label={<FormattedMessage
-                                id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.custom.fault.policy'
-                                defaultMessage={seq.name}
-                            />}
-                            value={seq.name}
-                            checked={selectedPolicyFile.name === seq.name}
-                        />
+                        <div>
+                            <IconButton onClick={() => handleDelete(seq.id)}>
+                                <Icon>delete</Icon>
+                            </IconButton>
+                            <Button onClick={() => handleDownload(seq.id)}>
+                                <Icon>arrow_downward</Icon>
+                            </Button>
+                            <FormControlLabel
+                                name={seq.id}
+                                type={seq.type}
+                                control={<Radio />}
+                                label={<FormattedMessage
+                                    id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.custom.fault.policy'
+                                    defaultMessage={seq.name}
+                                />}
+                                value={seq.name}
+                                checked={selectedPolicyFile.name === seq.name}
+                            />
+                        </div>
                     ))}
                     <FormControlLabel
-                        name='none'
+                        name={NONE}
                         type={type}
                         control={<Radio />}
                         label={<FormattedMessage
                             id='Apis.Details.Edit.MediationPolicies.EditFaultMediationPolicies.none'
                             defaultMessage='No Mediation'
                         />}
-                        value='none'
+                        value={NONE}
+                        checked={selectedPolicyFile.name === NONE || selectedPolicyFile.name === ''}
                     />
                     <FormLabel component='globalPolicies'>
                         <FormattedMessage
@@ -330,27 +337,24 @@ function EditFaultMediationPolicy(props) {
                         />
                     </FormLabel>
                     {globalFaultMediationPolicies.map(seq => (
-                        <FormControlLabel
-                            name={seq.id}
-                            type={seq.type}
-                            control={<Radio />}
-                            label={<FormattedMessage
-                                id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.global.fault.policy'
-                                defaultMessage={seq.name}
-                            />}
-                            value={seq.name}
-                            checked={selectedPolicyFile.name === seq.name}
-                        />
+                        <div>
+                            <Button onClick={() => handleDownload(seq.id)}>
+                                <Icon>arrow_downward</Icon>
+                            </Button>
+                            <FormControlLabel
+                                name={seq.id}
+                                type={seq.type}
+                                control={<Radio />}
+                                label={<FormattedMessage
+                                    id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.global.fault.policy'
+                                    defaultMessage={seq.name}
+                                />}
+                                value={seq.name}
+                                checked={selectedPolicyFile.name === seq.name}
+                            />
+                        </div>
                     ))}
                 </RadioGroup>
-                {/* </div> */}
-                <Button onClick={handleDownload}>
-                    <Icon>arrow_downward</Icon>
-                    <FormattedMessage
-                        id='Apis.Details.Edit.MediationPolicies.EditFaultMediationPolicies.download'
-                        defaultMessage='Download'
-                    />
-                </Button>
             </div>
         </FormControl>
     );

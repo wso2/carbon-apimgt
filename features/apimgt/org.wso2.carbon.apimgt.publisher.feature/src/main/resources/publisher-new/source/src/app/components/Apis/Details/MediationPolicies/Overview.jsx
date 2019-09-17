@@ -21,7 +21,7 @@
  * @param {any} props The props passed to the layout
  * @returns {any} HTML representation.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Grid } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
@@ -72,14 +72,15 @@ function Overview(props) {
     const [faultPolicyName, setFaultPolicyName] = useState(faultFlowMediationPolicy !== (null || undefined) ?
         { id: faultFlowMediationPolicy.id, name: faultFlowMediationPolicy.name, type: faultFlowMediationPolicy.type } :
         {});
+    const NONE = 'none';
     const mediationPolicies = [];
-    if (!isEmpty(inPolicyName)) {
+    if (!(isEmpty(inPolicyName) || inPolicyName.name === NONE)) {
         mediationPolicies.push(inPolicyName);
     }
-    if (!isEmpty(outPolicyName)) {
+    if (!(isEmpty(outPolicyName) || outPolicyName.name === NONE)) {
         mediationPolicies.push(outPolicyName);
     }
-    if (!isEmpty(faultPolicyName)) {
+    if (!(isEmpty(faultPolicyName) || faultPolicyName.name === NONE)) {
         mediationPolicies.push(faultPolicyName);
     }
 
@@ -88,7 +89,7 @@ function Overview(props) {
      *
      * @param {function} updateAPI The api update function.
      */
-    const saveAPI = () => {
+    const saveAPI = (updateAPI) => {
         // oldAPI.mediationPolicies = mediationPolicies;
         // updateAPI(oldAPI);
         const promisedApi = api.get(api.id);
@@ -96,15 +97,16 @@ function Overview(props) {
             .then((getResponse) => {
                 const apiData = getResponse.body;
                 apiData.mediationPolicies = mediationPolicies;
-                const promisedUpdate = api.update(apiData);
-                promisedUpdate
-                    .then(() => {
-                        Alert.info('Mediation Policies updated successfully.');
-                    })
-                    .catch((errorResponse) => {
-                        console.error(errorResponse);
-                        Alert.error('Error occurred while updating API mediation policies');
-                    });
+                updateAPI(apiData);
+                // const promisedUpdate = api.update(apiData);
+                // promisedUpdate
+                //     .then(() => {
+                //         Alert.info('Mediation Policies updated successfully.');
+                //     })
+                //     .catch((errorResponse) => {
+                //         console.error(errorResponse);
+                //         Alert.error('Error occurred while updating API mediation policies');
+                //     });
             })
             .catch((errorResponse) => {
                 console.error(errorResponse);
@@ -112,23 +114,41 @@ function Overview(props) {
             });
     };
     const updateInMediationPolicy = (policies) => {
+        // if (policies.name !== NONE) {
         setInPolicyName({ id: policies.id, name: policies.name, type: policies.type });
+        // }
     };
     const updateOutMediationPolicy = (policies) => {
+        // if (policies.name !== NONE) {
         setOutPolicyName({ id: policies.id, name: policies.name, type: policies.type });
+        // }
     };
     const updateFaultMediationPolicy = (policies) => {
+        // if (policies.name !== NONE) {
         setFaultPolicyName({ id: policies.id, name: policies.name, type: policies.type });
+        // }
     };
-    useEffect(() => {
-        setInPolicyName(inPolicyName);
-    }, [inPolicyName]);
-    useEffect(() => {
-        setOutPolicyName(outPolicyName);
-    }, [outPolicyName]);
-    useEffect(() => {
-        setFaultPolicyName(faultPolicyName);
-    }, [faultPolicyName]);
+    // useEffect(() => {
+    //     if (inPolicyName !== 'none') {
+    //         setInPolicyName(inPolicyName);
+    //     } else {
+    //         setInPolicyName(null);
+    //     }
+    // }, [inPolicyName]);
+    // useEffect(() => {
+    //     if (inPolicyName !== 'none') {
+    //         setOutPolicyName(outPolicyName);
+    //     } else {
+    //         setOutPolicyName(null);
+    //     }
+    // }, [outPolicyName]);
+    // useEffect(() => {
+    //     if (inPolicyName !== 'none') {
+    //         setFaultPolicyName(faultPolicyName);
+    //     } else {
+    //         setFaultPolicyName(null);
+    //     }
+    // }, [faultPolicyName]);
     return (
         <div >
             <div className={classes.titleWrapper}>
