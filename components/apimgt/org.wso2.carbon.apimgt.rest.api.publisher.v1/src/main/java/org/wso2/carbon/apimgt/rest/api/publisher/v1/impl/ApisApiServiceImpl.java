@@ -38,11 +38,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.cxf.phase.PhaseInterceptorChain;
@@ -634,20 +639,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                     .getAPIManagerConfiguration();
             String apiToken = config.getFirstProperty(APIConstants.API_SECURITY_AUDIT_API_TOKEN);
             // Retrieve the uuid from the database
-            String uuid = ApiMgtDAO.getInstance().getAuditApiId(apiIdentifier);
-            if (uuid != null) {
-                // PUT Request - Sync API Definition with Audit API
+            String auditUuid = ApiMgtDAO.getInstance().getAuditApiId(apiIdentifier);
+            if (auditUuid != null) {
+                // PUT Request - Update API Definition with Audit API
                 // Set the property to be attached in the body of the request
                 // Attach API Definition to property called specfile to be sent in the request
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("{\n");
-                stringBuilder.append("  \"specfile\":   \"")
-                        .append(Base64Utils.encode(apiDefinition.getBytes("UTF-8")))
-                        .append("\" \n");
-                stringBuilder.append("}");
+                JSONObject jsonBody = new JSONObject();
+                jsonBody.put("specfile", Base64Utils.encode(apiDefinition.getBytes("UTF-8")));
                 // Logic for HTTP Request
-                String putUrl = APIConstants.BASE_AUDIT_URL + "/" + uuid;
-                org.apache.axis2.util.URL updateApiUrl = new org.apache.axis2.util.URL(putUrl);
+                String putUrl = APIConstants.BASE_AUDIT_URL + "/" + auditUuid;
+                URL updateApiUrl = new URL(putUrl);
                 try (CloseableHttpClient httpClient = (CloseableHttpClient) APIUtil
                         .getHttpClient(updateApiUrl.getPort(), updateApiUrl.getProtocol())) {
                     HttpPut httpPut = new HttpPut(putUrl);
@@ -655,7 +656,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     httpPut.setHeader(APIConstants.HEADER_ACCEPT, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                     httpPut.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                     httpPut.setHeader(APIConstants.HEADER_API_TOKEN, apiToken);
-                    httpPut.setEntity(new StringEntity(stringBuilder.toString()));
+                    httpPut.setEntity(new StringEntity(jsonBody.toJSONString()));
                     // Code block for processing the response
                     try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
                         if (isDebugEnabled) {
@@ -727,14 +728,14 @@ public class ApisApiServiceImpl implements ApisApiService {
                     reader.close();
                     httpConn.disconnect();
                     JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
-                    uuid = (String) ((JSONObject) responseJson.get("desc")).get("id");
-                    ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, uuid);
+                    auditUuid = (String) ((JSONObject) responseJson.get(APIConstants.DESC)).get(APIConstants.ID);
+                    ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, auditUuid);
                 }
             }
             // GET Request - Retrieve the API Security Audit Report for the Audit API
             // Logic for the HTTP request
-            String getUrl = "https://platform.42crunch.com/api/v1/apis/" + uuid + "/assessmentreport";
-            org.apache.axis2.util.URL getReportUrl = new org.apache.axis2.util.URL(getUrl);
+            String getUrl = APIConstants.BASE_AUDIT_URL + "/" + auditUuid + APIConstants.ASSESSMENT_REPORT;
+            URL getReportUrl = new URL(getUrl);
             try (CloseableHttpClient getHttpClient = (CloseableHttpClient) APIUtil
                     .getHttpClient(getReportUrl.getPort(), getReportUrl.getProtocol())) {
                 HttpGet httpGet = new HttpGet(getUrl);
@@ -772,9 +773,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
         } catch (IOException e) {
-            log.error("Error occurred while getting HttpClient instance");
+            RestApiUtil.handleInternalServerError("Error occurred while getting "
+                    + "HttpClient instance", e, log);
         } catch (ParseException e) {
-            log.error("API Definition String could not be parsed into JSONObject.");
+            RestApiUtil.handleInternalServerError("API Definition String "
+                    + "could not be parsed into JSONObject.", e, log);
         } catch (APIManagementException e) {
             String errorMessage = "Error while Auditing API : " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
