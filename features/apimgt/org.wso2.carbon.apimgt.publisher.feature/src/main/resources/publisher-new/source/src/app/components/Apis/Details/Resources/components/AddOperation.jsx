@@ -24,6 +24,8 @@ import AddIcon from '@material-ui/icons/Add';
 import { FormattedMessage } from 'react-intl';
 
 import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -128,8 +130,8 @@ export default function AddOperation(props) {
             .finally(() => setIsAdding(false));
     }
     return (
-        <Paper>
-            <Grid container direction='row' spacing={1} justify='center' alignItems='center'>
+        <Paper style={{ marginTop: '12px' }}>
+            <Grid container direction='row' spacing={3} justify='center' alignItems='center'>
                 <Grid item md={2}>
                     <FormControl margin='dense' variant='outlined' className={classes.formControl}>
                         <InputLabel ref={inputLabel} htmlFor='outlined-age-simple'>
