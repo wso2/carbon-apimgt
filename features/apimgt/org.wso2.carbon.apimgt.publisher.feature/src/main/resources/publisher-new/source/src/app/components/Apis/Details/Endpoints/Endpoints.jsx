@@ -25,7 +25,7 @@ import { Link } from 'react-router-dom';
 import NewEndpointCreate from 'AppComponents/Apis/Details/Endpoints/NewEndpointCreate';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import cloneDeep from 'lodash.clonedeep';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 import EndpointOverview from './EndpointOverview';
 import PrototypeEndpoints from './Prototype/PrototypeEndpoints';
 import { getEndpointConfigByImpl, createEndpointConfig } from './endpointUtils';
@@ -74,7 +74,7 @@ function Endpoints(props) {
     const [apiObject, setModifiedAPI] = useState(api);
     const [endpointImplementation, setEndpointImplementation] = useState('');
     const [swagger, setSwagger] = useState(defaultSwagger);
-    const isNotCreator = AuthManager.isNotCreator();
+
     const [endpointValidity, setAPIEndpointsValid] = useState({ isValid: true, message: '' });
 
     /**
@@ -313,7 +313,7 @@ function Endpoints(props) {
                         >
                             <Grid item>
                                 <Button
-                                    disabled={!endpointValidity.isValid || isNotCreator}
+                                    disabled={!endpointValidity.isValid || isRestricted(['apim:api_create'], api)}
                                     type='submit'
                                     variant='contained'
                                     color='primary'
@@ -335,7 +335,7 @@ function Endpoints(props) {
                                     </Button>
                                 </Link>
                             </Grid>
-                            {isNotCreator
+                            {isRestricted(['apim:api_create'], api)
                                 && (
                                     <Grid item>
                                         <Typography variant='body2' color='primary'>

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -29,7 +29,8 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { FormattedMessage } from 'react-intl';
 import Certificates from 'AppComponents/Apis/Details/Endpoints/GeneralConfiguration/Certificates';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 import {
     API_SECURITY_MUTUAL_SSL,
@@ -48,7 +49,7 @@ import {
 export default function TransportLevel(props) {
     const { haveMultiLevelSecurity, securityScheme, configDispatcher } = props;
     const isMutualSSLEnabled = securityScheme.includes(API_SECURITY_MUTUAL_SSL);
-    const isNotCreator = AuthManager.isNotCreator();
+    const { api } = useContext(APIContext);
 
     let mandatoryValue = 'optional';
     // If not mutual ssl security is selected, no mandatory values should be pre-selected
@@ -75,7 +76,7 @@ export default function TransportLevel(props) {
                         <FormControlLabel
                             control={(
                                 <Checkbox
-                                    disabled={isNotCreator}
+                                    disabled={isRestricted(['apim:api_create'], api)}
                                     checked={isMutualSSLEnabled}
                                     onChange={({ target: { checked, value } }) => configDispatcher({
                                         action: 'securityScheme',

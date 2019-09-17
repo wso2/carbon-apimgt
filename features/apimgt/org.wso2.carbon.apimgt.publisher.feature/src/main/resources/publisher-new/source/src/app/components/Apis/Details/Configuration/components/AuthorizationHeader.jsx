@@ -23,7 +23,7 @@ import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 
 /**
  *
@@ -34,13 +34,12 @@ import AuthManager from 'AppData/AuthManager';
  */
 export default function AuthorizationHeader(props) {
     const { api, configDispatcher } = props;
-    const isNotCreator = AuthManager.isNotCreator();
 
     return (
         <Grid container spacing={1} alignItems='center'>
             <Grid item xs={11}>
                 <TextField
-                    disabled={isNotCreator}
+                    disabled={isRestricted(['apim:api_create'], api)}
                     id='outlined-name'
                     label={(
                         <FormattedMessage

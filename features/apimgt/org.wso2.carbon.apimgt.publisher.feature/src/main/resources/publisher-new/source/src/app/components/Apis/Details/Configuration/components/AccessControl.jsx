@@ -28,7 +28,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 import ChipInput from 'material-ui-chip-input';
 import APIValidation from 'AppData/APIValidation';
 import base64url from 'base64url';
@@ -49,8 +49,6 @@ export default function AccessControl(props) {
     const [roleValidity, setRoleValidity] = useState(true);
     const [userRoleValidity, setUserRoleValidity] = useState(true);
     const { api, configDispatcher } = props;
-    const isRestricted = api.accessControl === 'RESTRICTED';
-    const isNotCreator = AuthManager.isNotCreator();
 
     const [invalidRoles, setInvalidRoles] = useState([]);
     useEffect(() => {
@@ -134,7 +132,7 @@ export default function AccessControl(props) {
                         />
                     </InputLabel>
                     <Select
-                        disabled={isNotCreator}
+                        disabled={isRestricted(['apim:api_create'], api)}
                         value={api.accessControl}
                         onChange={({ target: { value } }) => configDispatcher({ action: 'accessControl', value })}
                         input={<Input name='accessControl' id='accessControl-selector' />}
@@ -203,6 +201,7 @@ export default function AccessControl(props) {
             {isRestricted && (
                 <Grid item>
                     <ChipInput
+                        disabled={isRestricted(['apim:api_create'], api)}
                         value={api.accessControlRoles.concat(invalidRoles)}
                         alwaysShowPlaceholder={false}
                         placeholder='Enter roles and press Enter'

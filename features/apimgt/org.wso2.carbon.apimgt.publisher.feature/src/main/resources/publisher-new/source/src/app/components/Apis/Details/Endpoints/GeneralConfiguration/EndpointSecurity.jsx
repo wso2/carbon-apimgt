@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
     Grid,
@@ -25,7 +25,8 @@ import {
     FormControl,
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 /**
  * The base component for advanced endpoint configurations.
@@ -33,6 +34,7 @@ import AuthManager from 'AppData/AuthManager';
  * @returns {any} The html representation of the component.
  */
 function EndpointSecurity(props) {
+    const { api } = useContext(APIContext);
     const {
         intl,
         securityInfo,
@@ -64,8 +66,6 @@ function EndpointSecurity(props) {
         setEndpointSecurityInfo(securityInfo !== null ? securityInfo : endpointSecurityInfo);
     }, [props]);
 
-    const isNotCreator = AuthManager.isNotCreator();
-
     return (
         <Grid container direction='column'>
             <Grid item xs={12}>
@@ -77,7 +77,7 @@ function EndpointSecurity(props) {
                         />
                     </InputLabel>
                     <Select
-                        disabled={isNotCreator}
+                        disabled={isRestricted(['apim:api_create'], api)}
                         fullwidth
                         value={endpointSecurityInfo.type}
                         onChange={(event) => { onChangeEndpointAuth(event, 'type'); }}
@@ -97,7 +97,7 @@ function EndpointSecurity(props) {
             <Grid item container xs={12}>
                 <Grid item xs>
                     <TextField
-                        disabled={isNotCreator}
+                        disabled={isRestricted(['apim:api_create'], api)}
                         required
                         id='auth-userName'
                         label={(
@@ -114,7 +114,7 @@ function EndpointSecurity(props) {
                 </Grid>
                 <Grid item xs>
                     <TextField
-                        disabled={isNotCreator}
+                        disabled={isRestricted(['apim:api_create'], api)}
                         required
                         type='password'
                         id='auth-password'

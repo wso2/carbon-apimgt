@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { TextField, MenuItem, Grid, Button, withStyles } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 const algorithms = [
     {
@@ -66,7 +67,7 @@ function LoadBalanceConfig(props) {
     } = props;
     const [lbConfig, setLbConfigObject] = useState(defaultTemplateObj);
     const [algoClassNameError, setAlgoClassNameError] = useState(false);
-    const isNotCreator = AuthManager.isNotCreator();
+    const { api } = useContext(APIContext);
 
     useEffect(() => {
         setLbConfigObject(() => {
@@ -132,6 +133,7 @@ function LoadBalanceConfig(props) {
                     onChange={handleAlgorithmChange}
                     helperText='Please select the Loadbalance Algorithm.'
                     margin='normal'
+                    disabled={isRestricted(['apim:api_create'], api)}
                 >
                     {algorithms.map(algo => (
                         <MenuItem key={algo.key} value={algo.key} selected={lbConfig.algoCombo}>
@@ -152,6 +154,7 @@ function LoadBalanceConfig(props) {
                         onChange={event => handleFieldChange(event, 'algoClassName')}
                         onBlur={() => setAlgoClassNameError(lbConfig.algoClassName === '')}
                         helperText='Enter the class name of the loadbalance algorithm'
+                        disabled={isRestricted(['apim:api_create'], api)}
                         margin='normal'
                     /> : <div /> }
                 <TextField
@@ -165,6 +168,7 @@ function LoadBalanceConfig(props) {
                     onChange={event => handleFieldChange(event, 'sessionManagement')}
                     helperText='Please select the Session Management mechanism.'
                     margin='normal'
+                    disabled={isRestricted(['apim:api_create'], api)}
                 >
                     {sessionManagementOps.map(option => (
                         <MenuItem key={option.key} value={option.key}>
@@ -183,6 +187,7 @@ function LoadBalanceConfig(props) {
                     type='number'
                     placeholder='300'
                     margin='normal'
+                    disabled={isRestricted(['apim:api_create'], api)}
                 />
             </Grid>
             <Grid className={classes.configButtonContainer}>
@@ -190,7 +195,7 @@ function LoadBalanceConfig(props) {
                     color='primary'
                     autoFocus
                     onClick={submitConfiguration}
-                    disabled={lbConfig.algoClassName === '' || isNotCreator}
+                    disabled={lbConfig.algoClassName === '' || isRestricted(['apim:api_create'], api)}
                 >
                     <FormattedMessage
                         id='Apis.Details.Endpoints.EndpointOverview.loadbalance.config.save.button'
