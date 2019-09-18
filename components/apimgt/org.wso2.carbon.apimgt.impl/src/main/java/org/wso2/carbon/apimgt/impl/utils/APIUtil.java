@@ -650,6 +650,7 @@ public final class APIUtil {
                 resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
                 Scope scope = findScopeByKey(scopes, resourceScopes.get(resourceScopeKey));
                 uriTemplate.setScope(scope);
+                uriTemplate.setScopes(scope);
                 //Checking for duplicate uri template names
 
                 if (uriTemplateNames.contains(uTemplate)) {
@@ -7094,7 +7095,7 @@ public final class APIUtil {
      *
      * @return access control expose headers string
      */
-    public static String getExposedHeaders() {
+    public static String getAccessControlExposedHeaders() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_EXPOSE_HEADERS);
     }
@@ -8063,7 +8064,6 @@ public final class APIUtil {
      */
     public static String constructApisGetQuery(String query) throws APIManagementException {
         String newSearchQuery = constructQueryWithProvidedCriterias(query.trim());
-
         String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY + APIUtil.getORBasedSearchCriteria
                 (APIConstants.API_SUPPORTED_TYPE_LIST);
         newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
