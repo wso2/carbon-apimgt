@@ -155,7 +155,7 @@ export default function UploadCertificate(props) {
             <DialogTitle>
                 <Typography className={classes.uploadCertDialogHeader}>
                     <FormattedMessage
-                        id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificates.uploadCertificate'
+                        id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.uploadCertificate'
                         defaultMessage='Upload Certificate'
                     />
                 </Typography>
@@ -177,7 +177,7 @@ export default function UploadCertificate(props) {
                                 id='certificateEndpoint'
                                 label={
                                     <FormattedMessage
-                                        id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificates.endpoint'
+                                        id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint'
                                         defaultMessage='Endpoint'
                                     />
                                 }
@@ -194,7 +194,7 @@ export default function UploadCertificate(props) {
                             id='certificateAlias'
                             label={
                                 <FormattedMessage
-                                    id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificates.alias'
+                                    id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.alias'
                                     defaultMessage='Alias'
                                 />
                             }
@@ -237,7 +237,7 @@ export default function UploadCertificate(props) {
                                                     <FormattedMessage
                                                         id={
                                                             'Apis.Details.Endpoints.GeneralConfiguration' +
-                                                                '.UploadCertificates.click.or.drop.to.upload.file'
+                                                                '.UploadCertificate.click.or.drop.to.upload.file'
                                                         }
                                                         defaultMessage={
                                                             'Click or drag the certificate ' +
@@ -273,14 +273,14 @@ export default function UploadCertificate(props) {
                     }
                 >
                     <FormattedMessage
-                        id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificates.config.save.button'
+                        id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.config.save.button'
                         defaultMessage='Save'
                     />
                     {isSaving && <CircularProgress size={24} />}
                 </Button>
                 <Button onClick={closeCertificateUpload} color='secondary'>
                     <FormattedMessage
-                        id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificates.cancel.button'
+                        id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.cancel.button'
                         defaultMessage='Close'
                     />
                 </Button>
