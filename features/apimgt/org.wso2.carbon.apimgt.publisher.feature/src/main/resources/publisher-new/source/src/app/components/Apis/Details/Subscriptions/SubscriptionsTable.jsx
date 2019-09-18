@@ -520,7 +520,6 @@ class SubscriptionsTable extends Component {
         const { classes, intl } = this.props;
         const emptyRows = totalSubscription > 0 ?
             (rowsPerPage - Math.min(rowsPerPage, totalSubscription - (page * rowsPerPage))) : 0;
-        console.log(invoice);
         return (
             <div>
                 <Dialog open={showPopup} onClose={this.handleClose} class={classes.dialog} fullWidth='true'>
