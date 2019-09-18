@@ -37,7 +37,7 @@ public enum ExceptionCodes implements ErrorHandler {
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, " The tier cannot be null"),
     TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, " The tier name is invalid"),
     APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Application not found"),
-    API_NOT_FOUND(900308, "API not found", 404, "API could not be found"),
+    API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id %s not found"),
     APPLICATION_INACTIVE(900309, "Application is not active", 400, "Application is not active"),
     SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 404, "Couldn't retrieve Subscriptions for API"),
     UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be " +
