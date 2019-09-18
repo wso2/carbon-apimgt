@@ -353,7 +353,6 @@ public class ThrottleProperties {
 
     public static class JMSConnectionProperties {
         private boolean enabled = false;
-        private String destination;
         private String serviceUrl;
         private String username;
         private String password;
@@ -375,14 +374,6 @@ public class ThrottleProperties {
 
         public void setInitialDelay(long initialDelay) {
             this.initialDelay = initialDelay;
-        }
-
-        public String getDestination() {
-            return destination;
-        }
-
-        public void setDestination(String destination) {
-            this.destination = destination;
         }
 
         public String getServiceUrl() {

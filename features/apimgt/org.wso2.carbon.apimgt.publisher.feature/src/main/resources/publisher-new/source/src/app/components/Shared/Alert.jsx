@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,7 +18,12 @@
 
 import React from 'react';
 import Notification from 'rc-notification';
+import Configurations from 'Config';
+import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Message from './Message';
+
+const theme = createMuiTheme(Configurations.themes.light);
 
 /**
  * Common alerting/message displaying component for Store application, Pre-set vertical: 'top',
@@ -62,9 +67,9 @@ class Alert {
                     key: this.key,
                     duration: this.duration,
                     content: (
-                        <div>
+                        <MuiThemeProvider theme={theme}>
                             <Message handleClose={this.remove} message={this.message} type={this.type} />
-                        </div>
+                        </MuiThemeProvider>
                     ),
                 });
             })
@@ -97,7 +102,8 @@ class Alert {
                         transitionName: 'move-down',
                         style: {
                             zIndex: '2000',
-                            bottom: 0,
+                            top: 0,
+                            right: 0,
                             marginLeft: '2%',
                             position: 'fixed',
                         },
@@ -137,7 +143,11 @@ Alert.defaultDuration = 5;
 /* In seconds */
 Alert.defaultTop = 0;
 Alert.CONSTS = {
-    INFO: 'info', SUCCESS: 'success', ERROR: 'error', WARN: 'warning', LOADING: 'loading',
+    INFO: 'info',
+    SUCCESS: 'success',
+    ERROR: 'error',
+    WARN: 'warning',
+    LOADING: 'loading',
 };
 Object.freeze(Alert.CONSTS);
 export default {

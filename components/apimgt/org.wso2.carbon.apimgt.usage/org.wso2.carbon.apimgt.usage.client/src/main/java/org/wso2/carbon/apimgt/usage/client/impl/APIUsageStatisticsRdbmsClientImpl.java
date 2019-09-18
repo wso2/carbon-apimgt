@@ -795,6 +795,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 AppCallTypeDTO appCallTypeDTO;
                 while (resultSet.next()) {
                     String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
+                    String apiVersion = resultSet.getString(APIUsageStatisticsClientConstants.VERSION);
                     String publisher = resultSet.getString(APIUsageStatisticsClientConstants.API_PUBLISHER);
                     apiName = apiName + " (" + publisher + ")";
                     String callType = resultSet.getString(APIUsageStatisticsClientConstants.METHOD);
@@ -810,7 +811,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     boolean found = false;
                     for (AppCallTypeDTO dto : appApiCallTypeList) {
                         if (dto.getAppName().equals(appName)) {
-                            dto.addToApiCallTypeArray(apiName, callTypeList, hitCountList);
+                            dto.addToApiCallTypeArray(apiName, apiVersion, callTypeList, hitCountList);
                             found = true;
                             break;
                         }
@@ -818,7 +819,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     if (!found) {
                         appCallTypeDTO = new AppCallTypeDTO();
                         appCallTypeDTO.setAppName(appName);
-                        appCallTypeDTO.addToApiCallTypeArray(apiName, callTypeList, hitCountList);
+                        appCallTypeDTO.addToApiCallTypeArray(apiName, apiVersion, callTypeList, hitCountList);
                         appApiCallTypeList.add(appCallTypeDTO);
                     }
                 }

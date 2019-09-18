@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import React from 'react';
-import APICreateForm from 'AppComponents/Apis/Create/Components/APICreateForm';
+import APICreateWrapper from 'AppComponents/Apis/Create/Default/APICreateWrapper';
 
 const ApiCreateWebSocket = (props) => {
-    return (<APICreateForm {...props} type='ws' />);
+    return (<APICreateWrapper {...props} type='ws' />);
 };
 export default ApiCreateWebSocket;

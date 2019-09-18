@@ -74,5 +74,5 @@ public class ThreatProtectorConstants {
     public static final String MAX_ATTRIBUTE_LENGTH = "maxAttributeLength";
     public static final String ENTITY_EXPANSION_LIMIT = "entityExpansionLimit";
     public static final String CHILDREN_PER_ELEMENT = "maxChildrenPerElement";
-
+    
 }

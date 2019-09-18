@@ -15,6 +15,7 @@
  */
 
 
+import CONSTS from 'AppData/Constants';
 import APIClientFactory from './APIClientFactory';
 import Resource from './Resource';
 import Utils from './Utils';
@@ -40,9 +41,9 @@ export default class API extends Resource {
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getAllAPIs(callback = null) {
+    getAllAPIs(params = {}, callback = null) {
         const promiseGetAll = this.client.then((client) => {
-            return client.apis.APIs.get_apis({}, this._requestMetaData());
+            return client.apis.APIs.get_apis(params, this._requestMetaData());
         });
         if (callback) {
             return promiseGetAll.then(callback);
@@ -68,6 +69,20 @@ export default class API extends Resource {
         }
     }
 
+    /*
+     Get the inline content of a given document
+     */
+    getInlineContentOfDocument(api_id, docId) {
+        const promised_getDocContent = this.client.then((client) => {
+            const payload = {
+                apiId: api_id,
+                documentId: docId,
+            };
+            return client.apis['API Documents'].get_apis__apiId__documents__documentId__content(payload);
+        });
+        return promised_getDocContent;
+    }
+
     /**
      * Get the Documents of an API
      * @param id {String} UUID of the API in which the documents needed
@@ -76,7 +91,7 @@ export default class API extends Resource {
      */
     getDocumentsByAPIId(id, callback = null) {
         const promiseGet = this.client.then((client) => {
-            return client.apis['API (Individual)'].get_apis__apiId__documents({ apiId: id }, this._requestMetaData());
+            return client.apis['API Documents'].get_apis__apiId__documents({ apiId: id }, this._requestMetaData());
         });
         if (callback) {
             return promiseGet.then(callback);
@@ -92,26 +107,85 @@ export default class API extends Resource {
      * @param callback {function} Function which needs to be called upon success of of getting document.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getFileForDocument(apiId, docId) {
-        const promiseGetDocContent = this.client.then((client) => {
-            const payload = { apiId, documentId: docId, Accept: 'application/octet-stream' };
-            return client.apis['API (Individual)'].get_apis__apiId__documents__documentId__content(
+    getFileForDocument(api_id, docId) {
+        const promised_getDocContent = this.client.then((client) => {
+            const payload = {
+                apiId: api_id,
+                documentId: docId,
+                Accept: 'application/octet-stream',
+            };
+            return client.apis['API Documents'].get_apis__apiId__documents__documentId__content(
                 payload,
-                this._requestMetaData({ 'Content-Type': 'multipart/form-data' }),
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
             );
         });
-        return promiseGetDocContent;
+        return promised_getDocContent;
     }
 
     /**
      * Get the swagger of an API
-     * @param id {String} UUID of the API in which the swagger is needed
+     * @param apiId {String} UUID of the API in which the swagger is needed
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getSwaggerByAPIId(id, callback = null) {
+    getSwaggerByAPIId(apiId, callback = null) {
         const promiseGet = this.client.then((client) => {
-            return client.apis.APIs.get_apis__apiId__swagger({ apiId: id }, this._requestMetaData());
+            return client.apis.APIs.get_apis__apiId__swagger({ apiId }, this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get the schema of an GraphQL API
+     * @param apiId {String} UUID of the API in which the schema is needed
+     * @param callback {function} Function which needs to be called upon success of the retrieving schema
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getGraphQLSchemaByAPIId(apiId, callback = null) {
+        const promiseGet = this.client.then((client) => {
+            return client.apis.APIs.get_apis__apiId__graphql_schema({ apiId }, this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get the swagger of an API
+     * @param apiId {String} UUID of the API in which the swagger is needed
+     * @param environmentName {String} API environment name
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getSwaggerByAPIIdAndEnvironment(apiId, environmentName, callback = null) {
+        const promiseGet = this.client.then((client) => {
+            return client.apis.APIs.get_apis__apiId__swagger({ apiId, environmentName }, this._requestMetaData());
+        });
+        if (callback) {
+            return promiseGet.then(callback);
+        } else {
+            return promiseGet;
+        }
+    }
+
+    /**
+     * Get the swagger of an API
+     * @param apiId {String} UUID of the API in which the swagger is needed
+     * @param labelName {String} Micro gateway label
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getSwaggerByAPIIdAndLabel(apiId, labelName, callback = null) {
+        const promiseGet = this.client.then((client) => {
+            return client.apis.APIs.get_apis__apiId__swagger({ apiId, labelName }, this._requestMetaData());
         });
         if (callback) {
             return promiseGet.then(callback);
@@ -178,6 +252,17 @@ export default class API extends Resource {
     }
 
     /**
+     * Get all application attributes
+     * @param {function} callback which needs to be called upon success
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getAllApplicationAttributes() {
+        return this.client.then((client) => {
+            return client.apis.Settings.get_settings_application_attributes(this._requestMetaData());
+        });
+    }
+
+    /**
      * Create application
      * @param {object} application content of the application
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
@@ -198,7 +283,7 @@ export default class API extends Resource {
      */
     updateApplication(application, callback = null) {
         const promiseGet = this.client.then((client) => {
-            const payload = { applicationId: application.id, body: application };
+            const payload = { applicationId: application.applicationId, body: application };
             return client.apis.Applications.put_applications__applicationId_(payload, this._requestMetaData());
         });
         if (callback) {
@@ -211,39 +296,23 @@ export default class API extends Resource {
     /**
      * Add new comment to an existing API
      * @param apiId apiId of the api to which the comment is added
-     * @param commentInfo comment text
+     * @param comment comment text
      */
-    addComment(apiId, commentInfo, callback = null) {
-        const promise = this.client.then((client) => {
-            return client.apis['Comment (Individual)'].post_apis__apiId__comments(
-                { apiId, body: commentInfo },
-                this._requestMetaData(),
-            );
-        }).catch((error) => {
-            console.error(error);
+    addComment(apiId, comment) {
+        return this.client.then((client) => {
+            const payload = { apiId, body: comment };
+            return client.apis['Comments'].addCommentToAPI(payload, this._requestMetaData());
         });
-        if (callback) {
-            return promise.then(callback);
-        } else {
-            return promise;
-        }
     }
 
     /**
      * Get all comments for a particular API
      * @param apiId api id of the api to which the comment is added
      */
-    getAllComments(apiId, callback = null) {
-        const promiseGet = this.client.then((client) => {
-            return client.apis['Comment (Collection)'].get_apis__apiId__comments({ apiId }, this._requestMetaData());
-        }).catch((error) => {
-            console.error(error);
+    getAllComments(apiId) {
+        return this.client.then((client) => {
+            return client.apis['Comments'].getAllCommentsOfAPI({ apiId }, this._requestMetaData());
         });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
-        }
     }
 
     /**
@@ -251,20 +320,10 @@ export default class API extends Resource {
      * @param apiId api id of the api to which the comment belongs to
      * @param commentId comment id of the comment which has to be deleted
      */
-    deleteComment(apiId, commentId, callback = null) {
-        const promise = this.client.then((client) => {
-            return client.apis['Comment (Individual)'].delete_apis__apiId__comments__commentId_(
-                { apiId, commentId },
-                this._requestMetaData(),
-            );
-        }).catch((error) => {
-            console.error(error);
+    deleteComment(apiId, commentId) {
+        return this.client.then((client) => {
+            return client.apis['Comments'].deleteComment({ apiId, commentId }, this._requestMetaData());
         });
-        if (callback) {
-            return promise.then(callback);
-        } else {
-            return promise;
-        }
     }
 
     /**
@@ -289,34 +348,50 @@ export default class API extends Resource {
         }
     }
 
-    getRatingFromUser(apiId, callback = null) {
+    /**
+     * Get Rating details for a partiuclar API
+     * @param {apiId} apiId of the api
+     * @returns {promise} promise
+     */
+    getRatingFromUser(apiId) {
         const promiseGet = this.client.then((client) => {
             return client.apis.Ratings.get_apis__apiId__ratings({ apiId }, this._requestMetaData());
         }).catch((error) => {
             console.error(error);
         });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
-        }
+        return promiseGet;
     }
 
+    /**
+     * Remove Rating details for a partiuclar API for the logged in user
+     * @param {apiId} apiId of the api
+     * @returns {promise} promise
+     */
+    removeRatingOfUser(apiId) {
+        const promiseDelete = this.client.then((client) => {
+            return client.apis.Ratings.delete_apis__apiId__user_rating({ apiId }, this._requestMetaData());
+        }).catch((error) => {
+            console.error(error);
+        });
+        return promiseDelete;
+    }
 
-    addRating(apiId, ratingInfo, callback = null) {
+    /**
+     * Add Rating for a partiuclar API by the logged in user
+     * @param {apiId} apiId of the api
+     * @param {ratingInfo} ratingInfo user rating for the api
+     * @returns {promise} promise
+     */
+    addRating(apiId, ratingInfo) {
         const promise = this.client.then((client) => {
-            return client.apis['API (Individual)'].put_apis__apiId__user_rating(
+            return client.apis.Ratings.put_apis__apiId__user_rating(
                 { apiId, body: ratingInfo },
                 this._requestMetaData(),
             );
         }).catch((error) => {
-            alert('error in adding ' + error);
+            console.error(error);
         });
-        if (callback) {
-            return promise.then(callback);
-        } else {
-            return promise;
-        }
+        return promise;
     }
 
     /**
@@ -409,14 +484,26 @@ export default class API extends Resource {
 
     /**
      * Create a subscription
-     * @param apiId id of the API that needs to be subscribed
-     * @param applicationId id of the application that needs to be subscribed
-     * @param policy throttle policy applicable for the subscription
-     * @param callback callback url
+     * @param {string} apiId id of the API that needs to be subscribed
+     * @param {string} applicationId id of the application that needs to be subscribed
+     * @param {string} policy throttle policy applicable for the subscription
+     * @param {string} apiType API type
+     * @param {function} callback callback url
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    subscribe(apiId, applicationId, policy, callback = null) {
+    subscribe(apiId, applicationId, policy, apiType = CONSTS.API_TYPE, callback = null) {
         const promiseCreateSubscription = this.client.then((client) => {
-            const subscriptionData = { apiId, applicationId, throttlingPolicy: policy };
+            let subscriptionData = null;
+
+            if (apiType === CONSTS.API_TYPE) {
+                subscriptionData = {
+                    apiId, applicationId, throttlingPolicy: policy, type: apiType,
+                };
+            } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+                subscriptionData = {
+                    apiProductId: apiId, applicationId, throttlingPolicy: policy, type: apiType,
+                };
+            }
             const payload = { body: subscriptionData };
             return client.apis.Subscriptions.post_subscriptions(payload, { 'Content-Type': 'application/json' });
         });
@@ -446,14 +533,10 @@ export default class API extends Resource {
      * @returns {Promise} List of languages that supports SDK generation by swagger-codegen
      */
     getSdkLanguages() {
-        const promise_languages = this.client.then(
-            (client) => {
-                return client.apis.SDKs.get_sdk_gen_languages(
-                    {}, this._requestMetaData(),
-                );
-            },
-        );
-        return promise_languages;
+        const promiseLanguages = this.client.then((client) => {
+            return client.apis.SDKs.get_sdk_gen_languages({}, this._requestMetaData());
+        });
+        return promiseLanguages;
     }
 
     /**
@@ -463,14 +546,10 @@ export default class API extends Resource {
     getSdk(apiId, language) {
         const payload = { apiId, language };
 
-        const promise_sdk = this.client.then(
-            (client) => {
-                return client.apis.SDKs.get_apis__apiId__sdks__language_(
-                    payload, this._requestMetaData(),
-                );
-            },
-        );
-        return promise_sdk;
+        const promiseSdk = this.client.then((client) => {
+            return client.apis.SDKs.get_apis__apiId__sdks__language_(payload, this._requestMetaData());
+        });
+        return promiseSdk;
     }
 
     /**
@@ -504,5 +583,57 @@ export default class API extends Resource {
             return client.apis['Sign Up'].post_self_signup(payload, { 'Content-Type': 'application/json' });
         });
         return promise;
+    }
+
+    /**
+     * Get all tags
+     * @returns {promise} promise all tags of APIs
+     */
+    getAllTags() {
+        const promiseGet = this.client.then((client) => {
+            return client.apis.Tags.get_tags(this._requestMetaData());
+        }).catch((error) => {
+            console.error(error);
+        });
+        return promiseGet;
+    }
+
+    /**
+     * Get the thumnail of an API
+     *
+     * @param id {string} UUID of the api
+     */
+    getAPIThumbnail(id) {
+        const promised_getAPIThumbnail = this.client.then((client) => {
+            return client.apis.APIs.get_apis__apiId__thumbnail({
+                apiId: id,
+            },
+            this._requestMetaData());
+        });
+
+        return promised_getAPIThumbnail;
+    }
+
+    /**
+     * method to search apis and documents based on content
+     * @param {Object} params APIs, Documents filtering parameters i:e { "name": "MyBank API"}
+     * @returns {Promise} promise object return from SwaggerClient-js
+     * @memberof API
+     */
+    search(params) {
+        return this.client.then((client) => {
+            return client.apis['Unified Search'].get_search(params, Resource._requestMetaData());
+        });
+    }
+
+    /**
+     * method to get store settings such as grant types, scopes, application sharing settings etc
+     * @returns {Promise} promise object return from SwaggerClient-js
+     * @memberof API
+     */
+    getSettings(){
+        return this.client.then((client) => {
+            return client.apis.Settings.get_settings(this._requestMetaData());
+        });
     }
 }

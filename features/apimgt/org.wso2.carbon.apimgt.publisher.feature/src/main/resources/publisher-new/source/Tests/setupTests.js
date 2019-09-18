@@ -19,6 +19,14 @@ import React from 'react';
 import Enzyme, { shallow, render, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import renderer from 'react-test-renderer';
+import SwaggerParser from 'swagger-parser';
+import path from "path";
+
+const CARBON_APIMGT_ROOT = path.join(__dirname, '../../../../../../../../../');
+const SWAGGER_RELATIVE_PATH =
+    'components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/src/main/resources/publisher-api.yaml';
+const swaggerFilePath = path.join(CARBON_APIMGT_ROOT, SWAGGER_RELATIVE_PATH);
+
 // React 16 Enzyme adapter
 Enzyme.configure({ adapter: new Adapter() });
 
@@ -39,3 +47,4 @@ if (global.document) {
         },
     });
 }
+global.apiDef = SwaggerParser.dereference(swaggerFilePath);

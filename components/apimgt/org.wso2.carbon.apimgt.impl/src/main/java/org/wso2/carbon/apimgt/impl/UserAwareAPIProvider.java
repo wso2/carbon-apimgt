@@ -89,9 +89,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String getWsdl(APIIdentifier apiId) throws APIManagementException {
+    public ResourceFile getWSDL(APIIdentifier apiId) throws APIManagementException {
         checkAccessControlPermission(apiId);
-        return super.getWsdl(apiId);
+        return super.getWSDL(apiId);
     }
 
     @Override
@@ -202,11 +202,14 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void addDocumentation(APIIdentifier apiId,
+    public void addDocumentation(Identifier id,
                                  Documentation documentation) throws APIManagementException {
         checkCreatePermission();
-        checkAccessControlPermission(apiId);
-        super.addDocumentation(apiId, documentation);
+        //todo : implement access control check for api products too
+        if (id instanceof APIIdentifier) {
+            checkAccessControlPermission((APIIdentifier) id);
+        }
+        super.addDocumentation(id, documentation);
     }
 
     @Override
@@ -225,7 +228,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String getOpenAPIDefinition(APIIdentifier apiId) throws APIManagementException {
+    public String getOpenAPIDefinition(Identifier apiId) throws APIManagementException {
         checkAccessControlPermission(apiId);
         return super.getOpenAPIDefinition(apiId);
     }
@@ -238,9 +241,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void removeDocumentation(APIIdentifier apiId, String docId) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        super.removeDocumentation(apiId, docId);
+    public void removeDocumentation(Identifier id, String docId) throws APIManagementException {
+        checkAccessControlPermission(id);
+        super.removeDocumentation(id, docId);
     }
 
     @Override
@@ -255,7 +258,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         checkAccessControlPermission(apiId);
         super.updateDocumentation(apiId, documentation);
     }
-   
+
     @Override
     public void addDocumentationContent(API api, String documentationName,
                                         String text) throws APIManagementException {
@@ -294,7 +297,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public void checkCreatePermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_CREATE);
     }
-    
+
     public void checkManageTiersPermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.MANAGE_TIERS);
     }
@@ -386,13 +389,13 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException {
-        checkAccessControlPermission(apiId);
-        return super.getAllDocumentation(apiId);
+    public List<Documentation> getAllDocumentation(Identifier id) throws APIManagementException {
+        checkAccessControlPermission(id);
+        return super.getAllDocumentation(id);
     }
 
     @Override
-    public String getDocumentationContent(APIIdentifier identifier, String documentationName)
+    public String getDocumentationContent(Identifier identifier, String documentationName)
             throws APIManagementException {
         checkAccessControlPermission(identifier);
         return super.getDocumentationContent(identifier, documentationName);
@@ -524,6 +527,16 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public ClientCertificateDTO getClientCertificate(int tenantId, String alias) throws APIManagementException {
+        ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias);
+        if (clientCertificateDTO != null) {
+            checkAccessControlPermission(clientCertificateDTO.getApiIdentifier());
+        }
+        return clientCertificateDTO;
+    }
+
+    @Override
+    public ClientCertificateDTO getClientCertificate(int tenantId, String alias, APIIdentifier apiIdentifier)
+            throws APIManagementException {
         ClientCertificateDTO clientCertificateDTO = super.getClientCertificate(tenantId, alias);
         if (clientCertificateDTO != null) {
             checkAccessControlPermission(clientCertificateDTO.getApiIdentifier());

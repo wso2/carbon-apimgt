@@ -20,11 +20,14 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
+import { PageNotFound } from 'AppComponents/Base/Errors/index';
 
-import ApiCreateEndpoint from './Endpoint/ApiCreateEndpoint';
-import ApiCreateSwagger from './Swagger/ApiCreateSwagger';
+import APICreateWrapper from './Default/APICreateWrapper';
+import APIProductCreateWrapper from './Default/APIProductCreateWrapper';
+import ApiCreateSwagger from './OpenAPI/ApiCreateOpenAPI';
 import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
-import APICreateTopMenu from './Components/APICreateTopMenu';
+import ApiCreateGraphQL from './GraphQL/ApiCreateGraphQL';
+import ApiCreateWebSocket from './WebSocket/ApiCreateWebSocket';
 
 const styles = {
     content: {
@@ -32,22 +35,32 @@ const styles = {
     },
 };
 
+
+/**
+ *
+ * Handle routing for APIs create
+ * @param {*} props
+ * @returns @inheritdoc
+ */
 function ApiCreate(props) {
     const { classes } = props;
     return (
         <main className={classes.content}>
-            <APICreateTopMenu />
             <Switch>
-                <Route path='/apis/create/rest' component={ApiCreateEndpoint} />
-                <Route path='/apis/create/swagger' component={ApiCreateSwagger} />
+                <Route path='/apis/create/rest' component={APICreateWrapper} />
+                <Route path='/api-products/create' component={APIProductCreateWrapper} />
+                <Route path='/apis/create/graphQL' component={ApiCreateGraphQL} />
+                <Route path='/apis/create/openapi' component={ApiCreateSwagger} />
                 <Route path='/apis/create/wsdl' component={ApiCreateWSDL} />
+                <Route path='/apis/create/ws' component={ApiCreateWebSocket} />
+                <Route component={PageNotFound} />
             </Switch>
         </main>
     );
 }
 
 ApiCreate.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({ content: PropTypes.string }).isRequired,
 };
 
 export default withStyles(styles)(ApiCreate);

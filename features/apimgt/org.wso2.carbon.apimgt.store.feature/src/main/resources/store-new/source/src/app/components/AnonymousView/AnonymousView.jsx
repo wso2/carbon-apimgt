@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import { injectIntl, } from 'react-intl';
 import Utils from '../../data/Utils';
 import AuthManager from '../../data/AuthManager';
 import ConfigManager from '../../data/ConfigManager';
@@ -42,6 +43,7 @@ class AnonymousView extends React.Component {
      * @memberof AnonymousView
      */
     componentDidMount() {
+        const { intl } = this.props;
         ConfigManager.getConfigs()
             .environments.then((response) => {
                 const environments = response.data.environments;
@@ -54,7 +56,8 @@ class AnonymousView extends React.Component {
                 Utils.setEnvironment(environment);
             })
             .catch(() => {
-                console.error('Error while receiving environment configurations');
+                console.error(intl.formatMessage({
+                    defaultMessage: 'Error while receiving environment configurations', id:'AnonymousView.AnonymousView.error'}));
             });
     }
 
@@ -69,4 +72,4 @@ class AnonymousView extends React.Component {
     }
 }
 
-export default AnonymousView;
+export default injectIntl(AnonymousView);

@@ -14,6 +14,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.ApplicationsApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -51,7 +52,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Remove an application ", notes = "This operation can be used to remove an application specifying its id. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Manage application")
         })
     }, tags={ "Applications",  })
     @ApiResponses(value = { 
@@ -59,7 +60,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 202, message = "Accepted. The request has been accepted. ", response = WorkflowResponseDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdDelete(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
+    public Response applicationsApplicationIdDelete(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.applicationsApplicationIdDelete(applicationId, ifMatch, securityContext);
     }
 
@@ -69,7 +70,8 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Generate application keys", notes = "Generate keys (Consumer key/secret) for application ", response = ApplicationKeyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Manage application"),
+            @AuthorizationScope(scope = "apim:app_update", description = "Update an application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -77,7 +79,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdGenerateKeysPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Application key generation request object " ,required=true) ApplicationKeyGenerateRequestDTO body) {
+    public Response applicationsApplicationIdGenerateKeysPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Application key generation request object " ,required=true) ApplicationKeyGenerateRequestDTO body) throws APIManagementException{
         return delegate.applicationsApplicationIdGenerateKeysPost(applicationId, body, securityContext);
     }
 
@@ -95,7 +97,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested application does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+    public Response applicationsApplicationIdGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.applicationsApplicationIdGet(applicationId, ifNoneMatch, securityContext);
     }
 
@@ -113,7 +115,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdKeysGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId) {
+    public Response applicationsApplicationIdKeysGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId) throws APIManagementException{
         return delegate.applicationsApplicationIdKeysGet(applicationId, securityContext);
     }
 
@@ -131,7 +133,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdKeysKeyTypeGenerateTokenPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "Application token generation request object " ,required=true) ApplicationTokenGenerateRequestDTO body, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
+    public Response applicationsApplicationIdKeysKeyTypeGenerateTokenPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "Application token generation request object " ,required=true) ApplicationTokenGenerateRequestDTO body, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.applicationsApplicationIdKeysKeyTypeGenerateTokenPost(applicationId, keyType, body, ifMatch, securityContext);
     }
 
@@ -149,7 +151,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdKeysKeyTypeGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType,  @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId) {
+    public Response applicationsApplicationIdKeysKeyTypeGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType,  @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId) throws APIManagementException{
         return delegate.applicationsApplicationIdKeysKeyTypeGet(applicationId, keyType, groupId, securityContext);
     }
 
@@ -159,7 +161,8 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update grant types and callback url of an application ", notes = "This operation can be used to update grant types and callback url of an application. (Consumer Key and Consumer Secret are ignored) Upon succesfull you will retrieve the updated key details as the response. ", response = ApplicationKeyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Manage application"),
+            @AuthorizationScope(scope = "apim:app_update", description = "Update an application")
         })
     }, tags={ "Application Keys",  })
     @ApiResponses(value = { 
@@ -167,7 +170,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdKeysKeyTypePut(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "Grant types/Callback URL update request object " ,required=true) ApplicationKeyDTO body) {
+    public Response applicationsApplicationIdKeysKeyTypePut(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType, @ApiParam(value = "Grant types/Callback URL update request object " ,required=true) ApplicationKeyDTO body) throws APIManagementException{
         return delegate.applicationsApplicationIdKeysKeyTypePut(applicationId, keyType, body, securityContext);
     }
 
@@ -185,7 +188,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met (Will be supported in future). ", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdKeysKeyTypeRegenerateSecretPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType) {
+    public Response applicationsApplicationIdKeysKeyTypeRegenerateSecretPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType) throws APIManagementException{
         return delegate.applicationsApplicationIdKeysKeyTypeRegenerateSecretPost(applicationId, keyType, securityContext);
     }
 
@@ -203,7 +206,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdMapKeysPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Application key mapping request object " ,required=true) ApplicationKeyMappingRequestDTO body) {
+    public Response applicationsApplicationIdMapKeysPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Application key mapping request object " ,required=true) ApplicationKeyMappingRequestDTO body) throws APIManagementException{
         return delegate.applicationsApplicationIdMapKeysPost(applicationId, body, securityContext);
     }
 
@@ -213,7 +216,8 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update an application ", notes = "This operation can be used to update an application. Upon succesfull you will retrieve the updated application as the response. ", response = ApplicationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Manage application"),
+            @AuthorizationScope(scope = "apim:app_update", description = "Update an application")
         })
     }, tags={ "Applications",  })
     @ApiResponses(value = { 
@@ -221,7 +225,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdPut(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Application object that needs to be updated " ,required=true) ApplicationDTO body, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
+    public Response applicationsApplicationIdPut(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Application object that needs to be updated " ,required=true) ApplicationDTO body, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.applicationsApplicationIdPut(applicationId, body, ifMatch, securityContext);
     }
 
@@ -240,7 +244,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 401, message = "Un authorized. The user is not authorized to view the application . ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested application does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdScopesGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId,  @ApiParam(value = "Filter user by roles. ")  @QueryParam("filterByUserRoles") Boolean filterByUserRoles, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+    public Response applicationsApplicationIdScopesGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId,  @ApiParam(value = "Filter user by roles. ")  @QueryParam("filterByUserRoles") Boolean filterByUserRoles, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.applicationsApplicationIdScopesGet(applicationId, filterByUserRoles, ifNoneMatch, securityContext);
     }
 
@@ -258,7 +262,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = ErrorDTO.class) })
-    public Response applicationsGet( @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId,  @ApiParam(value = "**Search condition**.  You can search for an application by specifying the name as \"query\" attribute.  Eg. \"app1\" will match an application if the name is exactly \"app1\".  Currently this does not support wildcards. Given name must exactly match the application name. ")  @QueryParam("query") String query,  @ApiParam(value = "", allowableValues="name, throttlingPolicy, status")  @QueryParam("sortBy") String sortBy,  @ApiParam(value = "", allowableValues="asc, desc")  @QueryParam("sortOrder") String sortOrder,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+    public Response applicationsGet( @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId,  @ApiParam(value = "**Search condition**.  You can search for an application by specifying the name as \"query\" attribute.  Eg. \"app1\" will match an application if the name is exactly \"app1\".  Currently this does not support wildcards. Given name must exactly match the application name. ")  @QueryParam("query") String query,  @ApiParam(value = "", allowableValues="name, throttlingPolicy, status")  @QueryParam("sortBy") String sortBy,  @ApiParam(value = "", allowableValues="asc, desc")  @QueryParam("sortOrder") String sortOrder,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.applicationsGet(groupId, query, sortBy, sortOrder, limit, offset, ifNoneMatch, securityContext);
     }
 
@@ -268,7 +272,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Create a new application ", notes = "This operation can be used to create a new application specifying the details of the application in the payload. ", response = ApplicationDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+            @AuthorizationScope(scope = "apim:app_manage", description = "Manage application")
         })
     }, tags={ "Applications" })
     @ApiResponses(value = { 
@@ -277,7 +281,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
         @ApiResponse(code = 409, message = "Conflict. Application already exists. ", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = ErrorDTO.class) })
-    public Response applicationsPost(@ApiParam(value = "Application object that is to be created. " ,required=true) ApplicationDTO body) {
+    public Response applicationsPost(@ApiParam(value = "Application object that is to be created. " ,required=true) ApplicationDTO body) throws APIManagementException{
         return delegate.applicationsPost(body, securityContext);
     }
 }

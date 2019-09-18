@@ -17,18 +17,20 @@
 */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings;
 
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionUsingOASParser;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -59,6 +61,9 @@ public class SettingsMappingUtil {
                 environmentListDTO = EnvironmentMappingUtil.fromEnvironmentCollectionToDTO(environments.values());
             }
             settingsDTO.setEnvironment(environmentListDTO.getList());
+            settingsDTO.setMonetizationAttributes(getMonetizationAttributes());
+            settingsDTO.setExternalStoresEnabled(
+                    APIUtil.isExternalStoresEnabled(RestApiUtil.getLoggedInUserTenantDomain()));
         }
         settingsDTO.setScopes(GetScopeList());
         return settingsDTO;
@@ -77,12 +82,40 @@ public class SettingsMappingUtil {
         } catch (IOException e) {
             log.error("Error while reading the swagger definition", e);
         }
-        APIDefinition apiDefinitionUsingOASParser = new APIDefinitionUsingOASParser();
-        Set<Scope> scopeSet = apiDefinitionUsingOASParser.getScopes(definition);
+        APIDefinition parser = OASParserUtil.getOASParser(definition);
+        Set<Scope> scopeSet = parser.getScopes(definition);
         List<String> scopeList = new ArrayList<>();
         for (Scope entry : scopeSet) {
             scopeList.add(entry.getKey());
         }
         return scopeList;
+    }
+
+    /**
+     * This method returns the monetization properties from configuration
+     *
+     * @return List<String> monetization properties
+     * @throws APIManagementException
+     */
+    private List<MonetizationAttributeDTO> getMonetizationAttributes() {
+
+        List<MonetizationAttributeDTO> monetizationAttributeDTOSList = new ArrayList<MonetizationAttributeDTO>();
+        JSONArray monetizationAttributes = APIUtil.getMonetizationAttributes();
+
+        for (int i = 0; i < monetizationAttributes.size(); i++) {
+            JSONObject monetizationAttribute = (JSONObject) monetizationAttributes.get(i);
+            MonetizationAttributeDTO monetizationAttributeDTO = new MonetizationAttributeDTO();
+            monetizationAttributeDTO.setName((String) monetizationAttribute.get(APIConstants.Monetization.ATTRIBUTE));
+            monetizationAttributeDTO.setDisplayName(
+                    (String) monetizationAttribute.get(APIConstants.Monetization.ATTRIBUTE_DISPLAY_NAME));
+            monetizationAttributeDTO.setDescription(
+                    (String) monetizationAttribute.get(APIConstants.Monetization.ATTRIBUTE_DESCRIPTION));
+            monetizationAttributeDTO
+                    .setRequired((Boolean) monetizationAttribute.get(APIConstants.Monetization.IS_ATTRIBITE_REQUIRED));
+            monetizationAttributeDTO
+                    .setHidden((Boolean) monetizationAttribute.get(APIConstants.Monetization.IS_ATTRIBUTE_HIDDEN));
+            monetizationAttributeDTOSList.add(monetizationAttributeDTO);
+        }
+        return monetizationAttributeDTOSList;
     }
 }

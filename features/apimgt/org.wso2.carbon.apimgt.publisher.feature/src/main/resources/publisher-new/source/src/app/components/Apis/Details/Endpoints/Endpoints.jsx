@@ -1,177 +1,371 @@
-/*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+/**
+ * Copyright (c)  WSO2 Inc. (http://wso2.com) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import TextField from '@material-ui/core/TextField';
+import React, { useContext, useEffect, useState } from 'react';
+import { Grid, FormControlLabel, Radio, RadioGroup } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import FormControl from '@material-ui/core/FormControl';
-import { FormattedMessage } from 'react-intl';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
-import API from 'AppData/api';
-import ApiContext from '../components/ApiContext';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import PropTypes from 'prop-types';
+import Button from '@material-ui/core/Button';
+import { Link } from 'react-router-dom';
+import NewEndpointCreate from 'AppComponents/Apis/Details/Endpoints/NewEndpointCreate';
+import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
+import cloneDeep from 'lodash.clonedeep';
+import { isRestricted } from 'AppData/AuthManager';
+import EndpointOverview from './EndpointOverview';
+import PrototypeEndpoints from './Prototype/PrototypeEndpoints';
+import { getEndpointConfigByImpl, createEndpointConfig } from './endpointUtils';
 
 const styles = theme => ({
-    FormControl: {
-        padding: '0 20px',
-        width: '100%',
-        marginTop: 0,
+    endpointTypesWrapper: {
+        display: 'flex',
+        alignItems: 'center',
+        flexDirection: 'row',
+        margin: '2px',
     },
-    FormControlOdd: {
-        padding: '0 20px',
-        backgroundColor: theme.palette.background.paper,
-        width: '100%',
-        marginTop: 0,
+    root: {
+        flexGrow: 1,
+        paddingRight: '10px',
+    },
+    buttonSection: {
+        marginTop: theme.spacing(2),
+    },
+    titleWrapper: {
+        paddingTop: '10px',
+    },
+    radioGroup: {
+        display: 'flex',
+        flexDirection: 'row',
+        marginLeft: theme.spacing(2),
+    },
+    endpointValidityMessage: {
+        color: theme.palette.error.main,
+    },
+    errorMessageContainer: {
+        marginTop: theme.spacing(),
     },
 });
+
+const endpointImplType = ['managed', 'PROTOTYPED'];
+const defaultSwagger = { paths: {} };
+
 /**
- * @export @inheritDoc
- * @class InputForm
- * @extends {Component}
+ * The base component of the endpoints view.
+ * @param {any} props The props passed to the layout
+ * @returns {any} HTML representation.
  */
-class Endpoints extends Component {
+function Endpoints(props) {
+    const { classes, intl } = props;
+    const { api, updateAPI } = useContext(APIContext);
+    const [apiObject, setModifiedAPI] = useState(api);
+    const [endpointImplementation, setEndpointImplementation] = useState('');
+    const [swagger, setSwagger] = useState(defaultSwagger);
+
+    const [endpointValidity, setAPIEndpointsValid] = useState({ isValid: true, message: '' });
+
     /**
-     * @inheritDoc
-     * @returns {React.Component}
-     * @memberof Endpoints
+     * Method to update the api.
+     *
+     * @param {function} updateFunc The api update function.
      */
-    handleInputChange () {
-        console.info('handle input change');
-    }
-    handleSubmit () {
-        console.info('handle submit');
-    }
-    showEndpoint (api, type) {
-        if(api.endpoint.length > 0){
-            for(var i=0; i< api.endpoint.length; i++){
-                if( type === "prod" && api.endpoint[i].type === "http"){
-                    return api.endpoint[i].inline.endpointConfig.list[0].url;
-                } else if( type === "sand" && api.endpoint[i].type === "sandbox_endpoints"){
-                    return api.endpoint[i].inline.endpointConfig.list[0].url;
-                }
-            }
-            
+    const saveAPI = () => {
+        if (apiObject !== {}) {
+            updateAPI(apiObject);
         }
-    }
-    render() {
-        const { classes } = this.props;
-        return (
-            <ApiContext.Consumer>
-                {({ api }) => (
-                    <Grid container spacing={24} className={classes.root}>
-                        <Grid item xs={12} md={8}>
-                            <div className={classes.titleWrapper}>
-                                <Typography variant='h4' align='left' className={classes.mainTitle}>
-                                   Endpoints
-                                </Typography>
-                            </div>
-                            <form onSubmit={this.handleSubmit}>
-                                <FormControl margin='normal' className={classes.FormControl}>
-                                    <TextField
-                                        error={false}
-                                        fullWidth
-                                        id='prodEndpoint'
-                                        placeholder='E.g: http://appserver/resource'
-                                        helperText={
-                                            false ? (
-                                                <FormattedMessage
-                                                    id='error.empty'
-                                                    defaultMessage='This field can not be empty.'
-                                                />
-                                            ) : (
-                                                <FormattedMessage
-                                                    id='api.create.endpoint.help'
-                                                    defaultMessage='This is the actual endpoint where the API implementation can be found'
-                                                />
-                                            )
-                                        }
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        label='Production Endpoint'
-                                        type='text'
-                                        name='Production Endpoint'
-                                        margin='normal'
-                                        value={this.showEndpoint(api,'prod')}
-                                        onChange={this.handleInputChange}
-                                    />
-                                </FormControl>
-                                <FormControl margin='normal' className={classes.FormControlOdd}>
-                                    <TextField
-                                        error={false}
-                                        fullWidth
-                                        id='sandboxEndpoint'
-                                        placeholder='E.g: http://appserver/resource'
-                                        helperText={
-                                            false ? (
-                                                <FormattedMessage
-                                                    id='error.empty'
-                                                    defaultMessage='This field can not be empty.'
-                                                />
-                                            ) : (
-                                                <FormattedMessage
-                                                    id='api.create.endpoint.help'
-                                                    defaultMessage='This is the actual endpoint where the API implementation can be found'
-                                                />
-                                            )
-                                        }
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        label='Sandbox Endpoint'
-                                        type='text'
-                                        name='Sandbox Endpoint'
-                                        margin='normal'
-                                        value={this.showEndpoint(api,'sand')}
-                                        onChange={this.handleInputChange}
-                                    />
-                                </FormControl>
-                                <Grid
-                                    container
-                                    direction='row'
-                                    alignItems='flex-start'
-                                    spacing={16}
-                                    className={classes.buttonSection}
-                                >
-                                    <Grid item>
-                                        <Button type='submit' variant='contained' color='primary'>
-                                            Save
-                                        </Button>
-                                    </Grid>
-                                    <Grid item>
-                                        <Button onClick={() => this.props.history.push('/apis')}>
-                                            <FormattedMessage id='cancel' defaultMessage='Cancel' />
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </form>
+        if (Object.getOwnPropertyNames(defaultSwagger).length !== Object.getOwnPropertyNames(swagger).length) {
+            console.log('Updating swagger...');
+            api.updateSwagger(swagger).then((resp) => {
+                console.log('success', resp);
+            }).catch((err) => {
+                console.log(err);
+            });
+        }
+    };
+
+    /**
+     * Validate the provided endpoint config object.
+     *
+     * @param {any} endpointConfig The provided endpoint config for validation.
+     * @param {string} implementationType The api implementation type (INLINE/ ENDPOINT)
+     * @return {{isValid: boolean, message: string}} The endpoint validity information.
+     * */
+    const validate = (endpointConfig, implementationType) => {
+        if (endpointConfig === null) {
+            return { isValid: false, message: '' };
+        }
+        const endpointType = endpointConfig.endpoint_type;
+        switch (endpointType) {
+            case 'awslambda':
+                if (endpointConfig.accessKey === '' || endpointConfig.secretKey === '') {
+                    return {
+                        isValid: false,
+                        message: intl.formatMessage({
+                            id: 'Apis.Details.Endpoints.Endpoints.missing.accessKey.secretKey.error',
+                            defaultMessage: 'Access Key and/ or Secret Key should not be empty',
+                        }),
+                    };
+                }
+                break;
+            case 'load_balance':
+                if (endpointConfig.production_endpoints[0].url === ''
+                    && endpointConfig.sandbox_endpoints[0].url === '') {
+                    return {
+                        isValid: false,
+                        message: intl.formatMessage({
+                            id: 'Apis.Details.Endpoints.Endpoints.missing.endpoint.loadbalance',
+                            defaultMessage: 'Production or Sandbox Endpoints should not be empty',
+                        }),
+                    };
+                }
+                break;
+            default:
+                if (endpointConfig.implementation_status === 'prototyped') {
+                    if (implementationType === 'ENDPOINT') {
+                        if (endpointConfig.production_endpoints.url === '') {
+                            return {
+                                isValid: false,
+                                message: intl.formatMessage({
+                                    id: 'Apis.Details.Endpoints.Endpoints.missing.prototype.url',
+                                    defaultMessage: 'Prototype Endpoint URL should not be empty',
+                                }),
+                            };
+                        }
+                    }
+                } else if (endpointConfig.production_endpoints.url === '' &&
+                    endpointConfig.sandbox_endpoints.url === '') {
+                    return {
+                        isValid: false,
+                        message: intl.formatMessage({
+                            id: 'Apis.Details.Endpoints.Endpoints.missing.endpoint.error',
+                            defaultMessage: 'Either one of Production or Sandbox Endpoints should be added.',
+                        }),
+                    };
+                }
+                break;
+        }
+        return {
+            isValid: true,
+            message: '',
+        };
+    };
+
+    useEffect(() => {
+        const { lifeCycleStatus } = api;
+        const apiClone = cloneDeep(api.toJSON());
+        setModifiedAPI(apiClone);
+        const implType = apiClone.endpointConfig === null ? undefined : apiClone.endpointConfig.implementation_status;
+        setEndpointImplementation(() => {
+            return lifeCycleStatus === 'PROTOTYPED' || implType === 'prototyped' ?
+                endpointImplType[1] : endpointImplType[0];
+        });
+    }, []);
+
+    useEffect(() => {
+        setAPIEndpointsValid(validate(apiObject.endpointConfig, apiObject.endpointImplementationType));
+    }, [apiObject]);
+
+    /**
+     * Get the swagger definition if the endpoint implementation type is 'prototyped'
+     * */
+    useEffect(() => {
+        if (endpointImplementation === 'PROTOTYPED') {
+            api.getSwagger(apiObject.id).then((resp) => {
+                setSwagger(resp.obj);
+            }).catch((err) => {
+                console.err(err);
+            });
+        }
+    }, [endpointImplementation]);
+
+    /**
+     * Method to update the swagger object.
+     *
+     * @param {any} swaggerObj The updated swagger object.
+     * */
+    const changeSwagger = (swaggerObj) => {
+        setSwagger(swaggerObj);
+    };
+
+    /**
+     * Method to handle the Managed/ Prototyped endpoint selection.
+     *
+     * @param {any} event The option change event.
+     * */
+    const handleEndpointManagedChange = (event) => {
+        const implOption = event.target.value;
+        setEndpointImplementation(implOption);
+        const tmpEndpointConfig = getEndpointConfigByImpl(implOption);
+        setModifiedAPI({ ...apiObject, endpointConfig: tmpEndpointConfig });
+    };
+
+    /**
+     * Generate endpoint configuration based on the selected endpoint type and set to the api object.
+     *
+     * @param {string} endpointType The endpoint type.
+     * @param {string} implementationType The endpoint implementationType. (Required only for prototype endpoints)
+     * */
+    const generateEndpointConfig = (endpointType, implementationType) => {
+        const config = createEndpointConfig(endpointType, implementationType);
+        setModifiedAPI(() => {
+            if (endpointType === 'prototyped') {
+                if (implementationType === 'mock') {
+                    return { ...apiObject, endpointConfig: config, endpointImplementationType: 'INLINE' };
+                }
+                return { ...apiObject, endpointConfig: config, endpointImplementationType: 'ENDPOINT' };
+            } else {
+                return { ...apiObject, endpointConfig: config };
+            }
+        });
+        setEndpointImplementation(() => {
+            return apiObject.lifeCycleStatus === 'PROTOTYPED' || endpointType === 'prototyped' ?
+                endpointImplType[1] : endpointImplType[0];
+        });
+    };
+
+    return (
+        <React.Fragment>
+            {/* Since the api is set to the state in component did mount, check both the api and the apiObject. */}
+            {api.endpointConfig === null && apiObject.endpointConfig === null ?
+                <NewEndpointCreate generateEndpointConfig={generateEndpointConfig} /> :
+                <div className={classes.root}>
+                    <Grid container spacing={16}>
+                        <Grid item>
+                            <Typography variant='h4' align='left' className={classes.titleWrapper}>
+                                <FormattedMessage
+                                    id='Apis.Details.Endpoints.Endpoints.endpoints.header'
+                                    defaultMessage='Endpoints'
+                                />
+                            </Typography>
                         </Grid>
+                        {apiObject.type === 'HTTP' && apiObject.endpointConfig.type !== 'awslambda' ?
+                            <Grid item>
+                                <RadioGroup
+                                    aria-label='endpointImpl'
+                                    name='endpointImpl'
+                                    className={classes.radioGroup}
+                                    value={endpointImplementation}
+                                    onChange={handleEndpointManagedChange}
+                                >
+                                    <FormControlLabel
+                                        value='managed'
+                                        control={<Radio />}
+                                        label={<FormattedMessage
+                                            id='Apis.Details.Endpoints.Endpoints.managed'
+                                            defaultMessage='Managed'
+                                        />}
+                                    />
+                                    <FormControlLabel
+                                        value='PROTOTYPED'
+                                        control={<Radio />}
+                                        label={<FormattedMessage
+                                            id='Apis.Details.Endpoints.Endpoints.prototyped'
+                                            defaultMessage='Prototyped'
+                                        />}
+                                    />
+                                </RadioGroup>
+                            </Grid> : <div />
+                        }
                     </Grid>
-                )}
-            </ApiContext.Consumer>
-        );
-    }
+                    <div>
+                        <Grid container>
+                            <Grid item xs={12} className={classes.endpointsContainer}>
+                                {endpointImplementation === 'PROTOTYPED' ?
+                                    <PrototypeEndpoints
+                                        implementation_method={apiObject.endpointConfig.implementation_status}
+                                        api={apiObject}
+                                        modifyAPI={setModifiedAPI}
+                                        swaggerDef={swagger}
+                                        updateSwagger={changeSwagger}
+                                    /> :
+                                    <EndpointOverview api={apiObject} onChangeAPI={setModifiedAPI} />
+                                }
+                            </Grid>
+                        </Grid>
+                        {
+                            endpointValidity.isValid ?
+                                <div /> :
+                                <Grid item className={classes.errorMessageContainer}>
+                                    <Typography className={classes.endpointValidityMessage}>
+                                        {endpointValidity.message}
+                                    </Typography>
+                                </Grid>
+                        }
+                        <Grid
+                            container
+                            direction='row'
+                            alignItems='flex-start'
+                            spacing={4}
+                            className={classes.buttonSection}
+                        >
+                            <Grid item>
+                                <Button
+                                    disabled={!endpointValidity.isValid || isRestricted(['apim:api_create'], api)}
+                                    type='submit'
+                                    variant='contained'
+                                    color='primary'
+                                    onClick={() => saveAPI()}
+                                >
+                                    <FormattedMessage
+                                        id='Apis.Details.Endpoints.Endpoints.save'
+                                        defaultMessage='Save'
+                                    />
+                                </Button>
+                            </Grid>
+                            <Grid item>
+                                <Link to={'/apis/' + api.id + '/overview'}>
+                                    <Button>
+                                        <FormattedMessage
+                                            id='Apis.Details.Endpoints.Endpoints.cancel'
+                                            defaultMessage='Cancel'
+                                        />
+                                    </Button>
+                                </Link>
+                            </Grid>
+                            {isRestricted(['apim:api_create'], api)
+                                && (
+                                    <Grid item>
+                                        <Typography variant='body2' color='primary'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Endpoints.Endpoints.update.not.allowed'
+                                                defaultMessage={'*You are not authorized to update Endpoints of' +
+                                                ' the API due to insufficient permissions'}
+                                            />
+                                        </Typography>
+                                    </Grid>
+                                )
+                            }
+                        </Grid>
+                    </div>
+                </div>
+            }
+        </React.Fragment>
+
+    );
 }
 
 Endpoints.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        root: PropTypes.shape({}),
+        buttonSection: PropTypes.shape({}),
+        endpointTypesWrapper: PropTypes.shape({}),
+        mainTitle: PropTypes.shape({}),
+    }).isRequired,
+    api: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(Endpoints);
+export default injectIntl(withStyles(styles)(Endpoints));

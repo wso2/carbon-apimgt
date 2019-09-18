@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>org.wso2.carbon.apimgt.usage</artifactId>
-        <version>6.4.227-SNAPSHOT</version>
+        <version>6.5.108-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -53,6 +53,11 @@
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -72,6 +77,8 @@
                             org.wso2.carbon.apimgt.usage.publisher.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                         <Import-Package>
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             javax.servlet;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.http;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
@@ -81,19 +88,7 @@
                     </instructions>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-                <version>1.7.4</version>
-            </plugin>
+
         </plugins>
     </build>
 </project>

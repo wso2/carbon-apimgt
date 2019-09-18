@@ -27,12 +27,10 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import Paper from '@material-ui/core/Paper';
 import InputAdornment from '@material-ui/core/InputAdornment';
-import User from '@material-ui/icons/AccountCircle';
-import Lock from '@material-ui/icons/Lock';
-import Person from '@material-ui/icons/Person';
-import Mail from '@material-ui/icons/Mail';
+import Icon from '@material-ui/core/Icon';
 import { Link } from 'react-router-dom';
 import Checkbox from '@material-ui/core/Checkbox';
+import { FormattedMessage, injectIntl, } from 'react-intl';
 import AuthManager from '../../data/AuthManager';
 import Utils from '../../data/Utils';
 import ConfigManager from '../../data/ConfigManager';
@@ -94,6 +92,7 @@ class SignUp extends React.Component {
      * @memberof SignUp
      */
     componentDidMount() {
+        const { intl } = this.props;
         ConfigManager.getConfigs()
             .environments.then((response) => {
                 const environments = response.data.environments;
@@ -109,7 +108,12 @@ class SignUp extends React.Component {
                 Utils.setEnvironment(environment);
             })
             .catch(() => {
-                console.error('Error while receiving environment configurations');
+                console.error(
+                    intl.formatMessage({
+                        defaultMessage: 'Error while receiving environment configurations',
+                        id: 'AnonymousView.SignUp.error.env',
+                    }),
+                );
             });
         ConfigManager.getConfigs()
             .policyRoutes.then((response) => {
@@ -117,12 +121,20 @@ class SignUp extends React.Component {
                     privacyPolicyUrl: response.data.privacyPolicyUrl,
                     cookiePolicyUrl: response.data.cookiePolicyUrl,
                 });
-                if (this.state.privacyPolicyUrl !== '/policy/privacy-policy' || this.state.cookiePolicyUrl !== '/policy/cookie-policy') {
+                if (
+                    this.state.privacyPolicyUrl !== '/policy/privacy-policy'
+                    || this.state.cookiePolicyUrl !== '/policy/cookie-policy'
+                ) {
                     this.setState({ isExternal: true });
                 }
             })
             .catch(() => {
-                console.error('Error while receiving policy routes configurations');
+                console.error(
+                    intl.formatMessage({
+                        defaultMessage: 'Error while receiving policy routes configurations',
+                        id: 'AnonymousView.SignUp.error.policy',
+                    }),
+                );
             });
     }
 
@@ -134,7 +146,12 @@ class SignUp extends React.Component {
     handleClick = () => {
         this.handleAuthentication()
             .then(() => this.handleSignUp())
-            .catch(() => console.log('Error occurred during authentication'));
+            .catch(() => console.log(
+                intl.formatMessage({
+                    defaultMessage: 'Error occurred during authentication',
+                    id: 'AnonymousView.SignUp.error.auth',
+                }),
+            ));
     };
 
     /**
@@ -148,9 +165,19 @@ class SignUp extends React.Component {
         } = this.state;
         if (!username || !password || !firstName || !lastName || !email || error) {
             if (error) {
-                Alert.warning('Please re-check password');
+                Alert.warning(
+                    intl.formatMessage({
+                        defaultMessage: 'Please re-check password',
+                        id: 'AnonymousView.SignUp.recheck',
+                    }),
+                );
             } else {
-                Alert.warning('Please fill all required fields');
+                Alert.warning(
+                    intl.formatMessage({
+                        defaultMessage: 'Please fill all required fields',
+                        id: 'AnonymousView.SignUp.fill.all.required',
+                    }),
+                );
             }
         } else {
             const user_data = {
@@ -164,14 +191,29 @@ class SignUp extends React.Component {
             const promise = api.createUser(user_data);
             promise
                 .then(() => {
-                    console.log('User created successfully.');
+                    console.log(
+                        intl.formatMessage({
+                            defaultMessage: 'User created successfully.',
+                            id: 'AnonymousView.SignUp.created.success',
+                        }),
+                    );
                     this.authManager.logout();
-                    Alert.info('User added successfully. You can now sign into the API store.');
+                    Alert.info(
+                        intl.formatMessage({
+                            defaultMessage: 'User added successfully. You can now sign into the API store.',
+                            id: 'AnonymousView.SignUp.added.success',
+                        }),
+                    );
                     const redirect_url = '/login';
                     this.props.history.push(redirect_url);
                 })
                 .catch(() => {
-                    console.log('Error while creating user');
+                    console.log(
+                        intl.formatMessage({
+                            defaultMessage: 'Error while creating user',
+                            id: 'AnonymousView.SignUp.create.error',
+                        }),
+                    );
                 });
         }
     };
@@ -204,7 +246,10 @@ class SignUp extends React.Component {
         if (event.target.value !== this.state.password) {
             this.setState({
                 error: true,
-                errorMessage: 'Password does not match',
+                errorMessage: intl.formatMessage({
+                    defaultMessage: 'Password does not match',
+                    id: 'AnonymousView.SignUp.password.not.match',
+                }),
             });
         } else {
             this.setState({
@@ -225,7 +270,11 @@ class SignUp extends React.Component {
         if (!regex.test(password)) {
             this.setState({
                 validation: true,
-                validationError: 'Password must contain minimum 8 characters, at least one upper case letter and one number',
+                validationError: intl.formatMessage({
+                    defaultMessage:
+                        'Password must contain minimum 8 characters, at least one upper case letter and one number',
+                    id: 'AnonymousView.SignUp.password.must.contain.minimum',
+                }),
             });
         } else {
             this.setState({
@@ -258,7 +307,16 @@ class SignUp extends React.Component {
     render() {
         const { classes } = this.props;
         const {
-            environments, error, errorMessage, policy, environmentId, validation, validationError, privacyPolicyUrl, cookiePolicyUrl, isExternal,
+            environments,
+            error,
+            errorMessage,
+            policy,
+            environmentId,
+            validation,
+            validationError,
+            privacyPolicyUrl,
+            cookiePolicyUrl,
+            isExternal,
         } = this.state;
         if (!environments[environmentId]) {
             return <LoadingAnimation />;
@@ -271,11 +329,18 @@ class SignUp extends React.Component {
                             <Grid item sm={3} xs={12}>
                                 <Grid container direction='column'>
                                     <Grid item>
-                                        <img className='brand' src='/store-new/site/public/images/logo.svg' alt='wso2-logo' />
+                                        <img
+                                            className='brand'
+                                            src='/store-new/site/public/images/logo.svg'
+                                            alt='wso2-logo'
+                                        />
                                     </Grid>
                                     <Grid item>
                                         <Typography type='subheading' align='right' gutterBottom>
-                                            API STORE
+                                            <FormattedMessage
+                                                id='AnonymousView.SignUp.api.store'
+                                                defaultMessage='API STORE'
+                                            />
                                         </Typography>
                                     </Grid>
                                 </Grid>
@@ -287,14 +352,20 @@ class SignUp extends React.Component {
                                     <Paper elevation={1} square className='login-paper'>
                                         <form className='login-form'>
                                             <Typography type='body1' gutterBottom>
-                                                Create your account
+                                                <FormattedMessage
+                                                    id='AnonymousView.SignUp.create.your.account'
+                                                    defaultMessage='Create your account'
+                                                />
                                             </Typography>
                                             <span>
                                                 <FormControl>
                                                     <TextField
                                                         required
                                                         id='username'
-                                                        label='Username'
+                                                        label={intl.formatMessage({
+                                                            defaultMessage: 'Username',
+                                                            id: 'AnonymousView.SignUp.input.username',
+                                                        })}
                                                         type='text'
                                                         autoComplete='username'
                                                         margin='normal'
@@ -302,7 +373,7 @@ class SignUp extends React.Component {
                                                         InputProps={{
                                                             startAdornment: (
                                                                 <InputAdornment position='start'>
-                                                                    <User />
+                                                                    <Icon>account_circle</Icon>
                                                                 </InputAdornment>
                                                             ),
                                                         }}
@@ -310,7 +381,10 @@ class SignUp extends React.Component {
                                                     <TextField
                                                         required
                                                         id='password'
-                                                        label='Password'
+                                                        label={intl.formatMessage({
+                                                            defaultMessage: 'Password',
+                                                            id: 'AnonymousView.SignUp.input.password',
+                                                        })}
                                                         type='password'
                                                         autoComplete='current-password'
                                                         margin='normal'
@@ -318,7 +392,7 @@ class SignUp extends React.Component {
                                                         InputProps={{
                                                             startAdornment: (
                                                                 <InputAdornment position='start'>
-                                                                    <Lock />
+                                                                    <Icon>lock</Icon>
                                                                 </InputAdornment>
                                                             ),
                                                         }}
@@ -329,7 +403,10 @@ class SignUp extends React.Component {
                                                         required
                                                         error={error}
                                                         id='rePassword'
-                                                        label='Re-type Password'
+                                                        label={intl.formatMessage({
+                                                            defaultMessage: 'Re-type Password',
+                                                            id: 'AnonymousView.SignUp.retype.password',
+                                                        })}
                                                         type='password'
                                                         autoComplete='current-password'
                                                         margin='normal'
@@ -346,14 +423,17 @@ class SignUp extends React.Component {
                                                     <TextField
                                                         required
                                                         id='firstName'
-                                                        label='First Name'
+                                                        label={intl.formatMessage({
+                                                            defaultMessage: 'First Name',
+                                                            id: 'AnonymousView.SignUp.input.firstname',
+                                                        })}
                                                         type='text'
                                                         margin='normal'
                                                         onChange={this.handleChange('firstName')}
                                                         InputProps={{
                                                             startAdornment: (
                                                                 <InputAdornment position='start'>
-                                                                    <Person />
+                                                                    <Icon>person</Icon>
                                                                 </InputAdornment>
                                                             ),
                                                         }}
@@ -361,7 +441,10 @@ class SignUp extends React.Component {
                                                     <TextField
                                                         required
                                                         id='lastName'
-                                                        label='Last Name'
+                                                        label={intl.formatMessage({
+                                                            defaultMessage: 'Last Name',
+                                                            id: 'AnonymousView.SignUp.input.lastname',
+                                                        })}
                                                         type='text'
                                                         margin='normal'
                                                         onChange={this.handleChange('lastName')}
@@ -376,33 +459,47 @@ class SignUp extends React.Component {
                                                     <TextField
                                                         required
                                                         id='email'
-                                                        label='E mail'
+                                                        label={intl.formatMessage({
+                                                            defaultMessage: 'E mail',
+                                                            id: 'AnonymousView.SignUp.input.email',
+                                                        })}
                                                         type='email'
                                                         margin='normal'
                                                         onChange={this.handleChange('email')}
                                                         InputProps={{
                                                             startAdornment: (
                                                                 <InputAdornment position='start'>
-                                                                    <Mail />
+                                                                    <Icon>mail</Icon>
                                                                 </InputAdornment>
                                                             ),
                                                         }}
                                                     />
                                                     <FormControl>
                                                         <Typography>
-                                                            After successfully signing in, a cookie is placed in your browser to track your session. See our
-                                                            {' '}
+                                                            <FormattedMessage
+                                                                id='AnonymousView.SignUp.policy.section.description'
+                                                                defaultMessage='After successfully signing in, a cookie is placed in your
+                                                            browser to track your session. See our'
+                                                            />
                                                             {isExternal ? (
                                                                 <a href={cookiePolicyUrl} target='_blank'>
-                                                                    Cookie Policy
+                                                                    <FormattedMessage
+                                                                        id='AnonymousView.SignUp.policy.section.cookie.policy'
+                                                                        defaultMessage='Cookie Policy'
+                                                                    />
                                                                 </a>
                                                             ) : (
                                                                 <Link to={cookiePolicyUrl} target='_blank'>
-                                                                    Cookie Policy
+                                                                    <FormattedMessage
+                                                                        id='AnonymousView.SignUp.policy.section.cookie.policy'
+                                                                        defaultMessage='Cookie Policy'
+                                                                    />
                                                                 </Link>
                                                             )}
-                                                            {' '}
-                                                            for more details.
+                                                            <FormattedMessage
+                                                                id='AnonymousView.SignUp.policy.section.for.more.details'
+                                                                defaultMessage='for more details.'
+                                                            />
                                                         </Typography>
                                                     </FormControl>
                                                     <FormControlLabel
@@ -410,16 +507,32 @@ class SignUp extends React.Component {
                                                         label={(
                                                             <p>
                                                                 <strong>
-                                                                    I hereby confirm that I have read and understood the
-                                                                    {' '}
-                                                                    {''}
+                                                                    <FormattedMessage
+                                                                        id='AnonymousView.SignUp.policy.section.i.heareby'
+                                                                        defaultMessage='I hereby confirm that I have read and understood the'
+                                                                    />
+
                                                                     {isExternal ? (
-                                                                        <a href={privacyPolicyUrl} target='_blank' className={classes.linkDisplay}>
-                                                                            Privacy Policy.
+                                                                        <a
+                                                                            href={privacyPolicyUrl}
+                                                                            target='_blank'
+                                                                            className={classes.linkDisplay}
+                                                                        >
+                                                                            <FormattedMessage
+                                                                                id='AnonymousView.SignUp.policy.section.privacy.policy'
+                                                                                defaultMessage='Privacy Policy.'
+                                                                            />
                                                                         </a>
                                                                     ) : (
-                                                                        <Link to='/policy/privacy-policy' target='_blank' className={classes.linkDisplay}>
-                                                                            Privacy Policy.
+                                                                        <Link
+                                                                            to='/policy/privacy-policy'
+                                                                            target='_blank'
+                                                                            className={classes.linkDisplay}
+                                                                        >
+                                                                            <FormattedMessage
+                                                                                id='AnonymousView.SignUp.policy.section.privacy.policy'
+                                                                                defaultMessage='Privacy Policy.'
+                                                                            />
                                                                         </Link>
                                                                     )}
                                                                 </strong>
@@ -429,12 +542,23 @@ class SignUp extends React.Component {
                                                 </FormControl>
                                             </span>
                                             <div className={classes.buttonsWrapper}>
-                                                <Button variant='raised' color='primary' onClick={this.handleClick.bind(this)} disabled={!policy}>
-                                                    Sign up
+                                                <Button
+                                                    variant='raised'
+                                                    color='primary'
+                                                    onClick={this.handleClick.bind(this)}
+                                                    disabled={!policy}
+                                                >
+                                                    <FormattedMessage
+                                                        id='AnonymousView.SignUp.btn.signup'
+                                                        defaultMessage='Sign up'
+                                                    />
                                                 </Button>
                                                 <Link to='/' className={classes.linkDisplay}>
                                                     <Button variant='raised' className={classes.buttonAlignment}>
-                                                        Back to Store
+                                                        <FormattedMessage
+                                                            id='AnonymousView.SignUp.btn.back.to'
+                                                            defaultMessage='Back to Store'
+                                                        />
                                                     </Button>
                                                 </Link>
                                             </div>
@@ -454,4 +578,4 @@ SignUp.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(SignUp);
+export default injectIntl(withStyles(styles)(SignUp));

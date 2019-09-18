@@ -460,7 +460,7 @@ public class APIMgtDAOTest {
     public void testUpdateSubscriptionPolicy() throws APIManagementException {
         String policyName = "TestUpdateSubPolicy";
         SubscriptionPolicy policy = (SubscriptionPolicy) getSubscriptionPolicy(policyName);
-        policy.setMonetizationPlan(APIConstants.FIXED_RATE);
+        policy.setMonetizationPlan(APIConstants.Monetization.FIXED_RATE);
         policy.setMonetizationPlanProperties(new HashMap<String, String>());
         apiMgtDAO.addSubscriptionPolicy(policy);
         policy = (SubscriptionPolicy) getSubscriptionPolicy(policyName);
@@ -608,7 +608,7 @@ public class APIMgtDAOTest {
         SubscriptionPolicy policy = (SubscriptionPolicy) getSubscriptionPolicy(policyName);
         policy.setRateLimitCount(20);
         policy.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
-        policy.setMonetizationPlan(APIConstants.FIXED_RATE);
+        policy.setMonetizationPlan(APIConstants.Monetization.FIXED_RATE);
         apiMgtDAO.addSubscriptionPolicy(policy);
 
         APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
@@ -812,7 +812,7 @@ public class APIMgtDAOTest {
         policy.setDescription("Subscription policy Description");
         policy.setTenantId(6);
         policy.setBillingPlan("FREE");
-        policy.setMonetizationPlan(APIConstants.FIXED_RATE);
+        policy.setMonetizationPlan(APIConstants.Monetization.FIXED_RATE);
         policy.setMonetizationPlanProperties(new HashMap<String, String>());
         RequestCountLimit defaultLimit = new RequestCountLimit();
         defaultLimit.setTimeUnit("min");
@@ -953,7 +953,7 @@ public class APIMgtDAOTest {
         Policy applicationPolicy = getApplicationPolicy("testCreateApplicationRegistrationEntry");
         SubscriptionPolicy subscriptionPolicy = (SubscriptionPolicy) getSubscriptionPolicy
                 ("testCreateApplicationRegistrationEntry");
-        subscriptionPolicy.setMonetizationPlan(APIConstants.FIXED_RATE);
+        subscriptionPolicy.setMonetizationPlan(APIConstants.Monetization.FIXED_RATE);
         apiMgtDAO.addSubscriptionPolicy((SubscriptionPolicy) subscriptionPolicy);
         applicationPolicy.setTenantId(-1234);
         apiMgtDAO.addApplicationPolicy((ApplicationPolicy) applicationPolicy);
@@ -1057,7 +1057,7 @@ public class APIMgtDAOTest {
         String customAttributes = "{api:abc}";
         subscriptionPolicy.setTenantId(-1234);
         subscriptionPolicy.setCustomAttributes(customAttributes.getBytes());
-        subscriptionPolicy.setMonetizationPlan(APIConstants.FIXED_RATE);
+        subscriptionPolicy.setMonetizationPlan(APIConstants.Monetization.FIXED_RATE);
         subscriptionPolicy.setMonetizationPlanProperties(new HashMap<String, String>());
         apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
         SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(subscriptionPolicy.getPolicyName(), -1234);

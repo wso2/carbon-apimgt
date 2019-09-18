@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1;
 
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
@@ -7,6 +8,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.SubscriptionsApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -51,8 +53,8 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Subscription list returned. ", response = SubscriptionListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response subscriptionsGet( @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ")  @QueryParam("apiId") String apiId,  @ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ")  @QueryParam("applicationId") String applicationId,  @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
-        return delegate.subscriptionsGet(apiId, applicationId, groupId, offset, limit, ifNoneMatch, securityContext);
+    public Response subscriptionsGet( @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ")  @QueryParam("apiId") String apiId,  @ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ")  @QueryParam("applicationId") String applicationId,  @ApiParam(value = "**API TYPE** Identifies the type API(API or API_PRODUCT). ")  @QueryParam("apiType") String apiType,  @ApiParam(value = "Application Group Id ")  @QueryParam("groupId") String groupId,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.subscriptionsGet(apiId, applicationId, apiType, groupId, offset, limit, ifNoneMatch, securityContext);
     }
 
     @POST
@@ -68,7 +70,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Successful response with the newly created objects as entity in the body. ", response = SubscriptionDTO.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = Void.class) })
-    public Response subscriptionsMultiplePost(@ApiParam(value = "Subscription objects that should to be added " ,required=true) List<SubscriptionDTO> body) {
+    public Response subscriptionsMultiplePost(@ApiParam(value = "Subscription objects that should to be added " ,required=true) List<SubscriptionDTO> body) throws APIManagementException{
         return delegate.subscriptionsMultiplePost(body, securityContext);
     }
 
@@ -78,7 +80,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add a new subscription ", notes = "This operation can be used to add a new subscription providing the id of the API and the application. ", response = SubscriptionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+            @AuthorizationScope(scope = "apim:sub_manage", description = "Manage subscriptions")
         })
     }, tags={ "Subscriptions",  })
     @ApiResponses(value = { 
@@ -86,7 +88,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @ApiResponse(code = 202, message = "Accepted. The request has been accepted. ", response = WorkflowResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = Void.class) })
-    public Response subscriptionsPost(@ApiParam(value = "Subscription object that should to be added " ,required=true) SubscriptionDTO body) {
+    public Response subscriptionsPost(@ApiParam(value = "Subscription object that should to be added " ,required=true) SubscriptionDTO body) throws APIManagementException{
         return delegate.subscriptionsPost(body, securityContext);
     }
 
@@ -96,7 +98,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Remove a subscription ", notes = "This operation can be used to remove a subscription. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+            @AuthorizationScope(scope = "apim:sub_manage", description = "Manage subscriptions")
         })
     }, tags={ "Subscriptions",  })
     @ApiResponses(value = { 
@@ -104,7 +106,7 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @ApiResponse(code = 202, message = "Accepted. The request has been accepted. ", response = WorkflowResponseDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
-    public Response subscriptionsSubscriptionIdDelete(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) {
+    public Response subscriptionsSubscriptionIdDelete(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId, @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.subscriptionsSubscriptionIdDelete(subscriptionId, ifMatch, securityContext);
     }
 
@@ -116,12 +118,29 @@ SubscriptionsApiService delegate = new SubscriptionsApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "Subscriptions" })
+    }, tags={ "Subscriptions",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Subscription returned ", response = SubscriptionDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. Requested Subscription does not exist. ", response = ErrorDTO.class) })
-    public Response subscriptionsSubscriptionIdGet(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+    public Response subscriptionsSubscriptionIdGet(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.subscriptionsSubscriptionIdGet(subscriptionId, ifNoneMatch, securityContext);
+    }
+
+    @GET
+    @Path("/{subscriptionId}/usage")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get details of a pending invoice for a monetized subscription with metered billing.", notes = "This operation can be used to get details of a pending invoice for a monetized subscription with metered billing. ", response = APIMonetizationUsageDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:sub_manage", description = "Manage subscriptions")
+        })
+    }, tags={ "API Monetization" })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Details of a pending invoice returned. ", response = APIMonetizationUsageDTO.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. Requested Subscription does not exist. ", response = ErrorDTO.class) })
+    public Response subscriptionsSubscriptionIdUsageGet(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId) throws APIManagementException{
+        return delegate.subscriptionsSubscriptionIdUsageGet(subscriptionId, securityContext);
     }
 }

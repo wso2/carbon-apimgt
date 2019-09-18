@@ -16,15 +16,11 @@
  * under the License.
  */
 
-import { generateStatic } from '@stoplight/prism-http/lib/mocker/generator/JSONSchema';
-import SwaggerParser from 'swagger-parser';
-import fs from 'fs';
-import path from 'path';
-
-const CARBON_APIMGT_ROOT = path.join(__dirname, '../../../../../../../../../../');
-const SWAGGER_RELATIVE_PATH =
-    'components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/src/main/resources/publisher-api.yaml';
-const swaggerFilePath = path.join(CARBON_APIMGT_ROOT, SWAGGER_RELATIVE_PATH);
+/**
+  * Swagger-parser library(https://apidevtools.org/swagger-parser/) is used for parsing the swagger YAML file
+  * Prism-HTTP module is used for generating the mock data from the swagger definition
+  */
+import { generateStatic } from '@stoplight/prism-http/dist/mocker/generator/JSONSchema';
 
 /**
  *
@@ -34,8 +30,59 @@ const swaggerFilePath = path.join(CARBON_APIMGT_ROOT, SWAGGER_RELATIVE_PATH);
  * @returns {*} Mocked API model
  */
 export default async function getMockedModel(modelName) {
-    const swaggerFile = fs.readFileSync(swaggerFilePath, 'utf8');
-    const { YAML } = SwaggerParser;
-    const swagger = await SwaggerParser.dereference(YAML.parse(swaggerFile));
+    const swagger = await apiDef;
     return generateStatic(swagger.definitions[modelName]);
+}
+
+/**
+ *
+ * Return all the available scopes under securityDefinitions in publisher-api.yaml
+ * @export
+ * @returns {Array} All the scopes available in publisher-api swagger
+ */
+export async function getAllScopes() {
+    const swagger = await apiDef;
+    return Object.keys(swagger.securityDefinitions.OAuth2Security.scopes);
+}
+
+/**
+ *
+ * Returns the example identified by the 'id' from the swagger extension 'x-examples' for the particular path and verb.
+ * The example will contain both request and response information.
+ * @param {string} resource resource path
+ * @param {string} verb http verb
+ * @param {string} id id of the example
+ * @returns {Promise<*>} the example for the given operation and id
+ */
+export async function getExampleById(resource, verb, id) {
+    const swagger = await apiDef;
+    return swagger.paths[resource][verb]['x-examples'].find(x => x.id === id);
+}
+
+/**
+ *
+ * Returns the example identified by the 'id' from the swagger extension 'x-examples' for the particular path and verb.
+ * The example will only contain response information (status and body).
+ * @param {string} resource resource path
+ * @param {string} verb http verb
+ * @param {string} id id of the example
+ * @returns {Promise<*>} the example response for the given operation and id
+ */
+export async function getExampleResponseById(resource, verb, id) {
+    const example = await getExampleById(resource, verb, id);
+    return example.response;
+}
+
+/**
+ *
+ * Returns the example identified by the 'id' from the swagger extension 'x-examples' for the particular path and verb.
+ * The example will only contain response body.
+ * @param {string} resource resource path
+ * @param {string} verb http verb
+ * @param {string} id id of the example
+ * @returns {Promise<*>} the example response body for the given operation and id
+ */
+export async function getExampleBodyById(resource, verb, id) {
+    const example = await getExampleResponseById(resource, verb, id);
+    return example.body;
 }

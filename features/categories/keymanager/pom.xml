@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>feature-categories</artifactId>
-        <version>6.4.227-SNAPSHOT</version>
+        <version>6.5.108-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -54,16 +54,30 @@
                                 </properties>
                             </adviceFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.apimgt.keymanager:${carbon.apimgt.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.core:${carbon.identity.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.oauth:${carbon.identity-inbound-auth-oauth.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.provider.server:${carbon.identity-inbound-auth-openid.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.apimgt.keymanager:${carbon.apimgt.version}
+                                </importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.core:${carbon.identity.version}
+                                </importFeatureDef>
+                                <importFeatureDef>
+                                    org.wso2.carbon.identity.oauth:${carbon.identity-inbound-auth-oauth.version}
+                                </importFeatureDef>
+                                <importFeatureDef>
+                                    org.wso2.carbon.identity.provider.server:${carbon.identity-inbound-auth-openid.version}
+                                </importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.idp.mgt:${carbon.identity.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.application.authentication.framework.server:${carbon.identity.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.logging.mgt:${carbon.commons.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.security.mgt:${carbon.identity.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.identity-user-ws.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.um.ws.service.client:${carbon.identity-user-ws.version}</importFeatureDef>
+                                <importFeatureDef>
+                                    org.wso2.carbon.identity.application.authentication.framework.server:${carbon.identity.version}
+                                </importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.logging.mgt:${carbon.commons.version}
+                                </importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.security.mgt:${carbon.identity.version}
+                                </importFeatureDef>
+                                <importFeatureDef>
+                                    org.wso2.carbon.um.ws.service.server:${carbon.identity-user-ws.version}
+                                </importFeatureDef>
+                                <importFeatureDef>
+                                    org.wso2.carbon.um.ws.service.client:${carbon.identity-user-ws.version}
+                                </importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

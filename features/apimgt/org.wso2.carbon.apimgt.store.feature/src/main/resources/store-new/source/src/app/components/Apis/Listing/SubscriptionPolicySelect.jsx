@@ -21,6 +21,8 @@ import { withStyles } from '@material-ui/core/styles';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
+import { FormattedMessage } from 'react-intl';
+import { ScopeValidation, resourceMethods, resourcePaths } from '../../Shared/ScopeValidation';
 
 /**
  *
@@ -32,7 +34,7 @@ const styles = theme => ({
         display: 'flex',
     },
     buttonGap: {
-        marginRight: 10,
+        marginLeft: 20,
     },
 });
 
@@ -75,33 +77,40 @@ class SubscriptionPolicySelect extends React.Component {
         const { selectedPolicy } = this.state;
 
         return (
-            policies &&
-            <div className={classes.root}>
-                <Button
-                    variant='contained'
-                    size='small'
-                    color='primary'
-                    className={classes.buttonGap}
-                    onClick={() => {
-                        handleSubscribe(applicationId, apiId, selectedPolicy);
-                    }}
-                >
-                    Subscribe
-                </Button>
-                <Select
-                    value={selectedPolicy}
-                    onChange={(e) => {
-                        this.setState({ selectedPolicy: e.target.value });
-                    }}
-                >
-                    {policies.map(policy => (
-                        <MenuItem value={policy}>
-                            {policy}
-                        </MenuItem>
-                    ))}
+            policies
+            && (
+                <div className={classes.root}>
+                    <Select
+                        value={selectedPolicy}
+                        onChange={(e) => {
+                            this.setState({ selectedPolicy: e.target.value });
+                        }}
+                    >
+                        {policies.map(policy => (
+                            <MenuItem value={policy}>
+                                {policy}
+                            </MenuItem>
+                        ))}
 
-                </Select>
-            </div>
+                    </Select>
+                    <ScopeValidation
+                        resourcePath={resourcePaths.SUBSCRIPTIONS}
+                        resourceMethod={resourceMethods.POST}
+                    >
+                        <Button
+                            variant='contained'
+                            size='small'
+                            color='primary'
+                            className={classes.buttonGap}
+                            onClick={() => {
+                                handleSubscribe(applicationId, apiId, selectedPolicy);
+                            }}
+                        >
+                            <FormattedMessage defaultMessage='Subscribe' id='Apis.Listing.SubscriptionPolicySelect.subscribe' />
+                        </Button>
+                    </ScopeValidation>
+                </div>
+            )
         );
     }
 }
@@ -111,4 +120,3 @@ SubscriptionPolicySelect.propTypes = {
 };
 
 export default withStyles(styles, { withTheme: true })(SubscriptionPolicySelect);
-

@@ -16,29 +16,29 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import green from '@material-ui/core/colors/green';
 import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import { FormattedMessage } from 'react-intl';
+import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import CheckItem from './CheckItem';
-import ApiContext from '../components/ApiContext';
+import API from 'AppData/api';
+import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import Resources from './Resources';
-import Policies from './Policies';
+import Operations from './Operations';
+import ProductResources from './ProductResources';
 import Configuration from './Configuration';
-import Endpoints from './Endpoints';
-import BusinessInformation from './BusinessInformation';
-import Scopes from './Scopes';
-import Documents from './Documents';
-import AdditionalProperties from './AdditionalProperties';
-import Lifecycle from './Lifecycle';
-
 
 const styles = theme => ({
     root: {
         ...theme.mixins.gutters(),
-        paddingTop: theme.spacing.unit * 2,
-        paddingBottom: theme.spacing.unit * 2,
+        paddingTop: theme.spacing(2),
+        paddingBottom: theme.spacing(2),
+    },
+    contentWrapper: {
+        marginTop: theme.spacing(2),
     },
     buttonSuccess: {
         backgroundColor: green[500],
@@ -54,7 +54,7 @@ const styles = theme => ({
         marginBottom: 20,
     },
     chip: {
-        margin: theme.spacing.unit / 2,
+        margin: theme.spacing(0.5),
         padding: 0,
         height: 'auto',
         '& span': {
@@ -65,16 +65,16 @@ const styles = theme => ({
         display: 'flex',
     },
     imageWrapper: {
-        marginRight: theme.spacing.unit * 3,
+        marginRight: theme.spacing(3),
     },
     subtitle: {
-        marginTop: theme.spacing.unit,
+        marginTop: theme.spacing(0),
     },
     specialGap: {
-        marginTop: theme.spacing.unit * 3,
+        marginTop: theme.spacing(3),
     },
     resourceTitle: {
-        marginBottom: theme.spacing.unit * 3,
+        marginBottom: theme.spacing(3),
     },
     ListRoot: {
         padding: 0,
@@ -100,7 +100,7 @@ const styles = theme => ({
         fontSize: theme.typography.pxToRem(14),
         border: '1px solid #dadde9',
         '& b': {
-          fontWeight: theme.typography.fontWeightMedium,
+            fontWeight: theme.typography.fontWeightMedium,
         },
     },
     lifecycleWrapper: {
@@ -110,48 +110,62 @@ const styles = theme => ({
     lifecycleIcon: {
         fontSize: 36,
         color: 'green',
-        marginRight: theme.spacing.unit,
+        marginRight: theme.spacing(1),
+    },
+    leftSideWrapper: {
+        paddingRight: theme.spacing(2),
+    },
+    notConfigured: {
+        color: 'rgba(0, 0, 0, 0.40)',
     },
 });
 
+/**
+ * API Overview page
+ *
+ * @param {*} props
+ * @returns
+ */
 function Overview(props) {
-    const { classes } = props;
+    const { classes, api: newApi } = props;
+    const { api } = useContext(ApiContext);
+    function getResourcesClassForAPIs(apiType) {
+        switch (apiType) {
+            case 'GRAPHQL':
+                return <Operations parentClasses={classes} api={api} />;
+            case 'APIProduct':
+                return <ProductResources parentClasses={classes} api={api} />;
+            default:
+                return <Resources parentClasses={classes} api={api} />;
+        }
+    }
+
+    if (newApi.apiType === API.CONSTS.APIProduct) {
+        api.type = API.CONSTS.APIProduct;
+    }
     return (
-        <ApiContext.Consumer>
-            {({ api }) => (
-                <Grid container spacing={24}>
-                    {console.info(api)}
-                    <Grid item xs={12}>
-                        <Grid container>
-                            <CheckItem itemSuccess itemLabel='Endpoints' />
-                            <CheckItem itemSuccess={false} itemLabel='Policies' />
-                            <CheckItem itemSuccess itemLabel='Resources' />
-                            <CheckItem itemSuccess={false} itemLabel='Scopes' />
-                            <CheckItem itemSuccess={false} itemLabel='Documents' />
-                            <CheckItem itemSuccess={false} itemLabel='Business Information' />
-                            <CheckItem itemSuccess={false} itemLabel='Description' />
+        <React.Fragment>
+            <div className={classes.titleWrapper}>
+                <Typography variant='h4' align='left' className={classes.mainTitle}>
+                    <FormattedMessage
+                        id='Apis.Details.Overview.Overview.topic.header'
+                        defaultMessage='Overview'
+                    />
+                </Typography>
+            </div>
+            <div className={classes.contentWrapper}>
+                <Paper className={classes.root} elevation={1}>
+                    <Grid container spacing={24}>
+                        <Grid item xs={12} md={12} lg={12} className={classes.leftSideWrapper}>
+                            <Configuration parentClasses={classes} />
+                        </Grid>
+                        <Grid item xs={12} md={12} lg={12}>
+                            {getResourcesClassForAPIs(api.type)}
                         </Grid>
                     </Grid>
-                    <Grid item xs={12}>
-                        <Grid container spacing={24}>
-                            <Grid item xs={12} md={6} lg={6}>
-                                <Configuration parentClasses={classes} />
-                                <Resources parentClasses={classes} api={api} />
-                                <AdditionalProperties parentClasses={classes} />
-                            </Grid>
-                            <Grid item xs={12} md={6} lg={6}>
-                                <Lifecycle parentClasses={classes} />
-                                <Endpoints parentClasses={classes} api={api} />
-                                <BusinessInformation parentClasses={classes} />
-                                <Scopes parentClasses={classes} />
-                                <Documents parentClasses={classes} api={api} />
-                                <Policies parentClasses={classes} />
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Grid>
-            )}
-        </ApiContext.Consumer>
+                </Paper>
+            </div>
+        </React.Fragment>
     );
 }
 

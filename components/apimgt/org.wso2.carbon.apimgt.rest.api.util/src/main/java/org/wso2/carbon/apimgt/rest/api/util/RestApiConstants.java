@@ -33,10 +33,19 @@ public final class RestApiConstants {
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
 
+    public static final String REQUEST_AUTHENTICATION_SCHEME = "request_authentication_scheme";
+    public static final String OAUTH2_AUTHENTICATION = "oauth2";
+    public static final String BASIC_AUTHENTICATION = "basic_auth";
+
+    public static final String USER_REST_API_SCOPES = "user_rest_api_scopes";
+
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
-    
+
     public static final String RESOURCE = "resource";
     public static final String RESOURCE_API = "API";
+    public static final String RESOURCE_API_PRODUCT = "API Product";
+    public static final String RESOURCE_PRODUCT_DOCUMENTATION = "product documentation";
+    public static final String RESOURCE_RATING = "Rating";
     public static final String RESOURCE_APPLICATION = "application";
     public static final String RESOURCE_SUBSCRIPTION = "subscription";
     public static final String RESOURCE_DOCUMENTATION = "documentation";
@@ -52,6 +61,8 @@ public final class RestApiConstants {
     public static final String RESOURCE_TIER_UPDATE_PERMISSION = RESOURCE_TIER + "/update-permission";
     public static final String RESOURCE_TAG = "tag";
     public static final String RESOURCE_WORKFLOW = "workflow";
+    public static final String RESOURCE_COMMENTS = "comments";
+    public static final String RESOURCE_MEDIATION_POLICY = "mediation-policy";
 
     public static final String API_ID_DELIMITER = "-";
     public static final String QUERY_PARAM = "{query}";
@@ -62,6 +73,7 @@ public final class RestApiConstants {
     public static final String SUBSCRIBER_PARAM = "{subscriber}";
     public static final String GROUPID_PARAM = "{groupId}";
     public static final String APIID_PARAM = "{apiId}";
+    public static final String APIPRODUCTID_PARAM = "{apiProductId}";
     public static final String APPLICATIONID_PARAM = "{applicationId}";
     public static final String DOCUMENTID_PARAM = "{documentId}";
     public static final String API_VERSION_PARAM="{version}";
@@ -70,11 +82,12 @@ public final class RestApiConstants {
 
     //todo better to take from cxf level
     public static final String RESOURCE_PATH_APIS = "/apis";
+    public static final String RESOURCE_PATH_API_PRODUCTS = "/api-products";
     public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
     public static final String RESOURCE_PATH_THROTTLING = "/throttling";
     public static final String RESOURCE_PATH_LABEL = "/labels";
     public static final String RESOURCE_PATH_THROTTLING_POLICIES = RESOURCE_PATH_THROTTLING + "/policies";
-    public static final String RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS = RESOURCE_PATH_THROTTLING 
+    public static final String RESOURCE_PATH_THROTTLING_BLOCK_CONDITIONS = RESOURCE_PATH_THROTTLING
             + "/blacklist";
     public static final String RESOURCE_PATH_THROTTLING_POLICIES_ADVANCED = RESOURCE_PATH_THROTTLING_POLICIES
             + "/advanced";
@@ -94,10 +107,20 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_TIERS_APPLICATION = RESOURCE_PATH_TIERS + "/application";
     public static final String RESOURCE_PATH_TIERS_RESOURCE = RESOURCE_PATH_TIERS + "/resource";
     public static final String RESOURCE_PATH_TAGS = "/tags";
+    public static final String RESOURCE_PATH_RATINGS = "/ratings";
     public static final String RESOURCE_PATH_THUMBNAIL = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/thumbnail";
     public static final String RESOURCE_PATH_DOCUMENTS = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/documents";
+    public static final String RESOURCE_PATH_PRODUCT_DOCUMENTS = RESOURCE_PATH_API_PRODUCTS + "/" + APIPRODUCTID_PARAM + "/documents";
+    public static final String RESOURCE_PATH_THUMBNAIL_API_PRODUCT = RESOURCE_PATH_API_PRODUCTS + "/"
+            + APIPRODUCTID_PARAM + "/thumbnail";
+    public static final String RESOURCE_PATH_DOCUMENTS_API_PRODUCT = RESOURCE_PATH_API_PRODUCTS + "/"
+            + APIPRODUCTID_PARAM + "/documents";
     public static final String RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID = RESOURCE_PATH_DOCUMENTS + "/" + DOCUMENTID_PARAM;
+    public static final String RESOURCE_PATH_PRODUCT_DOCUMENTS_DOCUMENT_ID = RESOURCE_PATH_PRODUCT_DOCUMENTS + "/" + DOCUMENTID_PARAM;
     public static final String RESOURCE_PATH_DOCUMENT_CONTENT = RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID + "/content";
+    public static final String RESOURCE_PATH_PRODUCT_DOCUMENT_CONTENT = RESOURCE_PATH_PRODUCT_DOCUMENTS_DOCUMENT_ID + "/content";
+    public static final String RESOURCE_PATH_RESOURCE_PATHS = "/resource-paths";
+    public static final String RESOURCE_PATH_COMMENTS = "/comments";
     public static final String REST_API_STORE_VERSION_0 ="v0.14";
     public static final String REST_API_STORE_VERSION_1 ="v1";
     public static final String REST_API_STORE_CONTEXT="/api/am/store/";
@@ -145,12 +168,23 @@ public final class RestApiConstants {
     public static final String DOCUMENTS_GET_PAGINATION_URL =
             RESOURCE_PATH_DOCUMENTS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
+    public static final String RATINGS_GET_PAGINATION_URL =
+            RESOURCE_PATH_RATINGS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+
     public static final String TIERS_GET_PAGINATION_URL =
             RESOURCE_PATH_TIERS + "/" + TIER_LEVEL_PARAM + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
     public static final String TAGS_GET_PAGINATION_URL =
             RESOURCE_PATH_TAGS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
+    public static final String RESOURCE_PATH_PAGINATION_URL =
+            RESOURCE_PATH_RESOURCE_PATHS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+
+    public static final String API_PRODUCTS_GET_PAGINATION_URL =
+            RESOURCE_PATH_API_PRODUCTS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM;
+
+    public static final String PRODUCT_DOCUMENTS_GET_PAGINATION_URL =
+            RESOURCE_PATH_PRODUCT_DOCUMENTS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_NAME = "name";
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_VALUE = "value";
@@ -159,7 +193,7 @@ public final class RestApiConstants {
     public static final String SORT_BY_NAME = "name";
     public static final String SORT_BY_THROTTLING_TIER = "throttlingTier";
     public static final String SORT_BY_STATUS = "status";
-    
+
     //default error messages
     public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "Forbidden";
     public static final String STATUS_NOT_FOUND_MESSAGE_DEFAULT = "Not Found";
@@ -169,7 +203,7 @@ public final class RestApiConstants {
     public static final String STATUS_CONFLICT_MESSAGE_RESOURCE_ALREADY_EXISTS = "Resource Already Exists";
     public static final String STATUS_CONFLICT_MESSAGE_DEFAULT = "Conflict";
 
-    public static final String STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT = "The server encountered " 
+    public static final String STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT = "The server encountered "
             + "an internal error. Please contact administrator.";
 
     // common attributes
@@ -198,6 +232,15 @@ public final class RestApiConstants {
     public static final String SEQUENCE_CONTENT = "content";
     public static final String SEQUENCE_ARTIFACT_ID = "id";
     public static final String HTTP_METHOD = "method";
-    
-    public static final String[] SUPPORTED_METHODS = {"get", "put", "post", "delete", "patch"};
+
+    public static final String GET_API_PRODUCT_QUERY  = "type=APIProduct";
+
+    public static final String RETURN_MODEL = "model";
+    public static final String RETURN_MODEL_BEFORE_ADDED = "model_before_added";
+    public static final String RETURN_DTO = "dto";
+
+    public static final String OAS_VERSION_2 = "v2";
+    public static final String OAS_VERSION_3 = "v3";
+
+    public static final String MESSAGE_EXCHANGE_TOKEN_INFO = "message_exchange_token_info";
 }

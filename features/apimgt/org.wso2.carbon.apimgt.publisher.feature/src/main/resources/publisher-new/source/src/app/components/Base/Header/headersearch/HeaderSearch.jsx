@@ -1,11 +1,31 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react';
+import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Autosuggest from 'react-autosuggest';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { injectIntl } from 'react-intl';
 
-import { renderInput, renderSuggestion, getSuggestions, getSuggestionValue } from './searchUtils';
+import { renderInput, renderSuggestion, getSuggestions, getSuggestionValue, buildSearchQuery } from './SearchUtils';
 
 const styles = theme => ({
     container: {
@@ -71,33 +91,38 @@ class HeaderSearch extends React.Component {
         this.handleSuggestionsFetchRequested = this.handleSuggestionsFetchRequested.bind(this);
         this.handleSuggestionsClearRequested = this.handleSuggestionsClearRequested.bind(this);
         this.handleChange = this.handleChange.bind(this);
+        this.onKeyDown = this.onKeyDown.bind(this);
         this.clearOnBlur = this.clearOnBlur.bind(this);
         this.renderSuggestionsContainer = this.renderSuggestionsContainer.bind(this);
+        this.onSuggestionSelected = this.onSuggestionSelected.bind(this);
+    }
+    /**
+     * To provide accessibility for Enter key upon suggestion selection
+     * @param {React.SyntheticEvent} event event
+     * @param {Object} suggestion This is either API object or document coming from search API call
+     */
+    onSuggestionSelected(event, { suggestion }) {
+        this.suggestionSelected = true;
+        if (event.key === 'Enter') {
+            const path = suggestion.type === 'API' ? `/apis/${suggestion.id}/overview` :
+                `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/details`;
+            this.props.history.push(path);
+        }
     }
 
     /**
-     * Fetch suggestions list for the user entered input value
-     *
-     * @param {String} { value }
-     * @memberof HeaderSearch
+     * On enter pressed after giving a search text
+     * @param event
      */
-    handleSuggestionsFetchRequested({ value }) {
-        this.setState({ isLoading: true });
-        getSuggestions(value).then(({ body }) => {
-            this.setState({ suggestions: body.list, isLoading: false });
-        });
+    onKeyDown(event) {
+        if (event.key === 'Enter' && !this.suggestionSelected) {
+            const { history } = this.props;
+            history.push('/apis/search?query=' + buildSearchQuery(event.target.value));
+        }
+        this.suggestionSelected = false;
     }
 
-    /**
-     * Handle the suggestions clear Synthetic event
-     *
-     * @memberof HeaderSearch
-     */
-    handleSuggestionsClearRequested() {
-        this.setState({
-            suggestions: [],
-        });
-    }
+    suggestionSelected = false;
 
     /**
      * On change search input element
@@ -112,6 +137,29 @@ class HeaderSearch extends React.Component {
         });
     }
 
+    /**
+     * Fetch suggestions list for the user entered input value
+     *
+     * @param {String} { value }
+     * @memberof HeaderSearch
+     */
+    handleSuggestionsFetchRequested({ value }) {
+        this.setState({ isLoading: true });
+        getSuggestions(value).then((body) => {
+            this.setState({ isLoading: false, suggestions: body.obj.list });
+        });
+    }
+
+    /**
+     * Handle the suggestions clear Synthetic event
+     *
+     * @memberof HeaderSearch
+     */
+    handleSuggestionsClearRequested() {
+        this.setState({
+            suggestions: [],
+        });
+    }
     /**
      *
      * When search input is focus out (Blur), Clear the input text to accept brand new search
@@ -155,6 +203,7 @@ class HeaderSearch extends React.Component {
      * @memberof HeaderSearch
      */
     render() {
+        const { intl } = this.props;
         const { classes, smSearch } = this.props;
         const { searchText, isLoading } = this.state;
         let autoFocus = false;
@@ -178,12 +227,17 @@ class HeaderSearch extends React.Component {
                 getSuggestionValue={getSuggestionValue}
                 renderSuggestion={renderSuggestion}
                 renderSuggestionsContainer={this.renderSuggestionsContainer}
+                onSuggestionSelected={this.onSuggestionSelected}
                 inputProps={{
                     autoFocus,
                     classes,
-                    placeholder: 'Search APIs',
+                    placeholder: intl.formatMessage({
+                        id: 'Base.Header.headersearch.HeaderSearch.search_api.tooltip',
+                        defaultMessage: 'Search APIs',
+                    }),
                     value: searchText,
                     onChange: this.handleChange,
+                    onKeyDown: this.onKeyDown,
                     onBlur: this.clearOnBlur,
                     isLoading,
                 }}
@@ -200,6 +254,13 @@ HeaderSearch.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     smSearch: PropTypes.bool,
     toggleSmSearch: PropTypes.func,
+    history: PropTypes.shape({
+        push: PropTypes.func,
+    }).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
-export default withStyles(styles)(HeaderSearch);
+export default injectIntl(withRouter(withStyles(styles)(HeaderSearch)));
+

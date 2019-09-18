@@ -2,30 +2,6 @@
 
 exports[`Progress component test should comply with the snapshot 1`] = `
 <div
-  className="MuiCircularProgress-root-1 MuiCircularProgress-colorPrimary-4 MuiCircularProgress-indeterminate-3"
-  role="progressbar"
-  style={
-    Object {
-      "display": "block",
-      "height": 40,
-      "margin": "auto",
-      "width": 40,
-    }
-  }
->
-  <svg
-    className="MuiCircularProgress-svg-6"
-    viewBox="22 22 44 44"
-  >
-    <circle
-      className="MuiCircularProgress-circle-7 MuiCircularProgress-circleIndeterminate-9"
-      cx={44}
-      cy={44}
-      fill="none"
-      r={20.2}
-      strokeWidth={3.6}
-      style={Object {}}
-    />
-  </svg>
-</div>
+  className="apim-dual-ring"
+/>
 `;

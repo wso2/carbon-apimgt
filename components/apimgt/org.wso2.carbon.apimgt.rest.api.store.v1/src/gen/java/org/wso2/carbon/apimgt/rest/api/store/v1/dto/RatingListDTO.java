@@ -13,13 +13,14 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
 public class RatingListDTO   {
   
     private String avgRating = null;
-    private String userRating = null;
+    private Integer userRating = null;
     private Integer count = null;
     private List<RatingDTO> list = new ArrayList<>();
     private PaginationDTO pagination = null;
@@ -45,7 +46,7 @@ public class RatingListDTO   {
   /**
    * Rating given by the user 
    **/
-  public RatingListDTO userRating(String userRating) {
+  public RatingListDTO userRating(Integer userRating) {
     this.userRating = userRating;
     return this;
   }
@@ -53,10 +54,10 @@ public class RatingListDTO   {
   
   @ApiModelProperty(value = "Rating given by the user ")
   @JsonProperty("userRating")
-  public String getUserRating() {
+  public Integer getUserRating() {
     return userRating;
   }
-  public void setUserRating(String userRating) {
+  public void setUserRating(Integer userRating) {
     this.userRating = userRating;
   }
 

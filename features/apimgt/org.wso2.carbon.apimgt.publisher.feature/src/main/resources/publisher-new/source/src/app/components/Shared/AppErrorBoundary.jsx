@@ -21,6 +21,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import Footer from 'AppComponents/Base/Footer/Footer';
+import { FormattedMessage } from 'react-intl';
 
 const styles = theme => ({
     appBar: {
@@ -136,7 +137,10 @@ class AppErrorBoundary extends React.Component {
                             <div className={classes.errorTitle}>
                                 <img src='/publisher-new/site/public/images/robo.png' alt='OOPS' />
                                 <Typography variant='h2' gutterBottom>
-                                    Something went wrong
+                                    <FormattedMessage
+                                        id='Apis.Shared.AppErrorBoundary.something.went.wrong'
+                                        defaultMessage='Something went wrong'
+                                    />
                                 </Typography>
                             </div>
                             <a href='/publisher-new/apis/'>
@@ -166,8 +170,20 @@ class AppErrorBoundary extends React.Component {
 
 AppErrorBoundary.propTypes = {
     children: PropTypes.node.isRequired,
-    classes: PropTypes.shape({}).isRequired,
-    theme: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        appBar: PropTypes.string,
+        toolbar: PropTypes.string,
+        errorDisplay: PropTypes.string,
+        errorDisplayContent: PropTypes.string,
+        errorTitle: PropTypes.string,
+        link: PropTypes.string,
+    }).isRequired,
+    theme: PropTypes.shape({
+        custom: PropTypes.shape({
+            logo: PropTypes.string,
+            title: PropTypes.string,
+        }),
+    }).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(AppErrorBoundary);

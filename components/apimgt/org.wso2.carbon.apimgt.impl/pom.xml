@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.4.227-SNAPSHOT</version>
+        <version>6.5.108-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -120,8 +120,13 @@
             <artifactId>org.wso2.carbon.identity.oauth</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.identity</groupId>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.captcha.mgt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.governance</groupId>
+            <artifactId>org.wso2.carbon.identity.recovery</artifactId>
+            <version>${carbon.identity.governance.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.governance</groupId>
@@ -140,6 +145,7 @@
         <dependency>
             <groupId>com.h2database.wso2</groupId>
             <artifactId>h2-database-engine</artifactId>
+            <version>1.2.140.wso2v3</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.eclipse.osgi</groupId>
@@ -322,7 +328,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
@@ -335,6 +340,16 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.localentry.stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
@@ -364,7 +379,7 @@
                                     <path refid="maven.compile.classpath" />
                                 </path>
                                 <echo message="########### Create Test Database ##############" />
-                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/target/repository/database/WSO2AM_DB" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
+                                <sql autocommit="true" driver="org.h2.Driver" onerror="continue" password="wso2carbon" url="jdbc:h2:${basedir}/target/repository/database/WSO2AM_DB" userid="wso2carbon">
                                     <classpath>
                                         <path refid="h2.classpath" />
                                     </classpath>
@@ -413,7 +428,22 @@
                             <name>IdentityConfigurationPath</name>
                             <value>${basedir}/src/test/resources/identity.xml</value>
                         </property>
+                        <property>
+                            <name>axis2.repo</name>
+                            <value>${basedir}/src/test/resources</value>
+                        </property>
+                        <property>
+                            <name>axis2.xml</name>
+                            <value>${basedir}/src/test/resources/axis2_client.xml</value>
+                        </property>
+                        <property>
+                            <name>carbon.home</name>
+                            <value>${basedir}/src/test/resources</value>
+                        </property>
                     </systemProperties>
+                    <classpathDependencyExcludes>
+                        <classpathDependencyExclude>org.ops4j.pax.logging</classpathDependencyExclude>
+                    </classpathDependencyExcludes>
                 </configuration>
                 <dependencies>
                     <dependency>
@@ -426,7 +456,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -442,14 +471,14 @@
                             !org.apache.commons.collections4.*
                         </Export-Package>
                         <Import-Package>
-                            !org.wso2.carbon.apimgt.api.model.xsd.*,
                             org.wso2.carbon.governance.api.*,
                             org.wso2.carbon.registry.ws.client.*,
                             org.apache.woden.*,
                             org.wso2.carbon.apimgt.keymgt.client.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.handlers.security.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.api.model.xsd;version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.api.model.xsd.*;version="${carbon.apimgt.imp.pkg.version}",
+                            !org.wso2.carbon.apimgt.api.model.xsd.*,
                             javax.servlet;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.http;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
@@ -458,9 +487,9 @@
                             org.apache.axis2.*; version="${imp.pkg.version.axis2}",
                             org.apache.commons.*,
                             org.apache.http.*,
-                            org.osgi.framework.*,
-                            org.osgi.util.*,
-                            org.osgi.service.*,
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.util.*;version="${imp.package.version.osgi.util}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.apache.axiom.*; version="${imp.pkg.version.axiom}",
                             org.wso2.carbon.utils; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
@@ -469,7 +498,6 @@
                             version="${carbon.registry.package.import.version.range}",
                             org.apache.pdfbox.*; version="${pdfbox.version}",
                             org.apache.poi.*,
-                            org.apache.thrift.*; version="${libthrift.import.version.range}",
                             org.apache.neethi.*,
                             org.apache.velocity.*,
                             org.apache.solr.common,
@@ -478,13 +506,15 @@
                             javax.sql,
                             javax.wsdl.*,
                             javax.xml.*;version="0.0.0",
-                            org.json.*,
+                            org.json.simple.*,
+                            org.json.*;version="${org.json.version.range}",
                             org.slf4j,
                             org.w3c.dom,
                             com.ibm.wsdl.*; version="${wsdl4j.version.range}";resolution:=optional,
                             net.sf.saxon.*,
                             org.wso2.carbon.identity.oauth.*;version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",
                             org.wso2.carbon.identity.oauth2.*;version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",
+                            org.wso2.carbon.identity.recovery.*;version="${carbon.identity.recovery.pkg.version}",
                             org.wso2.carbon.identity.*;version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.apimgt.keymgt.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.statsupdate.stub.*;version="${carbon.apimgt.imp.pkg.version}",
@@ -513,26 +543,7 @@
                     </instructions>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>generate-scr-scrdescriptor</id>
-                        <goals>
-                            <goal>scr</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
+
         </plugins>
     </build>
 </project>

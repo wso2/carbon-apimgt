@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
-import com.google.gson.Gson;
+import com.nimbusds.jose.util.StandardCharset;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -32,6 +32,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -51,11 +52,11 @@ import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.soaptorest.SequenceGenerator;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
-import org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
+import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDetailedDTO;
@@ -91,6 +92,7 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -249,32 +251,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                         + " already exists.", log);
             }
 
-            //Get all existing versions of  api been adding
-            List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
-            if (apiVersions.size() > 0) {
-                //If any previous version exists
-                for (String version : apiVersions) {
-                    if (version.equalsIgnoreCase(body.getVersion())) {
-                        //If version already exists
-                        if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
-                            RestApiUtil.handleResourceAlreadyExistsError("Error occurred while " +
-                                    "adding the API. A duplicate API already exists for "
-                                    + body.getName() + "-" + body.getVersion(), log);
-                        } else {
-                            RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " +
-                                    body.getName() + " already exists with different " +
-                                    "context", log);
-                        }
-                    }
-                }
-            } else {
-                //If no any previous version exists
-                if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
-                    RestApiUtil.handleBadRequest("Error occurred while adding the API. A duplicate API context " +
-                                    "already exists for " + body.getContext(), log);
-                }
-            }
-
             //Check if the user has admin permission before applying a different provider than the current user
             String provider = body.getProvider();
             if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
@@ -303,6 +279,32 @@ public class ApisApiServiceImpl extends ApisApiService {
             } else {
                 //Set username in case provider is null or empty
                 provider = username;
+            }
+
+            //Get all existing versions of  api been adding
+            List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), provider);
+            if (apiVersions.size() > 0) {
+                //If any previous version exists
+                for (String version : apiVersions) {
+                    if (version.equalsIgnoreCase(body.getVersion())) {
+                        //If version already exists
+                        if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
+                            RestApiUtil.handleResourceAlreadyExistsError("Error occurred while " +
+                                    "adding the API. A duplicate API already exists for "
+                                    + body.getName() + "-" + body.getVersion(), log);
+                        } else {
+                            RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " +
+                                    body.getName() + " already exists with different " +
+                                    "context", log);
+                        }
+                    }
+                }
+            } else {
+                //If no any previous version exists
+                if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
+                    RestApiUtil.handleBadRequest("Error occurred while adding the API. A duplicate API context " +
+                                    "already exists for " + body.getContext(), log);
+                }
             }
 
             List<String> tiersFromDTO = body.getTiers();
@@ -346,7 +348,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 if (StringUtils.isNotBlank(apiToAdd.getWsdlUrl())) {
                     String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(body.getWsdlUri());
                     apiProvider.saveSwagger20Definition(apiToAdd.getId(), swaggerStr);
-                    SequenceGenerator.generateSequencesFromSwagger(swaggerStr, new Gson().toJson(body));
+                    SequenceGenerator.generateSequencesFromSwagger(swaggerStr, apiToAdd.getId());
                 } else {
                     String errorMessage =
                             "Error while generating the swagger since the wsdl url is null for: " + body.getProvider()
@@ -583,10 +585,21 @@ public class ApisApiServiceImpl extends ApisApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
                     tenantDomain);
+            API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
             //Getting the api base path out apiResourcePath
             apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
+            //Getting specified mediation policy
+            Mediation mediation = apiProvider.getApiSpecificMediationPolicy(apiResourcePath,
+                    mediationPolicyId);
+            if (mediation != null) {
+                if (isAPIModified(api, mediation)) {
+                    apiProvider.updateAPI(api);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
+            }
             boolean deletionStatus = apiProvider.deleteApiSpecificMediationPolicy(apiResourcePath,
                     mediationPolicyId);
             if (deletionStatus) {
@@ -607,6 +620,9 @@ public class ApisApiServiceImpl extends ApisApiService {
                         mediationPolicyId + "of API " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -861,7 +877,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             API apiInfo = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = apiInfo.getId();
-            boolean isWSAPI = APIConstants.APIType.WS == APIConstants.APIType.valueOf(apiInfo.getType());
+            boolean isWSAPI = APIConstants.APITransportType.WS == APIConstants.APITransportType.valueOf(apiInfo.getType());
 
             //Overriding some properties:
             body.setName(apiIdentifier.getApiName());
@@ -1668,12 +1684,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             //for multiple http methods
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(api.getId());
             if (!StringUtils.isEmpty(apiSwaggerDefinition)) {
-                APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-                Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(api, apiSwaggerDefinition);
+                APIDefinition parser = OASParserUtil.getOASParser(apiSwaggerDefinition);
+                Set<URITemplate> uriTemplates = parser.getURITemplates(apiSwaggerDefinition);
                 api.setUriTemplates(uriTemplates);
 
                 // scopes
-                Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiSwaggerDefinition);
+                Set<Scope> scopes = parser.getScopes(apiSwaggerDefinition);
                 api.setScopes(scopes);
             }
 
@@ -1723,15 +1739,17 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdWsdlGet(String apiId, String accept, String ifNoneMatch,
                                      String ifModifiedSince) {
+        String errorMessageCommon = "Error while retrieving wsdl of API: " + apiId;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
                     tenantDomain);
-            String wsdlContent = apiProvider.getWsdl(apiIdentifier);
+            ResourceFile wsdlResource = apiProvider.getWSDL(apiIdentifier);
             WsdlDTO dto = new WsdlDTO();
-            dto.setWsdlDefinition(wsdlContent);
+            byte[] wsdlContent = Base64.getEncoder().encode(APIUtil.toByteArray(wsdlResource.getContent()));
+            dto.setWsdlDefinition(new String(wsdlContent, StandardCharset.UTF_8));
             dto.setName(apiIdentifier.getProviderName() + "--" + apiIdentifier.getApiName() +
                     apiIdentifier.getVersion() + ".wsdl");
             return Response.ok().entity(dto).build();
@@ -1745,25 +1763,27 @@ public class ApisApiServiceImpl extends ApisApiService {
                         .handleAuthorizationFailure("Authorization failure while retrieving wsdl of API: " + apiId, e,
                                 log);
             } else {
-                String errorMessage = "Error while retrieving wsdl of API: " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                RestApiUtil.handleInternalServerError(errorMessageCommon, e, log);
             }
+        } catch (IOException e) {
+            RestApiUtil.handleInternalServerError(errorMessageCommon, e, log);
         }
         return null;
     }
 
     /**
-     * 
+     *
      * @param apiId API Id
      * @param body WSDL DTO
      * @param contentType content type of the payload
      * @param ifMatch If-match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @return added wsdl 
+     * @return added wsdl
      */
     @Override
     public Response apisApiIdWsdlPost(String apiId, WsdlDTO body, String contentType, String ifMatch,
             String ifUnmodifiedSince) {
+        String errorMessageCommon = "Error while uploading wsdl of API : " + apiId;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -1778,8 +1798,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             apiProvider.uploadWsdl(resourcePath, body.getWsdlDefinition());
 
+            ResourceFile wsdlResource = apiProvider.getWSDL(apiIdentifier);
             WsdlDTO wsdlDTO = new WsdlDTO();
-            wsdlDTO.setWsdlDefinition(apiProvider.getWsdl(apiIdentifier));
+            byte[] wsdlContent = Base64.getEncoder().encode(APIUtil.toByteArray(wsdlResource.getContent()));
+            wsdlDTO.setWsdlDefinition(new String(wsdlContent, StandardCharset.UTF_8));
             wsdlDTO.setName(apiIdentifier.getProviderName() + "--" + apiIdentifier.getApiName() +
                     apiIdentifier.getVersion() + ".wsdl");
             return Response.ok().entity(wsdlDTO).build();
@@ -1793,9 +1815,10 @@ public class ApisApiServiceImpl extends ApisApiService {
                         .handleAuthorizationFailure("Authorization failure while uploading wsdl for API: " + apiId, e,
                                 log);
             } else {
-                String errorMessage = "Error while uploading wsdl of API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                RestApiUtil.handleInternalServerError(errorMessageCommon, e, log);
             }
+        } catch (IOException e) {
+            RestApiUtil.handleInternalServerError(errorMessageCommon, e, log);
         }
         return null;
     }
@@ -1814,13 +1837,18 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String contentType, String ifMatch,
                                         String ifUnmodifiedSince) {
         try {
-            APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+            APIDefinition parser = OASParserUtil.getOASParser(apiDefinition);
+            APIDefinitionValidationResponse response = parser.validateAPIDefinition(apiDefinition, false);
+            if (!response.isValid()) {
+                RestApiUtil.handleBadRequest(response.getErrorItems(), log);
+            }
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             API existingAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
-            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(existingAPI, apiDefinition);
-            Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiDefinition);
+
+            Set<URITemplate> uriTemplates = parser.getURITemplates(apiDefinition);
+            Set<Scope> scopes = parser.getScopes(apiDefinition);
             existingAPI.setUriTemplates(uriTemplates);
             existingAPI.setScopes(scopes);
 
@@ -1882,5 +1910,42 @@ public class ApisApiServiceImpl extends ApisApiService {
     private boolean isAuthorizationFailure(Exception e) {
         String errorMessage = e.getMessage();
         return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
+    }
+
+    /***
+     * To check if the API is modified or not when the given sequence is in API.
+     *
+     * @param api
+     * @param mediation
+     * @return if the API is modified or not
+     */
+    private boolean isAPIModified(API api, Mediation mediation) {
+        if (mediation != null) {
+            String sequenceName;
+            if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equalsIgnoreCase(mediation.getType())) {
+                sequenceName = api.getInSequence();
+                if (isSequenceExistsInAPI(sequenceName, mediation)) {
+                    api.setInSequence(null);
+                    return true;
+                }
+            } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equalsIgnoreCase(mediation.getType())) {
+                sequenceName = api.getOutSequence();
+                if (isSequenceExistsInAPI(sequenceName, mediation)) {
+                    api.setOutSequence(null);
+                    return true;
+                }
+            } else {
+                sequenceName = api.getFaultSequence();
+                if (isSequenceExistsInAPI(sequenceName, mediation)) {
+                    api.setFaultSequence(null);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isSequenceExistsInAPI(String sequenceName, Mediation mediation) {
+        return StringUtils.isNotEmpty(sequenceName) && mediation.getName().equals(sequenceName);
     }
 }

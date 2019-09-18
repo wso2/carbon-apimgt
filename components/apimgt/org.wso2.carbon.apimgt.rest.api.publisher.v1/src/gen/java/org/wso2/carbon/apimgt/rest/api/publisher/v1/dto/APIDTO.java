@@ -6,14 +6,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIWsdlInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
@@ -24,9 +23,11 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
+@Scope(name = "apim:api_create", description="", value ="")
 public class APIDTO   {
   
     private String id = null;
@@ -36,18 +37,19 @@ public class APIDTO   {
     private String version = null;
     private String provider = null;
     private String lifeCycleStatus = null;
-    private String wsdlUri = null;
-    private String responseCaching = null;
+    private APIWsdlInfoDTO wsdlInfo = null;
+    private Boolean responseCachingEnabled = null;
     private Integer cacheTimeout = null;
     private String destinationStatsEnabled = null;
     private Boolean hasThumbnail = null;
     private Boolean isDefaultVersion = null;
+    private Boolean enableSchemaValidation = null;
 
 @XmlType(name="TypeEnum")
 @XmlEnum(String.class)
 public enum TypeEnum {
 
-    @XmlEnumValue("HTTP") HTTP(String.valueOf("HTTP")), @XmlEnumValue("WS") WS(String.valueOf("WS")), @XmlEnumValue("SOAPTOREST") SOAPTOREST(String.valueOf("SOAPTOREST"));
+    @XmlEnumValue("HTTP") HTTP(String.valueOf("HTTP")), @XmlEnumValue("WS") WS(String.valueOf("WS")), @XmlEnumValue("SOAPTOREST") SOAPTOREST(String.valueOf("SOAPTOREST")), @XmlEnumValue("SOAP") SOAP(String.valueOf("SOAP")), @XmlEnumValue("GRAPHQL") GRAPHQL(String.valueOf("GRAPHQL"));
 
 
     private String value;
@@ -77,8 +79,11 @@ public enum TypeEnum {
 
     private TypeEnum type = TypeEnum.HTTP;
     private List<String> transport = new ArrayList<>();
+    @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> tags = new ArrayList<>();
+    @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> policies = new ArrayList<>();
+    @Scope(name = "apim:api_publish", description="", value ="")
     private String apiThrottlingPolicy = null;
     private String authorizationHeader = null;
     private List<String> securityScheme = new ArrayList<>();
@@ -116,10 +121,13 @@ public enum VisibilityEnum {
     }
 }
 
-    private VisibilityEnum visibility = null;
+    @Scope(name = "apim:api_publish", description="", value ="")
+    private VisibilityEnum visibility = VisibilityEnum.PUBLIC;
+    @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> visibleRoles = new ArrayList<>();
     private List<String> visibleTenants = new ArrayList<>();
     private APIEndpointSecurityDTO endpointSecurity = null;
+    @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> gatewayEnvironments = new ArrayList<>();
     private List<LabelDTO> labels = new ArrayList<>();
     private List<MediationPolicyDTO> mediationPolicies = new ArrayList<>();
@@ -156,8 +164,10 @@ public enum SubscriptionAvailabilityEnum {
     }
 }
 
-    private SubscriptionAvailabilityEnum subscriptionAvailability = null;
+    @Scope(name = "apim:api_publish", description="", value ="")
+    private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.ALL_TENANTS;
     private List<String> subscriptionAvailableTenants = new ArrayList<>();
+    @Scope(name = "apim:api_publish", description="", value ="")
     private Map<String, String> additionalProperties = new HashMap<>();
     private APIMonetizationInfoDTO monetization = null;
 
@@ -193,14 +203,49 @@ public enum AccessControlEnum {
     }
 }
 
-    private AccessControlEnum accessControl = null;
+    private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<>();
-    private APIBusinessInformationDTO businessInformation = null;
+    @Scope(name = "apim:api_publish", description="", value ="")
+    private Object businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String workflowStatus = null;
     private String createdTime = null;
     private String lastUpdatedTime = null;
-    private List<APIEndpointDTO> endpoint = new ArrayList<>();
+    private Object endpointConfig = null;
+
+@XmlType(name="EndpointImplementationTypeEnum")
+@XmlEnum(String.class)
+public enum EndpointImplementationTypeEnum {
+
+    @XmlEnumValue("INLINE") INLINE(String.valueOf("INLINE")), @XmlEnumValue("ENDPOINT") ENDPOINT(String.valueOf("ENDPOINT"));
+
+
+    private String value;
+
+    EndpointImplementationTypeEnum (String v) {
+        value = v;
+    }
+
+    public String value() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    public static EndpointImplementationTypeEnum fromValue(String v) {
+        for (EndpointImplementationTypeEnum b : EndpointImplementationTypeEnum.values()) {
+            if (String.valueOf(b.value).equals(v)) {
+                return b;
+            }
+        }
+        return null;
+    }
+}
+
+    private EndpointImplementationTypeEnum endpointImplementationType = EndpointImplementationTypeEnum.ENDPOINT;
     private List<ScopeDTO> scopes = new ArrayList<>();
     private List<APIOperationsDTO> operations = new ArrayList<>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
@@ -330,38 +375,37 @@ public enum AccessControlEnum {
   }
 
   /**
-   * WSDL URL if the API is based on a WSDL endpoint 
    **/
-  public APIDTO wsdlUri(String wsdlUri) {
-    this.wsdlUri = wsdlUri;
+  public APIDTO wsdlInfo(APIWsdlInfoDTO wsdlInfo) {
+    this.wsdlInfo = wsdlInfo;
     return this;
   }
 
   
-  @ApiModelProperty(example = "http://www.webservicex.com/globalweather.asmx?wsdl", value = "WSDL URL if the API is based on a WSDL endpoint ")
-  @JsonProperty("wsdlUri")
-  public String getWsdlUri() {
-    return wsdlUri;
+  @ApiModelProperty(value = "")
+  @JsonProperty("wsdlInfo")
+  public APIWsdlInfoDTO getWsdlInfo() {
+    return wsdlInfo;
   }
-  public void setWsdlUri(String wsdlUri) {
-    this.wsdlUri = wsdlUri;
+  public void setWsdlInfo(APIWsdlInfoDTO wsdlInfo) {
+    this.wsdlInfo = wsdlInfo;
   }
 
   /**
    **/
-  public APIDTO responseCaching(String responseCaching) {
-    this.responseCaching = responseCaching;
+  public APIDTO responseCachingEnabled(Boolean responseCachingEnabled) {
+    this.responseCachingEnabled = responseCachingEnabled;
     return this;
   }
 
   
-  @ApiModelProperty(example = "Disabled", value = "")
-  @JsonProperty("responseCaching")
-  public String getResponseCaching() {
-    return responseCaching;
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("responseCachingEnabled")
+  public Boolean isResponseCachingEnabled() {
+    return responseCachingEnabled;
   }
-  public void setResponseCaching(String responseCaching) {
-    this.responseCaching = responseCaching;
+  public void setResponseCachingEnabled(Boolean responseCachingEnabled) {
+    this.responseCachingEnabled = responseCachingEnabled;
   }
 
   /**
@@ -433,7 +477,24 @@ public enum AccessControlEnum {
   }
 
   /**
-   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST
+   **/
+  public APIDTO enableSchemaValidation(Boolean enableSchemaValidation) {
+    this.enableSchemaValidation = enableSchemaValidation;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("enableSchemaValidation")
+  public Boolean isEnableSchemaValidation() {
+    return enableSchemaValidation;
+  }
+  public void setEnableSchemaValidation(Boolean enableSchemaValidation) {
+    this.enableSchemaValidation = enableSchemaValidation;
+  }
+
+  /**
+   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
    **/
   public APIDTO type(TypeEnum type) {
     this.type = type;
@@ -441,7 +502,7 @@ public enum AccessControlEnum {
   }
 
   
-  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST")
+  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;
@@ -687,7 +748,7 @@ public enum AccessControlEnum {
   }
 
   
-  @ApiModelProperty(example = "\"\\\"sequences\\\": [ {\\\"name\\\": \\\"json_to_xml_in_message\\\",\\\"config\\\": null,\\\"type\\\": \\\"in\\\"}, {\\\"name\\\": \\\"xml_to_json_out_message\\\",\\\"config\\\": null,\\\"type\\\": \\\"out\\\"}, {\\\"name\\\": \\\"json_fault\\\",\\\"config\\\": null,\\\"type\\\": \\\"fault\\\"} ],\"", value = "")
+  @ApiModelProperty(example = "\"\\\"mediationPolicies\\\": [ {\\\"name\\\": \\\"json_to_xml_in_message\\\",\\\"type\\\": \\\"in\\\"}, {\\\"name\\\": \\\"xml_to_json_out_message\\\",\\\"type\\\": \\\"out\\\"}, {\\\"name\\\": \\\"json_fault\\\",\\\"type\\\": \\\"fault\\\"} ],\"", value = "")
   @JsonProperty("mediationPolicies")
   public List<MediationPolicyDTO> getMediationPolicies() {
     return mediationPolicies;
@@ -804,7 +865,7 @@ public enum AccessControlEnum {
 
   /**
    **/
-  public APIDTO businessInformation(APIBusinessInformationDTO businessInformation) {
+  public APIDTO businessInformation(Object businessInformation) {
     this.businessInformation = businessInformation;
     return this;
   }
@@ -812,10 +873,10 @@ public enum AccessControlEnum {
   
   @ApiModelProperty(value = "")
   @JsonProperty("businessInformation")
-  public APIBusinessInformationDTO getBusinessInformation() {
+  public Object getBusinessInformation() {
     return businessInformation;
   }
-  public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
+  public void setBusinessInformation(Object businessInformation) {
     this.businessInformation = businessInformation;
   }
 
@@ -888,20 +949,38 @@ public enum AccessControlEnum {
   }
 
   /**
+   * Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.  &#x60;Simple REST Endpoint&#x60;   {     \&quot;endpoint_type\&quot;: \&quot;http\&quot;,     \&quot;sandbox_endpoints\&quot;:       {        \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/\&quot;     },     \&quot;production_endpoints\&quot;:       {        \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/\&quot;     }   }  &#x60;Loadbalanced Endpoint&#x60;    {     \&quot;endpoint_type\&quot;: \&quot;load_balance\&quot;,     \&quot;algoCombo\&quot;: \&quot;org.apache.synapse.endpoints.algorithms.RoundRobin\&quot;,     \&quot;sessionManagement\&quot;: \&quot;\&quot;,     \&quot;sandbox_endpoints\&quot;:       [                 {           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/1\&quot;        },                 {           \&quot;endpoint_type\&quot;: \&quot;http\&quot;,           \&quot;template_not_supported\&quot;: false,           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/2\&quot;        }     ],     \&quot;production_endpoints\&quot;:       [                 {           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/3\&quot;        },                 {           \&quot;endpoint_type\&quot;: \&quot;http\&quot;,           \&quot;template_not_supported\&quot;: false,           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v1/api/4\&quot;        }     ],     \&quot;sessionTimeOut\&quot;: \&quot;\&quot;,     \&quot;algoClassName\&quot;: \&quot;org.apache.synapse.endpoints.algorithms.RoundRobin\&quot;   }  &#x60;Failover Endpoint&#x60;    {     \&quot;production_failovers\&quot;:[        {           \&quot;endpoint_type\&quot;:\&quot;http\&quot;,           \&quot;template_not_supported\&quot;:false,           \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/1\&quot;        }     ],     \&quot;endpoint_type\&quot;:\&quot;failover\&quot;,     \&quot;sandbox_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/2\&quot;     },     \&quot;production_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/3\&quot;     },     \&quot;sandbox_failovers\&quot;:[        {           \&quot;endpoint_type\&quot;:\&quot;http\&quot;,           \&quot;template_not_supported\&quot;:false,           \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v1/api/4\&quot;        }     ]   }  &#x60;Default Endpoint&#x60;    {     \&quot;endpoint_type\&quot;:\&quot;default\&quot;,     \&quot;sandbox_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;default\&quot;     },     \&quot;production_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;default\&quot;     }   } 
    **/
-  public APIDTO endpoint(List<APIEndpointDTO> endpoint) {
-    this.endpoint = endpoint;
+  public APIDTO endpointConfig(Object endpointConfig) {
+    this.endpointConfig = endpointConfig;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
-  @JsonProperty("endpoint")
-  public List<APIEndpointDTO> getEndpoint() {
-    return endpoint;
+  @ApiModelProperty(example = "{\"endpoint_type\":\"http\",\"sandbox_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\"},\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\"}}", value = "Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.  `Simple REST Endpoint`   {     \"endpoint_type\": \"http\",     \"sandbox_endpoints\":       {        \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/\"     },     \"production_endpoints\":       {        \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/\"     }   }  `Loadbalanced Endpoint`    {     \"endpoint_type\": \"load_balance\",     \"algoCombo\": \"org.apache.synapse.endpoints.algorithms.RoundRobin\",     \"sessionManagement\": \"\",     \"sandbox_endpoints\":       [                 {           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/1\"        },                 {           \"endpoint_type\": \"http\",           \"template_not_supported\": false,           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/2\"        }     ],     \"production_endpoints\":       [                 {           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/3\"        },                 {           \"endpoint_type\": \"http\",           \"template_not_supported\": false,           \"url\": \"https://localhost:9443/am/sample/pizzashack/v1/api/4\"        }     ],     \"sessionTimeOut\": \"\",     \"algoClassName\": \"org.apache.synapse.endpoints.algorithms.RoundRobin\"   }  `Failover Endpoint`    {     \"production_failovers\":[        {           \"endpoint_type\":\"http\",           \"template_not_supported\":false,           \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/1\"        }     ],     \"endpoint_type\":\"failover\",     \"sandbox_endpoints\":{        \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/2\"     },     \"production_endpoints\":{        \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/3\"     },     \"sandbox_failovers\":[        {           \"endpoint_type\":\"http\",           \"template_not_supported\":false,           \"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/4\"        }     ]   }  `Default Endpoint`    {     \"endpoint_type\":\"default\",     \"sandbox_endpoints\":{        \"url\":\"default\"     },     \"production_endpoints\":{        \"url\":\"default\"     }   } ")
+  @JsonProperty("endpointConfig")
+  public Object getEndpointConfig() {
+    return endpointConfig;
   }
-  public void setEndpoint(List<APIEndpointDTO> endpoint) {
-    this.endpoint = endpoint;
+  public void setEndpointConfig(Object endpointConfig) {
+    this.endpointConfig = endpointConfig;
+  }
+
+  /**
+   **/
+  public APIDTO endpointImplementationType(EndpointImplementationTypeEnum endpointImplementationType) {
+    this.endpointImplementationType = endpointImplementationType;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "INLINE", value = "")
+  @JsonProperty("endpointImplementationType")
+  public EndpointImplementationTypeEnum getEndpointImplementationType() {
+    return endpointImplementationType;
+  }
+  public void setEndpointImplementationType(EndpointImplementationTypeEnum endpointImplementationType) {
+    this.endpointImplementationType = endpointImplementationType;
   }
 
   /**
@@ -972,12 +1051,13 @@ public enum AccessControlEnum {
         Objects.equals(version, API.version) &&
         Objects.equals(provider, API.provider) &&
         Objects.equals(lifeCycleStatus, API.lifeCycleStatus) &&
-        Objects.equals(wsdlUri, API.wsdlUri) &&
-        Objects.equals(responseCaching, API.responseCaching) &&
+        Objects.equals(wsdlInfo, API.wsdlInfo) &&
+        Objects.equals(responseCachingEnabled, API.responseCachingEnabled) &&
         Objects.equals(cacheTimeout, API.cacheTimeout) &&
         Objects.equals(destinationStatsEnabled, API.destinationStatsEnabled) &&
         Objects.equals(hasThumbnail, API.hasThumbnail) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
+        Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
         Objects.equals(type, API.type) &&
         Objects.equals(transport, API.transport) &&
         Objects.equals(tags, API.tags) &&
@@ -1004,7 +1084,8 @@ public enum AccessControlEnum {
         Objects.equals(workflowStatus, API.workflowStatus) &&
         Objects.equals(createdTime, API.createdTime) &&
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
-        Objects.equals(endpoint, API.endpoint) &&
+        Objects.equals(endpointConfig, API.endpointConfig) &&
+        Objects.equals(endpointImplementationType, API.endpointImplementationType) &&
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(operations, API.operations) &&
         Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies);
@@ -1012,7 +1093,7 @@ public enum AccessControlEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlUri, responseCaching, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpoint, scopes, operations, threatProtectionPolicies);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, enableSchemaValidation, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies);
   }
 
   @Override
@@ -1027,12 +1108,13 @@ public enum AccessControlEnum {
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
-    sb.append("    wsdlUri: ").append(toIndentedString(wsdlUri)).append("\n");
-    sb.append("    responseCaching: ").append(toIndentedString(responseCaching)).append("\n");
+    sb.append("    wsdlInfo: ").append(toIndentedString(wsdlInfo)).append("\n");
+    sb.append("    responseCachingEnabled: ").append(toIndentedString(responseCachingEnabled)).append("\n");
     sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");
     sb.append("    destinationStatsEnabled: ").append(toIndentedString(destinationStatsEnabled)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
+    sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
@@ -1059,7 +1141,8 @@ public enum AccessControlEnum {
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
-    sb.append("    endpoint: ").append(toIndentedString(endpoint)).append("\n");
+    sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
+    sb.append("    endpointImplementationType: ").append(toIndentedString(endpointImplementationType)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("    threatProtectionPolicies: ").append(toIndentedString(threatProtectionPolicies)).append("\n");

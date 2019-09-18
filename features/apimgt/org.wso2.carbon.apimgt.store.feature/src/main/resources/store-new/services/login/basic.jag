@@ -17,7 +17,6 @@
  * under the License.
  */
 
-    var log = new Log("Services login app");
     var url = 'https://localhost:9443/client-registration/v0.14/register';
     var data = { "callbackUrl": "localhost", "clientName": request.getParameter("application", "UTF-8") , "owner": "admin", "grantType": "password refresh_token", "saasApp": true };
     var result = post(url, JSON.stringify(data) , {

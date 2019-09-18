@@ -1,5 +1,6 @@
+/* eslint-disable */
 /**
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,8 +17,6 @@
  * under the License.
  *
  */
-
-/* eslint-disable */
 var path = require('path');
 
 const config = {
@@ -36,6 +35,7 @@ const config = {
         alias: {
             AppData: path.resolve(__dirname, 'source/src/app/data/'),
             AppComponents: path.resolve(__dirname, 'source/src/app/components/'),
+            AppTests: path.resolve(__dirname, 'source/Tests/'),
         },
         extensions: ['.js', '.jsx'],
     },
@@ -52,6 +52,9 @@ const config = {
                 use: [
                     {
                         loader: 'babel-loader',
+                    },
+                    {
+                        loader: path.resolve('loader.js'),
                     },
                 ],
             },
@@ -81,12 +84,11 @@ const config = {
     },
     externals: {
         Config: 'Configurations',
+        MaterialIcons: 'MaterialIcons',
     },
-    plugins: [],
 };
 
 if (process.env.NODE_ENV === 'development') {
-    config.watch = true;
     config.mode = 'development';
 } else if (process.env.NODE_ENV === 'production') {
     /* ESLint will only un in production build to increase the continues build(watch) time in the development mode */

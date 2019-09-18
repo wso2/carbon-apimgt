@@ -25,12 +25,14 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
+import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 import API from 'AppData/api';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import LifeCycleImage from './LifeCycleImage';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 const styles = theme => ({
     buttonsWrapper: {
@@ -77,13 +79,19 @@ class LifeCycleUpdate extends Component {
                 /* TODO: Handle IO erros ~tmkb */
                 this.props.handleUpdate(true);
                 let newState = response.body.lifecycleState.state;
-                this.setState({newState});
-                Alert.info('Lifecycle state updated successfully');
+                this.context.updateAPI();
+                this.setState({ newState });
+                const { intl } = this.props;
+
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Details.LifeCycle.LifeCycleUpdate.success',
+                    defaultMessage: 'Lifecycle state updated successfully',
+                }));
                 /* TODO: add i18n ~tmkb */
             })
             .catch(error_response => {
                 console.log(error_response);
-                Alert.error(JSON.stringify(error_response));
+                Alert.error(JSON.stringify(error_response.message));
             });
     }
 
@@ -105,22 +113,33 @@ class LifeCycleUpdate extends Component {
         const { api, lcState, classes, theme, handleChangeCheckList, checkList } = this.props;
         const { newState } = this.state;
         const is_workflow_pending = api.workflowStatus && api.workflowStatus.toLowerCase() === 'pending';
+        const lcMap = new Map();
+        lcMap.set("Published", "Publish");
+        lcMap.set("Prototyped", "Deploy as a prototype");
+        lcMap.set("Deprecated", "Deprecate");
+        lcMap.set("Blocked", "Block");
+        lcMap.set("Created", "Create");
+        lcMap.set("Retired", "Retire");
         return (
             <Grid container>
                 {is_workflow_pending ? (
                     <Grid item xs={12}>
-                        <Typography variant="h5">Pending lifecycle state change.</Typography>
-                        <Typography>adjective</Typography>
+                        <Typography variant="h5">
+                            <FormattedMessage id='Apis.Details.LifeCycle.LifeCycleUpdate.pending' defaultMessage='Pending lifecycle state change.' />
+                        </Typography>
+                        <Typography>
+                            <FormattedMessage id='Apis.Details.LifeCycle.LifeCycleUpdate.adjective' defaultMessage='adjective' />
+                        </Typography>
                     </Grid>
                 ) : (
-                    <Grid item xs={12}>
-                        {theme.custom.lifeCycleImage ? (
-                            <img src={theme.custom.lifeCycleImage} alt="Lifecycle image" />
-                        ) : (
-                            <LifeCycleImage lifeCycleStatus={newState || api.lifeCycleStatus} />
-                        )}
-                    </Grid>
-                )}
+                        <Grid item xs={12}>
+                            {theme.custom.lifeCycleImage ? (
+                                <img src={theme.custom.lifeCycleImage} alt="Lifecycle image" />
+                            ) : (
+                                    <LifeCycleImage lifeCycleStatus={newState || api.lifeCycleStatus} />
+                                )}
+                        </Grid>
+                    )}
                 <Grid item xs={12}>
                     {!is_workflow_pending && (
                         <FormGroup row>
@@ -140,19 +159,19 @@ class LifeCycleUpdate extends Component {
                         </FormGroup>
                     )}
                     <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
-                            <div className={classes.buttonsWrapper}>
-                                {is_workflow_pending ? (
-                                    <div className="btn-group" role="group">
-                                        <input
-                                            type="button"
-                                            className="btn btn-primary wf-cleanup-btn"
-                                            defaultValue="Delete pending lifecycle state change request"
-                                        />
-                                    </div>
-                                ) : (
+                        <div className={classes.buttonsWrapper}>
+                            {is_workflow_pending ? (
+                                <div className="btn-group" role="group">
+                                    <input
+                                        type="button"
+                                        className="btn btn-primary wf-cleanup-btn"
+                                        defaultValue="Delete pending lifecycle state change request"
+                                    />
+                                </div>
+                            ) : (
                                     lcState.availableTransitions.map(
                                         transition_state =>
-                                            lcState.state !== transition_state.targetState && (
+                                            transition_state.event !== lcMap.get(lcState.state) && (
                                                 <Button
                                                     variant="outlined"
                                                     className={classes.stateButton}
@@ -165,7 +184,7 @@ class LifeCycleUpdate extends Component {
                                             ),
                                     ) /* Skip when transitions available for current state , this occurs in states where have allowed re-publishing in prototype and published sates */
                                 )}
-                            </div>
+                        </div>
                     </ScopeValidation>
                 </Grid>
             </Grid>
@@ -176,6 +195,11 @@ class LifeCycleUpdate extends Component {
 LifeCycleUpdate.propTypes = {
     classes: PropTypes.object.isRequired,
     theme: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(LifeCycleUpdate);
+LifeCycleUpdate.contextType = ApiContext;
+
+export default withStyles(styles, { withTheme: true })(injectIntl(LifeCycleUpdate));

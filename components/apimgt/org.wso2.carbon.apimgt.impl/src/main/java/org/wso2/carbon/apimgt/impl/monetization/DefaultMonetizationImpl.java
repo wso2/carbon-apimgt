@@ -16,14 +16,23 @@
 
 package org.wso2.carbon.apimgt.impl.monetization;
 
+import org.wso2.carbon.apimgt.api.APIAdmin;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Monetization;
+import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class DefaultMonetizationImpl implements Monetization {
 
@@ -69,4 +78,28 @@ public class DefaultMonetizationImpl implements Monetization {
     public Map<String, String> getTotalRevenue(API api, APIProvider apiProvider) throws MonetizationException {
         return new HashMap<String, String>();
     }
+
+    @Override
+    public boolean publishMonetizationUsageRecords(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
+            throws MonetizationException {
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        monetizationUsagePublishInfo.setState(APIConstants.Monetization.COMPLETED);
+        monetizationUsagePublishInfo.setStatus(APIConstants.Monetization.SUCCESSFULL);
+        DateFormat df = new SimpleDateFormat(APIConstants.Monetization.USAGE_PUBLISH_TIME_FORMAT);
+        Date dateobj = new Date();
+        //get the time in UTC format
+        df.setTimeZone(TimeZone.getTimeZone(APIConstants.Monetization.USAGE_PUBLISH_TIME_ZONE));
+        String currentDate = df.format(dateobj);
+        long currentTimestamp = apiAdmin.getTimestamp(currentDate);
+        monetizationUsagePublishInfo.setLastPublishTime(currentTimestamp);
+        try {
+            apiAdmin.updateMonetizationUsagePublishInfo(monetizationUsagePublishInfo);
+        } catch (APIManagementException e) {
+            String errorMsg = "Failed to update the monetization usage publish info";
+            throw new MonetizationException(errorMsg, e);
+        }
+        return true;
+    }
+
 }

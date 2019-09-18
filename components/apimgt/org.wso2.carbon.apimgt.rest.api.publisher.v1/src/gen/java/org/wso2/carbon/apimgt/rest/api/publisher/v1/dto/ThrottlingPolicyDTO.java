@@ -12,6 +12,7 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
@@ -93,6 +94,7 @@ public enum TierPlanEnum {
 
     private TierPlanEnum tierPlan = null;
     private Boolean stopOnQuotaReach = null;
+    private Map<String, String> monetizationProperties = new HashMap<>();
 
   /**
    **/
@@ -273,6 +275,24 @@ public enum TierPlanEnum {
     this.stopOnQuotaReach = stopOnQuotaReach;
   }
 
+  /**
+   * Properties of a tier plan which are related to monetization
+   **/
+  public ThrottlingPolicyDTO monetizationProperties(Map<String, String> monetizationProperties) {
+    this.monetizationProperties = monetizationProperties;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "{}", value = "Properties of a tier plan which are related to monetization")
+  @JsonProperty("monetizationProperties")
+  public Map<String, String> getMonetizationProperties() {
+    return monetizationProperties;
+  }
+  public void setMonetizationProperties(Map<String, String> monetizationProperties) {
+    this.monetizationProperties = monetizationProperties;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -292,12 +312,13 @@ public enum TierPlanEnum {
         Objects.equals(unitTime, throttlingPolicy.unitTime) &&
         Objects.equals(timeUnit, throttlingPolicy.timeUnit) &&
         Objects.equals(tierPlan, throttlingPolicy.tierPlan) &&
-        Objects.equals(stopOnQuotaReach, throttlingPolicy.stopOnQuotaReach);
+        Objects.equals(stopOnQuotaReach, throttlingPolicy.stopOnQuotaReach) &&
+        Objects.equals(monetizationProperties, throttlingPolicy.monetizationProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, description, policyLevel, displayName, attributes, requestCount, unitTime, timeUnit, tierPlan, stopOnQuotaReach);
+    return Objects.hash(name, description, policyLevel, displayName, attributes, requestCount, unitTime, timeUnit, tierPlan, stopOnQuotaReach, monetizationProperties);
   }
 
   @Override
@@ -315,6 +336,7 @@ public enum TierPlanEnum {
     sb.append("    timeUnit: ").append(toIndentedString(timeUnit)).append("\n");
     sb.append("    tierPlan: ").append(toIndentedString(tierPlan)).append("\n");
     sb.append("    stopOnQuotaReach: ").append(toIndentedString(stopOnQuotaReach)).append("\n");
+    sb.append("    monetizationProperties: ").append(toIndentedString(monetizationProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }

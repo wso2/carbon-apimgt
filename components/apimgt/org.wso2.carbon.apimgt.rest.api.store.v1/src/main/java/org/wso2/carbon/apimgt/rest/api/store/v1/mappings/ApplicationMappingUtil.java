@@ -18,14 +18,18 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationAttributeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
@@ -49,10 +53,11 @@ public class ApplicationMappingUtil {
         applicationDTO.setAttributes(applicationAttributes);
         applicationDTO.setName(application.getName());
         applicationDTO.setStatus(application.getStatus());
+        applicationDTO.setOwner(application.getOwner());
+
         if (StringUtils.isNotEmpty(application.getGroupId())) {
             applicationDTO.setGroups(Arrays.asList(application.getGroupId().split(",")));
         }
-        applicationDTO.setSubscriber(application.getSubscriber().getName());
         applicationDTO.setTokenType(ApplicationDTO.TokenTypeEnum.OAUTH);
         applicationDTO.setSubscriptionCount(application.getSubscriptionCount());
         if (StringUtils.isNotEmpty(application.getTokenType()) && !APIConstants.DEFAULT_TOKEN_TYPE
@@ -78,8 +83,13 @@ public class ApplicationMappingUtil {
         application.setDescription(applicationDTO.getDescription());
         application.setUUID(applicationDTO.getApplicationId());
         application.setTokenType(APIConstants.DEFAULT_TOKEN_TYPE);
-        if (applicationDTO.getTokenType() != null && !ApplicationDTO.TokenTypeEnum.OAUTH
-                .equals(applicationDTO.getTokenType())) {
+
+        //Check if the token type is not set in the request.
+        if (StringUtils.isEmpty(applicationDTO.getTokenType().toString())) {
+            //Set the default to JWT.
+            application.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+        } else {
+            //Otherwise set it to the type in the request.
             application.setTokenType(applicationDTO.getTokenType().toString());
         }
         Map <String, String> appAttributes = applicationDTO.getAttributes();
@@ -155,8 +165,10 @@ public class ApplicationMappingUtil {
         if (StringUtils.isNotEmpty(application.getGroupId())) {
             applicationInfoDTO.setGroups(Arrays.asList(application.getGroupId().split(",")));
         }
-        applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
+        Map<String,String> applicationAttributes = application.getApplicationAttributes();
+        applicationInfoDTO.setAttributes(applicationAttributes);
         applicationInfoDTO.setSubscriptionCount(application.getSubscriptionCount());
+        applicationInfoDTO.setOwner(application.getOwner());
         return applicationInfoDTO;
     }
 
@@ -177,5 +189,34 @@ public class ApplicationMappingUtil {
         }
 
         return updatedSortBy;
+    }
+
+    /**
+     * Creates a DTO representation of an Application Attribute
+     *
+     * @param attribute Application Attribute JSON object
+     * @return an Application Attribute DTO
+     */
+    public static ApplicationAttributeDTO fromApplicationAttributeJsonToDTO(JSONObject attribute) {
+        ApplicationAttributeDTO applicationAttributeDTO = new ApplicationAttributeDTO();
+        applicationAttributeDTO.setAttribute((String) attribute.get(APIConstants.ApplicationAttributes.ATTRIBUTE));
+        applicationAttributeDTO.setDescription((String) attribute.get(APIConstants.ApplicationAttributes.DESCRIPTION));
+        applicationAttributeDTO.setRequired(String.valueOf(attribute.get(APIConstants.ApplicationAttributes.REQUIRED)));
+        applicationAttributeDTO.setHidden(String.valueOf(attribute.get(APIConstants.ApplicationAttributes.HIDDEN)));
+        return applicationAttributeDTO;
+    }
+
+    /**
+     * Converts an Application Attribute List object into corresponding REST API DTO
+     *
+     * @param attributeList List of attribute objects
+     * @return ApplicationAttributeListDTO object
+     */
+    public static ApplicationAttributeListDTO fromApplicationAttributeListToDTO(
+            List<ApplicationAttributeDTO> attributeList) {
+        ApplicationAttributeListDTO applicationAttributeListDTO = new ApplicationAttributeListDTO();
+        applicationAttributeListDTO.setList(attributeList);
+        applicationAttributeListDTO.setCount(attributeList.size());
+        return applicationAttributeListDTO;
     }
 }

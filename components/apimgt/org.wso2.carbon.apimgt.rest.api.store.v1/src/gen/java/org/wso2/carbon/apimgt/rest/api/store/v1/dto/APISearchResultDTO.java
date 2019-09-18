@@ -10,104 +10,18 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
-public class APISearchResultDTO   {
+public class APISearchResultDTO extends SearchResultDTO  {
   
-    private String id = null;
-    private String name = null;
-
-@XmlType(name="TypeEnum")
-@XmlEnum(String.class)
-public enum TypeEnum {
-
-    @XmlEnumValue("DOC") DOC(String.valueOf("DOC"));
-
-
-    private String value;
-
-    TypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static TypeEnum fromValue(String v) {
-        for (TypeEnum b : TypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
-        }
-        return null;
-    }
-}
-
-    private TypeEnum type = null;
     private String description = null;
     private String context = null;
     private String version = null;
     private String provider = null;
     private String status = null;
     private String thumbnailUri = null;
-
-  /**
-   **/
-  public APISearchResultDTO id(String id) {
-    this.id = id;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
-  @JsonProperty("id")
-  public String getId() {
-    return id;
-  }
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  /**
-   **/
-  public APISearchResultDTO name(String name) {
-    this.name = name;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "TestAPI", value = "")
-  @JsonProperty("name")
-  public String getName() {
-    return name;
-  }
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  /**
-   **/
-  public APISearchResultDTO type(TypeEnum type) {
-    this.type = type;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("type")
-  public TypeEnum getType() {
-    return type;
-  }
-  public void setType(TypeEnum type) {
-    this.type = type;
-  }
 
   /**
    * A brief description about the API
@@ -226,10 +140,7 @@ public enum TypeEnum {
       return false;
     }
     APISearchResultDTO apISearchResult = (APISearchResultDTO) o;
-    return Objects.equals(id, apISearchResult.id) &&
-        Objects.equals(name, apISearchResult.name) &&
-        Objects.equals(type, apISearchResult.type) &&
-        Objects.equals(description, apISearchResult.description) &&
+    return Objects.equals(description, apISearchResult.description) &&
         Objects.equals(context, apISearchResult.context) &&
         Objects.equals(version, apISearchResult.version) &&
         Objects.equals(provider, apISearchResult.provider) &&
@@ -239,17 +150,14 @@ public enum TypeEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type, description, context, version, provider, status, thumbnailUri);
+    return Objects.hash(description, context, version, provider, status, thumbnailUri);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class APISearchResultDTO {\n");
-    
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");

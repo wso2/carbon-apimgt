@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,15 +26,24 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApiService;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO.TypeEnum;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SubscriptionMappingUtil;
@@ -46,6 +56,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.core.Response;
@@ -71,8 +82,8 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return matched subscriptions as a list of SubscriptionDTOs
      */
     @Override
-    public Response subscriptionsGet(String apiId, String applicationId, String apiType, Integer offset, Integer limit,
-            String ifNoneMatch, MessageContext messageContext) {
+    public Response subscriptionsGet(String apiId, String applicationId, String apiType, String groupId, Integer offset,
+                                     Integer limit, String ifNoneMatch, MessageContext messageContext) {
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         Subscriber subscriber = new Subscriber(username);
@@ -85,7 +96,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
         // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
         // As a improvement, we can check admin privileges of the user and honor groupId.
-        String groupId = RestApiUtil.getLoggedInUserGroupId();
+        groupId = RestApiUtil.getLoggedInUserGroupId();
 
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
@@ -93,12 +104,19 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             if (!StringUtils.isEmpty(apiId)) {
                 // todo : FIX properly, need to done properly with backend side pagination. 
                 // todo : getSubscribedIdentifiers() method should NOT be used. Appears to be too slow. 
-                
-                // This will fail with an authorization failed exception if user does not have permission to access the API
-                API api = apiConsumer.getLightweightAPIByUUID(apiId, tenantDomain);
-                subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, api.getId(), groupId);
-                //sort by application name
-                subscribedAPIList.addAll(subscriptions);
+
+                if (StringUtils.isEmpty(apiType) || APIType.API.toString().equals(apiType)) {
+                    // This will fail with an authorization failed exception if user does not have permission to access the API
+                    API api = apiConsumer.getLightweightAPIByUUID(apiId, tenantDomain);
+                    subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, api.getId(), groupId);
+                    //sort by application name
+                    subscribedAPIList.addAll(subscriptions);
+                } else if (APIType.API_PRODUCT.toString().equals(apiType)) {
+                    APIProduct apiProduct = apiConsumer.getAPIProductbyUUID(apiId, tenantDomain);
+                    subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, apiProduct.getId(), groupId);
+                    //sort by application name
+                    subscribedAPIList.addAll(subscriptions);
+                }
                 subscribedAPIList.sort(Comparator.comparing(o -> o.getApplication().getName()));
 
                 subscriptionListDTO = SubscriptionMappingUtil
@@ -154,16 +172,41 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         APIConsumer apiConsumer;
+        Identifier identifier;
         try {
             apiConsumer = RestApiUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
-
+            
             //check whether user is permitted to access the API. If the API does not exist, 
             // this will throw a APIMgtResourceNotFoundException
-            if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(body.getApiId(), tenantDomain)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, body.getApiId(), log);
+            if (body.getType() != null && TypeEnum.API == body.getType() && body.getApiId() != null) {
+                if (!RestAPIStoreUtils.isUserAccessAllowedForAPIByUUID(body.getApiId(), tenantDomain)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, body.getApiId(), log);
+                }
+                identifier = RestAPIStoreUtils.getAPIIdentifierFromUUID(body.getApiId(), tenantDomain);
+            } else if (body.getType() != null && TypeEnum.API_PRODUCT == body.getType()
+                    && body.getApiProductId() != null) {
+
+                String uuid = body.getApiProductId();
+                APIProduct product = apiConsumer.getAPIProductbyUUID(uuid, tenantDomain);
+                if(product == null) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, uuid, log);
+                    return null;
+                }
+                if (!RestAPIStoreUtils.isUserAccessAllowedForAPIProduct(product)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API_PRODUCT, uuid, log);
+                }
+
+                APIProductIdentifier prodIdentifier = new APIProductIdentifier(product.getId().getProviderName(),
+                        product.getId().getName(), product.getId().getVersion());
+                prodIdentifier.setUUID(uuid);
+                prodIdentifier.setProductId(product.getProductId());
+                identifier = prodIdentifier;
+            } else {
+                RestApiUtil.handleBadRequest(
+                        "Request must contain either apiIdentifier or apiProductIdentifier and the relevant type", log);
+                return null;
             }
-            APIIdentifier apiIdentifier = RestAPIStoreUtils.getAPIIdentifierFromUUID(body.getApiId(), tenantDomain);
 
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application == null) {
@@ -179,11 +222,12 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
             //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
             //  throw an APIMgtAuthorizationFailedException with the reason as the message
-            RestAPIStoreUtils.checkSubscriptionAllowed(apiIdentifier, body.getThrottlingPolicy());
+            RestAPIStoreUtils.checkSubscriptionAllowed(identifier, body.getThrottlingPolicy());
 
-            apiIdentifier.setTier(body.getThrottlingPolicy());
+            identifier.setTier(body.getThrottlingPolicy());
+
             SubscriptionResponse subscriptionResponse = apiConsumer
-                    .addSubscription(apiIdentifier, username, application.getId());
+                    .addSubscription(identifier, username, application.getId());
             SubscribedAPI addedSubscribedAPI = apiConsumer
                     .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
             SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);
@@ -196,8 +240,14 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             // the message of the exception e
             RestApiUtil.handleAuthorizationFailure(e.getMessage(), e, log);
         } catch (SubscriptionAlreadyExistingException e) {
+            String id =  "";
+            if(!StringUtils.isEmpty(body.getApiId())){
+               id = "API " + body.getApiId(); 
+            } else if (!StringUtils.isEmpty(body.getApiProductId())) {
+                id = "Product " + body.getApiProductId(); 
+            }
             RestApiUtil.handleResourceAlreadyExistsError(
-                    "Specified subscription already exists for API " + body.getApiId() + " for application "
+                    "Specified subscription already exists for " + id + " for application "
                             + body.getApplicationId(), e, log);
         } catch (APIManagementException | URISyntaxException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -214,7 +264,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     }
 
     /**
-     * Create multiple new subscriptions with the list of subscription details specified in the body parameter
+     * Create multiple new subscriptions with the list of subscription details specified in the body parameter.
      *
      * @param body        list of new subscription details
      * @return list of newly added subscription as a SubscriptionDTO if successful
@@ -308,6 +358,35 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             return Response.ok().entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while getting subscription with id " + subscriptionId, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response subscriptionsSubscriptionIdUsageGet(String subscriptionId, MessageContext messageContext) {
+
+        if (StringUtils.isBlank(subscriptionId)) {
+            String errorMessage = "Subscription ID cannot be empty or null when getting monetization usage.";
+            RestApiUtil.handleBadRequest(errorMessage, log);
+        }
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            Monetization monetizationImplementation = apiConsumer.getMonetizationImplClass();
+            Map<String, String> billingEngineUsageData = monetizationImplementation.
+                    getCurrentUsageForSubscription(subscriptionId, RestApiUtil.getLoggedInUserProvider());
+            if (MapUtils.isEmpty(billingEngineUsageData)) {
+                String errorMessage = "Billing engine usage data was not found for subscription ID : " + subscriptionId;
+                RestApiUtil.handleBadRequest(errorMessage, log);
+            }
+            APIMonetizationUsageDTO apiMonetizationUsageDTO = new APIMonetizationUsageDTO();
+            apiMonetizationUsageDTO.setProperties(billingEngineUsageData);
+            return Response.ok().entity(apiMonetizationUsageDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Failed to retrieve billing engine usage data for subscription ID : " + subscriptionId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (MonetizationException e) {
+            String errorMessage = "Failed to get current usage for subscription ID : " + subscriptionId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

@@ -16,7 +16,8 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Typography from '@material-ui/core/Typography';
@@ -47,6 +48,7 @@ const styles = theme => ({
         paddingRight: theme.spacing.unit,
         fontSize: theme.typography.caption.fontSize,
         cursor: 'pointer',
+        textDecoration: 'none',
     },
     leftLink_Icon: {
         color: theme.palette.getContrastText(theme.palette.background.leftMenu),
@@ -64,13 +66,34 @@ const styles = theme => ({
     },
 });
 function LeftMenuItem(props) {
-    const { classes, theme, Icon } = props;
+    const [selected, setSelected] = useState(false);
+
+    const {
+        classes, theme, Icon, to, history, text,
+    } = props;
     const { leftMenu } = theme.custom;
     const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
     const iconSize = theme.custom.leftMenuIconSize;
+    const ditectCurrentMenu = (location) => {
+        const { pathname } = location;
+        const test1 = new RegExp('/' + text + '$', 'g');
+        const test2 = new RegExp('/' + text + '/', 'g');
+        if (pathname.match(test1) || pathname.match(test2)) {
+            setSelected(true);
+        } else {
+            setSelected(false);
+        }
+    };
+    useEffect(() => {
+        const { location } = history;
+        ditectCurrentMenu(location);
+    }, []);
+    history.listen((location) => {
+        ditectCurrentMenu(location);
+    });
 
     return (
-        <div
+        <Link
             className={classNames(
                 classes.leftLInk,
                 {
@@ -78,9 +101,8 @@ function LeftMenuItem(props) {
                 },
                 'leftLInk',
             )}
-            onClick={() => props.handleMenuSelect(props.text)}
-            onKeyDown={() => props.handleMenuSelect(props.text)}
-            style={{ backgroundColor: props.active === props.text ? theme.palette.background.appBar : '' }}
+            to={to}
+            style={{ backgroundColor: selected ? theme.palette.background.appBarSelected : '' }}
         >
             {// If the icon pro ( which is comming from the React Material library )
             // is coming we add css class and render.
@@ -126,15 +148,39 @@ function LeftMenuItem(props) {
             >
                 {props.text}
             </Typography>
-        </div>
+        </Link>
     );
 }
 LeftMenuItem.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    theme: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        divider: PropTypes.string,
+        leftLInk: PropTypes.string,
+        leftLink_IconLeft: PropTypes.string,
+        noIcon: PropTypes.string,
+        leftLink_Icon: PropTypes.string,
+        leftLInkText: PropTypes.string,
+        leftLInkText_IconLeft: PropTypes.string,
+        leftLInkText_NoText: PropTypes.string,
+    }).isRequired,
+    theme: PropTypes.shape({
+        custom: PropTypes.shape({
+            leftMenu: PropTypes.string,
+            leftMenuIconSize: PropTypes.number,
+        }),
+        palette: PropTypes.shape({
+            getContrastText: PropTypes.func,
+            background: PropTypes.shape({
+                leftMenu: PropTypes.string,
+                appBar: PropTypes.string,
+            }),
+            leftMenu: PropTypes.string,
+        }),
+    }).isRequired,
     Icon: PropTypes.element.isRequired,
     text: PropTypes.string.isRequired,
-    handleMenuSelect: PropTypes.func.isRequired,
-    active: PropTypes.string.isRequired,
+    to: PropTypes.string.isRequired,
+    history: PropTypes.shape({
+        location: PropTypes.string.isRequired,
+    }).isRequired,
 };
-export default withStyles(styles, { withTheme: true })(LeftMenuItem);
+export default withRouter(withStyles(styles, { withTheme: true })(LeftMenuItem));

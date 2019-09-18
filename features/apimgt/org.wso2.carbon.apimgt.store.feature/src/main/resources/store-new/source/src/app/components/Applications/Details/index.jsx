@@ -22,19 +22,20 @@ import {
     Route, Switch, Redirect, Link,
 } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
-import Subscriptions from './Subscriptions';
-import API from '../../../data/api';
-import { PageNotFound } from '../../Base/Errors/index';
-import Loading from '../../Base/Loading/Loading';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import CustomIcon from '../../Shared/CustomIcon';
+import API from 'AppData/api';
+import { PageNotFound } from 'AppComponents/Base/Errors/index';
+import Loading from 'AppComponents/Base/Loading/Loading';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
+import TokenManager from 'AppComponents/Shared/AppsAndKeys/TokenManager';
 import InfoBar from './InfoBar';
-import LeftMenuItem from '../../Shared/LeftMenuItem';
-import TokenManager from '../../Shared/AppsAndKeys/TokenManager';
+import Subscriptions from './Subscriptions';
 /**
  *
  *
- * @param {*} theme
+ * @param {*} theme theme details
+ * @returns {Object}
  */
 const styles = theme => ({
     LeftMenu: {
@@ -78,6 +79,10 @@ const styles = theme => ({
  * @extends {Component}
  */
 class Details extends Component {
+    /**
+     *
+     * @param {Object} props props passed from above
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -92,9 +97,10 @@ class Details extends Component {
      * @memberof Details
      */
     componentDidMount() {
+        const { match } = this.props;
         const client = new API();
-        const promised_application = client.getApplication(this.props.match.params.application_uuid);
-        promised_application
+        const promisedApplication = client.getApplication(match.params.application_uuid);
+        promisedApplication
             .then((response) => {
                 this.setState({ application: response.obj });
             })
@@ -102,7 +108,7 @@ class Details extends Component {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
                     this.setState({ notFound: true });
                 }
@@ -111,40 +117,28 @@ class Details extends Component {
 
     /**
      *
-     *
-     * @memberof Details
-     */
-    handleChange = (event, value) => {
-        this.setState({ value });
-        this.props.history.push({ pathname: '/applications/' + this.props.match.params.application_uuid + '/' + value });
-    };
-
-    /**
-     *
-     *
+     * @param {String} menuLink selected menu name
      * @memberof Details
      */
     handleMenuSelect = (menuLink) => {
-        this.props.history.push({ pathname: '/applications/' + this.props.match.params.application_uuid + '/' + menuLink });
-        // (menuLink === "overview") ? this.infoBar.toggleOverview(true) : this.infoBar.toggleOverview(false) ;
+        const { history, match } = this.props;
+        history.push({ pathname: '/applications/' + match.params.application_uuid + '/' + menuLink });
         this.setState({ active: menuLink });
     };
 
     /**
      *
      *
-     * @returns
+     * @returns {Component}
      * @memberof Details
      */
     render() {
-        const redirect_url = '/applications/' + this.props.match.params.application_uuid + '/productionkeys';
-
-        const { classes, theme } = this.props;
-        const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
-
-        if (this.state.notFound) {
+        const { classes, match } = this.props;
+        const { notFound, application, active } = this.state;
+        const redirectUrl = '/applications/' + match.params.application_uuid + '/productionkeys';
+        if (notFound) {
             return <ResourceNotFound />;
-        } else if (!this.state.application) {
+        } else if (!application) {
             return <Loading />;
         }
         return (
@@ -155,17 +149,42 @@ class Details extends Component {
                             <CustomIcon width={52} height={52} icon='applications' />
                         </div>
                     </Link>
-                    <LeftMenuItem text='productionkeys' handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
-                    <LeftMenuItem text='sandBoxkeys' handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
-                    <LeftMenuItem text='subscriptions' handleMenuSelect={this.handleMenuSelect} active={this.state.active} />
+                    <LeftMenuItem text='productionkeys' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    <LeftMenuItem text='sandBoxkeys' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    <LeftMenuItem text='subscriptions' handleMenuSelect={this.handleMenuSelect} active={active} />
                 </div>
                 <div className={classes.content}>
-                    <InfoBar applicationId={this.props.match.params.application_uuid} innerRef={node => (this.infoBar = node)} />
+                    <InfoBar applicationId={match.params.application_uuid} innerRef={node => (this.infoBar = node)} />
                     <div className={classes.contentDown}>
                         <Switch>
-                            <Redirect exact from='/applications/:applicationId' to={redirect_url} />
-                            <Route path='/applications/:applicationId/productionkeys' render={() => <TokenManager keyType='PRODUCTION' selectedApp={{ appId: this.state.application.applicationId, label: this.state.application.name }} />} />
-                            <Route path='/applications/:applicationId/sandBoxkeys' render={() => <TokenManager keyType='SANDBOX' selectedApp={{ appId: this.state.application.applicationId, label: this.state.application.name }} />} />
+                            <Redirect exact from='/applications/:applicationId' to={redirectUrl} />
+                            <Route
+                                path='/applications/:applicationId/productionkeys'
+                                component={() => (
+                                    <TokenManager
+                                        keyType='PRODUCTION'
+                                        selectedApp={{
+                                            appId: application.applicationId,
+                                            label: application.name,
+                                            tokenType: application.tokenType,
+                                            owner: application.owner,
+                                        }}
+                                    />
+                                )}
+                            />
+                            <Route
+                                path='/applications/:applicationId/sandBoxkeys'
+                                component={() => (
+                                    <TokenManager
+                                        keyType='SANDBOX'
+                                        selectedApp={{
+                                            appId: application.applicationId,
+                                            label: application.name,
+                                            tokenType: application.tokenType,
+                                        }}
+                                    />
+                                )}
+                            />
                             <Route path='/applications/:applicationId/subscriptions' component={Subscriptions} />
                             <Route component={PageNotFound} />
                         </Switch>
@@ -177,8 +196,16 @@ class Details extends Component {
 }
 
 Details.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            application_uuid: PropTypes.string.isRequired,
+        }).isRequired,
+    }).isRequired,
+    history: PropTypes.shape({
+        push: PropTypes.func.isRequired,
+    }).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Details);

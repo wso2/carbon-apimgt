@@ -18,31 +18,26 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import {
-    KeyboardArrowLeft, StarRate, FileCopy, ArrowDropDownOutlined, ArrowDropUpOutlined,
-} from '@material-ui/icons';
 import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
-import HighlightOff from '@material-ui/icons/HighlightOff';
+import Button from '@material-ui/core/Button';
+import Icon from '@material-ui/core/Icon';
 import { Link } from 'react-router-dom';
-import CopyToClipboard from 'react-copy-to-clipboard';
-import Tooltip from '@material-ui/core/Tooltip';
 import Collapse from '@material-ui/core/Collapse';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import CalendarViewDay from '@material-ui/icons/CalendarViewDay';
-import AccountBalanceWallet from '@material-ui/icons/AccountBalanceWallet';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import Update from '@material-ui/icons/Update';
-import LinkIcon from '@material-ui/icons/Link';
-import Button from '@material-ui/core/Button';
+import Grade from '@material-ui/icons/Grade';
+import LaunchIcon from '@material-ui/icons/Launch';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import API from 'AppData/api';
+import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import VerticalDivider from '../../Shared/VerticalDivider';
 import ImageGenerator from '../Listing/ImageGenerator';
-import Api from '../../../data/api';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
-import Loading from '../../Base/Loading/Loading';
+import AuthManager from '../../../data/AuthManager';
+import { ApiContext } from './ApiContext';
+import Environments from './Environments';
 /**
  *
  *
@@ -58,6 +53,7 @@ const styles = theme => ({
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         display: 'flex',
         alignItems: 'center',
+        paddingLeft: theme.spacing.unit * 2,
     },
     backIcon: {
         color: theme.palette.primary.main,
@@ -75,11 +71,11 @@ const styles = theme => ({
         marginRight: 10,
     },
     starRate: {
-        fontSize: 70,
+        fontSize: 40,
         color: theme.custom.starColor,
     },
     starRateMy: {
-        fontSize: 70,
+        fontSize: 40,
         color: theme.palette.primary.main,
     },
     rateLink: {
@@ -116,7 +112,18 @@ const styles = theme => ({
         padding: '5px 12px',
         width: 350,
         transition: theme.transitions.create(['border-color', 'box-shadow']),
-        fontFamily: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'].join(','),
+        fontFamily: [
+            '-apple-system',
+            'BlinkMacSystemFont',
+            '"Segoe UI"',
+            'Roboto',
+            '"Helvetica Neue"',
+            'Arial',
+            'sans-serif',
+            '"Apple Color Emoji"',
+            '"Segoe UI Emoji"',
+            '"Segoe UI Symbol"',
+        ].join(','),
         '&:focus': {
             borderColor: '#80bdff',
             boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
@@ -150,7 +157,6 @@ const styles = theme => ({
         height: '40px',
         color: theme.palette.getContrastText(theme.palette.background.leftMenu),
         alignItems: 'center',
-        left: '0',
         paddingLeft: '5px',
         paddingRight: '5px',
     },
@@ -229,215 +235,24 @@ const styles = theme => ({
     margin: {
         marginLeft: 30,
     },
+    downloadLink: {
+        color: 'blue',
+    },
+    contentToTop: {
+        verticlaAlign: 'top',
+    },
+    viewInPubStoreLauncher: {
+        display: 'flex',
+        flexDirection: 'column',
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+        textAlign: 'center',
+        textDecoration: 'none',
+    },
+    linkText: {
+        fontSize: theme.typography.fontSize,
+    },
 });
-/**
- *
- *
- * @class StarRatingBar
- * @extends {React.Component}
- */
-class StarRatingBar extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            rating: null,
-            dummyRateValue: 1,
-            showRateNow: false,
-        };
 
-        this.handleMouseOver = this.handleMouseOver.bind(this);
-        this.handleRatingUpdate = this.handleRatingUpdate.bind(this);
-        this.handleMouseOut = this.handleMouseOut.bind(this);
-    }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    updateRating() {
-        const api = new Api();
-
-        // get user rating
-        const promised_rating = api.getRatingFromUser(this.props.apiIdProp, null);
-        promised_rating.then((response) => {
-            this.setState({
-                // rating: response.obj,
-                // dummyRateValue: response.obj.userRating,
-            });
-        });
-    }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    componentDidMount() {
-        this.updateRating();
-    }
-
-    /**
-     *
-     *
-     * @param {*} index
-     * @memberof StarRatingBar
-     */
-    handleMouseOver(index) {
-        this.setState({ rating: index });
-    }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    handleMouseOut() {
-        this.setState({ rating: this.state.previousRating });
-    }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    handleRatingUpdate() {}
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    handleClickAway = () => {
-        this.setState({
-            showRateNow: false,
-        });
-    };
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    showRateBox = () => {
-        this.setState({
-            showRateNow: true,
-        });
-    };
-
-    /**
-     *
-     *
-     * @param {*} index
-     * @memberof StarRatingBar
-     */
-    highlightUs(index) {
-        this.setState({ dummyRateValue: index });
-    }
-
-    /**
-     *
-     *
-     * @memberof StarRatingBar
-     */
-    unhighlightUs() {
-        this.setState({ dummyRateValue: 1 });
-    }
-
-    /**
-     *
-     *
-     * @param {*} rateIndex
-     * @memberof StarRatingBar
-     */
-    doRate(rateIndex) {
-        this.setState({ rateIndex, showRateNow: false });
-
-        const api = new Api();
-        const ratingInfo = { rating: rateIndex / 2 };
-        const promise = api.addRating(this.props.apiIdProp, ratingInfo);
-        promise
-            .then((response) => {
-                this.updateRating();
-                // message.success("Rating updated successfully");
-            })
-            .catch((error) => {
-                // message.error("Error occurred while adding ratings!");
-            });
-    }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof StarRatingBar
-     */
-    render() {
-        const { classes, theme } = this.props;
-        if (!this.state.rating) {
-            return <span />;
-        }
-        return (
-            <React.Fragment>
-                {this.state.rating.count > 0 ? (
-                    <React.Fragment>
-                        <StarRate className={classes.starRate} />
-                        <div className={classes.ratingSummery}>
-                            <div className={classes.userRating}>
-                                <Typography variant='display1'>{this.state.rating.avgRating * 2}</Typography>
-                                <Typography variant='caption'>/10</Typography>
-                            </div>
-                            <Typography variant='caption' gutterBottom align='left'>
-                                {this.state.rating.count}
-                                {' '}
-                                {this.state.rating.count == 1 ? 'user' : 'users'}
-                            </Typography>
-                        </div>
-                    </React.Fragment>
-                ) : (
-                    <StarRate onClick={this.showRateBox} className={classes.starRate} style={{ color: theme.palette.grey.A200 }} />
-                )}
-                <VerticalDivider height={32} />
-                <div className={classes.ratingBoxWrapper}>
-                    {this.state.showRateNow && (
-                        <div className={classes.ratingBox}>
-                            <HighlightOff />
-                            <VerticalDivider height={32} />
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
-                                <StarRate color={i <= this.state.rating.userRating * 2 || i <= this.state.dummyRateValue ? 'primary' : ''} onMouseOver={() => this.highlightUs(i)} onMouseLeave={() => this.unhighlightUs()} onClick={() => this.doRate(i)} />
-                            ))}
-                        </div>
-                    )}
-                    {this.state.rating.userRating ? (
-                        <React.Fragment>
-                            <StarRate className={classes.starRateMy} onClick={this.showRateBox} />
-                            <div className={classes.ratingSummery} onClick={this.showRateBox}>
-                                <Typography variant='display1'>{this.state.rating.userRating * 2}</Typography>
-                                <Typography variant='caption' gutterBottom align='left'>
-                                    YOU
-                                </Typography>
-                            </div>
-                        </React.Fragment>
-                    ) : (
-                        <React.Fragment>
-                            <StarRate onClick={this.showRateBox} className={classes.starRate} style={{ color: theme.palette.grey.A200 }} />
-                            <Typography onClick={this.showRateBox} className={classes.rateLink}>
-                                Rate this API
-                            </Typography>
-                        </React.Fragment>
-                    )}
-                </div>
-            </React.Fragment>
-        );
-    }
-}
-
-StarRatingBar.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
-};
-
-StarRatingBar = withStyles(styles, { withTheme: true })(StarRatingBar);
 /**
  *
  *
@@ -457,11 +272,10 @@ class InfoBar extends React.Component {
             tabValue: 'Social Sites',
             comment: '',
             commentList: null,
-            prodUrlCopied: false,
-            sandboxUrlCopied: false,
             showOverview: false,
             checked: false,
         };
+        this.getSchema = this.getSchema.bind(this);
     }
 
     /**
@@ -469,67 +283,7 @@ class InfoBar extends React.Component {
      *
      * @memberof InfoBar
      */
-    componentDidMount() {
-        const { apiId } = this.props;
-        const api = new Api();
-        api.getAPIById(apiId)
-            .then((response) => {
-                this.setState({ api: response.obj });
-                // this.props.setDetailsAPI(response.obj);
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
 
-        api.getAllApplications()
-            .then((response) => {
-                this.setState({ applications: response.obj.list });
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                if (error.status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-
-        api.getSubscriptions(apiId, null)
-            .then(() => {})
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                if (error.status === 404) {
-                    this.setState({ notFound: true });
-                }
-            });
-    }
-
-    /**
-     *
-     *
-     * @memberof InfoBar
-     */
-    onCopy = name => () => {
-        this.setState({
-            [name]: true,
-        });
-        const that = this;
-        const elementName = name;
-        const caller = function () {
-            that.setState({
-                [elementName]: false,
-            });
-        };
-        setTimeout(caller, 4000);
-    };
 
     /**
      *
@@ -544,16 +298,21 @@ class InfoBar extends React.Component {
         }
     };
 
-    /**
-     * [Temporary function] to get the first hybrid https or http endpoint of an API
-     *
-     * @param {Api} api API object
-     * @returns {string}
-     */
-    getHttpsEP = (api) => {
-        const epHybridUrl = api.endpointURLs.find(url => url.environmentType === 'hybrid');
-        return epHybridUrl.environmentURLs.https || epHybridUrl.environmentURLs.http;
-    };
+    getSchema() {
+        const newAPI = new API();
+        const { api } = this.context;
+        const promisedGraphQL = newAPI.getGraphQLSchemaByAPIId(api.id);
+        promisedGraphQL.then((response) => {
+            const windowUrl = window.URL || window.webkitURL;
+            const binary = new Blob([response.data]);
+            const url = windowUrl.createObjectURL(binary);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = api.provider + '-' + api.name + '-' + api.version + '.graphql';
+            anchor.click();
+            windowUrl.revokeObjectURL(url);
+        });
+    }
 
     /**
      *
@@ -562,191 +321,241 @@ class InfoBar extends React.Component {
      * @memberof InfoBar
      */
     render() {
-        const { classes, theme } = this.props;
+        const { classes, theme, intl } = this.props;
         const {
-            api, notFound, showOverview, prodUrlCopied, sandboxUrlCopied,
+            notFound, showOverview, prodUrlCopied, sandboxUrlCopied, epUrl,
         } = this.state;
         const { resourceNotFountMessage } = this.props;
+        const user = AuthManager.getUser();
         if (notFound) {
             return <ResourceNotFound message={resourceNotFountMessage} />;
         }
-        if (!api) {
-            return <Loading />;
-        }
-        const epUrl = this.getHttpsEP(api);
 
         return (
-            <div className={classes.infoBarMain}>
-                <div className={classes.root}>
-                    <Link to='/apis' className={classes.backLink}>
-                        <KeyboardArrowLeft className={classes.backIcon} />
-                        <div className={classes.backText}>
-                            BACK TO
-                            {' '}
-                            <br />
-                            LISTING
+            <ApiContext.Consumer>
+                {({ api }) => (
+                    <div className={classes.infoBarMain}>
+                        <div className={classes.root}>
+                            <Link to='/apis' className={classes.backLink}>
+                                <Icon className={classes.backIcon}>keyboard_arrow_left</Icon>
+                                <div className={classes.backText}>
+                                    <FormattedMessage id='Apis.Details.InfoBar.back.to' defaultMessage='BACK TO' />
+                                    <br />
+                                    <FormattedMessage id='Apis.Details.InfoBar.listing' defaultMessage='LISTING' />
+                                </div>
+                            </Link>
+                            <VerticalDivider height={70} />
+                            <ImageGenerator api={api} width='70' height='50' />
+                            <div style={{ marginLeft: theme.spacing.unit }}>
+                                <Typography variant='display1'>{api.name}</Typography>
+                                <Typography variant='caption' gutterBottom align='left'>
+                                    {api.provider}
+                                </Typography>
+                            </div>
+                            <VerticalDivider height={70} />
+                            {(!api.advertiseInfo.advertised && user)
+                                && <StarRatingBar apiId={api.id} isEditable={false} showSummary />}
+                            {api.advertiseInfo.advertised && (
+                                <React.Fragment>
+                                    <a
+                                        target='_blank'
+                                        rel='noopener noreferrer'
+                                        href={api.advertiseInfo.originalStoreUrl}
+                                        className={classes.viewInPubStoreLauncher}
+                                    >
+                                        <div>
+                                            <LaunchIcon />
+                                        </div>
+                                        <div className={classes.linkText}>Visit Publisher Store</div>
+                                    </a>
+                                    <VerticalDivider height={70} />
+                                </React.Fragment>
+                            )}
                         </div>
-                    </Link>
-                    <VerticalDivider height={70} />
-                    <ImageGenerator api={api} width='70' height='50' />
-                    <div style={{ marginLeft: theme.spacing.unit }}>
-                        <Typography variant='display1'>{api.name}</Typography>
-                        <Typography variant='caption' gutterBottom align='left'>
-                            {api.provider}
-                            {' '}
-| 21-May 2018
-                        </Typography>
-                    </div>
-                    <VerticalDivider height={70} />
-                    <StarRatingBar apiIdProp={api.id} />
-                </div>
 
-                {showOverview && (
-                    <Collapse in={showOverview}>
-                        <div className={classes.infoContent}>
-                            <div className={classes.contentWrapper}>
-                                <Typography>{api.description}</Typography>
-                                <Table className={classes.table}>
-                                    <TableBody>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row' className={classes.leftCol}>
-                                                <div className={classes.iconAligner}>
-                                                    <CalendarViewDay className={classes.iconOdd} />
-                                                    <span className={classes.iconTextWrapper}>Version</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>{api.version}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row'>
-                                                <div className={classes.iconAligner}>
-                                                    <AccountBalanceWallet className={classes.iconEven} />
-                                                    <span className={classes.iconTextWrapper}>Context</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>{api.context}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row'>
-                                                <div className={classes.iconAligner}>
-                                                    <AccountCircle className={classes.iconOdd} />
-                                                    <span className={classes.iconTextWrapper}>Provider</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>{api.provider}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row'>
-                                                <div className={classes.iconAligner}>
-                                                    <Update className={classes.iconEven} />
-                                                    <span className={classes.iconTextWrapper}>Last updated</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>21 May 2018</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row'>
-                                                <div className={classes.iconAligner}>
-                                                    <LinkIcon className={classes.iconOdd} />
-                                                    <span className={classes.iconTextWrapper}>Production URL</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <TextField
-                                                    defaultValue={epUrl}
-                                                    id='bootstrap-input'
-                                                    InputProps={{
-                                                        disableUnderline: true,
-                                                        classes: {
-                                                            root: classes.bootstrapRoot,
-                                                            input: classes.bootstrapInput,
-                                                        },
-                                                    }}
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                        className: classes.bootstrapFormLabel,
-                                                    }}
-                                                />
-                                                <Tooltip
-                                                    title={prodUrlCopied ? 'Copied' : 'Copy to clipboard'}
-                                                    placement='right'
-                                                >
-                                                    <CopyToClipboard text={epUrl} onCopy={this.onCopy('prodUrlCopied')}>
-                                                        <FileCopy color='secondary' />
-                                                    </CopyToClipboard>
-                                                </Tooltip>
-                                                <Button
-                                                    variant='contained'
-                                                    size='small'
-                                                    color='primary'
-                                                    className={classes.margin}
-                                                >
-                                                    Test Endpoint
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell component='th' scope='row'>
-                                                <div className={classes.iconAligner}>
-                                                    <LinkIcon className={classes.iconEven} />
-                                                    <span className={classes.iconTextWrapper}>Sandbox URL</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className={classes.iconAligner}>
-                                                    <TextField
-                                                        defaultValue={epUrl}
-                                                        id='bootstrap-input'
-                                                        InputProps={{
-                                                            disableUnderline: true,
-                                                            classes: {
-                                                                root: classes.bootstrapRoot,
-                                                                input: classes.bootstrapInput,
-                                                            },
-                                                        }}
-                                                        InputLabelProps={{
-                                                            shrink: true,
-                                                            className: classes.bootstrapFormLabel,
-                                                        }}
-                                                    />
-                                                    <Tooltip
-                                                        title={sandboxUrlCopied ? 'Copied' : 'Copy to clipboard'}
-                                                        placement='right'
-                                                    >
-                                                        <CopyToClipboard
-                                                            text={epUrl}
-                                                            onCopy={this.onCopy('sandboxUrlCopied')}
+                        {showOverview && (
+                            <Collapse in={showOverview}>
+                                <div className={classes.infoContent}>
+                                    <div className={classes.contentWrapper}>
+                                        <Typography>{api.description}</Typography>
+                                        <Table className={classes.table}>
+                                            <TableBody>
+                                                <TableRow>
+                                                    <TableCell component='th' scope='row' className={classes.leftCol}>
+                                                        <div className={classes.iconAligner}>
+                                                            <Icon className={classes.iconOdd}>settings_input_component</Icon>
+                                                            <span className={classes.iconTextWrapper}>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.list.version'
+                                                                    defaultMessage='Version'
+                                                                />
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {api.version}
+                                                    </TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                    <TableCell component='th' scope='row'>
+                                                        <div className={classes.iconAligner}>
+                                                            <Icon className={classes.iconEven}>account_balance_wallet</Icon>
+                                                            <span className={classes.iconTextWrapper}>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.list.context'
+                                                                    defaultMessage='Context'
+                                                                />
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>{api.context}</TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                    <TableCell component='th' scope='row'>
+                                                        <div className={classes.iconAligner}>
+                                                            <Icon className={classes.iconOdd}>account_circle</Icon>
+                                                            <span className={classes.iconTextWrapper}>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.provider'
+                                                                    defaultMessage='Provider'
+                                                                />
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>{api.provider}</TableCell>
+                                                </TableRow>
+                                                {/* <TableRow>
+                                                    <TableCell component='th' scope='row'>
+                                                        <div className={classes.iconAligner}>
+                                                            <Icon className={classes.iconEven}>update</Icon>
+                                                            <span className={classes.iconTextWrapper}>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.last.updated'
+                                                                    defaultMessage='Last updated'
+                                                                />
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>21 May 2018</TableCell>
+                                                </TableRow> */}
+                                                {(user && !api.advertiseInfo.advertised) && (
+                                                    <TableRow>
+                                                        <TableCell component='th' scope='row'>
+                                                            <div className={classes.iconAligner}>
+                                                                <Grade className={classes.iconEven} />
+                                                                <span className={classes.iconTextWrapper}>
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.InfoBar.list.context.rating'
+                                                                        defaultMessage='Rating'
+                                                                    />
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <StarRatingBar
+                                                                apiId={api.id}
+                                                                isEditable
+                                                                showSummary={false}
+                                                            />
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
+                                                { api.type === 'GRAPHQL' && (
+                                                    <TableRow>
+                                                        <TableCell component='th' scope='row'>
+                                                            <div className={classes.iconAligner}>
+                                                                <Icon className={classes.iconOdd}>cloud_download</Icon>
+                                                                <span className={classes.iconTextWrapper}>
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.InfoBar.download.Schema'
+                                                                        defaultMessage='Download Schema'
+                                                                    />
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Button
+                                                                onClick={this.getSchema}
+                                                                size='small'
+                                                                fontSize='small'
+                                                                variant='outlined'
+                                                            >
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.InfoBar.graphQL.schema'
+                                                                    defaultMessage='GraphQL Schema'
+                                                                />
+                                                            </Button>
+
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
+                                                {!api.advertiseInfo.advertised ? (
+                                                    <TableRow>
+                                                        <TableCell
+                                                            component='th'
+                                                            scope='row'
+                                                            className={classes.contentToTop}
                                                         >
-                                                            <FileCopy color='secondary' />
-                                                        </CopyToClipboard>
-                                                    </Tooltip>
-                                                    <Button
-                                                        variant='contained'
-                                                        size='small'
-                                                        color='primary'
-                                                        className={classes.margin}
-                                                    >
-                                                        Test Endpoint
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    </TableBody>
-                                </Table>
+                                                            <div className={classes.iconAligner}>
+                                                                <Icon className={classes.iconEven}>
+                                                                    desktop_windows
+                                                                </Icon>
+                                                                <span className={classes.iconTextWrapper}>
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.InfoBar.available.environments'
+                                                                        defaultMessage='Available Environments'
+                                                                    />
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Environments />
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ) : (
+                                                    <TableRow>
+                                                        <TableCell component='th' scope='row'>
+                                                            <div className={classes.iconAligner}>
+                                                                <Icon className={classes.iconOdd}>account_circle</Icon>
+                                                                <span className={classes.iconTextWrapper}>
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.InfoBar.owner'
+                                                                        defaultMessage='Owner'
+                                                                    />
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell>{api.advertiseInfo.apiOwner}</TableCell>
+                                                    </TableRow>
+                                                )}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                </div>
+                            </Collapse>
+                        )}
+                        <div className={classes.infoContentBottom}>
+                            <div className={classes.contentWrapper} onClick={this.toggleOverview}>
+                                <div className={classes.buttonView}>
+                                    {showOverview ? (
+                                        <Typography className={classes.buttonOverviewText}>
+                                            <FormattedMessage id='Apis.Details.InfoBar.less' defaultMessage='LESS' />
+                                        </Typography>
+                                    ) : (
+                                        <Typography className={classes.buttonOverviewText}>
+                                            <FormattedMessage
+                                                id='Apis.Details.InfoBar.more'
+                                                defaultMessage='MORE'
+                                            />
+                                        </Typography>
+                                    )}
+                                    {showOverview ? <Icon>arrow_drop_up</Icon> : <Icon>arrow_drop_down</Icon>}
+                                </div>
                             </div>
                         </div>
-                    </Collapse>
-                )}
-                <div className={classes.infoContentBottom}>
-                    <div className={classes.contentWrapper} onClick={this.toggleOverview}>
-                        <div className={classes.buttonView}>
-                            {showOverview ? <Typography className={classes.buttonOverviewText}>LESS</Typography>
-                                : <Typography className={classes.buttonOverviewText}>MORE</Typography>}
-                            {showOverview ? <ArrowDropUpOutlined /> : <ArrowDropDownOutlined />}
-                        </div>
                     </div>
-                </div>
-            </div>
+                )}
+            </ApiContext.Consumer>
         );
     }
 }
@@ -754,6 +563,11 @@ class InfoBar extends React.Component {
 InfoBar.propTypes = {
     classes: PropTypes.object.isRequired,
     theme: PropTypes.object.isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(InfoBar);
+InfoBar.contextType = ApiContext;
+
+export default injectIntl(withStyles(styles, { withTheme: true })(InfoBar));

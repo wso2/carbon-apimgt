@@ -19,6 +19,7 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 const ResourceNotFound = (props) => {
     const { response } = props;
@@ -27,11 +28,11 @@ const ResourceNotFound = (props) => {
     return (
         <div>
             <div className='message message-danger'>
-                <Typography variant='title' gutterBottom>
-                    {message.title || '404 Resource Not Found!'}
+                <Typography variant='h6' gutterBottom>
+                    { message.title }
                 </Typography>
-                <Typography variant='subheading' gutterBottom>
-                    {message.body || "Can't find the resource you are looking for"}
+                <Typography variant='subtitle1' gutterBottom>
+                    { message.body }
                     <span style={{ color: 'green' }}> {response ? response.statusText : ''} </span>
                 </Typography>
                 {message.more}
@@ -41,14 +42,33 @@ const ResourceNotFound = (props) => {
 };
 
 ResourceNotFound.defaultProps = {
-    message: 'No Error message give, Please give a proper error message when using `ResourceNotFound` Component',
+    message: {
+        title: <FormattedMessage
+            id='Base.Errors.ResourceNotfound.default_tittle'
+            defaultMessage='ResourceNotFound'
+        />,
+        body: <FormattedMessage
+            id='Base.Errors.ResourceNotfound.default_body'
+            defaultMessage={'No Error message give, Please give a proper error message when using `ResourceNotFound` ' +
+            'Component'}
+        />,
+    },
 };
 
 ResourceNotFound.propTypes = {
     response: PropTypes.shape({
         statusText: PropTypes.string,
     }).isRequired,
-    message: PropTypes.string,
+    message: PropTypes.shape({
+        title: PropTypes.oneOfType([
+            PropTypes.string,
+            PropTypes.instanceOf(FormattedMessage),
+        ]),
+        body: PropTypes.oneOfType([
+            PropTypes.string,
+            PropTypes.instanceOf(FormattedMessage),
+        ]),
+    }),
 };
 
 export default ResourceNotFound;

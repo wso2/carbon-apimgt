@@ -18,11 +18,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import ArrowDropDownCircleOutlined from '@material-ui/icons/ArrowDropDownCircleOutlined';
-import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
+import Icon from '@material-ui/core/Icon';
 import { Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid/Grid';
-import Alert from '../../../Shared/Alert';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import APIProduct from 'AppData/APIProduct';
+import CONSTS from 'AppData/Constants';
+import AuthManager from 'AppData/AuthManager';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
 import API from '../../../../data/api';
@@ -56,12 +58,13 @@ const styles = theme => ({
 });
 
 /**
-   * Display a comment list
-   * @class Comments
-   * @extends {React.Component}
-   */
+ * Display a comment list
+ * @class Comments
+ * @extends {React.Component}
+ */
 class Comments extends Component {
     static contextType = ApiContext;
+
     /**
      * Creates an instance of Comments
      * @param {*} props properies passed by the parent element
@@ -82,31 +85,54 @@ class Comments extends Component {
     }
 
     /**
-    * Gets all the comments for a particular API, when component mounts
-    * @memberof Comments
-    */
+     * Gets all the comments for a particular API, when component mounts
+     * @memberof Comments
+     */
     componentDidMount() {
-        let { apiId, theme, match } = this.props;
-        if( match ) apiId = match.params.api_uuid;
-        const restApi = new API();
-        restApi.getAllComments(apiId)
-            .then((result) => {
-                const commentList = result.body.list;
-                this.setState({ allComments: commentList, totalComments: commentList.length });
-                if (commentList.length < theme.custom.commentsLimit) {
-                    this.setState({ startCommentsToDisplay: 0, comments: commentList.slice(0, commentList.length) });
-                } else {
-                    this.setState({ startCommentsToDisplay: commentList.length - theme.custom.commentsLimit, comments: commentList.slice(commentList.length - theme.custom.commentsLimit, commentList.length) });
-                }
-            })
-            .catch((error) => {
-                console.error(error);
-                if (error.response) {
-                    Alert.error(error.response.body.message);
-                } else {
-                    Alert.error('Something went wrong while retrieving comments');
-                }
-            });
+        const { apiType } = this.context;
+        let {
+            apiId, theme, match, intl, isOverview, setCount
+        } = this.props;
+        if (match) apiId = match.params.apiUuid;
+
+        let restApi = null;
+        if (apiType === CONSTS.API_TYPE) {
+            restApi = new API();
+        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            restApi = new APIProduct();
+        }
+
+        const user = AuthManager.getUser();
+        if (user != null) {
+            restApi
+                .getAllComments(apiId)
+                .then((result) => {
+                    let commentList = result.body.list;
+                    if (isOverview) {
+                        setCount(commentList.length);
+                        if (commentList.length > 2) {
+                            commentList = commentList.slice(commentList.length - 3, commentList.length);
+                        }
+                    }
+                    this.setState({ allComments: commentList, totalComments: commentList.length });
+                    if (commentList.length < theme.custom.commentsLimit) {
+                        this.setState({ startCommentsToDisplay: 0, comments: commentList.slice(0, commentList.length) });
+                    } else {
+                        this.setState({
+                            startCommentsToDisplay: commentList.length - theme.custom.commentsLimit,
+                            comments: commentList.slice(
+                                commentList.length - theme.custom.commentsLimit,
+                                commentList.length,
+                            ),
+                        });
+                    }
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                });
+        }
     }
 
     /**
@@ -119,7 +145,10 @@ class Comments extends Component {
         if (startCommentsToDisplay - theme.custom.commentsLimit <= 0) {
             this.setState({ startCommentsToDisplay: 0, comments: allComments.slice(0, totalComments) });
         } else {
-            this.setState({ startCommentsToDisplay: startCommentsToDisplay - theme.custom.commentsLimit, comments: allComments.slice(startCommentsToDisplay - theme.custom.commentsLimit, totalComments) });
+            this.setState({
+                startCommentsToDisplay: startCommentsToDisplay - theme.custom.commentsLimit,
+                comments: allComments.slice(startCommentsToDisplay - theme.custom.commentsLimit, totalComments),
+            });
         }
     }
 
@@ -140,8 +169,9 @@ class Comments extends Component {
     updateCommentList(comments) {
         const { startCommentsToDisplay, totalComments } = this.state;
         const { theme } = this.props;
-        let newStart; let difference; let
-            newTotal;
+        let newStart;
+        let difference;
+        let newTotal;
         this.setState({ allComments: comments });
         if (totalComments < theme.custom.commentsLimit) {
             newTotal = comments.length;
@@ -150,7 +180,11 @@ class Comments extends Component {
             difference = comments.length - totalComments;
             newStart = startCommentsToDisplay + difference;
             newTotal = comments.length;
-            this.setState({ startCommentsToDisplay: newStart, totalComments: newTotal, comments: comments.slice(newStart, newTotal) });
+            this.setState({
+                startCommentsToDisplay: newStart,
+                totalComments: newTotal,
+                comments: comments.slice(newStart, newTotal),
+            });
         } else {
             difference = totalComments - comments.length;
             if (startCommentsToDisplay === 0) {
@@ -159,76 +193,108 @@ class Comments extends Component {
                 newStart = startCommentsToDisplay - difference;
             }
             newTotal = comments.length;
-            this.setState({ startCommentsToDisplay: newStart, totalComments: newTotal, comments: comments.slice(newStart, newTotal) });
+            this.setState({
+                startCommentsToDisplay: newStart,
+                totalComments: newTotal,
+                comments: comments.slice(newStart, newTotal),
+            });
         }
     }
 
     /**
-   * Render method of the component
-   * @returns {React.Component} Comment html component
-   * @memberof Comments
-   */
+     * Render method of the component
+     * @returns {React.Component} Comment html component
+     * @memberof Comments
+     */
     render() {
         const { classes, showLatest } = this.props;
         const {
-            comments, expanded, allComments, startCommentsToDisplay, totalComments,
+            comments, expanded, allComments, startCommentsToDisplay, totalComments, commentsUpdate,
         } = this.state;
         return (
             <ApiContext.Consumer>
-            {({ api }) => (
-            <div className={classes.contentWrapper}>
-                {!showLatest && <div className={classes.root}>
-                    <ArrowDropDownCircleOutlined
-                        onClick={this.handleExpandClick}
-                        aria-expanded={expanded}
-                    />
-                    <Typography
-                        onClick={this.handleExpandClick}
-                        variant='display1'
-                        className={classes.titleSub}
-                    >
-                    Comments
-                    </Typography>
-                </div>}
-                {!showLatest && <CommentAdd apiId={api.id} commentsUpdate={this.updateCommentList} allComments={allComments} parentCommentId={null} cancelButton={false} />}
-                <Comment comments={comments} apiId={api.id} commentsUpdate={this.updateCommentList} allComments={allComments} />
-                { startCommentsToDisplay !== 0
-                        && (
+                {({ api }) => (
+                    <div className={classes.contentWrapper}>
+                        {!showLatest && (
+                            <div className={classes.root}>
+                                <Icon
+                                    onClick={this.handleExpandClick}
+                                    aria-expanded={expanded}
+                                >
+                                    arrow_drop_down_circle
+                                </Icon>
+                                <Typography
+                                    onClick={this.handleExpandClick}
+                                    variant='display1'
+                                    className={classes.titleSub}
+                                >
+                                    <FormattedMessage id='Apis.Details.Comments.title' defaultMessage='Comments' />
+                                </Typography>
+                            </div>
+                        )}
+                        <Comment
+                            comments={comments}
+                            apiId={api.id}
+                            commentsUpdate={this.updateCommentList}
+                            allComments={allComments}
+                        />
+                        {!showLatest && (
+                            <CommentAdd
+                                apiId={api.id}
+                                commentsUpdate={this.updateCommentList}
+                                allComments={allComments}
+                                parentCommentId={null}
+                                cancelButton={true}
+                            />
+                        )}
+
+                        {startCommentsToDisplay !== 0 && (
                             <div className={classes.contentWrapper}>
                                 <Grid container spacing={32} className={classes.root}>
                                     <Grid item>
                                         <Typography className={classes.verticalSpace} variant='body2'>
-                                            <a className={classes.link + ' ' + classes.loadMoreLink} onClick={this.handleLoadMoreComments}>
-                                                Load Previous Comments
+                                            <a
+                                                className={classes.link + ' ' + classes.loadMoreLink}
+                                                onClick={this.handleLoadMoreComments}
+                                            >
+                                                <FormattedMessage
+                                                    id='Apis.Details.Comments.load.previous.comments'
+                                                    defaultMessage='Load Previous Comments'
+                                                />
                                             </a>
                                         </Typography>
                                     </Grid>
                                     <Grid>
-                                        <ArrowDropDown
+                                        <Icon
                                             onClick={this.handleLoadMoreComments}
                                             className={classes.link + ' ' + classes.verticalSpace}
-                                        />
+                                        >
+                                            arrow_drop_down
+                                        </Icon>
                                     </Grid>
                                     <Grid item>
                                         <Typography className={classes.verticalSpace} variant='body2'>
-                                            Showing comments
-                                            {' '}
-                                            { totalComments - startCommentsToDisplay + ' of ' + totalComments }
+                                            <FormattedMessage
+                                                id='Apis.Details.Comments.showing.comments'
+                                                defaultMessage='Showing comments '
+                                            />
+
+                                            {totalComments - startCommentsToDisplay + ' of ' + totalComments}
                                         </Typography>
                                     </Grid>
                                 </Grid>
                             </div>
-                        )
-                }
-            </div>
-            )}
+                        )}
+                    </div>
+                )}
             </ApiContext.Consumer>
         );
     }
 }
 
+
 Comments.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Comments);
+export default injectIntl(withStyles(styles, { withTheme: true })(Comments));

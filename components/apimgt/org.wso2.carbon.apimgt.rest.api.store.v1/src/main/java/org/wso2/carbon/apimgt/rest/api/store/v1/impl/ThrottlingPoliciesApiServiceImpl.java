@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -52,8 +53,9 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
 
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
+                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
 
             ThrottlingPolicyDTO.PolicyLevelEnum policyType;
@@ -99,13 +101,19 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
         return null;
     }
 
+    /**
+     * Returns the throttling policies which belongs to the given policy level
+     * @param policyLevel
+     * @return list of throttling policies
+     */
     public List<Tier> getThrottlingPolicyList(String policyLevel,String xWSO2Tenant) {
         List<Tier> throttlingPolicyList = new ArrayList<>();
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
 
         try {
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
+            if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
+                        ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
 
             if (StringUtils.isBlank(policyLevel)) {

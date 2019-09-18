@@ -63,7 +63,6 @@ import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.workflow.AbstractApplicationRegistrationWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
@@ -116,10 +115,9 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({WorkflowExecutorFactory.class, APIUtil.class, GovernanceUtils.class, ApplicationUtils.class,
         KeyManagerHolder.class, WorkflowExecutorFactory.class, AbstractApplicationRegistrationWorkflowExecutor.class,
-        PrivilegedCarbonContext.class, ServiceReferenceHolder.class, MultitenantUtils.class, CacheInvalidator.class,
+        ServiceReferenceHolder.class, MultitenantUtils.class, CacheInvalidator.class,
         RegistryUtils.class, Caching.class})
-@SuppressStaticInitializationFor( {"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils",
-        "org.wso2.carbon.context.PrivilegedCarbonContext"})
+@SuppressStaticInitializationFor( {"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
 public class APIConsumerImplTest {
 
     private static final Log log = LogFactory.getLog(APIConsumerImplTest.class);
@@ -270,9 +268,6 @@ public class APIConsumerImplTest {
         PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
         PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(false, true);
         System.setProperty(CARBON_HOME, "");
-        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
-        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
 
         GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
         PowerMockito.when(APIUtil.getArtifactManager(apiConsumer.registry, APIConstants.API_KEY)).
@@ -308,9 +303,6 @@ public class APIConsumerImplTest {
         PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
         PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(false, true);
         System.setProperty(CARBON_HOME, "");
-        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
-        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
 
         GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
         PowerMockito.when(APIUtil.getArtifactManager(apiConsumer.registry, APIConstants.API_KEY)).
@@ -393,9 +385,6 @@ public class APIConsumerImplTest {
         Mockito.when(apiManagerConfiguration.getFirstProperty(Mockito.anyString())).thenReturn("10", "20");
 
         PowerMockito.mockStatic(GovernanceUtils.class);
-        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
-        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
         PowerMockito.mockStatic(GovernanceUtils.class);
         PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
         GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
@@ -517,9 +506,6 @@ public class APIConsumerImplTest {
         PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
         PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(true, false);
         System.setProperty(CARBON_HOME, "");
-        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
-        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
 
         Mockito.when(registryService.getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt())).
                 thenReturn(userRegistry1);
@@ -546,9 +532,6 @@ public class APIConsumerImplTest {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
         System.setProperty(CARBON_HOME, "");
         PowerMockito.mockStatic(GovernanceUtils.class);
-        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
-        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
         UserRegistry userRegistry1 = Mockito.mock(UserRegistry.class);
         Mockito.when(registryService.getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt())).
                 thenReturn(userRegistry1);
@@ -1377,7 +1360,7 @@ public class APIConsumerImplTest {
             apiConsumer.addSubscription(identifier, "sub1", 1);
             Assert.fail("Resource not found exception not thrown for worng api state");
         } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Subscriptions not allowed on APIs in the state"));
+            Assert.assertTrue(e.getMessage().contains("Subscriptions not allowed on APIs/API Products in the state"));
         }
 
     }

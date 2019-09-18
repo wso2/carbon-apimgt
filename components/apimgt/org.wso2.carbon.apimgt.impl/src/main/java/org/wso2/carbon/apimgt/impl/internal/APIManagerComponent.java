@@ -15,7 +15,6 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.apache.axis2.engine.ListenerManager;
@@ -35,12 +34,14 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
+import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
@@ -58,6 +59,7 @@ import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterSchema;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
+import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -82,7 +84,6 @@ import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
-
 import javax.cache.Cache;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -92,56 +93,43 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
-
-/**
- * @scr.component name="org.wso2.apimgt.impl.services" immediate="true"
- * @scr.reference name="registry.service"
- * interface="org.wso2.carbon.registry.core.service.RegistryService"
- * cardinality="1..1" policy="dynamic" bind="setRegistryService" unbind="unsetRegistryService"
- * @scr.reference name="user.realm.service"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
- * @scr.reference name="config.context.service"
- * interface="org.wso2.carbon.utils.ConfigurationContextService"
- * cardinality="1..1" policy="dynamic"  bind="setConfigurationContextService"
- * unbind="unsetConfigurationContextService"
- * @scr.reference name="listener.manager.service"
- * interface="org.apache.axis2.engine.ListenerManager" cardinality="0..1" policy="dynamic"
- * bind="setListenerManager" unbind="unsetListenerManager"
- *@scr.reference name="tenant.registryloader"
- * interface="org.wso2.carbon.registry.core.service.TenantRegistryLoader"
- * cardinality="1..1" policy="dynamic"
- * bind="setTenantRegistryLoader"
- * unbind="unsetTenantRegistryLoader"
- * @scr.reference name="tenant.indexloader"
- * interface="org.wso2.carbon.registry.indexing.service.TenantIndexingLoader" cardinality="1..1" policy="dynamic"
- * bind="setIndexLoader" unbind="unsetIndexLoader"
- * @scr.reference name="event.output.adapter.service"
- * interface="org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService"
- * cardinality="1..1" policy="dynamic"  bind="setOutputEventAdapterService"
- * unbind="unsetOutputEventAdapterService"
- */
+@Component(
+         name = "org.wso2.apimgt.impl.services", 
+         immediate = true)
 public class APIManagerComponent {
-    //TODO refactor caching implementation
 
+    // TODO refactor caching implementation
     private static final Log log = LogFactory.getLog(APIManagerComponent.class);
 
     private ServiceRegistration registration;
 
     private static TenantRegistryLoader tenantRegistryLoader;
-    private APIManagerConfiguration configuration = new APIManagerConfiguration();
-    public static final String APPLICATION_ROOT_PERMISSION =  "applications";
-    public static final String API_RXT =  "api.rxt";
-    public static final String AUTHORIZATION_HEADER =  "Authorization Header";
-    public static final String LABELS =  "Labels";
-    public static final String API_SECURITY = "API Security";
 
+    private APIManagerConfiguration configuration = new APIManagerConfiguration();
+
+    public static final String APPLICATION_ROOT_PERMISSION = "applications";
+
+    public static final String API_RXT = "api.rxt";
+
+    public static final String AUTHORIZATION_HEADER = "Authorization Header";
+
+    public static final String LABELS = "Labels";
+
+    public static final String API_SECURITY = "API Security";
+    public static final String ENABLE_SCHEMA_VALIDATION = "Enable Schema Validation";
+
+    @Activate
     protected void activate(ComponentContext componentContext) throws Exception {
         if (log.isDebugEnabled()) {
             log.debug("API manager component activated");
         }
-
         try {
             BundleContext bundleContext = componentContext.getBundleContext();
             addRxtConfigs();
@@ -152,89 +140,40 @@ public class APIManagerComponent {
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             APIUtil.loadTenantConf(tenantId);
             APIUtil.loadTenantWorkFlowExtensions(tenantId);
-            //load self sigup configuration to the registry
+            // load self sigup configuration to the registry
             APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
-
             String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
             configuration.load(filePath);
-
             String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
             if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
                 addDefinedSequencesToRegistry();
             }
-
             CommonConfigDeployer configDeployer = new CommonConfigDeployer();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
-
             SignupObserver signupObserver = new SignupObserver();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver, null);
-
-            TenantLoadMessageSender tenantLoadMessageSender =
-                    new TenantLoadMessageSender();
+            TenantLoadMessageSender tenantLoadMessageSender = new TenantLoadMessageSender();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), tenantLoadMessageSender, null);
-
-            APIManagerConfigurationServiceImpl configurationService =
-                    new APIManagerConfigurationServiceImpl(configuration);
+            APIManagerConfigurationServiceImpl configurationService = new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
-            registration = componentContext.getBundleContext().registerService(
-                    APIManagerConfigurationService.class.getName(),
-                    configurationService, null);
+            registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
             APIStatusObserverList.getInstance().init(configuration);
-
             log.debug("Reading Analytics Configuration from file...");
-
             // This method is called in two places. Mostly by the time activate hits,
             // ServiceDataPublisherAdmin is not activated. Therefore, this same method is run,
             // when ServiceDataPublisherAdmin is set.
             APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
             analyticsConfiguration.setAPIManagerConfiguration(configuration);
-
-            AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_APIMGT_EXECUTION_ID,
-                                                        RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                                                                      APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                                                                                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                                      APIConstants.API_APPLICATION_DATA_LOCATION),
-                                                        APIConstants.Permissions.API_CREATE,
-                                                        UserMgtConstants.EXECUTE_ACTION, null);
-            AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_GOVERNANCE_EXECUTION_ID,
-                                                        RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                                                                      APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                                                                                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                                      "/trunk"),
-                                                        APIConstants.Permissions.API_CREATE,
-                                                        UserMgtConstants.EXECUTE_ACTION, null);
-            AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_PUBLISHER_APIMGT_EXECUTION_ID,
-                                                        RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                                                                      APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                                                                                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                                      APIConstants.API_APPLICATION_DATA_LOCATION),
-                                                        APIConstants.Permissions.API_PUBLISH,
-                                                        UserMgtConstants.EXECUTE_ACTION, null);
-
+            AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_APIMGT_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.API_APPLICATION_DATA_LOCATION), APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION, null);
+            AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_GOVERNANCE_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + "/trunk"), APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION, null);
+            AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_PUBLISHER_APIMGT_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.API_APPLICATION_DATA_LOCATION), APIConstants.Permissions.API_PUBLISH, UserMgtConstants.EXECUTE_ACTION, null);
             // Enabling API Publishers/Creators to make changes on life-cycle history.
-            AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_LIFECYCLE_EXECUTION_ID,
-                                                        RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                                                                      APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                                                                                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                                      APIConstants
-                                                                                              .API_LIFE_CYCLE_HISTORY),
-                                                        APIConstants.Permissions.API_CREATE,
-                                                        UserMgtConstants.EXECUTE_ACTION, null);
-
-            AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_PUBLISHER_LIFECYCLE_EXECUTION_ID,
-                                                        RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                                                                      APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                                                                                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                                                                                      APIConstants
-                                                                                              .API_LIFE_CYCLE_HISTORY),
-                                                        APIConstants.Permissions.API_PUBLISH,
-                                                        UserMgtConstants.EXECUTE_ACTION, null);
-
+            AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_LIFECYCLE_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.API_LIFE_CYCLE_HISTORY), APIConstants.Permissions.API_CREATE, UserMgtConstants.EXECUTE_ACTION, null);
+            AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_PUBLISHER_LIFECYCLE_EXECUTION_ID, RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.API_LIFE_CYCLE_HISTORY), APIConstants.Permissions.API_PUBLISH, UserMgtConstants.EXECUTE_ACTION, null);
             setupImagePermissions();
             APIMgtDBUtil.initialize();
-
             configureEventPublisherProperties();
-            //Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager
+            // Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager
             /* TODO: Load Config values from apimgt.core*/
             boolean apiManagementEnabled = APIUtil.isAPIManagementEnabled();
             boolean loadAPIContextsAtStartup = APIUtil.isLoadAPIContextsAtStartup();
@@ -245,23 +184,20 @@ public class APIManagerComponent {
                     contextCache.put(context, Boolean.TRUE);
                 }
             }
-
             try {
                 APIUtil.createDefaultRoles(MultitenantConstants.SUPER_TENANT_ID);
             } catch (APIManagementException e) {
                 log.error("Failed create default roles for tenant " + MultitenantConstants.SUPER_TENANT_ID, e);
-            } catch (Exception e) { // The generic Exception is handled explicitly so execution does not stop during config deployment
-                log.error("Exception when creating default roles for tenant " + MultitenantConstants.SUPER_TENANT_ID,
-                        e);
+            } catch (Exception e) {
+                // The generic Exception is handled explicitly so execution does not stop during config deployment
+                log.error("Exception when creating default roles for tenant " + MultitenantConstants.SUPER_TENANT_ID, e);
             }
-
-            //Adding default throttle policies
-            boolean advancedThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
-            if(advancedThrottlingEnabled) {
+            // Adding default throttle policies
+            boolean advancedThrottlingEnabled = APIUtil.isAdvanceThrottlingEnabled();
+            if (advancedThrottlingEnabled) {
                 addDefaultAdvancedThrottlePolicies();
             }
-
-            //Update all NULL THROTTLING_TIER values to Unlimited
+            // Update all NULL THROTTLING_TIER values to Unlimited
             boolean isNullThrottlingTierConversionEnabled = APIUtil.updateNullThrottlingTierAtStartup();
             try {
                 if (isNullThrottlingTierConversionEnabled) {
@@ -270,23 +206,35 @@ public class APIManagerComponent {
             } catch (APIManagementException e) {
                 log.error("Failed to convert NULL THROTTLING_TIERS to Unlimited");
             }
-
             // Initialise KeyManager.
             KeyManagerHolder.initializeKeyManager(configuration);
-            //Initialise sql constants
+            // Initialise sql constants
             SQLConstantManagerFactory.initializeSQLConstantManager();
+            // Initialize PasswordResolver
+            PasswordResolverFactory.initializePasswordResolver();
             boolean analyticsEnabled = APIUtil.isAnalyticsEnabled();
             if (analyticsEnabled) {
                 ServiceReferenceHolder.getInstance().setApiMgtWorkflowDataPublisher(new APIMgtWorkflowDataPublisher());
             }
             APIUtil.init();
+
+            // Activating UserPostSelfRegistration handler component
+            try {
+                registration = componentContext.getBundleContext()
+                        .registerService(AbstractEventHandler.class.getName(), new UserPostSelfRegistrationHandler(),
+                                null);
+            } catch (Exception e) {
+                log.error("Error while activating UserPostSelfRegistration handler component.", e);
+            }
+
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
-            log.fatal("Error while Creating the database",e);
+            log.fatal("Error while Creating the database", e);
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("Deactivating API manager component");
@@ -296,6 +244,12 @@ public class APIManagerComponent {
         org.wso2.carbon.apimgt.impl.utils.AuthorizationManager.getInstance().destroy();
     }
 
+    @Reference(
+             name = "registry.service", 
+             service = org.wso2.carbon.registry.core.service.RegistryService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetRegistryService")
     protected void setRegistryService(RegistryService registryService) {
         if (registryService != null && log.isDebugEnabled()) {
             log.debug("Registry service initialized");
@@ -307,6 +261,12 @@ public class APIManagerComponent {
         ServiceReferenceHolder.getInstance().setRegistryService(null);
     }
 
+    @Reference(
+             name = "tenant.indexloader", 
+             service = org.wso2.carbon.registry.indexing.service.TenantIndexingLoader.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetIndexLoader")
     protected void setIndexLoader(TenantIndexingLoader indexLoader) {
         if (indexLoader != null && log.isDebugEnabled()) {
             log.debug("IndexLoader service initialized");
@@ -318,6 +278,12 @@ public class APIManagerComponent {
         ServiceReferenceHolder.getInstance().setIndexLoaderService(null);
     }
 
+    @Reference(
+             name = "user.realm.service", 
+             service = org.wso2.carbon.user.core.service.RealmService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (realmService != null && log.isDebugEnabled()) {
             log.debug("Realm service initialized");
@@ -329,14 +295,18 @@ public class APIManagerComponent {
         ServiceReferenceHolder.getInstance().setRealmService(null);
     }
 
+    @Reference(
+             name = "listener.manager.service", 
+             service = org.apache.axis2.engine.ListenerManager.class, 
+             cardinality = ReferenceCardinality.OPTIONAL, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetListenerManager")
     protected void setListenerManager(ListenerManager listenerManager) {
-        // We bind to the listener manager so that we can read the local IP
         // address and port numbers properly.
         if (log.isDebugEnabled()) {
             log.debug("Listener manager bound to the API manager component");
         }
-        APIManagerConfigurationService service = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService();
+        APIManagerConfigurationService service = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
         if (service != null) {
             service.getAPIManagerConfiguration().reloadSystemProperties();
         }
@@ -347,23 +317,21 @@ public class APIManagerComponent {
     }
 
     private void addRxtConfigs() throws APIManagementException {
-        String rxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator +
-                        "resources" + File.separator + "rxts";
+        String rxtDir = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" + File.separator + "rxts";
         File file = new File(rxtDir);
-        //create a FilenameFilter
+        // create a FilenameFilter
         FilenameFilter filenameFilter = new FilenameFilter() {
+
             public boolean accept(File dir, String name) {
-                //if the file extension is .rxt return true, else false
+                // if the file extension is .rxt return true, else false
                 return name.endsWith(".rxt");
             }
         };
         String[] rxtFilePaths = file.list(filenameFilter);
-
-        if(rxtFilePaths == null || rxtFilePaths.length == 0){
+        if (rxtFilePaths == null || rxtFilePaths.length == 0) {
             log.info("No RXTs Found.");
             return;
         }
-
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         UserRegistry systemRegistry;
         try {
@@ -371,30 +339,33 @@ public class APIManagerComponent {
         } catch (RegistryException e) {
             throw new APIManagementException("Failed to get registry", e);
         }
-
         for (String rxtPath : rxtFilePaths) {
-            String resourcePath = GovernanceConstants.RXT_CONFIGS_PATH +
-                                  RegistryConstants.PATH_SEPARATOR + rxtPath;
+            String resourcePath = GovernanceConstants.RXT_CONFIGS_PATH + RegistryConstants.PATH_SEPARATOR + rxtPath;
             try {
                 if (systemRegistry.resourceExists(resourcePath)) {
                     // Adding Authorization header to the template if not exist
-                    if (API_RXT.equals(rxtPath )) {
+                    if (API_RXT.equals(rxtPath)) {
                         //get Registry resource
                         Resource resource = systemRegistry.get(resourcePath);
-                        if(resource.getContent() != null) {
+                        if (resource.getContent() != null) {
                             // check whether the resource contains a field called authorization header.
-                            if(!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
+                            if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
                                     contains(AUTHORIZATION_HEADER)) {
                                 updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
                             }
                             // check whether the resource contains a section called 'Labels' and add it
-                            if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
-                                    contains(LABELS)) {
+                            if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).contains(LABELS)) {
                                 updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
                             }
                             // check whether the resource contains a section called 'API Security' and add it
-                            if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).
-                                    contains(API_SECURITY)) {
+                            if (!RegistryUtils.decodeBytes((byte[]) resource.getContent()).contains(API_SECURITY)) {
+                                updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
+                            }
+                            // check whether the resource contains a section called 'enable Schema Validation' and
+                            // add it
+                            Object enableValidation = resource.getContent();
+                            if (!RegistryUtils.decodeBytes((byte[]) enableValidation).
+                                    contains(ENABLE_SCHEMA_VALIDATION)) {
                                 updateRegistryResourceContent(resource, systemRegistry, rxtDir, rxtPath, resourcePath);
                             }
                         }
@@ -416,9 +387,7 @@ public class APIManagerComponent {
         }
     }
 
-    private void updateRegistryResourceContent(Resource resource, UserRegistry systemRegistry, String rxtDir,
-                                               String rxtPath, String resourcePath) throws RegistryException, IOException {
-
+    private void updateRegistryResourceContent(Resource resource, UserRegistry systemRegistry, String rxtDir, String rxtPath, String resourcePath) throws RegistryException, IOException {
         String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
         resource.setContent(rxt.getBytes(Charset.defaultCharset()));
         resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
@@ -427,18 +396,11 @@ public class APIManagerComponent {
 
     private void setupImagePermissions() throws APIManagementException {
         try {
-            AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
-                    getRealmService().getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).
-                    getAuthorizationManager();
-            String imageLocation =
-                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                           RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                    APIConstants.API_IMAGE_LOCATION;
-            if (!accessControlAdmin.isRoleAuthorized(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
-                                                     imageLocation, ActionConstants.GET)) {
+            AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).getAuthorizationManager();
+            String imageLocation = APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + APIConstants.API_IMAGE_LOCATION;
+            if (!accessControlAdmin.isRoleAuthorized(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME, imageLocation, ActionConstants.GET)) {
                 // Can we get rid of this?
-                accessControlAdmin.authorizeRole(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
-                                                 imageLocation, ActionConstants.GET);
+                accessControlAdmin.authorizeRole(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME, imageLocation, ActionConstants.GET);
             }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while setting up permissions for image collection", e);
@@ -446,31 +408,20 @@ public class APIManagerComponent {
     }
 
     private void addTierPolicies() throws APIManagementException {
-
-        String apiTierFilePath =
-                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
-                + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_API_TIER_FILE_NAME;
-        String appTierFilePath =
-                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
-                + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_APP_TIER_FILE_NAME;
-        String resTierFilePath =
-                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
-                + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_RES_TIER_FILE_NAME;
-
+        String apiTierFilePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_API_TIER_FILE_NAME;
+        String appTierFilePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_APP_TIER_FILE_NAME;
+        String resTierFilePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources" + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_RES_TIER_FILE_NAME;
         addTierPolicy(APIConstants.API_TIER_LOCATION, apiTierFilePath);
         addTierPolicy(APIConstants.APP_TIER_LOCATION, appTierFilePath);
         addTierPolicy(APIConstants.RES_TIER_LOCATION, resTierFilePath);
-
     }
 
-    private void addTierPolicy(String tierLocation,String defaultTierFileName) throws APIManagementException {
-
+    private void addTierPolicy(String tierLocation, String defaultTierFileName) throws APIManagementException {
         File defaultTiers = new File(defaultTierFileName);
         if (!defaultTiers.exists()) {
             log.info("Default tier policies not found in : " + defaultTierFileName);
             return;
         }
-
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         InputStream inputStream = null;
         try {
@@ -479,14 +430,11 @@ public class APIManagerComponent {
                 log.debug("Tier policies already uploaded to the registry");
                 return;
             }
-
             log.debug("Adding API tier policies to the registry");
-
             inputStream = FileUtils.openInputStream(defaultTiers);
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = registry.newResource();
             resource.setContent(data);
-
             registry.put(tierLocation, resource);
         } catch (RegistryException e) {
             throw new APIManagementException("Error while saving policy information to the registry", e);
@@ -507,12 +455,10 @@ public class APIManagerComponent {
         try {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             UserRegistry registry = registryService.getGovernanceSystemRegistry();
-
-            //Add all custom in,out and fault sequences to registry
+            // Add all custom in,out and fault sequences to registry
             APIUtil.addDefinedAllSequencesToRegistry(registry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
             APIUtil.addDefinedAllSequencesToRegistry(registry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
             APIUtil.addDefinedAllSequencesToRegistry(registry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
-
         } catch (RegistryException e) {
             throw new APIManagementException("Error while saving defined sequences to the registry ", e);
         }
@@ -523,14 +469,11 @@ public class APIManagerComponent {
         if (!enabled) {
             return;
         }
-
         String role = config.getFirstProperty(APIConstants.SELF_SIGN_UP_ROLE);
         if (role == null) {
             // Required parameter missing - Throw an exception and interrupt startup
-            throw new APIManagementException("Required subscriber role parameter missing " +
-                                             "in the self sign up configuration");
+            throw new APIManagementException("Required subscriber role parameter missing " + "in the self sign up configuration");
         }
-
         try {
             RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
             UserRealm realm = realmService.getBootstrapRealm();
@@ -539,15 +482,13 @@ public class APIManagerComponent {
                 if (log.isDebugEnabled()) {
                     log.debug("Creating subscriber role: " + role);
                 }
-                Permission[] subscriberPermissions = new Permission[]{new Permission("/permission/admin/login", UserMgtConstants.EXECUTE_ACTION),
-                                                                      new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION)};
+                Permission[] subscriberPermissions = new Permission[] { new Permission("/permission/admin/login", UserMgtConstants.EXECUTE_ACTION), new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION) };
                 String superTenantName = ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealmConfiguration().getAdminUserName();
-                String[] userList = new String[]{superTenantName};
+                String[] userList = new String[] { superTenantName };
                 manager.addRole(role, userList, subscriberPermissions);
             }
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while creating subscriber role: " + role + " - " +
-                                             "Self registration might not function properly.", e);
+            throw new APIManagementException("Error while creating subscriber role: " + role + " - " + "Self registration might not function properly.", e);
         }
     }
 
@@ -563,13 +504,11 @@ public class APIManagerComponent {
                 log.debug("External Stores configuration already uploaded to the registry");
                 return;
             }
-
             log.debug("Adding External Stores configuration to the registry");
             InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/externalstores/default-external-api-stores.xml");
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = registry.newResource();
             resource.setContent(data);
-
             registry.put(APIConstants.EXTERNAL_API_STORES_LOCATION, resource);
         } catch (RegistryException e) {
             throw new APIManagementException("Error while saving External Stores configuration information to the registry", e);
@@ -583,22 +522,15 @@ public class APIManagerComponent {
      */
     private void addApplicationsPermissionsToRegistry() throws APIManagementException {
         Registry tenantGovReg = getRegistry();
-
-        String permissionResourcePath = CarbonConstants.UI_PERMISSION_NAME + RegistryConstants.PATH_SEPARATOR +
-                                        APPLICATION_ROOT_PERMISSION;
+        String permissionResourcePath = CarbonConstants.UI_PERMISSION_NAME + RegistryConstants.PATH_SEPARATOR + APPLICATION_ROOT_PERMISSION;
         try {
-
             if (!tenantGovReg.resourceExists(permissionResourcePath)) {
                 String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-                UserRealm realm =
-                        (UserRealm) CarbonContext.getThreadLocalCarbonContext().getUserRealm();
-
-                //Logged in user is not authorized to create the permission.
+                UserRealm realm = (UserRealm) CarbonContext.getThreadLocalCarbonContext().getUserRealm();
+                // Logged in user is not authorized to create the permission.
                 // Temporarily change the user to the admin for creating the permission
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(
-                        realm.getRealmConfiguration().getAdminUserName());
-                tenantGovReg = CarbonContext.getThreadLocalCarbonContext()
-                        .getRegistry(RegistryType.USER_GOVERNANCE);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(realm.getRealmConfiguration().getAdminUserName());
+                tenantGovReg = CarbonContext.getThreadLocalCarbonContext().getRegistry(RegistryType.USER_GOVERNANCE);
                 Collection appRootNode = tenantGovReg.newCollection();
                 appRootNode.setProperty("name", "Applications");
                 tenantGovReg.put(permissionResourcePath, appRootNode);
@@ -609,12 +541,10 @@ public class APIManagerComponent {
         } catch (org.wso2.carbon.registry.api.RegistryException e) {
             throw new APIManagementException("Error while creating new permission in registry", e);
         }
-
     }
 
     protected Registry getRegistry() {
-        return CarbonContext.getThreadLocalCarbonContext().getRegistry(
-                RegistryType.USER_GOVERNANCE);
+        return CarbonContext.getThreadLocalCarbonContext().getRegistry(RegistryType.USER_GOVERNANCE);
     }
 
     private void configureEventPublisherProperties() {
@@ -624,12 +554,9 @@ public class APIManagerComponent {
         adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
         Map<String, String> adapterParameters = new HashMap<>();
         if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
-            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            if (configuration.getThrottleProperties().getTrafficManager() != null && configuration
-                    .getThrottleProperties().getPolicyDeployer().isEnabled()) {
-                ThrottleProperties.TrafficManager trafficManager = configuration.getThrottleProperties()
-                        .getTrafficManager();
+            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            if (configuration.getThrottleProperties().getTrafficManager() != null && configuration.getThrottleProperties().getPolicyDeployer().isEnabled()) {
+                ThrottleProperties.TrafficManager trafficManager = configuration.getThrottleProperties().getTrafficManager();
                 adapterParameters.put(APIConstants.RECEIVER_URL, trafficManager.getReceiverUrlGroup());
                 adapterParameters.put(APIConstants.AUTHENTICATOR_URL, trafficManager.getAuthUrlGroup());
                 adapterParameters.put(APIConstants.USERNAME, trafficManager.getUsername());
@@ -641,10 +568,7 @@ public class APIManagerComponent {
                 try {
                     ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create(adapterConfiguration);
                 } catch (OutputEventAdapterException e) {
-                    log.warn(
-                            "Exception occurred while creating WSO2 Event Adapter. Request Blocking may not work " +
-                                    "properly",
-                            e);
+                    log.warn("Exception occurred while creating WSO2 Event Adapter. Request Blocking may not work " + "properly", e);
                 }
             } else {
                 log.info("Wso2Event Publisher not enabled.");
@@ -652,13 +576,18 @@ public class APIManagerComponent {
         } else {
             log.info("api-manager.xml not loaded. Wso2Event Publisher will not be enabled.");
         }
-
     }
 
     private void addDefaultAdvancedThrottlePolicies() throws APIManagementException {
         APIUtil.addDefaultSuperTenantAdvancedThrottlePolicies();
     }
 
+    @Reference(
+             name = "config.context.service", 
+             service = org.wso2.carbon.utils.ConfigurationContextService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetConfigurationContextService")
     protected void setConfigurationContextService(ConfigurationContextService contextService) {
         ServiceReferenceHolder.setContextService(contextService);
     }
@@ -667,7 +596,12 @@ public class APIManagerComponent {
         ServiceReferenceHolder.setContextService(null);
     }
 
-
+    @Reference(
+             name = "tenant.registryloader", 
+             service = org.wso2.carbon.registry.core.service.TenantRegistryLoader.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetTenantRegistryLoader")
     protected void setTenantRegistryLoader(TenantRegistryLoader tenantRegistryLoader) {
         this.tenantRegistryLoader = tenantRegistryLoader;
     }
@@ -676,7 +610,7 @@ public class APIManagerComponent {
         this.tenantRegistryLoader = null;
     }
 
-    public static TenantRegistryLoader getTenantRegistryLoader(){
+    public static TenantRegistryLoader getTenantRegistryLoader() {
         return tenantRegistryLoader;
     }
 
@@ -685,16 +619,23 @@ public class APIManagerComponent {
      *
      * @param outputEventAdapterService Output EventAdapter Service reference
      */
-    protected void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService){
+    @Reference(
+             name = "event.output.adapter.service", 
+             service = org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetOutputEventAdapterService")
+    protected void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(outputEventAdapterService);
     }
 
     /**
-     *  De-reference the Output EventAdapter Service dependency.
+     * De-reference the Output EventAdapter Service dependency.
      *
      * @param outputEventAdapterService
      */
-    protected void unsetOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService){
+    protected void unsetOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(null);
     }
 }
+

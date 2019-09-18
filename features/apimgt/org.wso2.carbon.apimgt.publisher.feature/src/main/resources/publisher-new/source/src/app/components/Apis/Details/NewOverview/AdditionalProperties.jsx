@@ -18,50 +18,64 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import ApiContext from '../components/ApiContext';
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const renderAdditionalProperties = function (additionalProperties) {
     const items = [];
     for (const key in additionalProperties) {
         if (Object.prototype.hasOwnProperty.call(additionalProperties, key)) {
-            items.push(<Typography component='p' variant='body1'>
-                <strong>{key}</strong>: {additionalProperties[key]}
-            </Typography>);
+            const additionalPropertiesTypography = (
+                <Typography component='p' variant='body1'>
+                    <strong>{key}</strong>: {additionalProperties[key]}
+                </Typography>
+            );
+            items.push(additionalPropertiesTypography);
         }
     }
     return items;
 };
-function AdditionalProperties(props) {
-    const { parentClasses } = props;
-    return (
-        <ApiContext.Consumer>
-            {({ api }) => (
-                <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
-                    <div className={parentClasses.titleWrapper}>
-                        <Typography variant='h5' component='h3' className={parentClasses.title}>
-                            Additional Properties
-                        </Typography>
-                        <Link to={'/apis/' + api.id + '/properties'}>
-                            <Button variant='contained' color='default'>
-                                Edit
-                            </Button>
-                        </Link>
-                    </div>
 
-                    {renderAdditionalProperties(api.additionalProperties)}                        
-                </Paper>
-            )}
-        </ApiContext.Consumer>
+/**
+ *
+ *
+ * @param {*} props
+ * @returns
+ */
+function AdditionalProperties(props) {
+    const { parentClasses, api } = props;
+    return (
+        <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
+            <div className={parentClasses.titleWrapper}>
+                <Typography variant='h5' component='h3' className={parentClasses.title}>
+                    <FormattedMessage
+                        id='Apis.Details.NewOverview.AdditionalProperties.additional.properties'
+                        defaultMessage='Additional Properties'
+                    />
+                </Typography>
+                <Link to={'/apis/' + api.id + '/properties'}>
+                    <Button variant='contained' color='default'>
+                        <FormattedMessage
+                            id='Apis.Details.NewOverview.AdditionalProperties.edit'
+                            defaultMessage='Edit'
+                        />
+                    </Button>
+                </Link>
+            </div>
+
+            {renderAdditionalProperties(api.additionalProperties)}
+        </Paper>
     );
 }
 
 AdditionalProperties.propTypes = {
-    parentClasses: PropTypes.object.isRequired,
+    parentClasses: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({}).isRequired,
 };
 
-export default AdditionalProperties;
+export default withAPI(AdditionalProperties);

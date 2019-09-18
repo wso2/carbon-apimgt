@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.wso2.carbon.apimgt.gateway.internal;
 
 import org.apache.axis2.AxisFault;
@@ -25,6 +24,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataService;
@@ -42,89 +42,84 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
-
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 
-/**
- * @scr.component name="org.wso2.carbon.apimgt.handlers" immediate="true"
- * @scr.reference name="user.realm.service"
- * interface="org.wso2.carbon.user.core.service.RealmService"
- * cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService"
- * @scr.reference name="configuration.context.service"
- * interface="org.wso2.carbon.utils.ConfigurationContextService" cardinality="1..1"
- * policy="dynamic" bind="setConfigurationContextService" unbind="unsetConfigurationContextService"
- * @scr.reference name="api.manager.config.service"
- * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
- * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
- * @scr.reference name="org.wso2.carbon.apimgt.tracing"
- *  interface="org.wso2.carbon.apimgt.tracing.TracingService" cardinality="1..1"
- *  policy="dynamic" bind="setTracingService" unbind="unsetTracingService"
- * @scr.reference name="server.configuration.service"
- * interface="org.wso2.carbon.base.api.ServerConfigurationService" cardinality="1..1"
- * policy="dynamic" bind="setServerConfigurationService" unbind="unsetServerConfigurationService"
- */
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+
+@Component(
+         name = "org.wso2.carbon.apimgt.handlers", 
+         immediate = true)
 public class APIHandlerServiceComponent {
 
     private static final Log log = LogFactory.getLog(APIHandlerServiceComponent.class);
 
     private APIKeyValidatorClientPool clientPool;
+
     private APIManagerConfiguration configuration = new APIManagerConfiguration();
+
     private ServiceRegistration registration;
 
+    @Activate
     protected void activate(ComponentContext context) {
         BundleContext bundleContext = context.getBundleContext();
         if (log.isDebugEnabled()) {
             log.debug("API handlers component activated");
         }
         try {
-            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem
-                    (getClientRepoLocation(), getAxis2ClientXmlLocation());
+            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(getClientRepoLocation(), getAxis2ClientXmlLocation());
             ServiceReferenceHolder.getInstance().setAxis2ConfigurationContext(ctx);
-
             if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(APISecurityUtils.getKeyValidatorClientType())) {
                 clientPool = APIKeyValidatorClientPool.getInstance();
             }
-
             String filePath = getFilePath();
             configuration.load(filePath);
-
             String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
             if ("Synapse".equalsIgnoreCase(gatewayType)) {
-                //Register Tenant service creator to deploy tenant specific common synapse configurations
+                // Register Tenant service creator to deploy tenant specific common synapse configurations
                 TenantServiceCreator listener = new TenantServiceCreator();
-                bundleContext.registerService(
-                        Axis2ConfigurationContextObserver.class.getName(), listener, null);
-
+                bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
                 if (configuration.getThrottleProperties().isEnabled()) {
                     ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
                     APIThrottleDataServiceImpl throttleDataServiceImpl = new APIThrottleDataServiceImpl();
                     throttleDataServiceImpl.setThrottleDataHolder(throttleDataHolder);
-
-
                     // Register APIThrottleDataService so that ThrottleData maps are available to other components.
-                    registration = context.getBundleContext().registerService(
-                            APIThrottleDataService.class.getName(),
-                            throttleDataServiceImpl, null);
+                    registration = context.getBundleContext().registerService(APIThrottleDataService.class.getName(), throttleDataServiceImpl, null);
                     ServiceReferenceHolder.getInstance().setThrottleDataHolder(throttleDataHolder);
-
                     log.debug("APIThrottleDataService Registered...");
-                    ServiceReferenceHolder.getInstance().setThrottleProperties(configuration
-                            .getThrottleProperties());
-
-
-                    //First do web service call and update map.
-                    //Then init JMS listener to listen que and update it.
-                    //Following method will initialize JMS listnet and listen all updates and keep throttle data map
-                    // up to date
-                    //start web service throttle data retriever as separate thread and start it.
+                    ServiceReferenceHolder.getInstance().setThrottleProperties(configuration.getThrottleProperties());
+                    // start web service throttle data retriever as separate thread and start it.
                     if (configuration.getThrottleProperties().getBlockCondition().isEnabled()) {
-                        BlockingConditionRetriever webServiceThrottleDataRetriever = new
-                                BlockingConditionRetriever();
+                        BlockingConditionRetriever webServiceThrottleDataRetriever = new BlockingConditionRetriever();
                         webServiceThrottleDataRetriever.startWebServiceThrottleDataRetriever();
-                        KeyTemplateRetriever webServiceBlockConditionsRetriever = new
-                                KeyTemplateRetriever();
+                        KeyTemplateRetriever webServiceBlockConditionsRetriever = new KeyTemplateRetriever();
                         webServiceBlockConditionsRetriever.startKeyTemplateDataRetriever();
                     }
+                }
+                // Read the trust store
+                ServerConfiguration config = CarbonUtils.getServerConfiguration();
+                String trustStorePassword = config.getFirstProperty(APIMgtGatewayConstants.TRUST_STORE_PASSWORD);
+                String trustStoreLocation = config.getFirstProperty(APIMgtGatewayConstants.TRUST_STORE_LOCATION);
+                if (trustStoreLocation != null && trustStorePassword != null) {
+                    try (FileInputStream trustStoreStream = new FileInputStream(new File(trustStoreLocation))) {
+                        KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                        trustStore.load(trustStoreStream, trustStorePassword.toCharArray());
+                        ServiceReferenceHolder.getInstance().setTrustStore(trustStore);
+                    } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
+                        log.error("Error in loading trust store.", e);
+                    }
+                } else {
+                    log.error("Error in loading trust store. Configurations are not set.");
                 }
             }
         } catch (APIManagementException | AxisFault e) {
@@ -132,6 +127,7 @@ public class APIHandlerServiceComponent {
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext context) {
         if (log.isDebugEnabled()) {
             log.debug("API handlers component deactivated");
@@ -145,6 +141,12 @@ public class APIHandlerServiceComponent {
         }
     }
 
+    @Reference(
+             name = "configuration.context.service", 
+             service = org.wso2.carbon.utils.ConfigurationContextService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetConfigurationContextService")
     protected void setConfigurationContextService(ConfigurationContextService cfgCtxService) {
         if (log.isDebugEnabled()) {
             log.debug("Configuration context service bound to the API handlers");
@@ -164,6 +166,12 @@ public class APIHandlerServiceComponent {
      *
      * @param serverConfigurationService Instance of {@link ServerConfigurationService}
      */
+    @Reference(
+             name = "server.configuration.service", 
+             service = org.wso2.carbon.base.api.ServerConfigurationService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetServerConfigurationService")
     protected void setServerConfigurationService(ServerConfigurationService serverConfigurationService) {
         if (log.isDebugEnabled()) {
             log.debug("Server configuration service is bound to the API handlers");
@@ -184,6 +192,12 @@ public class APIHandlerServiceComponent {
         ServiceReferenceHolder.getInstance().setServerConfigurationService(null);
     }
 
+    @Reference(
+             name = "api.manager.config.service", 
+             service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
         if (log.isDebugEnabled()) {
             log.debug("API manager configuration service bound to the API handlers");
@@ -205,23 +219,37 @@ public class APIHandlerServiceComponent {
     protected void setConfiguration(APIManagerConfiguration configuration) {
         this.configuration = configuration;
     }
+
     protected String getAxis2ClientXmlLocation() {
-        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" +
-                ".clientAxis2XmlLocation");
+        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" + ".clientAxis2XmlLocation");
         return axis2ClientXml;
     }
+
     protected String getClientRepoLocation() {
-        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" +
-                ".ClientRepositoryLocation");
+        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" + ".ClientRepositoryLocation");
         return axis2ClientXml;
     }
+
+    @Reference(
+             name = "org.wso2.carbon.apimgt.tracing", 
+             service = org.wso2.carbon.apimgt.tracing.TracingService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetTracingService")
     protected void setTracingService(TracingService tracingService) {
         ServiceReferenceHolder.getInstance().setTracingService(tracingService);
     }
+
     protected void unsetTracingService(TracingService tracingService) {
         ServiceReferenceHolder.getInstance().setTracingService(null);
     }
 
+    @Reference(
+             name = "user.realm.service", 
+             service = org.wso2.carbon.user.core.service.RealmService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetRealmService")
     protected void setRealmService(RealmService realmService) {
         if (realmService != null && log.isDebugEnabled()) {
             log.debug("Realm service initialized");
@@ -233,3 +261,4 @@ public class APIHandlerServiceComponent {
         ServiceReferenceHolder.getInstance().setRealmService(null);
     }
 }
+

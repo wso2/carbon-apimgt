@@ -23,7 +23,5 @@ describe('Progress component test', () => {
     test('should comply with the snapshot', () => {
         const snapShotTree = renderer.create(<Progress />).toJSON();
         expect(snapShotTree).toMatchSnapshot();
-        // eslint-disable-next-line no-debugger
-        debugger;
     });
 });

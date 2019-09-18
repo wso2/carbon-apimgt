@@ -48,11 +48,13 @@ describe('AppErrorBoundary test', () => {
 
         const wrapper = mount(TestComponent);
         const renderedAppErrorBoundary = wrapper.find(AppErrorBoundary);
+        expect(renderedAppErrorBoundary.contains(message)).toBeTruthy();
+        // Check the error message string
+        expect(renderedAppErrorBoundary.children().contains('Something went wrong')).toBeTruthy();
+
         expect(renderedAppErrorBoundary.children().state().hasError).toBeTruthy();
         expect(renderedAppErrorBoundary.children().state().error).not.toBeNull();
         expect(renderedAppErrorBoundary.children().state().error.message).not.toBeNull();
         expect(renderedAppErrorBoundary.children().state().error.message).toEqual(message);
-        // Check the error message string
-        expect(renderedAppErrorBoundary.children().contains('Something went wrong')).toBeTruthy();
     });
 });

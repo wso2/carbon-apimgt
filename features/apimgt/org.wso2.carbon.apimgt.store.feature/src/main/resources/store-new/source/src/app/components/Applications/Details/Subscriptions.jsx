@@ -30,17 +30,25 @@ import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Divider from '@material-ui/core/Divider';
-import Alert from '../../Shared/Alert';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import Alert from 'AppComponents/Shared/Alert';
+import APIList from 'AppComponents/Apis/Listing/APICardView';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import Subscription from 'AppData/Subscription';
+import Api from 'AppData/api';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
+import APIProduct from 'AppData/APIProduct';
+import CONSTS from 'AppData/Constants';
 import SubscriptionTableData from './SubscriptionTableData';
-import APIList from '../../Apis/Listing/APIList';
-import Subscription from '../../../data/Subscription';
-import Api from '../../../data/api';
-import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 
 /**
  *
- *
- * @param {*} theme
+ * @inheritdoc
+ * @param {*} theme theme
  */
 const styles = theme => ({
     root: {
@@ -67,6 +75,11 @@ const styles = theme => ({
  * @extends {React.Component}
  */
 class Subscriptions extends React.Component {
+    /**
+     *Creates an instance of Subscriptions.
+     * @param {*} props properties
+     * @memberof Subscriptions
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -75,11 +88,14 @@ class Subscriptions extends React.Component {
             apisNotFound: false,
             subscriptionsNotFound: false,
             isAuthorize: true,
+            apiType: CONSTS.API_TYPE,
         };
         this.handleSubscriptionDelete = this.handleSubscriptionDelete.bind(this);
         this.updateSubscriptions = this.updateSubscriptions.bind(this);
         this.updateUnsubscribedAPIsList = this.updateUnsubscribedAPIsList.bind(this);
         this.handleSubscribe = this.handleSubscribe.bind(this);
+        this.getIdsOfSubscribedEntities = this.getIdsOfSubscribedEntities.bind(this);
+        this.handleChange = this.handleChange.bind(this);
     }
 
     /**
@@ -88,23 +104,51 @@ class Subscriptions extends React.Component {
      * @memberof Subscriptions
      */
     componentDidMount() {
-        const { applicationId } = this.props.match.params;
+        const { match: { params: { applicationId } } } = this.props;
+        const { apiType } = this.state;
         this.updateSubscriptions(applicationId);
-        this.updateUnsubscribedAPIsList();
+        this.updateUnsubscribedAPIsList(apiType);
     }
 
     /**
      *
+     * Get List of the Ids of all APIs and API Products that have been already subscribed
+     *
+     * @returns {*} Ids of respective APIs and API Products
+     * @memberof Subscriptions
+     */
+    getIdsOfSubscribedEntities() {
+        const { subscriptions } = this.state;
+
+        // Get arrays of the API and API Product Ids and remove all null/empty references by executing 'fliter(Boolean)'
+        const subscribedAPIIds = subscriptions.map(sub => sub.apiId).filter(Boolean);
+        const subscribedAPIProductIds = subscriptions.map(sub => sub.apiProductId).filter(Boolean);
+
+        // We want to treat both API and API Product Ids as a single array of Ids
+        const subscribedIds = subscribedAPIIds.concat(subscribedAPIProductIds);
+
+        return subscribedIds;
+    }
+
+    handleChange = (event) => {
+        const { value } = event.target;
+        this.setState({ apiType: value });
+        this.updateUnsubscribedAPIsList(value);
+    };
+
+    /**
+     *
      * Update subscriptions list of Application
-     * @param {*} applicationId
+     * @param {*} applicationId application id
      * @memberof Subscriptions
      */
     updateSubscriptions(applicationId) {
         const client = new Subscription();
         const promisedSubscriptions = client.getSubscriptions(null, applicationId);
+        const { apiType } = this.state;
         promisedSubscriptions
             .then((response) => {
-                this.setState({ subscriptions: response.body.list }, this.updateUnsubscribedAPIsList);
+                this.setState({ subscriptions: response.body.list }, this.updateUnsubscribedAPIsList(apiType));
             })
             .catch((error) => {
                 const { status } = error;
@@ -119,7 +163,7 @@ class Subscriptions extends React.Component {
     /**
      *
      * Handle subscription deletion of application
-     * @param {*} subscriptionId
+     * @param {*} subscriptionId subscription id
      * @memberof Subscriptions
      */
     handleSubscriptionDelete(subscriptionId) {
@@ -134,15 +178,15 @@ class Subscriptions extends React.Component {
                     return;
                 }
                 Alert.info('Subscription deleted successfully!');
-                const { subscriptions } = this.state;
+                const { subscriptions, apiType } = this.state;
                 for (const endpointIndex in subscriptions) {
                     if (Object.prototype.hasOwnProperty.call(subscriptions, endpointIndex)
-                    && subscriptions[endpointIndex].subscriptionId === subscriptionId) {
+                        && subscriptions[endpointIndex].subscriptionId === subscriptionId) {
                         subscriptions.splice(endpointIndex, 1);
                         break;
                     }
                 }
-                this.setState({ subscriptions }, this.updateUnsubscribedAPIsList);
+                this.setState({ subscriptions }, this.updateUnsubscribedAPIsList(apiType));
             })
             .catch((error) => {
                 const { status } = error;
@@ -153,23 +197,30 @@ class Subscriptions extends React.Component {
             });
     }
 
+
     /**
      *
      * Update list of unsubscribed APIs
+     * @param {string} apiType The type of API being dealt with(API or API Product)
      * @memberof Subscriptions
      */
-    updateUnsubscribedAPIsList() {
-        const apiClient = new Api();
-        const promisedGetApis = apiClient.getAllAPIs();
-        const { subscriptions } = this.state;
+    updateUnsubscribedAPIsList(apiType) {
+        let promisedGetApis = null;
 
+        if (apiType === CONSTS.API_TYPE) {
+            const apiClient = new Api();
+            promisedGetApis = apiClient.getAllAPIs();
+        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            const apiClient = new APIProduct();
+            promisedGetApis = apiClient.getAllAPIProducts();
+        }
 
         promisedGetApis
             .then((response) => {
                 const { list } = response.obj;
-                const subscribedAPIIds = subscriptions.map(sub => sub.apiId);
+                const subscribedIds = this.getIdsOfSubscribedEntities();
                 const unsubscribedAPIList = list
-                    .filter(api => !subscribedAPIIds.includes(api.id))
+                    .filter(api => !subscribedIds.includes(api.id) && !api.advertiseInfo.advertised)
                     .map((filteredApi) => {
                         return {
                             Id: filteredApi.id,
@@ -190,25 +241,38 @@ class Subscriptions extends React.Component {
     }
 
     /**
-     *
      * Handle onClick of subscribing to an API
+     * @param {*} applicationId application id
+     * @param {*} apiId api id
+     * @param {*} policy policy
      * @memberof Subscriptions
      */
     handleSubscribe(applicationId, apiId, policy) {
         const api = new Api();
-
+        const { intl } = this.props;
         if (!policy) {
-            Alert.error('Select a subscription policy');
+            Alert.error(intl.formatMessage({
+                id: 'Applications.Details.Subscriptions.select.a.subscription.policy',
+                defaultMessage: 'Select a subscription policy',
+            }));
             return;
         }
 
-        const promisedSubscribe = api.subscribe(apiId, applicationId, policy);
+        const { apiType } = this.state;
+
+        const promisedSubscribe = api.subscribe(apiId, applicationId, policy, apiType);
         promisedSubscribe
             .then((response) => {
                 if (response.status !== 201) {
-                    Alert.error('Error occurred  during subscription');
+                    Alert.error(intl.formatMessage({
+                        id: 'Applications.Details.Subscriptions.error.occurred.during.subscription.not.201',
+                        defaultMessage: 'Error occurred during subscription',
+                    }));
                 } else {
-                    Alert.info('Subscription successful');
+                    Alert.info(intl.formatMessage({
+                        id: 'Applications.Details.Subscriptions.subscription.successful',
+                        defaultMessage: 'Subscription successful',
+                    }));
                     this.updateSubscriptions(applicationId);
                 }
             })
@@ -217,14 +281,15 @@ class Subscriptions extends React.Component {
                 if (status === 401) {
                     this.setState({ isAuthorize: false });
                 }
-                Alert.error('Error occurred  during subscription');
+                Alert.error(intl.formatMessage({
+                    id: 'Applications.Details.Subscriptions.error.occurred.during.subscription',
+                    defaultMessage: 'Error occurred during subscription',
+                }));
             });
     }
 
     /**
-     *
-     *
-     * @returns
+     * @inheritdoc
      * @memberof Subscriptions
      */
     render() {
@@ -235,59 +300,39 @@ class Subscriptions extends React.Component {
         }
 
         const {
-            subscriptions, unsubscribedAPIList, apisNotFound, subscriptionsNotFound,
+            subscriptions, unsubscribedAPIList, apisNotFound, subscriptionsNotFound, apiType,
         } = this.state;
-        const { applicationId } = this.props.match.params;
+        const { match: { params: { applicationId } } } = this.props;
         const { classes } = this.props;
 
         if (subscriptions) {
             return (
                 <div className={classes.root}>
                     <Typography variant='headline' className={classes.keyTitle}>
-                        Subscription Management
+                        <FormattedMessage
+                            id='Applications.Details.Subscriptions.subscription.management'
+                            defaultMessage='Subscription Management'
+                        />
                     </Typography>
 
+                    <div className='apiTypeSelection' align='center'>
+                        <FormControl component='fieldset' className={classes.formControl}>
+                            <FormLabel component='legend'>API Type</FormLabel>
+                            <RadioGroup
+                                aria-label='API Type'
+                                name='apiType1'
+                                className={classes.group}
+                                value={apiType}
+                                onChange={this.handleChange}
+                                row
+                            >
+                                <FormControlLabel value={CONSTS.API_TYPE} control={<Radio />} label='API' />
+                                <FormControlLabel value={CONSTS.API_PRODUCT_TYPE} control={<Radio />} label='API Product' />
+                            </RadioGroup>
+                        </FormControl>
+                    </div>
+
                     <Grid container className='tab-grid' spacing={16}>
-                        <Grid item xs={6}>
-                            <Card className={classes.card}>
-                                <CardActions>
-                                    <Typography variant='h6' gutterBottom className={classes.cardTitle}>
-                                        Subscriptions
-                                    </Typography>
-                                </CardActions>
-                                <Divider />
-                                <CardContent className={classes.cardContent}>
-                                    {
-                                        subscriptionsNotFound ?
-                                            (<ResourceNotFound />) :
-                                            (
-                                                <Table>
-                                                    <TableHead>
-                                                        <TableRow>
-                                                            <TableCell className={classes.firstCell}>
-                                                                API Name
-                                                            </TableCell>
-                                                            <TableCell>Subscription Tier</TableCell>
-                                                            <TableCell>Status</TableCell>
-                                                            <TableCell>Action</TableCell>
-                                                        </TableRow>
-                                                    </TableHead>
-                                                    <TableBody>
-                                                        {subscriptions
-                                                    && subscriptions.map((subscription) => {
-                                                        return (
-                                                            <SubscriptionTableData
-                                                                subscription={subscription}
-                                                                handleSubscriptionDelete={this.handleSubscriptionDelete}
-                                                            />
-                                                        );
-                                                    })}
-                                                    </TableBody>
-                                                </Table>)
-                                    }
-                                </CardContent>
-                            </Card>
-                        </Grid>
                         <Grid item xs={6} className={classes.cardGrid}>
                             <APIList
                                 apisNotFound={apisNotFound}
@@ -295,6 +340,71 @@ class Subscriptions extends React.Component {
                                 applicationId={applicationId}
                                 handleSubscribe={(app, api, policy) => this.handleSubscribe(app, api, policy)}
                             />
+                        </Grid>
+                        <Grid item xs={6} xl={10}>
+                            <Card className={classes.card}>
+                                <CardActions>
+                                    <Typography variant='h6' gutterBottom className={classes.cardTitle}>
+                                        <FormattedMessage
+                                            id='Applications.Details.Subscriptions.subscriptions'
+                                            defaultMessage='Subscriptions'
+                                        />
+                                    </Typography>
+                                </CardActions>
+                                <Divider />
+                                <CardContent className={classes.cardContent}>
+                                    {
+                                        subscriptionsNotFound
+                                            ? (<ResourceNotFound />)
+                                            : (
+                                                <Table>
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell className={classes.firstCell}>
+                                                                <FormattedMessage
+                                                                    id='Applications.Details.Subscriptions.api.name'
+                                                                    defaultMessage='API Name'
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <FormattedMessage
+                                                                    id={`Applications.Details.Subscriptions
+                                                                    .subscription.tier`}
+                                                                    defaultMessage='Subscription Tier'
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <FormattedMessage
+                                                                    id='Applications.Details.Subscriptions.Status'
+                                                                    defaultMessage='Status'
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <FormattedMessage
+                                                                    id='Applications.Details.Subscriptions.action'
+                                                                    defaultMessage='Action'
+                                                                />
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {subscriptions && subscriptions.map((subscription) => {
+                                                            return (
+                                                                <SubscriptionTableData
+                                                                    key={subscription.subscriptionId}
+                                                                    subscription={subscription}
+                                                                    handleSubscriptionDelete={
+                                                                        this.handleSubscriptionDelete
+                                                                    }
+                                                                />
+                                                            );
+                                                        })}
+                                                    </TableBody>
+                                                </Table>
+                                            )
+                                    }
+                                </CardContent>
+                            </Card>
                         </Grid>
                     </Grid>
                 </div>
@@ -305,7 +415,13 @@ class Subscriptions extends React.Component {
     }
 }
 Subscriptions.propTypes = {
-    classes: PropTypes.object,
+    classes: PropTypes.shape({}).isRequired,
+    match: PropTypes.shape({
+        params: PropTypes.shape({
+            application_uuid: PropTypes.string.isRequired,
+        }).isRequired,
+    }).isRequired,
+    intl: PropTypes.func.isRequired,
 };
 
-export default withStyles(styles)(Subscriptions);
+export default injectIntl(withStyles(styles)(Subscriptions));

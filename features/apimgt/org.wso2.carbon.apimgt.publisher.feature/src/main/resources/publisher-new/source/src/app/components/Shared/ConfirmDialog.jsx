@@ -2,20 +2,24 @@ import React from 'react';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 /**
- * React component for handling confirmation dialog box
+ * React component for handling confirmation dialog box.
  * @class ConfirmDialog
  * @extends {React.Component}
  */
-class ConfirmDialog extends React.Component {
+export default function ConfirmDialog(props) {
+    const {
+        title, message, labelCancel, labelOk, open, callback,
+    } = props;
+
     /**
      * If user confirms the action invoke the callback with true else false
      * @param {String} action One of ConfirmDialog.Action actions
      * @memberof ConfirmDialog
      */
-    handleRequestClose(action) {
-        const { callback } = this.props;
+    function handleRequestClose(action) {
         if (action === ConfirmDialog.Action.OK) {
             callback(true);
         } else {
@@ -23,46 +27,43 @@ class ConfirmDialog extends React.Component {
         }
     }
 
-    /**
-     * @inheritDoc
-     * @returns {React.Component} Confirmation box
-     * @memberof ConfirmDialog
-     */
-    render() {
-        const {
-            title, message, labelCancel, labelOk, open,
-        } = this.props;
-
-        return (
-            <Dialog open={open} onClose={this.handleRequestClose}>
-                <DialogTitle>{title || 'Please Confirm'}</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>{message || 'Are you sure?'}</DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => this.handleRequestClose(ConfirmDialog.Action.CANCEL)} color='primary'>
-                        {labelCancel || 'Cancel'}
-                    </Button>
-                    <Button onClick={() => this.handleRequestClose(ConfirmDialog.Action.OK)} color='primary'>
-                        {labelOk || 'OK'}
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        );
-    }
+    return (
+        <Dialog open={open} onClose={handleRequestClose}>
+            <DialogTitle>{title}</DialogTitle>
+            <DialogContent>
+                <DialogContentText>{message}</DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => handleRequestClose(ConfirmDialog.Action.CANCEL)} color='primary'>
+                    {labelCancel}
+                </Button>
+                <Button onClick={() => handleRequestClose(ConfirmDialog.Action.OK)} color='primary'>
+                    {labelOk}
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
 }
 
+ConfirmDialog.defaultProps = {
+    title: <FormattedMessage id='Apis.Shared.ConfirmDialog.please.confirm' defaultMessage='Please Confirm' />,
+    message: <FormattedMessage id='Apis.Shared.ConfirmDialog.are.you.sure' defaultMessage='Are you sure?' />,
+    labelOk: <FormattedMessage id='Apis.Shared.ConfirmDialog.ok' defaultMessage='OK' />,
+    labelCancel: <FormattedMessage id='Apis.Shared.ConfirmDialog.cancel' defaultMessage='Cancel' />,
+    callback: () => {},
+};
 ConfirmDialog.propTypes = {
-    title: PropTypes.string.isRequired,
-    message: PropTypes.string.isRequired,
-    labelCancel: PropTypes.string.isRequired,
-    labelOk: PropTypes.string.isRequired,
-    callback: PropTypes.func.isRequired,
+    title: PropTypes.string,
+    message: PropTypes.string,
+    labelCancel: PropTypes.string,
+    labelOk: PropTypes.string,
     open: PropTypes.bool.isRequired,
+    callback: PropTypes.func,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 ConfirmDialog.Action = {
     OK: 'ok',
     CANCEL: 'cancel',
 };
-
-export default ConfirmDialog;

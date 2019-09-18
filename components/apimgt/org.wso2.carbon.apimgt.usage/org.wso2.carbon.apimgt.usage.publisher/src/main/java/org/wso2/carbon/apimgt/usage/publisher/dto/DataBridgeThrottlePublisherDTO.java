@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.usage.publisher.dto;
 
+import org.json.simple.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +54,11 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
     }
 
     public Object createMetaData() {
-        return new Object[] { getKeyType()};
+        JSONObject obj = new JSONObject();
+        obj.put("keyType", getKeyType());
+        obj.put("correlationID", getCorrelationID());
+        String metaClientType = obj.toJSONString();
+        return new Object[]{metaClientType};
     }
 
     /*

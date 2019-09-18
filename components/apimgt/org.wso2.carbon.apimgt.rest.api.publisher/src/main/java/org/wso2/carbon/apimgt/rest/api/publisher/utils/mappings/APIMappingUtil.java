@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
@@ -266,7 +266,7 @@ public class APIMappingUtil {
             dto.setType(APIDetailedDTO.TypeEnum.valueOf(model.getType()));
         }
 
-        if (!APIConstants.APIType.WS.equals(model.getType())) {
+        if (!APIConstants.APITransportType.WS.equals(model.getType())) {
             dto.setTransport(Arrays.asList(model.getTransports().split(",")));
         }
         dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
@@ -395,8 +395,6 @@ public class APIMappingUtil {
 
     public static API fromDTOtoAPI(APIDetailedDTO dto, String provider) throws APIManagementException {
 
-        APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-
         String providerEmailDomainReplaced = APIUtil.replaceEmailDomain(provider);
 
         // The provider name that is coming from the body is not honored for now.
@@ -470,12 +468,14 @@ public class APIMappingUtil {
 
         if (dto.getApiDefinition() != null) {
             String apiSwaggerDefinition = dto.getApiDefinition();
+            APIDefinition parser = OASParserUtil.getOASParser(apiSwaggerDefinition);
+
             //URI Templates
-            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(model, apiSwaggerDefinition);
+            Set<URITemplate> uriTemplates = parser.getURITemplates(apiSwaggerDefinition);
             model.setUriTemplates(uriTemplates);
 
             // scopes
-            Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiSwaggerDefinition);
+            Set<Scope> scopes = parser.getScopes(apiSwaggerDefinition);
             model.setScopes(scopes);
 
         }
@@ -842,7 +842,7 @@ public class APIMappingUtil {
                 return null; // how to handle this?
         }
     }
-
+    
     private static APIDetailedDTO.VisibilityEnum mapVisibilityFromAPItoDTO(String visibility) {
         switch (visibility) { //public, private,controlled, restricted
             case APIConstants.API_GLOBAL_VISIBILITY :
@@ -888,7 +888,7 @@ public class APIMappingUtil {
         }
 
     }
-
+    
     private static String updateContextWithVersion(String version, String contextVal, String context) {
         // This condition should not be true for any occasion but we keep it so that there are no loopholes in
         // the flow.
@@ -917,4 +917,5 @@ public class APIMappingUtil {
     private static String getThumbnailUri (String uuid) {
         return RestApiConstants.RESOURCE_PATH_THUMBNAIL.replace(RestApiConstants.APIID_PARAM, uuid);
     }
+
 }

@@ -18,6 +18,8 @@
 
 import axios from 'axios';
 import qs from 'qs';
+import CONSTS from 'AppData/Constants';
+import Configurations from 'Config';
 import Utils from './Utils';
 import User from './User';
 import APIClient from './APIClient';
@@ -90,7 +92,8 @@ class AuthManager {
     static getUser(environmentName = Utils.getCurrentEnvironment().label) {
         const userData = localStorage.getItem(`${User.CONST.LOCAL_STORAGE_USER}_${environmentName}`);
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, environmentName);
-        if (!(userData && partialToken)) {
+        const refreshToken = Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1, environmentName);
+        if (!(userData && (partialToken || refreshToken))) {
             return null;
         }
         return User.fromJson(JSON.parse(userData), environmentName);
@@ -111,9 +114,10 @@ class AuthManager {
     static getUserFromToken() {
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
         if (!partialToken) {
-            return new Promise((resolve, reject) => reject(new Error('No partial token found!')));
+            return new Promise((resolve, reject) => reject(new Error(CONSTS.errorCodes.NO_TOKEN_FOUND)));
         }
-        const promisedResponse = fetch('/publisher-new/services/auth/introspect', { credentials: 'same-origin' });
+        const introspectUrl = Configurations.app.context + Utils.CONST.INTROSPECT;
+        const promisedResponse = fetch(introspectUrl, { credentials: 'same-origin' });
         return promisedResponse
             .then(response => response.json())
             .then((data) => {
@@ -121,14 +125,22 @@ class AuthManager {
                 if (data.active) {
                     const currentEnv = Utils.getCurrentEnvironment();
                     user = new User(currentEnv.label, data.username);
-                    user.scopes = data.scope.split(' ');
-                    AuthManager.setUser(user, currentEnv.label);
+                    const scopes = data.scope.split(' ');
+                    if (this.hasBasicLoginPermission(scopes)) {
+                        user.scopes = scopes;
+                        AuthManager.setUser(user, currentEnv.label);
+                    } else {
+                        console.warn('The user with ' + partialToken + ' doesn\'t enough have permission!');
+                        throw new Error(CONSTS.errorCodes.INSUFFICIENT_PREVILEGES);
+                    }
                 } else {
-                    console.warn('User with ' + partialToken + ' is not active!');
+                    console.warn('The user with ' + partialToken + ' is not active!');
+                    throw new Error(CONSTS.errorCodes.INVALID_TOKEN);
                 }
                 return user;
             });
     }
+
     /**
      * Persist an user in browser local storage and in-memory, Since only one use can be
      * logged into the application at a time,
@@ -170,6 +182,36 @@ class AuthManager {
         return validScope.then((scope) => {
             return userscopes.includes(scope);
         });
+    }
+
+    static isNotCreator() {
+        return !AuthManager.getUser().scopes.includes('apim:api_create');
+    }
+
+    static isNotPublisher() {
+        return !AuthManager.getUser().scopes.includes('apim:api_publish');
+    }
+
+    static isRestricted(scopesAllowedToEdit, api) {
+        // determines whether the user is a publisher or creator (based on what is passed from the element)
+        // if (scopesAllowedToEdit.filter(element => AuthManager.getUser().scopes.includes(element)).length > 0) {
+        if (scopesAllowedToEdit.find(element => AuthManager.getUser().scopes.includes(element))) {
+            // if the user has publisher role, no need to consider the api LifeCycleStatus
+            if (AuthManager.getUser().scopes.includes('apim:api_publish')) {
+                return false;
+            } else if (
+                // if the user has creator role, but not the publisher role
+                api.lifeCycleStatus === 'CREATED') {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        return true;
+    }
+
+    static hasBasicLoginPermission(scopes) {
+        return scopes.includes('apim:api_view');
     }
 
     /**
@@ -214,7 +256,7 @@ class AuthManager {
         const { data } = response;
         const { AM_ACC_TOKEN_DEFAULT_P1, expires_in: expiresIn } = data;
         const user = new User(environmentName, data.authUser);
-        user.setPartialToken(AM_ACC_TOKEN_DEFAULT_P1, expiresIn, Utils.CONST.CONTEXT_PATH);
+        user.setPartialToken(AM_ACC_TOKEN_DEFAULT_P1, expiresIn, Configurations.app.context);
         user.setExpiryTime(expiresIn);
         user.scopes = data.scopes.split(' ');
         return user;
@@ -239,7 +281,7 @@ class AuthManager {
         });
         promisedLogout
             .then(() => {
-                Utils.deleteCookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH, environmentName);
+                Utils.deleteCookie(User.CONST.WSO2_AM_TOKEN_1, Configurations.app.context, environmentName);
                 AuthManager.dismissUser(environmentName);
                 new APIClientFactory().destroyAPIClient(environmentName);
                 // Single client should be re initialize after log out
@@ -289,22 +331,21 @@ class AuthManager {
      * @return {AxiosPromise}
      */
     static refresh(environment) {
-        const authHeader = 'Bearer ' + AuthManager.getUser(environment.label).getRefreshPartialToken();
         const params = {
-            grant_type: 'refresh_token',
+            refresh_token: AuthManager.getUser(environment.label).getRefreshPartialToken(),
             validity_period: -1,
             scopes: AuthManager.CONST.USER_SCOPES,
         };
         const referrer = document.referrer.indexOf('https') !== -1 ? document.referrer : null;
-        const url = environment.loginTokenPath + Utils.CONST.CONTEXT_PATH;
-        /* TODO: Fetch this from configs ~tmkb */
+        const url = Configurations.app.context + environment.refreshTokenPath;
         const headers = {
-            Authorization: authHeader,
             Accept: 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Alt-Referer': referrer,
         };
-        return axios.post(url, qs.stringify(params), {
+        return fetch(url, {
+            method: 'POST',
+            body: qs.stringify(params),
             headers,
         });
     }
@@ -345,7 +386,11 @@ class AuthManager {
 
 // TODO: derive this from swagger definitions ~tmkb
 AuthManager.CONST = {
-    USER_SCOPES: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage ' +
-        'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
+    USER_SCOPES: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
+        + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover',
 };
+const { isRestricted } = AuthManager;
+
+export { isRestricted };
+
 export default AuthManager;

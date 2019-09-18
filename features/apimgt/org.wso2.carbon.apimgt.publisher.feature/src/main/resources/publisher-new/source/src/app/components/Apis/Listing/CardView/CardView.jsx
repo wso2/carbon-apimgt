@@ -6,16 +6,16 @@ import ApiThumb from '../components/ImageGenerator/ApiThumb';
 
 const CardView = ({ apis, updateAPIsList }) => {
     return (
-        <Grid container justify='flex-start' spacing={8}>
+        <Grid container justify='flex-start' spacing={2}>
             {apis.list.map((api) => {
-                return <ApiThumb key={api.id} updateAPIsList={updateAPIsList} api={api} />;
+                return <ApiThumb key={api.id} updateAPIsList={updateAPIsList} api={api} apiType={apis.apiType} />;
             })}
         </Grid>
     );
 };
 
 CardView.propTypes = {
-    apis: PropTypes.shape({ list: PropTypes.array, count: PropTypes.number }).isRequired,
+    apis: PropTypes.shape({ list: PropTypes.array, count: PropTypes.number, apiType: PropTypes.string }).isRequired,
     updateAPIsList: PropTypes.func.isRequired,
 };
 

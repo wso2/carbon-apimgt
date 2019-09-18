@@ -21,8 +21,8 @@ module.exports = {
         ecmaVersion: 6,
         ecmaFeatures: {
             jsx: true,
-            modules: true,
-        },
+            modules: true
+        }
     },
     env: {
         browser: true,
@@ -31,7 +31,7 @@ module.exports = {
         jest: true,
         node: true
     },
-    extends: ['airbnb','plugin:jest/recommended'],
+    extends: ['airbnb', 'plugin:jest/recommended'], // http://airbnb.io/javascript/react/
     rules: {
         'max-len': ['error', { code: 120, tabWidth: 4 }],
         'require-jsdoc': [
@@ -40,15 +40,15 @@ module.exports = {
                 require: {
                     FunctionDeclaration: true,
                     MethodDefinition: true,
-                    ClassDeclaration: true,
-                },
-            },
+                    ClassDeclaration: true
+                }
+            }
         ],
         'valid-jsdoc': [
             'warn',
             {
-                requireReturn: false,
-            },
+                requireReturn: false
+            }
         ],
         indent: ['error', 4, { SwitchCase: 1 }],
         'import/no-extraneous-dependencies': [
@@ -56,8 +56,8 @@ module.exports = {
             {
                 devDependencies: false,
                 optionalDependencies: false,
-                peerDependencies: false,
-            },
+                peerDependencies: false
+            }
         ],
         'import/no-unresolved': ['off'],
         'import/extensions': ['off'],
@@ -66,8 +66,8 @@ module.exports = {
         'no-underscore-dangle': [
             'error',
             {
-                allowAfterThis: true,
-            },
+                allowAfterThis: true
+            }
         ],
         'no-restricted-syntax': ['off'],
         'no-plusplus': ['off'],
@@ -84,7 +84,7 @@ module.exports = {
         'no-mixed-operators': ['error'],
         'jsx-quotes': ['error', 'prefer-single'],
         'no-else-return': 'off',
-        'no-unused-vars': ['error'],
+        'no-unused-vars': ['error']
     },
-    plugins: ['react','jest'],
+    plugins: ['react', 'jest']
 };

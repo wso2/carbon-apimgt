@@ -472,6 +472,34 @@
                 <URI>/api/am/publisher/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </WhiteListedURI>
+                        <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/swagger</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/documents</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/documents/{documentId}</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/documents/{documentId}/content</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/thumbnail</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
         </WhiteListedURIs>
         <ETagSkipList>
             <ETagSkipURI>
@@ -681,6 +709,12 @@
     <!--Specify the implementation class of the monetization interface-->
     <Monetization>
         <MonetizationImpl>org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl</MonetizationImpl>
+        <UsagePublisher>
+            <Granularity>days</Granularity>
+            <!--Number of days to reduce from the current time to get the last publish time of monetization
+            usgae publish job, when there is no record of the last publish time.-->
+            <PublishTimeDurationInDays>1</PublishTimeDurationInDays>
+        </UsagePublisher>
     </Monetization>
 
     <OpenTracer>

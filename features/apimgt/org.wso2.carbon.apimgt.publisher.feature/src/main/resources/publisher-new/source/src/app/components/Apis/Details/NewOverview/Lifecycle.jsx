@@ -18,46 +18,59 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import PeopleOutlineIcon from '@material-ui/icons/PeopleOutline';
-import ApiContext from '../components/ApiContext';
- 
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
+
+/**
+ *
+ *
+ * @param {*} props
+ * @returns
+ */
 function Lifecycle(props) {
-    const { parentClasses } = props;
+    const { parentClasses, api, isAPIProduct } = props;
     return (
-        <ApiContext.Consumer>
-            {({ api }) => (
-                <Paper className={classNames({ [parentClasses.root]: true })}>
-                    <div className={parentClasses.titleWrapper}>
-                        <Typography variant='h5' component='h3' className={parentClasses.title}>
-                            Lifecycle Status
-                        </Typography>
-                        <Link to={'/apis/' + api.id + '/lifecycle'}>
-                            <Button variant='contained' color='default'>
-                                Edit
-                            </Button>
-                        </Link>
-                    </div>
+        <Paper className={classNames({ [parentClasses.root]: true })}>
+            <div className={parentClasses.titleWrapper}>
+                <Typography variant='h5' component='h3' className={parentClasses.title}>
+                    <FormattedMessage
+                        id='Apis.Details.NewOverview.Lifecycle.lifecycle.status'
+                        defaultMessage='Lifecycle Status'
+                    />
+                </Typography>
+                <Link to={'/apis/' + api.id + '/lifecycle'}>
+                    <Button variant='contained' color='default'>
+                        <FormattedMessage id='Apis.Details.NewOverview.Lifecycle.edit' defaultMessage='Edit' />
+                    </Button>
+                </Link>
+            </div>
 
-                    {/* LifeCycle Status */}
-                        <Typography variant='h5' className={classNames({[parentClasses.subtitle]: true, [parentClasses.lifecycleWrapper]:true})}>
-                            <PeopleOutlineIcon className={parentClasses.lifecycleIcon}/>
-                            {api.lifeCycleStatus}
-                        </Typography>
-                   
-                </Paper>
-            )}
-        </ApiContext.Consumer>
+            {/* LifeCycle Status */}
+            <Typography
+                variant='h5'
+                className={classNames({
+                    [parentClasses.subtitle]: true,
+                    [parentClasses.lifecycleWrapper]: true,
+                })}
+            >
+                <PeopleOutlineIcon className={parentClasses.lifecycleIcon} />
+                {isAPIProduct ? api.state : api.lifeCycleStatus}
+            </Typography>
+        </Paper>
     );
 }
 
 Lifecycle.propTypes = {
-    parentClasses: PropTypes.object.isRequired,
+    parentClasses: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({}).isRequired,
+    isAPIProduct: PropTypes.bool.isRequired,
 };
 
-export default Lifecycle;
+export default withAPI(Lifecycle);

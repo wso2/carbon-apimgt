@@ -430,6 +430,14 @@ public class GatewayUtils {
         return hostname;
     }
 
+    public static String getQualifiedApiName(String apiProviderName, String apiName, String version) {
+        return apiProviderName + "--" + apiName + ":v" + version;
+    }
+
+    public static String getQualifiedDefaultApiName(String apiProviderName, String apiName) {
+        return apiProviderName + "--" + apiName;
+    }
+
     /**
      * This method extracts the endpoint address base path if query parameters are contained in endpoint
      * @param mc The message context
@@ -437,6 +445,9 @@ public class GatewayUtils {
      */
     public static String extractAddressBasePath(org.apache.synapse.MessageContext mc) {
         String endpointAddress = (String) mc.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
+        if (endpointAddress == null) {
+            endpointAddress = APIMgtGatewayConstants.DUMMY_ENDPOINT_ADDRESS;
+        }
         if (endpointAddress.contains("?")) {
             endpointAddress = endpointAddress.substring(0, endpointAddress.indexOf("?"));
         }

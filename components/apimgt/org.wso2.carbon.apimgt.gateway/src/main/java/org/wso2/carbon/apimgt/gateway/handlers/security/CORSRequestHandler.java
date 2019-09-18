@@ -107,7 +107,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             }
         }
         if (exposeHeaders == null) {
-            exposeHeaders = APIUtil.getExposedHeaders();
+            exposeHeaders = APIUtil.getAccessControlExposedHeaders();
         }
 
         initializeHeaderValues = true;
@@ -329,7 +329,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                 }
             }
             allowedMethods = allowedMethodsBuffer.toString();
-            if (methods.length != 0) {
+            if (allowedMethods.endsWith(",")) {
                 allowedMethods = allowedMethods.substring(0, allowedMethods.length() - 1);
             }
         } else {

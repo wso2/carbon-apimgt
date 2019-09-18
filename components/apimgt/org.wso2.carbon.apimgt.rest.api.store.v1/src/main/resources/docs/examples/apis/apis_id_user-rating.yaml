@@ -1,0 +1,61 @@
+get:
+  - id: getAPIUserRating
+    request:
+      method: GET
+      url: https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating
+      headers: |
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+        X-WSO2-Tenant: test.com
+    response:
+      status:
+        code: 200
+        msg: OK
+      headers: |
+        Content-Type: application/json
+      body:
+        {
+          "ratingId": "d93fb282-8uj6-48fc-2345-993fb89085e1",
+          "apiId": "e93fb282-b456-48fc-8981-003fb89086ae",
+          "username": "peter",
+          "rating": 5
+        }
+
+put:
+  - id: putAPIUserRating
+    request:
+      method: PUT
+      url: https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating
+      headers: |
+        Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
+        Content-Type: application/json
+        X-WSO2-Tenant: test.com
+      body:
+        {
+          "rating": 4
+        }
+    response:
+      status:
+        code: 200
+        msg: OK
+      headers: |
+        Content-Type: application/json
+      body:
+        {
+          "ratingId": "d93fb282-8uj6-48fc-2345-993fb89085e1",
+          "apiId": "e93fb282-b456-48fc-8981-003fb89086ae",
+          "username": "john",
+          "rating": 4
+        }
+
+delete:
+  - id: deleteAPIUserRating
+    request:
+      method: DELETE
+      url: https://localhost:9443/api/am/store/v1.0/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating
+      headers: |
+        Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
+        X-WSO2-Tenant: test.com
+    response:
+      status:
+        code: 200
+        msg: OK

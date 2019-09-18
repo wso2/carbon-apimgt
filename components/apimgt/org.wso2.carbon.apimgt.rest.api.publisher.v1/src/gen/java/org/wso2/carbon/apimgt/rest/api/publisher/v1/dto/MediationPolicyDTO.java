@@ -9,6 +9,7 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
@@ -16,7 +17,6 @@ public class MediationPolicyDTO   {
   
     private String id = null;
     private String name = null;
-    private String config = null;
     private String type = null;
     private Boolean shared = null;
 
@@ -53,23 +53,6 @@ public class MediationPolicyDTO   {
   }
   public void setName(String name) {
     this.name = name;
-  }
-
-  /**
-   **/
-  public MediationPolicyDTO config(String config) {
-    this.config = config;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "", value = "")
-  @JsonProperty("config")
-  public String getConfig() {
-    return config;
-  }
-  public void setConfig(String config) {
-    this.config = config;
   }
 
   /**
@@ -118,14 +101,13 @@ public class MediationPolicyDTO   {
     MediationPolicyDTO mediationPolicy = (MediationPolicyDTO) o;
     return Objects.equals(id, mediationPolicy.id) &&
         Objects.equals(name, mediationPolicy.name) &&
-        Objects.equals(config, mediationPolicy.config) &&
         Objects.equals(type, mediationPolicy.type) &&
         Objects.equals(shared, mediationPolicy.shared);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, config, type, shared);
+    return Objects.hash(id, name, type, shared);
   }
 
   @Override
@@ -135,7 +117,6 @@ public class MediationPolicyDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    config: ").append(toIndentedString(config)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    shared: ").append(toIndentedString(shared)).append("\n");
     sb.append("}");

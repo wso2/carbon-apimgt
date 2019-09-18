@@ -4,6 +4,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.SearchApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.SearchApiServiceImpl;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -43,12 +44,12 @@ SearchApiService delegate = new SearchApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
-    }, tags={ "API (Collection)" })
+    }, tags={ "Unified Search" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of qualifying APIs and API documents is returned. ", response = SearchResultListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ErrorDTO.class) })
-    public Response searchGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "**Search**.  You can search by proving a keyword. ")  @QueryParam("query") String query, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) {
+    public Response searchGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "**Search**.  You can search by proving a keyword. ")  @QueryParam("query") String query, @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.searchGet(limit, offset, query, ifNoneMatch, securityContext);
     }
 }

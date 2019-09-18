@@ -20,15 +20,9 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 // import 'typeface./src/App.jsx
 import 'material-design-icons';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import Config from 'Config';
 import Store from './src/App';
 
-const theme = createMuiTheme(Config);
-
 ReactDOM.render(
-    <MuiThemeProvider theme={theme}>
-        <Store />
-    </MuiThemeProvider>,
+    <Store />,
     document.getElementById('react-root'),
 );

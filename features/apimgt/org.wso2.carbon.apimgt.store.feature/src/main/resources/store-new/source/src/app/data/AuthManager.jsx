@@ -19,8 +19,10 @@
 
 import axios from 'axios';
 import qs from 'qs';
+import Configurations from 'Config';
 import Utils from './Utils';
 import User from './User';
+import APIClient from './APIClient';
 import APIClientFactory from './APIClientFactory';
 
 
@@ -33,42 +35,6 @@ class AuthManager {
     constructor() {
         this.isLogged = false;
         this.username = null;
-    }
-
-    static refreshTokenOnExpire() {
-        const timestampSkew = 100;
-        const currentTimestamp = Math.floor(Date.now() / 1000);
-        const tokenTimestamp = localStorage.getItem('expiresIn');
-        const rememberMe = localStorage.getItem('rememberMe') === 'true';
-        if (rememberMe && tokenTimestamp - currentTimestamp < timestampSkew) {
-            const bearerToken = 'Bearer ' + Utils.getCookie('WSO2_AM_REFRESH_TOKEN_1');
-            const loginPromise = authManager.refresh(bearerToken);
-            loginPromise.then((data, status, xhr) => {
-                authManager.setUser(true);
-                const expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
-                window.localStorage.setItem('expiresIn', expiresIn);
-            });
-            loginPromise.error((error) => {
-                const error_data = JSON.parse(error.responseText);
-                const message = 'Error while refreshing token' + '<br/> You will be redirect to the login page ...';
-                noty({
-                    text: message,
-                    type: 'error',
-                    dismissQueue: true,
-                    modal: true,
-                    progressBar: true,
-                    timeout: 5000,
-                    layout: 'top',
-                    theme: 'relax',
-                    maxVisible: 10,
-                    callback: {
-                        afterClose() {
-                            window.location = loginPageUri;
-                        },
-                    },
-                });
-            });
-        }
     }
 
     /**
@@ -143,9 +109,15 @@ class AuthManager {
             .then(response => response.json())
             .then((data) => {
                 let user = null;
+                let username;
                 if (data.active) {
                     const currentEnv = Utils.getCurrentEnvironment();
-                    user = new User(currentEnv.label, data.username);
+                    if (data.username.includes("@carbon.super")) {
+                        username = data.username.replace('@carbon.super', '');
+                    } else {
+                        username = data.username;
+                    }
+                    user = new User(currentEnv.label, username);
                     user.scopes = data.scope.split(' ');
                     AuthManager.setUser(user, currentEnv.label);
                 } else {
@@ -156,8 +128,21 @@ class AuthManager {
     }
 
     /**
-     * Persist an user in browser local storage and in-memory, Since only one use can be logged into the application at a time,
-     * This method will override any previously persist user data.
+     * retrieve Settings from settings rest api and store in the local storage
+     *  @returns {Object}: settings response object
+     */
+    static setSettings() {
+        const promisedResponse = fetch('/api/am/store/v1.0/settings', {});
+        return promisedResponse
+            .then(response => response.json())
+            .then((data) => {
+                return data;
+            });
+    }
+
+    /**
+     * Persist an user in browser local storage and in-memory, Since only one use can be logged
+     * into the application at a time,This method will override any previously persist user data.
      * @param {User} user : An instance of the {User} class
      * @param {string} environmentName: label of the environment to be set the user
      */
@@ -171,6 +156,27 @@ class AuthManager {
             localStorage.setItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`, JSON.stringify(user.toJson()));
         }
     }
+
+    /**
+     *
+     * Get scope for resources
+     * @static
+     * @param {String} resourcePath
+     * @param {String} resourceMethod
+     * @returns Boolean
+     * @memberof AuthManager
+     */
+    static hasScopes(resourcePath, resourceMethod) {
+        const user = AuthManager.getUser();
+        if (user) {
+            const userScopes = user.scopes;
+            const validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
+            return validScope.then((scope) => {
+                return userScopes.includes(scope);
+            });
+        }
+    }
+
 
     /**
      * By given username and password Authenticate the user, Since this REST API has no swagger definition,
@@ -208,7 +214,7 @@ class AuthManager {
                 const validityPeriod = response.data.validityPeriod; // In seconds
                 const WSO2_AM_TOKEN_1 = response.data.partialToken;
                 const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
-                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
+                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Configurations.app.context);
                 user.scopes = response.data.scopes.split(' ');
                 AuthManager.setUser(user);
             })
@@ -233,28 +239,35 @@ class AuthManager {
         };
         const promisedLogout = axios.post(url, null, { headers });
         return promisedLogout.then((response) => {
-            Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH);
+            Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Configurations.app.context);
             localStorage.removeItem(User.CONST.LOCALSTORAGE_USER);
             new APIClientFactory().destroyAPIClient(Utils.getEnvironment().label); // Single client should be re initialize after log out
         });
     }
 
-    refresh(authzHeader) {
+    /**
+     * Call Token API with refresh token grant type
+     * @param {Object} environment - Name of the environment
+     * @return {AxiosPromise}
+     */
+    static refresh(environment) {
         const params = {
-            grant_type: 'refresh_token',
-            validity_period: '3600',
-            scopes: 'apim:subscribe apim:signup apim:workflow_approve',
+            refresh_token: AuthManager.getUser(environment.label).getRefreshPartialToken(),
+            validity_period: -1,
+            scopes: AuthManager.CONST.USER_SCOPES,
         };
         const referrer = document.referrer.indexOf('https') !== -1 ? document.referrer : null;
-        const url = Utils.CONST.CONTEXT_PATH + '/auth/apis/login/token';
-        /* TODO: Fetch this from configs ~tmkb */
+        const url = Configurations.app.context + environment.refreshTokenPath;
         const headers = {
-            Authorization: authzHeader,
             Accept: 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Alt-Referer': referrer,
         };
-        return axios.post(url, qs.stringify(params), { headers });
+        return fetch(url, {
+            method: 'POST',
+            body: qs.stringify(params),
+            headers,
+        });
     }
 
     /**
@@ -284,7 +297,7 @@ class AuthManager {
                 const validityPeriod = response.data.validityPeriod;
                 const WSO2_AM_TOKEN_1 = response.data.partialToken;
                 const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
-                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
+                user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Configurations.app.context);
                 user.scopes = response.data.scopes;
                 AuthManager.setUser(user);
             })

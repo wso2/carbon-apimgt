@@ -50,7 +50,7 @@ const styles = theme => ({
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
         paddingLeft: theme.spacing.unit * 2,
-        paddingTop: theme.spacing.unig,
+        paddingTop: theme.spacing(2),
     },
 });
 
@@ -241,12 +241,12 @@ class Comment extends React.Component {
                     .reverse()
                     .map((comment, index) => (
                         <div key={this.getKey()} className={classes.contentWrapper}>
-                            <Grid container spacing={8} className={classes.root}>
+                            <Grid container spacing={2} className={classes.root}>
                                 <Grid item>
                                     <AccountBox className={classes.commentIcon} />
                                 </Grid>
                                 <Grid item xs zeroMinWidth>
-                                    <Typography noWrap className={classes.commentText} variant='body2'>
+                                    <Typography noWrap className={classes.commentText} variant='body1'>
                                         {comment.createdBy}
                                     </Typography>
 

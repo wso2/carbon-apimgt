@@ -14,6 +14,7 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
@@ -21,7 +22,6 @@ public class ApplicationDTO   {
   
     private String applicationId = null;
     private String name = null;
-    private String subscriber = null;
     private String throttlingPolicy = null;
     private String description = null;
 
@@ -57,12 +57,14 @@ public enum TokenTypeEnum {
     }
 }
 
-    private TokenTypeEnum tokenType = TokenTypeEnum.OAUTH;
+    private TokenTypeEnum tokenType = TokenTypeEnum.JWT;
     private String status = "";
     private List<String> groups = new ArrayList<>();
     private Integer subscriptionCount = null;
     private List<ApplicationKeyDTO> keys = new ArrayList<>();
     private Map<String, String> attributes = new HashMap<>();
+    private List<String> subscriptionScopes = new ArrayList<>();
+    private String owner = null;
 
   /**
    **/
@@ -97,24 +99,6 @@ public enum TokenTypeEnum {
   }
   public void setName(String name) {
     this.name = name;
-  }
-
-  /**
-   * If subscriber is not given user invoking the API will be taken as the subscriber. 
-   **/
-  public ApplicationDTO subscriber(String subscriber) {
-    this.subscriber = subscriber;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "admin", value = "If subscriber is not given user invoking the API will be taken as the subscriber. ")
-  @JsonProperty("subscriber")
-  public String getSubscriber() {
-    return subscriber;
-  }
-  public void setSubscriber(String subscriber) {
-    this.subscriber = subscriber;
   }
 
   /**
@@ -161,7 +145,7 @@ public enum TokenTypeEnum {
   }
 
   
-  @ApiModelProperty(example = "OAUTH", value = "Type of the access token generated for this application.  **OAUTH:** A UUID based access token which is issued by default. **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments. ")
+  @ApiModelProperty(example = "JWT", value = "Type of the access token generated for this application.  **OAUTH:** A UUID based access token which is issued by default. **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments. ")
   @JsonProperty("tokenType")
   public TokenTypeEnum getTokenType() {
     return tokenType;
@@ -255,6 +239,41 @@ public enum TokenTypeEnum {
     this.attributes = attributes;
   }
 
+  /**
+   **/
+  public ApplicationDTO subscriptionScopes(List<String> subscriptionScopes) {
+    this.subscriptionScopes = subscriptionScopes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "[\"admin\"]", value = "")
+  @JsonProperty("subscriptionScopes")
+  public List<String> getSubscriptionScopes() {
+    return subscriptionScopes;
+  }
+  public void setSubscriptionScopes(List<String> subscriptionScopes) {
+    this.subscriptionScopes = subscriptionScopes;
+  }
+
+  /**
+   * Application created user 
+   **/
+  public ApplicationDTO owner(String owner) {
+    this.owner = owner;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "admin", value = "Application created user ")
+  @JsonProperty("owner")
+  public String getOwner() {
+    return owner;
+  }
+  public void setOwner(String owner) {
+    this.owner = owner;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -267,7 +286,6 @@ public enum TokenTypeEnum {
     ApplicationDTO application = (ApplicationDTO) o;
     return Objects.equals(applicationId, application.applicationId) &&
         Objects.equals(name, application.name) &&
-        Objects.equals(subscriber, application.subscriber) &&
         Objects.equals(throttlingPolicy, application.throttlingPolicy) &&
         Objects.equals(description, application.description) &&
         Objects.equals(tokenType, application.tokenType) &&
@@ -275,12 +293,14 @@ public enum TokenTypeEnum {
         Objects.equals(groups, application.groups) &&
         Objects.equals(subscriptionCount, application.subscriptionCount) &&
         Objects.equals(keys, application.keys) &&
-        Objects.equals(attributes, application.attributes);
+        Objects.equals(attributes, application.attributes) &&
+        Objects.equals(subscriptionScopes, application.subscriptionScopes) &&
+        Objects.equals(owner, application.owner);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes);
+    return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner);
   }
 
   @Override
@@ -290,7 +310,6 @@ public enum TokenTypeEnum {
     
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    subscriber: ").append(toIndentedString(subscriber)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    tokenType: ").append(toIndentedString(tokenType)).append("\n");
@@ -299,6 +318,8 @@ public enum TokenTypeEnum {
     sb.append("    subscriptionCount: ").append(toIndentedString(subscriptionCount)).append("\n");
     sb.append("    keys: ").append(toIndentedString(keys)).append("\n");
     sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
+    sb.append("    subscriptionScopes: ").append(toIndentedString(subscriptionScopes)).append("\n");
+    sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
     sb.append("}");
     return sb.toString();
   }

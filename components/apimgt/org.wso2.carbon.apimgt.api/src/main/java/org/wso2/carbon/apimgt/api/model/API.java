@@ -49,11 +49,13 @@ public class API implements Serializable {
     private String wsdlUrl;
     private String wsdlArchivePath;
     private String wadlUrl;
+    private String swaggerDefinition;
+    private String graphQLSchema;
     private String type;
     private String context;
     private String contextTemplate;
     private String thumbnailUrl;
-    private ResourceFile wsdlArchive;
+    private ResourceFile wsdlResource;
     private Set<String> tags = new LinkedHashSet<String>();
     private Set<Documentation> documents = new LinkedHashSet<Documentation>();
     private String httpVerb;
@@ -149,6 +151,11 @@ public class API implements Serializable {
     private static final String NULL_VALUE = "NULL";
 
     private List<APIEndpoint> endpoints = new ArrayList<APIEndpoint>();
+
+    /**
+     *  Property to hold the enable/disable status of the json schema validation.
+     */
+    private boolean enableSchemaValidation = false;
 
 
     public void setEnvironmentList(Set<String> environmentList) {
@@ -250,6 +257,14 @@ public class API implements Serializable {
      */
     private String accessControl;
     private String accessControlRoles;
+
+    public String getSwaggerDefinition() {return swaggerDefinition; }
+
+    public void setSwaggerDefinition(String swaggerDefinition) { this.swaggerDefinition = swaggerDefinition; }
+
+    public void setGraphQLSchema(String graphQLSchema) { this.graphQLSchema = graphQLSchema; }
+
+    public String getGraphQLSchema() {return graphQLSchema; }
 
     public Set<String> getEnvironments() {
         return environments;
@@ -865,6 +880,24 @@ public class API implements Serializable {
     }
 
     /**
+     * Check the status of the Json schema validation property.
+     *
+     * @return Status of the validator property.
+     */
+    public boolean isEnabledSchemaValidation() {
+        return enableSchemaValidation;
+    }
+
+    /**
+     * To set the JSON schema validation enable/disable.
+     *
+     * @param enableSchemaValidation Given Status.
+     */
+    public void setEnableSchemaValidation(boolean enableSchemaValidation) {
+        this.enableSchemaValidation = enableSchemaValidation;
+    }
+
+    /**
      * To set the gateway security for the relevant API.
      *
      * @param apiSecurity Relevant type of gateway security for the API.
@@ -892,12 +925,12 @@ public class API implements Serializable {
         this.wsdlArchivePath = wsdlArchivePath;
     }
 
-    public ResourceFile getWsdlArchive() {
-        return wsdlArchive;
+    public ResourceFile getWsdlResource() {
+        return wsdlResource;
     }
 
-    public void setWsdlArchive(ResourceFile wsdlArchive) {
-        this.wsdlArchive = wsdlArchive;
+    public void setWsdlResource(ResourceFile wsdl) {
+        this.wsdlResource = wsdl;
     }
 
     public List<APIEndpoint> getEndpoint() {

@@ -16,24 +16,41 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
+import PropTypes from 'prop-types';
 import { Route, Switch } from 'react-router-dom';
-
-import Listing from './Listing';
-import Details from './Details';
-import DocCreate from './Create';
 import { PageNotFound } from 'AppComponents/Base/Errors';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
+import Listing from './Listing';
+import View from './View';
+import Edit from './Edit';
+import EditContent from './EditContent';
+import DocCreate from './Create';
 
 const Documents = (props) => {
-    const {api} = props;
+    const { isAPIProduct } = useContext(APIContext);
+    const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
     return (
-        <Switch>
-            <Route exact path='/apis/:apiUUID/documents' component={() => <Listing api={api}/>} />
-            <Route path='/apis/:apiUUID/documents/:documentId/details' component={Details} />
-            <Route path='/apis/:apiUUID/documents/create' component={DocCreate} />
-            <Route component={PageNotFound} />
-        </Switch>
+        <div>
+            <Switch>
+                <Route exact path={'/' + urlPrefix + '/:apiUUID/documents'} component={Listing} />} />
+                <Route exact path={'/' + urlPrefix + '/:apiUUID/documents/:documentId/view'} component={View} />} />
+                <Route exact path={'/' + urlPrefix + '/:apiUUID/documents/:documentId/edit'} component={Edit} />} />
+                <Route
+                    exact
+                    path={'/' + urlPrefix + '/:apiUUID/documents/:documentId/edit-content'}
+                    component={EditContent}
+                />
+                } />
+                <Route exact path={'/' + urlPrefix + '/:apiUUID/documents/create'} component={DocCreate} />
+                <Route component={PageNotFound} />
+            </Switch>
+        </div>
     );
+};
+
+Documents.propTypes = {
+    api: PropTypes.shape({}).isRequired,
 };
 
 export default Documents;

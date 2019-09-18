@@ -447,6 +447,8 @@
     "Sender IO error receiving": "Sender IO error receiving",
     "Sender IO error sending": "Sender IO error sending",
     "Show More Options": "Show More Options",
+    "Show Advanced Options": "Show Advanced Options",
+    "Show Fewer Advanced Options": "Show Fewer Advanced Options",
     "Sign In": "Sign In",
     "Sign in to your account": "Sign in to your account",
     "Since there aren't resources for Websocket API's, advanced throttling policies apply to the API-level": "Since resources do not exist for Websocket APIs, advanced throttling policies apply to the API-level",

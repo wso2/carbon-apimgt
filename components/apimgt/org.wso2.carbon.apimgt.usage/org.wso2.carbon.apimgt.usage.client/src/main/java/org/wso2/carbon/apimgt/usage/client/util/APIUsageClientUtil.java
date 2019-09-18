@@ -28,10 +28,11 @@ public class APIUsageClientUtil {
 
     /**
      * Get the formatted date string of API Last Access Time
+     *
      * @param lastAccessTimeMillis
      * @return
      */
-    public static String getFormattedAPILastAccessDate(long lastAccessTimeMillis){
+    public static String getFormattedAPILastAccessDate(long lastAccessTimeMillis) {
         DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy  HH:mm");
         return dateFormat.format(lastAccessTimeMillis);
     }

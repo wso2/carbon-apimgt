@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -135,7 +136,7 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         return getApi(apiArtifact);
     }
 
-    protected String getTenantDomain(APIIdentifier identifier) {
+    protected String getTenantDomain(Identifier identifier) {
         return "carbon.super";
     }
 
@@ -169,4 +170,8 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         }
     }
 
+    @Override
+    public String getGraphqlSchema(APIIdentifier apiId) throws APIManagementException {
+        return null;
+    }
 }

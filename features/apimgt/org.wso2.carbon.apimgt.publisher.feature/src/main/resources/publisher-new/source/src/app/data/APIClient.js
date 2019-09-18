@@ -17,7 +17,9 @@
  */
 
 import SwaggerClient from 'swagger-client';
-import AuthManager from './AuthManager';
+import { Mutex } from 'async-mutex';
+import Configurations from 'Config';
+import AuthManager from 'AppData/AuthManager';
 import Utils from './Utils';
 
 /**
@@ -35,13 +37,6 @@ class APIClient {
      */
     constructor(environment, args = {}) {
         this.environment = environment || Utils.getCurrentEnvironment();
-
-        const authorizations = {
-            OAuth2Security: {
-                token: { access_token: AuthManager.getUser(environment.label).getPartialToken() },
-            },
-        };
-
         SwaggerClient.http.withCredentials = true;
         const promisedResolve = SwaggerClient.resolve({
             url: Utils.getSwaggerURL(),
@@ -53,7 +48,6 @@ class APIClient {
         this._client = promisedResolve.then((resolved) => {
             const argsv = Object.assign(args, {
                 spec: this._fixSpec(resolved.spec),
-                authorizations,
                 requestInterceptor: this._getRequestInterceptor(),
                 responseInterceptor: this._getResponseInterceptor(),
             });
@@ -61,6 +55,7 @@ class APIClient {
             return new SwaggerClient(argsv);
         });
         this._client.catch(AuthManager.unauthorizedErrorHandler);
+        this.mutex = new Mutex();
     }
 
     /**
@@ -102,9 +97,9 @@ class APIClient {
         }
         return APIClient.spec.then((resolved) => {
             return (
-                resolved.spec.paths[resourcePath] &&
-                resolved.spec.paths[resourcePath][resourceMethod] &&
-                resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0]
+                resolved.spec.paths[resourcePath]
+                && resolved.spec.paths[resourcePath][resourceMethod]
+                && resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0]
             );
         });
     }
@@ -128,20 +123,73 @@ class APIClient {
             if (data.headers.etag) {
                 APIClient.addETag(data.url, data.headers.etag);
             }
+
+            // If an unauthenticated response is received, we check whether the token is valid by introspecting it.
+            // If it is not valid, we need to clear the stored tokens (in cookies etc) in the browser by redirecting the
+            //   user to logout.
+            if (data.status === 401 && data.body != null && data.body.description === 'Unauthenticated request') {
+                const userData = AuthManager.getUserFromToken();
+                userData.catch((error) => {
+                    console.error('Error occurred while checking token status. Hence redirecting to login', error);
+                    window.location = Configurations.app.context + Utils.CONST.LOGOUT_CALLBACK;
+                });
+            }
             return data;
         };
     }
 
     _getRequestInterceptor() {
         return (request) => {
-            AuthManager.refreshTokenOnExpire(request, this.environment);
-            if (
-                APIClient.getETag(request.url) &&
-                (request.method === 'PUT' || request.method === 'DELETE' || request.method === 'POST')
-            ) {
+            const existingUser = AuthManager.getUser(this.environment.label);
+            if (!existingUser) {
+                console.log('User not found. Token refreshing failed.');
+                return request;
+            }
+            let existingToken = AuthManager.getUser(this.environment.label).getPartialToken();
+            const refToken = AuthManager.getUser(this.environment.label).getRefreshPartialToken();
+            if (existingToken) {
+                request.headers.authorization = 'Bearer ' + existingToken;
+                return request;
+            } else {
+                console.log('Access token is expired. Trying to refresh.');
+                if (!refToken) {
+                    console.log('Refresh token not found. Token refreshing failed.');
+                    return request;
+                }
+            }
+
+            const env = this.environment;
+            const promise = new Promise((resolve, reject) => {
+                this.mutex.acquire().then((release) => {
+                    existingToken = AuthManager.getUser(env.label).getPartialToken();
+                    if (existingToken) {
+                        request.headers.authorization = 'Bearer ' + existingToken;
+                        release();
+                        resolve(request);
+                    } else {
+                        AuthManager.refresh(env).then(res => res.json())
+                            .then(() => {
+                                request.headers.authorization = 'Bearer '
+                                + AuthManager.getUser(env.label).getPartialToken();
+                                release();
+                                resolve(request);
+                            }).catch((error) => {
+                                console.error('Error:', error);
+                                release();
+                                reject();
+                            })
+                            .finally(() => {
+                                release();
+                            });
+                    }
+                });
+            });
+
+            if (APIClient.getETag(request.url)
+                && (request.method === 'PUT' || request.method === 'DELETE' || request.method === 'POST')) {
                 request.headers['If-Match'] = APIClient.getETag(request.url);
             }
-            return request;
+            return promise;
         };
     }
 }

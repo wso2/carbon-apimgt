@@ -18,11 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import io.swagger.models.Swagger;
-import io.swagger.parser.OpenAPIParser;
-import io.swagger.parser.SwaggerParser;
-import io.swagger.util.Json;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,10 +26,9 @@ import org.apache.commons.logging.LogFactory;
 import org.openapitools.codegen.ClientOptInput;
 import org.openapitools.codegen.DefaultGenerator;
 import org.openapitools.codegen.config.CodegenConfigurator;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -134,9 +128,8 @@ public class APIClientGenerationManager {
                         requestedTenant + " tenant ID : " + tenantId, e);
             }
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(apiProvider);
-            APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
             try {
-                swaggerAPIDefinition = definitionFromOpenAPISpec.getAPIDefinition(apiIdentifier, requiredRegistry);
+                swaggerAPIDefinition = OASParserUtil.getAPIDefinition(apiIdentifier, requiredRegistry);
             } catch (APIManagementException e) {
                 handleSDKGenException("Error loading swagger file for API " + apiName + " from registry.", e);
             }
@@ -187,8 +180,7 @@ public class APIClientGenerationManager {
         generateClient(apiName, specFileLocation, sdkLanguage, temporaryOutputPath);
         String temporaryZipFilePath = temporaryOutputPath + APIConstants.ZIP_FILE_EXTENSION;
         try {
-            ZIPUtils zipUtils = new ZIPUtils();
-            zipUtils.zipDir(temporaryOutputPath, temporaryZipFilePath);
+            ZIPUtils.zipDir(temporaryOutputPath, temporaryZipFilePath);
         } catch (IOException e) {
             handleSDKGenException("Error while generating .zip archive for the generated SDK.", e);
         }

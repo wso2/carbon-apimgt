@@ -108,4 +108,13 @@ public interface Monetization {
      */
     Map<String, String> getTotalRevenue(API api, APIProvider apiProvider) throws MonetizationException;
 
+    /**
+     * Publish the usage for a subscription to the billing engine
+     *
+     * @return true if the job is successfull, and false otherwise
+     * @throws MonetizationException if failed to get current usage for a subscription
+     */
+    boolean publishMonetizationUsageRecords(MonetizationUsagePublishInfo monetizationUsagePublishInfo)
+            throws MonetizationException;
+
 }

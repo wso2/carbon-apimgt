@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -73,7 +74,8 @@ public class APIMJWTGenerator extends JWTGenerator {
             String assertion = base64UrlEncodedHeader + '.' + base64UrlEncodedBody;
 
             //get the assertion signed
-            byte[] signedAssertion = signJWT(assertion, jwtTokenInfoDTO.getEndUserName());
+            byte[] signedAssertion = signJWT(assertion,
+                    MultitenantUtils.getTenantAwareUsername(jwtTokenInfoDTO.getEndUserName()));
 
             if (log.isDebugEnabled()) {
                 log.debug("signed assertion value : " + new String(signedAssertion, Charset.defaultCharset()));
@@ -178,9 +180,11 @@ public class APIMJWTGenerator extends JWTGenerator {
         claims.put("exp", expireIn);
         claims.put("scope", jwtTokenInfoDTO.getScopes());
         claims.put("subscribedAPIs", jwtTokenInfoDTO.getSubscribedApiDTOList());
+        claims.put("tierInfo", jwtTokenInfoDTO.getSubscriptionPolicyDTOList());
         claims.put("application", jwtTokenInfoDTO.getApplication());
         claims.put("keytype", jwtTokenInfoDTO.getKeyType());
         claims.put("consumerKey" , jwtTokenInfoDTO.getConsumerKey());
+        claims.put("backendJwt", jwtTokenInfoDTO.getBackendJwt());
 
         return claims;
     }

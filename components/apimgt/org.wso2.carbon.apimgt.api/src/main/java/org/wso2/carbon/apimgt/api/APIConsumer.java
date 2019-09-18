@@ -169,7 +169,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get API for subscriber
      */
     Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException;
-    
+
     /**
      * @param subscriber the subscriber to be subscribed to the API
      * @param groupingId the groupId of the subscriber
@@ -298,13 +298,13 @@ public interface APIConsumer extends APIManager {
     /**
      * Add new Subscriber
      *
-     * @param identifier    APIIdentifier
+     * @param identifier    Identifier
      * @param userId        id of the user
      * @param applicationId Application Id
      * @return SubscriptionResponse subscription response object
      * @throws APIManagementException if failed to add subscription details to database
      */
-    SubscriptionResponse addSubscription(APIIdentifier identifier, String userId, int applicationId)
+    SubscriptionResponse addSubscription(Identifier identifier, String userId, int applicationId)
             throws APIManagementException;
 
     /**
@@ -321,22 +321,22 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
-     * 
+     *
      * @param subscriptionId id of the subscription
      * @return
      * @throws APIManagementException if failed to get subscription detail from database
      */
     String getSubscriptionStatusById(int subscriptionId) throws APIManagementException;
- 
+
     /**
      * Unsubscribe the specified user from the specified API in the given application
      *
-     * @param identifier    APIIdentifier
+     * @param identifier    Identifier
      * @param userId        id of the user
      * @param applicationId Application Id
      * @throws APIManagementException if failed to remove subscription details from database
      */
-    void removeSubscription(APIIdentifier identifier, String userId, int applicationId) throws APIManagementException;
+    void removeSubscription(Identifier identifier, String userId, int applicationId) throws APIManagementException;
 
     /**
      * Unsubscribe the specified user from the specified API in the given application with GroupId
@@ -351,7 +351,7 @@ public interface APIConsumer extends APIManager {
             APIManagementException;
 
     /** Removes a subscription specified by SubscribedAPI object
-     * 
+     *
      * @param subscription SubscribedAPI object which contains the subscription information
      * @throws APIManagementException
      */
@@ -379,10 +379,23 @@ public interface APIConsumer extends APIManager {
     /**
      * @param identifier Api identifier
      * @param comment comment text
-     * @param user Username of the comment author                        
+     * @param user Username of the comment author
      * @throws APIManagementException if failed to add comment for API
+     *
+     * @deprecated
+     * This method needs to be removed once the Jaggery web apps are removed.
      */
     void addComment(APIIdentifier identifier, String comment, String user) throws APIManagementException;
+
+    /**
+     * This method is to add a comment.
+     *
+     * @param identifier Api identifier
+     * @param comment comment object
+     * @param user Username of the comment author
+     * @throws APIManagementException if failed to add comment for API
+     */
+    String addComment(APIIdentifier identifier, Comment comment, String user) throws APIManagementException;
 
     /**
      * @param identifier Api identifier
@@ -390,6 +403,25 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get comments for identifier
      */
     Comment[] getComments(APIIdentifier identifier) throws APIManagementException;
+
+    /**
+     * This method is to get a comment of an API.
+     *
+     * @param identifier API Identifier
+     * @param commentId Comment ID
+     * @return Comment
+     * @throws APIManagementException if failed to get comments for identifier
+     */
+    Comment getComment(APIIdentifier identifier, String commentId) throws APIManagementException;
+
+    /**
+     * This method is to delete a comment.
+     *
+     * @param identifier API Identifier
+     * @param commentId Comment ID
+     * @throws APIManagementException if failed to delete comment for identifier
+     */
+    void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException;
 
     /**
      * Adds an application
@@ -603,15 +635,21 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Set<SubscribedAPI> getSubscribedIdentifiers(Subscriber subscriber,
-                                                       APIIdentifier identifier, String groupingId) throws APIManagementException;
-    
+                                                Identifier identifier, String groupingId) throws APIManagementException;
+
     Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException;
 
     Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
 
     Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end, boolean limitAttributes) throws APIManagementException;
-    
+
     int getUserRating(APIIdentifier apiId, String user) throws APIManagementException;
+
+    JSONObject getUserRatingInfo(APIIdentifier apiId, String user) throws APIManagementException;
+
+    float getAverageAPIRating(APIIdentifier apiId) throws APIManagementException;
+
+    JSONArray getAPIRatings(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * Get a list of published APIs by the given provider.
@@ -670,7 +708,7 @@ public interface APIConsumer extends APIManager {
     /**
      * Check whether given Tier is denied for the user
      * @param tierName
-     * @return 
+     * @return
      * @throws APIManagementException if failed to get the tiers
      */
     boolean isTierDeneid(String tierName)throws APIManagementException;
@@ -717,7 +755,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed get API from APIIdentifier
      */
     API getLightweightAPI(APIIdentifier identifier) throws APIManagementException;
-    
+
     /**
      * Returns a paginated list of all APIs in given Status. If a given API has multiple APIs,
      * only the latest version will be included
@@ -732,7 +770,7 @@ public interface APIConsumer extends APIManager {
 
     Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String Status,
                                                           boolean returnAPITags) throws APIManagementException;
-    
+
     /**
      * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
      * only the latest version will be included in this list.
@@ -768,18 +806,18 @@ public interface APIConsumer extends APIManager {
      * @return swagger string
      * @throws APIManagementException if error occurred while obtaining the swagger definition
      */
-    String getOpenAPIDefinitionForEnvironment(APIIdentifier apiId, String environmentName)
+    String getOpenAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
             throws APIManagementException;
 
     /**
      * Returns the swagger definition of the API for the given microgateway gateway label as a string
-     * 
+     *
      * @param apiId id of the APIIdentifier
      * @param labelName name of the microgateway label
      * @return swagger string
      * @throws APIManagementException if error occurred while obtaining the swagger definition
      */
-    String getOpenAPIDefinitionForLabel(APIIdentifier apiId, String labelName)
+    String getOpenAPIDefinitionForLabel(Identifier apiId, String labelName)
             throws APIManagementException;
 
     /**
@@ -861,6 +899,14 @@ public interface APIConsumer extends APIManager {
     boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
 
     /**
+     * This methods loads the monetization implementation class
+     *
+     * @return monetization implementation class
+     * @throws APIManagementException if failed to load monetization implementation class
+     */
+    Monetization getMonetizationImplClass() throws APIManagementException;
+
+    /**
      * Returns wsdl document resource to be downloaded from the API store for a SOAP api
      *
      * @param username           user name of the logged in user
@@ -875,16 +921,27 @@ public interface APIConsumer extends APIManager {
             Map apiDetails) throws APIManagementException;
 
     /**
+     * Returns the WSDL ResourceFile (Single WSDL or ZIP) for the provided API and environment details
+     *
+     * @param apiIdentifier API Identifier object
+     * @param environmentName environment name
+     * @param environmentType environment type
+     * @return WSDL of the API
+     * @throws APIManagementException when error occurred while getting the WSDL
+     */
+    ResourceFile getWSDL(APIIdentifier apiIdentifier, String environmentName, String environmentType)
+            throws APIManagementException;
+
+    /**
      * Returns application attributes defined in configuration
      *
-     * @param userId           user name of the logged in user
+     * @param tenantDomain  tenant domain of the logged in user
      * @return Array of JSONObjects of key values from configuration
      * @throws APIManagementException
      */
-    JSONArray getAppAttributesFromConfig(String userId)  throws APIManagementException;
+    JSONArray getAppAttributesFromConfig(String tenantDomain) throws APIManagementException;
 
     Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(Subscriber subscriber, APIIdentifier apiIdentifier, String groupingId) throws APIManagementException;
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException;
-
 }

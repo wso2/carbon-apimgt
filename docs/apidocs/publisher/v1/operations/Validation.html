@@ -1,0 +1,1099 @@
+<div class="main-content">
+    <h1><a name="Validation"></a>Validation</h1>
+
+            <hr/>
+            <h4 class="operation-heading"><a name="apisValidateGraphqlSchemaPost"></a>Validate GraphQL API definition and retrieve a summary</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/validate-graphql-schema</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to validate a graphQL definition and retrieve a summary.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_create</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>file</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Definition to upload as a file</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                File
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. API definition validation information is returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#GraphQLValidationResponse">GraphQLValidationResponse</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Workflow for the given reference in not found. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h4 class="operation-heading"><a name="validateAPI"></a>Check given API attibute name is already exist.</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/validate</code>
+            <p class="marked"></p>
+
+            <p class="marked">Using this operation, you can check a given API context is already used. You need to provide the context name you want to check.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_create</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-validateAPI">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-validateAPI"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate?query&#x3D;name:PizzaShackAPI HTTP/1.1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-validateAPI">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-validateAPI" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 0</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -X POST -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot;
+https://localhost:9443/api/am/publisher/v1.0/apis/validate?query&#x3D;name:PizzaShackAPI
+</code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>query</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**Search condition**.
+
+You can search in attributes by using an **&quot;&lt;attribute&gt;:&quot;** modifier.
+
+Eg.
+&quot;name:wso2&quot; will match an API if the provider of the API is exactly &quot;wso2&quot;.
+
+Supported attribute modifiers are [** version, context, name **]
+
+If no advanced attribute modifier has been specified, search will match the
+given query string against API Name.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resource.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. API definition validation information is returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Workflow for the given reference in not found. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h4 class="operation-heading"><a name="validateOpenAPIDefinition"></a>Validate an OpenAPI Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/validate-openapi</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to validate an OpenAPI definition and retrieve a summary. Provide either &#x60;url&#x60;
+or &#x60;file&#x60; to specify the definition.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_create</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u>Using a Valid OpenAPI Definition</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-validateOpenAPIDefinition">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-validateOpenAPIDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-openapi?returnContent&#x3D;true HTTP/1.1
+Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_0_771605626.1563876237955&quot;
+Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a
+Content-Length: 1504
+
+------&#x3D;_Part_0_771605626.1563876237955
+Content-Type: application/octet-stream; name&#x3D;swagger2-sample.1.0.0.yaml
+Content-Transfer-Encoding: binary
+Content-Disposition: form-data; name&#x3D;&quot;file&quot;; filename&#x3D;&quot;swagger2-sample.1.0.0.yaml&quot;
+
+paths:
+  /menu:
+    patch:
+      x-auth-type: &quot;Application &amp; Application User&quot;
+      responses:
+        200:
+          description: &quot;OK&quot;
+      x-throttling-tier: &quot;Unlimited&quot;
+    post:
+      x-auth-type: &quot;Application &amp; Application User&quot;
+      responses:
+        200:
+          description: &quot;OK&quot;
+      x-throttling-tier: &quot;Unlimited&quot;
+    get:
+      x-auth-type: &quot;Application &amp; Application User&quot;
+      responses:
+        200:
+          description: &quot;OK&quot;
+      x-throttling-tier: &quot;Unlimited&quot;
+    delete:
+      x-auth-type: &quot;Application &amp; Application User&quot;
+      responses:
+        200:
+          description: &quot;OK&quot;
+      x-throttling-tier: &quot;Unlimited&quot;
+    put:
+      x-auth-type: &quot;Application &amp; Application User&quot;
+      responses:
+        200:
+          description: &quot;OK&quot;
+      x-throttling-tier: &quot;Unlimited&quot;
+securityDefinitions:
+  default:
+    tokenUrl: &quot;https://test.com&quot;
+    type: &quot;oauth2&quot;
+    flow: &quot;password&quot;
+swagger: &quot;2.0&quot;
+x-wso2-security:
+  apim:
+    x-wso2-scopes: []
+info:
+  title: &quot;sample&quot;
+  version: &quot;1.0.0&quot;
+
+------&#x3D;_Part_0_771605626.1563876237955--
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-validateOpenAPIDefinition">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-validateOpenAPIDefinition" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Date: Tue, 23 Jul 2019 10:04:01 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+
+{
+  &quot;isValid&quot; : true,
+  &quot;content&quot; : &quot;  paths: \n    /menu: \n      patch: \n        x-auth-type: \&quot;Application &amp; Application User\&quot;\n        responses: \n          200: \n            description: \&quot;OK\&quot;\n        x-throttling-tier: \&quot;Unlimited\&quot;\n      post: \n        x-auth-type: \&quot;Application &amp; Application User\&quot;\n        responses: \n          200: \n            description: \&quot;OK\&quot;\n        x-throttling-tier: \&quot;Unlimited\&quot;\n      get: \n        x-auth-type: \&quot;Application &amp; Application User\&quot;\n        responses: \n          200: \n            description: \&quot;OK\&quot;\n        x-throttling-tier: \&quot;Unlimited\&quot;\n      delete: \n        x-auth-type: \&quot;Application &amp; Application User\&quot;\n        responses: \n          200: \n            description: \&quot;OK\&quot;\n        x-throttling-tier: \&quot;Unlimited\&quot;\n      put: \n        x-auth-type: \&quot;Application &amp; Application User\&quot;\n        responses: \n          200: \n            description: \&quot;OK\&quot;\n        x-throttling-tier: \&quot;Unlimited\&quot;\n  securityDefinitions: \n    default: \n      tokenUrl: \&quot;https://test.com\&quot;\n      type: \&quot;oauth2\&quot;\n      flow: \&quot;password\&quot;\n  swagger: \&quot;2.0\&quot;\n  x-wso2-security: \n    apim: \n      x-wso2-scopes: []\n  info: \n    title: \&quot;sample\&quot;\n    version: \&quot;1.0.0\&quot;\n&quot;,
+  &quot;errors&quot; : [ ]
+}
+</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a&quot; -F file&#x3D;@petstore.v3.yaml  -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-openapi?returnContent&#x3D;true
+</code></div>
+
+            <h4 class="section-heading">
+                <u>Using an Invalid OpenAPI Definition</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-validateOpenAPIDefinition">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-validateOpenAPIDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-openapi HTTP/1.1
+Accept-Encoding: gzip,deflate
+Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_7_1998017516.1563885449948&quot;
+Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a
+Content-Length: 2841
+
+  ------&#x3D;_Part_7_1998017516.1563885449948
+Content-Type: application/octet-stream; name&#x3D;petstore.v3-invalid.yaml
+Content-Transfer-Encoding: binary
+Content-Disposition: form-data; name&#x3D;&quot;file&quot;; filename&#x3D;&quot;petstore.v3-invalid.yaml&quot;
+
+openapi: &quot;3.0.0&quot;
+servers:
+  - url: http://petstore.swagger.io/v1
+paths:
+  /pets:
+    get:
+      summary: List all pets
+      operationId: listPets
+      tags:
+        - pets
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        &#39;200&#39;:
+          description: A paged array of pets
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: &quot;#/components/schemas/Pets&quot;
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: &quot;#/components/schemas/Error&quot;
+    post:
+      summary: Create a pet
+      operationId: createPets
+      tags:
+        - pets
+      responses:
+        &#39;201&#39;:
+          description: Null response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: &quot;#/components/schemas/Error&quot;
+  /pets/{petId}:
+    get:
+      summary: Info for a specific pet
+      operationId: showPetById
+      tags:
+        - pets
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+      responses:
+        &#39;200&#39;:
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: &quot;#/components/schemas/Pet&quot;
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: &quot;#/components/schemas/Error&quot;
+components:
+  schemas:
+    Pet:
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          type: string
+    Pets:
+      type: array
+      items:
+        $ref: &quot;#/components/schemas/Pet&quot;
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+  ------&#x3D;_Part_7_1998017516.1563885449948--
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-validateOpenAPIDefinition">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-validateOpenAPIDefinition" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Date: Tue, 23 Jul 2019 10:04:01 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+
+{
+  &quot;isValid&quot; : false,
+  &quot;content&quot; : null,
+  &quot;errors&quot; : [
+  {
+    &quot;code&quot; : &quot;900754&quot;,
+    &quot;message&quot; : &quot;Error while parsing OpenAPI definition&quot;,
+    &quot;description&quot; : &quot;attribute info is missing&quot;
+  }
+  ]
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 031cf7d6-4f49-3089-a164-5289b171203a&quot; -F file&#x3D;@petstore.v3-invalid.yaml  -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-openapi?returnContent&#x3D;true
+</code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>url</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">OpenAPI definition url</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>file</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">OpenAPI definition as a file</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                File
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>returnContent</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Specify whether to return the full content of the OpenAPI definition in the response. This is only
+applicable when using url based validation
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                Boolean
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">false</p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. API definition validation information is returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#OpenAPIDefinitionValidationResponse">OpenAPIDefinitionValidationResponse</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Workflow for the given reference in not found. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h4 class="operation-heading"><a name="validateWSDLDefinition"></a>Validate a WSDL Definition</h4> <code>POST https://apis.wso2.com/api/am/publisher/v1.0/apis/validate-wsdl</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to validate a WSDL definition and retrieve a summary. Provide either &#x60;url&#x60;
+or &#x60;file&#x60; to specify the definition.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_create</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u>Validate a WSDL URL</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl HTTP/1.1
+Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_3_453576421.1568033260795&quot;
+MIME-Version: 1.0
+Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
+Content-Length: 253
+
+  ------&#x3D;_Part_3_453576421.1568033260795
+Content-Type: text/plain; charset&#x3D;us-ascii
+Content-Transfer-Encoding: 7bit
+Content-Disposition: form-data; name&#x3D;&quot;url&quot;
+
+  https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl
+  ------&#x3D;_Part_3_453576421.1568033260795--
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-validateWSDLDefinition" class="pre collapse in"><code class="json">HTTP 1/1 200 Ok
+Content-Type: application/json
+
+{
+  &quot;isValid&quot; : true,
+  &quot;errors&quot; : [ ],
+  &quot;wsdlInfo&quot; : {
+    &quot;version&quot; : &quot;1.1&quot;,
+    &quot;endpoints&quot; : [ {
+      &quot;name&quot; : &quot;IP2GeoSoap&quot;,
+      &quot;location&quot; : &quot;https://ws.cdyne.com/ip2geo/ip2geo.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;IP2GeoSoap12&quot;,
+      &quot;location&quot; : &quot;https://ws.cdyne.com/ip2geo/ip2geo.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;IP2GeoHttpGet&quot;,
+      &quot;location&quot; : &quot;https://ws.cdyne.com/ip2geo/ip2geo.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;IP2GeoHttpPost&quot;,
+      &quot;location&quot; : &quot;https://ws.cdyne.com/ip2geo/ip2geo.asmx&quot;
+    } ]
+  }
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F url&#x3D;&#39;https://ws.cdyne.com/ip2geo/ip2geo.asmx?wsdl&#39; -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl
+</code></div>
+
+            <h4 class="section-heading">
+                <u>Validate a WSDL File</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl HTTP/1.1
+Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_5_1281400982.1568033585941&quot;
+MIME-Version: 1.0
+Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
+Content-Length: 5695
+
+
+------&#x3D;_Part_5_1281400982.1568033585941
+Content-Type: text/xml; charset&#x3D;UTF-8; name&#x3D;stockQuote.wsdl
+Content-Transfer-Encoding: binary
+Content-Disposition: form-data; name&#x3D;&quot;file&quot;; filename&#x3D;&quot;stockQuote.wsdl&quot;
+
+&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;utf-8&quot;?&gt;
+&lt;wsdl:definitions xmlns:tm&#x3D;&quot;http://microsoft.com/wsdl/mime/textMatching/&quot; xmlns:soapenc&#x3D;&quot;http://schemas.xmlsoap.org/soap/encoding/&quot; xmlns:mime&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/mime/&quot; xmlns:tns&#x3D;&quot;http://www.webserviceX.NET/&quot; xmlns:soap&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/soap/&quot; xmlns:s&#x3D;&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:soap12&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/soap12/&quot; xmlns:http&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/http/&quot; targetNamespace&#x3D;&quot;http://www.webserviceX.NET/&quot; xmlns:wsdl&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/&quot;&gt;
+  &lt;wsdl:types&gt;
+    &lt;s:schema elementFormDefault&#x3D;&quot;qualified&quot; targetNamespace&#x3D;&quot;http://www.webserviceX.NET/&quot;&gt;
+      &lt;s:element name&#x3D;&quot;GetQuote&quot;&gt;
+        &lt;s:complexType&gt;
+          &lt;s:sequence&gt;
+            &lt;s:element minOccurs&#x3D;&quot;0&quot; maxOccurs&#x3D;&quot;1&quot; name&#x3D;&quot;symbol&quot; type&#x3D;&quot;s:string&quot; /&gt;
+          &lt;/s:sequence&gt;
+        &lt;/s:complexType&gt;
+      &lt;/s:element&gt;
+      &lt;s:element name&#x3D;&quot;GetQuoteResponse&quot;&gt;
+        &lt;s:complexType&gt;
+          &lt;s:sequence&gt;
+            &lt;s:element minOccurs&#x3D;&quot;0&quot; maxOccurs&#x3D;&quot;1&quot; name&#x3D;&quot;GetQuoteResult&quot; type&#x3D;&quot;s:string&quot; /&gt;
+          &lt;/s:sequence&gt;
+        &lt;/s:complexType&gt;
+      &lt;/s:element&gt;
+      &lt;s:element name&#x3D;&quot;string&quot; nillable&#x3D;&quot;true&quot; type&#x3D;&quot;s:string&quot; /&gt;
+    &lt;/s:schema&gt;
+  ...
+  ...
+  ...
+  &lt;/wsdl:binding&gt;
+  &lt;wsdl:service name&#x3D;&quot;StockQuote&quot;&gt;
+    &lt;wsdl:port name&#x3D;&quot;StockQuoteSoap&quot; binding&#x3D;&quot;tns:StockQuoteSoap&quot;&gt;
+      &lt;soap:address location&#x3D;&quot;http://www.webservicex.net/stockquote.asmx&quot; /&gt;
+    &lt;/wsdl:port&gt;
+    &lt;wsdl:port name&#x3D;&quot;StockQuoteSoap12&quot; binding&#x3D;&quot;tns:StockQuoteSoap12&quot;&gt;
+      &lt;soap12:address location&#x3D;&quot;http://www.webservicex.net/stockquote.asmx&quot; /&gt;
+    &lt;/wsdl:port&gt;
+    &lt;wsdl:port name&#x3D;&quot;StockQuoteHttpGet&quot; binding&#x3D;&quot;tns:StockQuoteHttpGet&quot;&gt;
+      &lt;http:address location&#x3D;&quot;http://www.webservicex.net/stockquote.asmx&quot; /&gt;
+    &lt;/wsdl:port&gt;
+    &lt;wsdl:port name&#x3D;&quot;StockQuoteHttpPost&quot; binding&#x3D;&quot;tns:StockQuoteHttpPost&quot;&gt;
+      &lt;http:address location&#x3D;&quot;http://www.webservicex.net/stockquote.asmx&quot; /&gt;
+    &lt;/wsdl:port&gt;
+  &lt;/wsdl:service&gt;
+&lt;/wsdl:definitions&gt;
+
+------&#x3D;_Part_5_1281400982.1568033585941--
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-validateWSDLDefinition" class="pre collapse in"><code class="json">HTTP 1/1 200 Ok
+Content-Type: application/json
+
+{
+  &quot;isValid&quot; : true,
+  &quot;errors&quot; : [ ],
+  &quot;wsdlInfo&quot; : {
+    &quot;version&quot; : &quot;1.1&quot;,
+    &quot;endpoints&quot; : [ {
+      &quot;name&quot; : &quot;StockQuoteSoap12&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;StockQuoteHttpGet&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;StockQuoteSoap&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;StockQuoteHttpPost&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    } ]
+  }
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockquote.wsdl -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl
+</code></div>
+
+            <h4 class="section-heading">
+                <u>Validate a WSDL Archive</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl HTTP/1.1
+Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_10_60710863.1568033977152&quot;
+MIME-Version: 1.0
+Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
+Content-Length: 1897
+
+
+------&#x3D;_Part_10_60710863.1568033977152
+Content-Type: application/zip; name&#x3D;stockQuote1xsd.zip
+Content-Transfer-Encoding: binary
+Content-Disposition: form-data; name&#x3D;&quot;file&quot;; filename&#x3D;&quot;stockQuote1xsd.zip&quot;
+
+...
+&lt;binary-data&gt;
+...
+
+------&#x3D;_Part_10_60710863.1568033977152--
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-validateWSDLDefinition" class="pre collapse in"><code class="json">HTTP 1/1 200 Ok
+Content-Type: application/json
+
+{
+  &quot;isValid&quot; : true,
+  &quot;errors&quot; : [ ],
+  &quot;wsdlInfo&quot; : {
+    &quot;version&quot; : &quot;1.1&quot;,
+    &quot;endpoints&quot; : [ {
+      &quot;name&quot; : &quot;StockQuoteSoap12&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;StockQuoteHttpGet&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;StockQuoteSoap&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    }, {
+      &quot;name&quot; : &quot;StockQuoteHttpPost&quot;,
+      &quot;location&quot; : &quot;http://www.webservicex.net/stockquote.asmx&quot;
+    } ]
+  }
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockquote.zip -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl
+</code></div>
+
+            <h4 class="section-heading">
+                <u>Trying to validate an invalid WSDL</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-validateWSDLDefinition"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl HTTP/1.1
+Content-Type: multipart/form-data; boundary&#x3D;&quot;----&#x3D;_Part_17_807981233.1568034538839&quot;
+MIME-Version: 1.0
+Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
+Content-Length: 5699
+
+
+------&#x3D;_Part_17_807981233.1568034538839
+Content-Type: text/xml; charset&#x3D;UTF-8; name&#x3D;stockQuote-invalid.wsdl
+Content-Transfer-Encoding: binary
+Content-Disposition: form-data; name&#x3D;&quot;file&quot;; filename&#x3D;&quot;stockQuote-invalid.wsdl&quot;
+
+&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;utf-8&quot;?&gt;
+&lt;wsdl:definitions xmlns:tm&#x3D;&quot;http://microsoft.com/wsdl/mime/textMatching/&quot; xmlns:soapenc&#x3D;&quot;http://schemas.xmlsoap.org/soap/encoding/&quot; xmlns:mime&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/mime/&quot; xmlns:tns&#x3D;&quot;http://www.webserviceX.NET/&quot; xmlns:soap&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/soap/&quot; xmlns:s&#x3D;&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:soap12&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/soap12/&quot; xmlns:http&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/http/&quot; targetNamespace&#x3D;&quot;http://www.webserviceX.NET/&quot; xmlns:wsdl&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/&quot;&gt;
+  &lt;wsdl:types1&gt;
+    &lt;s:schema elementFormDefault&#x3D;&quot;qualified&quot; targetNamespace&#x3D;&quot;http://www.webserviceX.NET/&quot;&gt;
+      &lt;s:element&gt;
+...
+...
+&lt;/wsdl:port&gt;
+  &lt;/wsdl:service&gt;
+&lt;/wsdl:definitions&gt;
+
+------&#x3D;_Part_17_807981233.1568034538839--
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-validateWSDLDefinition">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-validateWSDLDefinition" class="pre collapse in"><code class="json">HTTP 1/1 200 Ok
+Content-Type: application/json
+
+{
+  &quot;isValid&quot; : false,
+  &quot;errors&quot; : [ {
+    &quot;code&quot; : &quot;900676&quot;,
+    &quot;message&quot; : &quot;Invalid WSDL&quot;,
+    &quot;description&quot; : &quot;WSDLException (at /wsdl:definitions/wsdl:types1): faultCode&#x3D;INVALID_WSDL: Encountered illegal extension element &#39;{http://schemas.xmlsoap.org/wsdl/}types1&#39; in the context of a &#39;javax.wsdl.Definition&#39;. Extension elements must be in a namespace other than WSDL&#39;s.&quot;
+  } ]
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&quot; -F file&#x3D;@stockQuote-invalid.wsdl -X POST https://localhost:9443/api/am/publisher/v1.0/apis/validate-wsdl
+</code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>url</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Definition url</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>file</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Definition to upload as a file</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                File
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. API definition validation information is returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#WSDLValidationResponse">WSDLValidationResponse</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Workflow for the given reference in not found. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+</div>

@@ -731,10 +731,10 @@
                                                         apiData.apiName = api.name;
                                                         apiData.version = api.version;
                                                         apiData.provider = api.provider;
-                                                        var soapToRestUtils = Packages.org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
+                                                        var soapToRestUtils = Packages.org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
                                                         var isSoapToRestApi = soapToRestUtils.isSOAPToRESTApi(apiData.apiName, apiData.version, apiData.provider);
                                                         if(isSoapToRestApi) {
-                                                            var sequenceUtils = Packages.org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
+                                                            var sequenceUtils = Packages.org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
                                                             var sequenceObj = new Packages.java.lang.String(sequenceUtils.getRestToSoapConvertedSequence(api.name, api.version, api.provider, "in"));
                                                             var sequenceOutObj = new Packages.java.lang.String(sequenceUtils.getRestToSoapConvertedSequence(api.name, api.version, api.provider,"out"));
                                                             var jsonInSeq = JSON.parse(sequenceObj);
@@ -1157,7 +1157,7 @@
                 <td class="resource-method-td resource_expand" data-path="$.paths.{{ path}}.{{ @key }}">
                     <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
                 </td>
-                <td class="resource_expand"><a class="resource-path" title="{{ path }}">{{ path }}</a></td>
+                <td class="resource_expand"><a class="resource-path" title="{{ path }}">{{ displayPath }}</a></td>
                 <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
             </tr>
             <tr><td colspan="3" class="resource_body " data-path="$.paths.{{ path }}.{{@key}}"></td></tr>

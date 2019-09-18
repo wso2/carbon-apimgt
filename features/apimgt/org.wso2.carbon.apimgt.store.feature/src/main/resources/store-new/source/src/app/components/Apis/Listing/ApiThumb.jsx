@@ -18,14 +18,19 @@
 
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
-import Grid from '@material-ui/core/Grid';
 import { withStyles } from '@material-ui/core/styles';
+import Chip from '@material-ui/core/Chip';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { FormattedMessage } from 'react-intl';
+import MaterialIcons from 'MaterialIcons';
+import CONSTS from 'AppData/Constants';
+import APIProduct from 'AppData/APIProduct';
+import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import ImageGenerator from './ImageGenerator';
-import StarRatingBar from './StarRating';
 import Api from '../../../data/api';
+import { ApiContext } from '../Details/ApiContext';
 
 /**
  *
@@ -34,7 +39,7 @@ import Api from '../../../data/api';
  */
 const styles = theme => ({
     thumbContent: {
-        width: theme.custom.imageThumbnail.width - theme.spacing.unit,
+        width: theme.custom.thumbnail.width - theme.spacing.unit,
         backgroundColor: theme.palette.background.paper,
         padding: theme.spacing.unit,
     },
@@ -49,7 +54,7 @@ const styles = theme => ({
         display: 'flex',
     },
     thumbHeader: {
-        width: theme.custom.imageThumbnail.width,
+        width: theme.custom.thumbnail.width - theme.spacing.unit,
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -57,7 +62,7 @@ const styles = theme => ({
         margin: 0,
     },
     contextBox: {
-        width: parseInt((theme.custom.imageThumbnail.width - theme.spacing.unit) / 2),
+        width: parseInt((theme.custom.thumbnail.width - theme.spacing.unit) / 2),
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -69,18 +74,27 @@ const styles = theme => ({
     thumbWrapper: {
         position: 'relative',
         paddingTop: 20,
+        marginRight: theme.spacing.unit * 2,
     },
     deleteIcon: {
         fill: 'red',
     },
-    imageWrapper: {
+    textWrapper: {
         color: theme.palette.text.secondary,
         textDecoration: 'none',
+    },
+    imageWrapper: {
+        color: theme.palette.text.secondary,
+        backgroundColor: theme.palette.background.paper,
+        width: theme.custom.thumbnail.width + theme.spacing.unit,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     imageOverlap: {
         position: 'absolute',
         bottom: 1,
-        backgroundColor: theme.custom.imageThumbnail.contentBackgroundColor,
+        backgroundColor: theme.custom.thumbnail.contentBackgroundColor,
     },
 });
 /**
@@ -89,6 +103,8 @@ const styles = theme => ({
  * @class ApiThumb
  * @extends {React.Component}
  */
+const windowURL = window.URL || window.webkitURL;
+
 class ApiThumb extends React.Component {
     constructor(props) {
         super(props);
@@ -99,7 +115,11 @@ class ApiThumb extends React.Component {
             overview_link: '',
             isRedirect: false,
             openMoreMenu: false,
-            rating: 0,
+            category: MaterialIcons.categories[0].name,
+            selectedIcon: null,
+            color: null,
+            backgroundIndex: null,
+            imageObj: null,
         };
     }
 
@@ -109,11 +129,59 @@ class ApiThumb extends React.Component {
      * @memberof ApiThumb
      */
     componentDidMount() {
-        const api = new Api();
-        const promised_rating = api.getRatingFromUser(this.props.api.id, null);
-        promised_rating.then((response) => {
-            this.setState({ rating: response.obj.userRating });
+        const { apiType } = this.context;
+        const { api } = this.props;
+        let restApi = null;
+
+        if (apiType === CONSTS.API_TYPE) {
+            restApi = new Api();
+        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            restApi = new APIProduct();
+        }
+        const promisedThumbnail = restApi.getAPIThumbnail(api.id);
+
+        promisedThumbnail.then((response) => {
+            if (response && response.data) {
+                if (response.headers['content-type'] === 'application/json') {
+                    const iconJson = JSON.parse(response.data);
+                    this.setState({
+                        selectedIcon: iconJson.key,
+                        category: iconJson.category,
+                        color: iconJson.color,
+                        backgroundIndex: iconJson.backgroundIndex,
+                    });
+                } else if (response && response.data.size > 0) {
+                    const url = windowURL.createObjectURL(response.data);
+                    this.setState({ imageObj: url });
+                }
+            }
         });
+    }
+
+    /**
+     * Clean up resource
+     */
+    componentWillUnmount() {
+        if (this.state.thumbnail) {
+            windowURL.revokeObjectURL(this.state.imageObj);
+        }
+    }
+
+    /**
+     * Get Path Prefix depedning on the respective API Type being rendered
+     *
+     * @returns {String} path
+     * @memberof ApiThumb
+     */
+    getPathPrefix() {
+        const { apiType } = this.context;
+
+        let path = '/apis/';
+        if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            path = '/api-products/';
+        }
+
+        return path;
     }
 
     /**
@@ -123,41 +191,75 @@ class ApiThumb extends React.Component {
      * @memberof ApiThumb
      */
     render() {
-        const details_link = '/apis/' + this.props.api.id;
+        const {
+            imageObj, selectedIcon, color, backgroundIndex, category,
+        } = this.state;
+        const path = this.getPathPrefix();
+
+        const details_link = path + this.props.api.id;
         const { api, classes, theme } = this.props;
-        const { imageThumbnail } = theme.custom;
-        const { name, version, context, provider } = this.props.api;
-        const { rating } = this.state;
-        const starColor = theme.palette.getContrastText(theme.custom.imageThumbnail.contentBackgroundColor);
-        const imageWidth = theme.custom.imageThumbnail.width;
-        const defaultImage = theme.custom.imageThumbnail.defaultApiImage;
+        const { thumbnail } = theme.custom;
+        const {
+            name, version, context, provider,
+        } = api;
+
+        if (!api.lifeCycleStatus) {
+            api.lifeCycleStatus = api.status;
+        }
+        const imageWidth = thumbnail.width;
+        const defaultImage = thumbnail.defaultApiImage;
+
+        let ImageView;
+        if (imageObj) {
+            ImageView = <img height={140} src={imageObj} alt='API Product Thumbnail' className={classes.media} />;
+        } else {
+            ImageView = (
+                <ImageGenerator
+                    width={imageWidth}
+                    height={140}
+                    api={api}
+                    fixedIcon={{
+                        key: selectedIcon,
+                        color,
+                        backgroundIndex,
+                        category,
+                        api,
+                    }}
+                />
+            );
+        }
         return (
-            <Grid item xs={12} sm={6} md={4} lg={3} xl={2} className={classes.thumbWrapper}>
+            <div className={classes.thumbWrapper}>
                 <Link to={details_link} className={classes.imageWrapper}>
-                    {!defaultImage && <ImageGenerator api={api} width={imageWidth} />}
+                    {!defaultImage && ImageView}
                     {defaultImage && <img src={defaultImage} />}
                 </Link>
 
                 <div
                     className={classNames(classes.thumbContent, {
-                        [classes.imageOverlap]: imageThumbnail.contentPictureOverlap,
+                        [classes.imageOverlap]: thumbnail.contentPictureOverlap,
                     })}
                 >
-                    <Link to={details_link} className={classes.imageWrapper}>
-                        <Typography className={classes.thumbHeader} variant='display1' gutterBottom onClick={this.handleRedirectToAPIOverview} title={name}>
+                    <Link to={details_link} className={classes.textWrapper}>
+                        <Typography
+                            className={classes.thumbHeader}
+                            variant='display1'
+                            gutterBottom
+                            onClick={this.handleRedirectToAPIOverview}
+                            title={name}
+                        >
                             {name}
                         </Typography>
                     </Link>
                     <Typography variant='caption' gutterBottom align='left'>
-                        By: 
+                        <FormattedMessage defaultMessage='By:' id='Apis.Listing.ApiThumb.by' />
                         {provider}
-
                     </Typography>
                     <div className={classes.thumbInfo}>
                         <div className={classes.thumbLeft}>
                             <Typography variant='subheading'>{version}</Typography>
                             <Typography variant='caption' gutterBottom align='left'>
-                                Version
+                                <FormattedMessage defaultMessage='Version' id='Apis.Listing.ApiThumb.version' />
                             </Typography>
                         </div>
                         <div className={classes.thumbRight}>
@@ -165,24 +267,35 @@ class ApiThumb extends React.Component {
                                 {context}
                             </Typography>
                             <Typography variant='caption' gutterBottom align='right'>
-                                Context
+                                <FormattedMessage defaultMessage='Context' id='Apis.Listing.ApiThumb.context' />
                             </Typography>
                         </div>
                     </div>
                     <div className={classes.thumbInfo}>
-                        <Typography variant='subheading' gutterBottom align='left'>
-                            <StarRatingBar rating={rating} starColor={starColor} />
-                        </Typography>
+                        <div className={classes.thumbLeft}>
+                            <Typography variant='subheading' gutterBottom align='left'>
+                                <StarRatingBar apiRating={api.avgRating} apiId={api.id} isEditable={false} showSummary={false} />
+                            </Typography>
+                        </div>
+                        <div className={classes.thumbRight}>
+                            <Typography variant='subheading' gutterBottom align='right'>
+                                {api.type === 'GRAPHQL' && (
+                                    <Chip label={api.type} color='primary' />
+                                )}
+                            </Typography>
+                        </div>
                     </div>
                 </div>
-            </Grid>
+            </div>
         );
     }
 }
 
 ApiThumb.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
+
+ApiThumb.contextType = ApiContext;
 
 export default withStyles(styles, { withTheme: true })(ApiThumb);

@@ -11,13 +11,14 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
 public class ApplicationTokenGenerateRequestDTO   {
   
     private String consumerSecret = null;
-    private String validityPeriod = null;
+    private Long validityPeriod = null;
     private List<String> scopes = new ArrayList<>();
     private String revokeToken = null;
     private Object additionalProperties = null;
@@ -43,7 +44,7 @@ public class ApplicationTokenGenerateRequestDTO   {
   /**
    * Token validity period
    **/
-  public ApplicationTokenGenerateRequestDTO validityPeriod(String validityPeriod) {
+  public ApplicationTokenGenerateRequestDTO validityPeriod(Long validityPeriod) {
     this.validityPeriod = validityPeriod;
     return this;
   }
@@ -51,10 +52,10 @@ public class ApplicationTokenGenerateRequestDTO   {
   
   @ApiModelProperty(value = "Token validity period")
   @JsonProperty("validityPeriod")
-  public String getValidityPeriod() {
+  public Long getValidityPeriod() {
     return validityPeriod;
   }
-  public void setValidityPeriod(String validityPeriod) {
+  public void setValidityPeriod(Long validityPeriod) {
     this.validityPeriod = validityPeriod;
   }
 

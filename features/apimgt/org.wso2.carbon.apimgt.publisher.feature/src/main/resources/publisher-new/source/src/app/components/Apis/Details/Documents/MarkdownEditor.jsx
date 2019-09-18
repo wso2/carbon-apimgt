@@ -16,8 +16,9 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
-import intl, { FormattedMessage, injectIntl } from 'react-intl';
+import React, { useState, useContext } from 'react';
+import { withRouter } from 'react-router-dom';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -32,6 +33,7 @@ import ReactMarkdown from 'react-markdown';
 import MonacoEditor from 'react-monaco-editor';
 import Api from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = {
     appBar: {
@@ -67,14 +69,21 @@ function Transition(props) {
 }
 
 function MarkdownEditor(props) {
-    const { intl } = props;
-    const [open, setOpen] = useState(false);
+    const { intl, showAtOnce, history } = props;
+    const { api, isAPIProduct } = useContext(APIContext);
+
+    const [open, setOpen] = useState(showAtOnce);
     const [code, setCode] = useState(intl.formatMessage({
         id: 'documents.markdown.editor.default',
         defaultMessage: '#Enter your markdown content',
     }));
     const toggleOpen = () => {
         if (!open) updateDoc();
+        if (open && showAtOnce) {
+            const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
+            const listingPath = `/${urlPrefix}/${api.id}/documents`;
+            history.push(listingPath);
+        }
         setOpen(!open);
     };
     const updateCode = (newCode) => {
@@ -85,11 +94,11 @@ function MarkdownEditor(props) {
     };
     const addContentToDoc = () => {
         const restAPI = new Api();
-        const docPromise = restAPI.addInlineContentToDocument(props.apiId, props.docId, 'MARKDOWN', code);
+        const docPromise = restAPI.addInlineContentToDocument(api.id, props.docId, 'MARKDOWN', code);
         docPromise
             .then((doc) => {
                 Alert.info(`${doc.name} ${intl.formatMessage({
-                    id: 'documents.markdown.editor.updated.successfully',
+                    id: 'Apis.Details.Documents.MarkdownEditor.update.success.message',
                     defaultMessage: 'updated successfully.',
                 })}`);
                 toggleOpen();
@@ -107,7 +116,7 @@ function MarkdownEditor(props) {
     const updateDoc = () => {
         const restAPI = new Api();
 
-        const docPromise = restAPI.getInlineContentOfDocument(props.apiId, props.docId);
+        const docPromise = restAPI.getInlineContentOfDocument(api.id, props.docId);
         docPromise
             .then((doc) => {
                 setCode(doc.text);
@@ -127,7 +136,11 @@ function MarkdownEditor(props) {
     return (
         <div>
             <Button onClick={toggleOpen}>
-                <Icon>code</Icon> <FormattedMessage id='documents.markdown.editor.editor' defaultMessage='Editor' />
+                <Icon>code</Icon>
+                <FormattedMessage
+                    id='Apis.Details.Documents.MarkdownEditor.edit.content'
+                    defaultMessage='Edit Content'
+                />
             </Button>
             <Dialog fullScreen open={open} onClose={toggleOpen} TransitionComponent={Transition}>
                 <Paper square className={classes.popupHeader}>
@@ -136,27 +149,30 @@ function MarkdownEditor(props) {
                     </IconButton>
                     <Typography variant='h4' className={classes.docName}>
                         <FormattedMessage
-                            id='documents.markdown.editor.edit.content'
+                            id='Apis.Details.Documents.MarkdownEditor.edit.content.of'
                             defaultMessage='Edit Content of'
                         />{' '}
                         "{props.docName}"
                     </Typography>
                     <Button className={classes.button} variant='contained' color='primary' onClick={addContentToDoc}>
                         <FormattedMessage
-                            id='documents.markdown.editor.update.content'
+                            id='Apis.Details.Documents.MarkdownEditor.update.content.button'
                             defaultMessage='Update Content'
                         />
                     </Button>
                     <Button className={classes.button} onClick={toggleOpen}>
-                        <FormattedMessage id='documents.markdown.editor.cancel' defaultMessage='Cancel' />
+                        <FormattedMessage
+                            id='Apis.Details.Documents.MarkdownEditor.cancel.button'
+                            defaultMessage='Cancel'
+                        />
                     </Button>
                 </Paper>
                 <div className={classes.splitWrapper}>
-                    <Grid container spacing={24}>
+                    <Grid container spacing={7}>
                         <Grid item xs={6}>
                             <MonacoEditor
                                 width='100%'
-                                height='calc(100vh - 55px)'
+                                height='100vh'
                                 language='markdown'
                                 theme='vs-dark'
                                 value={code}
@@ -182,4 +198,4 @@ MarkdownEditor.propTypes = {
     intl: PropTypes.shape({}).isRequired,
 };
 
-export default injectIntl(withStyles(styles)(MarkdownEditor));
+export default injectIntl(withRouter(withStyles(styles)(MarkdownEditor)));

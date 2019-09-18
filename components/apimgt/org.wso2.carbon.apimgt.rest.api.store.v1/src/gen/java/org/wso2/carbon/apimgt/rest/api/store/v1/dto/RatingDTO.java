@@ -9,6 +9,7 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
@@ -16,7 +17,7 @@ public class RatingDTO   {
   
     private String ratingId = null;
     private String apiId = null;
-    private String username = null;
+    private String ratedBy = null;
     private Integer rating = null;
 
   /**
@@ -27,9 +28,8 @@ public class RatingDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("ratingId")
-  @NotNull
   public String getRatingId() {
     return ratingId;
   }
@@ -45,9 +45,8 @@ public class RatingDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("apiId")
-  @NotNull
   public String getApiId() {
     return apiId;
   }
@@ -56,22 +55,20 @@ public class RatingDTO   {
   }
 
   /**
-   * If username is not given user invoking the API will be taken as the username. 
    **/
-  public RatingDTO username(String username) {
-    this.username = username;
+  public RatingDTO ratedBy(String ratedBy) {
+    this.ratedBy = ratedBy;
     return this;
   }
 
   
-  @ApiModelProperty(required = true, value = "If username is not given user invoking the API will be taken as the username. ")
-  @JsonProperty("username")
-  @NotNull
-  public String getUsername() {
-    return username;
+  @ApiModelProperty(value = "")
+  @JsonProperty("ratedBy")
+  public String getRatedBy() {
+    return ratedBy;
   }
-  public void setUsername(String username) {
-    this.username = username;
+  public void setRatedBy(String ratedBy) {
+    this.ratedBy = ratedBy;
   }
 
   /**
@@ -104,13 +101,13 @@ public class RatingDTO   {
     RatingDTO rating = (RatingDTO) o;
     return Objects.equals(ratingId, rating.ratingId) &&
         Objects.equals(apiId, rating.apiId) &&
-        Objects.equals(username, rating.username) &&
+        Objects.equals(ratedBy, rating.ratedBy) &&
         Objects.equals(rating, rating.rating);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(ratingId, apiId, username, rating);
+    return Objects.hash(ratingId, apiId, ratedBy, rating);
   }
 
   @Override
@@ -120,7 +117,7 @@ public class RatingDTO   {
     
     sb.append("    ratingId: ").append(toIndentedString(ratingId)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
-    sb.append("    username: ").append(toIndentedString(username)).append("\n");
+    sb.append("    ratedBy: ").append(toIndentedString(ratedBy)).append("\n");
     sb.append("    rating: ").append(toIndentedString(rating)).append("\n");
     sb.append("}");
     return sb.toString();

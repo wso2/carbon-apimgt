@@ -19,11 +19,12 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import qs from 'qs';
-import PropTypes from 'prop-types';
 import AuthManager from '../data/AuthManager';
+import User from '../data/User';
+import Utils from '../data/Utils';
+
 /**
  * Logout component
- *
  * @class Logout
  * @extends {Component} Logout component
  */
@@ -33,7 +34,7 @@ class Logout extends Component {
         this.authManager = new AuthManager();
         this.state = {
             logoutSuccess: false,
-            referrer: '/login',
+            referrer: '/home',
         };
     }
 
@@ -43,23 +44,17 @@ class Logout extends Component {
      * @memberof Logout
      */
     componentDidMount() {
-        const promisedLogout = this.authManager.logout();
-        const { location } = this.props;
-        promisedLogout
-            .then(() => {
-                const newState = { logoutSuccess: true };
-                let queryString = location.search;
-                queryString = queryString.replace(/^\?/, '');
-                /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
-                const params = qs.parse(queryString);
-                if (params.referrer) {
-                    newState.referrer = params.referrer;
-                }
-                this.setState(newState);
-            })
-            .catch(() => {
-                console.log('Error while logging out');
-            });
+        const environmentName = Utils.getEnvironment().label;
+        localStorage.removeItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`);
+        const newState = { logoutSuccess: true };
+        let { search } = window.location;
+        search = search.replace(/^\?/, '');
+        /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
+        const params = qs.parse(search);
+        if (params.referrer) {
+            newState.referrer = params.referrer;
+        }
+        this.setState(newState);
     }
 
     /**
@@ -73,8 +68,5 @@ class Logout extends Component {
         return logoutSuccess && <Redirect to={referrer} />;
     }
 }
-Logout.propTypes = {
-    location: PropTypes.instanceOf(Object).isRequired,
-};
 
 export default Logout;

@@ -9,6 +9,7 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
@@ -50,7 +51,6 @@ public enum TypeEnum {
 }
 
     private TypeEnum type = null;
-    private String config = null;
 
   /**
    **/
@@ -105,24 +105,6 @@ public enum TypeEnum {
     this.type = type;
   }
 
-  /**
-   **/
-  public MediationDTO config(String config) {
-    this.config = config;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"log_in_message\"> <log level=\"full\"> <property name=\"IN_MESSAGE\" value=\"IN_MESSAGE_21133232\"/> </log> </sequence>", required = true, value = "")
-  @JsonProperty("config")
-  @NotNull
-  public String getConfig() {
-    return config;
-  }
-  public void setConfig(String config) {
-    this.config = config;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -135,13 +117,12 @@ public enum TypeEnum {
     MediationDTO mediation = (MediationDTO) o;
     return Objects.equals(id, mediation.id) &&
         Objects.equals(name, mediation.name) &&
-        Objects.equals(type, mediation.type) &&
-        Objects.equals(config, mediation.config);
+        Objects.equals(type, mediation.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type, config);
+    return Objects.hash(id, name, type);
   }
 
   @Override
@@ -152,7 +133,6 @@ public enum TypeEnum {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
-    sb.append("    config: ").append(toIndentedString(config)).append("\n");
     sb.append("}");
     return sb.toString();
   }

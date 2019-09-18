@@ -325,7 +325,7 @@ class Overview extends Component {
                             id='api-endpoint-production'
                             label={isEditable && 'Endpoint'}
                             value={
-                                api.getProductionEndpoint() && api.getProductionEndpoint().endpointConfig.list[0].url
+                                api.getProductionEndpoint()
                             }
                             placeholder='No Value!'
                             helperText='Production'
@@ -340,7 +340,7 @@ class Overview extends Component {
                             fullWidth
                             id='api-endpoint-sandbox'
                             label={isEditable && 'Endpoint'}
-                            value={api.getSandboxEndpoint() && api.getSandboxEndpoint().endpointConfig.list[0].url}
+                            value={api.getSandboxEndpoint()}
                             placeholder='No Value!'
                             helperText='Sandbox'
                             margin='normal'
@@ -374,7 +374,7 @@ class Overview extends Component {
                 </APIPropertyField>
                 <BusinessPlans api={api} />
                 <Grid item>
-                    <Typography variant='headline'> Business Information</Typography>
+                    <Typography variant='h5'> Business Information</Typography>
                     <Divider />
                 </Grid>
                 <APIPropertyField name='Business Owner'>
@@ -432,7 +432,7 @@ class Overview extends Component {
                 {additionalProperties && (
                     <React.Fragment>
                         <Grid item>
-                            <Typography variant='headline'> Additional Properties</Typography>
+                            <Typography variant='h5'> Additional Properties</Typography>
                             <Divider />
                         </Grid>
                         <Button

@@ -1,8 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.4.227-SNAPSHOT</version>
+        <version>6.5.108-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -30,33 +32,33 @@
             <scope>test</scope>
         </dependency>
 
-                <dependency>
-                    <groupId>com.github.tomakehurst</groupId>
-                    <artifactId>wiremock-standalone</artifactId>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-standalone</artifactId>
 
-                    <exclusions>
-                        <exclusion>
-                            <groupId>org.slf4j</groupId>
-                            <artifactId>slf4j-jdk14</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>org.slf4j</groupId>
-                            <artifactId>jcl-over-slf4j</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>org.slf4j</groupId>
-                            <artifactId>log4j-over-slf4j</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>com.fasterxml.jackson.core</groupId>
-                            <artifactId>jackson-annotations</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>com.fasterxml.jackson.core</groupId>
-                            <artifactId>jackson-core</artifactId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-jdk14</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>log4j-over-slf4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>rhino.wso2</groupId>
             <artifactId>js</artifactId>
@@ -181,19 +183,24 @@
             <artifactId>powermock-api-mockito</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-	    <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <configuration>
-                <excludes>
-                    <exclude>*</exclude>
-                </excludes>
-            </configuration>
-	    </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>*</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -204,10 +211,14 @@
                         <version>${maven.surefire.plugin.version}</version>
                     </dependency>
                 </dependencies>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
+                <configuration>
+                    <systemProperties>
+                        <property>
+                            <name>org.opensaml.httpclient.https.disableHostnameVerification</name>
+                            <value>true</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -229,7 +240,8 @@
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
                             org.eclipse.equinox.http.helper,
                             org.wso2.carbon.user.mgt.*;version="${carbon.identity.imp.pkg.version}",
-                            io.swagger.parser;version="${imp.pkg.version.io.swagger.parser}",
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             *;resolution:=optional
                         </Import-Package>
                         <Embed-Dependency>

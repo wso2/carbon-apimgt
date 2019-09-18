@@ -17,18 +17,26 @@
  */
 
 import React from 'react';
-import intl, { FormattedMessage, injectIntl } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
 import API from 'AppData/api.js';
+import APIProduct from 'AppData/APIProduct';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import AddCircle from '@material-ui/icons/AddCircle';
+import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Create from './Create';
 import MarkdownEditor from './MarkdownEditor';
+import TextEditor from './TextEditor';
+import Edit from './Edit';
+import Delete from './Delete';
+import Download from './Download';
 
 const styles = theme => ({
     root: {
@@ -45,9 +53,6 @@ const styles = theme => ({
         borderRadius: theme.shape.borderRadius,
         marginTop: theme.spacing.unit * 2,
         marginBottom: theme.spacing.unit * 2,
-    },
-    contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
     },
     addNewHeader: {
         padding: theme.spacing.unit * 2,
@@ -68,9 +73,34 @@ const styles = theme => ({
     mainTitle: {
         paddingRight: 10,
     },
+    actionTable: {
+        '& td': {
+            width: 50,
+        },
+        '& td:first-child': {
+            width: 130,
+        },
+    },
+    messageBox: {
+        marginTop: 20,
+    },
+    actions: {
+        padding: '20px 0',
+        '& button': {
+            marginLeft: 0,
+        },
+    },
+    head: {
+        fontWeight: 200,
+        marginBottom: 20,
+    },
 });
 function LinkGenerator(props) {
-    return <Link to={'/apis/' + props.apiId + '/documents/' + props.docId + '/details'}>{props.docName}</Link>;
+    return props.apiType === API.CONSTS.APIProduct ? (
+        <Link to={'/api-products/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
+    ) : (
+        <Link to={'/apis/' + props.apiId + '/documents/' + props.docId + '/view'}>{props.docName}</Link>
+    );
 }
 class Listing extends React.Component {
     constructor(props) {
@@ -95,21 +125,39 @@ class Listing extends React.Component {
      Get the document list attached to current API and set it to the state
      */
     getDocumentsList() {
-        const api = new API();
-        const { intl } = this.props;
-        const docs = api.getDocuments(this.props.api.id);
-        docs.then((response) => {
-            this.setState({ docs: response.obj.list });
-        }).catch((errorResponse) => {
-            const errorData = JSON.parse(errorResponse.message);
-            const messageTxt =
-                'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
-            console.error(messageTxt);
-            Alert.error(intl.formatMessage({
-                id: 'documents.listing.error.in.fetching',
-                defaultMessage: 'Error in fetching documents list of the API',
-            }));
-        });
+        const { api, intl } = this.props;
+
+        if (api.apiType === API.CONSTS.APIProduct) {
+            const apiProduct = new APIProduct();
+            const docs = apiProduct.getDocuments(api.id);
+            docs.then((response) => {
+                this.setState({ docs: response.obj.list });
+            }).catch((errorResponse) => {
+                const errorData = JSON.parse(errorResponse.message);
+                const messageTxt =
+                    'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
+                console.error(messageTxt);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Documents.Listing.documents.listing.fetching.error.message.api.product',
+                    defaultMessage: 'Error in fetching documents list of the API Product',
+                }));
+            });
+        } else {
+            const newApi = new API();
+            const docs = newApi.getDocuments(this.props.api.id);
+            docs.then((response) => {
+                this.setState({ docs: response.obj.list });
+            }).catch((errorResponse) => {
+                const errorData = JSON.parse(errorResponse.message);
+                const messageTxt =
+                    'Error[' + errorData.code + ']: ' + errorData.description + ' | ' + errorData.message + '.';
+                console.error(messageTxt);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Documents.Listing.documents.listing.fetching.error.message',
+                    defaultMessage: 'Error in fetching documents list of the API',
+                }));
+            });
+        }
     }
     toggleAddDocs() {
         this.setState((oldState) => {
@@ -117,8 +165,20 @@ class Listing extends React.Component {
         });
     }
     render() {
-        const { classes } = this.props;
+        const { classes, api, isAPIProduct } = this.props;
         const { docs, showAddDocs } = this.state;
+        const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
+        const url = `/${urlPrefix}/${api.id}/documents/create`;
+        const options = {
+            selectableRows: false,
+            title: false,
+            filter: false,
+            print: false,
+            download: false,
+            viewColumns: false,
+            customToolbar: false,
+            search: false,
+        };
         const columns = [
             {
                 name: 'documentId',
@@ -130,31 +190,183 @@ class Listing extends React.Component {
             {
                 name: 'name',
                 options: {
-                    customBodyRender: (value, tableMeta, api) => {
+                    customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
                             const docName = tableMeta.rowData[1];
                             const docId = tableMeta.rowData[0];
-                            return <LinkGenerator docName={docName} docId={docId} apiId={this.apiId} />;
+                            return (
+                                <LinkGenerator
+                                    docName={docName}
+                                    docId={docId}
+                                    apiId={this.apiId}
+                                    apiType={api.apiType}
+                                />
+                            );
                         }
+                        return null;
                     },
                     filter: false,
+                    label: (
+                        <FormattedMessage
+                            id='Apis.Details.Documents.Listing.column.header.name'
+                            defaultMessage='name'
+                        />
+                    ),
                 },
             },
-            'sourceType',
+            {
+                name: 'sourceType',
+                label: (
+                    <FormattedMessage
+                        id='Apis.Details.Documents.Listing.column.header.source.type'
+                        defaultMessage='sourceType'
+                    />
+                ),
+            },
+            {
+                name: 'type',
+                label: (
+                    <FormattedMessage id='Apis.Details.Documents.Listing.column.header.type' defaultMessage='type' />
+                ),
+            },
             {
                 name: 'action',
+                label: (
+                    <FormattedMessage
+                        id='Apis.Details.Documents.Listing.column.header.action'
+                        defaultMessage='action'
+                    />
+                ),
                 options: {
-                    customBodyRender: (value, tableMeta, api) => {
+                    customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
                             const docName = tableMeta.rowData[1];
                             const docId = tableMeta.rowData[0];
                             const sourceType = tableMeta.rowData[2];
                             if (sourceType === 'MARKDOWN') {
-                                return <MarkdownEditor docName={docName} docId={docId} apiId={this.apiId} />;
+                                return (
+                                    <table className={classes.actionTable}>
+                                        <tr>
+                                            <td>
+                                                <MarkdownEditor docName={docName} docId={docId} apiId={this.apiId} />
+                                            </td>
+                                            <td>
+                                                <Edit
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                />
+                                            </td>
+                                            <td>
+                                                <Delete
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                    apiType={api.apiType}
+                                                />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                );
+                            } else if (sourceType === 'INLINE') {
+                                return (
+                                    <table className={classes.actionTable}>
+                                        <tr>
+                                            <td>
+                                                <TextEditor
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    apiType={api.apiType}
+                                                />
+                                            </td>
+                                            <td>
+                                                <Edit
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                />
+                                            </td>
+                                            <td>
+                                                <Delete
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                    apiType={api.apiType}
+                                                />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                );
+                            } else if (sourceType === 'URL') {
+                                return (
+                                    <table className={classes.actionTable}>
+                                        <tr>
+                                            <td>
+                                                <Button>
+                                                    <Icon>open_in_new</Icon>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Documents.Listing.documents.open'
+                                                        defaultMessage='Open'
+                                                    />
+                                                </Button>
+                                            </td>
+                                            <td>
+                                                <Edit
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                />
+                                            </td>
+                                            <td>
+                                                <Delete
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                    apiType={api.apiType}
+                                                />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                );
+                            } else if (sourceType === 'FILE') {
+                                return (
+                                    <table className={classes.actionTable}>
+                                        <tr>
+                                            <td>
+                                                <Download docId={docId} apiId={this.apiId} />
+                                            </td>
+                                            <td>
+                                                <Edit
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                />
+                                            </td>
+                                            <td>
+                                                <Delete
+                                                    docName={docName}
+                                                    docId={docId}
+                                                    apiId={this.apiId}
+                                                    getDocumentsList={this.getDocumentsList}
+                                                    apiType={api.apiType}
+                                                />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                );
                             } else {
                                 return <span />;
                             }
                         }
+                        return null;
                     },
                     filter: false,
                 },
@@ -164,20 +376,63 @@ class Listing extends React.Component {
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        <FormattedMessage id='documents.listing.documents' defaultMessage='Documents' />
+                        <FormattedMessage
+                            id='Apis.Details.Documents.Listing.documents.listing.title'
+                            defaultMessage='Documents'
+                        />
                     </Typography>
-                    <Button size='small' className={classes.button} onClick={this.toggleAddDocs}>
-                        <AddCircle className={classes.buttonIcon} />
-                        <FormattedMessage id='documents.listing.add.new.document' defaultMessage='Add New Document' />
-                    </Button>
+                    <Link to={url}>
+                        <Button size='small' className={classes.button}>
+                            <AddCircle className={classes.buttonIcon} />
+                            <FormattedMessage
+                                id='Apis.Details.Documents.Listing.add.new.document.button'
+                                defaultMessage='Add New Document'
+                            />
+                        </Button>
+                    </Link>
                 </div>
                 <div className={classes.contentWrapper}>
                     {showAddDocs && (
-                        <Create toggleAddDocs={this.toggleAddDocs} getDocumentsList={this.getDocumentsList} />
+                        <Create
+                            toggleAddDocs={this.toggleAddDocs}
+                            getDocumentsList={this.getDocumentsList}
+                            apiType={api.apiType}
+                        />
                     )}
 
-                    {docs && (
-                        <MUIDataTable title='' data={docs} columns={columns} options={{ selectableRows: false }} />
+                    {docs && docs.length > 0 ? (
+                        <MUIDataTable title='' data={docs} columns={columns} options={options} />
+                    ) : (
+                        <InlineMessage type='info' height={140}>
+                            <div className={classes.contentWrapper}>
+                                <Typography variant='h5' component='h3' className={classes.head}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Documents.Listing.add.new.msg.title'
+                                        defaultMessage='Create Documents'
+                                    />
+                                </Typography>
+                                <Typography component='p' className={classes.content}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Documents.Listing.add.new.msg.content'
+                                        defaultMessage={
+                                            'You can add different types of documents to an API.' +
+                                            ' Proper documentation helps API publishers to market their ' +
+                                            ' APIs better and sustain competition. '
+                                        }
+                                    />
+                                </Typography>
+                                <div className={classes.actions}>
+                                    <Link to={url}>
+                                        <Button variant='contained' color='primary' className={classes.button}>
+                                            <FormattedMessage
+                                                id='Apis.Details.Documents.Listing.add.new.msg.button'
+                                                defaultMessage='Add New Document'
+                                            />
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </div>
+                        </InlineMessage>
                     )}
                 </div>
             </div>
@@ -188,6 +443,10 @@ class Listing extends React.Component {
 Listing.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({
+        id: PropTypes.string,
+        apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]),
+    }).isRequired,
 };
 
-export default injectIntl(withStyles(styles)(Listing));
+export default injectIntl(withAPI(withStyles(styles)(Listing)));

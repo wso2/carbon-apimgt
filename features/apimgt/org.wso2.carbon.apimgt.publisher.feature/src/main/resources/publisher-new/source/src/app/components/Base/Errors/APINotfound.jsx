@@ -18,16 +18,24 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 const APINotFound = (props) => {
     return (
         <div>
             <div className='message message-danger'>
                 <h4>
-                    <i className='icon fw fw-error' />404 API Not Found!
+                    <i className='icon fw fw-error' />
+                    <FormattedMessage
+                        id='Base.Errors.APINotfound.header'
+                        defaultMessage='404 API Not Found!'
+                    />
                 </h4>
                 <p>
-                    {"Can't"} find an API associate with the given API ID
+                    <FormattedMessage
+                        id='Base.Errors.APINotfound.message'
+                        defaultMessage='Can&apos;t find an API associate with the given API ID'
+                    />
                     <span style={{ color: 'green' }}> {props.match.params.apiUUID} </span>
                 </p>
             </div>

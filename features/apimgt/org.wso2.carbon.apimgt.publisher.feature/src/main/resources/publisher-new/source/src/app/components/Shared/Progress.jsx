@@ -17,10 +17,9 @@
  */
 
 import React from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
-const Progress = (props) => {
-    return <CircularProgress {...props} style={{ margin: 'auto', display: 'block' }} />;
+const Progress = () => {
+    return <div className='apim-dual-ring' />;
 };
 
 export default Progress;

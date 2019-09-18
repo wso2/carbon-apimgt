@@ -23,6 +23,7 @@ import PropTypes from 'prop-types';
 import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import { withStyles } from '@material-ui/core/styles';
+import { FormattedMessage } from 'react-intl';
 
 import LifeCycleUpdate from './LifeCycleUpdate';
 import LifeCycleHistory from './LifeCycleHistory';
@@ -164,7 +165,7 @@ class LifeCycle extends Component {
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
                     <Typography variant="h4" align="left" className={classes.mainTitle}>
-                        Lifecycle
+                        <FormattedMessage id='Apis.Details.LifeCycle.LifeCycle.lifecycle' defaultMessage='Lifecycle' />
                     </Typography>
                 </div>
                 <div className={classes.contentWrapper}>
@@ -183,7 +184,7 @@ class LifeCycle extends Component {
                             {lcHistory.length > 1 && (
                                 <div>
                                     <Typography variant="h6" gutterBottom className={classes.historyHead}>
-                                        History
+                                        <FormattedMessage id='Apis.Details.LifeCycle.LifeCycle.history' defaultMessage='History' />
                                     </Typography>
                                     <LifeCycleHistory lcHistory={lcHistory} />
                                 </div>

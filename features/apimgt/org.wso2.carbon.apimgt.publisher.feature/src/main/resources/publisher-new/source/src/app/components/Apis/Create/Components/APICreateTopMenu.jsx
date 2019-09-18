@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
@@ -7,8 +25,6 @@ import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
-
-// import { FormattedMessage } from 'react-intl';
 
 const styles = theme => ({
     rightIcon: {
@@ -76,8 +92,11 @@ const APIDetailsTopMenu = ({ classes, theme }) => {
                 <Link to='/apis' className={classes.backLink}>
                     <KeyboardArrowLeft className={classes.backIcon} />
                     <div className={classes.backText}>
-                        BACK TO <br />
-                        LISTING
+                        <FormattedMessage
+                            id='Apis.Create.Components.APICreateTopMenu.back.to.listing'
+                            defaultMessage='BACK TO {break} LISTING'
+                            values={{ break: <br /> }}
+                        />
                     </div>
                 </Link>
                 <VerticalDivider height={70} />
@@ -85,11 +104,17 @@ const APIDetailsTopMenu = ({ classes, theme }) => {
                     <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
                 </div>
                 <div className={classes.mainTitleWrapper}>
-                    <Typography variant='display1'>
+                    <Typography variant='h4'>
                         <FormattedMessage id='apis.create.new.api' defaultMessage='APIs - Create New API' />
                     </Typography>
                     <Typography variant='caption' gutterBottom align='left'>
-                        <FormattedMessage id='fill.the.mandatory.fields' defaultMessage='Fill the mandatory fields (Name, Version, Context) and create the API. Configure advanced configurations later.' />
+                        <FormattedMessage
+                            id='fill.the.mandatory.fields'
+                            defaultMessage={
+                                'Fill the mandatory fields (Name, Version, Context)' +
+                                ' and create the API. Configure advanced configurations later.'
+                            }
+                        />
                     </Typography>
                 </div>
             </div>

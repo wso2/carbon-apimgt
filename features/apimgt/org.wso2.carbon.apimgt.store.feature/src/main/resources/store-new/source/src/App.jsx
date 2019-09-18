@@ -17,27 +17,30 @@
  */
 
 import React from 'react';
-
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import Loadable from 'react-loadable';
-import { Login, Logout } from './app/components';
+import Configurations from 'Config';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import Login from './app/components/Login/Login';
+import Logout from './app/components/Logout';
 import SignUp from './app/components/AnonymousView/SignUp';
-import PrivacyPolicy from './app/components/Policy/PrivacyPolicy';
-import CookiePolicy from './app/components/Policy/CookiePolicy';
 import Progress from './app/components/Shared/Progress';
+import { SettingsProvider } from './app/components/Shared/SettingsContext';
+import AuthManager from './app/data/AuthManager';
+import BrowserRouter from './app/components/Base/CustomRouter/BrowserRouter';
 
 const LoadableProtectedApp = Loadable({
     loader: () => import(// eslint-disable-line function-paren-newline
         /* webpackChunkName: "ProtectedApp" */
         /* webpackPrefetch: true */
-        './app/ProtectedApp',
-    ),
+        // eslint-disable-next-line function-paren-newline
+        './app/ProtectedApp'),
     loading: Progress,
 });
 
 
 /**
- *Root Store component
+ * Root Store component
  *
  * @class Store
  * @extends {React.Component}
@@ -51,26 +54,87 @@ class Store extends React.Component {
     constructor(props) {
         super(props);
         LoadableProtectedApp.preload();
+        this.state = {
+            settings: null,
+            tenantDomain: null,
+            theme: null,
+        };
+        this.SetTenantTheme = this.SetTenantTheme.bind(this);
     }
 
     /**
-     *Reners the Store component
+     *  Mounting the components
+     */
+    componentDidMount() {
+        AuthManager.setSettings().then((response) => {
+            this.setState({ settings: response });
+        }).catch((error) => {
+            console.error(
+                'Error while receiving settings : ',
+                error,
+            );
+        });
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('tenant') === null || urlParams.get('tenant') === 'carbon.super') {
+            this.setState({ theme: Configurations.themes.light });
+        } else {
+            this.SetTenantTheme(urlParams.get('tenant'));
+        }
+    }
+
+    /**
+     * Set the tenant domain to state
+     * @param {String} tenantDomain tenant domain
+     * @memberof Store
+     */
+    setTenantDomain = (tenantDomain) => {
+        this.setState({ tenantDomain });
+        if (tenantDomain === 'carbon.super') {
+            this.setState({ theme: Configurations.themes.light });
+        } else {
+            this.SetTenantTheme(tenantDomain);
+        }
+    }
+
+    /**
+     * Load Theme file.
      *
+     * @param {string} tenant tenant name
+     */
+    SetTenantTheme(tenant) {
+        fetch(`${Configurations.app.context}/site/public/tenant_themes/${tenant}/defaultTheme.json`)
+            .then(resp => resp.json())
+            .then((data) => {
+                this.setState({ theme: data.themes.light });
+            })
+            .catch(() => {
+                this.setState({ theme: Configurations.themes.light });
+            });
+    }
+
+    /**
+     * Reners the Store component
      * @returns {JSX} this is the description
      * @memberof Store
      */
     render() {
+        const { settings, tenantDomain, theme } = this.state;
+        const { app: { context } } = Configurations;
         return (
-            <Router basename='/store-new'>
-                <Switch>
-                    <Route path='/login' render={() => <Login appName='store-new' appLabel='STORE' />} />
-                    <Route path='/logout' component={Logout} />
-                    <Route path='/sign-up' component={SignUp} />
-                    <Route path='/policy/privacy-policy' component={PrivacyPolicy} />
-                    <Route path='/policy/cookie-policy' component={CookiePolicy} />
-                    <Route component={LoadableProtectedApp} />
-                </Switch>
-            </Router>
+            settings && theme && (
+                <SettingsProvider value={{ settings, tenantDomain, setTenantDomain: this.setTenantDomain }}>
+                    <MuiThemeProvider theme={createMuiTheme(theme)}>
+                        <BrowserRouter basename={context}>
+                            <Switch>
+                                <Route path='/login' render={() => <Login appName='store-new' appLabel='STORE' />} />
+                                <Route path='/logout' component={Logout} />
+                                <Route path='/sign-up' component={SignUp} />
+                                <Route component={LoadableProtectedApp} />
+                            </Switch>
+                        </BrowserRouter>
+                    </MuiThemeProvider>
+                </SettingsProvider>
+            )
         );
     }
 }

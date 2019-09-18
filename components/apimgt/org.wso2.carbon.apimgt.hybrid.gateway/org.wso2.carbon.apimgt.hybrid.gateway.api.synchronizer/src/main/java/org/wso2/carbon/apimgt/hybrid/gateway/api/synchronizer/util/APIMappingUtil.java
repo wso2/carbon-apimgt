@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.dto.APIDTO;
@@ -46,6 +46,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -118,7 +119,6 @@ public class APIMappingUtil {
      * @param provider API provider
      */
     private static API fromDTOtoAPI(APIDTO dto, String provider) throws APIManagementException {
-        APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
         String providerEmailDomainReplaced = APIUtil.replaceEmailDomain(provider);
 
         // The provider name that is coming from the body is not honored for now.
@@ -166,12 +166,14 @@ public class APIMappingUtil {
 
         if (dto.getApiDefinition() != null) {
             String apiSwaggerDefinition = dto.getApiDefinition();
+            APIDefinition parser = OASParserUtil.getOASParser(apiSwaggerDefinition);
+
             //URI Templates
-            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(model, apiSwaggerDefinition);
+            Set<URITemplate> uriTemplates = parser.getURITemplates(apiSwaggerDefinition);
             model.setUriTemplates(uriTemplates);
 
             // scopes
-            Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiSwaggerDefinition);
+            Set<Scope> scopes = parser.getScopes(apiSwaggerDefinition);
             model.setScopes(scopes);
 
         }

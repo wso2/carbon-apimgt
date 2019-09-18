@@ -19,6 +19,8 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import Menu, { MenuItem } from '@material-ui/core/Menu';
+import { FormattedMessage } from 'react-intl';
+
 /**
  * Renders the Enviorment menu to select ( dev, prod, aq etc..)
  *
@@ -77,9 +79,8 @@ class EnvironmentMenu extends React.Component {
      */
     render() {
         // Props list
-        const environments = this.props.environments;
-        const environmentLabel = this.props.environmentLabel;
-
+        const { environments, environmentLabel } = this.props;
+        const { anchorElEnvironmentMenu, openEnvironmentMenu } = this.state;
         const showEnvironments = environments && environments.length > 1;
 
         if (!showEnvironments) {
@@ -88,11 +89,26 @@ class EnvironmentMenu extends React.Component {
 
         return (
             <div style={{ display: 'flex' }}>
-                <Button aria-owns='simple-menu' aria-haspopup='true' onClick={this.handleClickEnvironmentMenu} color='default'>
-                    {environmentLabel}
+                <Button
+                    aria-owns='simple-menu'
+                    aria-haspopup='true'
+                    onClick={this.handleClickEnvironmentMenu}
+                    color='default'
+                >
+                    <FormattedMessage
+                        id='Base.Header.EnvironmentMenu.environment.label'
+                        defaultMessage='{environmentLabel}'
+                        values={{ environmentLabel }}
+                    />
                 </Button>
 
-                <Menu id='simple-menu' anchorEl={this.state.anchorElEnvironmentMenu} open={this.state.openEnvironmentMenu} onRequestClose={this.handleRequestCloseEnvironmentMenu} style={{ alignItems: 'center', justifyContent: 'center' }}>
+                <Menu
+                    id='simple-menu'
+                    anchorEl={anchorElEnvironmentMenu}
+                    open={openEnvironmentMenu}
+                    onRequestClose={this.handleRequestCloseEnvironmentMenu}
+                    style={{ alignItems: 'center', justifyContent: 'center' }}
+                >
                     {environments.map((environment, index) => (
                         <MenuItem onClick={this.handleEnvironmentChange} key={index} id={index}>
                             {environment.label}

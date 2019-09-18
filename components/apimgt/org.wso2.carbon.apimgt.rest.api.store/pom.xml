@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.4.227-SNAPSHOT</version>
+        <version>6.5.108-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -76,7 +76,7 @@
                     <groupId>com.fasterxml.jackson.dataformat</groupId>
                     <artifactId>jackson-dataformat-yaml</artifactId>
                 </exclusion>
-	            <exclusion>
+                <exclusion>
                     <groupId>com.google.code.findbugs</groupId>
                     <artifactId>jsr305</artifactId>
                 </exclusion>
@@ -113,6 +113,7 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -157,21 +158,14 @@
     <build>
         <plugins>
             <!--<plugin>-->
-                <!--<groupId>org.wso2.maven.plugins</groupId>-->
-                <!--<artifactId>swagger2cxf-maven-plugin</artifactId>-->
-                <!--<version>1.0-SNAPSHOT</version>-->
-                <!--<configuration>-->
-                    <!--<inputSpec>${project.basedir}/src/main/resources/store-api.yaml</inputSpec>-->
-                <!--</configuration>-->
+            <!--<groupId>org.wso2.maven.plugins</groupId>-->
+            <!--<artifactId>swagger2cxf-maven-plugin</artifactId>-->
+            <!--<version>1.0-SNAPSHOT</version>-->
+            <!--<configuration>-->
+            <!--<inputSpec>${project.basedir}/src/main/resources/store-api.yaml</inputSpec>-->
+            <!--</configuration>-->
             <!--</plugin>-->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
+
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>

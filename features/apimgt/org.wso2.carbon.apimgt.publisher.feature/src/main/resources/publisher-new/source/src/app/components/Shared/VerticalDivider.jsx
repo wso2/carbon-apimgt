@@ -22,7 +22,9 @@ function VerticalDivider(props) {
 }
 
 VerticalDivider.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        divider: PropTypes.string,
+    }).isRequired,
     height: PropTypes.shape({}).isRequired,
     marginLeft: PropTypes.shape({}).isRequired,
     marginRight: PropTypes.shape({}).isRequired,

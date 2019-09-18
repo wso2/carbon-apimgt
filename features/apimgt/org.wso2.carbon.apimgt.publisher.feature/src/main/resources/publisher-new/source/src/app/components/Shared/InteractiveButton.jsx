@@ -109,7 +109,11 @@ InteractiveButton.propTypes = {
     loading: PropTypes.bool,
     success: PropTypes.bool,
     children: PropTypes.node.isRequired,
-    classes: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({
+        buttonSuccess: PropTypes.string,
+        wrapper: PropTypes.string,
+        buttonProgress: PropTypes.string,
+    }).isRequired,
     /**
      * The color of the component. It supports those theme colors that make sense for this component.
      */

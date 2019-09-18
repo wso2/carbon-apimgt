@@ -42,7 +42,6 @@ import org.wso2.carbon.identity.oauth.dao.OAuthAppDAO;
 import org.wso2.carbon.identity.oauth.dao.OAuthAppDO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -52,7 +51,6 @@ import java.util.Set;
 public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
     private static final Log log = LogFactory.getLog(DefaultKeyValidationHandler.class);
-    private static final String DEFAULT_SCOPE_VALIDATOR_NAME = "Role based scope validator";
 
     public DefaultKeyValidationHandler(){
         log.info(this.getClass().getName() + " Initialised");
@@ -130,7 +128,6 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         if (validationContext.isCacheHit()) {
             return true;
         }
-
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validationContext.getValidationInfoDTO();
 
         if (apiKeyValidationInfoDTO == null) {
@@ -139,11 +136,11 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
         String[] scopes = null;
         Set<String> scopesSet = apiKeyValidationInfoDTO.getScopes();
+        StringBuilder scopeList = new StringBuilder();
 
         if (scopesSet != null && !scopesSet.isEmpty()) {
             scopes = scopesSet.toArray(new String[scopesSet.size()]);
             if (log.isDebugEnabled() && scopes != null) {
-                StringBuilder scopeList = new StringBuilder();
                 for (String scope : scopes) {
                     scopeList.append(scope);
                     scopeList.append(",");
@@ -168,6 +165,16 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 null, apiKeyValidationInfoDTO.getValidityPeriod(), apiKeyValidationInfoDTO.getValidityPeriod(),
                 apiKeyValidationInfoDTO.getType());
 
+        if (apiKeyValidationInfoDTO.getProductName() == null && apiKeyValidationInfoDTO.getProductProvider() == null) {
+            accessTokenDO.setTokenType(accessTokenDO.getTokenType() + ":" + APIConstants.API_SUBSCRIPTION_TYPE);
+        } else {
+            String productName = apiKeyValidationInfoDTO.getProductName();
+            String productProvider = apiKeyValidationInfoDTO.getProductProvider();
+            accessTokenDO.setTokenType(
+                    accessTokenDO.getTokenType() + ":" + APIConstants.API_PRODUCT_SUBSCRIPTION_TYPE + ":" + productName
+                            + ":" + productProvider);
+        }
+
         accessTokenDO.setAccessToken(validationContext.getAccessToken());
 
         String actualVersion = validationContext.getVersion();
@@ -176,49 +183,50 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             //Remove the prefix from the version.
             actualVersion = actualVersion.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
         }
-        String resource = validationContext.getContext() + "/" + actualVersion + validationContext
-                .getMatchingResource()
-                + ":" +
-                validationContext.getHttpVerb();
 
-        Set<OAuth2ScopeValidator> oAuth2ScopeValidators = OAuthServerConfiguration.getInstance()
-                .getOAuth2ScopeValidators();
+        String resourceList = validationContext.getMatchingResource();
+        List<String> resourceArray = new ArrayList<>(Arrays.asList(resourceList.split(",")));
+        Set<OAuth2ScopeValidator> oAuth2ScopeValidators = new HashSet<> (OAuthServerConfiguration.getInstance().
+                getOAuth2ScopeValidators());
         //validate scope for filtered validators from db
         String[] scopeValidators;
-        OAuthAppDO appInfo;
+        OAuthAppDO appInfo = new OAuthAppDO();
         try {
             OAuthAppDAO oAuthAppDAO = new OAuthAppDAO();
             appInfo = oAuthAppDAO.getAppInformation(clientId);
             scopeValidators = appInfo.getScopeValidators();     //get scope validators from the DB
             boolean isValid = true;
             List<String> appScopeValidators=  new ArrayList<>(Arrays.asList(scopeValidators));
+            for (String resourceString : resourceArray) {
+                String resource = validationContext.getContext() + "/" + actualVersion + resourceString
+                        + ":" + validationContext.getHttpVerb();
+                for (OAuth2ScopeValidator validator : oAuth2ScopeValidators) {
+                    try {
+                        if (validator != null && ArrayUtils.isEmpty(scopeValidators)) {
+                            // validate scopes for old created applications
+                            isValid = validator.validateScope(accessTokenDO, resource);
+                            oAuth2ScopeValidators.clear();
+                        } else if (validator != null && appScopeValidators.contains(validator.getValidatorName())) {
+                            //take the intersection of defined scope validators and scope validators registered for the apps
+                            log.debug(String.format("Validating scope of token %s using %s", accessTokenDO.getTokenId(),
+                                    validator.getValidatorName()));
 
-            for (OAuth2ScopeValidator validator : oAuth2ScopeValidators) {
-                try {
-                    if (validator != null && ArrayUtils.isEmpty(scopeValidators) &&
-                            validator.getValidatorName().contains(DEFAULT_SCOPE_VALIDATOR_NAME)) {
-                        // validate scopes for old created applications
-                        isValid = validator.validateScope(accessTokenDO, resource);
-                    } else if (validator != null && scopeValidators != null &&
-                            appScopeValidators.contains(validator.getValidatorName())) {
-                        //take the intersection of defined scope validators and scope validators registered for the apps
-                        log.debug(String.format("Validating scope of token %s using %s", accessTokenDO.getTokenId(),
-                                validator.getValidatorName()));
-
-                        isValid = validator.validateScope(accessTokenDO, resource);
-                        appScopeValidators.remove(validator.getValidatorName());
-                    }
-                    if (!isValid) {
-                        log.debug(String.format("Scope validation failed for %s", validator.getValidatorName()));
+                            isValid = validator.validateScope(accessTokenDO, resource);
+                            appScopeValidators.remove(validator.getValidatorName());
+                        }
+                        if (!isValid) {
+                            log.debug(String.format("Scope validation of token %s using %s failed for %s",
+                                    accessTokenDO.getTokenId(), validator.getValidatorName(), scopeList.toString()));
+                            apiKeyValidationInfoDTO.setAuthorized(false);
+                            apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
+                            return false;
+                        }
+                    } catch (IdentityOAuth2Exception e) {
+                        log.error("ERROR while validating token scope " + e.getMessage(), e);
                         apiKeyValidationInfoDTO.setAuthorized(false);
                         apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
                         return false;
                     }
-                } catch (IdentityOAuth2Exception e) {
-                    log.error("ERROR while validating token scope " + e.getMessage(), e);
-                    apiKeyValidationInfoDTO.setAuthorized(false);
-                    apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
-                    return false;
                 }
             }
             if (!appScopeValidators.isEmpty()) {   //if scope validators are not defined in identity.xml but there are
@@ -234,7 +242,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
             return false;
         } catch (IdentityOAuth2Exception e) {
-            log.error("Error while retrieving the app information");
+            log.error(String.format("Error while retrieving the app information of %s", appInfo.getApplicationName()));
             apiKeyValidationInfoDTO.setAuthorized(false);
             apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
             return false;

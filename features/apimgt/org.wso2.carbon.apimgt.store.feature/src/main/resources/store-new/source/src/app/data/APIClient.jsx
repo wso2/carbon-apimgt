@@ -15,10 +15,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-"use strict";
-import SwaggerClient from 'swagger-client'
-import AuthManager from './AuthManager'
-import Utils from "./Utils";
+
+
+import SwaggerClient from 'swagger-client';
+import { Mutex } from 'async-mutex';
+import Configurations from 'Config';
+import queryString from 'query-string';
+import AuthManager from './AuthManager';
+import Utils from './Utils';
 
 /**
  * This class expose single swaggerClient instance created using the given swagger URL (Publisher, Store, ect ..)
@@ -33,30 +37,31 @@ class APIClient {
      */
     constructor(host, args = {}) {
         this.host = host || location.host;
-
+        this.environment = Utils.getCurrentEnvironment();
         const authorizations = {
             OAuth2Security: {
-                token: {access_token: AuthManager.getUser() ? AuthManager.getUser().getPartialToken() : ""}
-            }
+                token: { access_token: AuthManager.getUser() ? AuthManager.getUser().getPartialToken() : '' },
+            },
         };
 
         SwaggerClient.http.withCredentials = true;
-        let promisedResolve = SwaggerClient.resolve({url: Utils.getSwaggerURL(), requestInterceptor: (request) => { request.headers.Accept = "text/yaml";}});
+        const promisedResolve = SwaggerClient.resolve({ url: Utils.getSwaggerURL(), requestInterceptor: (request) => { request.headers.Accept = 'text/yaml'; } });
         APIClient.spec = promisedResolve;
         this._client = promisedResolve.then(
-            resolved => {
+            (resolved) => {
                 const argsv = Object.assign(args,
                     {
                         spec: this._fixSpec(resolved.spec),
-                        authorizations: authorizations,
+                        authorizations,
                         requestInterceptor: this._getRequestInterceptor(),
-                        responseInterceptor: this._getResponseInterceptor()
+                        responseInterceptor: this._getResponseInterceptor(),
                     });
                 SwaggerClient.http.withCredentials = true;
                 return new SwaggerClient(argsv);
-            }
+            },
         );
         this._client.catch(AuthManager.unauthorizedErrorHandler);
+        this.mutex = new Mutex();
     }
 
     /**
@@ -73,7 +78,7 @@ class APIClient {
      * @returns {string} ETag value for the given key
      */
     static getETag(key) {
-        return sessionStorage.getItem("etag_" + key);
+        return sessionStorage.getItem('etag_' + key);
     }
 
     /**
@@ -82,7 +87,7 @@ class APIClient {
      * @param etag {string} etag value to be stored against the key
      */
     static addETag(key, etag) {
-        sessionStorage.setItem("etag_" + key, etag);
+        sessionStorage.setItem('etag_' + key, etag);
     }
 
     /**
@@ -94,13 +99,13 @@ class APIClient {
     static getScopeForResource(resourcePath, resourceMethod) {
         if (!APIClient.spec) {
             SwaggerClient.http.withCredentials = true;
-            APIClient.spec = SwaggerClient.resolve({url: Utils.getSwaggerURL()});
+            APIClient.spec = SwaggerClient.resolve({ url: Utils.getSwaggerURL() });
         }
         return APIClient.spec.then(
-            resolved => {
+            (resolved) => {
                 return resolved.spec.paths[resourcePath] && resolved.spec.paths[resourcePath][resourceMethod] && resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0];
-            }
-        )
+            },
+        );
     }
 
     /**
@@ -113,7 +118,7 @@ class APIClient {
      */
     _fixSpec(spec) {
         spec.host = this.host;
-        spec.security = [{OAuth2Security : ["apim:api_subscribe"]}];
+        spec.security = [{ OAuth2Security: ['apim:api_subscribe'] }];
         return spec;
     }
 
@@ -122,17 +127,96 @@ class APIClient {
             if (data.headers.etag) {
                 APIClient.addETag(data.url, data.headers.etag);
             }
-            return data;
-        }
-    }
 
-    _getRequestInterceptor() {
-        return (data) => {
-            if (APIClient.getETag(data.url) && (data.method === "PUT" || data.method === "DELETE" || data.method === "POST")) {
-                data.headers["If-Match"] = APIClient.getETag(data.url);
+            // If an unauthenticated response is received, we check whether the token is valid by introspecting it.
+            // If it is not valid, we need to clear the stored tokens (in cookies etc) in the browser by redirecting the
+            //   user to logout.
+            if (data.status === 401 && data.obj != null && data.obj.description === 'Unauthenticated request') {
+                const userData = AuthManager.getUserFromToken();
+                const existingUser = AuthManager.getUser(this.environment.label);
+                if (existingUser) {
+                    userData.then((user) => {
+                        if (user) {
+                            window.location = Configurations.app.context + Utils.CONST.LOGOUT_CALLBACK;
+                        }
+                    }).catch((error) => {
+                        console.error('Error occurred while checking token status. Hence redirecting to login', error);
+                        window.location = Configurations.app.context + Utils.CONST.LOGOUT_CALLBACK;
+                    });
+                } else {
+                    console.error('Attempted a call to a protected API without a proper access token');
+                }
             }
             return data;
-        }
+        };
+    }
+
+    /**
+     * Interceptor for each request
+     * @returns {Object}
+     * @memberof APIClient
+     */
+    _getRequestInterceptor() {
+        return (request) => {
+            const { location } = window;
+            if (location) {
+                const { tenant } = queryString.parse(location.search);
+                if (tenant) {
+                    request.headers['X-WSO2-Tenant'] = tenant;
+                }
+            }
+
+            const existingUser = AuthManager.getUser(this.environment.label);
+            if (!existingUser) {
+                console.log('User not found. Token refreshing failed.');
+                return request;
+            }
+            let existingToken = AuthManager.getUser(this.environment.label).getPartialToken();
+            const refToken = AuthManager.getUser(this.environment.label).getRefreshPartialToken();
+            if (existingToken) {
+                request.headers.authorization = 'Bearer ' + existingToken;
+                return request;
+            } else {
+                console.log('Access token is expired. Trying to refresh.');
+                if (!refToken) {
+                    console.log('Refresh token not found. Token refreshing failed.');
+                    return request;
+                }
+            }
+
+            const env = this.environment;
+            const promise = new Promise((resolve, reject) => {
+                this.mutex.acquire().then((release) => {
+                    existingToken = AuthManager.getUser(env.label).getPartialToken();
+                    if (existingToken) {
+                        request.headers.authorization = 'Bearer ' + existingToken;
+                        release();
+                        resolve(request);
+                    } else {
+                        AuthManager.refresh(env).then(res => res.json())
+                            .then(() => {
+                                request.headers.authorization = 'Bearer '
+                                    + AuthManager.getUser(env.label).getPartialToken();
+                                release();
+                                resolve(request);
+                            }).catch((error) => {
+                                console.error('Error:', error);
+                                release();
+                                reject();
+                            })
+                            .finally(() => {
+                                release();
+                            });
+                    }
+                });
+            });
+
+            if (APIClient.getETag(request.url)
+                && (request.method === 'PUT' || request.method === 'DELETE' || request.method === 'POST')) {
+                request.headers['If-Match'] = APIClient.getETag(request.url);
+            }
+            return promise;
+        };
     }
 }
 

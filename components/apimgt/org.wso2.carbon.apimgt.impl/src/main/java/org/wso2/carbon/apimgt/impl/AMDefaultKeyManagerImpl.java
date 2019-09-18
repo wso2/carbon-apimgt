@@ -436,15 +436,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         token.setTokenType("bearer");
         requestDTO.setAccessToken(token);
 
-        //TODO: If these values are not set, validation will fail giving an NPE. Need to see why that happens
-        OAuth2TokenValidationRequestDTO.TokenValidationContextParam contextParam = requestDTO.new
-                TokenValidationContextParam();
-        contextParam.setKey("dummy");
-        contextParam.setValue("dummy");
-
         OAuth2TokenValidationRequestDTO.TokenValidationContextParam[] contextParams =
                 new OAuth2TokenValidationRequestDTO.TokenValidationContextParam[1];
-        contextParams[0] = contextParam;
         requestDTO.setContext(contextParams);
 
         OAuth2ClientApplicationDTO clientApplicationDTO = findOAuthConsumerIfTokenIsValid(requestDTO);

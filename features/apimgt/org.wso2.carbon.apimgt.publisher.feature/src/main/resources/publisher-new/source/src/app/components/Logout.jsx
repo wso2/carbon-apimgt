@@ -19,10 +19,8 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import qs from 'qs';
-import Alert from 'AppComponents/Shared/Alert';
-import PropTypes from 'prop-types';
-
-import AuthManager from 'AppData/AuthManager';
+import Utils from 'AppData/Utils';
+import User from 'AppData/User';
 
 /**
  *
@@ -38,13 +36,9 @@ class Logout extends Component {
      */
     constructor(props) {
         super(props);
-        const { search } = window.location;
-        const queryString = search.replace(/^\?/, '');
-        /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
-        const queryParams = qs.parse(queryString);
-        this.referrer = qs.stringify({ referrer: queryParams.referrer || '/' });
         this.state = {
             logoutSuccess: false,
+            referrer: '/apis',
         };
     }
 
@@ -54,15 +48,17 @@ class Logout extends Component {
      * @memberof Logout
      */
     componentDidMount() {
-        const authManager = new AuthManager();
-        const promisedLogout = authManager.logoutFromEnvironments();
-        promisedLogout
-            .then(() => this.setState({ logoutSuccess: true }))
-            .catch((error) => {
-                const message = 'Error while logging out';
-                Alert.error(message);
-                console.log(error);
-            });
+        const environmentName = Utils.getCurrentEnvironment().label;
+        localStorage.removeItem(`${User.CONST.LOCAL_STORAGE_USER}_${environmentName}`);
+        const newState = { logoutSuccess: true };
+        let { search } = window.location;
+        search = search.replace(/^\?/, '');
+        /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
+        const params = qs.parse(search);
+        if (params.referrer) {
+            newState.referrer = params.referrer;
+        }
+        this.setState(newState);
     }
 
     /**
@@ -72,15 +68,9 @@ class Logout extends Component {
      * @memberof Logout
      */
     render() {
-        const { logoutSuccess } = this.state;
-        return logoutSuccess && <Redirect to={{ pathname: '/login', search: this.referrer }} />;
+        const { logoutSuccess, referrer } = this.state;
+        return logoutSuccess && <Redirect to={referrer} />;
     }
 }
-
-Logout.propTypes = {
-    location: PropTypes.shape({
-        search: PropTypes.string,
-    }).isRequired,
-};
 
 export default Logout;

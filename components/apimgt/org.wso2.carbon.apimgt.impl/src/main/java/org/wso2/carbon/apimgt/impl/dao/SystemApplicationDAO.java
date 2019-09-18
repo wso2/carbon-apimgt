@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.SystemApplicationDTO;
-import org.wso2.carbon.apimgt.impl.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.api.APIMgtDAOException;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
 import java.sql.Connection;
@@ -34,6 +34,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.TimeZone;
+import java.util.concurrent.Semaphore;
 
 /**
  * Implementation for SystemApplicationDAO
@@ -43,6 +44,16 @@ public class SystemApplicationDAO {
     private static final Logger log = LoggerFactory.getLogger(SystemApplicationDAO.class);
     private static final String SYSTEM_APP_TABLE_NAME = "AM_SYSTEM_APPS";
     private static boolean initialAutoCommit = false;
+    private static Semaphore semaphore = new Semaphore(1);
+
+    /**
+     * A Semaphore object which acts as a lock for doing thread safe invocations of the DAO
+     *
+     * @return static Semaphore object
+     */
+    public static Semaphore getLock() {
+        return semaphore;
+    }
 
     /**
      * Checks whether the system application table exists in the database.

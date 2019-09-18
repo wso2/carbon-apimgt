@@ -36,11 +36,12 @@ import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 
-import java.util.ArrayList;
+
+import javax.cache.Caching;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.cache.Caching;
 
 /**
  * This class represents the functions related to an scope issuer which
@@ -80,20 +81,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
             //Add API Manager rest API scopes set. This list should be loaded at server start up and keep
             //in memory and add it to each and every request coming.
             String tenantDomain = tokReqMsgCtx.getAuthorizedUser().getTenantDomain();
-            restAPIScopesOfCurrentTenant = (Map) getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                    .getCache("REST_API_SCOPE_CACHE")
-                    .get(tenantDomain);
-            if (restAPIScopesOfCurrentTenant != null) {
-                appScopes.putAll(restAPIScopesOfCurrentTenant);
-            } else {
-                restAPIScopesOfCurrentTenant = getRESTAPIScopesFromConfig(getTenantRESTAPIScopesConfig(tenantDomain));
-                //call load tenant config for rest API.
-                //then put cache
-                appScopes.putAll(restAPIScopesOfCurrentTenant);
-                getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                        .getCache("REST_API_SCOPE_CACHE")
-                        .put(tenantDomain, restAPIScopesOfCurrentTenant);
-            }
+            appScopes.putAll(APIUtil.getRESTAPIScopesForTenant(tenantDomain));
 
             //If no scopes can be found in the context of the application
             if (appScopes.isEmpty()) {

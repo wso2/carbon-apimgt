@@ -44,12 +44,13 @@ public class TenantManagerHostObject extends ScriptableObject {
 
     //using a set for file extensions white list since it will be faster to search
     private static final Set<String> EXTENTION_WHITELIST = new HashSet<String>(Arrays.asList(
-            new String[]{"css", "jpg", "png", "gif", "svg", "ttf", "html", "js"}
+            new String[]{"css", "jpg", "png", "gif", "svg", "ttf", "html", "js", "json"}
     ));
 
     public static String getStoreTenantThemesPath() {
         return "repository" + File.separator + "deployment" + File.separator + "server" + File.separator + "jaggeryapps"
-                + File.separator + "store" + File.separator + "site" + File.separator + "tenant_themes" + File.separator;
+                + File.separator + "store-new" + File.separator + "site" + File.separator + "public"
+                + File.separator + "tenant_themes" + File.separator;
     }
 
     @Override

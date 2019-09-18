@@ -17,10 +17,11 @@
  * under the License.
  */
 
-    var log = new Log("Token Request Function");
     include("/services/constants.jag");
+    include("/services/jagg.jag");
     var site = require("/site/conf/site.json");
     var utils = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+
     var serverUrl = utils.getServerURL();
     var tokenRequestData = {
         "grant_type": "authorization_code",
@@ -38,9 +39,9 @@
     var String = Packages.java.lang.String;
     var Integer = Packages.java.lang.Integer;
     var base64encoded = Base64.encode ( new String (clientId + ":" + clientSecret).getBytes());
-    var tokenEndpoint = MGT_TRANSPORT + HOST + ":" +  application.get("serverPort") + TOKEN_URL_SUFFIX;
+    var tokenEndpoint = MGT_TRANSPORT + HOST + ":" + getServerPort() + TOKEN_URL_SUFFIX;
     var result = post(tokenEndpoint, tokenRequestData,{"Authorization": "Basic " + base64encoded});
-    log.debug("Token response: " + result.data);
+
     response.contentType = "application/json";
     var tokenResponse = JSON.parse(result.data);
 
@@ -61,14 +62,6 @@
     var refreshTokenPart1 = refreshToken.substring(0, tokenLength/2);
     var refreshTokenPart2 = refreshToken.substring(tokenLength/2, tokenLength);
 
-    var response_data = {
-        AM_ACC_TOKEN_DEFAULT_P1: String(accessTokenPart1),
-        AM_REF_TOKEN_DEFAULT_P1: String(refreshTokenPart1),
-        id_token: String(tokenResponse.id_token),
-        scope: String(tokenResponse.scope),
-        expires_in: String(tokenResponse.expires_in)
-    } // TODO: not in use ~tmkb
-
     // Setting access token part 1 as secured HTTP only cookie, Can't restrict the path to /api/am/store
     // because partial HTTP only cookie is required for get the user information from access token,
     // hence setting the HTTP only access token path to /store-new/
@@ -84,10 +77,10 @@
     cookie = {'name': 'WSO2_AM_TOKEN_1_Default', 'value': accessTokenPart1, 'path': site.context + "/", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
     response.addCookie(cookie);
 
-    cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P2', 'value':idTokenPart2, 'path': "/store-new/services/logout", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
+    cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P2', 'value':idTokenPart2, 'path': site.context + "/services/logout", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
     response.addCookie(cookie);
 
-    cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P1', 'value':idTokenPart1, 'path': "/store-new/services/logout", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
+    cookie = {'name': 'AM_ID_TOKEN_DEFAULT_P1', 'value':idTokenPart1, 'path': site.context + "/services/logout", "secure": true, "maxAge": Integer(tokenResponse.expires_in)};
     response.addCookie(cookie);
 
     var state = request.getParameter("state");

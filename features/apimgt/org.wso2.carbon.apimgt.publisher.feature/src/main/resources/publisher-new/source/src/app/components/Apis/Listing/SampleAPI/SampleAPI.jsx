@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -27,7 +27,7 @@ import green from '@material-ui/core/colors/green';
 import Create from '@material-ui/icons/Create';
 import GetApp from '@material-ui/icons/GetApp';
 import { PropTypes } from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
@@ -45,10 +45,11 @@ const styles = theme => ({
         paddingLeft: theme.spacing.unit * 2.5,
     },
     head: {
-        paddingBottom: theme.spacing.unit,
+        paddingBottom: theme.spacing.unit * 2,
+        fontWeight: 200,
     },
     content: {
-        paddingBottom: theme.spacing.unit,
+        paddingBottom: theme.spacing.unit * 2,
     },
     buttonLeft: {
         marginRight: theme.spacing.unit,
@@ -85,9 +86,14 @@ class SampleAPI extends Component {
      * @memberof SampleAPI
      */
     handleDeploySample() {
+        const { intl } = this.props;
         this.setState({ deploying: true });
         const promisedSampleAPI = this.createSampleAPI();
         const swaggerUpdatePromise = promisedSampleAPI.then((sampleAPI) => {
+            Alert.info(intl.formatMessage({
+                id: 'Apis.Listing.SampleAPI.SampleAPI.created',
+                defaultMessage: 'Sample PizzaShackAPI API created successfully',
+            }));
             return sampleAPI.updateSwagger(getSampleSwagger('Unlimited'));
         });
         swaggerUpdatePromise.catch((error) => {
@@ -97,9 +103,11 @@ class SampleAPI extends Component {
         swaggerUpdatePromise.then((api) => {
             api.publish()
                 .then(() => {
-                    const message = 'Pet-Store API Published successfully';
                     this.setState({ published: true, api });
-                    Alert.info(message);
+                    Alert.info(intl.formatMessage({
+                        id: 'Apis.Listing.SampleAPI.SampleAPI.published',
+                        defaultMessage: 'PizzaShackAPI API published successfully',
+                    }));
                 })
                 .catch((error) => {
                     console.error(error);
@@ -132,66 +140,43 @@ class SampleAPI extends Component {
                 technicalOwner: 'John Doe',
                 technicalOwnerEmail: 'architecture@pizzashack.com',
             },
-            endpoint: [
-                {
-                    inline: {
-                        endpointConfig: {
-                            list: [
-                                {
-                                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
-                                    timeout: '1000',
-                                },
-                            ],
-                            endpointType: 'SINGLE',
-                        },
-                        type: 'http',
-                    },
-                    type: 'production_endpoints',
+            endpointConfig: {
+                endpoint_type: 'http',
+                sandbox_endpoints: {
+                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
                 },
-                {
-                    inline: {
-                        endpointConfig: {
-                            list: [
-                                {
-                                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
-                                    timeout: '1000',
-                                },
-                            ],
-                            endpointType: 'SINGLE',
-                        },
-                        type: 'http',
-                    },
-                    type: 'sandbox_endpoints',
+                production_endpoints: {
+                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
                 },
-            ],
+            },
             operations: [
                 {
-                    uritemplate: '/order/{orderId}',
-                    httpVerb: 'GET',
+                    target: '/order/{orderId}',
+                    verb: 'GET',
                     throttlingPolicy: 'Unlimited',
                     authType: 'Application & Application User',
                 },
                 {
-                    uritemplate: '/order/{orderId}',
-                    httpVerb: 'DELETE',
+                    target: '/order/{orderId}',
+                    verb: 'DELETE',
                     throttlingPolicy: 'Unlimited',
                     authType: 'Application & Application User',
                 },
                 {
-                    uritemplate: '/order/{orderId}',
-                    httpVerb: 'PUT',
+                    target: '/order/{orderId}',
+                    verb: 'PUT',
                     throttlingPolicy: 'Unlimited',
                     authType: 'Application & Application User',
                 },
                 {
-                    uritemplate: '/menu',
-                    httpVerb: 'GET',
+                    target: '/menu',
+                    verb: 'GET',
                     throttlingPolicy: 'Unlimited',
                     authType: 'Application & Application User',
                 },
                 {
-                    uritemplate: '/order',
-                    httpVerb: 'POST',
+                    target: '/order',
+                    verb: 'POST',
                     throttlingPolicy: 'Unlimited',
                     authType: 'Application & Application User',
                 },
@@ -229,7 +214,7 @@ class SampleAPI extends Component {
         return (
             <InlineMessage type='info' height={140}>
                 <div className={classes.contentWrapper}>
-                    <Typography variant='headline' component='h3' className={classes.head}>
+                    <Typography variant='h5' component='h3' className={classes.head}>
                         <FormattedMessage
                             id='welcome.to.wso2.api.manager'
                             defaultMessage='Welcome to WSO2 API Manager'
@@ -237,10 +222,12 @@ class SampleAPI extends Component {
                     </Typography>
                     <Typography component='p' className={classes.content}>
                         <FormattedMessage
-                            id={
-                                'wso2.api.publisher.enables.api.providers.to.publish.apis,.share.' +
-                                'documentation,.provision.api.keys.and.gather.feedback.on.features,.quality' +
-                                '.and.usage..to.get.started,.create.an.api.or.publish.a.sample.api..'
+                            id='Apis.Listing.SampleAPI.SampleAPI.description'
+                            defaultMessage={
+                                'WSO2 API Publisher enables API providers to ' +
+                                ' publish APIs, share documentation, provision API keys and gather feedback' +
+                                ' on features, quality and usage. To get started, Create an API ' +
+                                'or Publish a sample API.'
                             }
                         />
                     </Typography>
@@ -265,8 +252,8 @@ class SampleAPI extends Component {
                         >
                             <GetApp />
                             <FormattedMessage id='deploy.sample.api' defaultMessage='Deploy Sample API' />
+                            {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
                         </Button>
-                        {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
                     </div>
                 </div>
             </InlineMessage>
@@ -276,6 +263,7 @@ class SampleAPI extends Component {
 
 SampleAPI.propTypes = {
     classes: PropTypes.shape({}).isRequired,
+    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
 };
 
-export default withStyles(styles)(SampleAPI);
+export default injectIntl(withStyles(styles)(SampleAPI));

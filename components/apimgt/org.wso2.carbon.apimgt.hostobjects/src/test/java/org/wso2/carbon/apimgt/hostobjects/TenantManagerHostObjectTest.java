@@ -21,9 +21,9 @@ public class TenantManagerHostObjectTest {
 
     @Test
     public void testGetStoreTenantThemesPath() throws Exception {
-        Assert.assertEquals(TenantManagerHostObject.getStoreTenantThemesPath(), "repository"+File.separator+"deployment"
-        +File.separator+"server"+File.separator+"jaggeryapps"+File.separator+"store"+File.separator+"site"+File.separator+
-        "tenant_themes"+File.separator+"");
+        Assert.assertEquals(TenantManagerHostObject.getStoreTenantThemesPath(), "repository"+File.separator
+                +"deployment" +File.separator+"server"+File.separator+"jaggeryapps"+File.separator+"store-new"
+                +File.separator+"site" +File.separator+"public"+File.separator+ "tenant_themes"+File.separator+"");
     }
 
     @Test

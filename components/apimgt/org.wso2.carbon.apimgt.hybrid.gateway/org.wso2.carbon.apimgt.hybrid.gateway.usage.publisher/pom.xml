@@ -16,12 +16,11 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>org.wso2.carbon.apimgt.hybrid.gateway</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.4.227-SNAPSHOT</version>
+        <version>6.5.108-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -125,6 +124,11 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.ds-annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -156,8 +160,8 @@
                             org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher.*;version="${project.version}"
                         </Export-Package>
                         <Import-Package>
-                            org.osgi.framework.*,
-                            org.osgi.service.component.*,
+                            org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",					
                             com.lmax.disruptor.*;version="${lmax.disruptor.version.range}",
                             org.wso2.carbon.apimgt.api;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.imp.pkg.version}",
@@ -179,10 +183,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <configuration>
@@ -191,14 +191,7 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
+
         </plugins>
     </build>
 

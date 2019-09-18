@@ -112,7 +112,7 @@ public class LocalEntryAdminClient {
      * @return LocalEntry
      * @throws AxisFault If error occurs when retrieving Local Entry.
      */
-    public Boolean getEntry(String key) throws AxisFault {
+    public Boolean localEntryExists(String key) throws AxisFault {
         try {
             Object localEntryObject = localEntryAdminServiceStub.getEntry(key, tenantDomain);
             return localEntryObject != null;

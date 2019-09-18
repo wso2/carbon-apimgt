@@ -17,45 +17,50 @@
  */
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import ApiContext from '../components/ApiContext';
+import Grid from '@material-ui/core/Grid';
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
+/**
+ *
+ *
+ * @param {*} props
+ * @returns
+ */
 function Policies(props) {
-    const { parentClasses } = props;
+    const { parentClasses, api } = props;
     return (
-        <ApiContext.Consumer>
-            {({ api }) => (
-                <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
-                    <div className={parentClasses.titleWrapper}>
-                        <Typography variant='h5' component='h3' className={parentClasses.title}>
-                            Throttling Policies
-                        </Typography>
-                        <Link to={'/apis/' + api.id + '/documents'}>
-                            <Button variant='contained' color='default'>
-                                Edit
-                            </Button>
-                        </Link>
-                    </div>
-
-                    {/* Throttling Policies */}
-                    <Typography component='p' variant='body1'>
-                        {api.policies && api.policies.length !== 0 && api.policies.map( (item,index) => (
-                            <span>{item}{api.policies.length !== (index+1) && `, `} </span>    
-                        ))}
-                    </Typography>
-                </Paper>
-            )}
-        </ApiContext.Consumer>
+        <React.Fragment>
+            <Grid item xs={12} md={6} lg={4}>
+                <Typography component='p' variant='subtitle2' className={parentClasses.subtitle}>
+                    <FormattedMessage
+                        id='Apis.Details.NewOverview.Policies.business.plans'
+                        defaultMessage='Business Plans:'
+                    />
+                </Typography>
+            </Grid>
+            <Grid item xs={12} md={6} lg={8}>
+                {/* Throttling Policies */}
+                <Typography component='p' variant='body1'>
+                    {api.policies &&
+                    api.policies.length !== 0 &&
+                    api.policies.map((item, index) => (
+                        <span>
+                            {item}
+                            {api.policies.length !== index + 1 && ', '}{' '}
+                        </span>
+                    ))}
+                </Typography>
+            </Grid>
+        </React.Fragment>
     );
 }
 
 Policies.propTypes = {
-    parentClasses: PropTypes.object.isRequired,
+    parentClasses: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({}).isRequired,
 };
 
-export default Policies;
+export default withAPI(Policies);

@@ -36,7 +36,8 @@ public class ThrottlingPolicyMappingUtil {
     /**
      * Converts a List object of Tiers into a DTO
      *
-     * @param throttlingPolicyList a list of ThrottlingPolicy_ objects
+     * @param throttlingPolicyList a list of Tier objects
+     * @param policyLevel          the policy level(eg: application or subscription)
      * @param limit                max number of objects returned
      * @param offset               starting index
      * @return TierListDTO object containing TierDTOs
@@ -101,7 +102,7 @@ public class ThrottlingPolicyMappingUtil {
     /**
      * Converts a Tier object into TierDTO
      *
-     * @param throttlingPolicy ThrottlingPolicy_ object
+     * @param throttlingPolicy Tier object
      * @param tierLevel        tier level (api/application or resource)
      * @return TierDTO corresponds to Tier object
      */

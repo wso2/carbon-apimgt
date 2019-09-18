@@ -16,9 +16,8 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.basicauth;
 
-import io.swagger.models.Swagger;
-import io.swagger.parser.SwaggerParser;
-import org.apache.commons.lang.StringUtils;
+import io.swagger.v3.oas.models.OpenAPI;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -29,12 +28,13 @@ import org.apache.ws.security.util.Base64;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
+import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
-import org.apache.synapse.config.Entry;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -50,19 +50,16 @@ public class BasicAuthAuthenticator implements Authenticator {
     private String securityHeader;
     private String requestOrigin;
     private BasicAuthCredentialValidator basicAuthCredentialValidator;
-    private String apiUUID;
-    private Swagger swagger = null;
+    private OpenAPI openAPI = null;
     private boolean isMandatory;
 
     /**
      * Initialize the authenticator with the required parameters.
      *
      * @param authorizationHeader the Authorization header
-     * @param apiUUID             the API UUID
      */
-    public BasicAuthAuthenticator(String authorizationHeader, boolean isMandatory, String apiUUID) {
+    public BasicAuthAuthenticator(String authorizationHeader, boolean isMandatory) {
         this.securityHeader = authorizationHeader;
-        this.apiUUID = apiUUID;
         this.isMandatory = isMandatory;
     }
 
@@ -108,19 +105,18 @@ public class BasicAuthAuthenticator implements Authenticator {
             log.info("Basic Authentication initialized");
         }
 
-        if (swagger == null && apiUUID != null) {
-            Entry localEntryObj = (Entry) synCtx.getConfiguration().getLocalRegistry().get(apiUUID);
-            if (localEntryObj != null) {
-                SwaggerParser parser = new SwaggerParser();
-                swagger = parser.parse(localEntryObj.getValue().toString());
-            }
+        openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
+        if (openAPI == null) {
+            log.error("OpenAPI definition is missing in the gateway. Basic authentication cannot be performed.");
+            return new AuthenticationResponse(false, isMandatory, true,
+                    APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF, "Basic authentication cannot be performed.");
         }
 
         // Extract basic authorization header while removing it from the authorization header
         String basicAuthHeader = extractBasicAuthHeader(synCtx);
 
         // Check for resource level authentication
-        String authenticationScheme = basicAuthCredentialValidator.getResourceAuthenticationScheme(swagger, synCtx);
+        String authenticationScheme = OpenAPIUtils.getResourceAuthenticationScheme(openAPI, synCtx);
 
         if (APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)) {
             if (log.isDebugEnabled()) {
@@ -199,7 +195,7 @@ public class BasicAuthAuthenticator implements Authenticator {
             //scope validation
             boolean scopesValid = false;
             try {
-                scopesValid = basicAuthCredentialValidator.validateScopes(username, swagger, synCtx);
+                scopesValid = basicAuthCredentialValidator.validateScopes(username, openAPI, synCtx);
             } catch (APISecurityException ex) {
                 return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
             }
@@ -214,9 +210,11 @@ public class BasicAuthAuthenticator implements Authenticator {
                     authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
                     authContext.setStopOnQuotaReach(true);//Since we don't have details on unauthenticated tier we setting stop on quota reach true
                     //Resource level throttling
+                    List<VerbInfoDTO> verbInfoList = new ArrayList<>(1);
                     VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
-                    verbInfoDTO.setThrottling(basicAuthCredentialValidator.getResourceThrottlingTier(swagger, synCtx));
-                    synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoDTO);
+                    verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
+                    verbInfoList.add(verbInfoDTO);
+                    synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
 
                     //In basic authentication scenario, we will use the username for throttling.
                     authContext.setApiKey(username);
@@ -229,7 +227,7 @@ public class BasicAuthAuthenticator implements Authenticator {
                     APISecurityUtils.setAuthenticationContext(synCtx, authContext, null);
                 }
                 log.debug("Basic Authentication: Scope validation passed");
-                return new AuthenticationResponse(true, isMandatory, false,0, null);
+                return new AuthenticationResponse(true, isMandatory, false, 0, null);
             }
             return new AuthenticationResponse(false, isMandatory, true,
                     APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
@@ -296,7 +294,7 @@ public class BasicAuthAuthenticator implements Authenticator {
                     String[] authHeaderArr = authHeader.split(authHeaderSplitter);
                     ArrayList<String> remainingAuthHeaders = new ArrayList<>();
                     String basicAuthHeader = null;
-                    for (String headerSegment: authHeaderArr) {
+                    for (String headerSegment : authHeaderArr) {
                         if (headerSegment.trim().split(" ")[0].equals(basicAuthKeyHeaderSegment)) {
                             basicAuthHeader = headerSegment.trim();
                         } else {

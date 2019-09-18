@@ -35,8 +35,7 @@ import Radio from '@material-ui/core/Radio';
 import FormLabel from '@material-ui/core/FormLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Alert from 'AppComponents/Shared/Alert';
-
-import ApiContext from '../components/ApiContext';
+import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = theme => ({
     FormControl: {
@@ -130,19 +129,26 @@ class CreateNewVersion extends React.Component {
             return;
         }
         const isDefaultVersionBool = isDefaultVersion === 'yes';
+        const { intl } = this.props;
         api.createNewAPIVersion(newVersion, isDefaultVersionBool)
             .then((response) => {
                 this.setState({
                     redirectToReferrer: true,
                     apiId: response.obj.id,
                 });
-                Alert.info('Successfully created new version "' + newVersion + '"');
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.NewVersion.NewVersion.success',
+                    defaultMessage: 'Successfully created new version',
+                }) + newVersion);
             })
             .catch((error) => {
                 if (error.status === 409) {
                     this.setState({ valid: { version: { alreadyExists: true } } });
                 } else {
-                    Alert.error('Something went wrong while creating a new version!. Error: ' + error.status);
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.NewVersion.NewVersion.error',
+                        defaultMessage: 'Something went wrong while creating a new version!. Error: ',
+                    }) + error.status);
                 }
             });
     }
@@ -153,14 +159,12 @@ class CreateNewVersion extends React.Component {
      * @returns {*} CreateNewVersion component
      */
     render() {
-        const { classes } = this.props;
+        const { classes, api } = this.props;
         const {
             isDefaultVersion, newVersion, redirectToReferrer, apiId, valid,
         } = this.state;
         if (redirectToReferrer) {
-            return (
-                <Redirect to={'/apis/' + apiId + '/overview'} />
-            );
+            return <Redirect to={'/apis/' + apiId + '/overview'} />;
         }
 
         let helperText = 'Provide new version';
@@ -174,117 +178,154 @@ class CreateNewVersion extends React.Component {
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        Create New Version
+                        <FormattedMessage
+                            id='Apis.Details.NewVersion.NewVersion.create.new.version'
+                            defaultMessage='Create New Version'
+                        />
                     </Typography>
                 </div>
-                <ApiContext.Consumer>
-                    {({ api }) => (
-                        <Grid container spacing={24}>
-                            <Grid item xs={12}>
-                                <Paper className={classes.root} elevation={1}>
-                                    <FormControl margin='normal' className={classes.FormControlOdd}>
-                                        <TextField
-                                            fullWidth
-                                            id='name'
-                                            error={valid.version.empty || valid.version.alreadyExists}
-                                            label='New Version'
-                                            helperText={helperText}
-                                            type='text'
-                                            name='name'
-                                            placeholder='Eg: 2.0.0'
-                                            value={newVersion}
-                                            onChange={this.handleVersionChange()}
-                                            margin='normal'
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            autoFocus
+                <Grid container spacing={7}>
+                    <Grid item xs={12}>
+                        <Paper className={classes.root} elevation={1}>
+                            <FormControl margin='normal' className={classes.FormControlOdd}>
+                                <TextField
+                                    fullWidth
+                                    id='newVersion'
+                                    error={valid.version.empty || valid.version.alreadyExists}
+                                    label={
+                                        <FormattedMessage
+                                            id='Apis.Details.NewVersion.NewVersion.new.version'
+                                            defaultMessage='New Version'
                                         />
-                                    </FormControl>
-                                    <FormControl margin='normal' className={classes.FormControl}>
-                                        <FormLabel className={classes.FormLabel} component='legend'>
-                                            Make this the default version
-                                            <Tooltip
-                                                placement='top'
-                                                classes={{
-                                                    tooltip: classes.htmlTooltip,
-                                                }}
-                                                disableHoverListener
-                                                title={
-                                                    <React.Fragment>
-                                                        Marks one API version in a group as the default so that it
-                                                        can be invoked without specifying the version number in the
-                                                        URL. For example, if you mark http://host:port/youtube/2.0
-                                                        as the default API, requests made to
-                                                        http://host:port/youtube/ are automatically routed to
-                                                        version 2.0. If you mark an unpublished API as the default,
-                                                        the previous default published API will still be used as the
-                                                        default until the new default API is published.
-                                                    </React.Fragment>
-                                                }
-                                            >
-                                                <Button className={classes.helpButton}>
-                                                    <HelpOutline className={classes.helpIcon} />
-                                                </Button>
-                                            </Tooltip>
-                                        </FormLabel>
-                                        <RadioGroup
-                                            name='isDefaultVersion'
-                                            className={classes.group}
-                                            value={isDefaultVersion}
-                                            onChange={this.handleDefaultVersionChange()}
-                                        >
-                                            <FormControlLabel value='yes' control={<Radio />} label='Yes' />
-                                            <FormControlLabel value='no' control={<Radio />} label='No' />
-                                        </RadioGroup>
-                                        <FormHelperText>Indicate whether API should be the default version among the
-                                            group of APIs with the same name
-                                        </FormHelperText>
-                                    </FormControl>
-                                </Paper>
-                                <div className={classes.buttonWrapper}>
-                                    <Grid
-                                        container
-                                        direction='row'
-                                        alignItems='flex-start'
-                                        spacing={16}
-                                        className={classes.buttonSection}
+                                    }
+                                    helperText={
+                                        <FormattedMessage
+                                            id='Apis.Details.NewVersion.NewVersion.helper.text'
+                                            defaultMessage='{helper}'
+                                            values={{ helper: helperText }}
+                                        />
+                                    }
+                                    type='text'
+                                    name='newVersion'
+                                    placeholder='Eg: 2.0.0'
+                                    value={newVersion}
+                                    onChange={this.handleVersionChange()}
+                                    margin='normal'
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    autoFocus
+                                />
+                            </FormControl>
+                            <FormControl margin='normal' className={classes.FormControl}>
+                                <FormLabel className={classes.FormLabel} component='legend'>
+                                    <FormattedMessage
+                                        id='Apis.Details.NewVersion.NewVersion.default'
+                                        defaultMessage='Make this the default version'
+                                    />
+                                    <Tooltip
+                                        placement='top'
+                                        classes={{
+                                            tooltip: classes.htmlTooltip,
+                                        }}
+                                        disableHoverListener
+                                        title={
+                                            <React.Fragment>
+                                                <FormattedMessage
+                                                    id='Apis.Details.NewVersion.NewVersion.tooltip'
+                                                    defaultMessage={
+                                                        'Marks one API version in a group as ' +
+                                                        'the default so that it can be invoked without ' +
+                                                        'specifying the version number in the URL. ' +
+                                                        'For example, if you mark ' +
+                                                        'http://host:port/youtube/2.0 as the default API, ' +
+                                                        'requests made to http://host:port/youtube/ are ' +
+                                                        'automatically routed to version 2.0. If you mark ' +
+                                                        'an unpublished API as the default, ' +
+                                                        'the previous default published API ' +
+                                                        'will still be used as the default until ' +
+                                                        'the new default API is published.'
+                                                    }
+                                                />
+                                            </React.Fragment>
+                                        }
                                     >
-                                        <Grid item>
-                                            <div>
-                                                <Button
-                                                    variant='contained'
-                                                    color='primary'
-                                                    onClick={() => this.handleSubmit(api, newVersion, isDefaultVersion)}
-                                                >
-                                                    <FormattedMessage id='create' defaultMessage='Create' />
-                                                </Button>
-                                            </div>
-                                        </Grid>
-                                        <Grid item>
-                                            <Link to={'/apis/' + api.id + '/overview'}>
-                                                <Button>
-                                                    <FormattedMessage id='cancel' defaultMessage='Cancel' />
-                                                </Button>
-                                            </Link>
-                                        </Grid>
-                                    </Grid>
-                                </div>
+                                        <Button className={classes.helpButton}>
+                                            <HelpOutline className={classes.helpIcon} />
+                                        </Button>
+                                    </Tooltip>
+                                </FormLabel>
+                                <RadioGroup
+                                    name='isDefaultVersion'
+                                    id='isDefaultVersion'
+                                    className={classes.group}
+                                    value={isDefaultVersion}
+                                    onChange={this.handleDefaultVersionChange()}
+                                >
+                                    <FormControlLabel value='yes' control={<Radio />} label='Yes' />
+                                    <FormControlLabel value='no' control={<Radio />} label='No' />
+                                </RadioGroup>
+                                <FormHelperText>
+                                    <FormattedMessage
+                                        id='Apis.Details.NewVersion.NewVersion.api.helper'
+                                        defaultMessage={
+                                            'Indicate whether API should be the default version ' +
+                                            'among the group of APIs with the same name'
+                                        }
+                                    />
+                                </FormHelperText>
+                            </FormControl>
+                        </Paper>
+                        <div className={classes.buttonWrapper}>
+                            <Grid
+                                container
+                                direction='row'
+                                alignItems='flex-start'
+                                spacing={4}
+                                className={classes.buttonSection}
+                            >
+                                <Grid item>
+                                    <div>
+                                        <Button
+                                            variant='contained'
+                                            color='primary'
+                                            id='createBtn'
+                                            onClick={() => this.handleSubmit(api, newVersion, isDefaultVersion)}
+                                        >
+                                            <FormattedMessage
+                                                id='Apis.Details.NewVersion.NewVersion.create'
+                                                defaultMessage='Create'
+                                            />
+                                        </Button>
+                                    </div>
+                                </Grid>
+                                <Grid item>
+                                    <Link to={'/apis/' + api.id + '/overview'}>
+                                        <Button id='cancelBtn'>
+                                            <FormattedMessage
+                                                id='Apis.Details.NewVersion.NewVersion.cancel'
+                                                defaultMessage='Cancel'
+                                            />
+                                        </Button>
+                                    </Link>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    )}
-                </ApiContext.Consumer>
+                        </div>
+                    </Grid>
+                </Grid>
             </div>
         );
     }
 }
 
 CreateNewVersion.propTypes = {
-    state: PropTypes.shape({}).isRequired,
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,
     }).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
-export default withStyles(styles)(CreateNewVersion);
+export default withAPI(withStyles(styles)(CreateNewVersion));

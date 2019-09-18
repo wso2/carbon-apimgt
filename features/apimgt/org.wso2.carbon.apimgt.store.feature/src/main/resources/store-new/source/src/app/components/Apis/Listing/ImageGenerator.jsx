@@ -15,28 +15,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import InboxIcon from '@material-ui/icons/Inbox';
-import FaceIcon from '@material-ui/icons/Face';
-import PlaceIcon from '@material-ui/icons/Place';
-import MailIcon from '@material-ui/icons/Mail';
+import Icon from '@material-ui/core/Icon';
+import MaterialIcons from 'MaterialIcons';
+import Background from './Background';
 
-const icons = {
-    InboxIcon,
-    FaceIcon,
-    PlaceIcon,
-    MailIcon,
-};
-
-const iconNames = Object.keys(icons);
 const styles = {
-    svgImage: {
-        cursor: 'pointer',
-        // ⚠️ object-fit is not supported by IE11.
-        objectFit: 'cover',
+    icon: {},
+    iconWrapper: {
+        position: 'relative',
+        '& span': {
+            position: 'absolute',
+            left: '50%',
+        },
     },
 };
 
@@ -55,36 +48,48 @@ class ImageGenerator extends PureComponent {
      */
     render() {
         const {
-            classes, api, width, height,
+            classes, api, width, height, theme, fixedIcon,
         } = this.props;
-        const str = typeof api === "object" ? api.name : api;
 
-        const colorPairs = [{ prime: 0x8f6bcaff, sub: 0x4fc2f8ff }, { prime: 0xf47f16ff, sub: 0xcddc39ff }, { prime: 0xf44236ff, sub: 0xfec107ff }, { prime: 0x2196f3ff, sub: 0xaeea00ff }, { prime: 0xff9700ff, sub: 0xffeb3cff }, { prime: 0xff9700ff, sub: 0xfe5722ff }];
-        const thumbnailBox = {
-            width: 250,
-            height: 200,
-        };
+        const {
+            category, key, color, backgroundIndex,
+        } = fixedIcon;
 
-        const thumbnailBoxChild = {
-            width: 50,
-            height: 50,
-        };
-        const randomIndex = (str.charCodeAt(0) + str.charCodeAt(str.length - 1)) % 5;
-        const randomIcon = (str.charCodeAt(0) + str.charCodeAt(str.length - 1)) % iconNames.length;
-        const colorPair = colorPairs[randomIndex];
-        const rects = [];
-        const Icon = icons[iconNames[randomIcon]];
-        for (let i = 0; i <= 4; i++) {
-            for (let j = 0; j <= 4; j++) {
-                rects.push(<rect key={i + '_' + j} {...thumbnailBoxChild} fill={'#' + (colorPair.sub - 0x00000025 * i - j * 0x00000015).toString(16)} x={200 - i * 54} y={54 * j} />);
-            }
+        let str = api;
+        if(typeof api === "object") str = api.name;
+        let count;
+        let colorPair;
+        let randomBackgroundIndex;
+        let IconElement;
+        const colorPairs = theme.custom.thumbnail.backgrounds;
+
+        // Creating the icon
+        if (key && category) {
+            IconElement = key;
+        } else if (api.type === 'DOC') {
+            IconElement = theme.custom.thumbnail.document.icon;
+        } else {
+            count = MaterialIcons.categories[0].icons.length;
+            const randomIconIndex = (str.charCodeAt(0) + str.charCodeAt(str.length - 1)) % count;
+            IconElement = MaterialIcons.categories[0].icons[randomIconIndex].id;
+        }
+
+        // Obtain or generate background color pair
+        if (api.type === 'DOC') {
+            colorPair = theme.custom.thumbnail.document.backgrounds;
+        } else if (backgroundIndex && colorPairs.length > backgroundIndex) {
+            colorPair = colorPairs[backgroundIndex];
+        } else {
+            randomBackgroundIndex = (str.charCodeAt(0) + str.charCodeAt(str.length - 1)) % colorPairs.length;
+            colorPair = colorPairs[randomBackgroundIndex];
         }
         return (
-            <svg width={width} height={height} className={classes.svgImage}>
-                <rect {...thumbnailBox} fill={'#' + colorPair.prime.toString(16)} />
-                {rects}
-                <Icon />
-            </svg>
+            <div className={classes.iconWrapper} style={{ width }}>
+                <Icon className={classes.icon} style={{ fontSize: height + 'px', marginLeft: -height / 2, color }}>
+                    {IconElement}
+                </Icon>
+                <Background width={width} height={height} colorPair={colorPair} />
+            </div>
         );
     }
 }
@@ -92,12 +97,22 @@ class ImageGenerator extends PureComponent {
 ImageGenerator.defaultProps = {
     height: 190,
     width: 250,
+    fixedIcon: {
+        category: null,
+        key: null,
+        color: '',
+        backgroundIndex: null,
+    },
 };
 
 ImageGenerator.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     height: PropTypes.number,
     width: PropTypes.number,
+    fixedIcon: PropTypes.shape({}),
+    api: PropTypes.shape({}).isRequired,
+    iconSettings: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles)(ImageGenerator);
+export default withStyles(styles, { withTheme: true })(ImageGenerator);

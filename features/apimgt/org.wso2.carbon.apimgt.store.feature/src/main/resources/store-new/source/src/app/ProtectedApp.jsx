@@ -18,25 +18,19 @@
 
 import React, { Component } from 'react';
 import qs from 'qs';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { addLocaleData, defineMessages, IntlProvider } from 'react-intl';
 import Configurations from 'Config';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import { Apis, Applications, Base } from './components';
-import ApplicationCreate from './components/Shared/AppsAndKeys/ApplicationCreate';
-import { PageNotFound, ScopeNotFound } from './components/Base/Errors';
+import Tenants from 'AppData/Tenants';
+import SettingsContext from 'AppComponents/Shared/SettingsContext';
+import queryString from 'query-string';
+import PropTypes from 'prop-types';
+import Base from './components/Base/index';
 import AuthManager from './data/AuthManager';
-import ApplicationEdit from './components/Applications/Edit/ApplicationEdit';
 import Loading from './components/Base/Loading/Loading';
-// import 'typeface-roboto'
 import Utils from './data/Utils';
 import ConfigManager from './data/ConfigManager';
-
-
-const themes = [];
-
-themes.push(createMuiTheme(Configurations.themes.light));
-themes.push(createMuiTheme(Configurations.themes.dark));
+import AppRouts from './AppRouts';
+import TenantListing from './TenantListing';
 
 /**
  * Language.
@@ -46,16 +40,11 @@ const language = (navigator.languages && navigator.languages[0])
     || navigator.language || navigator.userLanguage;
 
 /**
- * Language without region code.
- */
-const languageWithoutRegionCode = language.toLowerCase().split(/[_-]+/)[0];
-
-// import './materialize.css'
-
-/**
  * Render protected application paths
  */
 export default class ProtectedApp extends Component {
+    static contextType = SettingsContext;
+
     /**
      *  constructor
      * @param {*} props props passed to constructor
@@ -63,10 +52,10 @@ export default class ProtectedApp extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            themeIndex: 0,
             messages: {},
             userResolved: false,
             scopesFound: false,
+            tenantList: null,
         };
         this.environments = [];
         this.loadLocale = this.loadLocale.bind(this);
@@ -74,21 +63,25 @@ export default class ProtectedApp extends Component {
     }
 
     /**
-     * Change the theme index incrementally
-     */
-    componentWillMount() {
-        const storedThemeIndex = localStorage.getItem('themeIndex');
-        if (storedThemeIndex) {
-            this.setState({ themeIndex: parseInt(storedThemeIndex) });
-        }
-        const locale = languageWithoutRegionCode || language || 'en';
-        this.loadLocale(locale);
-    }
-
-    /**
      *  Check if data available ,if not get the user info from existing token information
      */
     componentDidMount() {
+        const { location: { search } } = this.props;
+        const { setTenantDomain } = this.context;
+        const { tenant } = queryString.parse(search);
+        const tenantApi = new Tenants();
+
+        // Check if tenant domain is present as a query param if not retrieve the tenant list
+        if (tenant) {
+            this.setState({ tenantList: [] }, setTenantDomain(tenant));
+        } else {
+            tenantApi.getTenantsByState().then((response) => {
+                this.setState({ tenantList: response.body.list });
+            }).catch((error) => {
+                console.error('error when getting tenants ' + error);
+            });
+        }
+
         ConfigManager.getConfigs()
             .environments.then((response) => {
                 this.environments = response.data.environments;
@@ -150,27 +143,17 @@ export default class ProtectedApp extends Component {
     }
 
     /**
-    *  Update the state of the theme
-    */
-    setTheme() {
-        this.setState({ theme: themes[this.state.themeIndex % 3] });
-        let { themeIndex } = this.state;
-        themeIndex++;
-        localStorage.setItem('themeIndex', themeIndex);
-    }
-
-    /**
      * Load locale file.
      *
      * @param {string} locale Locale name
      */
     loadLocale(locale = 'en') {
-        fetch(`${Utils.CONST.CONTEXT_PATH}/site/public/locales/${locale}.json`)
+        fetch(`${Configurations.app.context}/site/public/locales/${locale}.json`)
             .then(resp => resp.json())
             .then((data) => {
                 // eslint-disable-next-line global-require, import/no-dynamic-require
                 addLocaleData(require(`react-intl/locale-data/${locale}`));
-                this.setState({ messages: defineMessages(data) });
+                this.setState({ messages: defineMessages({ ...data }) });
             });
     }
 
@@ -180,10 +163,10 @@ export default class ProtectedApp extends Component {
      */
     handleEnvironmentQueryParam() {
         const { location } = this.props;
-        let queryString = location.search;
-        queryString = queryString.replace(/^\?/, '');
+        const { search } = { ...location };
+        const query = search.replace(/^\?/, '');
         /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
-        const queryParams = qs.parse(queryString);
+        const queryParams = qs.parse(query);
         const environmentName = queryParams.environment;
 
         if (!environmentName || Utils.getEnvironment() === environmentName) {
@@ -209,15 +192,27 @@ export default class ProtectedApp extends Component {
      * @returns {Component}
      */
     render() {
-        const { userResolved } = this.state;
+        const { userResolved, tenantList } = this.state;
+        const { tenantDomain } = this.context;
         if (!userResolved) {
             return <Loading />;
         }
-        const { scopesFound, messages, themeIndex } = this.state;
+        const { scopesFound, messages } = this.state;
         const isUserFound = AuthManager.getUser();
         let isAuthenticated = false;
         if (scopesFound && isUserFound) {
             isAuthenticated = true;
+        }
+
+        // Waiting till the tenant list is retrieved
+        if (tenantList === null) {
+            return <Loading />;
+        }
+        // user is redirected to tenant listing page if there are any tenants present and
+        // if the user is not authenticated and if there is no tenant domain present in the context
+        // tenantDomain contains INVALID when the tenant does not exist
+        if (tenantDomain === 'INVALID' || (tenantList.length > 0 && !isAuthenticated && tenantDomain === null)) {
+            return <TenantListing tenantList={tenantList} />;
         }
         /**
          * Note: AuthManager.getUser() method is a passive check, which simply
@@ -227,63 +222,15 @@ export default class ProtectedApp extends Component {
          */
         return (
             <IntlProvider locale={language} messages={messages}>
-                <MuiThemeProvider theme={themes[themeIndex % 2]}>
-                    <Base setTheme={() => this.setTheme()}>
-                        <Switch>
-                            <Redirect exact from='/' to='/apis' />
-                            <Route path='/apis' component={Apis} />
-                            {isAuthenticated ? (
-                                <React.Fragment>
-                                    <Route
-                                        path='/applications'
-                                        component={Applications}
-                                    />
-                                    <Route
-                                        path='/application/create'
-                                        component={ApplicationCreate}
-                                    />
-                                    <Route
-                                        path='/application/edit/:application_id'
-                                        component={ApplicationEdit}
-                                    />
-                                </React.Fragment>
-                            ) : [isUserFound ? (
-                                <React.Fragment>
-                                    <Route
-                                        path='/applications'
-                                        component={ScopeNotFound}
-                                    />
-                                    <Route
-                                        path='/application/create'
-                                        component={ScopeNotFound}
-                                    />
-                                    <Route
-                                        path='/application/edit/:application_id'
-                                        component={ScopeNotFound}
-                                    />
-                                </React.Fragment>
-                            ) : (
-                                <React.Fragment>
-                                    <Route
-                                        path='/applications'
-                                        component={PageNotFound}
-                                    />
-                                    <Route
-                                        path='/application/create'
-                                        component={PageNotFound}
-                                    />
-                                    <Route
-                                        path='/application/edit/:application_id'
-                                        component={PageNotFound}
-                                    />
-                                </React.Fragment>
-                            ),
-                            ]}
-                            <Route component={PageNotFound} />
-                        </Switch>
-                    </Base>
-                </MuiThemeProvider>
+                <Base>
+                    <AppRouts isAuthenticated={isAuthenticated} isUserFound={isUserFound} />
+                </Base>
             </IntlProvider>
         );
     }
 }
+ProtectedApp.propTypes = {
+    location: PropTypes.shape({
+        search: PropTypes.string.isRequired,
+    }).isRequired,
+};

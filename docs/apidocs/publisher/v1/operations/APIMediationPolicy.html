@@ -1,0 +1,892 @@
+<div class="main-content">
+    <h1><a name="API Mediation Policy"></a>API Mediation Policy</h1>
+
+            <hr/>
+            <h4 class="operation-heading"><a name="apisApiIdMediationPoliciesMediationPolicyIdContentGet"></a>Download an API specific mediation policy</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/mediation-policies/{mediationPolicyId}/content</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to download a particular API specific mediation policy.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_view</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u>retrieve content of a mediation policy of an api</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdMediationPoliciesMediationPolicyIdContentGet">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-apisApiIdMediationPoliciesMediationPolicyIdContentGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d/mediation-policies/624b9f7d-bfaf-484b-94cc-e84491f5d725/content HTTP 1/1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdMediationPoliciesMediationPolicyIdContentGet">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-apisApiIdMediationPoliciesMediationPolicyIdContentGet" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+Content-Disposition: attachment; filename&#x3D;&quot;sampleSeq.xml&quot;
+Content-Type: application/xml
+Content-Length: 166</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d/mediation-policies/624b9f7d-bfaf-484b-94cc-e84491f5d725/content&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>mediationPolicyId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Mediation policy Id
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resource.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Mediation policy returned. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested file does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h4 class="operation-heading"><a name="apisApiIdMediationPoliciesMediationPolicyIdContentPut"></a>Update an API specific mediation policy</h4> <code>PUT https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/mediation-policies/{mediationPolicyId}/content</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to update an existing mediation policy of an API.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:mediation_policy_manage</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u>update a mediation policy of an api</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdMediationPoliciesMediationPolicyIdContentPut">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-apisApiIdMediationPoliciesMediationPolicyIdContentPut"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d/mediation-policies/624b9f7d-bfaf-484b-94cc-e84491f5d725/content HTTP 1/1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdMediationPoliciesMediationPolicyIdContentPut">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-apisApiIdMediationPoliciesMediationPolicyIdContentPut" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+Content-Type: application/json
+
+{
+  &quot;id&quot; : &quot;24cea00d-9f4a-48d5-89b0-cbf01d487782&quot;,
+  &quot;name&quot; : &quot;header_sequence&quot;,
+  &quot;type&quot; : &quot;IN&quot;,
+  &quot;sourceType&quot; : &quot;FILE&quot;
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X PUT &#39;https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d/mediation-policies/624b9f7d-bfaf-484b-94cc-e84491f5d725/content&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>type</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Type of the mediation sequence(in/out/fault)</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>mediationPolicyId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Mediation policy Id
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>file</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Mediation Policy to upload</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                File
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>inlineContent</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Inline content of the Mediation Policy</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Successful response with updated API object </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Mediation">Mediation</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">403</p></td>
+                        <td class="parameter"><p class="marked">Forbidden. The request must be conditional but no condition has been specified. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. The resource to be updated does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">412</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h4 class="operation-heading"><a name="apisApiIdMediationPoliciesMediationPolicyIdDelete"></a>Delete an API specific mediation policy</h4> <code>DELETE https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/mediation-policies/{mediationPolicyId}</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to delete an existing API specific mediation policy providing the Id of the API and the Id of the mediation policy.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:mediation_policy_manage</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u>delete a mediation policy</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdMediationPoliciesMediationPolicyIdDelete">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-apisApiIdMediationPoliciesMediationPolicyIdDelete"class="pre collapse in"><code class="json">DELETE https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d/mediation-policies/624b9f7d-bfaf-484b-94cc-e84491f5d725 HTTP 1/1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdMediationPoliciesMediationPolicyIdDelete">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-apisApiIdMediationPoliciesMediationPolicyIdDelete" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+Content-Type: application/json
+</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X DELETE &#39;https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d/mediation-policies/624b9f7d-bfaf-484b-94cc-e84491f5d725&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>mediationPolicyId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Mediation policy Id
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Resource successfully deleted. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">403</p></td>
+                        <td class="parameter"><p class="marked">Forbidden. The request must be conditional but no condition has been specified. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Resource to be deleted does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">412</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h4 class="operation-heading"><a name="apisApiIdMediationPoliciesMediationPolicyIdGet"></a>Get an API specific mediation policy</h4> <code>GET https://apis.wso2.com/api/am/publisher/v1.0/apis/{apiId}/mediation-policies/{mediationPolicyId}</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to retrieve a particular API specific mediation policy.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_view</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u>get a mediation policy of an api</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdMediationPoliciesMediationPolicyIdGet">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-apisApiIdMediationPoliciesMediationPolicyIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d/mediation-policies/624b9f7d-bfaf-484b-94cc-e84491f5d725 HTTP 1/1
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdMediationPoliciesMediationPolicyIdGet">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-apisApiIdMediationPoliciesMediationPolicyIdGet" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+Content-Type: application/json
+
+{
+  &quot;id&quot; : &quot;24cea00d-9f4a-48d5-89b0-cbf01d487782&quot;,
+  &quot;name&quot; : &quot;header_sequence1&quot;,
+  &quot;type&quot; : &quot;IN&quot;,
+  &quot;sourceType&quot; : &quot;FILE&quot;
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.0/apis/a8f0fb89-edf9-484c-b937-036b088f287d/mediation-policies/624b9f7d-bfaf-484b-94cc-e84491f5d725&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>mediationPolicyId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Mediation policy Id
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resource.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Mediation policy returned. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Mediation">Mediation</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested Document does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+</div>

@@ -19,71 +19,115 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import {
-    Route, Switch, Redirect, Link,
+    Route, Switch, Redirect, Link, withRouter,
 } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Loadable from 'react-loadable';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import APIProduct from 'AppData/APIProduct';
+import Api from 'AppData/api';
+import CONSTS from 'AppData/Constants';
+import AuthManager from 'AppData/AuthManager';
+import withSettings from 'AppComponents/Shared/withSettingsContext';
+import Alert from 'AppComponents/Shared/Alert';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { PageNotFound } from '../../Base/Errors/index';
 import InfoBar from './InfoBar';
 import RightPanel from './RightPanel';
 import { ApiContext } from './ApiContext';
-import Api from '../../../data/api';
 import Progress from '../../Shared/Progress';
 
-const LoadableSwitch = Loadable.Map({
+const LoadableSwitch = withRouter(Loadable.Map({
     loader: {
-        ApiConsole: () => import(// eslint-disable-line function-paren-newline
-        /* webpackChunkName: "ApiConsole" */
-        /* webpackPrefetch: true */
-            './ApiConsole/ApiConsole',
+        ApiConsole: () => import(
+            // eslint-disable-line function-paren-newline
+            /* webpackChunkName: "ApiConsole" */
+            /* webpackPrefetch: true */
+            // eslint-disable-next-line comma-dangle
+            './ApiConsole/ApiConsole'
         ),
-        Overview: () => import(// eslint-disable-line function-paren-newline
+        Overview: () => import(
+            // eslint-disable-line function-paren-newline
             /* webpackChunkName: "Overview" */
             /* webpackPrefetch: true */
-            './Overview',
+            // eslint-disable-next-line comma-dangle
+            './Overview'
         ),
-        Documentation: () => import(// eslint-disable-line function-paren-newline
+        Documentation: () => import(
+            // eslint-disable-line function-paren-newline
             /* webpackChunkName: "Documentation" */
             /* webpackPrefetch: true */
-            './Documents/Documentation',
+            // eslint-disable-next-line comma-dangle
+            './Documents/Documentation'
         ),
-        Credentials: () => import(// eslint-disable-line function-paren-newline
+        Credentials: () => import(
+            // eslint-disable-line function-paren-newline
             /* webpackChunkName: "Credentials" */
             /* webpackPrefetch: true */
-            './Credentials/Credentials',
+            // eslint-disable-next-line comma-dangle
+            './Credentials/Credentials'
         ),
-        Comments: () => import(// eslint-disable-line function-paren-newline
+        Comments: () => import(
+            // eslint-disable-line function-paren-newline
             /* webpackChunkName: "Comments" */
             /* webpackPrefetch: true */
-            './Comments/Comments',
+            // eslint-disable-next-line comma-dangle
+            './Comments/Comments'
         ),
-        Sdk: () => import(// eslint-disable-line function-paren-newline
+        Sdk: () => import(
+            // eslint-disable-line function-paren-newline
             /* webpackChunkName: "Sdk" */
             /* webpackPrefetch: true */
-            './Sdk',
+            // eslint-disable-next-line comma-dangle
+            './Sdk'
         ),
     },
     render(loaded, props) {
-        const { api_uuid } = props;
+        const { apiType, match, advertised } = props;
         const ApiConsole = loaded.ApiConsole.default;
         const Overview = loaded.Overview.default;
         const Documentation = loaded.Documentation.default;
         const Credentials = loaded.Credentials.default;
         const Comments = loaded.Comments.default;
         const Sdk = loaded.Sdk.default;
-        const redirectURL = '/apis/' + api_uuid + '/overview';
+        const apiUuid = match.params.api_uuid;
+        let path = '/apis/';
+        if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            path = '/api-products/';
+        }
+        const redirectURL = path + apiUuid + '/overview';
 
         return (
             <Switch>
-                <Redirect exact from='/apis/:api_uuid' to={redirectURL} />
-                <Route path='/apis/:api_uuid/overview' component={Overview} />
-                <Route path='/apis/:api_uuid/credentials' component={Credentials} />
-                <Route path='/apis/:api_uuid/comments' component={Comments} />
-                <Route path='/apis/:api_uuid/test' component={ApiConsole} />
-                <Route path='/apis/:api_uuid/docs' component={Documentation} />
-                <Route path='/apis/:api_uuid/sdk' component={Sdk} />
+                <Redirect exact from='/apis/:apiUuid' to={redirectURL} />
+                <Route
+                    path='/apis/:apiUuid/overview'
+                    render={props => (
+                        <Overview {...props} />)}
+                />
+                {!advertised
+                    && (
+                        <React.Fragment>
+                            <Route path='/apis/:apiUuid/credentials' component={Credentials} />
+                            <Route path='/apis/:apiUuid/comments' component={Comments} />
+                            <Route path='/apis/:apiUuid/test' component={ApiConsole} />
+                            <Route path='/apis/:apiUuid/sdk' component={Sdk} />
+                        </React.Fragment>
+                    )
+                }
+                <Route path='/apis/:apiUuid/docs' component={Documentation} />
+                <Redirect exact from='/api-products/:apiUuid' to={redirectURL} />
+                <Route
+                    path='/api-products/:apiUuid/overview'
+                    render={props => (
+                        <Overview {...props} />)}
+                />
+                <Route path='/api-products/:apiUuid/credentials' component={Credentials} />
+                <Route path='/api-products/:apiUuid/comments' component={Comments} />
+                <Route path='/api-products/:apiUuid/test' component={ApiConsole} />
+                <Route path='/api-products/:apiUuid/docs' component={Documentation} />
+                <Route path='/api-products/:apiUuid/sdk' component={Sdk} />
                 <Route component={PageNotFound} />
             </Switch>
         );
@@ -91,7 +135,7 @@ const LoadableSwitch = Loadable.Map({
     loading() {
         return <Progress />;
     },
-});
+}));
 
 /**
  *
@@ -162,71 +206,96 @@ class Details extends React.Component {
          *
          * @memberof Details
          */
-        this.updateSubscriptionData = () => {
-            const api = new Api();
-            const promised_api = api.getAPIById(this.api_uuid);
-            const existing_subscriptions = api.getSubscriptions(this.api_uuid, null);
-            const promised_applications = api.getAllApplications();
+        this.updateSubscriptionData = (callback) => {
+            const { apiType } = this.props;
+            this.setState({ apiType });
 
-            Promise.all([promised_api, existing_subscriptions, promised_applications])
-                .then((response) => {
-                    const [api, subscriptions, applications] = response.map(data => data.obj);
-                    // Getting the policies from api details
-                    this.setState({ api });
-                    if (api && api.policies) {
-                        const apiTiers = api.policies;
-                        const tiers = [];
-                        for (let i = 0; i < apiTiers.length; i++) {
-                            const tierName = apiTiers[i];
-                            tiers.push({ value: tierName, label: tierName });
-                        }
-                        this.setState({ tiers });
-                        if (tiers.length > 0) {
-                            this.setState({ policyName: tiers[0].value });
-                        }
-                    }
+            let promisedAPI = null;
+            let existingSubscriptions = null;
+            let promisedApplications = null;
+            let restApi = null;
 
-                    const subscribedApplications = [];
-                    // get the application IDs of existing subscriptions
-                    subscriptions.list.map(element => subscribedApplications.push({
-                        value: element.applicationId,
-                        policy: element.policy,
-                        subscriptionId: element.subscriptionId,
-                    }));
-                    this.setState({ subscribedApplications });
+            if (apiType === CONSTS.API_TYPE) {
+                restApi = new Api();
+            } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
+                restApi = new APIProduct();
+            }
 
-                    // Removing subscribed applications from all the applications and get the available applications to subscribe
-                    const applicationsAvailable = [];
-                    for (let i = 0; i < applications.list.length; i++) {
-                        const applicationId = applications.list[i].applicationId;
-                        const applicationName = applications.list[i].name;
-                        // include the application only if it does not has an existing subscriptions
-                        let applicationSubscribed = false;
-                        for (let j = 0; j < subscribedApplications.length; j++) {
-                            if (subscribedApplications[j].value === applicationId) {
-                                applicationSubscribed = true;
-                                subscribedApplications[j].label = applicationName;
-                            }
-                        }
-                        if (!applicationSubscribed) {
-                            applicationsAvailable.push({ value: applicationId, label: applicationName });
-                        }
-                    }
-                    this.setState({ applicationsAvailable });
-                    if (applicationsAvailable && applicationsAvailable.length > 0) {
-                        this.setState({ applicationId: applicationsAvailable[0].value });
-                    }
-                })
-                .catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.log(error);
-                    }
-                    const status = error.status;
-                    if (status === 404) {
-                        this.setState({ notFound: true });
-                    }
+            // const subscriptionClient = new Subscription();
+            promisedAPI = restApi.getAPIById(this.api_uuid);
+
+            promisedAPI.then((api) => {
+                this.setState({ api: api.body });
+            }).catch((error) => {
+                const { status, response } = error;
+                const { setTenantDomain, intl } = this.props;
+
+                const message = intl.formatMessage({
+                    defaultMessage: 'Invalid tenant domain',
+                    id: 'Apis.Details.index.invalid.tenant.domain',
                 });
+                if (response && response.body.code === 901300) {
+                    setTenantDomain('INVALID');
+                    Alert.error(message);
+                }
+                console.error('Error when getting apis', error);
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
+            const user = AuthManager.getUser();
+            if (user != null) {
+                existingSubscriptions = restApi.getSubscriptions(this.api_uuid, null);
+                promisedApplications = restApi.getAllApplications();
+
+                Promise.all([existingSubscriptions, promisedApplications])
+                    .then((response) => {
+                        const [subscriptions, applications] = response.map(data => data.obj);
+                        const appIdToNameMapping = applications.list.reduce((acc, cur) => {
+                            acc[cur.applicationId] = cur.name;
+                            return acc;
+                        }, {});
+                        // get the application IDs of existing subscriptions
+                        const subscribedApplications = subscriptions.list.map((element) => {
+                            return {
+                                value: element.applicationId,
+                                policy: element.throttlingPolicy,
+                                status: element.status,
+                                subscriptionId: element.subscriptionId,
+                                label: appIdToNameMapping[element.applicationId],
+                            };
+                        });
+
+                        // Removing subscribed applications from all the applications and get
+                        // the available applications to subscribe
+                        const subscribedAppIds = subscribedApplications.map(sub => sub.value);
+                        const applicationsAvailable = applications.list
+                            .filter(app => !subscribedAppIds.includes(app.applicationId)
+                            && app.status === 'APPROVED')
+                            .map((filteredApp) => {
+                                return {
+                                    value: filteredApp.applicationId,
+                                    label: filteredApp.name,
+                                };
+                            });
+                        this.setState({ subscribedApplications, applicationsAvailable }, () => {
+                            if (callback) {
+                                callback();
+                            }
+                        });
+                    })
+                    .catch((error) => {
+                        if (process.env.NODE_ENV !== 'production') {
+                            console.log(error);
+                        }
+                        const { status } = error;
+                        if (status === 404) {
+                            this.setState({ notFound: true });
+                        }
+                    });
+            }
         };
+        const { apiType } = this.props;
         this.state = {
             active: 'overview',
             overviewHiden: false,
@@ -237,6 +306,8 @@ class Details extends React.Component {
             subscribedApplications: [],
             applicationsAvailable: [],
             item: 1,
+            xo: null,
+            apiType,
         };
         this.setDetailsAPI = this.setDetailsAPI.bind(this);
         this.api_uuid = this.props.match.params.api_uuid;
@@ -248,7 +319,13 @@ class Details extends React.Component {
      * @memberof Details
      */
     handleMenuSelect = (menuLink) => {
-        this.props.history.push({ pathname: '/apis/' + this.props.match.params.api_uuid + '/' + menuLink });
+        const { apiType } = this.state;
+        let path = '/apis/';
+        if (apiType === CONSTS.API_PRODUCT_TYPE) {
+            path = '/api-products/';
+        }
+
+        this.props.history.push({ pathname: path + this.props.match.params.api_uuid + '/' + menuLink });
         menuLink === 'overview' ? this.infoBar.toggleOverview(true) : this.infoBar.toggleOverview(false);
         this.setState({ active: menuLink });
     };
@@ -296,43 +373,72 @@ class Details extends React.Component {
     render() {
         this.updateActiveLink();
 
-        const { classes, theme } = this.props;
-        const { active } = this.state;
-        const redirect_url = '/apis/' + this.props.match.params.api_uuid + '/overview';
-        const leftMenuIconMainSize = theme.custom.leftMenuIconMainSize;
+        const {
+            classes, theme, intl, apiType, match,
+        } = this.props;
+        const { apiUuid } = match.params;
+        const { active, api } = this.state;
+        const { leftMenuIconMainSize } = theme.custom;
         const globalStyle = 'body{ font-family: ' + theme.typography.fontFamily + '}';
-        return (
+        return (api ? (
             <ApiContext.Provider value={this.state}>
                 <style>{globalStyle}</style>
                 <div className={classes.LeftMenu}>
                     <Link to='/apis' className={classes.leftLInkMainWrapper}>
                         <div className={classes.leftLInkMain}>
                             <CustomIcon width={leftMenuIconMainSize} height={leftMenuIconMainSize} icon='api' />
-                            <Typography className={classes.leftLInkMainText}>ALL APIs</Typography>
+                            <Typography className={classes.leftLInkMainText}>
+                                <FormattedMessage id='Apis.Details.index.all.apis' defaultMessage='ALL APIs' />
+                            </Typography>
                         </div>
                     </Link>
                     <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    <LeftMenuItem text='credentials' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    {/* TODO: uncomment when the feature is working */}
-                    {/* <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={active} /> */}
-                    <LeftMenuItem text='test' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    {/* TODO: uncomment when the feature is working */}
-                    {/* <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} /> */}
-                    <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    {!api.advertiseInfo.advertised
+                        && (
+                            <React.Fragment>
+                                <LeftMenuItem
+                                    text='credentials'
+                                    handleMenuSelect={this.handleMenuSelect}
+                                    active={active}
+                                />
+                                <LeftMenuItem
+                                    text='comments'
+                                    handleMenuSelect={this.handleMenuSelect}
+                                    active={active}
+                                />
+                                <LeftMenuItem
+                                    text='test'
+                                    handleMenuSelect={this.handleMenuSelect}
+                                    active={active}
+                                />
+                            </React.Fragment>
+                        )
+                    }
+                    <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    {!api.advertiseInfo.advertised
+                        && <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    }
                 </div>
                 <div className={classes.content}>
-                    <InfoBar apiId={this.props.match.params.api_uuid} innerRef={node => (this.infoBar = node)} />
-                    <LoadableSwitch api_uuid={this.props.match.params.api_uuid} />
+                    <InfoBar apiId={apiUuid} innerRef={node => (this.infoBar = node)} intl={intl} />
+                    <LoadableSwitch api_uuid={apiUuid} apiType={apiType} advertised={api.advertiseInfo.advertised} />
                 </div>
                 {theme.custom.showApiHelp && <RightPanel />}
             </ApiContext.Provider>
+        ) : <div className='apim-dual-ring' />
         );
     }
 }
 
 Details.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
+    match: PropTypes.shape({}).isRequired,
+    params: PropTypes.shape({}).isRequired,
+    apiType: PropTypes.string.isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Details);
+export default withSettings(injectIntl(withStyles(styles, { withTheme: true })(Details)));

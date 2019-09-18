@@ -16,30 +16,28 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
-
+import React, { Component, useContext } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Table from '@material-ui/core/Table';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
-import qs from 'qs';
 import TablePagination from '@material-ui/core/TablePagination';
-import CustomIcon from '../../Shared/CustomIcon';
-import InlineMessage from '../../Shared/InlineMessage';
-import Alert from '../../Base/Alert';
+import CustomIcon from 'AppComponents/Shared/CustomIcon';
+import { FormattedMessage, injectIntl } from 'react-intl';
+import Alert from 'AppComponents/Shared/Alert';
+import Loading from 'AppComponents/Base/Loading/Loading';
+import Application from 'AppData/Application';
+import NewApp from 'AppComponents/Applications/Create/NewApp';
+import GenericDisplayDialog from 'AppComponents/Shared/GenericDisplayDialog';
+import Settings from 'AppComponents/Shared/SettingsContext';
 import AppsTableContent from './AppsTableContent';
-import Loading from '../../Base/Loading/Loading';
-import Application from '../../../data/Application';
-import NewApp from '../Create/NewApp';
+import ApplicationTableHead from './ApplicationTableHead';
+
 /**
  *
- *
- * @param {*} theme
+ * @inheritdoc
+ * @param {*} theme theme object
  */
 const styles = theme => ({
     card: {
@@ -98,181 +96,97 @@ const styles = theme => ({
         paddingTop: theme.spacing.unit,
         width: theme.custom.contentAreaWidth,
     },
+    dialogContainer: {
+        width: 1000,
+        padding: theme.spacing.unit * 2,
+    },
 });
-/**
- *
- *
- * @class ApplicationTableHead
- * @extends {Component}
- */
-class ApplicationTableHead extends Component {
-    static propTypes = {
-        onRequestSort: PropTypes.func.isRequired,
-        order: PropTypes.string.isRequired,
-        orderBy: PropTypes.string.isRequired,
-    };
 
-    createSortHandler = property => (event) => {
-        this.props.onRequestSort(event, property);
-    };
-
-    render() {
-        const columnData = [
-            {
-                id: 'name',
-                numeric: false,
-                disablePadding: true,
-                label: 'Name',
-                sorting: true,
-            },
-            {
-                id: 'throttlingTier',
-                numeric: false,
-                disablePadding: false,
-                label: 'Policy',
-                sorting: true,
-            },
-            {
-                id: 'lifeCycleStatus',
-                numeric: false,
-                disablePadding: false,
-                label: 'Workflow Status',
-                sorting: true,
-            },
-            {
-                id: 'subscriptions',
-                numeric: false,
-                disablePadding: false,
-                label: 'Subscriptions',
-                sorting: true,
-            },
-            {
-                id: 'actions',
-                numeric: false,
-                disablePadding: false,
-                label: 'Actions',
-                sorting: false,
-            },
-        ];
-        const { order, orderBy } = this.props;
-        return (
-            <TableHead>
-                <TableRow>
-                    {columnData.map((column) => {
-                        return (
-                            <TableCell key={column.id} numeric={column.numeric} sortDirection={orderBy === column.id ? order : false}>
-                                {column.sorting ? (
-                                    <TableSortLabel active={orderBy === column.id} direction={order} onClick={this.createSortHandler(column.id)}>
-                                        {column.label}
-                                    </TableSortLabel>
-                                ) : (
-                                    column.label
-                                )}
-                            </TableCell>
-                        );
-                    }, this)}
-                </TableRow>
-            </TableHead>
-        );
-    }
-}
 /**
- *
- *
+ * @inheritdoc
  * @class Listing
  * @extends {Component}
  */
 class Listing extends Component {
+    static contextType = Settings;
+    /**
+     *
+     * @param {any} props properties
+     */
     constructor(props) {
         super(props);
         this.state = {
             order: 'asc',
             orderBy: 'name',
-            selected: [],
             data: null,
-            alertMessage: null,
             page: 0,
             rowsPerPage: 10,
+            open: false,
+            isApplicationSharingEnabled: true,
         };
         this.handleAppDelete = this.handleAppDelete.bind(this);
     }
 
     /**
-     *
-     *
      * @memberof Listing
      */
     componentDidMount() {
         this.updateApps();
+        this.isApplicationGroupSharingEnabled();
     }
 
     /**
-     *
-     *
+     * retrieve Settings from the context and check the application sharing enabled
+     * @param {*} settingsData required data
+     */
+    isApplicationGroupSharingEnabled = () => {
+        const settingsContext = this.context;
+        const enabled = settingsContext.settings.applicationSharingEnabled;
+        this.setState({ isApplicationSharingEnabled: enabled });
+    }
+
+    /**
      * @memberof Listing
      */
     updateApps = () => {
-        const promised_applications = Application.all();
-        promised_applications
+        const promisedApplications = Application.all();
+        promisedApplications
             .then((applications) => {
-                const apps = new Map(); // Applications list put into map, to make it efficient when deleting apps (referring back to an App)
+                // Applications list put into map, to make it efficient when deleting apps (referring back to an App)
+                const apps = new Map();
                 applications.list.map(app => apps.set(app.applicationId, app)); // Store application against its UUID
                 this.setState({ data: apps });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') console.log(error);
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
+                    // eslint-disable-next-line react/no-unused-state
                     this.setState({ notFound: true });
                 } else if (status === 401) {
-                    this.setState({ isAuthorize: false });
-                    const params = qs.stringify({ reference: this.props.location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
+                    window.location = '/store-new/services/configs';
                 }
             });
     };
 
     /**
-     *
-     *
-     * @memberof Listing
+     * @param{*} event event
+     * @param{*} property sorting method
      */
     handleRequestSort = (event, property) => {
-        const orderBy = property;
-        let order = 'desc';
-        if (this.state.orderBy === property && this.state.order === 'desc') {
-            order = 'asc';
+        const { orderBy, order } = this.state;
+        let currentOrder = 'desc';
+        if (orderBy === property && order === 'desc') {
+            currentOrder = 'asc';
         }
-        this.setState({ order, orderBy });
+        this.setState({ order: currentOrder, orderBy });
     };
 
-    /**
-     *
-     *
-     * @param {*} event
-     * @memberof Listing
-     */
-    handleAppDelete(event) {
-        const id = event.currentTarget.getAttribute('data-appId');
-        const app = this.state.data.get(id);
-        app.deleting = true;
-        this.state.data.set(id, app);
-        this.setState({ data: this.state.data });
-
-        const message = 'Application: ' + app.name + ' deleted successfully!';
-        const promised_delete = Application.deleteApp(id);
-        promised_delete.then((ok) => {
-            if (ok) {
-                const { data } = this.state;
-                data.delete(id);
-                this.setState({ data: this.state.data, alertMessage: message });
-            }
-        });
-    }
 
     /**
      *
-     *
+     * @param {*} event event
+     * @param {*} page page
      * @memberof Listing
      */
     handleChangePage = (event, page) => {
@@ -281,7 +195,7 @@ class Listing extends Component {
 
     /**
      *
-     *
+     * @inheritdoc
      * @memberof Listing
      */
     handleChangeRowsPerPage = (event) => {
@@ -289,20 +203,57 @@ class Listing extends Component {
     };
 
     /**
-     *
-     *
-     * @returns
+     * @memberof NewApp
+     */
+    handleClose = () => {
+        this.setState({ open: false });
+    };
+
+    /**
      * @memberof Listing
+     */
+    handleClickOpen = () => {
+        this.setState({ open: true });
+    };
+
+    /**
+     * @param {*} event event
+     * @memberof Listing
+     */
+    handleAppDelete(event) {
+        const { data } = this.state;
+        const { intl } = this.props;
+        const id = event.currentTarget.getAttribute('data-appId');
+        const newData = new Map([...data]);
+        const app = newData.get(id);
+        app.deleting = true;
+        this.setState({ data: newData });
+
+        const message = intl.formatMessage({
+            defaultMessage: 'Application {name} deleted successfully!',
+            id: 'Applications.Listing.Listing.application.deleted.successfully',
+        }, { name: app.name });
+        const promisedDelete = Application.deleteApp(id);
+        promisedDelete.then((ok) => {
+            if (ok) {
+                newData.delete(id);
+                Alert.info(message);
+                this.setState({ data: newData });
+            }
+        });
+    }
+
+    /**
+     * @inheritdoc
      */
     render() {
         const {
-            data, order, orderBy, alertMessage, rowsPerPage, page,
+            data, order, orderBy, rowsPerPage, page, open, isApplicationSharingEnabled,
         } = this.state;
         if (!data) {
             return <Loading />;
         }
-        const { classes, theme } = this.props;
-        const bull = <span className={classes.bullet}>•</span>;
+        const { classes, theme, intl } = this.props;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
         return (
             <main className={classes.content}>
@@ -312,41 +263,87 @@ class Listing extends Component {
                     </div>
                     <div className={classes.mainTitleWrapper}>
                         <Typography variant='display1' className={classes.mainTitle}>
-                            Applications
+                            <FormattedMessage
+                                id='Applications.Listing.Listing.applications'
+                                defaultMessage='Applications'
+                            />
+
                         </Typography>
-                        {this.state.data && (
+                        {data && (
                             <Typography variant='caption' gutterBottom align='left'>
-                                {this.state.data.count === 0 ? (
-                                    <React.Fragment>No Applications created</React.Fragment>
+                                {data.count === 0 ? (
+                                    <React.Fragment>
+                                        <FormattedMessage
+                                            id='Applications.Listing.Listing.no.applications.created'
+                                            defaultMessage='No Applications created'
+                                        />
+                                    </React.Fragment>
                                 ) : (
                                     <React.Fragment>
-                                        Displaying
+                                        <FormattedMessage
+                                            id='Applications.Listing.Listing.displaying'
+                                            defaultMessage='Displaying'
+                                        />
                                         {' '}
-                                        {this.state.data.count}
+                                        {data.count}
                                         {' '}
-                                        {this.state.data.count === 1 ? 'Application' : 'Applications'}
+                                        {data.count === 1
+                                            ? (
+                                                <FormattedMessage
+                                                    id='Applications.Listing.Listing.displaying.application'
+                                                    defaultMessage='Application'
+                                                />
+                                            )
+                                            : (
+                                                <FormattedMessage
+                                                    id='Applications.Listing.Listing.displaying.applications'
+                                                    defaultMessage='Applications'
+                                                />
+                                            )}
                                     </React.Fragment>
                                 )}
                             </Typography>
                         )}
                     </div>
-                    {data.size !== 0 && (
+                    {(data.size !== 0 || open) && (
                         <div className={classes.createLinkWrapper}>
-                            <NewApp updateApps={this.updateApps} />
+                            <NewApp
+                                updateApps={this.updateApps}
+                                open={open}
+                                handleClickOpen={this.handleClickOpen}
+                                handleClose={this.handleClose}
+                            />
                         </div>
                     )}
                 </div>
-                {alertMessage && <Alert message={alertMessage} />}
                 <Grid container spacing={0} justify='center'>
                     <Grid item xs={12}>
                         {data.size > 0 ? (
                             <div className={classes.appContent}>
                                 <Typography variant='caption' gutterBottom align='left'>
-                                    An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.
+                                    <FormattedMessage
+                                        id='Applications.Listing.Listing.logical.description'
+                                        defaultMessage={`An application is a logical collection of APIs. 
+                                        Applications allow you to use a single access token to invoke a
+                                         collection of APIs and to subscribe to one API multiple times pre-created
+                                          and allows unlimited access by default.`}
+                                    />
                                 </Typography>
                                 <Table>
-                                    <ApplicationTableHead order={order} orderBy={orderBy} onRequestSort={this.handleRequestSort} />
-                                    <AppsTableContent handleAppDelete={this.handleAppDelete} apps={data} page={page} rowsPerPage={rowsPerPage} order={order} orderBy={orderBy} />
+                                    <ApplicationTableHead
+                                        order={order}
+                                        orderBy={orderBy}
+                                        onRequestSort={this.handleRequestSort}
+                                    />
+                                    <AppsTableContent
+                                        handleAppDelete={this.handleAppDelete}
+                                        apps={data}
+                                        page={page}
+                                        rowsPerPage={rowsPerPage}
+                                        order={order}
+                                        orderBy={orderBy}
+                                        isApplicationSharingEnabled={isApplicationSharingEnabled}
+                                    />
                                 </Table>
                                 <TablePagination
                                     component='div'
@@ -366,15 +363,23 @@ class Listing extends Component {
                                 />
                             </div>
                         ) : (
-                            <div className={classes.appContent}>
-                                <InlineMessage type='info' style={{ width: 1000, padding: theme.spacing.unit * 2 }}>
-                                    <Typography variant='headline' component='h3'>
-                                        Create New Application
-                                    </Typography>
-                                    <Typography component='p'>An application is a logical collection of APIs. Applications allow you to use a single access token to invoke a collection of APIs and to subscribe to one API multiple times with different SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.</Typography>
-                                    <NewApp updateApps={this.updateApps} />
-                                </InlineMessage>
-                            </div>
+                            <GenericDisplayDialog
+                                classes={classes}
+                                handleClick={this.handleClickOpen}
+                                heading='Create New Application'
+                                caption={intl.formatMessage({
+                                    defaultMessage: `An application is a logical collection of APIs. Applications
+                                    allow you to use a single access token to invoke a collection
+                                    of APIs and to subscribe to one API multiple times with different
+                                    SLA levels. The DefaultApplication is pre-created and allows unlimited
+                                    access by default.`,
+                                    id: 'Applications.Listing.Listing.generic.display.description',
+                                })}
+                                buttonText={intl.formatMessage({
+                                    defaultMessage: 'ADD NEW APPLICATION',
+                                    id: 'Applications.Listing.Listing.generic.display.description',
+                                })}
+                            />
                         )}
                     </Grid>
                 </Grid>
@@ -383,8 +388,18 @@ class Listing extends Component {
     }
 }
 Listing.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({
+        root: PropTypes.string,
+        flex: PropTypes.string,
+        content: PropTypes.string,
+        mainIconWrapper: PropTypes.string,
+        mainTitle: PropTypes.string,
+        mainTitleWrapper: PropTypes.string,
+        createLinkWrapper: PropTypes.string,
+        appContent: PropTypes.string,
+    }).isRequired,
+    theme: PropTypes.shape({}).isRequired,
+    intl: PropTypes.func.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Listing);
+export default injectIntl(withStyles(styles, { withTheme: true })(Listing));

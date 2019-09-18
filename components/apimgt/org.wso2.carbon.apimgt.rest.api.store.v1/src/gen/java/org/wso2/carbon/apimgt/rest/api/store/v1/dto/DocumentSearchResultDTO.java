@@ -10,47 +10,12 @@ import io.swagger.annotations.*;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.*;
+import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 
 
-public class DocumentSearchResultDTO   {
+public class DocumentSearchResultDTO extends SearchResultDTO  {
   
-    private String id = null;
-    private String name = null;
-
-@XmlType(name="TypeEnum")
-@XmlEnum(String.class)
-public enum TypeEnum {
-
-    @XmlEnumValue("DOC") DOC(String.valueOf("DOC"));
-
-
-    private String value;
-
-    TypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public static TypeEnum fromValue(String v) {
-        for (TypeEnum b : TypeEnum.values()) {
-            if (String.valueOf(b.value).equals(v)) {
-                return b;
-            }
-        }
-        return null;
-    }
-}
-
-    private TypeEnum type = null;
 
 @XmlType(name="DocTypeEnum")
 @XmlEnum(String.class)
@@ -159,57 +124,7 @@ public enum VisibilityEnum {
     private String apiName = null;
     private String apiVersion = null;
     private String apiProvider = null;
-
-  /**
-   **/
-  public DocumentSearchResultDTO id(String id) {
-    this.id = id;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
-  @JsonProperty("id")
-  public String getId() {
-    return id;
-  }
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  /**
-   **/
-  public DocumentSearchResultDTO name(String name) {
-    this.name = name;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "TestAPI", value = "")
-  @JsonProperty("name")
-  public String getName() {
-    return name;
-  }
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  /**
-   **/
-  public DocumentSearchResultDTO type(TypeEnum type) {
-    this.type = type;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("type")
-  public TypeEnum getType() {
-    return type;
-  }
-  public void setType(TypeEnum type) {
-    this.type = type;
-  }
+    private String apiUUID = null;
 
   /**
    **/
@@ -366,6 +281,23 @@ public enum VisibilityEnum {
     this.apiProvider = apiProvider;
   }
 
+  /**
+   **/
+  public DocumentSearchResultDTO apiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("apiUUID")
+  public String getApiUUID() {
+    return apiUUID;
+  }
+  public void setApiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -376,10 +308,7 @@ public enum VisibilityEnum {
       return false;
     }
     DocumentSearchResultDTO documentSearchResult = (DocumentSearchResultDTO) o;
-    return Objects.equals(id, documentSearchResult.id) &&
-        Objects.equals(name, documentSearchResult.name) &&
-        Objects.equals(type, documentSearchResult.type) &&
-        Objects.equals(docType, documentSearchResult.docType) &&
+    return Objects.equals(docType, documentSearchResult.docType) &&
         Objects.equals(summary, documentSearchResult.summary) &&
         Objects.equals(sourceType, documentSearchResult.sourceType) &&
         Objects.equals(sourceUrl, documentSearchResult.sourceUrl) &&
@@ -387,22 +316,20 @@ public enum VisibilityEnum {
         Objects.equals(visibility, documentSearchResult.visibility) &&
         Objects.equals(apiName, documentSearchResult.apiName) &&
         Objects.equals(apiVersion, documentSearchResult.apiVersion) &&
-        Objects.equals(apiProvider, documentSearchResult.apiProvider);
+        Objects.equals(apiProvider, documentSearchResult.apiProvider) &&
+        Objects.equals(apiUUID, documentSearchResult.apiUUID);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, type, docType, summary, sourceType, sourceUrl, otherTypeName, visibility, apiName, apiVersion, apiProvider);
+    return Objects.hash(docType, summary, sourceType, sourceUrl, otherTypeName, visibility, apiName, apiVersion, apiProvider, apiUUID);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class DocumentSearchResultDTO {\n");
-    
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("    docType: ").append(toIndentedString(docType)).append("\n");
     sb.append("    summary: ").append(toIndentedString(summary)).append("\n");
     sb.append("    sourceType: ").append(toIndentedString(sourceType)).append("\n");
@@ -412,6 +339,7 @@ public enum VisibilityEnum {
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
     sb.append("    apiProvider: ").append(toIndentedString(apiProvider)).append("\n");
+    sb.append("    apiUUID: ").append(toIndentedString(apiUUID)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -19,11 +19,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import AuthManager from './AuthManager';
+import AuthManager from 'AppData/AuthManager';
 
 const resourcePath = {
     APIS: '/apis',
+    API_PRODUCTS: '/api-products',
     SINGLE_API: '/apis/{apiId}',
+    SINGLE_API_PRODUCT: '/api-products/{apiId}',
     API_SWAGGER: '/apis/{apiId}/swagger',
     API_WSDL: '/apis/{apiId}/wsdl',
     API_GW_CONFIG: '/apis/{apiId}/gateway-config',
@@ -42,7 +44,7 @@ const resourcePath = {
     IMPORT_APIS: '/import/apis',
     SUBSCRIPTION: '/subscriptions',
     SUBSCRIPTIONS: '/subscriptions',
-    BLOCK_SUBSCRIPTION: '/subscriptions/block-subscription:',
+    BLOCK_SUBSCRIPTION: '/subscriptions/block-subscription',
     UNBLOCK_SUBSCRIPTION: '/subscriptions/unblock-subscription',
     POLICIES: "'/policies/{tierLevel}'",
     POLICY: "'/policies/{tierLevel}/{tierName}'",
@@ -94,7 +96,8 @@ class ScopeValidation extends React.Component {
      */
     render() {
         const { children } = this.props;
-        if (this.state.haveScope) {
+        const { haveScope } = this.state;
+        if (haveScope) {
             return children || null;
         }
         return null;
@@ -107,8 +110,4 @@ ScopeValidation.propTypes = {
     resourceMethod: PropTypes.string.isRequired,
 };
 
-export {
-    ScopeValidation,
-    resourceMethod,
-    resourcePath,
-};
+export { ScopeValidation, resourceMethod, resourcePath };

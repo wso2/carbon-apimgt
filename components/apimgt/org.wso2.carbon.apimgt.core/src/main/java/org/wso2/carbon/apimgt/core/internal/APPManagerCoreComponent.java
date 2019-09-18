@@ -15,7 +15,6 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-
 package org.wso2.carbon.apimgt.core.internal;
 
 import org.apache.commons.logging.Log;
@@ -23,33 +22,43 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
-
-/**
- * @scr.component name="org.wso2.apimgt.core.services" immediate="true"
- * @scr.reference name="api.manager.config.service"
- * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
- * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
- */
+@Component(
+         name = "org.wso2.apimgt.core.services", 
+         immediate = true)
 public class APPManagerCoreComponent {
-    //TODO refactor caching implementation
 
+    // TODO refactor caching implementation
     private static final Log log = LogFactory.getLog(APPManagerCoreComponent.class);
 
     private static APIManagerConfiguration configuration = null;
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
-        if (log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("HostObjectComponent activated");
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
-        if (log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("HostObjectComponent deactivated");
         }
     }
 
+    @Reference(
+             name = "api.manager.config.service", 
+             service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class, 
+             cardinality = ReferenceCardinality.MANDATORY, 
+             policy = ReferencePolicy.DYNAMIC, 
+             unbind = "unsetAPIManagerConfigurationService")
     protected void setAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
         if (log.isDebugEnabled()) {
             log.debug("WebApp manager configuration service bound to the WebApp host objects");
@@ -66,3 +75,4 @@ public class APPManagerCoreComponent {
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
 }
+

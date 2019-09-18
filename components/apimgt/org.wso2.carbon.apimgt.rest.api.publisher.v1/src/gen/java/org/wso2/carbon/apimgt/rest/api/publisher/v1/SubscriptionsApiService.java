@@ -7,9 +7,10 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
+
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExtendedSubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionListDTO;
 
 import java.util.List;
@@ -21,9 +22,8 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface SubscriptionsApiService {
-      public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch, MessageContext messageContext);
-      public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext);
-      public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch, MessageContext messageContext);
-      public Response subscriptionsSubscriptionIdUsageGet(String subscriptionId, MessageContext messageContext);
-      public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch, MessageContext messageContext);
+      public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch, String query, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsSubscriptionIdUsageGet(String subscriptionId, MessageContext messageContext) throws APIManagementException;
+      public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch, MessageContext messageContext) throws APIManagementException;
 }

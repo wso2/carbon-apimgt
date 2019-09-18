@@ -43,6 +43,7 @@ public class URITemplate implements Serializable{
     private List<Scope> scopes = new ArrayList<Scope>();
     private Map<String, String> mediationScripts = new HashMap<String, String>();
     private ConditionGroupDTO[] conditionGroups;
+    private int id;
 
     public ConditionGroupDTO[] getConditionGroups() {
         return conditionGroups;
@@ -366,5 +367,17 @@ public class URITemplate implements Serializable{
         result = 31 * result + (mediationScripts != null ? mediationScripts.hashCode() : 0);
         result = 31 * result + Arrays.hashCode(conditionGroups);
         return result;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public List<Scope> retrieveAllScopes() {
+        return this.scopes;
     }
 }
