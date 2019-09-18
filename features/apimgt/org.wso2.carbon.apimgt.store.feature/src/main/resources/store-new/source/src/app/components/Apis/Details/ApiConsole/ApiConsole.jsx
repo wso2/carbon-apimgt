@@ -32,6 +32,8 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
+import Button from '@material-ui/core/Button';
+import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
 import CONSTS from 'AppData/Constants';
@@ -46,6 +48,9 @@ import Application from '../../../../data/Application';
  * @param {*} theme theme
  */
 const styles = theme => ({
+    buttonIcon: {
+        marginRight: 10,
+    },
     inputAdornmentStart: {
         width: '100%',
     },
@@ -116,6 +121,7 @@ class ApiConsole extends React.Component {
         let accessToken;
 
         this.apiClient = new Api();
+
 
         const promiseAPI = this.apiClient.getAPIById(apiID);
 
@@ -335,6 +341,11 @@ class ApiConsole extends React.Component {
         } = this.state;
         const user = AuthManager.getUser();
 
+
+        const downloadSwagger = JSON.stringify({ ...swagger });
+        const downloadLink = 'data:text/json;charset=utf-8, ' + encodeURIComponent(downloadSwagger);
+        const fileName = 'swagger.json';
+
         if (api == null || swagger == null) {
             return <Progress />;
         }
@@ -342,7 +353,7 @@ class ApiConsole extends React.Component {
             return 'API Not found !';
         }
 
-        const {authorizationHeader='Authorization'} = api;
+        const { authorizationHeader = 'Authorization' } = api;
 
         return (
             <React.Fragment>
@@ -359,8 +370,8 @@ class ApiConsole extends React.Component {
                                     <FormattedMessage
                                         id='api.console.require.access.token'
                                         defaultMessage={'You require an access token to try the API. Please log '
-                                        + 'in and subscribe to the API to generate an access token. If you already '
-                                        + 'have an access token, please provide it below.'}
+                                            + 'in and subscribe to the API to generate an access token. If you already '
+                                            + 'have an access token, please provide it below.'}
                                     />
                                 </Typography>
                             </Paper>
@@ -387,15 +398,15 @@ class ApiConsole extends React.Component {
                                         ))}
                                     </Select>
                                 </FormControl>
-                                { subscriptions.length === 0
-                                && (
-                                    <FormHelperText>
-                                        <FormattedMessage
-                                            id='require.application.subscribe'
-                                            defaultMessage='Please subscribe to an application'
-                                        />
-                                    </FormHelperText>
-                                )
+                                {subscriptions.length === 0
+                                    && (
+                                        <FormHelperText>
+                                            <FormattedMessage
+                                                id='require.application.subscribe'
+                                                defaultMessage='Please subscribe to an application'
+                                            />
+                                        </FormHelperText>
+                                    )
                                 }
                             </Grid>
                             <Grid item md={4} xs={4} className={classes.gridWrapper}>
@@ -501,9 +512,24 @@ class ApiConsole extends React.Component {
                             />
                         </Grid>
                     </Grid>
+                    <Grid xs={12} container>
+                        <Grid xs={10} />
+                        <Grid xs={2}>
+                            <a href={downloadLink} download={fileName}>
+                                <Button size='small'>
+                                    <CloudDownloadRounded className={classes.buttonIcon} />
+                                    <FormattedMessage
+                                        id='Apis.Details.APIConsole.APIConsole.download.swagger'
+                                        defaultMessage='Swagger ( /swagger.json )'
+                                    />
+                                </Button>
+                            </a>
+                        </Grid>
+                    </Grid>
                 </Grid>
-                <SwaggerUI accessTokenProvider={this.accessTokenProvider} spec={swagger} 
-                authorizationHeader={authorizationHeader} />
+
+                <SwaggerUI accessTokenProvider={this.accessTokenProvider} spec={swagger}
+                    authorizationHeader={authorizationHeader} />
             </React.Fragment>
         );
     }
