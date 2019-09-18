@@ -148,7 +148,7 @@ const Configurations = {
                         ],
                     },
                 },
-                tagWiseMode: true,
+                tagWiseMode: false,
                 tagThumbnail: {
                     width: 150,
                     defaultTagImage: '/store-new/site/public/images/api/api-default.png',

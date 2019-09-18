@@ -17,11 +17,8 @@
  */
 
 import React from 'react';
-import { TagCloud } from 'react-tagcloud';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import { FormattedMessage } from 'react-intl';
 import ApiTagThumb from './ApiTagThumb';
 
 const styles = theme => ({
@@ -95,11 +92,6 @@ class ApiTagCloud extends React.Component {
             classes, data, listType,
         } = this.props;
         const tagWiseURL = '/apis?limit=10&offset=0&query=tag';
-        // const { selectedTag } = this.state;
-        // const Coloroptions = {
-        //     luminosity: 'dark',
-        //     hue: 'blue',
-        // };
         return (
             <div className={classes.tagedApisWrapper}>
                 {/* Todo: api tag wise grouping */}
