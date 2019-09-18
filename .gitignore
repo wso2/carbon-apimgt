@@ -29,3 +29,7 @@ components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/publis
 components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/store-api.yaml
 components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/swagger.json
 components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/swagger.json
+features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/libs/Saxon-HE-9.5.1-8.jar
+features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/repository/database/WSO2AM_DB.mv.db
+features/apimgt/org.wso2.carbon.apimgt.keymanager.feature/src/main/resources/repository/database/WSO2AM_DB.mv.db
+features/apimgt/org.wso2.carbon.apimgt.keymanager.feature/src/main/resources/throttle#data#v1.war

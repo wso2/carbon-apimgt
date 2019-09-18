@@ -41,5 +41,4 @@ i18n.init(request,localeResourcesBasePath);
         }
     });
 }());
-
 %>
