@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
@@ -154,33 +154,6 @@ function GlobalNavBar(props) {
                         primary={intl.formatMessage({
                             id: 'Base.Generic.GlobalNavbar.menu.apis',
                             defaultMessage: 'APIs',
-                        })}
-                    />
-                </ListItem>
-            </Link>
-            <Link to='/api-products' className={classNames({ [classes.selected]: selected === 'api-products', [classes.links]: true })}>
-                <ListItem button>
-                    <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
-                        <CustomIcon
-                            width={iconWidth}
-                            height={iconWidth}
-                            icon='api-product'
-                            className={classes.listText}
-                            strokeColor={strokeColor}
-                        />
-                    </ListItemIcon>
-                    <ListItemText
-                        classes={{
-                            root: classes.listItemTextRoot,
-                            primary: classNames({
-                                [classes.selectedText]: selected === 'api-products',
-                                [classes.listText]: selected !== 'api-products' && !smallView,
-                                [classes.listTextSmall]: selected !== 'api-products' && smallView,
-                            }),
-                        }}
-                        primary={intl.formatMessage({
-                            id: 'Base.Generic.GlobalNavbar.menu.apiproducts',
-                            defaultMessage: 'API Products',
                         })}
                     />
                 </ListItem>

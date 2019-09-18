@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
@@ -79,6 +80,17 @@ public interface APIManager {
      * @throws APIManagementException if failed get API from APIIdentifier
      */
     API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
+
+    /**
+     * Get API or APIProduct by registry artifact id
+     *
+     * @param uuid                  Registry artifact id
+     * @param requestedTenantDomain tenantDomain for the registry
+     * @return ApiTypeWrapper wrapping the API or APIProduct of the provided artifact id
+     * @throws APIManagementException
+     */
+    ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
+            throws APIManagementException;
 
     /**
      * Get minimal details of API by registry artifact id

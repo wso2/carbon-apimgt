@@ -34,7 +34,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
-import APIProduct from 'AppData/APIProduct';
 import CONSTS from 'AppData/Constants';
 import { ApiContext } from '../ApiContext';
 import Progress from '../../../Shared/Progress';
@@ -102,7 +101,7 @@ class ApiConsole extends React.Component {
      * @memberof ApiConsole
      */
     componentDidMount() {
-        const { apiType, api } = this.context;
+        const { api } = this.context;
         const apiID = api.id;
         const user = AuthManager.getUser();
         let apiData;
@@ -116,11 +115,7 @@ class ApiConsole extends React.Component {
         let selectedKeyType;
         let accessToken;
 
-        if (apiType === CONSTS.API_PRODUCT_TYPE) {
-            this.apiClient = new APIProduct();
-        } else if (apiType === CONSTS.API_TYPE) {
-            this.apiClient = new Api();
-        }
+        this.apiClient = new Api();
 
         const promiseAPI = this.apiClient.getAPIById(apiID);
 

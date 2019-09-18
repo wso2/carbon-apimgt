@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -146,20 +147,19 @@ public class ApplicationImportExportManager {
                 Set<API> apiSet = (Set<API>) matchedAPIs.get("apis");
                 if (apiSet != null && !apiSet.isEmpty()) {
                     API api = apiSet.iterator().next();
-                    APIIdentifier apiId = api.getId();
                     //tier of the imported subscription
                     Tier tier = subscribedAPI.getTier();
                     //checking whether the target tier is available
                     if (isTierAvailable(tier, api) && api.getStatus() != null &&
                             APIConstants.PUBLISHED.equals(api.getStatus())) {
-                        apiId.setTier(tier.getName());
+                        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
                         // add subscription if update flag is not specified
                         // it will throw an error if subscriber already exists
                         if (!update) {
-                            apiConsumer.addSubscription(apiId, userId, appId);
+                            apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
                         } else if (!apiConsumer.isSubscribed(subscribedAPI.getApiId(), userId)) {
                             // on update skip subscriptions that already exists
-                            apiConsumer.addSubscription(apiId, userId, appId);
+                            apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
                         }
                     } else {
                         log.error("Failed to import Subscription as API " + name + "-" + version +

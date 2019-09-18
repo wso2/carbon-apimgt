@@ -30,8 +30,10 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
@@ -40,6 +42,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
+
 
 import java.io.File;
 import java.net.URI;
@@ -118,8 +121,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             Map allMatchedApisMap = apiConsumer
                     .searchPaginatedAPIs(newSearchQuery, requestedTenantDomain, offset, limit, false);
-            Set<API> sortedSet = (Set<API>) allMatchedApisMap.get("apis"); // This is a SortedSet
-            ArrayList<API> allMatchedApis = new ArrayList<>(sortedSet);
+            Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
+            ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
 
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
             //Add pagination section in the response
@@ -135,7 +138,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.rootCauseMessageMatches(e, "start index seems to be greater than the limit count")) {
-                //this is not an error of the user as he does not know the total number of apis available. Thus sends
+                //this is not an error of the user as he does not know the total number of apis available. Thus sends 
                 //  an empty response
                 apiListDTO.setCount(0);
                 apiListDTO.setPagination(new PaginationDTO());
@@ -454,15 +457,22 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
-            APIIdentifier apiIdentifier = api.getId();
-            float avgRating = apiConsumer.getAverageAPIRating(apiIdentifier);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
+
+            float avgRating = apiConsumer.getAverageAPIRating(identifier);
             int userRating = 0;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equals(username)) {
-                userRating = apiConsumer.getUserRating(apiIdentifier, username);
+                userRating = apiConsumer.getUserRating(identifier, username);
             }
             List<RatingDTO> ratingDTOList = new ArrayList<>();
-            JSONArray array = apiConsumer.getAPIRatings(apiIdentifier);
+            JSONArray array = apiConsumer.getAPIRatings(identifier);
             for (int i = 0; i < array.size(); i++) {
                 JSONObject obj = (JSONObject) array.get(i);
                 RatingDTO ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
@@ -528,7 +538,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     /**
      * Retrieves the swagger document of an API
-     *
+     * 
      * @param apiId API identifier
      * @param labelName name of the gateway label
      * @param environmentName name of the gateway environment
@@ -831,9 +841,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
 
-            API api = apiConsumer.getAPIbyUUID(apiId, requestedTenantDomain);
-            if (APIConstants.PUBLISHED.equals(api.getStatus()) || APIConstants.PROTOTYPED.equals(api.getStatus())
-                            || APIConstants.DEPRECATED.equals(api.getStatus())) {
+            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            String status = api.getStatus();
+            if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
+                            || APIConstants.DEPRECATED.equals(status)) {
                 return APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
             } else {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);

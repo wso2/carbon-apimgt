@@ -37,7 +37,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -60,6 +59,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -1795,8 +1795,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Collections.sort(sortedAPIs, comparator);
         for (int i = sortedAPIs.size() - 1; i >= 0; i--) {
             String oldVersion = sortedAPIs.get(i).getId().getVersion();
-            apiMgtDAO.makeKeysForwardCompatible(provider, apiName, oldVersion, api.getId().getVersion(),
-                    api.getContext());
+            apiMgtDAO.makeKeysForwardCompatible(new ApiTypeWrapper(api), oldVersion
+            );
         }
     }
 
@@ -6917,11 +6917,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             GenericArtifact artifact = APIUtil.createAPIProductArtifactContent(genericArtifact, apiProduct);
             artifactManager.addGenericArtifact(artifact);
-
+            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             String providerPath = APIUtil.getAPIProductProviderPath(apiProduct.getId());
             //provider ------provides----> APIProduct
             registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
+
+            // Make the LC status of the API Product published by default
+            saveAPIStatus(artifactPath, APIConstants.PUBLISHED);
 
             String visibleRolesList = apiProduct.getVisibleRoles();
             String[] visibleRoles = new String[0];
@@ -6944,6 +6947,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + " created";
                 log.debug(logMessage);
             }
+            changeLifeCycleStatusToPublish(apiProduct.getId());
         } catch (RegistryException e) {
             try {
                 registry.rollbackTransaction();
@@ -6962,6 +6966,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } catch (RegistryException ex) {
                 handleException("Error while rolling back the transaction for API Product : " + apiProduct.getId().getName(), ex);
             }
+        }
+    }
+
+    private void changeLifeCycleStatusToPublish(APIProductIdentifier apiIdentifier) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
+
+            String productArtifactId = registry.get(APIUtil.getAPIProductPath(apiIdentifier)).getUUID();
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(productArtifactId);
+
+            if (apiArtifact != null) {
+                apiArtifact.invokeAction("Publish", APIConstants.API_LIFE_CYCLE);
+                if (log.isDebugEnabled()) {
+                    String logMessage = "API Product Status changed successfully. API Product Name: "
+                            + apiIdentifier.getName();
+                    log.debug(logMessage);
+                }
+            }
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while Changing Lifecycle status of API Product "
+                    + apiIdentifier.getName(), e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 
