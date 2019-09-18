@@ -508,8 +508,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = originalAPI.getId();
-            boolean isWSAPI = originalAPI.getType() != null && APIConstants.APITransportType.WS == APIConstants.APITransportType
-                    .valueOf(originalAPI.getType());
+            boolean isWSAPI = originalAPI.getType() != null
+                            && APIConstants.APITransportType.WS.toString().equals(originalAPI.getType());
 
             org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] apiDtoClassAnnotatedScopes =
                     APIDTO.class.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
@@ -2826,7 +2826,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             ResourceFile getWSDLResponse = apiProvider.getWSDL(apiIdentifier);
-            return Response.ok(getWSDLResponse.getContent(), getWSDLResponse.getContentType()).build();
+            return RestApiUtil.getResponseFromResourceFile(apiIdentifier.toString(), getWSDLResponse);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
@@ -3232,19 +3232,18 @@ public class ApisApiServiceImpl implements ApisApiService {
      * This method is used to assign micro gateway labels to the DTO
      *
      * @param apiDTO API DTO
-     * @param api the API object
+     * @param api    the API object
      * @return the API object with labels
      */
     private API assignLabelsToDTO(APIDTO apiDTO, API api) {
 
         if (apiDTO.getLabels() != null) {
-            List<LabelDTO> dtoLabels = apiDTO.getLabels();
+            List<String> labels = apiDTO.getLabels();
             List<Label> labelList = new ArrayList<>();
-            for (LabelDTO labelDTO : dtoLabels) {
-                Label label = new Label();
-                label.setName(labelDTO.getName());
-//                label.setDescription(labelDTO.getDescription()); todo add description
-                labelList.add(label);
+            for (String label : labels) {
+                Label mgLabel = new Label();
+                mgLabel.setName(label);
+                labelList.add(mgLabel);
             }
             api.setGatewayLabels(labelList);
         }

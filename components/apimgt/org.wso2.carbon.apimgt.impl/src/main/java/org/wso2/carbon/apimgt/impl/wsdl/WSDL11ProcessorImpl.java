@@ -34,8 +34,12 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
@@ -53,7 +57,7 @@ import javax.wsdl.xml.WSDLReader;
 import javax.wsdl.xml.WSDLWriter;
 
 /**
- * Class that reads wsdl soap operations and maps with the types.
+ * The class that processes WSDL 1.1 documents
  */
 public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
     private static final Logger log = LoggerFactory.getLogger(WSDL11ProcessorImpl.class);
@@ -66,6 +70,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
     private ErrorHandler error;
     private Definition wsdlDefinition;
     private static volatile WSDLFactory wsdlFactoryInstance;
+    private String wsdlArchiveExtractedPath;
 
     private Map<String, Definition> pathToDefinitionMap;
 
@@ -137,6 +142,7 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
     @Override
     public boolean initPath(String path) throws APIMgtWSDLException {
         pathToDefinitionMap = new HashMap<>();
+        wsdlArchiveExtractedPath = path;
         WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
 
         try {
@@ -182,7 +188,40 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
     }
 
     @Override
-    public byte[] updateEndpoints(API api, String environmentName, String environmentType) throws APIMgtWSDLException {
+    public void updateEndpoints(API api, String environmentName, String environmentType) throws APIMgtWSDLException {
+        if (wsdlDefinition != null) {
+            updateEndpointsOfSingleWSDL(api, environmentName, environmentType);
+        } else {
+            updateEndpointsOfWSDLArchive(api, environmentName, environmentType);
+        }
+    }
+
+    /**
+     * Update the endpoint information of the WSDL (single WSDL scenario) when an API and the environment details are
+     * provided
+     *
+     * @param api API
+     * @param environmentName name of the gateway environment
+     * @param environmentType type of the gateway environment
+     * @throws APIMgtWSDLException when error occurred while updating the endpoints
+     */
+    private void updateEndpointsOfSingleWSDL(API api, String environmentName, String environmentType)
+            throws APIMgtWSDLException {
+        updateEndpointsOfSingleWSDL(api, environmentName, environmentType, wsdlDefinition);
+    }
+
+    /**
+     * Update the endpoint information of the provided WSDL definition when an API and the environment details are
+     * provided
+     *
+     * @param api API
+     * @param environmentName name of the gateway environment
+     * @param environmentType type of the gateway environment
+     * @param wsdlDefinition WSDL 1.1 definition
+     * @throws APIMgtWSDLException when error occurred while updating the endpoints
+     */
+    private void updateEndpointsOfSingleWSDL(API api, String environmentName, String environmentType,
+              Definition wsdlDefinition) throws APIMgtWSDLException {
         Map serviceMap = wsdlDefinition.getAllServices();
         URL addressURI;
         for (Object entry : serviceMap.entrySet()) {
@@ -220,20 +259,65 @@ public class WSDL11ProcessorImpl extends AbstractWSDLProcessor {
                 }
             }
         }
-        return getWSDL();
+    }
+
+    /**
+     * Update the endpoint information of the WSDL (WSDL archive scenario) when an API and the environment details are
+     * provided
+     *
+     * @param api API
+     * @param environmentName name of the gateway environment
+     * @param environmentType type of the gateway environment
+     * @throws APIMgtWSDLException when error occurred while updating the endpoints
+     */
+    private void updateEndpointsOfWSDLArchive(API api, String environmentName, String environmentType)
+            throws APIMgtWSDLException {
+        for (Map.Entry<String, Definition> entry : pathToDefinitionMap.entrySet()) {
+            Definition definition = entry.getValue();
+            if (log.isDebugEnabled()) {
+                log.debug("Updating endpoints of WSDL: " + entry.getKey());
+            }
+            updateEndpointsOfSingleWSDL(api, environmentName, environmentType, definition);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated endpoints of WSDL: " + entry.getKey());
+            }
+            try (FileOutputStream wsdlFileOutputStream = new FileOutputStream(new File(entry.getKey()))) {
+                WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
+                writer.writeWSDL(definition, wsdlFileOutputStream);
+            } catch (IOException | WSDLException e) {
+                throw new APIMgtWSDLException("Failed to create WSDL archive for API:" + api.getId().getName() + ":"
+                        + api.getId().getVersion() + " for environment " + environmentName, e,
+                        ExceptionCodes.ERROR_WHILE_CREATING_WSDL_ARCHIVE);
+            }
+        }
     }
 
     @Override
-    public byte[] getWSDL() throws APIMgtWSDLException {
+    public ByteArrayInputStream getWSDL() throws APIMgtWSDLException {
+        if (wsdlDefinition != null) {
+            return getSingleWSDL();
+        } else {
+            return getWSDLArchive(wsdlArchiveExtractedPath);
+        }
+    }
+
+    /**
+     * Retrieves an InputStream representing the WSDL (single WSDL scenario) attached to the processor
+     *
+     * @return Retrieves an InputStream representing the WSDL
+     * @throws APIMgtWSDLException when error occurred while getting the InputStream
+     */
+    private ByteArrayInputStream getSingleWSDL() throws APIMgtWSDLException {
         WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
             writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
         } catch (WSDLException e) {
-            throw new APIMgtWSDLException("Error while stringifying WSDL definition", e,
+            throw new APIMgtWSDLException("Error while converting WSDL definition object to text format", e,
                     ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
         }
-        return byteArrayOutputStream.toByteArray();
+        byte[] bytes = byteArrayOutputStream.toByteArray();
+        return new ByteArrayInputStream(bytes);
     }
 
     @Override

@@ -32,7 +32,7 @@ import MUIDataTable from 'mui-datatables';
 import Icon from '@material-ui/core/Icon';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Grid from '@material-ui/core/Grid';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import Delete from './Delete';
 
@@ -91,8 +91,6 @@ class Scopes extends React.Component {
         this.api = new Api();
         this.api_uuid = props.match.params.api_uuid;
         this.api_data = props.api;
-        this.isNotPublisher = AuthManager.isNotPublisher();
-        this.isNotCreator = AuthManager.isNotCreator();
     }
 
     /**
@@ -171,7 +169,7 @@ class Scopes extends React.Component {
                                         <td>
                                             <Link
                                                 to={
-                                                    !this.isNotCreator && {
+                                                    !isRestricted(['apim:api_create'], api) && {
                                                         pathname: editUrl,
                                                         state: {
                                                             scopeName,
@@ -179,7 +177,12 @@ class Scopes extends React.Component {
                                                     }
                                                 }
                                             >
-                                                <Button disabled={this.isNotCreator && this.isNotPublisher}>
+                                                <Button
+                                                    disabled={isRestricted(
+                                                        ['apim:api_create'],
+                                                        api,
+                                                    )}
+                                                >
                                                     <Icon>edit</Icon>
                                                     <FormattedMessage
                                                         id='Apis.Details.Documents.Edit.documents.text.editor.edit'
@@ -247,11 +250,11 @@ class Scopes extends React.Component {
                                 defaultMessage='Scopes'
                             />
                         </Typography>
-                        <Link to={url}>
+                        <Link to={!isRestricted(['apim:api_create'], api) && url}>
                             <Button
                                 size='small'
                                 className={classes.button}
-                                disabled={this.isNotCreator && this.isNotPublisher}
+                                disabled={isRestricted(['apim:api_create'], api)}
                             >
                                 <AddCircle className={classes.buttonIcon} />
                                 <FormattedMessage
@@ -273,14 +276,19 @@ class Scopes extends React.Component {
                                 <FormattedMessage
                                     id='Apis.Details.Scopes.Scopes.scopes.enable.fine.gained.access.control'
                                     defaultMessage={
-                                        'Scopes enable fine-grained access control to API resources' +
-                                        ' based on user roles.'
+                                        'Scopes enable fine-grained access control to API resources'
+                                        + ' based on user roles.'
                                     }
                                 />
                             </Typography>
                             <div className={classes.actions}>
-                                <Link to={url}>
-                                    <Button variant='contained' color='primary' className={classes.button}>
+                                <Link to={!isRestricted(['apim:api_create'], api) && url}>
+                                    <Button
+                                        variant='contained'
+                                        color='primary'
+                                        className={classes.button}
+                                        disabled={isRestricted(['apim:api_create'], api)}
+                                    >
                                         <FormattedMessage
                                             id='Apis.Details.Scopes.Scopes.create.scopes.button'
                                             defaultMessage='Create Scopes'
@@ -303,8 +311,12 @@ class Scopes extends React.Component {
                             defaultMessage='Scopes'
                         />
                     </Typography>
-                    <Link to={!this.isNotCreator && url}>
-                        <Button size='small' className={classes.button} disabled={this.isNotCreator}>
+                    <Link to={!isRestricted(['apim:api_create'], api) && url}>
+                        <Button
+                            size='small'
+                            className={classes.button}
+                            disabled={isRestricted(['apim:api_create'], api)}
+                        >
                             <AddCircle className={classes.buttonIcon} />
                             <FormattedMessage
                                 id='Apis.Details.Scopes.Scopes.heading.scope.add_new'
@@ -312,14 +324,14 @@ class Scopes extends React.Component {
                             />
                         </Button>
                     </Link>
-                    {this.isNotCreator && (
+                    {isRestricted(['apim:api_create'], api) && (
                         <Grid item>
                             <Typography variant='body2' color='primary'>
                                 <FormattedMessage
                                     id='Apis.Details.Scopes.Scopes.update.not.allowed'
                                     defaultMessage={
-                                        '*You are not authorized to update Scopes of' +
-                                        ' the API due to insufficient permissions'
+                                        '*You are not authorized to update Scopes of'
+                                        + ' the API due to insufficient permissions'
                                     }
                                 />
                             </Typography>

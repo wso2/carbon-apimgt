@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -27,9 +27,12 @@ import FormLabel from '@material-ui/core/FormLabel';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Certificates from 'AppComponents/Apis/Details/Endpoints/GeneralConfiguration/Certificates';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
+import API from 'AppData/api';
+import Alert from 'AppComponents/Shared/Alert';
 
 import {
     API_SECURITY_MUTUAL_SSL,
@@ -45,10 +48,90 @@ import {
  * @param {*} props
  * @returns
  */
-export default function TransportLevel(props) {
-    const { haveMultiLevelSecurity, securityScheme, configDispatcher } = props;
+function TransportLevel(props) {
+    const {
+        haveMultiLevelSecurity, securityScheme, configDispatcher, intl, id,
+    } = props;
     const isMutualSSLEnabled = securityScheme.includes(API_SECURITY_MUTUAL_SSL);
-    const isNotCreator = AuthManager.isNotCreator();
+    const { api } = useContext(APIContext);
+    const [clientCertificates, setClientCertificates] = useState([]);
+
+    /**
+     * Method to upload the certificate content by calling the rest api.
+     *
+     * @param {string} certificate The certificate needs to be associated with the API
+     * @param {string} policy The tier to be used for the certificate.
+     * @param {string} alias The alias of the certificate to be deleted.
+     * */
+    const saveClientCertificate = (certificate, policy, alias) => {
+        API.addClientCertificate(id, certificate, policy, alias).then((resp) => {
+            if (resp.status === 201) {
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.add.success',
+                    defaultMessage: 'Certificate added successfully',
+                }));
+                const tmpCertificates = [...clientCertificates];
+                tmpCertificates.push({
+                    apiId: resp.obj.apiId,
+                    alias: resp.obj.alias,
+                    tier: resp.obj.tier,
+                });
+                setClientCertificates(tmpCertificates);
+            }
+        }).catch((error) => {
+            if (error.response) {
+                Alert.error(error.response.body.description);
+            } else {
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.alias.error',
+                    defaultMessage: 'Something went wrong while adding the API certificate',
+                }));
+            }
+        });
+    };
+
+    /**
+     * Method to delete the selected certificate.
+     *
+     * @param {string} alias The alias of the certificate to be deleted.
+     * */
+    const deleteClientCertificate = (alias) => {
+        API.deleteClientCertificate(alias, id).then((resp) => {
+            setClientCertificates(() => {
+                if (resp.status === 200) {
+                    return clientCertificates.filter((cert) => {
+                        return cert.alias !== alias;
+                    });
+                } else {
+                    return -1;
+                }
+            });
+            Alert.info(intl.formatMessage({
+                id: 'Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.delete.success',
+                defaultMessage: 'Certificate Deleted Successfully',
+            }));
+        }).catch((error) => {
+            if (error.response) {
+                Alert.error(error.response.body.description);
+            } else {
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.delete.error',
+                    defaultMessage: 'Error while deleting certificate',
+                }));
+            }
+        });
+    };
+
+    // Get the client certificates from backend.
+    useEffect(() => {
+        API.getAllClientCertificates(id).then((resp) => {
+            const { certificates } = resp.obj;
+            setClientCertificates(certificates);
+        }).catch((err) => {
+            console.error(err);
+            setClientCertificates([]);
+        });
+    }, []);
 
     let mandatoryValue = 'optional';
     // If not mutual ssl security is selected, no mandatory values should be pre-selected
@@ -75,7 +158,7 @@ export default function TransportLevel(props) {
                         <FormControlLabel
                             control={(
                                 <Checkbox
-                                    disabled={isNotCreator}
+                                    disabled={isRestricted(['apim:api_create'], api)}
                                     checked={isMutualSSLEnabled}
                                     onChange={({ target: { checked, value } }) => configDispatcher({
                                         action: 'securityScheme',
@@ -117,7 +200,7 @@ export default function TransportLevel(props) {
                         </RadioGroup>
                         <FormHelperText>
                             <FormattedMessage
-                                id='Apis.Details.Configuration.components.APISecurity.http.mandatory'
+                                id='Apis.Details.Configuration.components.APISecurity.components.TransportLevel'
                                 defaultMessage='Choose whether Transport level security is mandatory or optional'
                             />
                         </FormHelperText>
@@ -129,9 +212,11 @@ export default function TransportLevel(props) {
                         // This is half baked!!!
                         // Refactor the Certificate component to share its capabilities in here and endpoints page ~tmkb
                         <Certificates
-                            certificates={{}}
-                            uploadCertificate={() => {}}
-                            deleteCertificate={() => {}}
+                            isMutualSSLEnabled={isMutualSSLEnabled}
+                            certificates={clientCertificates}
+                            uploadCertificate={saveClientCertificate}
+                            deleteCertificate={deleteClientCertificate}
+                            apiId={id}
                         />
                     )}
 
@@ -145,4 +230,8 @@ TransportLevel.propTypes = {
     configDispatcher: PropTypes.func.isRequired,
     haveMultiLevelSecurity: PropTypes.bool.isRequired,
     securityScheme: PropTypes.arrayOf(PropTypes.string).isRequired,
+    intl: PropTypes.shape({}).isRequired,
+    id: PropTypes.string.isRequired,
 };
+
+export default injectIntl((TransportLevel));

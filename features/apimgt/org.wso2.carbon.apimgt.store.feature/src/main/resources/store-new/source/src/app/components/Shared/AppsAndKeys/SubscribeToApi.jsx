@@ -20,8 +20,10 @@ import React, { useState, useEffect } from 'react';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Grid from '@material-ui/core/Grid';
+import ListItemText from '@material-ui/core/ListItemText';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
+import Typography from '@material-ui/core/Typography';
 import Select from '@material-ui/core/Select';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
@@ -181,7 +183,31 @@ const subscribeToApi = (props) => {
                         >
                             {throttlingPolicyList.map(policy => (
                                 <MenuItem value={policy.tierName} key={policy.tierName}>
-                                    {policy.tierName}
+                                    {(policy.tierPlan === 'COMMERCIAL') ? (
+                                        <React.Fragment>
+                                            <ListItemText
+                                                primary={policy.tierName}
+                                                secondary={
+                                                    policy.monetizationAttributes.pricePerRequest ? (
+                                                        <Typography>
+                                                            {policy.monetizationAttributes.pricePerRequest} {` `}
+                                                            {policy.monetizationAttributes.currencyType} {` per `} 
+                                                            {policy.monetizationAttributes.billingCycle}
+                                                        </Typography>
+                                                    ) : (
+                                                        <Typography>
+                                                            {policy.monetizationAttributes.fixedPrice} {` `}
+                                                            {policy.monetizationAttributes.currencyType}{` per `}
+                                                            {policy.monetizationAttributes.billingCycle}
+                                                        </Typography>
+                                                    )}
+                                            />
+                                        </React.Fragment>
+                                    ) : (
+                                        <ListItemText
+                                            primary={policy.tierName}
+                                        />
+                                    )}
                                 </MenuItem>
                             ))}
                         </Select>

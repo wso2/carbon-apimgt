@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -28,7 +28,9 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { FormattedMessage } from 'react-intl';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
+
 import {
     DEFAULT_API_SECURITY_OAUTH2,
     API_SECURITY_BASIC_AUTH,
@@ -45,7 +47,7 @@ import {
  */
 export default function ApplicationLevel(props) {
     const { haveMultiLevelSecurity, securityScheme, configDispatcher } = props;
-    const isNotCreator = AuthManager.isNotCreator();
+    const { api } = useContext(APIContext);
 
     let mandatoryValue = 'optional';
     // If not Oauth2 or Basic auth security is selected, no mandatory values should be pre-selected
@@ -71,7 +73,7 @@ export default function ApplicationLevel(props) {
                         <FormControlLabel
                             control={(
                                 <Checkbox
-                                    disabled={isNotCreator}
+                                    disabled={isRestricted(['apim:api_create'], api)}
                                     checked={securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2)}
                                     onChange={({ target: { checked, value } }) => configDispatcher({
                                         action: 'securityScheme',
@@ -86,7 +88,7 @@ export default function ApplicationLevel(props) {
                         <FormControlLabel
                             control={(
                                 <Checkbox
-                                    disabled={isNotCreator}
+                                    disabled={isRestricted(['apim:api_create'], api)}
                                     checked={securityScheme.includes(API_SECURITY_BASIC_AUTH)}
                                     onChange={({ target: { checked, value } }) => configDispatcher({
                                         action: 'securityScheme',
@@ -128,7 +130,7 @@ export default function ApplicationLevel(props) {
                         </RadioGroup>
                         <FormHelperText>
                             <FormattedMessage
-                                id='Apis.Details.Configuration.components.APISecurity.http.mandatory'
+                                id='Apis.Details.Configuration.components.APISecurity.components.ApplicationLevel'
                                 defaultMessage='Choose whether Application level security is mandatory or optional'
                             />
                         </FormHelperText>

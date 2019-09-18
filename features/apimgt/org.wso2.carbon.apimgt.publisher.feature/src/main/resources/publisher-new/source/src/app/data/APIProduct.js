@@ -98,6 +98,25 @@ class APIProduct extends Resource {
         });
     }
     /**
+     * Create an API Product with the given parameters in template and call the callback method given optional.
+     * @param {Object} apiData - API data which need to fill the placeholder values in the @get_template
+     * @returns {Promise} Promise after creating and optionally calling the callback method.
+     */
+    create(apiData) {
+        let payload;
+        let promise_create;
+
+        payload = {
+            body: apiData,
+            'Content-Type': 'application/json',
+        };
+        promise_create = this.client.then(client => {
+            return client.apis['API Products'].post_api_products(payload, this._requestMetaData());
+        });
+
+        return promise_create;
+    }
+    /**
      *
      * Instance method of the API class to provide raw JSON object
      * which is API body friendly to use with REST api requests
@@ -114,7 +133,7 @@ class APIProduct extends Resource {
      */
     toJSON(resource = this, userExcludes = []) {
         var copy = {},
-            excludes = ['_data', 'client', 'apiType', ...userExcludes];
+            excludes = ['_data', 'client', 'type', ...userExcludes];
         for (var prop in resource) {
             if (!excludes.includes(prop)) {
                 copy[prop] = resource[prop];

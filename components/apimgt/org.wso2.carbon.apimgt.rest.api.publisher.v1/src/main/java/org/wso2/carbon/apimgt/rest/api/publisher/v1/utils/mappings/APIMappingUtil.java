@@ -809,14 +809,11 @@ public class APIMappingUtil {
 
         //setting micro-gateway labels if there are any
         if (model.getGatewayLabels() != null) {
-            List<LabelDTO> labels = new ArrayList<>();
+            List<String> labels = new ArrayList<>();
             List<Label> gatewayLabels = model.getGatewayLabels();
             for (Label label : gatewayLabels) {
-                LabelDTO labelDTO = new LabelDTO();
-                labelDTO.setName(label.getName());
-                labelDTO.setAccessUrls(label.getAccessUrls());
-                labelDTO.setDescription(label.getDescription());
-                labels.add(labelDTO);
+                String labelName = label.getName();
+                labels.add(labelName);
             }
             dto.setLabels(labels);
         }
@@ -1801,6 +1798,10 @@ public class APIMappingUtil {
         product.setContext(context);
         context = checkAndSetVersionParam(context);
         product.setContextTemplate(context);
+
+        List<String> apiProductTags = dto.getTags();
+        Set<String> tagsToReturn = new HashSet<>(apiProductTags);
+        product.addTags(tagsToReturn);
 
         if(dto.getBusinessInformation() != null) {
             product.setBusinessOwner(dto.getBusinessInformation().getBusinessOwner());

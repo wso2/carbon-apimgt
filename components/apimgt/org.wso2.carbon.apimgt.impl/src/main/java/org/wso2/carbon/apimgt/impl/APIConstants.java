@@ -169,6 +169,7 @@ public final class APIConstants {
     public static final String API_WSDL_EXTRACTED_DIRECTORY = "extracted";
     public static final String WSDL_ARCHIVES_TEMP_FOLDER = "WSDL-archives";
     public static final String WSDL_ARCHIVE_ZIP_FILE = "wsdl-archive.zip";
+    public static final String WSDL_ARCHIVE_UPDATED_ZIP_FILE = "wsdl-archive-updated.zip";
     public static final String WSDL_FILE = "wsdlFile";
     public static final String UPDATED_WSDL_ZIP = "updated.zip";
     public static final String FILE_URI_PREFIX = "file://";
@@ -996,6 +997,12 @@ public final class APIConstants {
     public static final String GRAPHQL_QUERY = "Query";
     public static final String GRAPHQL_MUTATION = "Mutation";
     public static final String GRAPHQL_SUBSCRIPTION = "Subscription";
+    public static final String SCOPE_ROLE_MAPPING = "ScopeRoleMapping";
+    public static final String SCOPE_OPERATION_MAPPING = "ScopeOperationMapping";
+    public static final String OPERATION_THROTTLING_MAPPING = "OperationThrottlingMapping";
+    public static final String OPERATION_AUTH_SCHEME_MAPPING = "OperationAuthSchemeMapping";
+    public static final String OPERATION_SECURITY_ENABLED = "Enabled";
+    public static final String OPERATION_SECURITY_DISABLED = "Disabled";
 
     //URI Authentication Schemes
     public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
@@ -1373,7 +1380,7 @@ public final class APIConstants {
     public static final String API_PRODUCT_VERSION = "1.0.0";
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
-    public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS" , "SOAPTOREST", "GRAPHQL"};
+    public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS" , "SOAPTOREST", "GRAPHQL", "SOAP"};
 
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
@@ -1442,6 +1449,7 @@ public final class APIConstants {
     public static final String MULTI_ATTRIBUTE_SEPARATOR_DEFAULT = ",";
     public static final String MULTI_ATTRIBUTE_SEPARATOR = "MultiAttributeSeparator";
     public static final String CUSTOM_URL = "customUrl";
+    public static final String API_PRODUCT = "APIProduct";
 
     public static class AuditLogConstants {
         public static final String CREATED = "created";

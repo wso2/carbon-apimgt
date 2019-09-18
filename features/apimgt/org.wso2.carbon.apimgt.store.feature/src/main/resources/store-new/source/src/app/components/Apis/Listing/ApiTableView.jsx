@@ -23,18 +23,50 @@ import MUIDataTable from 'mui-datatables';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import queryString from 'query-string';
 import API from 'AppData/api';
-import APIProduct from 'AppData/APIProduct';
 import CONSTS from 'AppData/Constants';
 import Configurations from 'Config';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
-import withSettings from 'AppComponents/Shared/withSettingsContext';
-import Alert from 'AppComponents/Shared/Alert';
 import ImageGenerator from './ImageGenerator';
 import ApiThumb from './ApiThumb';
 import DocThumb from './DocThumb';
 import { ApiContext } from '../Details/ApiContext';
 
-const styles = theme => ({
+class StarRatingColumn extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            rating: null,
+        };
+        this.api = new API();
+    }
+
+    componentDidMount() {
+        const promised_rating = this.api.getRatingFromUser(this.props.apiId, null);
+        promised_rating
+            .then((response) => {
+                const rating = response.obj;
+                this.setState({
+                    rating: rating.userRating,
+                });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const status = error.status;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+            });
+    }
+
+    render() {
+        const { rating } = this.state;
+        return rating && <StarRatingBar rating={rating} />;
+    }
+}
+
+const styles = (theme) => ({
     rowImageOverride: {
         '& .material-icons': {
             marginTop: 5,
@@ -64,28 +96,6 @@ class ApiTableView extends React.Component {
         this.count = 100;
         this.rowsPerPage = 10;
         this.pageType = null;
-    }
-
-    /**
-     *
-     * @memberof ApiTableView
-     */
-    componentDidMount() {
-        this.apiType = this.context.apiType;
-        this.getData();
-    }
-
-    /**
-     * @param {*} prevProps previous props
-     * @memberof ApiTableView
-     */
-    componentDidUpdate(prevProps) {
-        const { query, selectedTag } = this.props;
-        if ((this.apiType !== this.context.apiType) || query !== prevProps.query
-            || (prevProps.selectedTag !== selectedTag)) {
-            this.apiType = this.context.apiType;
-            this.getData();
-        }
     }
 
     getMuiTheme = () => {
@@ -151,6 +161,20 @@ class ApiTableView extends React.Component {
         return createMuiTheme(muiTheme);
     };
 
+    componentDidMount() {
+        this.apiType = this.context.apiType;
+        this.getData();
+    }
+
+    componentDidUpdate(prevProps) {
+        const { query, selectedTag } = this.props;
+        if ((this.apiType !== this.context.apiType) || query !== prevProps.query ||
+            (prevProps.selectedTag !== selectedTag)) {
+            this.apiType = this.context.apiType;
+            this.getData();
+        }
+    }
+
     // get data
     getData = () => {
         this.xhrRequest().then((data) => {
@@ -159,18 +183,6 @@ class ApiTableView extends React.Component {
             const { total } = pagination;
             this.count = total;
             this.setState({ data: list });
-        }).catch((error) => {
-            const { setTenantDomain, intl } = this.props;
-            const { response } = error;
-            const message = intl.formatMessage({
-                defaultMessage: 'Invalid tenant domain',
-                id: 'Apis.Listing.ApiTableView.invalid.tenant.domain',
-            });
-            if (response && response.body.code === 901300) {
-                setTenantDomain('INVALID');
-                Alert.error(message);
-            }
-            console.error('Error when getting apis', error);
         });
     };
 
@@ -185,15 +197,11 @@ class ApiTableView extends React.Component {
             composeQuery.offset = page * rowsPerPage;
             return api.search(composeQuery);
         }
-        if (apiType === CONSTS.API_TYPE) {
-            if (selectedTag) {
-                return api.getAllAPIs({ query: 'tag:' + selectedTag, limit: this.rowsPerPage, offset: page * rowsPerPage });
-            } else {
-                return api.getAllAPIs({ limit: this.rowsPerPage, offset: page * rowsPerPage });
-            }
+
+        if (selectedTag) {
+            return api.getAllAPIs({ query: 'tag:' + selectedTag, limit: this.rowsPerPage, offset: page * rowsPerPage });
         } else {
-            const apiProduct = new APIProduct();
-            return apiProduct.getAllAPIProducts({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+            return api.getAllAPIs({ limit: this.rowsPerPage, offset: page * rowsPerPage });
         }
     };
 
@@ -246,39 +254,26 @@ class ApiTableView extends React.Component {
                 options: {
                     customBodyRender: (value, tableMeta, updateValue, tableViewObj = this) => {
                         if (tableMeta.rowData) {
-                            const { apiType } = this.context;
                             const artifact = tableViewObj.state.data[tableMeta.rowIndex];
                             const apiName = tableMeta.rowData[2];
                             const apiId = tableMeta.rowData[0];
                             const { classes } = this.props;
-                            if (apiType === CONSTS.API_TYPE) {
-                                if (artifact) {
-                                    if (artifact.type === 'DOC') {
-                                        return (
-                                            <Link to={'/apis/' + artifact.apiUUID + '/docs'}>
-                                                <ImageGenerator api={artifact} width={30} height={30} />
-                                                <FormattedMessage
-                                                    id='Apis.Listing.TableView.TableView.doc.flag'
-                                                    defaultMessage='[Doc] '
-                                                />
-                                                {apiName}
-                                            </Link>
-                                        );
-                                    }
-                                    return (
-                                        <Link to={'/apis/' + apiId + '/overview'} className={classes.rowImageOverride}>
-                                            <ImageGenerator api={artifact} width={30} height={30} />
-                                            {apiName}
 
+                            if (artifact) {
+                                if (artifact.type === 'DOC') {
+                                    return (
+                                        <Link to={'/apis/' + artifact.apiUUID + '/docs'}>
+                                            <ImageGenerator api={artifact} width={30} height={30} />
+                                            <FormattedMessage
+                                                id='Apis.Listing.TableView.TableView.doc.flag'
+                                                defaultMessage='[Doc] '
+                                            />
+                                            {apiName}
                                         </Link>
                                     );
                                 }
-                            } else {
                                 return (
-                                    <Link
-                                        to={'/api-products/' + apiId + '/overview'}
-                                        className={classes.rowImageOverride}
-                                    >
+                                    <Link to={'/apis/' + apiId + '/overview'} className={classes.rowImageOverride}>
                                         <ImageGenerator api={artifact} width={30} height={30} />
                                         {apiName}
 
@@ -426,4 +421,4 @@ class ApiTableView extends React.Component {
 
 ApiTableView.contextType = ApiContext;
 
-export default withSettings(injectIntl(withStyles(styles)(ApiTableView)));
+export default injectIntl(withStyles(styles)(ApiTableView));

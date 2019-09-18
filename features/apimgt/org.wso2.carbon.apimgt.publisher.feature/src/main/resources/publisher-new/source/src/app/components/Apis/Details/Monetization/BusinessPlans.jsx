@@ -9,7 +9,7 @@ import { withStyles } from '@material-ui/core/styles';
 import API from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import { classes } from 'istanbul-lib-coverage';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 
 const styles = theme => ({
     root: {
@@ -49,8 +49,6 @@ class BusinessPlans extends Component {
             monetizedPolices: null,
         };
         this.monetizationQuery = this.monetizationQuery.bind(this);
-        this.isNotCreator = AuthManager.isNotCreator();
-        this.isNotPublisher = AuthManager.isNotPublisher();
     }
 
     /**
@@ -82,6 +80,7 @@ class BusinessPlans extends Component {
      */
     render() {
         const { policies, monetizedPolices } = this.state;
+        const { api } = this.props;
         if (monetizedPolices === null) {
             return <Progress />;
         }
@@ -92,7 +91,7 @@ class BusinessPlans extends Component {
                         <Checkbox
                             id='monetizationStatus'
                             checked={this.monetizationQuery(policy.name)}
-                            disabled={this.isNotCreator && this.isNotPublisher}
+                            disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                         />
                     )}
                     label={policy.name}

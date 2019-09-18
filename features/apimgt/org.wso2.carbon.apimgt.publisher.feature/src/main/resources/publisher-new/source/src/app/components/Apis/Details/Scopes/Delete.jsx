@@ -24,7 +24,7 @@ import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import Alert from 'AppComponents/Shared/Alert';
 import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 
 const styles = {
     appBar: {
@@ -52,13 +52,14 @@ const styles = {
 };
 
 function Delete(props) {
-    const { intl } = props;
+    // const { api } = useContext(APIContext);
+    const { intl, api } = props;
     const [open, setOpen] = useState(false);
     const toggleOpen = () => {
         setOpen(!open);
     };
     const deleteScope = () => {
-        const { api, scopeName } = props;
+        const { scopeName } = props;
         const ops = JSON.parse(JSON.stringify(api.operations));
         const operations = ops.map((op) => {
             // eslint-disable-next-line no-param-reassign
@@ -98,10 +99,10 @@ function Delete(props) {
         }
     };
     const { scopeName } = props;
-    const isNotCreator = AuthManager.isNotCreator();
+
     return (
         <div>
-            <Button onClick={toggleOpen} disabled={isNotCreator}>
+            <Button onClick={toggleOpen} disabled={isRestricted(['apim:api_create'], api)}>
                 <Icon>delete_forever</Icon>
                 <FormattedMessage
                     id='Apis.Details.Documents.Delete.document.delete'

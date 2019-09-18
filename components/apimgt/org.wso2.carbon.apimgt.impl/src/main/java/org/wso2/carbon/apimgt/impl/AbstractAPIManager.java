@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
@@ -71,6 +72,7 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -516,6 +518,55 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+    /**
+     * Get API or APIProduct by registry artifact id
+     *
+     * @param uuid                  Registry artifact id
+     * @param requestedTenantDomain tenantDomain for the registry
+     * @return ApiTypeWrapper wrapping the API or APIProduct of the provided artifact id
+     * @throws APIManagementException
+     */
+    public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String requestedTenantDomain)
+            throws APIManagementException {
+        try {
+            Registry registry;
+            if (requestedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
+                    (requestedTenantDomain)) {
+                int id = getTenantManager()
+                        .getTenantId(requestedTenantDomain);
+                registry = getRegistryService().getGovernanceSystemRegistry(id);
+            } else {
+                if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
+                    // at this point, requested tenant = carbon.super but logged in user is anonymous or tenant
+                    registry = getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
+                } else {
+                    // both requested tenant and logged in user's tenant are carbon.super
+                    registry = this.registry;
+                }
+            }
+
+            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
+                    APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
+            if (apiArtifact != null) {
+                String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+
+                if (APIConstants.API_PRODUCT.equals(type)) {
+                    return new ApiTypeWrapper(getApiProduct(registry, apiArtifact));
+                } else {
+                    return new ApiTypeWrapper(getApiForPublishing(registry, apiArtifact));
+                }
+            } else {
+                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                throw new APIMgtResourceNotFoundException(msg);
+            }
+        } catch (RegistryException | org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Failed to get API";
+            throw new APIManagementException(msg, e);
+        }
+    }
+
     protected TenantManager getTenantManager() {
         return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager();
     }
@@ -553,7 +604,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
                 log.error(msg);
-                throw new APIMgtResourceNotFoundException(msg);
+                throw new APIMgtResourceNotFoundException(msg, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, uuid));
             }
         } catch (RegistryException e) {
             String msg = "Failed to get API with uuid " + uuid;
@@ -2512,8 +2563,8 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public Map<String, Object> searchPaginatedAPIs(Registry registry, String searchQuery, int start, int end,
                                                    boolean limitAttributes) throws APIManagementException {
-        SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
-        List<API> apiList = new ArrayList<API>();
+        SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
+        List<Object> apiList = new ArrayList<>();
         Map<String, Object> result = new HashMap<String, Object>();
         int totalLength = 0;
         boolean isMore = false;
@@ -2578,14 +2629,24 @@ public abstract class AbstractAPIManager implements APIManager {
 
             int tempLength = 0;
             for (GovernanceArtifact artifact : governanceArtifacts) {
-                API resultAPI;
-                if (limitAttributes) {
-                    resultAPI = APIUtil.getAPI(artifact);
+                String type = artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
+
+                if (APIConstants.API_PRODUCT.equals(type)) {
+                    APIProduct resultAPI = APIUtil.getAPIProduct(artifact, registry);
+
+                    if (resultAPI != null) {
+                        apiList.add(resultAPI);
+                    }
                 } else {
-                    resultAPI = APIUtil.getAPI(artifact, registry);
-                }
-                if (resultAPI != null) {
-                    apiList.add(resultAPI);
+                    API resultAPI;
+                    if (limitAttributes) {
+                        resultAPI = APIUtil.getAPI(artifact);
+                    } else {
+                        resultAPI = APIUtil.getAPI(artifact, registry);
+                    }
+                    if (resultAPI != null) {
+                        apiList.add(resultAPI);
+                    }
                 }
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -2600,10 +2661,16 @@ public abstract class AbstractAPIManager implements APIManager {
             String apiIdsString = "";
             int apiCount = apiList.size();
             for (int i = 0; i < apiCount; i++) {
-                String apiId = apiList.get(i).getId().getApplicationId();
+                Object api = apiList.get(i);
+                String apiId = "";
+                if (api instanceof API) {
+                    apiId = ((API) api).getId().getApplicationId();
+                } else if (api instanceof APIProduct) {
+                    apiId = ((APIProduct) api).getId().getApplicationId();
+                }
 
-                if (apiId != null && apiId != "") {
-                    if (apiIdsString == "") {
+                if (apiId != null && !apiId.isEmpty()) {
+                    if (apiIdsString.isEmpty()) {
                         apiIdsString = apiId;
                     } else {
                         apiIdsString = apiIdsString + "," + apiId;
@@ -2612,15 +2679,25 @@ public abstract class AbstractAPIManager implements APIManager {
             }
 
             // setting scope
-            if (apiIdsString != "") {
+            if (!apiIdsString.isEmpty()) {
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
                 Map<String, Set<Scope>> apiScopeSet = keyManager.getScopesForAPIS(apiIdsString);
                 if (apiScopeSet.size() > 0) {
                     for (int i = 0; i < apiCount; i++) {
-                        String apiId = apiList.get(i).getId().getApplicationId();
+                        Object api = apiList.get(i);
+                        String apiId = "";
+                        if (api instanceof API) {
+                            apiId = ((API) api).getId().getApplicationId();
+                        } else if (api instanceof APIProduct) {
+                            apiId = ((APIProduct) api).getId().getApplicationId();
+                        }
                         if (apiId != null && apiId != "") {
                             Set<Scope> scopes = apiScopeSet.get(apiId);
-                            apiList.get(i).setScopes(scopes);
+                            if (api instanceof API) {
+                                ((API) api).setScopes(scopes);
+                            } else if (api instanceof APIProduct) {
+                                ((APIProduct) api).setScopes(scopes);
+                            }
                         }
                     }
                 }
@@ -2653,7 +2730,9 @@ public abstract class AbstractAPIManager implements APIManager {
             boolean limitAttributes) throws APIManagementException {
 
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
+        SortedSet<APIProduct> apiProductSet = new TreeSet<APIProduct>(new APIProductNameComparator());
         Map<Documentation, API> docMap = new HashMap<Documentation, API>();
+        Map<Documentation, APIProduct> productDocMap = new HashMap<Documentation, APIProduct>();
         Map<String, Object> result = new HashMap<String, Object>();
         int totalLength = 0;
         boolean isMore = false;
@@ -2789,6 +2868,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     Association[] docAssociations = registry
                             .getAssociations(resourcePath, APIConstants.DOCUMENTATION_ASSOCIATION);
                     API associatedAPI = null;
+                    APIProduct associatedAPIProduct = null;
                     if (docAssociations.length > 0) { // a content can have one api association at most
                         String apiPath = docAssociations[0].getSourcePath();
 
@@ -2796,7 +2876,12 @@ public abstract class AbstractAPIManager implements APIManager {
                         String apiArtifactId = apiResource.getUUID();
                         if (apiArtifactId != null) {
                             GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
-                            associatedAPI = APIUtil.getAPI(apiArtifact, registry);
+                            if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
+                                    equals(APIConstants.AuditLogConstants.API_PRODUCT)) {
+                                associatedAPIProduct = APIUtil.getAPIProduct(apiArtifact, registry);
+                            } else {
+                                associatedAPI = APIUtil.getAPI(apiArtifact, registry);
+                            }
                         } else {
                             throw new GovernanceException("artifact id is null for " + apiPath);
                         }
@@ -2804,14 +2889,24 @@ public abstract class AbstractAPIManager implements APIManager {
                         if (associatedAPI != null && doc != null) {
                             docMap.put(doc, associatedAPI);
                         }
+                        if (associatedAPIProduct != null && doc != null) {
+                            productDocMap.put(doc, associatedAPIProduct);
+                        }
                     }
                 } else {
                     String apiArtifactId = resource.getUUID();
                     API api;
+                    APIProduct apiProduct;
                     if (apiArtifactId != null) {
                         GenericArtifact apiArtifact = apiArtifactManager.getGenericArtifact(apiArtifactId);
-                         api = APIUtil.getAPI(apiArtifact, registry);
-                         apiSet.add(api);
+                        if (apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE).
+                                equals(APIConstants.API_PRODUCT)) {
+                            apiProduct = APIUtil.getAPIProduct(apiArtifact, registry);
+                            apiProductSet.add(apiProduct);
+                        } else {
+                            api = APIUtil.getAPI(apiArtifact, registry);
+                            apiSet.add(api);
+                        }
                     } else {
                         throw new GovernanceException("artifact id is null for " + resourcePath);
                     }
@@ -2819,7 +2914,9 @@ public abstract class AbstractAPIManager implements APIManager {
             }
 
             compoundResult.addAll(apiSet);
+            compoundResult.addAll(apiProductSet);
             compoundResult.addAll(docMap.entrySet());
+            compoundResult.addAll(productDocMap.entrySet());
             compoundResult.sort(new ContentSearchResultNameComparator());
         } catch (RegistryException e) {
             handleException("Failed to search APIs by content", e);

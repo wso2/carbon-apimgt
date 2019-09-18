@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
@@ -92,6 +93,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.validation.ConstraintViolation;
+import javax.ws.rs.core.Response;
 
 public class RestApiUtil {
 
@@ -250,6 +252,28 @@ public class RestApiUtil {
 
     public static String getLoggedInUserTenantDomain() {
         return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    }
+
+    /**
+     * Create a JAXRS Response object based on the provided ResourceFile
+     *
+     * @param fileNameWithoutExtension Filename without the extension. The extension is determined from the method
+     * @param resourceFile ResourceFile object
+     * @return JAXRS Response object
+     */
+    public static Response getResponseFromResourceFile(String fileNameWithoutExtension, ResourceFile resourceFile) {
+        String contentType;
+        String extension;
+        if (resourceFile.getContentType().contains(APIConstants.APPLICATION_ZIP)) {
+            contentType = APIConstants.APPLICATION_ZIP;
+            extension = APIConstants.ZIP_FILE_EXTENSION;
+        } else {
+            contentType = APIConstants.APPLICATION_WSDL_MEDIA_TYPE;
+            extension = APIConstants.WSDL_FILE_EXTENSION;
+        }
+        String filename = fileNameWithoutExtension + extension;
+        return Response.ok(resourceFile.getContent(), contentType).header("Content-Disposition",
+                "attachment; filename=\"" + filename + "\"" ).build();
     }
 
     /**

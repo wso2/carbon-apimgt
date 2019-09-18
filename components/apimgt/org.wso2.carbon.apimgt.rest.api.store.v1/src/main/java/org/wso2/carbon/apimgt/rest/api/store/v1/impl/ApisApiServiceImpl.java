@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
-import io.swagger.annotations.Api;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,25 +26,25 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -53,6 +52,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.DocumentationMappingUtil;
@@ -111,8 +121,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             Map allMatchedApisMap = apiConsumer
                     .searchPaginatedAPIs(newSearchQuery, requestedTenantDomain, offset, limit, false);
-            Set<API> sortedSet = (Set<API>) allMatchedApisMap.get("apis"); // This is a SortedSet
-            ArrayList<API> allMatchedApis = new ArrayList<>(sortedSet);
+            Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
+            ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
 
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
             //Add pagination section in the response
@@ -447,15 +457,22 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
-            APIIdentifier apiIdentifier = api.getId();
-            float avgRating = apiConsumer.getAverageAPIRating(apiIdentifier);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
+
+            float avgRating = apiConsumer.getAverageAPIRating(identifier);
             int userRating = 0;
             if (!APIConstants.WSO2_ANONYMOUS_USER.equals(username)) {
-                userRating = apiConsumer.getUserRating(apiIdentifier, username);
+                userRating = apiConsumer.getUserRating(identifier, username);
             }
             List<RatingDTO> ratingDTOList = new ArrayList<>();
-            JSONArray array = apiConsumer.getAPIRatings(apiIdentifier);
+            JSONArray array = apiConsumer.getAPIRatings(identifier);
             for (int i = 0; i < array.size(); i++) {
                 JSONObject obj = (JSONObject) array.get(i);
                 RatingDTO ratingDTO = APIMappingUtil.fromJsonToRatingDTO(obj);
@@ -513,7 +530,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String message = "Error generating client sdk for api: " + api.getName() + " for language: " + language;
                 RestApiUtil.handleInternalServerError(message, e, log);
             }
-        } 
+        }
         String message = "Could not find an API for ID " + apiId;
         RestApiUtil.handleResourceNotFoundError(message, log);
         return null;
@@ -552,7 +569,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
-            
+
             String apiSwagger = null;
             if (StringUtils.isNotEmpty(environmentName)) {
                 apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(api.getId(), environmentName);
@@ -758,9 +775,38 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+    public Response getWSDLOfAPI(String apiId, String labelName, String environmentName, String ifNoneMatch,
+                                 String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        API api = apiConsumer.getLightweightAPIByUUID(apiId, xWSO2Tenant);
+        APIIdentifier apiIdentifier = api.getId();
+
+        List<Environment> environments = APIUtil.getEnvironmentsOfAPI(api);
+        if (environments != null && environments.size() > 0) {
+            if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)) {
+                environmentName = api.getEnvironments().iterator().next();
+            }
+
+            Environment selectedEnvironment = null;
+            for (Environment environment: environments) {
+               if (environment.getName().equals(environmentName)) {
+                   selectedEnvironment = environment;
+                   break;
+               }
+            }
+
+            if (selectedEnvironment == null) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND,
+                        environmentName));
+            }
+            ResourceFile wsdl = apiConsumer.getWSDL(apiIdentifier, selectedEnvironment.getName(),
+                    selectedEnvironment.getType());
+
+            return RestApiUtil.getResponseFromResourceFile(apiIdentifier.toString(), wsdl);
+        } else {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.NO_GATEWAY_ENVIRONMENTS_ADDED,
+                    apiIdentifier.toString()));
+        }
     }
 
     @Override
@@ -795,9 +841,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
 
-            API api = apiConsumer.getAPIbyUUID(apiId, requestedTenantDomain);
-            if (APIConstants.PUBLISHED.equals(api.getStatus()) || APIConstants.PROTOTYPED.equals(api.getStatus())
-                            || APIConstants.DEPRECATED.equals(api.getStatus())) {
+            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            String status = api.getStatus();
+            if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
+                            || APIConstants.DEPRECATED.equals(status)) {
                 return APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
             } else {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);

@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -108,6 +109,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
@@ -1276,9 +1278,11 @@ public class APIConsumerImplTest {
     @Test
     public void testUpdateSubscriptions() throws APIManagementException {
         APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
-        Mockito.doNothing().when(apiMgtDAO).updateSubscriptions(identifier, null, 2, "1");
+        ApiTypeWrapper apiTypeWrapper = Mockito.mock(ApiTypeWrapper.class);
+        Mockito.doNothing().when(apiMgtDAO).updateSubscriptions(apiTypeWrapper, 2);
         new APIConsumerImplWrapper(apiMgtDAO).updateSubscriptions(identifier, "1", 2);
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).updateSubscriptions(identifier, null, 2, "1");
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).
+                updateSubscriptions(Mockito.any(ApiTypeWrapper.class), eq(2));
     }
 
     @Test
@@ -1344,20 +1348,24 @@ public class APIConsumerImplTest {
 
     @Test
     public void testAddSubscription() throws APIManagementException {
-        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, "published_api", SAMPLE_API_VERSION);
-        Mockito.when(apiMgtDAO.addSubscription(Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
-                Mockito.anyString(), Mockito.anyString())).thenReturn(1);
+        ApiTypeWrapper apiTypeWrapper = Mockito.mock(ApiTypeWrapper.class);
+        API api  = Mockito.mock(API.class);
+        Mockito.when(apiTypeWrapper.getApi()).thenReturn(api);
+        Mockito.when(api.getStatus()).thenReturn(APIConstants.PUBLISHED);
+        Mockito.when(api.getId()).thenReturn(new APIIdentifier(API_PROVIDER, "published_api",
+                SAMPLE_API_VERSION));
+        Mockito.when(apiMgtDAO.addSubscription(Mockito.any(), Mockito.anyInt(), Mockito.anyString())).thenReturn(1);
         Mockito.when(apiMgtDAO.isAppAllowed(Mockito.anyInt(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         SubscribedAPI subscribedAPI = new SubscribedAPI("api1");
         Mockito.when(apiMgtDAO.getSubscriptionById(Mockito.anyInt())).thenReturn(subscribedAPI);
         apiConsumer.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertEquals(apiConsumer.addSubscription(identifier, "sub1", 1).getSubscriptionUUID()
+        Assert.assertEquals(apiConsumer.addSubscription(apiTypeWrapper, "sub1", 1).getSubscriptionUUID()
                 ,"api1");
-        identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
         try {
-            apiConsumer.addSubscription(identifier, "sub1", 1);
+            Mockito.when(api.getStatus()).thenReturn(APIConstants.CREATED);
+            apiConsumer.addSubscription(apiTypeWrapper, "sub1", 1);
             Assert.fail("Resource not found exception not thrown for worng api state");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Subscriptions not allowed on APIs/API Products in the state"));

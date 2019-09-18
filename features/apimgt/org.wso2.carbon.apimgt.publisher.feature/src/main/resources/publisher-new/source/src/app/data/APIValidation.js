@@ -68,7 +68,7 @@ const apiSchema = Joi.extend(joi => ({
 }));
 
 const documentSchema = Joi.extend(joi => ({
-    base: joi.string(),
+    base: joi.object(),
     name: 'document',
     rules: [
         {

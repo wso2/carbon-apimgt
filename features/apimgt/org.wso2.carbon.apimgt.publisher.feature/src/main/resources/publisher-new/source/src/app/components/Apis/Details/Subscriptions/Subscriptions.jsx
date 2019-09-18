@@ -16,12 +16,14 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import withStyles from '@material-ui/core/styles/withStyles';
-
+import API from 'AppData/api';
+import CONSTS from 'AppData/Constants';
 import SubscriptionsTable from './SubscriptionsTable';
 import SubscriptionPoliciesManage from './SubscriptionPoliciesManage';
+import SubscriptionAvailability from './SubscriptionAvailability';
 
 const styles = theme => ({
     button: {
@@ -37,11 +39,22 @@ const styles = theme => ({
  */
 function Subscriptions(props) {
     const { api, updateAPI } = props;
+    const restApi = new API();
+    const [tenants, setTenants] = useState([]);
+    useEffect(() => {
+        restApi.getTenantsByState(CONSTS.TENANT_STATE_ACTIVE)
+            .then((result) => {
+                setTenants(result.body.count);
+            });
+    }, []);
 
     return (
         <div>
             <SubscriptionsTable api={api} />
             <SubscriptionPoliciesManage api={api} updateAPI={updateAPI} />
+            {tenants !== 0 && (
+                <SubscriptionAvailability api={api} updateAPI={updateAPI} />
+            )}
         </div>
     );
 }

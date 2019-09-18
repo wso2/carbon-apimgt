@@ -113,6 +113,13 @@ class LifeCycleUpdate extends Component {
         const { api, lcState, classes, theme, handleChangeCheckList, checkList } = this.props;
         const { newState } = this.state;
         const is_workflow_pending = api.workflowStatus && api.workflowStatus.toLowerCase() === 'pending';
+        const lcMap = new Map();
+        lcMap.set("Published", "Publish");
+        lcMap.set("Prototyped", "Deploy as a prototype");
+        lcMap.set("Deprecated", "Deprecate");
+        lcMap.set("Blocked", "Block");
+        lcMap.set("Created", "Create");
+        lcMap.set("Retired", "Retire");
         return (
             <Grid container>
                 {is_workflow_pending ? (
@@ -164,7 +171,7 @@ class LifeCycleUpdate extends Component {
                             ) : (
                                     lcState.availableTransitions.map(
                                         transition_state =>
-                                            lcState.state !== transition_state.targetState && (
+                                            transition_state.event !== lcMap.get(lcState.state) && (
                                                 <Button
                                                     variant="outlined"
                                                     className={classes.stateButton}

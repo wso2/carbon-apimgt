@@ -29,7 +29,7 @@ import { FormattedMessage } from 'react-intl';
 import FormControl from '@material-ui/core/FormControl';
 import API from 'AppData/api.js';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 
 const styles = theme => ({
     FormControl: {
@@ -78,8 +78,6 @@ class BusinessInformation extends React.Component {
             technicalOwner,
             technicalOwnerEmail,
         };
-        this.isNotCreator = AuthManager.isNotCreator();
-        this.isNotPublisher = AuthManager.isNotPublisher();
     }
 
     handleChange = name => (event) => {
@@ -104,24 +102,14 @@ class BusinessInformation extends React.Component {
      * @param {*} updateAPI
      * @memberof BusinessInformation
      */
-    handleSubmit(oldAPI, updateAPI) {
+    handleSubmit(updateAPI) {
         const {
             businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail,
         } = this.state;
-
-        if (businessOwner) {
-            oldAPI.businessInformation.businessOwner = businessOwner;
-        }
-        if (businessOwnerEmail) {
-            oldAPI.businessInformation.businessOwnerEmail = businessOwnerEmail;
-        }
-        if (technicalOwner) {
-            oldAPI.businessInformation.technicalOwner = technicalOwner;
-        }
-        if (technicalOwnerEmail) {
-            oldAPI.businessInformation.technicalOwnerEmail = technicalOwnerEmail;
-        }
-        updateAPI(oldAPI);
+        const businessInformation = {
+            businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail,
+        };
+        updateAPI({ businessInformation });
     }
 
     /**
@@ -151,7 +139,7 @@ class BusinessInformation extends React.Component {
                         <Paper className={classes.paperRoot} elevation={1}>
                             <FormControl margin='normal' className={classes.FormControlOdd}>
                                 <TextField
-                                    disabled={this.isNotCreator && this.isNotPublisher}
+                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                     fullWidth
                                     id='name'
                                     label={
@@ -185,7 +173,7 @@ class BusinessInformation extends React.Component {
                             </FormControl>
                             <FormControl margin='normal' className={classes.FormControl}>
                                 <TextField
-                                    disabled={this.isNotCreator && this.isNotPublisher}
+                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                     fullWidth
                                     id='name'
                                     label={
@@ -219,7 +207,7 @@ class BusinessInformation extends React.Component {
                             </FormControl>
                             <FormControl margin='normal' className={classes.FormControlOdd}>
                                 <TextField
-                                    disabled={this.isNotCreator && this.isNotPublisher}
+                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                     fullWidth
                                     id='name'
                                     label={
@@ -253,7 +241,7 @@ class BusinessInformation extends React.Component {
                             </FormControl>
                             <FormControl margin='normal' className={classes.FormControl}>
                                 <TextField
-                                    disabled={this.isNotCreator && this.isNotPublisher}
+                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                     fullWidth
                                     id='name'
                                     label={
@@ -299,8 +287,8 @@ class BusinessInformation extends React.Component {
                                         <Button
                                             variant='contained'
                                             color='primary'
-                                            onClick={() => this.handleSubmit(api, updateAPI)}
-                                            disabled={this.isNotCreator && this.isNotPublisher}
+                                            onClick={() => this.handleSubmit(updateAPI)}
+                                            disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                         >
                                             <FormattedMessage id='save' defaultMessage='Save' />
                                         </Button>

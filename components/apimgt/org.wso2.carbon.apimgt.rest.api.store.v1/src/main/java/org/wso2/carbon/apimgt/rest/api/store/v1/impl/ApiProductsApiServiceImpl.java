@@ -115,8 +115,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if(!RestAPIStoreUtils.isUserAccessAllowedForAPIProduct(product)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
-            APIProductDTO productToReturn = APIMappingUtil.fromAPIProductToDTO(product, requestedTenantDomain);
-            return Response.ok().entity(productToReturn).build();
+
+            return Response.ok().entity(new APIProductDTO()).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API Product : " + apiProductId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);

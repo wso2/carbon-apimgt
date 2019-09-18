@@ -13,7 +13,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIWsdlInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
 import javax.validation.constraints.*;
@@ -129,7 +128,7 @@ public enum VisibilityEnum {
     private APIEndpointSecurityDTO endpointSecurity = null;
     @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> gatewayEnvironments = new ArrayList<>();
-    private List<LabelDTO> labels = new ArrayList<>();
+    private List<String> labels = new ArrayList<>();
     private List<MediationPolicyDTO> mediationPolicies = new ArrayList<>();
 
 @XmlType(name="SubscriptionAvailabilityEnum")
@@ -725,7 +724,7 @@ public enum EndpointImplementationTypeEnum {
   /**
    * Labels of micro-gateway environments attached to the API. 
    **/
-  public APIDTO labels(List<LabelDTO> labels) {
+  public APIDTO labels(List<String> labels) {
     this.labels = labels;
     return this;
   }
@@ -733,10 +732,10 @@ public enum EndpointImplementationTypeEnum {
   
   @ApiModelProperty(value = "Labels of micro-gateway environments attached to the API. ")
   @JsonProperty("labels")
-  public List<LabelDTO> getLabels() {
+  public List<String> getLabels() {
     return labels;
   }
-  public void setLabels(List<LabelDTO> labels) {
+  public void setLabels(List<String> labels) {
     this.labels = labels;
   }
 

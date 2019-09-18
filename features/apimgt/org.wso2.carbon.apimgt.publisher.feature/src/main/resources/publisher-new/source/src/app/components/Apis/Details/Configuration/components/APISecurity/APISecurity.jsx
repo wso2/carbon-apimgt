@@ -51,7 +51,7 @@ const useStyles = makeStyles(theme => ({
  */
 export default function APISecurity(props) {
     const {
-        api: { securityScheme },
+        api: { securityScheme, id },
         configDispatcher,
     } = props;
     const haveMultiLevelSecurity =
@@ -131,6 +131,7 @@ export default function APISecurity(props) {
                     haveMultiLevelSecurity={haveMultiLevelSecurity}
                     securityScheme={securityScheme}
                     configDispatcher={configDispatcher}
+                    id={id}
                 />
                 <Grid item>
                     <span className={classes.error}>

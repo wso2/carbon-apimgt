@@ -24,7 +24,9 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.wsdl.exceptions.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.net.URL;
 
 /**
@@ -67,10 +69,10 @@ public interface WSDLProcessor {
     /**
      * Retrieves a byte array content of the WSDL.
      *
-     * @return A {@link ByteArrayOutputStream} of the WSDL
-     * @throws APIMgtWSDLException If an error occurs while creating {@link ByteArrayOutputStream}
+     * @return A {@link ByteArrayInputStream} of the WSDL
+     * @throws APIMgtWSDLException If an error occurs while creating {@link ByteArrayInputStream}
      */
-    byte[] getWSDL() throws APIMgtWSDLException;
+    ByteArrayInputStream getWSDL() throws APIMgtWSDLException;
 
     /**
      * Clear the actual service Endpoint and use Gateway Endpoint instead of the
@@ -81,7 +83,7 @@ public interface WSDLProcessor {
      * @param environmentType gateway environment type
      * @throws APIMgtWSDLException when error occurred getting WSDL address location
      */
-    byte[] updateEndpoints(API api, String environmentName, String environmentType) throws APIMgtWSDLException;
+    void updateEndpoints(API api, String environmentName, String environmentType) throws APIMgtWSDLException;
 
     /**
      * Returns whether this WSDL processor processed the provided WSDL content bytes or WSDL file path without an error.
