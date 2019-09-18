@@ -194,11 +194,26 @@ class TagCloudListing extends React.Component {
 TagCloudListing.propTypes = {
     classes: PropTypes.shape({
         listContentWrapper: PropTypes.shape({}).isRequired,
+        defaultApiView: PropTypes.shape({}).isRequired,
+        mainTitle: PropTypes.shape({}).isRequired,
+        buttonRight: PropTypes.shape({}).isRequired,
+        button: PropTypes.shape({}).isRequired,
+        mainTitleWrapper: PropTypes.shape({}).isRequired,
+        mainIconWrapper: PropTypes.shape({}).isRequired,
+        content: PropTypes.shape({}).isRequired,
+        root: PropTypes.shape({}).isRequired,
     }).isRequired,
     theme: PropTypes.shape({
+        palette: PropTypes.shape({
+            getContrastText: PropTypes.func.isRequired,
+            background: PropTypes.shape({
+                paper: PropTypes.shape({}).isRequired,
+            }).isRequired,
+        }).isRequired,
         custom: PropTypes.shape({
             tagWiseMode: PropTypes.bool.isRequired,
             tagGroupKey: PropTypes.string.isRequired,
+            defaultApiView: PropTypes.string.isRequired,
         }),
     }).isRequired,
 };

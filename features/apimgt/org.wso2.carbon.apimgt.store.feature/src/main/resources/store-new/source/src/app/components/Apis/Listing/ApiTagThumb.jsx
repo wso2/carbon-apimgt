@@ -24,9 +24,8 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 /**
- *
- *
- * @param {*} theme
+ * @inheritdoc
+ * @param {*} theme theme object
  */
 const styles = theme => ({
     thumbContent: {
@@ -93,55 +92,46 @@ const styles = theme => ({
         backgroundColor: theme.custom.thumbnail.contentBackgroundColor,
     },
 });
+
 /**
- *
- *
- * @class ApiTagThumb
- * @extends {React.Component}
+ * Get ApiTagThumb
+ * @param {*} props properties
+ * @returns {*}
  */
+function ApiTagThumb(props) {
+    const {
+        tag, path, classes, theme,
+    } = props;
+    const tagLink = path + ':' + tag.value;
+    const { thumbnail, tagThumbnail } = theme.custom;
+    const name = tag.value.split(theme.custom.tagGroupKey)[0];
+    const { contentPictureOverlap } = thumbnail;
+    const { defaultTagImage } = tagThumbnail;
 
-
-class ApiTagThumb extends React.Component {
-    /**
-     * Shared ApiTagThumb page
-     *
-     * @returns ApiTagThumb
-     * @memberof ApiTagThumb
-     */
-    render() {
-        const { tag, path } = this.props;
-        const tagLink = path + ':' + tag.value;
-        const { classes, theme } = this.props;
-        const { thumbnail, tagThumbnail } = theme.custom;
-        const name = tag.value.split(theme.custom.tagGroupKey)[0];
-        const { contentPictureOverlap } = thumbnail;
-        const { defaultTagImage } = tagThumbnail;
-
-        return (
-            <div className={classes.thumbWrapper}>
-                <Link to={tagLink} className={classes.imageWrapper}>
-                    <img src={defaultTagImage} className={classes.image} alt='' />
+    return (
+        <div className={classes.thumbWrapper}>
+            <Link to={tagLink} className={classes.imageWrapper}>
+                <img src={defaultTagImage} className={classes.image} alt='' />
+            </Link>
+            <div
+                className={classNames(classes.thumbContent, {
+                    [classes.imageOverlap]: contentPictureOverlap,
+                })}
+            >
+                <Link to={tagLink} className={classes.textWrapper}>
+                    <Typography
+                        className={classes.thumbHeader}
+                        variant='display1'
+                        gutterBottom
+                        onClick={this}
+                        title={name}
+                    >
+                        {name}
+                    </Typography>
                 </Link>
-                <div
-                    className={classNames(classes.thumbContent, {
-                        [classes.imageOverlap]: contentPictureOverlap,
-                    })}
-                >
-                    <Link to={tagLink} className={classes.textWrapper}>
-                        <Typography
-                            className={classes.thumbHeader}
-                            variant='display1'
-                            gutterBottom
-                            onClick={this.handleRedirectToAPIListingPage}
-                            title={name}
-                        >
-                            {name}
-                        </Typography>
-                    </Link>
-                </div>
             </div>
-        );
-    }
+        </div>
+    );
 }
 
 ApiTagThumb.propTypes = {
@@ -152,6 +142,7 @@ ApiTagThumb.propTypes = {
         imageOverlap: PropTypes.shape({}).isRequired,
         textWrapper: PropTypes.shape({}).isRequired,
         thumbHeader: PropTypes.shape({}).isRequired,
+        image: PropTypes.shape({}).isRequired,
     }).isRequired,
     theme: PropTypes.shape({
         custom: PropTypes.shape({
