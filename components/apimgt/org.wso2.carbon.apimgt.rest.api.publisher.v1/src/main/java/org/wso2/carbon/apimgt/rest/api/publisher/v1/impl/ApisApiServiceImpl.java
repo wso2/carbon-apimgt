@@ -3232,19 +3232,18 @@ public class ApisApiServiceImpl implements ApisApiService {
      * This method is used to assign micro gateway labels to the DTO
      *
      * @param apiDTO API DTO
-     * @param api the API object
+     * @param api    the API object
      * @return the API object with labels
      */
     private API assignLabelsToDTO(APIDTO apiDTO, API api) {
 
         if (apiDTO.getLabels() != null) {
-            List<LabelDTO> dtoLabels = apiDTO.getLabels();
+            List<String> labels = apiDTO.getLabels();
             List<Label> labelList = new ArrayList<>();
-            for (LabelDTO labelDTO : dtoLabels) {
-                Label label = new Label();
-                label.setName(labelDTO.getName());
-//                label.setDescription(labelDTO.getDescription()); todo add description
-                labelList.add(label);
+            for (String label : labels) {
+                Label mgLabel = new Label();
+                mgLabel.setName(label);
+                labelList.add(mgLabel);
             }
             api.setGatewayLabels(labelList);
         }
