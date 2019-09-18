@@ -51,6 +51,10 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -224,10 +228,75 @@ public class OAS3Parser extends APIDefinition {
         info.setVersion(swaggerData.getVersion());
         openAPI.setInfo(info);
         updateSwaggerSecurityDefinition(openAPI, swaggerData);
-        for (SwaggerData.Resource resource : swaggerData.getResources()) {
-            addOrUpdatePathToSwagger(openAPI, resource);
+        if (APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
+            openAPI = modifyGraphQLSwagger(openAPI);
+        } else {
+            for (SwaggerData.Resource resource : swaggerData.getResources()) {
+                addOrUpdatePathToSwagger(openAPI, resource);
+            }
         }
         return Json.pretty(openAPI);
+    }
+
+    /**
+     * Construct openAPI definition for graphQL. Add get and post operations
+     *
+     * @param openAPI OpenAPI
+     */
+    private OpenAPI modifyGraphQLSwagger(OpenAPI openAPI) {
+        SwaggerData.Resource resource = new SwaggerData.Resource();
+        resource.setAuthType("Any");
+        resource.setPolicy("Unlimited");
+        resource.setPath("/*");
+
+        resource.setVerb("GET");
+        Operation getOperation = createOperation(resource);
+        resource.setVerb("POST");
+        Operation postOperation = createOperation(resource);
+
+        //get operation
+        Parameter getParameter = new Parameter();
+        getParameter.setName("query");
+        getParameter.setIn("query");
+        getParameter.setRequired(true);
+        getParameter.setDescription("Query to be passed to graphQL API");
+
+        Schema getSchema = new Schema();
+        getSchema.setType("string");
+        getParameter.setSchema(getSchema);
+        getOperation.addParametersItem(getParameter);
+
+        //post operation
+        RequestBody requestBody = new RequestBody();
+        requestBody.setDescription("Query or mutation to be passed to graphQL API");
+        requestBody.setRequired(true);
+
+        JSONObject typeOfPayload = new JSONObject();
+        JSONObject payload = new JSONObject();
+        typeOfPayload.put("type", "string");
+        payload.put("payload", typeOfPayload);
+
+        Schema postSchema = new Schema();
+        postSchema.setType("object");
+        postSchema.setProperties(payload);
+
+        MediaType mediaType = new MediaType();
+        mediaType.setSchema(postSchema);
+
+        Content content = new Content();
+        content.addMediaType("application/json", mediaType);
+        requestBody.setContent(content);
+        postOperation.setRequestBody(requestBody);
+
+        //add post and get operations to path /*
+        PathItem pathItem = new PathItem();
+        pathItem.setGet(getOperation);
+        pathItem.setPost(postOperation);
+        Paths paths = new Paths();
+        paths.put("/*", pathItem);
+
+        openAPI.setPaths(paths);
+        return openAPI;
     }
 
     /**
