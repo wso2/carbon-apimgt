@@ -303,7 +303,6 @@ public class APIMappingUtil {
         advertiseInfoDTO.setAdvertised(false);
         dto.setAdvertiseInfo(advertiseInfoDTO);
 
-
         return dto;
     }
 
