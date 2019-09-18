@@ -154,7 +154,7 @@ public class APIExecutor implements Execution {
         boolean isCurrentCreatedOrPrototyped = APIConstants.CREATED.equals(oldStatus) ||
                 APIConstants.PROTOTYPED.equals(oldStatus);
         boolean isStateTransitionToPublished = isCurrentCreatedOrPrototyped && APIConstants.PUBLISHED.equals(newStatus);
-        if(newStatus != null){ //only allow the executor to be used with default LC states transition
+        if (newStatus != null) { //only allow the executor to be used with default LC states transition
             //check only the newStatus so this executor can be used for LC state change from
             //custom state to default api state
             if (isStateTransitionToPublished) {
