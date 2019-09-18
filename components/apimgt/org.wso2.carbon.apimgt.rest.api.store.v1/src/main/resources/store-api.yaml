@@ -81,6 +81,7 @@ securityDefinitions:
       apim:self-signup: Self Sign-up
       apim:dedicated_gateway: Updating dedicated Gateway
       apim:store_settings: Retrieve store settings
+      apim:alerts_manage: Retrieve, subscribe and configure store alert types
 
 ######################################################
 # The "API Collection" resource APIs
@@ -3919,7 +3920,8 @@ paths:
     #--------------------------------------------------
     get:
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+            - apim:alerts_manage
       x-examples:
         $ref: docs/examples/alerts/alerts.yaml#/get
       operationId: getStoreAlertTypes
@@ -3954,7 +3956,8 @@ paths:
     #--------------------------------------------------
     get:
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+            - apim:alerts_manage
       x-examples:
         $ref: docs/examples/alerts/alerts_subscriptions.yaml#/get
       summary: |
@@ -3988,7 +3991,8 @@ paths:
     #--------------------------------------------------
     put:
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+            - apim:alerts_manage
       x-examples:
         $ref: docs/examples/alerts/alerts_subscriptions.yaml#/put
       summary: |
@@ -4033,7 +4037,8 @@ paths:
     #--------------------------------------------------
     delete:
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+            - apim:alerts_manage
       x-examples:
         $ref: docs/examples/alerts/alerts_subscriptions.yaml#/delete
       summary: |
@@ -4068,7 +4073,8 @@ paths:
     #----------------------------------------------
     get:
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+            - apim:alerts_manage
       x-examples:
         $ref: docs/examples/alerts/alerts_config.yaml#/get
       summary: |
@@ -4105,7 +4111,8 @@ paths:
     #----------------------------------------------
     put:
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+            - apim:alerts_manage
       x-examples:
         $ref: docs/examples/alerts/alerts_config.yaml#/put
       summary: |
@@ -4156,7 +4163,8 @@ paths:
     #----------------------------------------------
     delete:
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+            - apim:alerts_manage
       x-examples:
         $ref: docs/examples/alerts/alerts_config.yaml#/delete
       summary: |
