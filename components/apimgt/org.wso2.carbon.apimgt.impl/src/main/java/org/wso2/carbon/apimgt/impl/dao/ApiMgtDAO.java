@@ -14125,31 +14125,17 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void addAuditApiMapping(APIIdentifier apiIdentifier, String uuid) throws APIManagementException {
-        Connection conn = null;
-        ResultSet rs = null;
-        PreparedStatement ps = null;
-        int apiId = -1;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-            apiId = getAPIID(apiIdentifier, conn);
-            String query = SQLConstants.ADD_SECURITY_AUDIT_MAP_SQL;
-            ps = conn.prepareStatement(query);
-            ps.setInt(1, apiId);
-            ps.setString(2, uuid);
-            ps.executeUpdate();
-            conn.commit();
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    log.error("Error while rolling back the failed operation", ex);
-                }
+        Connection connection = null;
+        String query = SQLConstants.ADD_SECURITY_AUDIT_MAP_SQL;
+        int apiId = getAPIID(apiIdentifier, connection);
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
+                ps.setInt(1, apiId);
+                ps.setString(2, uuid);
+                ps.executeUpdate();
             }
-            handleException("Error while handling API Security Audit information : ", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        } catch (SQLException e) {
+            handleException("Error while adding new audit api id: ", e);
         }
     }
 
@@ -14160,29 +14146,22 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String getAuditApiId(APIIdentifier apiIdentifier) throws APIManagementException {
-        Connection conn = null;
-        ResultSet rs = null;
-        PreparedStatement ps = null;
-        int apiId = -1;
-        String uuid = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            String getUuidQuery = SQLConstants.GET_AUDIT_UUID_SQL;
-            ps = conn.prepareStatement(getUuidQuery);
-            apiId = getAPIID(apiIdentifier, conn);
-            if (ps != null) {
+        Connection connection = null;
+        String query = SQLConstants.GET_AUDIT_UUID_SQL;
+        int apiId = getAPIID(apiIdentifier, connection);
+        String auditUuid = null;
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(query)) {
                 ps.setInt(1, apiId);
-                rs = ps.executeQuery();
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        auditUuid = rs.getString("AUDIT_UUID");
+                    }
+                }
             }
-            if (rs.next()) {
-                uuid = rs.getString("AUDIT_UUID");
-            }
-            return uuid;
         } catch (SQLException e) {
-            log.error("Failed to retrieve API Security Audit UUID");
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+            handleException("Error while getting audit api id: ", e);
         }
-        return null;
+        return auditUuid;
     }
 }
