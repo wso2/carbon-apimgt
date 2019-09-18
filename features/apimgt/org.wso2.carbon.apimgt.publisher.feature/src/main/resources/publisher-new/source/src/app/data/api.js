@@ -556,7 +556,7 @@ class API extends Resource {
     /**
      * Get monettization status of an API
      * @param id {String} UUID of the API in which the swagger is needed
-     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @param callback {function} Function which needs to be called upon success of the Invoice received
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getMonetization(id, callback = null) {
@@ -569,6 +569,24 @@ class API extends Resource {
             );
         });
         return promiseMonetization.then(response => response.body);
+    }
+
+    /**
+     * Get monettization Invoice
+     * @param id {String} UUID of the subscription
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getMonetizationInvoice(id, callback = null) {
+        const promiseInvoice = this.client.then(client => {
+            return client.apis['API Monetization'].get_subscriptions__subscriptionId__usage(
+                {
+                    subscriptionId: id
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promiseInvoice.then(response => response.body);
     }
 
     /**
