@@ -2435,7 +2435,7 @@ paths:
         404:
           description: |
             Not Found.
-            Workflow for the given reference in not found.
+            Workflow for the given reference is not found.
           schema:
             $ref: '#/definitions/Error'
 
