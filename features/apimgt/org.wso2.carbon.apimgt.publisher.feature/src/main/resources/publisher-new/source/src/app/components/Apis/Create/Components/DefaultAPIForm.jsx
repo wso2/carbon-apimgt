@@ -75,6 +75,23 @@ export default function DefaultAPIForm(props) {
     useEffect(() => {
         onValidate(Boolean(api.name) && Boolean(api.version) && Boolean(api.context));
     }, []);
+
+    const updateValidity = (newState) => {
+        let isFormValid =
+            Object.entries(newState).length > 0 &&
+            Object.entries(newState)
+                .map(([key, value]) =>
+                    value === null ||
+                        value === undefined ||
+                        (isAPIProduct && ['version', 'endpoints'].includes(key)))
+                .reduce((acc, cVal) => acc && cVal); // Aggregate the individual validation states
+        // API Name , Version & Context is a must that's why `&&` chain
+        // if isAPIProduct gets true version validation has been skipped
+        isFormValid =
+            isFormValid && Boolean(api.name) && (isAPIProduct || Boolean(api.version)) && Boolean(api.context);
+        onValidate(isFormValid, validity);
+        setValidity(newState);
+    };
     /**
      * Trigger the provided onValidate call back on each input validation run
      * Do the validation state aggregation and call the onValidate method with aggregated value
@@ -83,12 +100,11 @@ export default function DefaultAPIForm(props) {
      */
     function validate(field, value) {
         switch (field) {
-            case 'name':
-            {
+            case 'name': {
                 const nameValidity = APIValidation.apiName.required().validate(value).error;
                 if (nameValidity === null) {
                     APIValidation.apiParameter.validate(field + ':' + value).then((isValid) => {
-                        setValidity(() => {
+                        updateValidity(() => {
                             if (isValid) {
                                 return { ...validity, name: { message: 'API with name ' + value + ' exists' } };
                             }
@@ -96,17 +112,18 @@ export default function DefaultAPIForm(props) {
                         });
                     });
                 } else {
-                    setValidity({ ...validity, name: nameValidity });
+                    updateValidity({ ...validity, name: nameValidity });
                 }
                 break;
             }
             case 'context': {
                 const contextValidity = APIValidation.apiContext.required().validate(value).error;
                 if (contextValidity === null) {
-                    const apiContext = value.includes('/') ?
-                        value + '/' + api.version : '/' + value + '/' + api.version;
+                    const apiContext = value.includes('/')
+                        ? value + '/' + api.version
+                        : '/' + value + '/' + api.version;
                     APIValidation.apiParameter.validate(field + ':' + apiContext).then((isValid) => {
-                        setValidity(() => {
+                        updateValidity(() => {
                             if (isValid) {
                                 return { ...validity, context: { message: 'API context with version exists' } };
                             }
@@ -114,17 +131,18 @@ export default function DefaultAPIForm(props) {
                         });
                     });
                 } else {
-                    setValidity({ ...validity, context: contextValidity });
+                    updateValidity({ ...validity, context: contextValidity });
                 }
                 break;
             }
             case 'version': {
                 const versionValidity = APIValidation.apiVersion.required().validate(value).error;
                 if (versionValidity === null) {
-                    const apiVersion = api.context.includes('/') ?
-                        api.context + '/' + value : '/' + api.context + '/' + value;
+                    const apiVersion = api.context.includes('/')
+                        ? api.context + '/' + value
+                        : '/' + api.context + '/' + value;
                     APIValidation.apiParameter.validate(field + ':' + apiVersion).then((isValid) => {
-                        setValidity(() => {
+                        updateValidity(() => {
                             if (isValid) {
                                 return { ...validity, version: { message: 'API context with version exists' } };
                             }
@@ -132,30 +150,15 @@ export default function DefaultAPIForm(props) {
                         });
                     });
                 } else {
-                    setValidity({ ...validity, version: versionValidity });
+                    updateValidity({ ...validity, version: versionValidity });
                 }
                 break;
             }
             default: {
-                // url
-                const urlValidity = value ? APIValidation.url.validate(value).error : null;
-                setValidity({ ...validity, endpointURL: urlValidity });
                 break;
             }
         }
     }
-
-    useEffect(() => {
-        let isFormValid = Object.entries(validity).length > 0 &&
-            Object.entries(validity).map(([key, value]) =>
-                value === null || value === undefined || (isAPIProduct && ['version', 'endpoints'].includes(key)))
-                .reduce((acc, cVal) => acc && cVal); // Aggregate the individual validation states
-        // API Name , Version & Context is a must that's why `&&` chain
-        // if isAPIProduct gets true version validation has been skipped
-        isFormValid =
-            isFormValid && Boolean(api.name) && (isAPIProduct || Boolean(api.version)) && Boolean(api.context);
-        onValidate(isFormValid, validity);
-    }, [validity]);
 
     return (
         <Grid item md={9}>
@@ -247,8 +250,7 @@ export default function DefaultAPIForm(props) {
                                 />
                             </Grid>
                         </React.Fragment>
-
-                    ) :
+                    ) : (
                         <React.Fragment>
                             <Grid item md={12}>
                                 <TextField
@@ -269,19 +271,19 @@ export default function DefaultAPIForm(props) {
                                     onChange={onChange}
                                     InputProps={{
                                         onBlur: ({ target: { value } }) => {
-                                            validate('url', value);
+                                            validate('context', value);
                                         },
                                     }}
                                     helperText={
                                         (validity.context && validity.context.message) ||
-                            `API will be exposed in ${actualContext(api)} context at the gateway`
+                                        `API will be exposed in ${actualContext(api)} context at the gateway`
                                     }
                                     margin='normal'
                                     variant='outlined'
                                 />
                             </Grid>
                         </React.Fragment>
-                    }
+                    )}
                 </Grid>
                 {!isAPIProduct && (
                     <TextField
@@ -291,14 +293,6 @@ export default function DefaultAPIForm(props) {
                         name='endpoint'
                         value={api.endpoint}
                         onChange={onChange}
-                        InputProps={{
-                            onBlur: ({ target: { value } }) => {
-                                validate({
-                                    ...validity,
-                                    endpointURL: value ? APIValidation.url.validate(value).error : null,
-                                });
-                            },
-                        }}
                         helperText={
                             validity.endpointURL && (
                                 <span>
