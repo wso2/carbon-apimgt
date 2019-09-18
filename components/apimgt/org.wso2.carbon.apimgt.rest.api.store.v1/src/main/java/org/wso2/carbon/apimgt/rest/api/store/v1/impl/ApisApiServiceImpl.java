@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
-import io.swagger.annotations.Api;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,7 +26,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -41,12 +39,12 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -532,7 +530,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String message = "Error generating client sdk for api: " + api.getName() + " for language: " + language;
                 RestApiUtil.handleInternalServerError(message, e, log);
             }
-        } 
+        }
         String message = "Could not find an API for ID " + apiId;
         RestApiUtil.handleResourceNotFoundError(message, log);
         return null;
@@ -571,7 +569,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
-            
+
             String apiSwagger = null;
             if (StringUtils.isNotEmpty(environmentName)) {
                 apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(api.getId(), environmentName);
@@ -777,9 +775,38 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+    public Response getWSDLOfAPI(String apiId, String labelName, String environmentName, String ifNoneMatch,
+                                 String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        API api = apiConsumer.getLightweightAPIByUUID(apiId, xWSO2Tenant);
+        APIIdentifier apiIdentifier = api.getId();
+
+        List<Environment> environments = APIUtil.getEnvironmentsOfAPI(api);
+        if (environments != null && environments.size() > 0) {
+            if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)) {
+                environmentName = api.getEnvironments().iterator().next();
+            }
+
+            Environment selectedEnvironment = null;
+            for (Environment environment: environments) {
+               if (environment.getName().equals(environmentName)) {
+                   selectedEnvironment = environment;
+                   break;
+               }
+            }
+
+            if (selectedEnvironment == null) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND,
+                        environmentName));
+            }
+            ResourceFile wsdl = apiConsumer.getWSDL(apiIdentifier, selectedEnvironment.getName(),
+                    selectedEnvironment.getType());
+
+            return RestApiUtil.getResponseFromResourceFile(apiIdentifier.toString(), wsdl);
+        } else {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.NO_GATEWAY_ENVIRONMENTS_ADDED,
+                    apiIdentifier.toString()));
+        }
     }
 
     @Override

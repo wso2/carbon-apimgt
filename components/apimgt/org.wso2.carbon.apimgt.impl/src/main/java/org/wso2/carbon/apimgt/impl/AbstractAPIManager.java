@@ -604,7 +604,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
                 log.error(msg);
-                throw new APIMgtResourceNotFoundException(msg);
+                throw new APIMgtResourceNotFoundException(msg, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, uuid));
             }
         } catch (RegistryException e) {
             String msg = "Failed to get API with uuid " + uuid;

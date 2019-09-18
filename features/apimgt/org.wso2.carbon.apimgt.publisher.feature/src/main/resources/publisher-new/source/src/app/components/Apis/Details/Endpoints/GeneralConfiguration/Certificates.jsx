@@ -235,9 +235,8 @@ function Certificates(props) {
                                         </IconButton>
                                         <IconButton
                                             onClick={() => setCertificateToDelete({ open: true, alias: cert.alias })}
-                                            color='secondary'
                                         >
-                                            <Icon>delete</Icon>
+                                            <Icon color='error'>delete</Icon>
                                         </IconButton>
                                     </ListItemSecondaryAction>
                                 </ListItem>
@@ -393,6 +392,7 @@ function Certificates(props) {
                                 placeholder='My Alias'
                                 onChange={event => setAlias(event.target.value)}
                                 margin='normal'
+                                variant='outlined'
                                 fullWidth
                             />
                             <Dropzone

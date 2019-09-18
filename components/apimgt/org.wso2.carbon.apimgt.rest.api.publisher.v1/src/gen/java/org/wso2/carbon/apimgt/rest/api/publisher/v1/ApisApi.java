@@ -958,7 +958,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @GET
     @Path("/{apiId}/wsdl")
     @Consumes({ "application/json" })
-    @Produces({ "application/wsdl+xml", "application/zip" })
+    @Produces({ "application/json", "application/wsdl", "application/zip" })
     @ApiOperation(value = "Get WSDL definition", notes = "This operation can be used to retrieve the WSDL definition of an API. It can be either a single WSDL file or a WSDL archive.  The type of the WSDL of the API is indicated at the \"wsdlInfo\" element of the API payload definition. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API")

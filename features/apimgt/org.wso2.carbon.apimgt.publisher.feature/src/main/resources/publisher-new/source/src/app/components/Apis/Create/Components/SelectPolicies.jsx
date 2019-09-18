@@ -56,7 +56,7 @@ export default function SelectPolicies(props) {
 
 SelectPolicies.defaultProps = {
     policies: [],
-    multiSelect: true,
+    multiple: true,
     required: false,
     helperText: 'Select one or multiple throttling policy for the API',
 };

@@ -59,6 +59,15 @@ public class APIManagementException extends Exception {
 
     /**
      * This is a default constructure where you can pass error code to error DTO
+     * @param code Exception code that need to pass to the error DTO
+     */
+    public APIManagementException(ErrorHandler code) {
+        super(code.getErrorCode() + ":" + code.getErrorMessage() + "::" + code.getErrorDescription());
+        this.errorHandler = code;
+    }
+
+    /**
+     * This is a default constructure where you can pass error code to error DTO
      * @param message Error message
      * @param cause throwable object.
      * @param code Exception code that need to pass to the error DTO
