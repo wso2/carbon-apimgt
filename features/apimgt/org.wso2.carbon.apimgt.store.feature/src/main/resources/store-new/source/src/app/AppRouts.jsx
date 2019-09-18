@@ -6,6 +6,7 @@ import Applications from './components/Applications/Applications';
 import Landing from './components/LandingPage/Landing';
 import ApplicationCreate from './components/Shared/AppsAndKeys/ApplicationCreateForm';
 import { PageNotFound, ScopeNotFound } from './components/Base/Errors';
+import RedirectToLogin from './components/Login/RedirectToLogin';
 import EditApp from './components/Applications/Edit/EditApp';
 
 /**
@@ -39,9 +40,9 @@ function AppRouts(props) {
                         </React.Fragment>
                     ) : (
                         <React.Fragment>
-                            <Route path='/applications' component={PageNotFound} />
-                            <Route path='/application/create' component={PageNotFound} />
-                            <Route path='/application/edit/:application_id' component={PageNotFound} />
+                            <Route path='/applications' component={RedirectToLogin} />
+                            <Route path='/application/create' component={RedirectToLogin} />
+                            <Route path='/application/edit/:application_id' component={RedirectToLogin} />
                         </React.Fragment>
                     ),
                 ]

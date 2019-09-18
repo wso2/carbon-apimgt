@@ -66,6 +66,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -4585,6 +4586,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
+    }
+
+    /**
+     * Returns all labels associated with given tenant domain.
+     *
+     * @param tenantDomain tenant domain
+     * @return List<Label>  List of label of given tenant domain.
+     * @throws APIManagementException
+     */
+    @Override
+    public List<Label> getAllLabels(String tenantDomain) throws APIManagementException {
+        return apiMgtDAO.getAllLabels(tenantDomain);
     }
 
     @Override

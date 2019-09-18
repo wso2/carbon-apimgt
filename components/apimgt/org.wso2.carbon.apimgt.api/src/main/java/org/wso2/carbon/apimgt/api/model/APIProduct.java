@@ -64,6 +64,7 @@ public class APIProduct {
      */
     private String apiSecurity = "oauth2";
     private static final String NULL_VALUE = "NULL";
+    private static final String API_PRODUCT = "APIProduct";
 
     private String transports;
     private String responseCache;
@@ -163,7 +164,7 @@ public class APIProduct {
 
     public void setType(String type) {
         if (StringUtils.isEmpty(type) || NULL_VALUE.equalsIgnoreCase(StringUtils.trim(type))) {
-            this.type = "APIProduct";
+            this.type = API_PRODUCT;
         } else {
             this.type = type;
         }

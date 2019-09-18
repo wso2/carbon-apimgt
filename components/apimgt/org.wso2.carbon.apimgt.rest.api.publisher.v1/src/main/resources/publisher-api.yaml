@@ -6178,7 +6178,33 @@ paths:
             Not Found.
             Requested role name does not exist.
 
+  ####################################################
+  # The "Label" resource API
+  ######################################################
+  /labels:
 
+    #-----------------------------------------------------
+    # Retrieve all labels
+    #-----------------------------------------------------
+    get:
+      x-scope: apim:api_view
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/publisher/v1.0/labels
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v1.0/labels\""
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"count\": 1,\r\n  \"list\": [\r\n	{\r\n	\"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n	\"name\":\"internal\",\r\n	\"description\":\"label used for internal purpose\",\r\n	\"accessUrls\":[\r\n	  \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}"
+      summary: Get all registered Labels
+      description: |
+        Get all registered Labels
+      tags:
+      - Label Collection
+      responses:
+        200:
+          description: |
+            OK.
+            Labels returned
+          schema:
+            $ref: '#/definitions/LabelList'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -8726,6 +8752,7 @@ definitions:
           $ref: '#/definitions/Tenant'
       pagination:
         $ref: '#/definitions/Pagination'
+
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

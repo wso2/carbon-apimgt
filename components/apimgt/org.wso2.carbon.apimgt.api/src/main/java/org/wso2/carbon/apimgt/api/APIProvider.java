@@ -1257,4 +1257,12 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to add the schema as a resource to registry
      */
      void saveGraphqlSchemaDefinition(API api, String schemaDefinition) throws APIManagementException;
+
+    /**
+     * Returns labels of a given tenant
+     *
+     * @param tenantDomain    tenant domain
+     * @return A List of labels related to the given tenant
+     */
+    List<Label> getAllLabels(String tenantDomain) throws APIManagementException;
 }

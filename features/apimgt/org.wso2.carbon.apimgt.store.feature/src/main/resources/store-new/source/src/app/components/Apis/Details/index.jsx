@@ -83,7 +83,7 @@ const LoadableSwitch = withRouter(Loadable.Map({
         ),
     },
     render(loaded, props) {
-        const { match } = props;
+        const { match, advertised } = props;
         const ApiConsole = loaded.ApiConsole.default;
         const Overview = loaded.Overview.default;
         const Documentation = loaded.Documentation.default;
@@ -103,11 +103,17 @@ const LoadableSwitch = withRouter(Loadable.Map({
                     render={props => (
                         <Overview {...props} />)}
                 />
-                <Route path='/apis/:apiUuid/credentials' component={Credentials} />
-                <Route path='/apis/:apiUuid/comments' component={Comments} />
-                <Route path='/apis/:apiUuid/test' component={ApiConsole} />
+                {!advertised
+                    && (
+                        <React.Fragment>
+                            <Route path='/apis/:apiUuid/credentials' component={Credentials} />
+                            <Route path='/apis/:apiUuid/comments' component={Comments} />
+                            <Route path='/apis/:apiUuid/test' component={ApiConsole} />
+                            <Route path='/apis/:apiUuid/sdk' component={Sdk} />
+                        </React.Fragment>
+                    )
+                }
                 <Route path='/apis/:apiUuid/docs' component={Documentation} />
-                <Route path='/apis/:apiUuid/sdk' component={Sdk} />
                 <Redirect exact from='/api-products/:apiUuid' to={redirectURL} />
                 <Route
                     path='/api-products/:apiUuid/overview'
@@ -350,7 +356,7 @@ class Details extends React.Component {
         this.updateActiveLink();
 
         const {
-            classes, theme, intl, match,
+            classes, theme, intl, apiType, match,
         } = this.props;
         const { apiUuid } = match.params;
         const { active, api } = this.state;
@@ -369,16 +375,35 @@ class Details extends React.Component {
                         </div>
                     </Link>
                     <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    <LeftMenuItem text='credentials' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    {/* TODO: uncomment when the feature is working */}
-                    <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    <LeftMenuItem text='test' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    {!api.advertiseInfo.advertised
+                        && (
+                            <React.Fragment>
+                                <LeftMenuItem
+                                    text='credentials'
+                                    handleMenuSelect={this.handleMenuSelect}
+                                    active={active}
+                                />
+                                <LeftMenuItem
+                                    text='comments'
+                                    handleMenuSelect={this.handleMenuSelect}
+                                    active={active}
+                                />
+                                <LeftMenuItem
+                                    text='test'
+                                    handleMenuSelect={this.handleMenuSelect}
+                                    active={active}
+                                />
+                            </React.Fragment>
+                        )
+                    }
                     <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    {!api.advertiseInfo.advertised
+                        && <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    }
                 </div>
                 <div className={classes.content}>
                     <InfoBar apiId={apiUuid} innerRef={node => (this.infoBar = node)} intl={intl} />
-                    <LoadableSwitch api_uuid={apiUuid} />
+                    <LoadableSwitch api_uuid={apiUuid} advertised={api.advertiseInfo.advertised} />
                 </div>
                 {theme.custom.showApiHelp && <RightPanel />}
             </ApiContext.Provider>

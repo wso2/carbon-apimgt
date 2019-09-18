@@ -226,7 +226,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                         } catch (IOException e) {
                             // Exception isn't thrown in order to generate jwt without claim, even if an error is
                             // occurred during the retrieving claims.
-                            log.error("Error while reading claim values", e);
+                            log.error(String.format("Error while reading claim values for %s", claimVal), e);
                         }
                     } else if (userAttributeSeparator != null && claimVal != null &&
                             claimVal.contains(userAttributeSeparator)) {

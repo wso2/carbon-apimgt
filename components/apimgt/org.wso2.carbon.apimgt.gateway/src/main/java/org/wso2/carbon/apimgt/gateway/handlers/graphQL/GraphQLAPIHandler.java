@@ -106,7 +106,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
                     getAxis2MessageContext();
             String requestPath = ((Axis2MessageContext) messageContext).getProperties().
                     get(REST_SUB_REQUEST_PATH).toString();
-            if (!requestPath.isEmpty()) {
+            if (requestPath != null && !requestPath.isEmpty()) {
                 String[] queryParams = ((Axis2MessageContext) messageContext).getProperties().
                         get(REST_SUB_REQUEST_PATH).toString().split(QUERY_PATH_STRING);
                 if (queryParams.length > 1) {
