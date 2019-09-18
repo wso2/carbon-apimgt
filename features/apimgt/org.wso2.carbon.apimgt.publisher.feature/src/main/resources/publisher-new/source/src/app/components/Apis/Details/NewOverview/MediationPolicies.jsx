@@ -38,7 +38,7 @@ function MediationPolicies(props) {
                         <Typography variant='h5' component='h3' className={parentClasses.title}>
                             <FormattedMessage
                                 id='Apis.Details.NewOverview.MediationPolicies'
-                                defaultMessage='Mediatio  Policies'
+                                defaultMessage='Mediation Policies'
                             />
                         </Typography>
                         <Link to={'/apis/' + api.id + '/Mediation Policies'}>

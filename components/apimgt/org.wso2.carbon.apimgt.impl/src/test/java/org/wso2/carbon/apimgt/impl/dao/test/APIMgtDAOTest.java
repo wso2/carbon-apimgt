@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
@@ -241,7 +242,8 @@ public class APIMgtDAOTest {
         apiIdentifier.setApplicationId("APPLICATION99");
         apiIdentifier.setTier("T1");
         API api = new API(apiIdentifier);
-        apiMgtDAO.addSubscription(apiIdentifier, api.getContext(), 100, "UNBLOCKED", "admin");
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        apiMgtDAO.addSubscription(apiTypeWrapper, 100, "UNBLOCKED");
     }
 
 
@@ -407,7 +409,8 @@ public class APIMgtDAOTest {
         api.setContextTemplate("/context1/{version}");
 
         apiMgtDAO.addAPI(api, -1234);
-        apiMgtDAO.makeKeysForwardCompatible("SUMEDHA", "API1", "V1.0.0", "V2.0.0", "/context1");
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper, "V1.0.0");
         apiSet = apiMgtDAO.getAPIByConsumerKey("SSDCHEJJ-AWUIS-232");
         assertEquals(2, apiSet.size());
         for (APIIdentifier apiId : apiSet) {
@@ -599,7 +602,8 @@ public class APIMgtDAOTest {
         api.setContext("/wso2utils");
         api.setContextTemplate("/wso2utils/{version}");
         apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID);
-        int subsId = apiMgtDAO.addSubscription(apiId, api.getContext(), applicationId, "UNBLOCKED", "sub_user1");
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        int subsId = apiMgtDAO.addSubscription(apiTypeWrapper, applicationId, "UNBLOCKED");
         String[] apiDetail = apiMgtDAO.getAPIDetailsByContext("/wso2utils");
         assertTrue(apiDetail.length == 2);
         assertEquals(apiDetail[0], "WSO2-Utils");
@@ -898,10 +902,11 @@ public class APIMgtDAOTest {
         retrievedApplicationRegistrationWorkflowDTO.setExternalWorkflowReference(applicationRegistrationWorkflowDTO
                 .getExternalWorkflowReference());
         apiMgtDAO.populateAppRegistrationWorkflowDTO(retrievedApplicationRegistrationWorkflowDTO);
-        apiMgtDAO.addSubscription(apiId, api.getContext(), application.getId(), APIConstants.SubscriptionStatus
-                .ON_HOLD, subscriber.getName());
-        int subsId = apiMgtDAO.addSubscription(apiId1, api1.getContext(), application.getId(), APIConstants
-                .SubscriptionStatus.ON_HOLD, subscriber.getName());
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        ApiTypeWrapper apiTypeWrapper1 = new ApiTypeWrapper(api1);
+        apiMgtDAO.addSubscription(apiTypeWrapper, application.getId(), APIConstants.SubscriptionStatus.ON_HOLD);
+        int subsId = apiMgtDAO.addSubscription(apiTypeWrapper1, application.getId(),
+                APIConstants.SubscriptionStatus.ON_HOLD);
         assertTrue(apiMgtDAO.isContextExist(api.getContext()));
         assertTrue(api.getContext().equals(apiMgtDAO.getAPIContext(apiId)));
         apiMgtDAO.removeSubscription(apiId, application.getId());
@@ -972,8 +977,9 @@ public class APIMgtDAOTest {
         api.setApiLevelPolicy(apiPolicy.getPolicyName());
         apiMgtDAO.addAPI(api, -1234);
         apiId.setTier(subscriptionPolicy.getPolicyName());
-        int subsId = apiMgtDAO.addSubscription(apiId, api.getContext(), application.getId(), APIConstants
-                .SubscriptionStatus.ON_HOLD, subscriber.getName());
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        int subsId = apiMgtDAO.addSubscription(apiTypeWrapper, application.getId(),
+                APIConstants.SubscriptionStatus.ON_HOLD);
         assertTrue(apiMgtDAO.getApplicationsByTier(subscriptionPolicy.getPolicyName()).length > 0);
         String subStatus = apiMgtDAO.getSubscriptionStatusById(subsId);
         assertEquals(subStatus, APIConstants.SubscriptionStatus.ON_HOLD);

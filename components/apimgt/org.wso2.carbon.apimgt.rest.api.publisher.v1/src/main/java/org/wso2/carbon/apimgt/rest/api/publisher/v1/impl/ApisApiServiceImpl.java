@@ -508,8 +508,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = originalAPI.getId();
-            boolean isWSAPI = originalAPI.getType() != null && APIConstants.APITransportType.WS == APIConstants.APITransportType
-                    .valueOf(originalAPI.getType());
+            boolean isWSAPI = originalAPI.getType() != null
+                            && APIConstants.APITransportType.WS.toString().equals(originalAPI.getType());
 
             org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] apiDtoClassAnnotatedScopes =
                     APIDTO.class.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
@@ -2829,7 +2829,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             ResourceFile getWSDLResponse = apiProvider.getWSDL(apiIdentifier);
-            return Response.ok(getWSDLResponse.getContent(), getWSDLResponse.getContentType()).build();
+            return RestApiUtil.getResponseFromResourceFile(apiIdentifier.toString(), getWSDLResponse);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource

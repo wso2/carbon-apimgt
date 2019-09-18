@@ -415,18 +415,6 @@
         <!--set isStoreForumEnabled to false for disable forum in store-->
         <isStoreForumEnabled>{{apim.store.enable_forum}}</isStoreForumEnabled>
 
-        {% if apim.store.application_attributes is defined %}
-        <ApplicationConfiguration>
-            <ApplicationAttributes>
-                {% for attribute in apim.store.application_attributes %}
-                <Attribute required="{{attribute.required}}">
-                    <Name>{{attribute.name}}</Name>
-                    <Description>{{attribute.description}}</Description>
-                </Attribute>
-                {% endfor %}
-            </ApplicationAttributes>
-        </ApplicationConfiguration>
-        {% endif %}
         <!--This parameter specifies whether Provisioning Out-of-Band OAuth Clients is enabled-->
         <MapExistingAuthApps>{{apim.store.enable_map_auth}}</MapExistingAuthApps>
     </APIStore>
@@ -879,5 +867,19 @@
             <Enabled>{{apim.open_tracer.log_tracer.enable}}</Enabled>
         </LogTracer>
     </OpenTracer>
+
+    {% if apim.store.application_attributes is defined %}
+    <ApplicationConfiguration>
+        <ApplicationAttributes>
+            {% for attribute in apim.store.application_attributes %}
+            <Attribute Required="{{attribute.required}}" Hidden="{{attribute.hidden}}">
+                <Name>{{attribute.name}}</Name>
+                <Description>{{attribute.description}}</Description>
+                <Default>{{attribute.default}}</Default>
+            </Attribute>
+            {% endfor %}
+        </ApplicationAttributes>
+    </ApplicationConfiguration>
+    {% endif %}
 
 </APIManager>

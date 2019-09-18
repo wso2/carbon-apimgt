@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -146,4 +148,31 @@ public abstract class APIDefinition {
         String keepLegacyExtension = System.getProperty(KEEP_LEGACY_EXTENSION_PROP);
         return Boolean.parseBoolean(keepLegacyExtension);
     }
+
+    /**
+     * Update the OAS definition for API consumers
+     *
+     * @param api            API
+     * @param oasDefinition  OAS definition
+     * @param hostWithScheme host address with protocol
+     * @return updated OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
+    public abstract String getOASDefinitionForStore(API api, String oasDefinition, String hostWithScheme)
+            throws APIManagementException;
+
+    /**
+     * Update the OAS definition for API consumers
+     *
+     * @param product        APIProduct
+     * @param oasDefinition  OAS definition
+     * @param hostWithScheme host address with protocol
+     * @return updated OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
+    public abstract String getOASDefinitionForStore(APIProduct product, String oasDefinition, String hostWithScheme)
+            throws APIManagementException;
+
+    public abstract String getOASDefinitionForPublisher(API api, String oasDefinition)
+            throws APIManagementException;
 }

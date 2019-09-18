@@ -37,6 +37,7 @@ import {
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Dropzone from 'react-dropzone';
 import API from '../../../../../data/api';
+import SelectPolicies from '../../../Create/Components/SelectPolicies';
 
 const dropzoneStyles = {
     border: '1px dashed ',
@@ -97,11 +98,12 @@ const styles = theme => ({
  */
 function Certificates(props) {
     const {
-        classes, certificates, uploadCertificate, deleteCertificate,
+        classes, certificates, uploadCertificate, deleteCertificate, isMutualSSLEnabled, apiId,
     } = props;
     const [certificate, setCertificate] = useState({ name: '', content: {} });
     const [certificateList, setCertificateList] = useState([]);
     const [alias, setAlias] = useState('');
+    const [policy, setPolicy] = useState('');
     const [endpoint, setEndpoint] = useState('');
     const [uploadCertificateOpen, setUploadCertificateOpen] = useState(false);
     const [openCertificateDetails, setOpenCertificateDetails] = useState({ open: false, anchor: null, details: {} });
@@ -112,13 +114,18 @@ function Certificates(props) {
         setCertificate({ name: '', content: '' });
         setAlias('');
         setEndpoint('');
+        setPolicy('');
     };
 
     /**
      * Method to upload the certificate content by calling the rest api.
      * */
     const saveCertificate = () => {
-        uploadCertificate(certificate.content, endpoint, alias);
+        if (isMutualSSLEnabled) {
+            uploadCertificate(certificate.content, policy, alias);
+        } else {
+            uploadCertificate(certificate.content, endpoint, alias);
+        }
         closeCertificateUpload();
     };
 
@@ -129,26 +136,41 @@ function Certificates(props) {
      * @param {string} certAlias  The alias of the certificate which information is required.
      * */
     const showCertificateDetails = (event, certAlias) => {
-        API.getCertificateStatus(certAlias)
-            .then((response) => {
-                setOpenCertificateDetails({
-                    details: response.body,
-                    open: true,
-                    alias: certAlias,
-                    anchor: event.currentTarget,
+        if (!isMutualSSLEnabled) {
+            API.getCertificateStatus(certAlias)
+                .then((response) => {
+                    setOpenCertificateDetails({
+                        details: response.body,
+                        open: true,
+                        alias: certAlias,
+                        anchor: event.currentTarget,
+                    });
+                })
+                .catch((err) => {
+                    console.error(err);
                 });
-            })
-            .catch((err) => {
-                console.error(err);
-            });
+        } else {
+            API.getClientCertificateStatus(certAlias, apiId)
+                .then((response) => {
+                    setOpenCertificateDetails({
+                        details: response.body,
+                        open: true,
+                        alias: certAlias,
+                        anchor: event.currentTarget,
+                    });
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        }
     };
 
     /**
-     * Delete endpoint certificate represented by the alias.
+     * Delete certificate represented by the alias.
      *
      * @param {string} certificateAlias The alias of the certificate that is needed to be deleted.
      * */
-    const deleteEndpointCertificate = (certificateAlias) => {
+    const deleteCertificateByAlias = (certificateAlias) => {
         deleteCertificate(certificateAlias);
         setCertificateToDelete({ open: false, alias: '' });
     };
@@ -165,9 +187,20 @@ function Certificates(props) {
         }
     };
 
+    /**
+     * On change functionality to handle the policy dropdown
+     *
+     * @param {*} event
+     */
+    function handleOnChange(event) {
+        const { value } = event.target;
+        setPolicy(value);
+    }
+
     useEffect(() => {
         setCertificateList(certificates);
     }, [certificates]);
+
     return (
         <Grid container direction='column'>
             {/* TODO: Add list of existing certificates */}
@@ -188,7 +221,11 @@ function Certificates(props) {
                                     <ListItemAvatar>
                                         <Icon>lock</Icon>
                                     </ListItemAvatar>
-                                    <ListItemText primary={cert.alias} secondary={cert.endpoint} />
+                                    {isMutualSSLEnabled ?
+                                        (<ListItemText primary={cert.alias} secondary={cert.tier} />) :
+                                        <ListItemText primary={cert.alias} secondary={cert.endpoint} />
+                                    }
+
                                     <ListItemSecondaryAction>
                                         <IconButton
                                             edge='end'
@@ -198,9 +235,8 @@ function Certificates(props) {
                                         </IconButton>
                                         <IconButton
                                             onClick={() => setCertificateToDelete({ open: true, alias: cert.alias })}
-                                            color='secondary'
                                         >
-                                            <Icon>delete</Icon>
+                                            <Icon color='error'>delete</Icon>
                                         </IconButton>
                                     </ListItemSecondaryAction>
                                 </ListItem>
@@ -250,7 +286,7 @@ function Certificates(props) {
                 </DialogContent>
                 <DialogActions>
                     <Button
-                        onClick={() => deleteEndpointCertificate(certificateToDelete.alias)}
+                        onClick={() => deleteCertificateByAlias(certificateToDelete.alias)}
                         color='primary'
                         autoFocus
                     >
@@ -317,21 +353,32 @@ function Certificates(props) {
                 <DialogContent>
                     <Grid>
                         <div>
-                            <TextField
-                                required
-                                id='certificateEndpoint'
-                                label={
-                                    <FormattedMessage
-                                        id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.endpoint'
-                                        defaultMessage='Endpoint'
-                                    />
-                                }
-                                value={endpoint}
-                                placeholder='Endpoint'
-                                onChange={event => setEndpoint(event.target.value)}
-                                margin='normal'
-                                fullWidth
-                            />
+                            {isMutualSSLEnabled ? (
+                                <SelectPolicies
+                                    multiple={false}
+                                    policies={policy}
+                                    helperText='Select a throttling policy for the certificate'
+                                    onChange={handleOnChange}
+                                    required
+                                />
+                            ) :
+                                <TextField
+                                    required
+                                    id='certificateEndpoint'
+                                    label={
+                                        <FormattedMessage
+                                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.endpoint'
+                                            defaultMessage='Endpoint'
+                                        />
+                                    }
+                                    value={endpoint}
+                                    placeholder='Endpoint'
+                                    onChange={event => setEndpoint(event.target.value)}
+                                    margin='normal'
+                                    fullWidth
+                                />
+                            }
+
                             <TextField
                                 required
                                 id='certificateAlias'
@@ -345,6 +392,7 @@ function Certificates(props) {
                                 placeholder='My Alias'
                                 onChange={event => setAlias(event.target.value)}
                                 margin='normal'
+                                variant='outlined'
                                 fullWidth
                             />
                             <Dropzone
@@ -406,7 +454,12 @@ function Certificates(props) {
                         onClick={saveCertificate}
                         color='primary'
                         autoFocus
-                        disabled={alias === '' || endpoint === '' || certificate.name === ''}
+                        disabled={
+                            alias === '' ||
+                            (!isMutualSSLEnabled && endpoint === '') ||
+                            certificate.name === '' ||
+                            (isMutualSSLEnabled && policy === '')
+                        }
                     >
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.config.save.button'
@@ -425,6 +478,11 @@ function Certificates(props) {
     );
 }
 
+Certificates.defaultProps = {
+    isMutualSSLEnabled: false,
+    apiId: '',
+};
+
 Certificates.propTypes = {
     classes: PropTypes.shape({
         fileinput: PropTypes.shape({}),
@@ -433,5 +491,7 @@ Certificates.propTypes = {
     certificates: PropTypes.shape({}).isRequired,
     uploadCertificate: PropTypes.func.isRequired,
     deleteCertificate: PropTypes.func.isRequired,
+    apiId: PropTypes.string,
+    isMutualSSLEnabled: PropTypes.bool,
 };
 export default injectIntl(withStyles(styles)(Certificates));

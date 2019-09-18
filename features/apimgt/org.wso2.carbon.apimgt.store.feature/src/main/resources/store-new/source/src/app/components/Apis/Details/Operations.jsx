@@ -19,6 +19,7 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import { withStyles, withTheme } from '@material-ui/core/styles';
+import { FormattedMessage } from 'react-intl';
 import { injectIntl } from 'react-intl';
 import Table from '@material-ui/core/Table';
 import TableCell from '@material-ui/core/TableCell';

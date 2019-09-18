@@ -19,7 +19,6 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
-import com.google.gson.Gson;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -28,8 +27,11 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.OAuthFlow;
@@ -44,8 +46,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -53,7 +54,6 @@ import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -61,7 +61,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -235,10 +234,76 @@ public class OAS3Parser extends APIDefinition {
         openAPI.setInfo(info);
         updateSwaggerSecurityDefinition(openAPI, swaggerData, "https://test.com");
         updateLegacyScopesFromSwagger(openAPI, swaggerData);
-        for (SwaggerData.Resource resource : swaggerData.getResources()) {
-            addOrUpdatePathToSwagger(openAPI, resource);
+        if (APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
+            openAPI = modifyGraphQLSwagger(openAPI);
+        } else {
+            for (SwaggerData.Resource resource : swaggerData.getResources()) {
+                addOrUpdatePathToSwagger(openAPI, resource);
+            }
         }
         return Json.pretty(openAPI);
+    }
+
+    /**
+     * Construct openAPI definition for graphQL. Add get and post operations
+     *
+     * @param openAPI OpenAPI
+     * @return modified openAPI for GraphQL
+     */
+    private OpenAPI modifyGraphQLSwagger(OpenAPI openAPI) {
+        SwaggerData.Resource resource = new SwaggerData.Resource();
+        resource.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+        resource.setPolicy(APIConstants.DEFAULT_SUB_POLICY_UNLIMITED);
+        resource.setPath("/*");
+
+        resource.setVerb(APIConstants.HTTP_GET);
+        Operation getOperation = createOperation(resource);
+        resource.setVerb(APIConstants.HTTP_POST);
+        Operation postOperation = createOperation(resource);
+
+        //get operation
+        Parameter getParameter = new Parameter();
+        getParameter.setName(APIConstants.GRAPHQL_QUERY);
+        getParameter.setIn(APIConstants.GRAPHQL_QUERY);
+        getParameter.setRequired(true);
+        getParameter.setDescription("Query to be passed to graphQL API");
+
+        Schema getSchema = new Schema();
+        getSchema.setType("string");
+        getParameter.setSchema(getSchema);
+        getOperation.addParametersItem(getParameter);
+
+        //post operation
+        RequestBody requestBody = new RequestBody();
+        requestBody.setDescription("Query or mutation to be passed to graphQL API");
+        requestBody.setRequired(true);
+
+        JSONObject typeOfPayload = new JSONObject();
+        JSONObject payload = new JSONObject();
+        typeOfPayload.put(APIConstants.TYPE, "string");
+        payload.put(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME, typeOfPayload);
+
+        Schema postSchema = new Schema();
+        postSchema.setType("object");
+        postSchema.setProperties(payload);
+
+        MediaType mediaType = new MediaType();
+        mediaType.setSchema(postSchema);
+
+        Content content = new Content();
+        content.addMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE, mediaType);
+        requestBody.setContent(content);
+        postOperation.setRequestBody(requestBody);
+
+        //add post and get operations to path /*
+        PathItem pathItem = new PathItem();
+        pathItem.setGet(getOperation);
+        pathItem.setPost(postOperation);
+        Paths paths = new Paths();
+        paths.put("/*", pathItem);
+
+        openAPI.setPaths(paths);
+        return openAPI;
     }
 
     /**
@@ -435,7 +500,7 @@ public class OAS3Parser extends APIDefinition {
             openAPI.addExtension(APIConstants.X_THROTTLING_TIER, api.getApiLevelPolicy());
         }
         openAPI.addExtension(APIConstants.X_WSO2_CORS, api.getCorsConfiguration());
-        JSONObject endpoints = new JSONObject(api.getEndpointConfig());
+        org.json.JSONObject endpoints = new org.json.JSONObject(api.getEndpointConfig());
         if (endpoints.has(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
             String prodUrls = endpoints.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)
                     .getString(APIConstants.API_DATA_URL);
@@ -537,6 +602,11 @@ public class OAS3Parser extends APIDefinition {
             securityScheme = new SecurityScheme();
             securityScheme.setType(SecurityScheme.Type.OAUTH2);
             securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY, securityScheme);
+            List<SecurityRequirement> security = new ArrayList<SecurityRequirement>();
+            SecurityRequirement secReq = new SecurityRequirement();
+            secReq.addList(OPENAPI_SECURITY_SCHEMA_KEY, new ArrayList<String>());
+            security.add(secReq);
+            openAPI.setSecurity(security);
         }
         if (securityScheme.getFlows() == null) {
             securityScheme.setFlows(new OAuthFlows());

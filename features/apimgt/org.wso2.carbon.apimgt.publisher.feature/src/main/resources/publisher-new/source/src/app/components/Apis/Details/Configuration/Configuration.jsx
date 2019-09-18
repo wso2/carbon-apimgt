@@ -101,6 +101,7 @@ const useStyles = makeStyles(theme => ({
  */
 function copyAPIConfig(api) {
     return {
+        id: api.id,
         name: api.name,
         description: api.description,
         accessControl: api.accessControl,
