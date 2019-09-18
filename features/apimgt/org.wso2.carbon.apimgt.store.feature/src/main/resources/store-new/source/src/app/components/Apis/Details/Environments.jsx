@@ -144,6 +144,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,
@@ -174,6 +175,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,
@@ -204,6 +206,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,
@@ -234,6 +237,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,
@@ -275,6 +279,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,
@@ -305,6 +310,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,
@@ -335,6 +341,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,
@@ -365,6 +372,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,

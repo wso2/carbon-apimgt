@@ -38,6 +38,7 @@ import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import AuthManager from '../../../data/AuthManager';
 import { ApiContext } from './ApiContext';
 import Environments from './Environments';
+import Labels from './Labels';
 /**
  *
  *
@@ -510,6 +511,22 @@ class InfoBar extends React.Component {
                                                         </TableCell>
                                                         <TableCell>
                                                             <Environments />
+                                                        </TableCell>
+                                                    </TableRow>
+                                                    <TableRow>
+                                                        <TableCell component='th' scope='row' className={classes.contentToTop}>
+                                                            <div className={classes.iconAligner}>
+                                                                <Icon className={classes.iconEven}>games</Icon>
+                                                                <span className={classes.iconTextWrapper}>
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.InfoBar.available.mgLabels'
+                                                                        defaultMessage='Available Microgateways'
+                                                                     />
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Labels />
                                                         </TableCell>
                                                     </TableRow>
                                                 ) : (

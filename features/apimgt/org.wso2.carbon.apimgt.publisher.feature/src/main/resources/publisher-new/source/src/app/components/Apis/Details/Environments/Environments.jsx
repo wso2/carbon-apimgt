@@ -56,7 +56,7 @@ const useStyles = makeStyles(theme => ({
         marginTop: theme.spacing.unit * 3,
     },
     content: {
-        marginTop: theme.spacing.unit * 3,
+        marginTop: theme.spacing.unit * 2,
         margin: `${theme.spacing.unit * 2}px 0 ${theme.spacing.unit * 2}px 0`,
     },
 }));
@@ -210,7 +210,7 @@ export default function Environments() {
                     </Table>
                 </Paper>) :
                 (
-                    <InlineMessage type='info' height={80} lassName={classes.gatewayPaper}>
+                    <InlineMessage type='info' height={80} >
                         <div className={classes.contentWrapper}>
                             <Typography component='p' className={classes.content}>
                                 <FormattedMessage
