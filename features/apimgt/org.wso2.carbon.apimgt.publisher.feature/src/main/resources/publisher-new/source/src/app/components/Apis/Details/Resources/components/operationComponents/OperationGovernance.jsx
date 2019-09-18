@@ -19,6 +19,7 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
+import Box from '@material-ui/core/Box';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import Switch from '@material-ui/core/Switch';
@@ -42,6 +43,7 @@ export default function OperationGovernance(props) {
     const {
         operation, operationActionsDispatcher, operationRateLimits, api,
     } = props;
+    const isOperationRateLimiting = api.apiThrottlingPolicy === null;
     return (
         <Fragment>
             <Grid item md={12}>
@@ -87,19 +89,45 @@ export default function OperationGovernance(props) {
                 </sup>
             </Grid>
             <Grid item md={1} />
-            <Grid item md={11}>
+            <Grid item md={3}>
                 <TextField
-                    id='operation_throttling_policy'
+                    id='operation_rate_limiting_policy'
                     select
-                    label='Throttling policy'
-                    value={operation.throttlingPolicy}
+                    fullWidth={!isOperationRateLimiting}
+                    SelectProps={{ autoWidth: true }}
+                    disabled={!isOperationRateLimiting}
+                    label={
+                        isOperationRateLimiting ? (
+                            'Rate limiting policy'
+                        ) : (
+                            <div>
+                                Rate limiting is governed by{' '}
+                                <Box fontWeight='fontWeightBold' display='inline' color='primary.main'>
+                                    API Level
+                                </Box>
+                            </div>
+                        )
+                    }
+                    value={isOperationRateLimiting ? operation.throttlingPolicy : ''}
                     onChange={({ target: { value } }) =>
                         operationActionsDispatcher({
                             action: 'throttlingPolicy',
                             event: { value },
                         })
                     }
-                    helperText='Select a rate limit policy for this operation'
+                    helperText={
+                        isOperationRateLimiting ? (
+                            'Select a rate limit policy for this operation'
+                        ) : (
+                            <span>
+                                Use{' '}
+                                <Box fontWeight='fontWeightBold' display='inline' color='primary.main'>
+                                    Operation Level
+                                </Box>{' '}
+                                rate limiting to <b>enable</b> rate limiting per operation
+                            </span>
+                        )
+                    }
                     margin='dense'
                     variant='outlined'
                 >
@@ -110,6 +138,7 @@ export default function OperationGovernance(props) {
                     ))}
                 </TextField>
             </Grid>
+            <Grid item md={8} />
             <Grid item md={1} />
             <Grid item md={11}>
                 <TextField

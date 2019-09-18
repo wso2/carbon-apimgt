@@ -32,7 +32,12 @@ import Typography from '@material-ui/core/Typography';
 import MenuItem from '@material-ui/core/MenuItem';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
+const RateLimitingLevels = {
+    API: 'api',
+    RESOURCE: 'resource',
+};
 /**
  *
  * Handles the resource level and API level throttling UI switch
@@ -43,7 +48,26 @@ import HelpOutline from '@material-ui/icons/HelpOutline';
 export default function APIRateLimiting(props) {
     const { api, updateAPI, operationRateLimits } = props;
     const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(api.apiThrottlingPolicy);
-    const isAPILevel = apiThrottlingPolicy === null && 'api';
+    const isResourceLevel = apiThrottlingPolicy === null;
+    const rateLimitingLevel = isResourceLevel ? RateLimitingLevels.RESOURCE : RateLimitingLevels.API;
+    const [isSaving, setIsSaving] = useState(false);
+
+    /**
+     *
+     *
+     */
+    function saveChanges() {
+        setIsSaving(true);
+        updateAPI({ apiThrottlingPolicy }).finally(() => setIsSaving(false));
+    }
+
+    /**
+     *
+     *
+     */
+    function resetChanges() {
+        setApiThrottlingPolicy(api.apiThrottlingPolicy);
+    }
     return (
         <Paper>
             <Grid container direction='row' spacing={3} justify='flex-start' alignItems='flex-start'>
@@ -53,7 +77,7 @@ export default function APIRateLimiting(props) {
                             Resources Configuration
                             <Tooltip
                                 fontSize='small'
-                                title='Configurations that are applied commonly to all the resources'
+                                title='Configurations that affects on all the resources'
                                 aria-label='common configurations'
                                 placement='right-end'
                                 interactive
@@ -67,17 +91,24 @@ export default function APIRateLimiting(props) {
                 <Grid item md={1} />
                 <Grid item md={3}>
                     <FormControl component='fieldset'>
-                        <FormLabel component='legend'>Apply rate limiting</FormLabel>
+                        <FormLabel component='legend'>Rate limiting level</FormLabel>
                         <RadioGroup
                             aria-label='Apply rate limiting in'
-                            value={isAPILevel}
+                            value={rateLimitingLevel}
                             onChange={(event) => {
-                                setApiThrottlingPolicy(event.target.value === 'api' ? null : '');
+                                // If the selected option is resource, we set the api level rate limiting to null
+                                setApiThrottlingPolicy(event.target.value === RateLimitingLevels.RESOURCE ? null : '');
                             }}
                             row
                         >
-                            <FormControlLabel value='api' control={<Radio />} label='API Level' labelPlacement='end' />
                             <FormControlLabel
+                                value={RateLimitingLevels.API}
+                                control={<Radio />}
+                                label='API Level'
+                                labelPlacement='end'
+                            />
+                            <FormControlLabel
+                                value={RateLimitingLevels.RESOURCE}
                                 control={<Radio />}
                                 label='Operation Level'
                                 labelPlacement='end'
@@ -86,28 +117,32 @@ export default function APIRateLimiting(props) {
                     </FormControl>
                 </Grid>
                 <Grid item md={8}>
-                    <Box borderLeft={1} pl={1}>
-                        <TextField
-                            id='operation_throttling_policy'
-                            select
-                            label='Rate limiting policies'
-                            value={api.apiThrottlingPolicy}
-                            // onChange={({ target: { value } }) =>
-                            //     operationActionsDispatcher({
-                            //         action: 'throttlingPolicy',
-                            //         event: { value },
-                            //     })
-                            // }
-                            helperText='Selected rate limiting policy will be applied to whole API'
-                            margin='dense'
-                            variant='outlined'
-                        >
-                            {operationRateLimits.map(rateLimit => (
-                                <MenuItem key={rateLimit.name} value={rateLimit.name}>
-                                    {rateLimit.displayName}
-                                </MenuItem>
-                            ))}
-                        </TextField>
+                    <Box minHeight={70} borderLeft={1} pl={10}>
+                        {isResourceLevel ? (
+                            <Typography variant='body1' gutterBottom>
+                                You may change the rate limiting policies per operation
+                                <Typography variant='caption' display='block' gutterBottom >
+                                    Expand an operation below to select a rate limiting policy for an operation
+                                </Typography>
+                            </Typography>
+                        ) : (
+                            <TextField
+                                id='operation_throttling_policy'
+                                select
+                                label='Rate limiting policies'
+                                value={apiThrottlingPolicy}
+                                onChange={({ target: { value } }) => setApiThrottlingPolicy(value)}
+                                helperText='Selected rate limiting policy will be applied to whole API'
+                                margin='dense'
+                                variant='outlined'
+                            >
+                                {operationRateLimits.map(rateLimit => (
+                                    <MenuItem key={rateLimit.name} value={rateLimit.name}>
+                                        {rateLimit.displayName}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        )}
                     </Box>
                 </Grid>
                 <Grid item md={12}>
@@ -115,17 +150,11 @@ export default function APIRateLimiting(props) {
                 </Grid>
                 <Grid item>
                     <Box ml={1}>
-                        <Button disabled={false} variant='outlined' size='small' color='primary'>
+                        <Button onClick={saveChanges} disabled={false} variant='outlined' size='small' color='primary'>
                             Save
-                            {/* {isSaving && <CircularProgress size={24} />} */}
+                            {isSaving && <CircularProgress size={24} />}
                         </Button>
-                        <Button
-                            size='small'
-                            // onClick={() => {
-                            //     operationActionsDispatcher({ action: 'update', event: { value: initOperation } });
-                            //     setIsNotSaved(false);
-                            // }}
-                        >
+                        <Button size='small' onClick={resetChanges}>
                             Reset
                         </Button>
                     </Box>
