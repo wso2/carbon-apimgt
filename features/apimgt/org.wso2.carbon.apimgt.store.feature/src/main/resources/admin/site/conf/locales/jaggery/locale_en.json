@@ -297,5 +297,17 @@
     "Type an Email and press Enter":"Type an email address and press Enter",
     "Label contains spaces": "Label contains spaces",
     "Label": "Label",
-    "Label contains one or more illegal characters": "Label contains one or more illegal characters "
+    "Label contains one or more illegal characters": "Label contains one or more illegal characters ",
+    "Record Time": "Record Time",
+    "Message ID": "Message ID",
+    "API Method" : "API Method",
+    "Headers Set" : "Headers Set",
+    "Message Body" : "Message Body",
+    "Client IP" : "Client IP",
+    "Remove" : "Remove",
+    "No Alert triggered" : "No Alert triggered",
+    "Configure Emails": "Configure Emails",
+    "Bot Detection": "Bot Detection",
+    "Bot Detected Data List": "Bot Detected Data List",
+    "Bot Detected Data": "Bot Detected Data"
 }

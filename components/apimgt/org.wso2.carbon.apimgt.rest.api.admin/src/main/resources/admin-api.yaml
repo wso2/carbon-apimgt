@@ -2249,6 +2249,127 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The BotDetectedData API resources
+######################################################
+
+  #-----------------------------------------------------
+  # Get configured email list
+  #-----------------------------------------------------
+  /botData/getEmailList:
+
+    get:
+      x-scope: apim:bot_data
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer 8739edc7-7c95-34d5-895a-398fe5dd5972\" https://localhost:9443/api/am/admin/v0.14/botData/getEmailList -H \"accept: application/json\""
+      produces:
+        - application/json
+      summary: |
+        Get all configured email list
+      description: |
+        Get all email list which configured to trigger for BotData api email alert
+      parameters:
+        - name: tenantDomain
+          in: query
+          description: |
+            Pass the tenantDomain to get the email list and if not passed it will get from the logged user.
+          required: false
+          type: string
+      responses:
+        200:
+          description: |
+            OK.
+            Export Successful.
+        400:
+          description: |
+            Bad Request.messageID
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested Data does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+#-----------------------------------------------------
+  # Delete email
+#-----------------------------------------------------
+  /botData/deleteEmail:
+
+    delete:
+      x-scope: apim:bot_data
+      x-wso2-curl: "curl -k -X DELETE -H \"Authorization: Bearer 7469aa7c-5e29-3d2b-a144-5d8160c91176\" https://localhost:9443/api/am/admin/v0.14/botData/deleteEmail?uuid=23a2a896-bd58-46ec-83c7-2f2b5cc09284 -H \"accept: application/json\""
+      summary: Delete an configured email.
+      description: |
+        Delete an configured email from DB by pasing uuid.
+      parameters:
+        - name: uuid
+          in: query
+          description: |
+            Pass the uuid to remove the email
+          required: true
+          type: string
+      responses:
+        200:
+          description: |
+            OK.
+            Email successfully deleted.
+        404:
+          description: |
+            Not Found.
+            Resource to be deleted does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+#-----------------------------------------------------
+  # Add email
+#-----------------------------------------------------
+  /botData/addEmail:
+
+    post:
+      x-scope: apim:bot_data
+      summary: Add an Email
+      description: |
+          Here we can use this to configure email
+      parameters:
+        - in: body
+          name: body
+          description: |
+              A email
+          required: true
+          schema:
+            $ref: '#/definitions/Email'
+      responses:
+        200:
+          description: |
+            OK.
+            Email List updated.
+          schema:
+            $ref: '#/definitions/Email'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # The "Individual label" resource APIs
 ######################################################
 
@@ -2729,6 +2850,17 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/AdvancedThrottlePolicyInfo'
+
+  #-----------------------------------------------------
+  # The Email list
+  #-----------------------------------------------------
+  Email:
+    title: Email
+    properties:
+      email:
+        type: string
+        description: email value
+        example: "abc@.com"
 
 #-----------------------------------------------------
 # The Application Throttling Policy resource

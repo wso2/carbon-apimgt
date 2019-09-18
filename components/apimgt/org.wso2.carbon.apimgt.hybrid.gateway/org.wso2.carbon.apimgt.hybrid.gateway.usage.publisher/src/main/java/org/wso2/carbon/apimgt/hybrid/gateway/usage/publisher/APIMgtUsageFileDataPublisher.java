@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeThrottlePublisherDTO
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestResponseStreamDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.BotDataDTO;
 
 /**
  * Implementation of APIMgtUsageDataPublisher used for writing events into a File
@@ -130,5 +131,10 @@ public class APIMgtUsageFileDataPublisher implements APIMgtUsageDataPublisher {
         } catch (Exception e) {
             log.error("Error while publishing Request event", e);
         }
+    }
+
+    @Override
+    public void publishEvent(BotDataDTO botDataDTO) {
+        //added due to overide method
     }
 }
