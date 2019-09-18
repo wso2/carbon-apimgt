@@ -245,19 +245,19 @@ public class OAS3Parser extends APIDefinition {
      */
     private OpenAPI modifyGraphQLSwagger(OpenAPI openAPI) {
         SwaggerData.Resource resource = new SwaggerData.Resource();
-        resource.setAuthType("Any");
-        resource.setPolicy("Unlimited");
+        resource.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+        resource.setPolicy(APIConstants.DEFAULT_SUB_POLICY_UNLIMITED);
         resource.setPath("/*");
 
-        resource.setVerb("GET");
+        resource.setVerb(APIConstants.HTTP_GET);
         Operation getOperation = createOperation(resource);
-        resource.setVerb("POST");
+        resource.setVerb(APIConstants.HTTP_POST);
         Operation postOperation = createOperation(resource);
 
         //get operation
         Parameter getParameter = new Parameter();
-        getParameter.setName("query");
-        getParameter.setIn("query");
+        getParameter.setName(APIConstants.GRAPHQL_QUERY);
+        getParameter.setIn(APIConstants.GRAPHQL_QUERY);
         getParameter.setRequired(true);
         getParameter.setDescription("Query to be passed to graphQL API");
 
@@ -273,8 +273,8 @@ public class OAS3Parser extends APIDefinition {
 
         JSONObject typeOfPayload = new JSONObject();
         JSONObject payload = new JSONObject();
-        typeOfPayload.put("type", "string");
-        payload.put("payload", typeOfPayload);
+        typeOfPayload.put(APIConstants.TYPE, "string");
+        payload.put(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME, typeOfPayload);
 
         Schema postSchema = new Schema();
         postSchema.setType("object");
@@ -284,7 +284,7 @@ public class OAS3Parser extends APIDefinition {
         mediaType.setSchema(postSchema);
 
         Content content = new Content();
-        content.addMediaType("application/json", mediaType);
+        content.addMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE, mediaType);
         requestBody.setContent(content);
         postOperation.setRequestBody(requestBody);
 
