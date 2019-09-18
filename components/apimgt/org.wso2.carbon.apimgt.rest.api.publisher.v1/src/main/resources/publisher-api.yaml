@@ -6732,7 +6732,8 @@ definitions:
           Labels of micro-gateway environments attached to the API.
         type: array
         items:
-          $ref: '#/definitions/Label'
+          type: string
+          example: ["Pizzashack, Petstore"]
       mediationPolicies:
         type: array
         items:

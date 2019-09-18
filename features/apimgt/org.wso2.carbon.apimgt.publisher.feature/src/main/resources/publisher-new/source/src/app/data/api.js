@@ -1494,6 +1494,15 @@ class API extends Resource {
     }
 
     /**
+     * Get list of microgateway labels
+     */
+    microgatewayLabelsGet() {
+        return this.client.then((client) => {
+            return client.apis['Label Collection'].get_labels();
+        });
+    }
+
+    /**
      *
      * Static method for get all APIs for current environment user.
      * @static
