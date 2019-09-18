@@ -59,7 +59,6 @@ public class AlertDTO   {
   }
 
   /**
-   * Optional configuration for alert.
    **/
   public AlertDTO _configuration(List<AlertConfigDTO> _configuration) {
     this._configuration = _configuration;
@@ -67,7 +66,7 @@ public class AlertDTO   {
   }
 
   
-  @ApiModelProperty(value = "Optional configuration for alert.")
+  @ApiModelProperty(value = "")
   @JsonProperty("configuration")
   public List<AlertConfigDTO> getConfiguration() {
     return _configuration;

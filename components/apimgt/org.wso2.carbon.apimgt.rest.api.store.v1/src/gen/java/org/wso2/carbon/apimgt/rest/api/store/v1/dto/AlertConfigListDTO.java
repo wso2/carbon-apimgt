@@ -18,23 +18,41 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class AlertConfigListDTO   {
   
-    private List<AlertConfigDTO> config = new ArrayList<>();
+    private Integer count = null;
+    private List<AlertConfigDTO> list = new ArrayList<>();
 
   /**
    **/
-  public AlertConfigListDTO config(List<AlertConfigDTO> config) {
-    this.config = config;
+  public AlertConfigListDTO count(Integer count) {
+    this.count = count;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1", value = "")
+  @JsonProperty("count")
+  public Integer getCount() {
+    return count;
+  }
+  public void setCount(Integer count) {
+    this.count = count;
+  }
+
+  /**
+   **/
+  public AlertConfigListDTO list(List<AlertConfigDTO> list) {
+    this.list = list;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("config")
-  public List<AlertConfigDTO> getConfig() {
-    return config;
+  @JsonProperty("list")
+  public List<AlertConfigDTO> getList() {
+    return list;
   }
-  public void setConfig(List<AlertConfigDTO> config) {
-    this.config = config;
+  public void setList(List<AlertConfigDTO> list) {
+    this.list = list;
   }
 
 
@@ -47,12 +65,13 @@ public class AlertConfigListDTO   {
       return false;
     }
     AlertConfigListDTO alertConfigList = (AlertConfigListDTO) o;
-    return Objects.equals(config, alertConfigList.config);
+    return Objects.equals(count, alertConfigList.count) &&
+        Objects.equals(list, alertConfigList.list);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(config);
+    return Objects.hash(count, list);
   }
 
   @Override
@@ -60,7 +79,8 @@ public class AlertConfigListDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class AlertConfigListDTO {\n");
     
-    sb.append("    config: ").append(toIndentedString(config)).append("\n");
+    sb.append("    count: ").append(toIndentedString(count)).append("\n");
+    sb.append("    list: ").append(toIndentedString(list)).append("\n");
     sb.append("}");
     return sb.toString();
   }

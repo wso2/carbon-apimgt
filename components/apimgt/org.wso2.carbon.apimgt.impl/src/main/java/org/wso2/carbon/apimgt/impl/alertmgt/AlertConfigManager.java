@@ -18,20 +18,22 @@
 
 package org.wso2.carbon.apimgt.impl.alertmgt;
 
+import javafx.scene.control.Alert;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.alertmgt.exception.AlertManagementException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 public class AlertConfigManager {
 
     private static AlertConfigManager alertConfigManager = null;
 
-    private AlertConfigManager() throws APIManagementException {
+    private AlertConfigManager() throws AlertManagementException {
         if (!APIUtil.isAnalyticsEnabled()) {
-            throw new APIManagementException("Analytics Not Enabled");
+            throw new AlertManagementException("Analytics Not Enabled");
         }
     }
 
-    public static AlertConfigManager getInstance() throws APIManagementException {
+    public static AlertConfigManager getInstance() throws AlertManagementException {
         if (alertConfigManager == null) {
              alertConfigManager = new AlertConfigManager();
         }
@@ -40,6 +42,8 @@ public class AlertConfigManager {
 
     /**
      * Method to get the alert configuration impl class based on the agent.
+     *
+     * @param agent : The alert subscribing agent. (subscriber/ publisher/ admin-dashboard)
      * */
     public AlertConfigurator getAlertConfigurator(String agent) {
         switch (agent) {

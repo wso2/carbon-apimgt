@@ -409,20 +409,18 @@ paths:
     get:
       security:
         - OAuth2Security: []
-      operationId: getWSDLOfAPI
       produces:
-        - application/json
-        - application/wsdl
-        - application/zip
-      x-examples:
-        $ref: docs/examples/apis/wsdl/apiId_wsdl_get.yaml
+        - application/octet-stream
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
       summary: Get API WSDL definition
       description: |
         This operation can be used to retrieve the swagger definition of an API.
       parameters:
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/labelName'
-        - $ref: '#/parameters/environmentName'
         - $ref: '#/parameters/If-None-Match'
         - $ref : '#/parameters/requestedTenant'
       tags:
@@ -2281,7 +2279,7 @@ paths:
           description: |
             Unsupported media type.
             The entity of the request was in a not supported format.
-
+            
 
 ######################################################
 # The "Multiple Subscriptions" resource API
@@ -3913,7 +3911,7 @@ paths:
   ####################################################
   # Store Alerts management REST API
   ####################################################
-  '/alerts/types':
+  '/alert-types':
     #--------------------------------------------------
     # Retrieve the list of api store alert types.
     #--------------------------------------------------
@@ -3948,7 +3946,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  '/alerts':
+  '/alert-subscriptions':
     #--------------------------------------------------
     # Retrieve the list of alerts subscribed by the user.
     #--------------------------------------------------
@@ -3956,14 +3954,14 @@ paths:
       security:
         - OAuth2Security: []
       x-examples:
-        $ref: docs/examples/alerts/alerts_user.yaml#/get
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/get
       summary: |
         Get the list of API Store alert types subscribed by the user.
       operationId: getSubscribedAlertTypes
       description: |
         This operation is used to get the list of subscribed alert types by the user.
       tags:
-        - Alerts
+        - Alert Subscriptions
       responses:
         200:
           description: |
@@ -3986,11 +3984,11 @@ paths:
     #--------------------------------------------------
     # Subscribe to the selected alert types by the user.
     #--------------------------------------------------
-    post:
+    put:
       security:
-       - OAuth2Security: []
+        - OAuth2Security: []
       x-examples:
-        $ref: docs/examples/alerts/alerts_user.yaml#/post
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/put
       summary: |
         Subscribe to the selected alert types by the user.
       operationId: subscribeToAlerts
@@ -4005,7 +4003,7 @@ paths:
           schema:
             $ref: '#/definitions/AlertsInfo'
       tags:
-        - Alerts
+        - Alert Subscriptions
       responses:
         201:
           description: |
@@ -4017,7 +4015,7 @@ paths:
                 The content type of the body.
               type: string
           schema:
-            $ref: '#/definitions/AlertsInfo'
+            $ref: '#/definitions/AlertsInfoResponse'
         400:
           description: |
             Bad Request.
@@ -4035,14 +4033,14 @@ paths:
       security:
         - OAuth2Security: []
       x-examples:
-        $ref: docs/examples/alerts/alerts_user.yaml#/delete
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/delete
       summary: |
         Unsubscribe user from all the alert types.
       operationId: unsubscribeAllAlerts
       description: |
         This operation is used to unsubscribe the respective user from all the alert types.
       tags:
-        - Alerts
+        - Alert Subscriptions
       responses:
         200:
           description: |
@@ -4057,12 +4055,12 @@ paths:
           description: |
             Internal Server Error
           schema:
-           $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error'
 
   ##################################################
   # Alert configuration api
   #################################################
-  '/alerts/config':
+  '/alerts/{alert-type}/configurations':
     #----------------------------------------------
     # Get the alert configs
     #----------------------------------------------
@@ -4070,14 +4068,16 @@ paths:
       security:
         - OAuth2Security: []
       x-examples:
-        $ref: docs/examples/alerts/alerts_user_config.yaml#/get
+        $ref: docs/examples/alerts/alerts_config.yaml#/get
       summary: |
-        Get the AbnormalRequestsPerMin alert configurations
-      operationId: getAlertConfigs
+        Get all AbnormalRequestsPerMin alert configurations
+      operationId: getAllAlertConfigs
       description: |
-        This operation is used to get configurations of the AbnormalRequestsPerMin alert type.
+        This operation is used to get all configurations of the AbnormalRequestsPerMin alert type.
       tags:
-        - Alerts
+        - Alert Configuration
+      parameters:
+        - $ref: '#/parameters/alert-type'
       responses:
         200:
           description: |
@@ -4096,41 +4096,46 @@ paths:
             An error occurred while retrieving subscribed alert types by user.
           schema:
             $ref: '#/definitions/Error'
+
+  '/alerts/{alert-type}/configurations/{configuration-id}':
     #----------------------------------------------
     # Add alert config
     #----------------------------------------------
-    post:
+    put:
       security:
         - OAuth2Security: []
       x-examples:
-      $ref: docs/examples/alerts/alerts_user_config.yaml#/post
+        $ref: docs/examples/alerts/alerts_config.yaml#/put
       summary: |
         Add AbnormalRequestsPerMin alert configurations.
       operationId: addAlertConfig
       description: |
         This operation is used to add configuration for the AbnormalRequestsPerMin alert type.
       parameters:
+        - $ref: '#/parameters/alert-type'
+        - $ref: '#/parameters/configuration-id'
         - in: body
           name: body
           description:
             Configuration for AbnormalRequestCount alert type
           required: true
           schema:
-            $ref: '#/definitions/AlertConfigList'
+            $ref: '#/definitions/AlertConfigInfo'
       tags:
-        - Alerts
+        - Alert Configuration
       responses:
         201:
           description: |
             Created.
             Successful response with newly created object as entity.
+            Location header contains URL of newly created entity.
           headers:
             Location:
               description: |
                 The location of the newly created entity.
               type: string
           schema:
-            $ref: '#/definitions/AlertConfigList'
+            $ref: '#/definitions/AlertConfig'
         400:
           description: |
             Bad Request
@@ -4151,22 +4156,17 @@ paths:
       security:
         - OAuth2Security: []
       x-examples:
-        $ref: docs/examples/alerts/alerts_user_config.yaml#/delete
+        $ref: docs/examples/alerts/alerts_config.yaml#/delete
       summary: |
         Delete the selected configuration from AbnormalRequestsPerMin alert type.
       operationId: deleteAlertConfig
       description: |
         This operation is used to delete configuration from the AbnormalRequestsPerMin alert type.
       parameters:
-        - in: body
-          name: body
-          description:
-            The AbnormalRequestCount configurations that should be deleted
-          required: true
-          schema:
-            $ref: '#/definitions/AlertConfigList'
+        - $ref: '#/parameters/alert-type'
+        - $ref: '#/parameters/configuration-id'
       tags:
-        - Alerts
+        - Alert Configuration
       responses:
         200:
           description: |
@@ -4311,8 +4311,8 @@ parameters:
     required: true
     type: string
 
-# Policy Id
-# Specified as part of the path expression
+  # Policy Id
+  # Specified as part of the path expression
   policyId:
     name: policyId
     in: path
@@ -4321,8 +4321,8 @@ parameters:
     required: true
     type: string
 
-# Comment Identifier
-# Specified as part of the path expression
+  # Comment Identifier
+  # Specified as part of the path expression
   commentId:
     name: commentId
     in: path
@@ -4425,6 +4425,24 @@ parameters:
       Validator for conditional requests; based on ETag.
     type: string
 
+  # The alert-type parameter
+  alert-type:
+    name: alert-type
+    in: path
+    type: string
+    required: true
+    description: |
+      The alert type.
+
+  # The alert subscription id parameter
+  configuration-id:
+    name: configuration-id
+    type: string
+    in: path
+    required: true
+    description: |
+      The alert configuration id.
+
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
@@ -4518,9 +4536,6 @@ definitions:
         items:
           type: string
         example: ["Unlimited", "Bronze"]
-      advertiseInfo:
-        description: The advertise info of the API
-        $ref: '#/definitions/AdvertiseInfo'
 
 #-----------------------------------------------------
 # The Standard API resource
@@ -4726,12 +4741,12 @@ definitions:
         type: string
         description: The average rating of the API
         example: 4.5
-      advertiseInfo:
+  advertiseInfo:
         description: The advertise info of the API
         $ref: '#/definitions/AdvertiseInfo'
-#-----------------------------------------------------
-# The API List resource
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # The API List resource
+  #-----------------------------------------------------
   APIProductList:
     title: API ProductList
     properties:
@@ -5982,9 +5997,8 @@ definitions:
         type: string
         description: The name of the alert.
         example: "AbnormalRequestsPerMin"
-      isConfigurable:
-        type: string
-        description: Whether the alert can be configured.
+      isRequireConfiguration:
+        type: boolean
         example: true
 
   #----------------------------------------------
@@ -6003,9 +6017,8 @@ definitions:
         example: "AbnormalRequestsPerMin"
       configuration:
         type: array
-        description: Optional configuration for alert.
         items:
-          $ref: "#/definitions/AlertConfig"
+          $ref: '#/definitions/AlertConfig'
 
   #-----------------------------------------------
   # The Alert Info resource definition.
@@ -6023,12 +6036,34 @@ definitions:
           type: string
 
   #-----------------------------------------------
+  # The Alert Info Response resource definition.
+  #-----------------------------------------------
+  AlertsInfoResponse:
+    title: Alerts Info Response
+    properties:
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/Alert'
+      emailList:
+        type: array
+        items:
+          type: string
+      failedConfigurations:
+        type: array
+        items:
+          $ref: '#/definitions/AlertConfig'
+
+  #-----------------------------------------------
   # The Alert Config List resource definition.
   #-----------------------------------------------
   AlertConfigList:
     title: Alert Configuration List
     properties:
-      config:
+      count:
+        type: integer
+        example: 1
+      list:
         type: array
         items:
           $ref: '#/definitions/AlertConfig'
@@ -6039,22 +6074,36 @@ definitions:
   AlertConfig:
     title: Alert Configuration
     properties:
-      apiName:
+      configurationId:
         type: string
-        description: The name of the api.
-        example: PizzaShackAPI
-      apiVersion:
-        type: string
-        description: The version of the api.
-        example: 1.0.0
-      applicationId:
-        type: string
-        description: The id of the application
-        example: 1
-      requestCount:
-        type: integer
-        description: The abnormal request count per minute.
-        example: 20
+        description: The alert config subscription id.
+        example: UGl6emFTaGFja0FQSSsxLjAuMCtEZWZhdWx0QXBwbGljYXRpb24K
+      configuration:
+        type: object
+        description: The config parameters.
+        additionalProperties:
+          type: string
+        example:
+          apiName: 'PizzaShackAPI'
+          apiVersion: '1.0.0'
+          applicationName: 'DefaultApplication'
+          requestConunt: '12'
+
+  #-----------------------------------------------
+  # The Alert Config Info resource definition.
+  #-----------------------------------------------
+  AlertConfigInfo:
+    title: Alert Configuration Info
+    type: object
+    description: The config parameters.
+    additionalProperties:
+      type: string
+    example:
+      apiName: 'PizzaShackAPI'
+      apiVersion: '1.0.0'
+      applicationName: 'DefaultApplication'
+      requestConunt: '12'
+
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

@@ -1,7 +1,7 @@
 get:
   - request:
       method: GET
-      url: https://localhost:9443/api/am/store/v1.0/alerts/types
+      url: https://localhost:9443/api/am/store/v1.0/alert-types
       headers: |
           Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
     response:
@@ -12,28 +12,37 @@ get:
           Content-Type: application/json
       body:
         {
-          "count": 1,
-          "alerts": [
-            {
-              "id": 1,
-              "name": "AbnormalRequestsPerMin",
-              "isConfigurable": true
-            }
-          ]
+          "count":2,
+          "alerts":[
+          {
+            "id":3,
+            "name":"AbnormalRequestsPerMin",
+            "isRequireConfiguration":true
+          },
+          {
+            "id":4,
+            "name":"AbnormalRequestPattern",
+            "isRequireConfiguration":false
+          }]
         }
   - rawRequest: |
-        GET https://localhost:9443/api/am/store/v1.0/alerts/types HTTP/1.1
+        GET https://localhost:9443/api/am/store/v1.0/alert-types HTTP/1.1
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
     curl: |
-        curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/store/v1.0/alerts/types
+        curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/store/v1.0/alert-types
     rawResponse: |
-        {
-          "count": 3,
-          "alerts": [
-            {
-              "id": 1,
-              "name": "AbnormalRequestsPerMin",
-              "isConfigurable": true
-            }
-          ]
-        }
+      {
+        "count":2,
+        "alerts":[
+          {
+            "id":3,
+            "name":"AbnormalRequestsPerMin",
+            "isRequireConfiguration":true
+          },
+          {
+            "id":4,
+            "name":"AbnormalRequestPattern",
+            "isRequireConfiguration":false
+          }
+        ]
+      }

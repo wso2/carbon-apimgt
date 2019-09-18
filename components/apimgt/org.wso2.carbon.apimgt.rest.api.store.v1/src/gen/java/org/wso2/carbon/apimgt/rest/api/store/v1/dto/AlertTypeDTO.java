@@ -17,7 +17,7 @@ public class AlertTypeDTO   {
   
     private Integer id = null;
     private String name = null;
-    private String isConfigurable = null;
+    private Boolean isRequireConfiguration = null;
 
   /**
    * The alert Id
@@ -56,21 +56,20 @@ public class AlertTypeDTO   {
   }
 
   /**
-   * Whether the alert can be configured.
    **/
-  public AlertTypeDTO isConfigurable(String isConfigurable) {
-    this.isConfigurable = isConfigurable;
+  public AlertTypeDTO isRequireConfiguration(Boolean isRequireConfiguration) {
+    this.isRequireConfiguration = isRequireConfiguration;
     return this;
   }
 
   
-  @ApiModelProperty(example = "true", value = "Whether the alert can be configured.")
-  @JsonProperty("isConfigurable")
-  public String getIsConfigurable() {
-    return isConfigurable;
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("isRequireConfiguration")
+  public Boolean isIsRequireConfiguration() {
+    return isRequireConfiguration;
   }
-  public void setIsConfigurable(String isConfigurable) {
-    this.isConfigurable = isConfigurable;
+  public void setIsRequireConfiguration(Boolean isRequireConfiguration) {
+    this.isRequireConfiguration = isRequireConfiguration;
   }
 
 
@@ -85,12 +84,12 @@ public class AlertTypeDTO   {
     AlertTypeDTO alertType = (AlertTypeDTO) o;
     return Objects.equals(id, alertType.id) &&
         Objects.equals(name, alertType.name) &&
-        Objects.equals(isConfigurable, alertType.isConfigurable);
+        Objects.equals(isRequireConfiguration, alertType.isRequireConfiguration);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, isConfigurable);
+    return Objects.hash(id, name, isRequireConfiguration);
   }
 
   @Override
@@ -100,7 +99,7 @@ public class AlertTypeDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    isConfigurable: ").append(toIndentedString(isConfigurable)).append("\n");
+    sb.append("    isRequireConfiguration: ").append(toIndentedString(isRequireConfiguration)).append("\n");
     sb.append("}");
     return sb.toString();
   }

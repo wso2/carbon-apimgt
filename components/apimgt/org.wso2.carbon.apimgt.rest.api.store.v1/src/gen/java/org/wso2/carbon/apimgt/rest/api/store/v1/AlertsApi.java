@@ -1,8 +1,8 @@
 package org.wso2.carbon.apimgt.rest.api.store.v1;
 
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertConfigDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertConfigInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertConfigListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertTypesListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertsInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.AlertsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.AlertsApiServiceImpl;
@@ -38,119 +38,54 @@ public class AlertsApi  {
 AlertsApiService delegate = new AlertsApiServiceImpl();
 
 
-    @POST
-    @Path("/config")
+    @PUT
+    @Path("/{alert-type}/configurations/{configuration-id}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Add AbnormalRequestsPerMin alert configurations. ", notes = "This operation is used to add configuration for the AbnormalRequestsPerMin alert type. ", response = AlertConfigListDTO.class, authorizations = {
+    @ApiOperation(value = "Add AbnormalRequestsPerMin alert configurations. ", notes = "This operation is used to add configuration for the AbnormalRequestsPerMin alert type. ", response = AlertConfigDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
-    }, tags={ "Alerts",  })
+    }, tags={ "Alert Configuration",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "Created. Successful response with newly created object as entity. ", response = AlertConfigListDTO.class),
+        @ApiResponse(code = 201, message = "Created. Successful response with newly created object as entity. Location header contains URL of newly created entity. ", response = AlertConfigDTO.class),
         @ApiResponse(code = 400, message = "Bad Request The request parameters validation failed. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error An error occurred while retrieving subscribed alert types by user. ", response = ErrorDTO.class) })
-    public Response addAlertConfig(@ApiParam(value = "Configuration for AbnormalRequestCount alert type" ,required=true) AlertConfigListDTO body) throws APIManagementException{
-        return delegate.addAlertConfig(body, securityContext);
+    public Response addAlertConfig(@ApiParam(value = "The alert type. ",required=true) @PathParam("alert-type") String alertType, @ApiParam(value = "The alert configuration id. ",required=true) @PathParam("configuration-id") String configurationId, @ApiParam(value = "Configuration for AbnormalRequestCount alert type" ,required=true) AlertConfigInfoDTO body) throws APIManagementException{
+        return delegate.addAlertConfig(alertType, configurationId, body, securityContext);
     }
 
     @DELETE
-    @Path("/config")
+    @Path("/{alert-type}/configurations/{configuration-id}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete the selected configuration from AbnormalRequestsPerMin alert type. ", notes = "This operation is used to delete configuration from the AbnormalRequestsPerMin alert type. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
-    }, tags={ "Alerts",  })
+    }, tags={ "Alert Configuration",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The alert config is deleted successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request The request parameters validation failed. ", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The provided alert configuration is not found. ", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error An error occurred while retrieving subscribed alert types by user. ", response = ErrorDTO.class) })
-    public Response deleteAlertConfig(@ApiParam(value = "The AbnormalRequestCount configurations that should be deleted" ,required=true) AlertConfigListDTO body) throws APIManagementException{
-        return delegate.deleteAlertConfig(body, securityContext);
+    public Response deleteAlertConfig(@ApiParam(value = "The alert type. ",required=true) @PathParam("alert-type") String alertType, @ApiParam(value = "The alert configuration id. ",required=true) @PathParam("configuration-id") String configurationId) throws APIManagementException{
+        return delegate.deleteAlertConfig(alertType, configurationId, securityContext);
     }
 
     @GET
-    @Path("/config")
+    @Path("/{alert-type}/configurations")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get the AbnormalRequestsPerMin alert configurations ", notes = "This operation is used to get configurations of the AbnormalRequestsPerMin alert type. ", response = AlertConfigListDTO.class, authorizations = {
+    @ApiOperation(value = "Get all AbnormalRequestsPerMin alert configurations ", notes = "This operation is used to get all configurations of the AbnormalRequestsPerMin alert type. ", response = AlertConfigListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
-    }, tags={ "Alerts",  })
+    }, tags={ "Alert Configuration" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. The store alert configuration. ", response = AlertConfigListDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error An error occurred while retrieving subscribed alert types by user. ", response = ErrorDTO.class) })
-    public Response getAlertConfigs() throws APIManagementException{
-        return delegate.getAlertConfigs(securityContext);
-    }
-
-    @GET
-    @Path("/types")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get the list of API Store alert types. ", notes = "This operation is used to get the list of supportd alert types for the 'subscriber' agent. ", response = AlertTypesListDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            
-        })
-    }, tags={ "Alerts",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. The list of subscriber alert types are returned. ", response = AlertTypesListDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error. An internal server error occurred while retrieving the alert types. ", response = ErrorDTO.class) })
-    public Response getStoreAlertTypes() throws APIManagementException{
-        return delegate.getStoreAlertTypes(securityContext);
-    }
-
-    @GET
-    
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get the list of API Store alert types subscribed by the user. ", notes = "This operation is used to get the list of subscribed alert types by the user. ", response = AlertsInfoDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            
-        })
-    }, tags={ "Alerts",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. The list of subscribed alert types are returned. ", response = AlertsInfoDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error An error occurred while retrieving subscribed alert types by user. ", response = ErrorDTO.class) })
-    public Response getSubscribedAlertTypes() throws APIManagementException{
-        return delegate.getSubscribedAlertTypes(securityContext);
-    }
-
-    @POST
-    
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Subscribe to the selected alert types by the user. ", notes = "This operation is used to get the list of subscribed alert types by the user. ", response = AlertsInfoDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            
-        })
-    }, tags={ "Alerts",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "OK. Successful response with the newly subscribed alerts. ", response = AlertsInfoDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid Request or request validation failure. ", response = Void.class),
-        @ApiResponse(code = 500, message = "Internal Server Error An internal server error occurred while subscribing to alerts. ", response = ErrorDTO.class) })
-    public Response subscribeToAlerts(@ApiParam(value = "The alerts list and the email list to subscribe." ,required=true) AlertsInfoDTO body) throws APIManagementException{
-        return delegate.subscribeToAlerts(body, securityContext);
-    }
-
-    @DELETE
-    
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Unsubscribe user from all the alert types. ", notes = "This operation is used to unsubscribe the respective user from all the alert types. ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            
-        })
-    }, tags={ "Alerts" })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. The user is unsubscribed from the alerts successfully. ", response = Void.class),
-        @ApiResponse(code = 500, message = "Internal Server Error ", response = ErrorDTO.class) })
-    public Response unsubscribeAllAlerts() throws APIManagementException{
-        return delegate.unsubscribeAllAlerts(securityContext);
+    public Response getAllAlertConfigs(@ApiParam(value = "The alert type. ",required=true) @PathParam("alert-type") String alertType) throws APIManagementException{
+        return delegate.getAllAlertConfigs(alertType, securityContext);
     }
 }
