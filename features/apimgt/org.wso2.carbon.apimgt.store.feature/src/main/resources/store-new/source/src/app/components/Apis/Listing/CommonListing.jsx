@@ -87,27 +87,8 @@ class CommonListing extends React.Component {
         super(props);
         this.state = {
             listType: props.theme.custom.defaultApiView,
-            allTags: null,
         };
     }
-
-    /**
-     * @memberof CommonListing
-     */
-    componentDidMount() {
-        const api = new API();
-        const promisedTags = api.getAllTags();
-        promisedTags
-            .then((response) => {
-                if (response.body.count !== 0) {
-                    this.setState({ allTags: response.body.list });
-                }
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }
-
 
     /**
      *
@@ -121,7 +102,7 @@ class CommonListing extends React.Component {
 
     /**
      *
-     * @inheritdoc
+     * @inheritdoctheme
      * @returns {React.Component} @inheritdoc
      * @memberof CommonListing
      */
@@ -129,9 +110,8 @@ class CommonListing extends React.Component {
         const {
             apis, apiType, theme, classes, location: { search },
         } = this.props;
-        const { listType, allTags } = this.state;
+        const { listType } = this.state;
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
-
         return (
             <main className={classes.content}>
                 <div className={classes.root}>
@@ -159,25 +139,20 @@ class CommonListing extends React.Component {
                         </IconButton>
                     </div>
                 </div>
-                {(allTags && apiType === CONSTS.API_TYPE)
-                    ? <ApiTagCloud data={allTags} listType={listType} apiType={apiType} />
-                    : (
-                        <div className={classes.listContentWrapper}>
-                            {listType === 'grid'
+                <div className={classes.listContentWrapper}>
+                    {listType === 'grid'
                             && (
                                 <ApiContext.Provider value={{ apiType }}>
                                     <ApiTableView gridView query={search} />
                                 </ApiContext.Provider>
                             )}
-                            {listType === 'list'
+                    {listType === 'list'
                             && (
                                 <ApiContext.Provider value={{ apiType }}>
                                     <ApiTableView gridView={false} query={search} />
                                 </ApiContext.Provider>
                             )}
-                        </div>
-                    )
-                }
+                </div>
             </main>
         );
     }

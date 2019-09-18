@@ -131,7 +131,10 @@ function GlobalNavBar(props) {
                         </ListItem>
                     </Link>
                 ) }
-            <Link to='/apis' className={classNames({ [classes.selected]: selected === 'apis', [classes.links]: true })}>
+            <Link
+                to={theme.custom.tagWiseMode ? '/api-groups' : '/apis'}
+                className={classNames({ [classes.selected]: selected === 'apis', [classes.links]: true })}
+            >
                 <ListItem button>
                     <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}>
                         <CustomIcon

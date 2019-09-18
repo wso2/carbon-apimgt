@@ -56,7 +56,7 @@ class ImageGenerator extends PureComponent {
         } = fixedIcon;
 
         let str = api;
-        if(typeof api === "object") str = api.name;
+        if (typeof api === 'object') str = api.name;
         let count;
         let colorPair;
         let randomBackgroundIndex;

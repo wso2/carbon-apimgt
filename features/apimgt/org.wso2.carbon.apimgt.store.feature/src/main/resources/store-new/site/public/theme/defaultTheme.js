@@ -148,6 +148,12 @@ const Configurations = {
                         ],
                     },
                 },
+                tagWiseMode: true,
+                tagThumbnail: {
+                    width: 150,
+                    defaultTagImage: '/store-new/site/public/images/api/api-default.png',
+                },
+                tagGroupKey: '-group',
             },
         },
     },
