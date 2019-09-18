@@ -2,6 +2,9 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.validation.constraints.*;
 
 
@@ -15,81 +18,43 @@ import org.wso2.carbon.apimgt.rest.api.util.annotations.Scope;
 
 public class AlertConfigDTO   {
   
-    private String apiName = null;
-    private String apiVersion = null;
-    private String applicationId = null;
-    private Integer requestCount = null;
+    private String configurationId = null;
+    private Map<String, String> _configuration = new HashMap<>();
 
   /**
-   * The name of the api.
+   * The alert config subscription id.
    **/
-  public AlertConfigDTO apiName(String apiName) {
-    this.apiName = apiName;
+  public AlertConfigDTO configurationId(String configurationId) {
+    this.configurationId = configurationId;
     return this;
   }
 
   
-  @ApiModelProperty(example = "PizzaShackAPI", value = "The name of the api.")
-  @JsonProperty("apiName")
-  public String getApiName() {
-    return apiName;
+  @ApiModelProperty(example = "UGl6emFTaGFja0FQSSsxLjAuMCtEZWZhdWx0QXBwbGljYXRpb24K", value = "The alert config subscription id.")
+  @JsonProperty("configurationId")
+  public String getConfigurationId() {
+    return configurationId;
   }
-  public void setApiName(String apiName) {
-    this.apiName = apiName;
+  public void setConfigurationId(String configurationId) {
+    this.configurationId = configurationId;
   }
 
   /**
-   * The version of the api.
+   * The config parameters.
    **/
-  public AlertConfigDTO apiVersion(String apiVersion) {
-    this.apiVersion = apiVersion;
+  public AlertConfigDTO _configuration(Map<String, String> _configuration) {
+    this._configuration = _configuration;
     return this;
   }
 
   
-  @ApiModelProperty(example = "1.0.0", value = "The version of the api.")
-  @JsonProperty("apiVersion")
-  public String getApiVersion() {
-    return apiVersion;
+  @ApiModelProperty(example = "{\"apiName\":\"PizzaShackAPI\",\"apiVersion\":\"1.0.0\",\"applicationName\":\"DefaultApplication\",\"requestConunt\":\"12\"}", value = "The config parameters.")
+  @JsonProperty("configuration")
+  public Map<String, String> getConfiguration() {
+    return _configuration;
   }
-  public void setApiVersion(String apiVersion) {
-    this.apiVersion = apiVersion;
-  }
-
-  /**
-   * The id of the application
-   **/
-  public AlertConfigDTO applicationId(String applicationId) {
-    this.applicationId = applicationId;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "1", value = "The id of the application")
-  @JsonProperty("applicationId")
-  public String getApplicationId() {
-    return applicationId;
-  }
-  public void setApplicationId(String applicationId) {
-    this.applicationId = applicationId;
-  }
-
-  /**
-   * The abnormal request count per minute.
-   **/
-  public AlertConfigDTO requestCount(Integer requestCount) {
-    this.requestCount = requestCount;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "20", value = "The abnormal request count per minute.")
-  @JsonProperty("requestCount")
-  public Integer getRequestCount() {
-    return requestCount;
-  }
-  public void setRequestCount(Integer requestCount) {
-    this.requestCount = requestCount;
+  public void setConfiguration(Map<String, String> _configuration) {
+    this._configuration = _configuration;
   }
 
 
@@ -102,15 +67,13 @@ public class AlertConfigDTO   {
       return false;
     }
     AlertConfigDTO alertConfig = (AlertConfigDTO) o;
-    return Objects.equals(apiName, alertConfig.apiName) &&
-        Objects.equals(apiVersion, alertConfig.apiVersion) &&
-        Objects.equals(applicationId, alertConfig.applicationId) &&
-        Objects.equals(requestCount, alertConfig.requestCount);
+    return Objects.equals(configurationId, alertConfig.configurationId) &&
+        Objects.equals(_configuration, alertConfig._configuration);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiName, apiVersion, applicationId, requestCount);
+    return Objects.hash(configurationId, _configuration);
   }
 
   @Override
@@ -118,10 +81,8 @@ public class AlertConfigDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class AlertConfigDTO {\n");
     
-    sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
-    sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
-    sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
-    sb.append("    requestCount: ").append(toIndentedString(requestCount)).append("\n");
+    sb.append("    configurationId: ").append(toIndentedString(configurationId)).append("\n");
+    sb.append("    _configuration: ").append(toIndentedString(_configuration)).append("\n");
     sb.append("}");
     return sb.toString();
   }

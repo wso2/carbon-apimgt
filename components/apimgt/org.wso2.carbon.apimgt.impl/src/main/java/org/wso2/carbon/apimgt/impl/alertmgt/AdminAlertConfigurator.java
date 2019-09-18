@@ -22,21 +22,10 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
-public class AdminAlertConfigurator implements AlertConfigurator {
-
-    @Override public List<AlertTypeDTO> getSupportedAlertTypes() throws APIManagementException {
-        return null;
-    }
-
-    @Override public List<Integer> getSubscribedAlerts(String userName) throws APIManagementException {
-        return null;
-    }
-
-    @Override public List<String> getSubscribedEmailAddresses(String userName) throws APIManagementException {
-        return null;
-    }
+public class AdminAlertConfigurator extends AlertConfigurator {
 
     @Override public void subscribe(String userName, List<String> emailsList, List<AlertTypeDTO> alertTypeDTOList)
             throws APIManagementException {
@@ -47,18 +36,18 @@ public class AdminAlertConfigurator implements AlertConfigurator {
 
     }
 
-    @Override public void addAlertConfiguration(String userName, String alertName, Properties configProperties)
+    @Override public void addAlertConfiguration(String userName, String alertName, Map<String, String> configProperties)
             throws APIManagementException {
 
     }
 
-    @Override public List<Properties> getAlertConfiguration(String userName, String alertName)
+    @Override public List<Map<String, String>> getAlertConfiguration(String userName, String alertName)
             throws APIManagementException {
         return null;
     }
 
-    @Override public void removeAlertConfiguration(String userName, String alertName, Properties configProperties)
-            throws APIManagementException {
+    @Override public void removeAlertConfiguration(String userName, String alertName,
+            Map<String, String> configProperties) throws APIManagementException {
 
     }
 }
