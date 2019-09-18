@@ -242,6 +242,7 @@ public class OAS3Parser extends APIDefinition {
      * Construct openAPI definition for graphQL. Add get and post operations
      *
      * @param openAPI OpenAPI
+     * @return modified openAPI for GraphQL
      */
     private OpenAPI modifyGraphQLSwagger(OpenAPI openAPI) {
         SwaggerData.Resource resource = new SwaggerData.Resource();
