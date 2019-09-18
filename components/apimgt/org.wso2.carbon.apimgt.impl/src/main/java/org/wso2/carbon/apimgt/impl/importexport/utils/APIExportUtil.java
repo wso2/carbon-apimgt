@@ -64,13 +64,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -240,9 +238,8 @@ public class APIExportUtil {
                     //Inline/Markdown content file name would be same as the documentation name
                     //Markdown content files will also be stored in InlineContents directory
                     localFileName = doc.getName();
-                    resourcePath = APIUtil.getAPIDocPath(apiIdentifier) + RegistryConstants.PATH_SEPARATOR
-                            + APIConstants.INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR
-                            + localFileName;
+                    resourcePath = APIUtil.getAPIDocPath(apiIdentifier) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
+                            + RegistryConstants.PATH_SEPARATOR + localFileName;
                     localDocDirectoryPath += File.separator + APIImportExportConstants.INLINE_DOCUMENT_DIRECTORY;
                 }
 
@@ -258,10 +255,11 @@ public class APIExportUtil {
                             IOUtils.copy(fileInputStream, outputStream);
                         }
                     } else {
+                        //Log error and avoid throwing as we give capability to export document artifact without the
+                        //content if does not exists
                         String errorMessage = "Documentation resource for API: " + apiIdentifier.getApiName()
                                 + " not found in " + resourcePath;
                         log.error(errorMessage);
-                        throw new APIImportExportException(errorMessage);
                     }
                 }
             }
@@ -539,7 +537,6 @@ public class APIExportUtil {
                 JsonParser parser = new JsonParser();
                 JsonObject json = parser.parse(swaggerDefinition).getAsJsonObject();
                 String formattedSwaggerJson = gson.toJson(json);
-                apiToReturn.setUriTemplates(Collections.EMPTY_SET);
                 switch (exportFormat) {
                     case YAML:
                         String swaggerInYaml = CommonUtil.jsonToYaml(formattedSwaggerJson);
@@ -594,6 +591,7 @@ public class APIExportUtil {
         // Swagger.json contains complete details about scopes and URI templates. Therefore scope and URI template
         // details are removed from api.json
         api.setScopes(new LinkedHashSet<>());
+        api.setUriTemplates(new LinkedHashSet<>());
         // Secure endpoint password is removed, as it causes security issues. When importing need to add it manually,
         // if Secure Endpoint is enabled.
         if (api.getEndpointUTPassword() != null) {
