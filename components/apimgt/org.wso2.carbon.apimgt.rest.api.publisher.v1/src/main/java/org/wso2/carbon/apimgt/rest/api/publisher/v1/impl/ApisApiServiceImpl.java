@@ -314,6 +314,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " + body.getName()
                     + " already exists.", log);
         }
+        if (body.getAuthorizationHeader() == null) {
+            body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);          
+        }
 
         //Get all existing versions of  api been adding
         List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
