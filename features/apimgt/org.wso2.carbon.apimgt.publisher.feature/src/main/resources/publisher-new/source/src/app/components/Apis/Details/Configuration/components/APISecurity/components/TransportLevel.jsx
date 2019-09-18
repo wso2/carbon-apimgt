@@ -62,9 +62,10 @@ function TransportLevel(props) {
      * @param {string} certificate The certificate needs to be associated with the API
      * @param {string} policy The tier to be used for the certificate.
      * @param {string} alias The alias of the certificate to be deleted.
+     *
      * */
     const saveClientCertificate = (certificate, policy, alias) => {
-        API.addClientCertificate(id, certificate, policy, alias).then((resp) => {
+        return API.addClientCertificate(id, certificate, policy, alias).then((resp) => {
             if (resp.status === 201) {
                 Alert.info(intl.formatMessage({
                     id: 'Apis.Details.Configuration.components.APISecurity.TranportLevel.certificate.add.success',
@@ -96,7 +97,7 @@ function TransportLevel(props) {
      * @param {string} alias The alias of the certificate to be deleted.
      * */
     const deleteClientCertificate = (alias) => {
-        API.deleteClientCertificate(alias, id).then((resp) => {
+        return API.deleteClientCertificate(alias, id).then((resp) => {
             setClientCertificates(() => {
                 if (resp.status === 200) {
                     return clientCertificates.filter((cert) => {
