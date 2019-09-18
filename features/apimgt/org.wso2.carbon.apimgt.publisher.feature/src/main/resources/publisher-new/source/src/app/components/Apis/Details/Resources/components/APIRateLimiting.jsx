@@ -121,7 +121,7 @@ export default function APIRateLimiting(props) {
                         {isResourceLevel ? (
                             <Typography variant='body1' gutterBottom>
                                 You may change the rate limiting policies per operation
-                                <Typography variant='caption' display='block' gutterBottom >
+                                <Typography variant='caption' display='block' gutterBottom>
                                     Expand an operation below to select a rate limiting policy for an operation
                                 </Typography>
                             </Typography>
@@ -166,4 +166,6 @@ export default function APIRateLimiting(props) {
 APIRateLimiting.defaultProps = {};
 APIRateLimiting.propTypes = {
     api: PropTypes.shape({ id: PropTypes.string }).isRequired,
+    updateAPI: PropTypes.func.isRequired,
+    operationRateLimits: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
 };

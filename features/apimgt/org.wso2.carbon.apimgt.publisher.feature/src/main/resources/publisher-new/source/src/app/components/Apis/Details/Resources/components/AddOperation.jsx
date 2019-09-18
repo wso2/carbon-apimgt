@@ -24,8 +24,6 @@ import AddIcon from '@material-ui/icons/Add';
 import { FormattedMessage } from 'react-intl';
 
 import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
