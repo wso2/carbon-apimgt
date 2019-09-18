@@ -447,6 +447,11 @@ public class OAS3Parser extends APIDefinition {
             securityScheme = new SecurityScheme();
             securityScheme.setType(SecurityScheme.Type.OAUTH2);
             securitySchemes.put(OPENAPI_SECURITY_SCHEMA_KEY, securityScheme);
+            List<SecurityRequirement> security = new ArrayList<SecurityRequirement>();
+            SecurityRequirement secReq = new SecurityRequirement();
+            secReq.addList(OPENAPI_SECURITY_SCHEMA_KEY, new ArrayList<String>());
+            security.add(secReq);
+            openAPI.setSecurity(security);
         }
         if (securityScheme.getFlows() == null) {
             securityScheme.setFlows(new OAuthFlows());
