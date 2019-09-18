@@ -1653,7 +1653,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-        <synapse.version>2.1.7-wso2v120</synapse.version>
+        <synapse.version>2.1.7-wso2v121</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
@@ -1718,11 +1718,11 @@
         <cxf.version>3.2.8</cxf.version>
 
 
-        <carbon.metrics.version>1.3.2</carbon.metrics.version>
+        <carbon.metrics.version>1.3.3</carbon.metrics.version>
         <!-- apache pdfbox version -->
         <pdfbox.version>1.8.16</pdfbox.version>
 
-        <event.processor.stub.version>2.2.4</event.processor.stub.version>
+        <event.processor.stub.version>2.2.5</event.processor.stub.version>
         <swagger.codegen.version>2.3.1.wso2v2</swagger.codegen.version>
         <swagger.inflector.version>1.0.16.wso2v1</swagger.inflector.version>
         <swagger.parser.version>1.0.32.wso2v1</swagger.parser.version>

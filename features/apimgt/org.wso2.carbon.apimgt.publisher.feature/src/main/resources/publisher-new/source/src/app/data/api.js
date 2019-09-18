@@ -1692,6 +1692,83 @@ class API extends Resource {
     }
 
     /**
+     * Upload endpoint certificate.
+     *
+     * @param {string} apiId API UUID
+     * @param {any} certificateFile The certificate file to be uploaded.
+     * @param {string} tier The tier the certificate needs to be associated.
+     * @param {string} alias The certificate alias.
+     * */
+    static addClientCertificate(apiId, certificateFile, tier, alias) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(
+            client => {
+                return client.apis['Client Certificates'].post_apis__apiId__client_certificates({
+                    certificate: certificateFile,
+                    alias,
+                    apiId,
+                    tier,
+                });
+            },
+            this._requestMetaData({
+                'Content-Type': 'multipart/form-data',
+            }),
+        );
+    }
+
+     /**
+     * Get all certificates for a particular API.
+     *
+     * @param apiId api id of the api to which the certificate is added
+     */
+    static getAllClientCertificates(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(
+            client => {
+                return client.apis['Client Certificates'].get_apis__apiId__client_certificates(
+                    { apiId: apiId },
+                    this._requestMetaData(),
+                );
+            },
+            this._requestMetaData({
+                'Content-Type': 'multipart/form-data',
+            }),
+        );
+    }
+
+    /**
+     * Get the status of the client certificate which matches the given alias.
+     *
+     * @param {string} alias The alias of the certificate which the information required.
+     * @param apiId api id of the api of which the certificate is retrieved.
+     * */
+    static getClientCertificateStatus(alias, apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['Client Certificates'].get_apis__apiId__client_certificates__alias_({
+                alias,
+                apiId,
+            });
+        }, this._requestMetaData());
+    }
+
+    /**
+     * Delete the endpoint certificate which represented by the given alias.
+     *
+     * @param {string} alias The alias of the certificate.
+     * @param apiId api id of the api of which the certificate is deleted.
+     * */
+    static deleteClientCertificate(alias, apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['Client Certificates'].delete_apis__apiId__client_certificates__alias_({
+                alias,
+                apiId,
+            });
+        }, this._requestMetaData());
+    }
+
+    /**
      * Get the status of the endpoint certificate which matches the given alias.
      *
      * @param {string} alias The alias of the certificate which the information required.
@@ -1798,7 +1875,7 @@ class API extends Resource {
     /**
      * Update the available mediation policies by the mediation policy uuid and api.
      * @param {String} seqId mediation policy uuid
-     * @param {String} apiId uuid 
+     * @param {String} apiId uuid
      * @returns {Promise}
      *
      */
@@ -1866,6 +1943,55 @@ class API extends Resource {
                 mediationPolicyId: mediationPolicyId,
             },
                 this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * @static
+     * Get all the external stores configured for the current environment
+     * @returns {Promise}
+     */
+    static getAllExternalStores() {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['External Stores'].getAllExternalStores(
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * @static
+     * Get published external stores for the given API
+     * @param {String} apiId uuid
+     * @returns {Promise}
+     */
+    static getPublishedExternalStores(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['External Stores'].getAllPublishedExternalStoresByAPI(
+                { apiId: apiId },
+                this._requestMetaData,
+            );
+        });
+    }
+
+    /**
+     * @static
+     * Publish the given API to given set of external stores and remove from others which are not specified
+     * @param {String} apiId uuid
+     * @param {Array} externalStoreIds 
+     */
+    static publishAPIToExternalStores(apiId, externalStoreIds) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
+        return apiClient.then(client => {
+            return client.apis['External Stores'].publishAPIToExternalStores(
+                {
+                    apiId: apiId,
+                    externalStoreIds: externalStoreIds
+                }
+                , this._requestMetaData,
             );
         });
     }

@@ -4235,6 +4235,9 @@ definitions:
         items:
           type: string
         example: ["Unlimited", "Bronze"]
+      advertiseInfo:
+        description: The advertise info of the API
+        $ref: '#/definitions/AdvertiseInfo'
 
 #-----------------------------------------------------
 # The Standard API resource
@@ -4440,6 +4443,9 @@ definitions:
         type: string
         description: The average rating of the API
         example: 4.5
+      advertiseInfo:
+        description: The advertise info of the API
+        $ref: '#/definitions/AdvertiseInfo'
 #-----------------------------------------------------
 # The API List resource
 #-----------------------------------------------------
@@ -5648,6 +5654,23 @@ definitions:
           $ref: '#/definitions/Tenant'
       pagination:
         $ref: '#/definitions/Pagination'
+
+#-----------------------------------------------------
+# The API Advertise Info resource
+#-----------------------------------------------------
+  AdvertiseInfo :
+    title: API Advertise info object with advertise details
+    properties:
+      advertised:
+        type: boolean
+        example: true
+      originalStoreUrl:
+        type: string
+        example: https://localhost:9443/store
+      apiOwner:
+        type: string
+        example: admin
+
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

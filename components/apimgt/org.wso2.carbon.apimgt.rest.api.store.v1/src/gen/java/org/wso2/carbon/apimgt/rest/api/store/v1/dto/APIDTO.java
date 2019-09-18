@@ -10,6 +10,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import javax.validation.constraints.*;
@@ -50,6 +51,7 @@ public class APIDTO   {
     private List<String> environmentList = new ArrayList<>();
     private List<ScopeInfoDTO> scopes = new ArrayList<>();
     private String avgRating = null;
+    private AdvertiseInfoDTO advertiseInfo = null;
 
   /**
    * UUID of the api 
@@ -499,6 +501,24 @@ public class APIDTO   {
     this.avgRating = avgRating;
   }
 
+  /**
+   * The advertise info of the API
+   **/
+  public APIDTO advertiseInfo(AdvertiseInfoDTO advertiseInfo) {
+    this.advertiseInfo = advertiseInfo;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "The advertise info of the API")
+  @JsonProperty("advertiseInfo")
+  public AdvertiseInfoDTO getAdvertiseInfo() {
+    return advertiseInfo;
+  }
+  public void setAdvertiseInfo(AdvertiseInfoDTO advertiseInfo) {
+    this.advertiseInfo = advertiseInfo;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -533,12 +553,13 @@ public class APIDTO   {
         Objects.equals(labels, API.labels) &&
         Objects.equals(environmentList, API.environmentList) &&
         Objects.equals(scopes, API.scopes) &&
-        Objects.equals(avgRating, API.avgRating);
+        Objects.equals(avgRating, API.avgRating) &&
+        Objects.equals(advertiseInfo, API.advertiseInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo);
   }
 
   @Override
@@ -571,6 +592,7 @@ public class APIDTO   {
     sb.append("    environmentList: ").append(toIndentedString(environmentList)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");
+    sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIURLsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
@@ -197,6 +198,8 @@ public class APIMappingUtil {
         if (model.getApiSecurity() != null) {
             dto.setSecurityScheme(Arrays.asList(model.getApiSecurity().split(",")));
         }
+
+        dto.setAdvertiseInfo(extractAdvertiseInfo(model));
         return dto;
     }
 
@@ -433,6 +436,7 @@ public class APIMappingUtil {
         //        if (!StringUtils.isBlank(api.getThumbnailUrl())) {
         //            apiInfoDTO.setThumbnailUri(getThumbnailUri(api.getUUID()));
         //        }
+        apiInfoDTO.setAdvertiseInfo(extractAdvertiseInfo(api));
         return apiInfoDTO;
     }
 
@@ -759,4 +763,19 @@ public class APIMappingUtil {
                 .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
         apiProductListDTO.setPagination(paginationDTO);
     }
+
+    /**
+     * Maps external store advertise API properties to AdvertiseInfoDTO object.
+     *
+     * @param api API object
+     * @return AdvertiseInfoDTO
+     */
+    public static AdvertiseInfoDTO extractAdvertiseInfo(API api) {
+        AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
+        advertiseInfoDTO.setAdvertised(api.isAdvertiseOnly());
+        advertiseInfoDTO.setOriginalStoreUrl(api.getRedirectURL());
+        advertiseInfoDTO.setApiOwner(api.getApiOwner());
+        return advertiseInfoDTO;
+    }
+
 }

@@ -107,7 +107,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             }
         }
         if (exposeHeaders == null) {
-            exposeHeaders = APIUtil.getExposedHeaders();
+            exposeHeaders = APIUtil.getAccessControlExposedHeaders();
         }
 
         initializeHeaderValues = true;
