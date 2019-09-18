@@ -132,7 +132,7 @@ class Monetization extends Component {
         }
         return (
             <Grid item xs={6}>
-                <Typography variant='title' gutterBottom>
+                <Typography variant='headline' component='h2' gutterBottom>
                     <FormattedMessage id='Apis.Details.Monetization.Index.monetization' defaultMessage='Monetization' />
                 </Typography>
                 <form method='post' onSubmit={this.handleSubmit}>
