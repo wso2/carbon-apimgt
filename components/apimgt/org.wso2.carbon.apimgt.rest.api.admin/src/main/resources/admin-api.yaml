@@ -101,6 +101,10 @@ x-wso2-security:
         roles: admin
         name: apim:monetization_usage_publish
         key: apim:monetization_usage_publish
+      - description: ""
+        roles: admin
+        name: apim:api_workflow
+        key: apim:api_workflow
 
 ######################################################
 # The "API Collection" resource APIs
@@ -2383,6 +2387,57 @@ paths:
           schema:
             $ref: '#/definitions/MonetizationUsagePublishInfo'
 
+######################################################
+  # The "Workflow approval" resource API
+  ######################################################
+  /workflows/update-workflow-status:
+
+    #-------------------------------------------------------------------
+    # Resume the workflow by approving or rejecting the workflow request
+    #-------------------------------------------------------------------
+    post:
+      x-scope: apim:api_workflow
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v0.14/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\""
+      x-wso2-request: "POST https://localhost:9443/api/am/publisher/v0.14/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n   \"status\" : \"APPROVED\",\n   \"attributes\" : {\n      \"apiCurrentState\": \"Created\",\n      \"apiLCAction\": \"Publish\",\n      \"apiName\":\"APIname\",\n      \"apiVersion\" : \"1.0.0\",\n      \"apiProvider\" : \"admin\",\n      \"invoker\": \"admin\"\n   }\n}"
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Update workflow status
+      description: |
+        This operation can be used to approve or reject a workflow task.
+      parameters:
+        - $ref: '#/parameters/workflowReferenceId-Q'
+        - in: body
+          name: body
+          description: |
+            Workflow event that need to be updated
+          required: true
+          schema:
+            $ref: '#/definitions/Workflow'
+      tags:
+        - Workflows (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Workflow request information is returned.
+          schema:
+            $ref: '#/definitions/Workflow'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -2536,6 +2591,15 @@ parameters:
     required: false
     type: string
 
+  # Workflow reference ID
+  # Specified as part of the path expression
+  workflowReferenceId-Q:
+    name: workflowReferenceId
+    in: query
+    description: |
+      Workflow reference id
+    required: true
+    type: string
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -3324,6 +3388,33 @@ definitions:
      lastPublsihedTime:
        type: string
        description: Timestamp of the last published time
+
+  #-----------------------------------------------------
+  # The workflow response resource
+  #-----------------------------------------------------
+  Workflow:
+    title: workflow
+    required:
+      - status
+    properties:
+      status:
+        description: |
+          This attribute declares whether this workflow task is approved or rejected.
+        type: string
+        enum:
+          - APPROVED
+          - REJECTED
+        example: APPROVED
+      attributes:
+        description: |
+          Custom attributes to complete the workflow task
+        type: object
+        additionalProperties:
+          type: string
+        example: {}
+      description:
+        type: string
+        example: "Approve workflow request."
 
 #-----------------------------------------------------
 # END-OF-FILE
