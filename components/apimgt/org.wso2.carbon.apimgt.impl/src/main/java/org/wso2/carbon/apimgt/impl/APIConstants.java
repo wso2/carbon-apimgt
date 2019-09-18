@@ -997,6 +997,12 @@ public final class APIConstants {
     public static final String GRAPHQL_QUERY = "Query";
     public static final String GRAPHQL_MUTATION = "Mutation";
     public static final String GRAPHQL_SUBSCRIPTION = "Subscription";
+    public static final String SCOPE_ROLE_MAPPING = "ScopeRoleMapping";
+    public static final String SCOPE_OPERATION_MAPPING = "ScopeOperationMapping";
+    public static final String OPERATION_THROTTLING_MAPPING = "OperationThrottlingMapping";
+    public static final String OPERATION_AUTH_SCHEME_MAPPING = "OperationAuthSchemeMapping";
+    public static final String OPERATION_SECURITY_ENABLED = "Enabled";
+    public static final String OPERATION_SECURITY_DISABLED = "Disabled";
 
     //URI Authentication Schemes
     public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
