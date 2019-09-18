@@ -35,6 +35,7 @@ public interface ApplicationsApiService {
       public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdKeysGet(String applicationId, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdKeysKeyTypeCleanUpPost(String applicationId, String keyType, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdKeysKeyTypeGenerateTokenPost(String applicationId, String keyType, ApplicationTokenGenerateRequestDTO body, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdKeysKeyTypeGet(String applicationId, String keyType, String groupId, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdKeysKeyTypePut(String applicationId, String keyType, ApplicationKeyDTO body, MessageContext messageContext) throws APIManagementException;

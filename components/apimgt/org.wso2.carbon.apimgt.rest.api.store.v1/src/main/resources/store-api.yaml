@@ -1850,6 +1850,55 @@ paths:
             $ref: '#/definitions/Error'
 
 
+
+  ######################################################
+  # The "Cleanup" Processing Function resource API
+  ######################################################
+  '/applications/{applicationId}/keys/{keyType}/clean-up':
+
+    #-----------------------------------------------------
+    # clean up keys after failed key generation of an application
+    #-----------------------------------------------------
+    post:
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+      summary: Clean up application keys
+      description: |
+        Clean up keys after failed key generation of an application
+      parameters:
+        - $ref: '#/parameters/applicationId'
+        - $ref: '#/parameters/keyType'
+        - $ref: '#/parameters/If-Match'
+      tags:
+        - Application Keys
+      responses:
+        200:
+          description: |
+            OK.
+            Clean up is performed
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+
+
 ######################################################
 # The "Generate Token" Processing Function resource API
 ######################################################
