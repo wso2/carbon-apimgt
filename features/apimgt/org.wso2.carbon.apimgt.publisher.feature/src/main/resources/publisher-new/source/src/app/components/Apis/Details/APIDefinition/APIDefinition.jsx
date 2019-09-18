@@ -16,6 +16,8 @@
  * under the License.
  */
 
+import AppContext from 'AppComponents/Shared/AppContext';
+
 import React, { Suspense } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -87,6 +89,7 @@ const styles = () => ({
  * 'Import API Definition'.
  * */
 class APIDefinition extends React.Component {
+    static contextType = AppContext;
     /**
      * @inheritDoc
      */
@@ -124,6 +127,7 @@ class APIDefinition extends React.Component {
      */
     componentDidMount() {
         const { api } = this.props;
+        const { settings } = this.context;
         let promisedApi;
         if (api.type === 'GRAPHQL') {
             promisedApi = api.getSchema(api.id);
@@ -131,11 +135,7 @@ class APIDefinition extends React.Component {
             promisedApi = api.getSwagger(api.id);
         }
 
-        api.getSettings().then((settings) => {
-            if (settings.securityAuditProperties !== null && settings.securityAuditProperties.length !== 0) {
-                this.setState({ securityAuditProperties: settings.securityAuditProperties });
-            }
-        });
+        this.setState({ securityAuditProperties: settings.securityAuditProperties });
 
         promisedApi
             .then((response) => {
