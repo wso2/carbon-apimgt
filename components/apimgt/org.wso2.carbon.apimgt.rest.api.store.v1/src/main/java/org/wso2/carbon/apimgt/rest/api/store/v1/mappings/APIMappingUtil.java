@@ -297,6 +297,12 @@ public class APIMappingUtil {
         if (model.getApiSecurity() != null) {
             dto.setSecurityScheme(Arrays.asList(model.getApiSecurity().split(",")));
         }
+
+        //Since same APIInfoDTO is used for APIProduct in StoreUI set default AdvertisedInfo to the DTO
+        AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
+        advertiseInfoDTO.setAdvertised(false);
+        dto.setAdvertiseInfo(advertiseInfoDTO);
+
         return dto;
     }
 
@@ -577,6 +583,10 @@ public class APIMappingUtil {
         }
         apiInfoDTO.setThrottlingPolicies(throttlingPolicyNames);
 
+        //Since same APIInfoDTO is used for listing APIProducts in StoreUI set default AdvertisedInfo to the DTO
+        AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
+        advertiseInfoDTO.setAdvertised(false);
+        apiInfoDTO.setAdvertiseInfo(advertiseInfoDTO);
         return apiInfoDTO;
     }
 
