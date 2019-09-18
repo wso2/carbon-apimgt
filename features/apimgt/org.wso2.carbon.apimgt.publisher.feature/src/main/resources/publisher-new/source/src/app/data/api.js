@@ -553,7 +553,7 @@ class API extends Resource {
     /**
      * Get monettization status of an API
      * @param id {String} UUID of the API in which the swagger is needed
-     * @param callback {function} Function which needs to be called upon success of the Invoice received
+     * @param callback {function} Function which needs to be called upon success of get Monetization status
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getMonetization(id, callback = null) {
