@@ -88,6 +88,10 @@ const Configurations = {
                 adminRole: 'admin',
                 commentsLimit: 5,
                 maxCommentLength: 1300,
+                productSampleProgess: {
+                    backgroundMain: '#15b8cf',
+                    backgroundChip: '#5aebf9',
+                },
             },
         },
     },

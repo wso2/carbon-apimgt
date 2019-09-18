@@ -31,6 +31,7 @@ import DocThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/DocTh
 import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import SampleAPI from 'AppComponents/Apis/Listing/SampleAPI/SampleAPI';
+import SampleAPIProduct from 'AppComponents/Apis/Listing/SampleAPI/SampleAPIProduct';
 import TopMenu from 'AppComponents/Apis/Listing/components/TopMenu';
 
 const styles = theme => ({
@@ -416,9 +417,7 @@ class TableView extends React.Component {
                         isAPIProduct={isAPIProduct}
                         listType={listType}
                     />
-                    <div className={classes.contentInside}>
-                        <SampleAPI isAPIProduct={isAPIProduct} />
-                    </div>
+                    <div className={classes.contentInside}>{isAPIProduct ? <SampleAPIProduct /> : <SampleAPI />}</div>
                 </React.Fragment>
             );
         }
