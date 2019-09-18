@@ -38,19 +38,8 @@ public class ZIPUtils {
      * @throws IOException when error occurred while creating the zip file
      */
     public static void zipDir(String dirName, String nameZipFile) throws IOException {
-        ZipOutputStream zip = null;
-        FileOutputStream fW = null;
-        try {
-            fW = new FileOutputStream(nameZipFile);
-            zip = new ZipOutputStream(fW);
+        try (FileOutputStream fW = new FileOutputStream(nameZipFile); ZipOutputStream zip = new ZipOutputStream(fW)) {
             addFolderToZip("", dirName, zip);
-        } finally {
-            if (zip != null) {
-                zip.close();
-            }
-            if (fW != null) {
-                fW.close();
-            }
         }
 
     }
@@ -109,16 +98,10 @@ public class ZIPUtils {
             } else {
                 byte[] buf = new byte[1024];
                 int len;
-                FileInputStream in = null;
-                try {
-                    in = new FileInputStream(srcFile);
+                try (FileInputStream in = new FileInputStream(srcFile)) {
                     zip.putNextEntry(new ZipEntry(path + "/" + folder.getName()));
                     while ((len = in.read(buf)) > 0) {
                         zip.write(buf, 0, len);
-                    }
-                } finally {
-                    if (in != null) {
-                        in.close();
                     }
                 }
             }

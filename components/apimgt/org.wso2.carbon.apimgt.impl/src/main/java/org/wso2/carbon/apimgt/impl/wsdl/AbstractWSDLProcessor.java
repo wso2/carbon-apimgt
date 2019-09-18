@@ -167,15 +167,17 @@ abstract class AbstractWSDLProcessor implements WSDLProcessor {
      * Creates a zip for from the files of the provided path and returns an InputStream for the created zip file.
      *
      * @param wsdlArchiveFilePath file path where the WSDL archive is extracted
-     * @return InputStream object of the WSDL archive zip file
+     * @return ByteArrayInputStream object of the WSDL archive zip file
      * @throws APIMgtWSDLException when error occurred when creating the zip and returning the InputStream
      */
-    InputStream getWSDLArchive(String wsdlArchiveFilePath) throws APIMgtWSDLException {
+    ByteArrayInputStream getWSDLArchive(String wsdlArchiveFilePath) throws APIMgtWSDLException {
         try {
             Collection<File> allFiles = FileUtils.listFiles(new File(wsdlArchiveFilePath), null, true);
-            String outputZipFile = wsdlArchiveFilePath + File.separator + APIConstants.WSDL_ARCHIVE_UPDATED_ZIP_FILE;
-            ZIPUtils.zipFiles(outputZipFile, allFiles);
-            return new FileInputStream(outputZipFile);
+            String outputZipFilePath =
+                    wsdlArchiveFilePath + File.separator + APIConstants.WSDL_ARCHIVE_UPDATED_ZIP_FILE;
+            ZIPUtils.zipFiles(outputZipFilePath, allFiles);
+            File outputZipFile = new File(outputZipFilePath);
+            return new ByteArrayInputStream(FileUtils.readFileToByteArray(outputZipFile));
         } catch (APIManagementException | IOException e) {
             throw new APIMgtWSDLException("General error occurred while creating WSDL archive", e,
                     ExceptionCodes.ERROR_WHILE_CREATING_WSDL_ARCHIVE);

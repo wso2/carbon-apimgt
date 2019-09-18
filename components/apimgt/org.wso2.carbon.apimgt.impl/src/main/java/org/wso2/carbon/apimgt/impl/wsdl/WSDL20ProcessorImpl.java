@@ -198,7 +198,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
     }
 
     @Override
-    public InputStream getWSDL() throws APIMgtWSDLException {
+    public ByteArrayInputStream getWSDL() throws APIMgtWSDLException {
         if (wsdlDescription != null) {
             return getSingleWSDL();
         } else {
@@ -212,7 +212,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
      * @return Retrieves an InputStream representing the WSDL
      * @throws APIMgtWSDLException when error occurred while getting the InputStream
      */
-    private InputStream getSingleWSDL() throws APIMgtWSDLException {
+    private ByteArrayInputStream getSingleWSDL() throws APIMgtWSDLException {
         WSDLWriter writer;
         try {
             writer = getWsdlFactoryInstance().newWSDLWriter();
@@ -285,7 +285,7 @@ public class WSDL20ProcessorImpl extends AbstractWSDLProcessor {
                 writer.writeWSDL(description.toElement(), wsdlFileOutputStream);
             } catch (IOException | WSDLException e) {
                 throw new APIMgtWSDLException("Failed to create WSDL archive for API:" + api.getId().getName() + ":"
-                        + api.getId().getVersion() + " for environment " + environmentName,
+                        + api.getId().getVersion() + " for environment " + environmentName, e,
                         ExceptionCodes.ERROR_WHILE_CREATING_WSDL_ARCHIVE);
             }
         }
