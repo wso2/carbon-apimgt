@@ -224,6 +224,19 @@
         </li>
         <% } %>
         <li class="nav-header">
+            <a href="#"><i class="fw fw-alert fw-2x" style="font-size:22px;"></i><%=i18n.localize("Bot Detection")%><i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
+             <ul class="nav nav-pills secondary-nav collapse">
+                <li <%if (reqUrl.match("bot-detected-data-list")){%> class="active" <% } %>><a href="<%= jagg.url("/bot-detected-data-list") %>"
+                    onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                    <i class="fw fw-list"></i><%=i18n.localize("Bot Detected Data")%></a>
+                </li>
+                <li <%if (reqUrl.match("bot-detection-email-configuration")){%> class="active" <% } %>><a href="<%= jagg.url("/bot-detection-email-configuration") %>"
+                    onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+                    <i class="fw fw-mail"></i><%=i18n.localize("Configure Emails")%></a>
+                </li>
+             </ul>
+        </li>
+        <li class="nav-header">
           <a href="#"><i class="fw fw-statistics fw-2x" style="font-size:22px;"></i><%=i18n.localize("Analytics")%><i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
           <ul class="nav nav-pills secondary-nav collapse">
             <li  <%if (reqUrl.match("analytics-api-availability")){%> class="active" <% } %>><a href="<%=apiAvailability%>"

@@ -1,0 +1,72 @@
+<%
+include("/jagg/jagg.jag");
+
+(function () {
+    var log = new Log();
+
+    response.contentType = "application/json; charset=UTF-8";
+    var mod, obj, result, username,
+            action = request.getParameter("action"),
+            site = require("/site/conf/site.json"),
+            msg = require("/site/conf/ui-messages.jag");
+    if (jagg.getUser() == null) {
+        print({
+            error: true,
+            message: 'AuthenticateError'
+        });
+    } else if( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
+        print({
+            error:true,
+            message: msg.error.csrfError
+        });
+    } else {
+        if (action === "saveEmailList" && request.getMethod() == 'POST') {
+            var userName = jagg.getUser().username;
+            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+            var tenantDomain = MultitenantUtils.getTenantDomain(userName);
+
+            if ("carbon.super" == tenantDomain) {
+                userName = userName + "@carbon.super";
+            }
+
+            mod = jagg.module("bot-detection-email-configuration");
+            var email = request.getParameter("email");
+            var results = mod.saveEmailList(email);
+
+            if (results.error) {
+                obj = {
+                    error: results.error,
+                    message: results.message
+                };
+            } else {
+                obj = {
+                    error: false
+                }
+            }
+            print(obj);
+	   }else if(action === "deleteEmails" && request.getMethod() == 'POST'){
+
+                mod = jagg.module("bot-detection-email-configuration");
+                var uuid = request.getParameter("uuid");
+                var results = mod.deleteEmails(uuid);
+
+                if (results.error) {
+                    obj = {
+                        error: results.error,
+                        message: results.message
+                    };
+                } else {
+                    obj = {
+                        error: false
+                    }
+                }
+                print(obj);
+        } else {
+            print({
+                error: true,
+                message: msg.error.invalidAction(action)
+            });
+        }
+    }
+}());
+%>

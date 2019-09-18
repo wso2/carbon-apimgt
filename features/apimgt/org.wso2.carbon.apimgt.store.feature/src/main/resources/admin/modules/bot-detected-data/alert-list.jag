@@ -1,0 +1,85 @@
+<%
+var log = new Log();
+
+var getAlert = function(){
+    try{
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+                var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
+                if(!isAnalyticsEnabled) {
+
+                    return {
+                        error:true,
+                        message:"Please enable statistics to see this page"
+                    };
+
+                }
+        var appName = "apim_bot_detection_alert_configuration_0";
+        var query = "from AM_BOT_DATA SELECT REQUEST_TIME, MESSAGE_ID, HTTP_METHOD, HEADERS, MESSAGE_BODY, CLIENT_IP ;";
+
+        var result = APIUtil.executeQueryOnStreamProcessor(appName, query);
+        var objArr = [];
+                if(result != null ) {
+                    var parsedDataResult = JSON.parse(result);
+                    if(parsedDataResult.records != null) {
+                      var items = parsedDataResult.records;
+                      for (var i = 0; i < items.length; i ++){
+                            var record = items[i];
+                            var obj =  {
+                                      "records":{
+                                         "REQUEST_TIME" : record[0],
+                                         "MESSAGE_ID" : record[1],
+                                         "HTTP_METHOD" : record[2],
+                                         "HEADERS" : record[3],
+                                         "MESSAGE_BODY" : record[4],
+                                         "CLIENT_IP" : record[5]
+                                         }
+                                      }
+                            objArr.push(obj);
+                      }
+
+                    }
+                }
+        var alertData = objArr;
+        return {
+            error: false,
+            alertData:alertData
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while getting alerts (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+
+//var deleteAlert = function (messageID) {
+    //try {
+        //var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+                //var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
+                //if(!isAnalyticsEnabled) {
+
+                    //return {
+                        //error:true,
+                        //message:"Please enable statistics to see this page"
+                    //};
+
+                //}
+        //var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        //var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+        //var APIAdminImpl = Packages.org.wso2.carbon.apimgt.impl.APIAdminImpl;
+        //var apiAdmin = new APIAdminImpl();
+        //apiAdmin.deleteHoneyPotAlert(messageID);/
+        //log.debug("Deletion Success");
+        //return {
+            //error: false
+        //};
+    //} catch (ex) {
+        //return {
+            //error: true,
+            //message: ex.message.split(":")[1]
+        //};
+    //}
+//};
+%>
