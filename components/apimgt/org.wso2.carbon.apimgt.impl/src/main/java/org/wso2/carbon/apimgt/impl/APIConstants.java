@@ -1185,6 +1185,13 @@ public final class APIConstants {
     public static final String SWAGGER_RESOURCE_PATH = "resourcePath";
     public static final String API_VERSION = "apiVersion";
 
+    //swagger MG related constants
+    public static final String X_WSO2_AUTH_HEADER = "x-wso2-auth-header";
+    public static final String X_THROTTLING_TIER = "x-throttling-tier";
+    public static final String X_WSO2_CORS = "x-wso2-cors";
+    public static final String X_WSO2_PRODUCTION_ENDPOINTS = "x-wso2-production-endpoints";
+    public static final String X_WSO2_SANDBOX_ENDPOINTS = "x-wso2-sandbox-endpoints";
+    public static final String X_WSO2_BASEPATH = "x-wso2-basePath";
 
     //API Constants
     public static final String API_DATA_NAME = "name";
