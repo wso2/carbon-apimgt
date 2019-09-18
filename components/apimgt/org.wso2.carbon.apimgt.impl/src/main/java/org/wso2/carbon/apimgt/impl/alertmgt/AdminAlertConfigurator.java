@@ -48,6 +48,5 @@ public class AdminAlertConfigurator extends AlertConfigurator {
 
     @Override public void removeAlertConfiguration(String userName, String alertName,
             Map<String, String> configProperties) throws APIManagementException {
-
     }
 }

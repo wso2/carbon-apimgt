@@ -3962,7 +3962,7 @@ paths:
   ####################################################
   # Store Alerts management REST API
   ####################################################
-  '/alerts/types':
+  '/alert-types':
     #--------------------------------------------------
     # Retrieve the list of api store alert types.
     #--------------------------------------------------
@@ -3997,7 +3997,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  '/alerts':
+  '/alert-subscriptions':
     #--------------------------------------------------
     # Retrieve the list of alerts subscribed by the user.
     #--------------------------------------------------
@@ -4005,14 +4005,14 @@ paths:
       security:
         - OAuth2Security: []
       x-examples:
-        $ref: docs/examples/alerts/alerts_user.yaml#/get
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/get
       summary: |
         Get the list of API Store alert types subscribed by the user.
       operationId: getSubscribedAlertTypes
       description: |
         This operation is used to get the list of subscribed alert types by the user.
       tags:
-        - Alerts
+        - Alert Subscriptions
       responses:
         200:
           description: |
