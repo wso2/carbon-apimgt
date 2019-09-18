@@ -102,7 +102,8 @@ public class StoreAlertConfigurator extends AlertConfigurator {
     }
 
     @Override
-    public List<Map<String, String>> getAlertConfiguration(String userName, String alertName) throws APIManagementException {
+    public List<Map<String, String>> getAlertConfiguration(String userName, String alertName)
+            throws APIManagementException {
 
         String query = "from ApiSubAlertConf on subscriber == '" + userName + "' select applicationId ,apiName , "
                 + "apiVersion, thresholdRequestCountPerMin;";
@@ -131,7 +132,8 @@ public class StoreAlertConfigurator extends AlertConfigurator {
         String apiName = configProperties.get(AlertMgtConstants.API_NAME_KEY);
         String apiVersion = configProperties.get(AlertMgtConstants.API_VERSION_KEY);
 
-        String query = "delete ApiSubAlertConf on ApiSubAlertConf.applicationId == '" + applicationId + "' and ApiSubAlertConf.apiName == '" + apiName
+        String query = "delete ApiSubAlertConf on ApiSubAlertConf.applicationId == '"
+                + applicationId + "' and ApiSubAlertConf.apiName == '" + apiName
                 + "' and ApiSubAlertConf.subscriber == '" + userName
                 + "' and ApiSubAlertConf.apiVersion == '" + apiVersion + "'";
         APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_ALERT_CONFIG_APP, query);

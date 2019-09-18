@@ -18,11 +18,12 @@
 
 package org.wso2.carbon.apimgt.impl.alertmgt;
 
-import javafx.scene.control.Alert;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.alertmgt.exception.AlertManagementException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+/**
+ * Alert Configuration Manager class. This class is used to get the required implementation of AlertConfigurator.
+ * */
 public class AlertConfigManager {
 
     private static AlertConfigManager alertConfigManager = null;

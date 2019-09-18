@@ -409,18 +409,20 @@ paths:
     get:
       security:
         - OAuth2Security: []
+      operationId: getWSDLOfAPI
       produces:
-        - application/octet-stream
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl"
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+        - application/json
+        - application/wsdl
+        - application/zip
+      x-examples:
+        $ref: docs/examples/apis/wsdl/apiId_wsdl_get.yaml
       summary: Get API WSDL definition
       description: |
         This operation can be used to retrieve the swagger definition of an API.
       parameters:
         - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/labelName'
+        - $ref: '#/parameters/environmentName'
         - $ref: '#/parameters/If-None-Match'
         - $ref : '#/parameters/requestedTenant'
       tags:
@@ -2279,7 +2281,7 @@ paths:
           description: |
             Unsupported media type.
             The entity of the request was in a not supported format.
-            
+
 
 ######################################################
 # The "Multiple Subscriptions" resource API
@@ -4311,8 +4313,8 @@ parameters:
     required: true
     type: string
 
-  # Policy Id
-  # Specified as part of the path expression
+# Policy Id
+# Specified as part of the path expression
   policyId:
     name: policyId
     in: path
@@ -4321,8 +4323,8 @@ parameters:
     required: true
     type: string
 
-  # Comment Identifier
-  # Specified as part of the path expression
+# Comment Identifier
+# Specified as part of the path expression
   commentId:
     name: commentId
     in: path
@@ -4536,6 +4538,9 @@ definitions:
         items:
           type: string
         example: ["Unlimited", "Bronze"]
+      advertiseInfo:
+        description: The advertise info of the API
+        $ref: '#/definitions/AdvertiseInfo'
 
 #-----------------------------------------------------
 # The Standard API resource
@@ -4741,12 +4746,12 @@ definitions:
         type: string
         description: The average rating of the API
         example: 4.5
-  advertiseInfo:
+      advertiseInfo:
         description: The advertise info of the API
         $ref: '#/definitions/AdvertiseInfo'
-  #-----------------------------------------------------
-  # The API List resource
-  #-----------------------------------------------------
+#-----------------------------------------------------
+# The API List resource
+#-----------------------------------------------------
   APIProductList:
     title: API ProductList
     properties:

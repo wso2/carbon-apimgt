@@ -122,6 +122,6 @@ public abstract class AlertConfigurator {
      * @param alertName: The alert type name
      * @param configProperties: The properties that should be removed from the alert config.
      * */
-    public abstract void removeAlertConfiguration(String userName, String alertName, Map<String, String> configProperties)
-            throws APIManagementException;
+    public abstract void removeAlertConfiguration(String userName, String alertName, Map<String,
+            String> configProperties) throws APIManagementException;
 }

@@ -50,6 +50,12 @@ public class AlertMgtUtils {
         return alertTypeDTOList;
     }
 
+    /**
+     * Converts a list of AlertTypeDTOs to HashMap.
+     *
+     * @param alertTypes : The AlertTypeDTO list
+     * @return A HashMap of the alert types
+     * */
     static Map<String, String> alertTypesToMap(List<AlertTypeDTO> alertTypes) {
         List<Integer> alertTypeIds = new ArrayList<>();
         List<String> alertTypeNames = new ArrayList<>();
@@ -64,5 +70,4 @@ public class AlertMgtUtils {
         alertTypesMap.put("names", StringUtils.join(alertTypeNames, ","));
         return alertTypesMap;
     }
-
 }

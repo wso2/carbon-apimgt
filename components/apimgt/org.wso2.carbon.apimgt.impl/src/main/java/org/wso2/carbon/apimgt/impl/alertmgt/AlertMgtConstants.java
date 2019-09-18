@@ -46,5 +46,4 @@ public class AlertMgtConstants {
         alertTypeConfigMap.put("AbnormalResponseTime", "thresholdResponseTime");
         alertTypeConfigMap.put("AbnormalBackendTime", "thresholdBackendTime");
     }
-
 }
