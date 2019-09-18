@@ -64,7 +64,7 @@ public class AlertTypesPublisherTest {
         String agent = "publisher";
         String checkedAlertListValues = "true";
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        Mockito.doThrow(SQLException.class).when(apiMgtDAO).addAlertTypesConfigInfo(userName, emailList,
+        Mockito.doThrow(APIManagementException.class).when(apiMgtDAO).addAlertTypesConfigInfo(userName, emailList,
                 checkedAlertList, agent);
         APIMgtUsageDataPublisher apiMgtUsageDataPublisher = Mockito.mock(APIMgtUsageDataPublisher.class);
         AlertTypesPublisher alertTypesPublisher = new AlertTypePublisherWrapper(apiMgtDAO, apiMgtUsageDataPublisher);
@@ -82,7 +82,7 @@ public class AlertTypesPublisherTest {
         String agent = "publisher";
         String checkedAlertListValues = "true";
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        Mockito.doThrow(SQLException.class).when(apiMgtDAO).addAlertTypesConfigInfo(userName, emailList,
+        Mockito.doThrow(APIManagementException.class).when(apiMgtDAO).addAlertTypesConfigInfo(userName, emailList,
                 checkedAlertList, agent);
         APIMgtUsageDataPublisher apiMgtUsageDataPublisher = Mockito.mock(APIMgtUsageDataPublisher.class);
         AlertTypesPublisher alertTypesPublisher = new AlertTypePublisherWrapper(apiMgtDAO, apiMgtUsageDataPublisher);
@@ -114,7 +114,7 @@ public class AlertTypesPublisherTest {
         String userName = "admin@carbon.super";
         String agent = "publisher";
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        Mockito.doThrow(SQLException.class).when(apiMgtDAO).unSubscribeAlerts(userName, agent);
+        Mockito.doThrow(APIManagementException.class).when(apiMgtDAO).unSubscribeAlerts(userName, agent);
         APIMgtUsageDataPublisher apiMgtUsageDataPublisher = Mockito.mock(APIMgtUsageDataPublisher.class);
         AlertTypesPublisher alertTypesPublisher = new AlertTypePublisherWrapper(apiMgtDAO, apiMgtUsageDataPublisher);
         alertTypesPublisher.enabled = true;
