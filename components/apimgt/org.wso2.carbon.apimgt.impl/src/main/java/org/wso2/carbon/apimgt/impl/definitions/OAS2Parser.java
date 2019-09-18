@@ -423,6 +423,15 @@ public class OAS2Parser extends APIDefinition {
         return generateAPIDefinition(swaggerData, swagger);
     }
 
+    /**
+     * Update OAS definition for store
+     *
+     * @param api            API
+     * @param oasDefinition  OAS definition
+     * @param hostWithScheme host address with protocol
+     * @return OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
     @Override
     public String getOASDefinitionForStore(API api, String oasDefinition, String hostWithScheme)
             throws APIManagementException {
@@ -433,6 +442,15 @@ public class OAS2Parser extends APIDefinition {
         return updateSwaggerSecurityDefinitionForStore(swagger, new SwaggerData(api), hostWithScheme);
     }
 
+    /**
+     * Update OAS definition for store
+     *
+     * @param product        APIProduct
+     * @param oasDefinition  OAS definition
+     * @param hostWithScheme host address with protocol
+     * @return OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
     @Override
     public String getOASDefinitionForStore(APIProduct product, String oasDefinition, String hostWithScheme)
             throws APIManagementException {
@@ -442,6 +460,14 @@ public class OAS2Parser extends APIDefinition {
         return updateSwaggerSecurityDefinitionForStore(swagger, new SwaggerData(product), hostWithScheme);
     }
 
+    /**
+     * Update OAS definition for API Publisher
+     *
+     * @param api           API
+     * @param oasDefinition
+     * @return OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
     @Override
     public String getOASDefinitionForPublisher(API api, String oasDefinition) throws APIManagementException {
         Swagger swagger = getSwagger(oasDefinition);
@@ -721,6 +747,11 @@ public class OAS2Parser extends APIDefinition {
         return Collections.emptyList();
     }
 
+    /**
+     * Update OAS operations for Store
+     *
+     * @param swagger Swagger to be updated
+     */
     private void updateOperations(Swagger swagger) {
         for (String pathKey : swagger.getPaths().keySet()) {
             Path path = swagger.getPath(pathKey);
@@ -752,23 +783,54 @@ public class OAS2Parser extends APIDefinition {
         }
     }
 
+    /**
+     * Get parsed Swagger object
+     *
+     * @param oasDefinition OAS definition
+     * @return Swagger
+     * @throws APIManagementException
+     */
     private Swagger getSwagger(String oasDefinition) {
         SwaggerParser parser = new SwaggerParser();
         return parser.parse(oasDefinition);
     }
 
+    /**
+     * Update OAS definition with GW endpoints
+     *
+     * @param product        APIProduct
+     * @param hostWithScheme GW host with protocol
+     * @param swagger        Swagger
+     * @throws APIManagementException
+     */
     private void updateEndpoints(APIProduct product, String hostWithScheme, Swagger swagger) {
         String basePath = product.getContext();
         String transports = product.getTransports();
         updateEndpoints(swagger, basePath, transports, hostWithScheme);
     }
 
+    /**
+     * Update OAS definition with GW endpoints
+     *
+     * @param api            API
+     * @param hostWithScheme GW host with protocol
+     * @param swagger        Swagger
+     * @throws APIManagementException
+     */
     private void updateEndpoints(API api, String hostWithScheme, Swagger swagger) {
         String basePath = api.getContext();
         String transports = api.getTransports();
         updateEndpoints(swagger, basePath, transports, hostWithScheme);
     }
 
+    /**
+     * Update OAS definition with GW endpoints and API information
+     *
+     * @param swagger        Swagger
+     * @param basePath       API context
+     * @param transports     transports types
+     * @param hostWithScheme GW host with protocol
+     */
     private void updateEndpoints(Swagger swagger, String basePath, String transports, String hostWithScheme) {
         String host = hostWithScheme.trim().replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "")
                 .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
@@ -785,6 +847,14 @@ public class OAS2Parser extends APIDefinition {
         swagger.setHost(host);
     }
 
+    /**
+     * Update OAS definition with authorization endpoints
+     *
+     * @param swagger        Swagger
+     * @param swaggerData    SwaggerData
+     * @param hostWithScheme GW host with protocol
+     * @return updated OAS definition
+     */
     private String updateSwaggerSecurityDefinitionForStore(Swagger swagger, SwaggerData swaggerData,
             String hostWithScheme) throws APIManagementException {
         String authUrl = hostWithScheme + "/authorize";

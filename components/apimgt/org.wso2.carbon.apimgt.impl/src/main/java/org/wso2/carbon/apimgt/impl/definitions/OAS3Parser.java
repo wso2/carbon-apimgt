@@ -326,6 +326,18 @@ public class OAS3Parser extends APIDefinition {
         return generateAPIDefinition(swaggerData, openAPI);
     }
 
+    /**
+     * This method generates API definition using the given api's URI templates and the swagger.
+     * It will alter the provided swagger definition based on the URI templates. For example: if there is a new
+     * URI template which is not included in the swagger, it will be added to the swagger as a basic resource. Any
+     * additional resources inside the swagger will be removed from the swagger. Changes to scopes, throtting policies,
+     * on the resource will be updated on the swagger
+     *
+     * @param swaggerData api
+     * @param openAPI     OpenAPI
+     * @return API definition in string format
+     * @throws APIManagementException if error occurred when generating API Definition
+     */
     private String generateAPIDefinition(SwaggerData swaggerData, OpenAPI openAPI) throws APIManagementException {
         Set<SwaggerData.Resource> copy = new HashSet<>(swaggerData.getResources());
 
@@ -443,6 +455,11 @@ public class OAS3Parser extends APIDefinition {
         return generateAPIDefinition(swaggerData, openAPI);
     }
 
+    /**
+     * Remove MG related information
+     *
+     * @param openAPI OpenAPI
+     */
     private void removePublisherSpecificInfo(OpenAPI openAPI) {
         Map<String, Object> extensions = openAPI.getExtensions();
         if (extensions.containsKey(APIConstants.X_WSO2_AUTH_HEADER)) {
@@ -465,6 +482,15 @@ public class OAS3Parser extends APIDefinition {
         }
     }
 
+    /**
+     * Update OAS definition for store
+     *
+     * @param api            API
+     * @param oasDefinition  OAS definition
+     * @param hostWithScheme host address with protocol
+     * @return OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
     @Override
     public String getOASDefinitionForStore(API api, String oasDefinition, String hostWithScheme)
             throws APIManagementException {
@@ -474,6 +500,15 @@ public class OAS3Parser extends APIDefinition {
         return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(api), hostWithScheme);
     }
 
+    /**
+     * Update OAS definition for store
+     *
+     * @param product        APIProduct
+     * @param oasDefinition  OAS definition
+     * @param hostWithScheme host address with protocol
+     * @return OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
     @Override
     public String getOASDefinitionForStore(APIProduct product, String oasDefinition, String hostWithScheme)
             throws APIManagementException {
@@ -483,6 +518,14 @@ public class OAS3Parser extends APIDefinition {
         return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(product), hostWithScheme);
     }
 
+    /**
+     * Update OAS definition for API Publisher
+     *
+     * @param api           API
+     * @param oasDefinition
+     * @return OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
     @Override
     public String getOASDefinitionForPublisher(API api, String oasDefinition) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(oasDefinition);
@@ -777,6 +820,14 @@ public class OAS3Parser extends APIDefinition {
         }
     }
 
+    /**
+     * Update OAS definition with authorization endpoints
+     *
+     * @param openAPI        OpenAPI
+     * @param swaggerData    SwaggerData
+     * @param hostWithScheme GW host with protocol
+     * @return updated OAS definition
+     */
     private String updateSwaggerSecurityDefinitionForStore(OpenAPI openAPI, SwaggerData swaggerData,
             String hostWithScheme) {
         String authUrl = hostWithScheme + "/authorize";
@@ -785,6 +836,14 @@ public class OAS3Parser extends APIDefinition {
         return Json.pretty(openAPI);
     }
 
+    /**
+     * Update OAS definition with GW endpoints
+     *
+     * @param product        APIProduct
+     * @param hostWithScheme GW host with protocol
+     * @param openAPI        OpenAPI
+     * @throws APIManagementException
+     */
     private void updateEndpoints(APIProduct product, String hostWithScheme, OpenAPI openAPI)
             throws APIManagementException {
         String basePath = product.getContext();
@@ -796,6 +855,14 @@ public class OAS3Parser extends APIDefinition {
         }
     }
 
+    /**
+     * Update OAS definition with GW endpoints
+     *
+     * @param api            API
+     * @param hostWithScheme GW host with protocol
+     * @param openAPI        OpenAPI
+     * @throws APIManagementException
+     */
     private void updateEndpoints(API api, String hostWithScheme, OpenAPI openAPI) throws APIManagementException {
         String basePath = api.getContext();
         String transports = api.getTransports();
@@ -806,6 +873,15 @@ public class OAS3Parser extends APIDefinition {
         }
     }
 
+    /**
+     * Update OAS definition with GW endpoints and API information
+     *
+     * @param openAPI        OpenAPI
+     * @param basePath       API context
+     * @param transports     transports types
+     * @param hostWithScheme GW host with protocol
+     * @throws MalformedURLException
+     */
     private void updateEndpoints(OpenAPI openAPI, String basePath, String transports, String hostWithScheme)
             throws MalformedURLException {
         String host = hostWithScheme.trim().replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "")
@@ -827,6 +903,11 @@ public class OAS3Parser extends APIDefinition {
         openAPI.setServers(servers);
     }
 
+    /**
+     * Update OAS operations for Store
+     *
+     * @param openAPI OpenAPI to be updated
+     */
     private void updateOperations(OpenAPI openAPI) {
         for (String pathKey : openAPI.getPaths().keySet()) {
             PathItem pathItem = openAPI.getPaths().get(pathKey);
@@ -856,6 +937,13 @@ public class OAS3Parser extends APIDefinition {
         }
     }
 
+    /**
+     * Get parsed OpenAPI object
+     *
+     * @param oasDefinition OAS definition
+     * @return OpenAPI
+     * @throws APIManagementException
+     */
     private OpenAPI getOpenAPI(String oasDefinition) throws APIManagementException {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(oasDefinition, null, null);

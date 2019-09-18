@@ -173,6 +173,14 @@ public abstract class APIDefinition {
     public abstract String getOASDefinitionForStore(APIProduct product, String oasDefinition, String hostWithScheme)
             throws APIManagementException;
 
+    /**
+     * Update OAS definition for API Publisher
+     *
+     * @param api           API
+     * @param oasDefinition
+     * @return OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
     public abstract String getOASDefinitionForPublisher(API api, String oasDefinition)
             throws APIManagementException;
 }
