@@ -169,6 +169,7 @@ public final class APIConstants {
     public static final String API_WSDL_EXTRACTED_DIRECTORY = "extracted";
     public static final String WSDL_ARCHIVES_TEMP_FOLDER = "WSDL-archives";
     public static final String WSDL_ARCHIVE_ZIP_FILE = "wsdl-archive.zip";
+    public static final String WSDL_ARCHIVE_UPDATED_ZIP_FILE = "wsdl-archive-updated.zip";
     public static final String WSDL_FILE = "wsdlFile";
     public static final String UPDATED_WSDL_ZIP = "updated.zip";
     public static final String FILE_URI_PREFIX = "file://";
@@ -1373,7 +1374,7 @@ public final class APIConstants {
     public static final String API_PRODUCT_VERSION = "1.0.0";
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
-    public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS" , "SOAPTOREST", "GRAPHQL"};
+    public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS" , "SOAPTOREST", "GRAPHQL", "SOAP"};
 
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";

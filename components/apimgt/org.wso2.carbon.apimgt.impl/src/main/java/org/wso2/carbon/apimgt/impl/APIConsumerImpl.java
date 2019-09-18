@@ -36,6 +36,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -65,6 +66,7 @@ import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
@@ -89,6 +91,7 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -113,6 +116,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -5000,7 +5004,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             wsdlFiles.add(updatedWSDLFile);
                         }
                         wsdlFiles.addAll(xsdFiles);
-                        getZipFileFromFileList(folderToImport.getCanonicalPath() + APIConstants.UPDATED_WSDL_ZIP,
+                        ZIPUtils.zipFiles(folderToImport.getCanonicalPath() + APIConstants.UPDATED_WSDL_ZIP,
                                 wsdlFiles);
                         wsdlContent = folderToImport.getCanonicalPath() + APIConstants.UPDATED_WSDL_ZIP;
                     }
@@ -5033,8 +5037,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public ResourceFile getWSDL(APIIdentifier apiIdentifier, String environmentName, String environmentType) throws APIManagementException {
-        return null;
+    public ResourceFile getWSDL(APIIdentifier apiIdentifier, String environmentName, String environmentType)
+            throws APIManagementException {
+        WSDLValidationResponse validationResponse;
+        ResourceFile resourceFile = getWSDL(apiIdentifier);
+        if (resourceFile.getContentType().contains(APIConstants.APPLICATION_ZIP)) {
+            validationResponse = APIMWSDLReader.extractAndValidateWSDLArchive(resourceFile.getContent());
+        } else {
+            validationResponse = APIMWSDLReader.validateWSDLFile(resourceFile.getContent());
+        }
+        if (validationResponse.isValid()) {
+            API api = getAPI(apiIdentifier);
+            WSDLProcessor wsdlProcessor = validationResponse.getWsdlProcessor();
+            wsdlProcessor.updateEndpoints(api, environmentName, environmentType);
+            InputStream wsdlDataStream = wsdlProcessor.getWSDL();
+            return new ResourceFile(wsdlDataStream, resourceFile.getContentType());
+        } else {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.CORRUPTED_STORED_WSDL,
+                    apiIdentifier.toString()));
+        }
     }
 
     @Override
@@ -5055,30 +5076,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return apikeys;
     }
 
-    private void getZipFileFromFileList(String zipFile, Collection<File> fileList) throws APIManagementException {
-        byte[] buffer = new byte[1024];
-        try {
-            FileOutputStream fos = new FileOutputStream(zipFile);
-            ZipOutputStream zos = new ZipOutputStream(fos);
-            for (File file : fileList) {
-                String path = file.getAbsolutePath().substring(
-                        file.getAbsolutePath().indexOf(APIConstants.API_WSDL_EXTRACTED_DIRECTORY)
-                                + APIConstants.API_WSDL_EXTRACTED_DIRECTORY.length() + 1);
-                ZipEntry ze = new ZipEntry(path);
-                zos.putNextEntry(ze);
-                try (FileInputStream in = new FileInputStream(file)) {
-                    int len;
-                    while ((len = in.read(buffer)) > 0) {
-                        zos.write(buffer, 0, len);
-                    }
-                }
-            }
-            zos.closeEntry();
-            zos.close();
-        } catch (IOException e) {
-            handleException("Error occurred while creating the ZIP file: " + zipFile, e);
-        }
-    }
+
 
     /**
      * To check authorization of the API against current logged in user. If the user is not authorized an exception

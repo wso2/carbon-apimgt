@@ -2002,8 +2002,8 @@ public final class APIUtil {
                 }
                 // Get the WSDL 1.1 or 2.0 processor and process the content based on the version
                 WSDLProcessor wsdlProcessor = APIMWSDLReader.getWSDLProcessorForUrl(wsdlUrl);
-                byte[] wsdlContent = wsdlProcessor.getWSDL();
-                wsdlResource.setContent(wsdlContent);
+                InputStream wsdlContent = wsdlProcessor.getWSDL();
+                wsdlResource.setContentStream(wsdlContent);
 
             } else {
                 byte[] wsdl = (byte[]) registry.get(wsdlResourcePath).getContent();
