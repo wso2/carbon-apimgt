@@ -42,7 +42,7 @@
       },
       {
         "Name": "apim:subscription_view",
-        "Roles": "admin,Internal/creator"
+        "Roles": "admin,Internal/creator,Internal/publisher"
       },
       {
         "Name": "apim:subscription_block",
@@ -50,11 +50,11 @@
       },
       {
         "Name": "apim:mediation_policy_view",
-        "Roles": "admin"
+        "Roles": "admin,Internal/creator"
       },
       {
         "Name": "apim:mediation_policy_create",
-        "Roles": "admin"
+        "Roles": "admin,Internal/creator"
       },
       {
         "Name": "apim:api_workflow",
