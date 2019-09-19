@@ -203,15 +203,14 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     /**
-     * configure email list which need to send alert
-     * update email list as adding more or remove
+     * configure email list to which the alert needs to be sent
      */
     public void addBotDataEmailConfiguration(String email) throws APIManagementException, SQLException {
         apiMgtDAO.addBotDataEmailConfiguration(email);
     }
 
     /**
-     * retrieve email lit which configured above
+     * retrieve the configured email list
      */
     public static List<BotDetectionData> retrieveSavedBotDataEmailList() throws APIManagementException {
 
