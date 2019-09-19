@@ -42,6 +42,7 @@ import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -87,8 +88,7 @@ public class OAS2Parser extends APIDefinition {
      */
     @Override
     public Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException {
-        SwaggerParser parser = new SwaggerParser();
-        Swagger swagger = parser.parse(resourceConfigsJSON);
+        Swagger swagger = getSwagger(resourceConfigsJSON);
         Set<URITemplate> urlTemplates = new LinkedHashSet<>();
         Set<Scope> scopes = getScopes(resourceConfigsJSON);
         String oauth2SchemeKey = getOAuth2SecuritySchemeKey(swagger);
@@ -152,8 +152,7 @@ public class OAS2Parser extends APIDefinition {
      */
     @Override
     public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
-        SwaggerParser parser = new SwaggerParser();
-        Swagger swagger = parser.parse(resourceConfigsJSON);
+        Swagger swagger = getSwagger(resourceConfigsJSON);
         String oauth2SchemeKey = getOAuth2SecuritySchemeKey(swagger);
 
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
@@ -272,8 +271,7 @@ public class OAS2Parser extends APIDefinition {
      */
     @Override
     public String generateAPIDefinition(SwaggerData swaggerData, String swagger) throws APIManagementException {
-        SwaggerParser parser = new SwaggerParser();
-        Swagger swaggerObj = parser.parse(swagger);
+        Swagger swaggerObj = getSwagger(swagger);
         return generateAPIDefinition(swaggerData, swaggerObj);
     }
 
@@ -402,7 +400,20 @@ public class OAS2Parser extends APIDefinition {
     public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData)
             throws APIManagementException {
         Swagger swagger = getSwagger(oasDefinition);
+        removePublisherSpecificInfo(swagger);
+        return generateAPIDefinition(swaggerData, swagger);
+    }
+
+    /**
+     * Remove MG related information
+     *
+     * @param swagger Swagger
+     */
+    private void removePublisherSpecificInfo(Swagger swagger) {
         Map<String, Object> extensions = swagger.getVendorExtensions();
+        if (extensions == null) {
+            return;
+        }
         if (extensions.containsKey(APIConstants.X_WSO2_AUTH_HEADER)) {
             extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
         }
@@ -421,7 +432,6 @@ public class OAS2Parser extends APIDefinition {
         if (extensions.containsKey(APIConstants.X_WSO2_BASEPATH)) {
             extensions.remove(APIConstants.X_WSO2_BASEPATH);
         }
-        return generateAPIDefinition(swaggerData, swagger);
     }
 
     /**
@@ -796,9 +806,13 @@ public class OAS2Parser extends APIDefinition {
      * @return Swagger
      * @throws APIManagementException
      */
-    private Swagger getSwagger(String oasDefinition) {
+    private Swagger getSwagger(String oasDefinition) throws APIManagementException {
         SwaggerParser parser = new SwaggerParser();
-        return parser.parse(oasDefinition);
+        SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(oasDefinition);
+        if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
+            log.debug("Errors found when parsing OAS definition");
+        }
+        return parseAttemptForV2.getSwagger();
     }
 
     /**
