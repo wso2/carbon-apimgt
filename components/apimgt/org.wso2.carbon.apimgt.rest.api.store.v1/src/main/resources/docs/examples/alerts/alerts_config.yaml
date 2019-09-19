@@ -26,26 +26,6 @@ get:
         }
       headers: |
         Content-Type: application/json
-  - rawRequest: |
-      GET https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24 HTTP/1.1
-      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-    curl: |
-      curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24
-    rawResponse: |
-      {
-        "count": 1,
-        "list": [
-          {
-            "configurationId": "UGl6emFTaGFja0FQSSsxLjAuMCtEZWZhdWx0QXBwbGljYXRpb24K",
-            "configuration": {
-              "apiName": "PizzaShackAPI",
-              "apiVersion": "1.0.0",
-              "applicationName": "DefaultApplication",
-              "requestConunt": "12"
-            }
-          }
-        ]
-      }
 
 put:
   - id: AddAlertConfiguration
@@ -80,23 +60,6 @@ put:
             }
         }
 
-  - rawRequest: |
-      PUT https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24 HTTP/1.1
-      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      Content-Type: application/json
-    curl: |
-      curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24
-    rawResponse: |
-      {
-        "configurationId":"YWRhZGEjIDIuMCNEZWZhdWx0QXBwbGljYXRpb24",
-        "configuration":
-        {
-          "requestCount":"12112",
-          "apiName":"PizzaShackAPI",
-          "apiVersion":" 2.0",
-          "applicationName":"DefaultApplication"
-        }
-      }
 delete:
   - id: RemoveAlertConfiguration
     request:
@@ -111,9 +74,3 @@ delete:
           msg: OK
         headers: |
           Content-Type: application/json
-  - rawRequest: |
-      DELETE https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24 HTTP/1.1
-      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      Content-Type: application/json
-    curl: |
-      curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24

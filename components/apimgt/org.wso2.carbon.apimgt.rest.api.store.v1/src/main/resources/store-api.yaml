@@ -5048,8 +5048,9 @@ definitions:
         type: string
         description: The name of the alert.
         example: "AbnormalRequestsPerMin"
-      isRequireConfiguration:
+      requireConfiguration:
         type: boolean
+        description: Whether the alert type require additional configurations.
         example: true
 
   #----------------------------------------------

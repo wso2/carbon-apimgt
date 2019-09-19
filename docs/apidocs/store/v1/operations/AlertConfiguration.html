@@ -57,42 +57,6 @@ Content-Type: application/json
                 <h5 class="section-heading">CURL</h5>
                     <div class="pre"><code class="bash">curl -k -v -X PUT &#39;https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24&#39; -H &#39;Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2&#39; -H &#39;Content-Type: application/json&#39; -d @payload.json</code></div>
 
-            <h4 class="section-heading">
-                <u></u>
-            </h4>
-                <div class="pointer" data-toggle="collapse" data-target="#request-addAlertConfig">
-                    <h5 class="section-heading">
-                        Request
-                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    </h5>
-                </div>
-                    <div id="request-addAlertConfig"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24 HTTP/1.1
-Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-Content-Type: application/json
-</code></div>
-
-                <div class="pointer" data-toggle="collapse" data-target="#response-addAlertConfig">
-                    <h5 class="section-heading">
-                        Response
-                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    </h5>
-                </div>
-                    <div id="response-addAlertConfig" class="pre collapse in"><code class="json">{
-  &quot;configurationId&quot;:&quot;YWRhZGEjIDIuMCNEZWZhdWx0QXBwbGljYXRpb24&quot;,
-  &quot;configuration&quot;:
-  {
-    &quot;requestCount&quot;:&quot;12112&quot;,
-    &quot;apiName&quot;:&quot;PizzaShackAPI&quot;,
-    &quot;apiVersion&quot;:&quot; 2.0&quot;,
-    &quot;applicationName&quot;:&quot;DefaultApplication&quot;
-  }
-}
-</code></div>
-
-                <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -X PUT -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24
-</code></div>
-
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -281,31 +245,6 @@ Content-Type: application/json
                 <h5 class="section-heading">CURL</h5>
                     <div class="pre"><code class="bash">curl -k -v -X DELETE &#39;https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24&#39; -H &#39;Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2&#39; -H &#39;Content-Type: application/json&#39; </code></div>
 
-            <h4 class="section-heading">
-                <u></u>
-            </h4>
-                <div class="pointer" data-toggle="collapse" data-target="#request-deleteAlertConfig">
-                    <h5 class="section-heading">
-                        Request
-                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    </h5>
-                </div>
-                    <div id="request-deleteAlertConfig"class="pre collapse in"><code class="json">DELETE https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24 HTTP/1.1
-Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-Content-Type: application/json
-</code></div>
-
-                <div class="pointer" data-toggle="collapse" data-target="#response-deleteAlertConfig">
-                    <h5 class="section-heading">
-                        Response
-                    </h5>
-                </div>
-                    <p>Not Available</p>
-
-                <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -X DELETE -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24
-</code></div>
-
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -488,45 +427,6 @@ Content-Type: application/json
 
                 <h5 class="section-heading">CURL</h5>
                     <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations&#39; -H &#39;Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2&#39; </code></div>
-
-            <h4 class="section-heading">
-                <u></u>
-            </h4>
-                <div class="pointer" data-toggle="collapse" data-target="#request-getAllAlertConfigs">
-                    <h5 class="section-heading">
-                        Request
-                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    </h5>
-                </div>
-                    <div id="request-getAllAlertConfigs"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24 HTTP/1.1
-Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-</code></div>
-
-                <div class="pointer" data-toggle="collapse" data-target="#response-getAllAlertConfigs">
-                    <h5 class="section-heading">
-                        Response
-                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
-                    </h5>
-                </div>
-                    <div id="response-getAllAlertConfigs" class="pre collapse in"><code class="json">{
-  &quot;count&quot;: 1,
-  &quot;list&quot;: [
-    {
-      &quot;configurationId&quot;: &quot;UGl6emFTaGFja0FQSSsxLjAuMCtEZWZhdWx0QXBwbGljYXRpb24K&quot;,
-      &quot;configuration&quot;: {
-        &quot;apiName&quot;: &quot;PizzaShackAPI&quot;,
-        &quot;apiVersion&quot;: &quot;1.0.0&quot;,
-        &quot;applicationName&quot;: &quot;DefaultApplication&quot;,
-        &quot;requestConunt&quot;: &quot;12&quot;
-      }
-    }
-  ]
-}
-</code></div>
-
-                <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24
-</code></div>
 
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
