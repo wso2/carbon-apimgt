@@ -14207,13 +14207,11 @@ public class ApiMgtDAO {
             ps.setString(1, uuid);
             ps.execute();
             connection.commit();
-
         } catch (SQLException e) {
             connection.rollback();
             handleException("Failed to delete alert email data.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
-
         }
     }
 }

@@ -188,10 +188,10 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
                 dataPublisher.tryPublish(streamID, null, (Object[]) dataBridgeBotDataDTO.createPayload(),
                         null);
             } catch (Exception e) {
-                log.error("Error while publishing Request event", e);
+                log.error("Error while publishing bot detection event", e);
             }
         } else {
-            log.error("RequestResponse event dropped due to unavailability of mandatory data: "
+            log.error("Bot detection event dropped due to unavailability of mandatory data: "
                     + missingMandatoryValues.toString() + " in event: " + dataBridgeBotDataDTO.toString());
         }
     }

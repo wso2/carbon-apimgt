@@ -71,8 +71,6 @@ $(document).ready(function () {
     });
 
     $('#tokenfield').on('beforeItemRemove', function(event){
-        //deleteEmails();
-        //event.cancel = true;
     });
 
     $("#cancelBtn").click(function () {

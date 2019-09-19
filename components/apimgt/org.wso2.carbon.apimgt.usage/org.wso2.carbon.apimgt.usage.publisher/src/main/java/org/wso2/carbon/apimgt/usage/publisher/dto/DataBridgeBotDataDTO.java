@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * DataBridgeBotDataDTO is used to get and set the values
  */
 public class DataBridgeBotDataDTO extends BotDataDTO {
 
@@ -56,7 +56,6 @@ public class DataBridgeBotDataDTO extends BotDataDTO {
 
     @Override
     public String toString() {
-
         return "Current Time: " + getCurrentTime() +
                 ", Message ID: " + getMessageID() + ", API invoked method: " + getApiMethod() +
                 ", Header Set: " + getHeaderSet() + ", Message Body: " + getClientIp();
