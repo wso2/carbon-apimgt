@@ -143,7 +143,7 @@ class CommentOptions extends React.Component {
             classes, comment, editIndex, index, theme,
         } = this.props;
         return (
-            <Grid container spacing={8} className={classes.verticalSpace} key={comment.commentId}>
+            <Grid container spacing={1} className={classes.verticalSpace} key={comment.commentId}>
                 {/* only the comment owner or admin can delete a comment */}
                 {(comment.createdBy === AuthManager.getUser().name
                     || AuthManager.getUser().name === theme.custom.adminRole) && [

@@ -62,7 +62,7 @@ ShallowWrapper {
     "props": Object {
       "children": <WithStyles(Grid)
         container={true}
-        spacing={8}
+        spacing={1}
       >
         <WithStyles(Grid)
           item={true}
@@ -307,7 +307,7 @@ ShallowWrapper {
       "props": Object {
         "children": <WithStyles(Grid)
           container={true}
-          spacing={8}
+          spacing={1}
         >
           <WithStyles(Grid)
             item={true}

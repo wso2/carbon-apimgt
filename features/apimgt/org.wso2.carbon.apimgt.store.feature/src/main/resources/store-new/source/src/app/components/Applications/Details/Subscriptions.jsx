@@ -284,7 +284,7 @@ class Subscriptions extends React.Component {
                         />
                     </Typography>
 
-                    <Grid container className='tab-grid' spacing={16}>
+                    <Grid container className='tab-grid' spacing={2}>
                         <Grid item xs={6} className={classes.cardGrid}>
                             <APIList
                                 apisNotFound={apisNotFound}

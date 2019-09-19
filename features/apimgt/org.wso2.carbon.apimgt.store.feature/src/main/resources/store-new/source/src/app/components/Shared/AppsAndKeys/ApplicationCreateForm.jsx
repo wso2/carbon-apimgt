@@ -107,7 +107,7 @@ const ApplicationCreate = (props) => {
     const tokenTypeList = ['JWT', 'OAUTH'];
     return (
         <form className={classes.container} noValidate autoComplete='off'>
-            <Grid container spacing={24} className={classes.root}>
+            <Grid container spacing={3} className={classes.root}>
                 <Grid item xs={12} md={6}>
                     <FormControl margin='normal' className={classes.FormControl}>
                         <TextField

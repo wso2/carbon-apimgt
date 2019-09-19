@@ -133,7 +133,7 @@ const subscribeToApi = (props) => {
     };
 
     return (
-        <Grid container spacing={24} className={classes.subscribeRoot}>
+        <Grid container spacing={3} className={classes.subscribeRoot}>
             <Grid item xs={12} md={6}>
                 {appSelected && (
                     <FormControl className={classes.FormControl}>

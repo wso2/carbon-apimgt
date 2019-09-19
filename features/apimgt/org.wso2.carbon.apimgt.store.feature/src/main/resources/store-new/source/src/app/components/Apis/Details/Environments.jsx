@@ -153,7 +153,7 @@ class Environments extends React.Component {
         const { prodUrlCopied, epUrl } = this.state;
 
         return (
-            <Grid container spacing={16} item xs={12}>
+            <Grid container spacing={2} item xs={12}>
                 {api.endpointURLs.map((endpoint) => {
                     return (
                         <Grid key={endpoint} item xs={12}>
@@ -181,7 +181,7 @@ class Environments extends React.Component {
                                     </div>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
-                                    <Grid container item xs={12} spacing={16}>
+                                    <Grid container item xs={12} spacing={2}>
                                         {(endpoint.URLs.http !== null
                                             || endpoint.URLs.https !== null
                                             || endpoint.URLs.ws !== null

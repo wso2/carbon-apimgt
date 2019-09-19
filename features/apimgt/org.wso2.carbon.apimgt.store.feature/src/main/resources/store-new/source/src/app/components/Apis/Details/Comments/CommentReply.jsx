@@ -210,7 +210,7 @@ class CommentReply extends React.Component {
             comments
                 && comments.map((comment, index) => (
                     <div key={comment.commentId + '-' + index} className={classes.contentWrapper}>
-                        <Grid container spacing={8} className={classes.root}>
+                        <Grid container spacing={1} className={classes.root}>
                             <Grid item>
                                 <Icon className={classes.commentIcon}>account_box</Icon>
                             </Grid>

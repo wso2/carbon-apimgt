@@ -243,7 +243,7 @@ class Comments extends Component {
 
                         {startCommentsToDisplay !== 0 && (
                             <div className={classes.contentWrapper}>
-                                <Grid container spacing={32} className={classes.root}>
+                                <Grid container spacing={4} className={classes.root}>
                                     <Grid item>
                                         <Typography className={classes.verticalSpace} variant='body2'>
                                             <a
