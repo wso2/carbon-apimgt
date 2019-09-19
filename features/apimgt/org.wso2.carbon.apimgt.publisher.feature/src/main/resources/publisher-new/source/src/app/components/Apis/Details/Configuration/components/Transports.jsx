@@ -46,7 +46,7 @@ export default function Transports(props) {
     const { api, configDispatcher } = props;
     const classes = useStyles();
     const Validate = () => {
-        if (api.transport.length === 0) {
+        if (api.transport && api.transport.length === 0) {
             return (
                 <FormattedMessage
                     id='Apis.Details.Configuration.components.transport.empty'
@@ -66,12 +66,12 @@ export default function Transports(props) {
                             defaultMessage='Transports'
                         />
                     </FormLabel>
-                    <FormGroup>
+                    <FormGroup style={{ display: 'flow-root' }}>
                         <FormControlLabel
                             control={(
                                 <Checkbox
                                     disabled={isRestricted(['apim:api_create'], api)}
-                                    checked={api.transport.includes('http')}
+                                    checked={api.transport ? api.transport.includes('http') : null}
                                     onChange={({ target: { checked } }) => configDispatcher({
                                         action: 'transport',
                                         event: { checked, value: 'http' },
@@ -86,7 +86,7 @@ export default function Transports(props) {
                             control={(
                                 <Checkbox
                                     disabled={isRestricted(['apim:api_create'], api)}
-                                    checked={api.transport.includes('https')}
+                                    checked={api.transport ? api.transport.includes('https') : null}
                                     onChange={({ target: { checked } }) => configDispatcher({
                                         action: 'transport',
                                         event: { checked, value: 'https' },

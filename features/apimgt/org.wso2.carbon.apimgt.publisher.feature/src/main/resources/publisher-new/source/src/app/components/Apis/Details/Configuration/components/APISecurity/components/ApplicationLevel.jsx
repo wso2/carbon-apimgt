@@ -23,7 +23,15 @@ import Checkbox from '@material-ui/core/Checkbox';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormLabel from '@material-ui/core/FormLabel';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import AuthorizationHeader from 'AppComponents/Apis/Details/Configuration/components/AuthorizationHeader.jsx';
+import Typography from '@material-ui/core/Typography';
+import { makeStyles } from '@material-ui/core/styles';
+import Tooltip from '@material-ui/core/Tooltip';
+import HelpOutline from '@material-ui/icons/HelpOutline';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -39,6 +47,28 @@ import {
     API_SECURITY_MUTUAL_SSL,
 } from '../APISecurity';
 
+const useStyles = makeStyles(theme => ({
+    expansionPanel: {
+        marginBottom: theme.spacing(1),
+    },
+    expansionPanelDetails: {
+        flexDirection: 'column',
+    },
+    iconSpace: {
+        marginLeft: theme.spacing(0.5),
+    },
+    bottomSpace: {
+        marginBottom: theme.spacing(4),
+    },
+    subHeading: {
+        fontSize: '1rem',
+        fontWeight: 400,
+        margin: 0,
+        display: 'inline-flex',
+        lineHeight: '38px',
+    },
+}));
+
 /**
  *
  *
@@ -49,6 +79,7 @@ import {
 export default function ApplicationLevel(props) {
     const { haveMultiLevelSecurity, securityScheme, configDispatcher } = props;
     const { api } = useContext(APIContext);
+    const classes = useStyles();
 
     let mandatoryValue = 'optional';
     // If not Oauth2, Basic auth or ApiKey security is selected, no mandatory values should be pre-selected
@@ -63,96 +94,121 @@ export default function ApplicationLevel(props) {
 
     return (
         <React.Fragment>
-            <Grid item>
-                <FormControl component='fieldset'>
-                    <FormLabel component='legend'>
-                        <FormattedMessage
-                            id='Apis.Details.Configuration.Configuration.APISecurity.http'
-                            defaultMessage='Application Level (HTTP)'
-                        />
-                    </FormLabel>
-                    <FormGroup style={{ display: 'flow-root' }}>
-                        <FormControlLabel
-                            control={(
-                                <Checkbox
-                                    disabled={isRestricted(['apim:api_create'], api)}
-                                    checked={securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2)}
-                                    onChange={({ target: { checked, value } }) => configDispatcher({
-                                        action: 'securityScheme',
-                                        event: { checked, value },
-                                    })
-                                    }
-                                    value={DEFAULT_API_SECURITY_OAUTH2}
-                                />
-                            )}
-                            label='OAuth2'
-                        />
-                        <FormControlLabel
-                            control={(
-                                <Checkbox
-                                    disabled={isRestricted(['apim:api_create'], api)}
-                                    checked={securityScheme.includes(API_SECURITY_BASIC_AUTH)}
-                                    onChange={({ target: { checked, value } }) => configDispatcher({
-                                        action: 'securityScheme',
-                                        event: { checked, value },
-                                    })
-                                    }
-                                    value={API_SECURITY_BASIC_AUTH}
-                                />
-                            )}
-                            label='Basic'
-                        />
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={securityScheme.includes(API_SECURITY_API_KEY)}
-                                    onChange={({ target: { checked, value } }) =>
-                                        configDispatcher({
+            <Grid item xs={12}>
+                <ExpansionPanel className={classes.expansionPanel}>
+                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography className={classes.subHeading} variant='h6'>
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.Components.APISecurity.Components.
+                                    ApplicationLevel.http'
+                                defaultMessage='Application Level Security'
+                            />
+                            <Tooltip
+                                title={
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.components.APISecurity.tooltip'
+                                        defaultMessage={
+                                            'This option determines the type of security' +
+                                            ' that will be used to secure this API. An API can be secured ' +
+                                            'with either OAuth2/Basic/ApiKey or it can be secured with all of them. ' +
+                                            'If OAuth2 option is selected, relevant API will require a valid ' +
+                                            'OAuth2 token for successful invocation. If Mutual SSL option is ' +
+                                            'selected, a trusted client certificate should be presented to access' +
+                                            'the API'
+                                        }
+                                    />
+                                }
+                                aria-label='APISecurity'
+                                placement='right-end'
+                                interactive
+                            >
+                                <HelpOutline className={classes.iconSpace} />
+                            </Tooltip>
+                        </Typography>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails className={classes.expansionPanelDetails}>
+                        <FormGroup style={{ display: 'flow-root' }}>
+                            <FormControlLabel
+                                control={(
+                                    <Checkbox
+                                        disabled={isRestricted(['apim:api_create'], api)}
+                                        checked={securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2)}
+                                        onChange={({ target: { checked, value } }) => configDispatcher({
                                             action: 'securityScheme',
                                             event: { checked, value },
                                         })
-                                    }
-                                    value={API_SECURITY_API_KEY}
+                                        }
+                                        value={DEFAULT_API_SECURITY_OAUTH2}
+                                    />
+                                )}
+                                label='OAuth2'
+                            />
+                            <FormControlLabel
+                                control={(
+                                    <Checkbox
+                                        disabled={isRestricted(['apim:api_create'], api)}
+                                        checked={securityScheme.includes(API_SECURITY_BASIC_AUTH)}
+                                        onChange={({ target: { checked, value } }) => configDispatcher({
+                                            action: 'securityScheme',
+                                            event: { checked, value },
+                                        })
+                                        }
+                                        value={API_SECURITY_BASIC_AUTH}
+                                    />
+                                )}
+                                label='Basic'
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={securityScheme.includes(API_SECURITY_API_KEY)}
+                                        onChange={({ target: { checked, value } }) =>
+                                            configDispatcher({
+                                                action: 'securityScheme',
+                                                event: { checked, value },
+                                            })
+                                        }
+                                        value={API_SECURITY_API_KEY}
+                                    />
+                                }
+                                label='Api Key'
+                            />
+                        </FormGroup>
+                        <FormControl className={classes.bottomSpace} component='fieldset'>
+                            <RadioGroup
+                                aria-label='HTTP security HTTP mandatory selection'
+                                name={API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY}
+                                value={mandatoryValue}
+                                onChange={({ target: { name, value } }) => configDispatcher({
+                                    action: 'securityScheme',
+                                    event: { name, value },
+                                })
+                                }
+                                row
+                            >
+                                <FormControlLabel
+                                    value={API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY}
+                                    control={<Radio disabled={!haveMultiLevelSecurity} color='default' />}
+                                    label='Mandatory'
+                                    labelPlacement='end'
                                 />
-                            }
-                            label='Api Key'
-                        />
-                    </FormGroup>
-                </FormControl>
-                <Grid item>
-                    <FormControl component='fieldset'>
-                        <RadioGroup
-                            aria-label='HTTP security HTTP mandatory selection'
-                            name={API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY}
-                            value={mandatoryValue}
-                            onChange={({ target: { name, value } }) => configDispatcher({
-                                action: 'securityScheme',
-                                event: { name, value },
-                            })
-                            }
-                            row
-                        >
-                            <FormControlLabel
-                                value={API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY}
-                                control={<Radio disabled={!haveMultiLevelSecurity} color='default' />}
-                                label='Mandatory'
-                                labelPlacement='end'
-                            />
-                            <FormControlLabel
-                                value='optional'
-                                control={<Radio disabled={!haveMultiLevelSecurity} color='default' />}
-                                label='Optional'
-                                labelPlacement='end'
-                            />
-                        </RadioGroup>
-                        <FormHelperText>
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.components.APISecurity.components.ApplicationLevel'
-                                defaultMessage='Choose whether Application level security is mandatory or optional'
-                            />
-                        </FormHelperText>
-                    </FormControl>
-                </Grid>
+                                <FormControlLabel
+                                    value='optional'
+                                    control={<Radio disabled={!haveMultiLevelSecurity} color='default' />}
+                                    label='Optional'
+                                    labelPlacement='end'
+                                />
+                            </RadioGroup>
+                            <FormHelperText>
+                                <FormattedMessage
+                                    id='Apis.Details.Configuration.components.APISecurity.http.mandatory'
+                                    defaultMessage='Choose whether Application level security is mandatory or optional'
+                                />
+                            </FormHelperText>
+                        </FormControl>
+                        <AuthorizationHeader api={securityScheme} configDispatcher={configDispatcher} />
+                    </ExpansionPanelDetails>
+                </ExpansionPanel>
             </Grid>
         </React.Fragment>
     );
