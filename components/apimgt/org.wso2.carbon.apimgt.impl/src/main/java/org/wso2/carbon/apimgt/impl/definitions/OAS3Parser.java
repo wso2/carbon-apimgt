@@ -89,12 +89,7 @@ public class OAS3Parser extends APIDefinition {
      */
     @Override
     public Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException {
-        OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
-        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(resourceConfigsJSON, null, null);
-        if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
-            throw new APIManagementException("Error Occurred while parsing OpenAPI3 definition.");
-        }
-        OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
+        OpenAPI openAPI = getOpenAPI(resourceConfigsJSON);
         Set<URITemplate> urlTemplates = new LinkedHashSet<>();
         Set<Scope> scopes = getScopes(resourceConfigsJSON);
 
@@ -158,12 +153,7 @@ public class OAS3Parser extends APIDefinition {
      */
     @Override
     public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
-        OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
-        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(resourceConfigsJSON, null, null);
-        if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
-            throw new APIManagementException("Error Occurred while parsing OpenAPI3 definition.");
-        }
-        OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
+        OpenAPI openAPI = getOpenAPI(resourceConfigsJSON);
         Map<String, SecurityScheme> securitySchemes;
         SecurityScheme securityScheme;
         OAuthFlow oAuthFlow;
@@ -320,9 +310,7 @@ public class OAS3Parser extends APIDefinition {
      */
     @Override
     public String generateAPIDefinition(SwaggerData swaggerData, String swagger) throws APIManagementException {
-        OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
-        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(swagger, null, null);
-        OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
+        OpenAPI openAPI = getOpenAPI(swagger);
         return generateAPIDefinition(swaggerData, openAPI);
     }
 

@@ -42,6 +42,7 @@ import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -86,8 +87,7 @@ public class OAS2Parser extends APIDefinition {
      */
     @Override
     public Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException {
-        SwaggerParser parser = new SwaggerParser();
-        Swagger swagger = parser.parse(resourceConfigsJSON);
+        Swagger swagger = getSwagger(resourceConfigsJSON);
         Set<URITemplate> urlTemplates = new LinkedHashSet<>();
         Set<Scope> scopes = getScopes(resourceConfigsJSON);
         String oauth2SchemeKey = getOAuth2SecuritySchemeKey(swagger);
@@ -151,8 +151,7 @@ public class OAS2Parser extends APIDefinition {
      */
     @Override
     public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
-        SwaggerParser parser = new SwaggerParser();
-        Swagger swagger = parser.parse(resourceConfigsJSON);
+        Swagger swagger = getSwagger(resourceConfigsJSON);
         String oauth2SchemeKey = getOAuth2SecuritySchemeKey(swagger);
 
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
@@ -271,8 +270,7 @@ public class OAS2Parser extends APIDefinition {
      */
     @Override
     public String generateAPIDefinition(SwaggerData swaggerData, String swagger) throws APIManagementException {
-        SwaggerParser parser = new SwaggerParser();
-        Swagger swaggerObj = parser.parse(swagger);
+        Swagger swaggerObj = getSwagger(swagger);
         return generateAPIDefinition(swaggerData, swaggerObj);
     }
 
@@ -790,9 +788,13 @@ public class OAS2Parser extends APIDefinition {
      * @return Swagger
      * @throws APIManagementException
      */
-    private Swagger getSwagger(String oasDefinition) {
+    private Swagger getSwagger(String oasDefinition) throws APIManagementException {
         SwaggerParser parser = new SwaggerParser();
-        return parser.parse(oasDefinition);
+        SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(oasDefinition);
+        if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
+            throw new APIManagementException("Error Occurred while parsing OpenAPI3 definition.");
+        }
+        return parseAttemptForV2.getSwagger();
     }
 
     /**
