@@ -2209,7 +2209,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             String updatedDefinition = parser.getOASDefinitionForPublisher(api, apiSwagger);
-            return Response.ok().entity(updatedDefinition).build();
+            return Response.ok().entity(updatedDefinition).header("Content-Disposition",
+                    "attachment; filename=\"" + "swagger.json" + "\"" ).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {

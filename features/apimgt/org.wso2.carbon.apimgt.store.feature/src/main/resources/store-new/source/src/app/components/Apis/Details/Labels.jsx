@@ -22,13 +22,14 @@ import Typography from '@material-ui/core/Typography';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
+import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import CopyToClipboard from 'react-copy-to-clipboard';
-import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField';
 import Icon from '@material-ui/core/Icon';
+import API from 'AppData/api';
 import { FormattedMessage } from 'react-intl';
-import LabelIcon from '@material-ui/icons/Label';
+import Utils from 'AppData/Utils';
 import { ApiContext } from './ApiContext';
 
 const styles = theme => ({
@@ -67,15 +68,20 @@ const styles = theme => ({
             boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
         },
     },
+    buttonIcon: {
+        marginRight: 10,
+    },
 });
 
 class Labels extends React.Component {
     constructor(props) {
         super(props);
+        this.apiClient = new API();
         this.state = {
             prodUrlCopied: false,
             epUrl: '',
         };
+        this.downloadSwagger = this.downloadSwagger.bind(this);
     }
 
     onCopy = name => () => {
@@ -92,6 +98,27 @@ class Labels extends React.Component {
         setTimeout(caller, 4000);
     };
 
+    /**
+     * Downloads the Swagger of the api for the provided label
+     *
+     * @param {string} apiId uuid of the API
+     * @param {string} label name of the environment
+     */
+    downloadSwagger(apiId, label) {       
+        const promiseSwagger = this.apiClient.getSwaggerByAPIIdAndLabel(apiId, label);
+        promiseSwagger
+            .then((done) => {
+                Utils.downloadFile(done);
+            })
+            .catch((error) => {
+                console.log(error);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Environments.download.wsdl.error',
+                    defaultMessage: 'Error downloading the Swagger',
+                }));
+            });
+    }
+
     render() {
         const { api } = this.context;
         const { classes } = this.props;
@@ -99,9 +126,9 @@ class Labels extends React.Component {
 
         return (
             <Grid container spacing={16} item xs={12}>
-                {api.labels.map((endpoint) => {
+                {api.labels.map((label) => {
                     return (
-                        <Grid key={endpoint} item xs={12}>
+                        <Grid key={label} item xs={12}>
                             <ExpansionPanel>
                                 <ExpansionPanelSummary
                                     expandIcon={<Icon>expand_more</Icon>}
@@ -112,21 +139,20 @@ class Labels extends React.Component {
                                         <Icon className={classes.iconEven}>label</Icon>
                                         <span className={classes.iconTextWrapper}>
                                             <Typography className={classes.heading}>
-                                                {endpoint.name}
+                                                {label.name}
                                             </Typography>
                                         </span>
                                     </div>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
                                     <Grid container item xs={12} spacing={16}>
-                                        {/* {(endpoint.accessUrls == null) && ( */}
                                         <Typography className={classes.heading}>
                                             <FormattedMessage
                                                 id='Apis.Details.InfoBar.gateway.urls'
                                                 defaultMessage='Microgateway URLs'
                                             />
                                         </Typography>
-                                        {endpoint.accessUrls.map(row => (
+                                        {label.accessUrls.map(row => (
                                             <Grid item xs={12}>
                                                 <TextField
                                                     defaultValue={row}
@@ -145,7 +171,21 @@ class Labels extends React.Component {
                                                     }}
                                                 />
                                             </Grid>
-                                        ))} 
+                                        ))}
+                                        {(api.type === 'HTTP' || api.type === 'SOAPTOREST') && (
+                                            <Button
+                                                size='small'
+                                                onClick={
+                                                    () => this.downloadSwagger(api.id, label.name)
+                                                }
+                                            >
+                                                <CloudDownloadRounded className={classes.buttonIcon} />
+                                                <FormattedMessage
+                                                    id='Apis.Details.Environments.download.wsdl'
+                                                    defaultMessage='Swagger'
+                                                />
+                                            </Button>
+                                        )}
                                     </Grid>
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>
