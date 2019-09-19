@@ -8721,7 +8721,13 @@ public class ApiMgtDAO {
 
                         String roles = scope.getRoles();
                         //Adding scope bindings
-                        List<String> roleList = Lists.newArrayList(Splitter.on(",").trimResults().split(roles));
+                        List<String> roleList;
+                        if (roles != null) {
+                            roleList = Lists.newArrayList(Splitter.on(",").trimResults().split(roles));
+                        } else {
+                            roleList = Collections.EMPTY_LIST;
+                        }
+
                         for (String role : roleList) {
                             ps3.setInt(1, scope.getId());
                             ps3.setString(2, role);
