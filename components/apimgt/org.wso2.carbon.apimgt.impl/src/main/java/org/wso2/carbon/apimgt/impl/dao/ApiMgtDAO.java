@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIType;
@@ -14123,5 +14124,94 @@ public class ApiMgtDAO {
             handleException("Failed to get product resources of api product : " + productIdentifier, e);
         }
         return productResourceList;
+    }
+
+    /**
+     * Configure email list
+     * modify email list by adding or removing emails
+     */
+    public void addBotDataEmailConfiguration(String email) throws SQLException, APIManagementException {
+        Connection connection;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        connection = APIMgtDBUtil.getConnection();
+        connection.setAutoCommit(false);
+        try {
+            String emailListSaveQuery = SQLConstants.BotDataConstants.ADD_NOTIFICATION;
+            ps = connection.prepareStatement(emailListSaveQuery);
+            UUID uuid = UUID.randomUUID();
+            String randomUUIDString = uuid.toString();
+            String category = "Bot-Detection";
+            String notificationType = "email";
+            ps.setString(1, randomUUIDString);
+            ps.setString(2, category);
+            ps.setString(3, notificationType);
+            ps.setString(4, email);
+            ps.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+            handleException("Error while save email list.", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, rs);
+        }
+    }
+
+    /**
+     * retrieve email list which configured for BotDetectedData Api alert
+     */
+    public List<BotDetectionData> retrieveSavedBotDataEmailList()
+            throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        List<BotDetectionData> list = new ArrayList<>();
+
+        try {
+            String sqlQuery;
+            conn = APIMgtDBUtil.getConnection();
+            sqlQuery = SQLConstants.BotDataConstants.GET_SAVED_ALERT_EMAILS;
+            ps = conn.prepareStatement(sqlQuery);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                BotDetectionData botDetectedData = new BotDetectionData();
+                botDetectedData.setUuid(resultSet.getString("UUID"));
+                botDetectedData.setEmail(resultSet.getString("SUBSCRIBER_ADDRESS"));
+                list.add(botDetectedData);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve saved email types by tenant Name. ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return list;
+
+    }
+
+    /**
+     * Delete email list from the database by using the tenantDomain
+     */
+    public void deleteBotDataEmailList(String uuid) throws APIManagementException, SQLException {
+
+        Connection connection;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        connection = APIMgtDBUtil.getConnection();
+        connection.setAutoCommit(false);
+
+        try {
+            connection.setAutoCommit(false);
+            String deleteEmail = SQLConstants.BotDataConstants.DELETE_EMAIL_BY_UUID;
+            ps = connection.prepareStatement(deleteEmail);
+            ps.setString(1, uuid);
+            ps.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            connection.rollback();
+            handleException("Failed to delete alert email data.", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, rs);
+        }
     }
 }

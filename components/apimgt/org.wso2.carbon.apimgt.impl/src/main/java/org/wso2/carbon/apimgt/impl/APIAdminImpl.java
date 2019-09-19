@@ -25,11 +25,13 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
+import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.text.SimpleDateFormat;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -198,5 +200,29 @@ public class APIAdminImpl implements APIAdmin {
             log.error("Error while parsing the date ", e);
         }
         return time;
+    }
+
+    /**
+     * configure email list to which the alert needs to be sent
+     */
+    public void addBotDataEmailConfiguration(String email) throws APIManagementException, SQLException {
+        apiMgtDAO.addBotDataEmailConfiguration(email);
+    }
+
+    /**
+     * retrieve the configured email list
+     */
+    public static List<BotDetectionData> retrieveSavedBotDataEmailList() throws APIManagementException {
+
+        List<BotDetectionData> list;
+        list = ApiMgtDAO.getInstance().retrieveSavedBotDataEmailList();
+        return list;
+    }
+
+    /**
+     * remove all configured email list
+     */
+    public void deleteBotDataEmailList(String uuid) throws APIManagementException, SQLException {
+        apiMgtDAO.deleteBotDataEmailList(uuid);
     }
 }
