@@ -577,7 +577,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiSwagger = apiConsumer.getOpenAPIDefinitionForLabel(api.getId(), labelName);
             }
 
-            return Response.ok().entity(apiSwagger).build();
+            return Response.ok().entity(apiSwagger).header("Content-Disposition",
+                    "attachment; filename=\"" + "swagger.json" + "\"" ).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
