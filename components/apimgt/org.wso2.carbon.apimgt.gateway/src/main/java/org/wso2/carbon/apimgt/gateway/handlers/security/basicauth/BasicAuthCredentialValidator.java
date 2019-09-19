@@ -53,6 +53,7 @@ import java.rmi.RemoteException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 /**
@@ -171,75 +172,87 @@ public class BasicAuthCredentialValidator {
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String apiElectedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+
+        String[] userRoles = null;
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+        String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
+        String resourceKey = apiContext + ":" + apiVersion + ":" + apiElectedResource + ":" + httpMethod;
+        String resourceCacheKey = resourceKey + ":" + username;
+
+        if (gatewayKeyCacheEnabled && getGatewayBasicAuthResourceCache().get(resourceCacheKey) != null) {
+            return true;
+        }
+
         if (openAPI != null) {
-            org.apache.axis2.context.MessageContext axis2MessageContext =
-                    ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-            String httpMethod = (String) axis2MessageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD);
-            String resourceKey = apiContext + ":" + apiVersion + ":" + apiElectedResource + ":" + httpMethod;
-            String resourceCacheKey = resourceKey + ":" + username;
-            if (gatewayKeyCacheEnabled && getGatewayBasicAuthResourceCache().get(resourceCacheKey) != null) {
-                return true;
+            // retrieve the user roles related to the scope of the API resource
+            String resourceRoles = null;
+            String resourceScope = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
+            if (resourceScope != null) {
+                ArrayList<LinkedHashMap> apiScopes = OpenAPIUtils.getScopeToRoleMappingOfApi(openAPI, synCtx);
+                if (apiScopes != null) {
+                    for (LinkedHashMap scope : apiScopes) {
+                        if (resourceScope.equals(scope.get(APIConstants.SWAGGER_SCOPE_KEY))) {
+                            resourceRoles = (String) scope.get(APIConstants.SWAGGER_ROLES);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (StringUtils.isNotBlank(resourceRoles)) {
+                userRoles = getUserRoles(username);
+
+                // check if the roles related to the API resource contains any of the role of the user
+                for (String role : userRoles) {
+                    if (resourceRoles.contains(role)) {
+                        if (gatewayKeyCacheEnabled) {
+                            getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+                        }
+                        return true;
+                    }
+                }
             } else {
-                // retrieve the user roles related to the scope of the API resource
-                String resourceRoles = null;
-                String resourceScope = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
-                if (resourceScope != null) {
-                    ArrayList<LinkedHashMap> apiScopes = OpenAPIUtils.getScopeToRoleMappingOfApi(openAPI, synCtx);
-                    if (apiScopes != null) {
-                        for (LinkedHashMap scope : apiScopes) {
-                            if (resourceScope.equals(scope.get(APIConstants.SWAGGER_SCOPE_KEY))) {
-                                resourceRoles = (String) scope.get(APIConstants.SWAGGER_ROLES);
+                // No scopes for the requested resource
+                if (gatewayKeyCacheEnabled) {
+                    getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Basic Authentication: No scopes for the API resource: ".concat(resourceKey));
+                }
+                return true;
+            }
+        } else if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
+            HashMap<String, String> operationScopeMappingList =
+                    (HashMap<String, String>) synCtx.getProperty(APIConstants.SCOPE_OPERATION_MAPPING);
+            HashMap<String, ArrayList<String>> scopeRoleMappingList =
+                    (HashMap<String, ArrayList<String>>) synCtx.getProperty(APIConstants.SCOPE_ROLE_MAPPING);
+            String[] operationList = ((String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE)).split(",");
+            for (String operation : operationList) {
+                String operationScope = operationScopeMappingList.get(operation);
+                if (operationScope != null) {
+                    ArrayList<String> operationRoles = scopeRoleMappingList.get(operationScope);
+                    boolean userHasOperationRole = false;
+                    for (String role : userRoles) {
+                        for (String operationRole : operationRoles) {
+                            if (operationRole.equals(role)) {
+                                userHasOperationRole = true;
                                 break;
                             }
                         }
-                    }
-                }
-
-                if (StringUtils.isNotBlank(resourceRoles)) {
-                    String[] userRoles;
-
-                    String tenantDomain = MultitenantUtils.getTenantDomain(username);
-                    if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                        try {
-                            userRoles = remoteUserStoreManagerServiceStub
-                                    .getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
-                        } catch (RemoteException | RemoteUserStoreManagerServiceUserStoreExceptionException e) {
-                            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage());
-                        }
-                    } else {
-                        try {
-                            int tenantId = ServiceReferenceHolder.getInstance()
-                                    .getRealmService().getTenantManager().getTenantId(tenantDomain);
-
-                            UserStoreManager manager = ServiceReferenceHolder
-                                    .getInstance().getRealmService()
-                                    .getTenantUserRealm(tenantId).getUserStoreManager();
-
-                            userRoles = manager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
-                        } catch (UserStoreException e) {
-                            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage());
+                        if (userHasOperationRole) {
+                            break;
                         }
                     }
-                    // check if the roles related to the API resource contains any of the role of the user
-                    for (String role : userRoles) {
-                        if (resourceRoles.contains(role)) {
-                            if (gatewayKeyCacheEnabled) {
-                                getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
-                            }
-                            return true;
-                        }
+                    if (!userHasOperationRole) {
+                        throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
                     }
-                } else {
-                    // No scopes for the requested resource
-                    if (gatewayKeyCacheEnabled) {
-                        getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
-                    }
-                    if (log.isDebugEnabled()) {
-                        log.debug("Basic Authentication: No scopes for the API resource: ".concat(resourceKey));
-                    }
-                    return true;
                 }
             }
+            if (gatewayKeyCacheEnabled) {
+                getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+            }
+            return true;
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Basic Authentication: No OpenAPI found in the gateway for the API: ".concat(apiContext)
@@ -251,6 +264,33 @@ public class BasicAuthCredentialValidator {
             log.debug("Basic Authentication: Scope validation failed for the API resource: ".concat(apiElectedResource));
         }
         throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
+    }
+
+    private String[] getUserRoles(String username) throws APISecurityException {
+        String[] userRoles;
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            try {
+                userRoles = remoteUserStoreManagerServiceStub
+                        .getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
+            } catch (RemoteException | RemoteUserStoreManagerServiceUserStoreExceptionException e) {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
+            }
+        } else {
+            try {
+                int tenantId = ServiceReferenceHolder.getInstance()
+                        .getRealmService().getTenantManager().getTenantId(tenantDomain);
+
+                UserStoreManager manager = ServiceReferenceHolder
+                        .getInstance().getRealmService()
+                        .getTenantUserRealm(tenantId).getUserStoreManager();
+
+                userRoles = manager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
+            } catch (UserStoreException e) {
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
+            }
+        }
+        return userRoles;
     }
 
     /**

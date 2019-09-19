@@ -65,7 +65,6 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
     private static final String QUERY_PATH_STRING = "/?query=";
     private static final String REST_SUB_REQUEST_PATH = "REST_SUB_REQUEST_PATH";
-    private static final String API_TYPE = "API_TYPE";
     private static final String GRAPHQL_API = "GRAPHQL";
     private static final String HTTP_VERB = "HTTP_VERB";
     private static final String UNICODE_TRANSFORMATION_FORMAT = "UTF-8";
@@ -212,7 +211,8 @@ public class GraphQLAPIHandler extends AbstractHandler {
                         String base64DecodedURLScope = new String(Base64.getUrlDecoder().decode(type.getName()));
                         operationScopeMappingList.put(base64DecodedAdditionalType, base64DecodedURLScope);
                     } else if (additionalType.getName().contains(APIConstants.OPERATION_THROTTLING_MAPPING)) {
-                        operationThrottlingMappingList.put(additionalTypeName, type.getName());
+                        String base64DecodedURLThrottlingTier = new String(Base64.getUrlDecoder().decode(type.getName()));
+                        operationThrottlingMappingList.put(base64DecodedAdditionalType, base64DecodedURLThrottlingTier);
                     } else if (additionalType.getName().contains(APIConstants.OPERATION_AUTH_SCHEME_MAPPING)) {
                         boolean isSecurityEnabled = true;
                         if (APIConstants.OPERATION_SECURITY_DISABLED.equalsIgnoreCase(type.getName())) {
@@ -231,7 +231,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
         messageContext.setProperty(APIConstants.SCOPE_OPERATION_MAPPING, operationScopeMappingList);
         messageContext.setProperty(APIConstants.OPERATION_THROTTLING_MAPPING, operationThrottlingMappingList);
         messageContext.setProperty(APIConstants.OPERATION_AUTH_SCHEME_MAPPING, operationAuthSchemeMappingList);
-        messageContext.setProperty(API_TYPE, GRAPHQL_API);
+        messageContext.setProperty(APIConstants.API_TYPE, GRAPHQL_API);
     }
 
     /**

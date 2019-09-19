@@ -100,8 +100,6 @@ public class GraphQLSchemaDefinition {
                             for (URITemplate template : api.getUriTemplates()) {
                                 String scopeInURITemplate = template.getScope() != null ?
                                         template.getScope().getName() : null;
-                                operationThrottlingMap.put(template.getUriTemplate(), template.getThrottlingTier());
-                                operationAuthSchemeMap.put(template.getUriTemplate(), template.getAuthType());
                                 if (scopeInURITemplate != null && scopeInURITemplate.
                                         equals(scope.get(APIConstants.SWAGGER_SCOPE_KEY))) {
                                     operationScopeMap.put(template.getUriTemplate(), scopeInURITemplate);
@@ -114,6 +112,11 @@ public class GraphQLSchemaDefinition {
                         }
                     }
                 }
+            }
+
+            for (URITemplate template : api.getUriTemplates()) {
+                operationThrottlingMap.put(template.getUriTemplate(), template.getThrottlingTier());
+                operationAuthSchemeMap.put(template.getUriTemplate(), template.getAuthType());
             }
 
             if (operationScopeMap.size() > 0) {
@@ -167,8 +170,12 @@ public class GraphQLSchemaDefinition {
             if (operationThrottlingMap.size() > 0) {
                 String operationThrottlingType;
                 for (Map.Entry<String, String> entry : operationThrottlingMap.entrySet()) {
+                    String base64EncodedURLOperationKey = Base64.getUrlEncoder().withoutPadding().
+                            encodeToString(entry.getKey().getBytes(Charset.defaultCharset()));
+                    String base64EncodedURLThrottilingTier = Base64.getUrlEncoder().withoutPadding().
+                            encodeToString(entry.getValue().getBytes(Charset.defaultCharset()));
                     operationThrottlingType = "type OperationThrottlingMapping_" +
-                            entry.getKey() + "{\n" + entry.getValue() + ": String\n}\n";
+                            base64EncodedURLOperationKey + "{\n" + base64EncodedURLThrottilingTier + ": String\n}\n";
                     operationThrottlingMappingBuilder.append(operationThrottlingType);
                 }
                 schemaDefinitionBuilder.append(operationThrottlingMappingBuilder.toString());
@@ -179,9 +186,9 @@ public class GraphQLSchemaDefinition {
                 String isSecurityEnabled;
                 for (Map.Entry<String, String> entry : operationAuthSchemeMap.entrySet()) {
                     if (entry.getValue().equalsIgnoreCase(APIConstants.AUTH_NO_AUTHENTICATION)) {
-                        isSecurityEnabled = APIConstants.OPERATION_SECURITY_ENABLED;
-                    } else {
                         isSecurityEnabled = APIConstants.OPERATION_SECURITY_DISABLED;
+                    } else {
+                        isSecurityEnabled = APIConstants.OPERATION_SECURITY_ENABLED;
                     }
                     operationAuthSchemeType = "type OperationAuthSchemeMapping_" +
                             entry.getKey() + "{\n" + isSecurityEnabled + ": String\n}\n";
