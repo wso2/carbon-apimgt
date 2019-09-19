@@ -20,10 +20,14 @@ import React, { useEffect, useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Checkbox from '@material-ui/core/Checkbox';
-import FormGroup from '@material-ui/core/FormGroup';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormLabel from '@material-ui/core/FormLabel';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Typography from '@material-ui/core/Typography';
+import { makeStyles } from '@material-ui/core/styles';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -33,6 +37,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
+import Transports from 'AppComponents/Apis/Details/Configuration/components/Transports.jsx';
 
 import {
     API_SECURITY_MUTUAL_SSL,
@@ -40,6 +45,25 @@ import {
     DEFAULT_API_SECURITY_OAUTH2,
     API_SECURITY_BASIC_AUTH,
 } from '../APISecurity';
+
+const useStyles = makeStyles(theme => ({
+    expansionPanel: {
+        marginBottom: theme.spacing(1),
+    },
+    expansionPanelDetails: {
+        flexDirection: 'column',
+    },
+    bottomSpace: {
+        marginBottom: theme.spacing(4),
+    },
+    subHeading: {
+        fontSize: '1rem',
+        fontWeight: 400,
+        margin: 0,
+        display: 'inline-flex',
+        lineHeight: '38px',
+    },
+}));
 
 /**
  *
@@ -55,6 +79,7 @@ function TransportLevel(props) {
     const isMutualSSLEnabled = securityScheme.includes(API_SECURITY_MUTUAL_SSL);
     const { api } = useContext(APIContext);
     const [clientCertificates, setClientCertificates] = useState([]);
+    const classes = useStyles();
 
     /**
      * Method to upload the certificate content by calling the rest api.
@@ -147,15 +172,19 @@ function TransportLevel(props) {
     }
     return (
         <React.Fragment>
-            <Grid item>
-                <FormControl component='fieldset'>
-                    <FormLabel component='legend'>
-                        <FormattedMessage
-                            id='Apis.Details.Configuration.Configuration.APISecurity.ssl'
-                            defaultMessage='Transport Level (TLS)'
-                        />
-                    </FormLabel>
-                    <FormGroup>
+            <Grid item xs={12}>
+                <ExpansionPanel className={classes.expansionPanel}>
+                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography className={classes.subHeading} variant='h6'>
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.Components.APISecurity.Components.
+                                    TransportLevel.transport.level.security'
+                                defaultMessage='Transport Level Security'
+                            />
+                        </Typography>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails className={classes.expansionPanelDetails}>
+                        <Transports api={securityScheme} configDispatcher={configDispatcher} />
                         <FormControlLabel
                             control={(
                                 <Checkbox
@@ -171,57 +200,56 @@ function TransportLevel(props) {
                             )}
                             label='Mutual SSL'
                         />
-                    </FormGroup>
-                </FormControl>
-                <Grid item>
-                    <FormControl component='fieldset'>
-                        <RadioGroup
-                            aria-label='HTTP security SSL mandatory selection'
-                            name={API_SECURITY_MUTUAL_SSL_MANDATORY}
-                            value={mandatoryValue}
-                            onChange={({ target: { name, value } }) => configDispatcher({
-                                action: 'securityScheme',
-                                event: { name, value },
-                            })
-                            }
-                            row
-                        >
-                            <FormControlLabel
-                                value={API_SECURITY_MUTUAL_SSL_MANDATORY}
-                                control={<Radio disabled={!haveMultiLevelSecurity} color='default' />}
-                                label='Mandatory'
-                                labelPlacement='end'
+                        {isMutualSSLEnabled && (
+                            <FormControl component='fieldset'>
+                                <RadioGroup
+                                    aria-label='HTTP security SSL mandatory selection'
+                                    name={API_SECURITY_MUTUAL_SSL_MANDATORY}
+                                    value={mandatoryValue}
+                                    onChange={({ target: { name, value } }) => configDispatcher({
+                                        action: 'securityScheme',
+                                        event: { name, value },
+                                    })
+                                    }
+                                    row
+                                >
+                                    <FormControlLabel
+                                        value={API_SECURITY_MUTUAL_SSL_MANDATORY}
+                                        control={<Radio disabled={!haveMultiLevelSecurity} color='default' />}
+                                        label='Mandatory'
+                                        labelPlacement='end'
+                                    />
+                                    <FormControlLabel
+                                        value='optional'
+                                        control={<Radio disabled={!haveMultiLevelSecurity} color='default' />}
+                                        label='Optional'
+                                        labelPlacement='end'
+                                    />
+                                </RadioGroup>
+                                <FormHelperText>
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.components.APISecurity.http.mandatory'
+                                        defaultMessage='Choose whether Transport level security is mandatory or
+                                        optional'
+                                    />
+                                </FormHelperText>
+                            </FormControl>
+                        )}
+                        {isMutualSSLEnabled && (
+                            // TODO:
+                            // This is half baked!!!
+                            // Refactor the Certificate component to share its capabilities in here and
+                            // endpoints page ~tmkb
+                            <Certificates
+                                isMutualSSLEnabled={isMutualSSLEnabled}
+                                certificates={clientCertificates}
+                                uploadCertificate={saveClientCertificate}
+                                deleteCertificate={deleteClientCertificate}
+                                apiId={id}
                             />
-                            <FormControlLabel
-                                value='optional'
-                                control={<Radio disabled={!haveMultiLevelSecurity} color='default' />}
-                                label='Optional'
-                                labelPlacement='end'
-                            />
-                        </RadioGroup>
-                        <FormHelperText>
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.components.APISecurity.components.TransportLevel'
-                                defaultMessage='Choose whether Transport level security is mandatory or optional'
-                            />
-                        </FormHelperText>
-                    </FormControl>
-                </Grid>
-                <Grid item>
-                    {isMutualSSLEnabled && (
-                        // TODO:
-                        // This is half baked!!!
-                        // Refactor the Certificate component to share its capabilities in here and endpoints page ~tmkb
-                        <Certificates
-                            isMutualSSLEnabled={isMutualSSLEnabled}
-                            certificates={clientCertificates}
-                            uploadCertificate={saveClientCertificate}
-                            deleteCertificate={deleteClientCertificate}
-                            apiId={id}
-                        />
-                    )}
-
-                </Grid>
+                        )}
+                    </ExpansionPanelDetails>
+                </ExpansionPanel>
             </Grid>
         </React.Fragment>
     );
