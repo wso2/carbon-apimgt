@@ -43,6 +43,7 @@ import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
@@ -478,16 +479,19 @@ public class OAS2Parser extends APIDefinition {
             swagger.setVendorExtension(APIConstants.X_THROTTLING_TIER, api.getApiLevelPolicy());
         }
         swagger.setVendorExtension(APIConstants.X_WSO2_CORS, api.getCorsConfiguration());
-        JSONObject endpoints = new JSONObject(api.getEndpointConfig());
-        if (endpoints.has(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
-            String prodUrls = endpoints.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)
-                    .getString(APIConstants.API_DATA_URL);
-            swagger.setVendorExtension(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS, prodUrls);
-        }
-        if (endpoints.has(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
-            String sandUrls = endpoints.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS)
-                    .getString(APIConstants.API_DATA_URL);
-            swagger.setVendorExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandUrls);
+        String endpointConfig = api.getEndpointConfig();
+        if (!StringUtils.isBlank(endpointConfig)) {
+            JSONObject endpoints = new JSONObject(endpointConfig);
+            if (endpoints.has(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
+                String prodUrls = endpoints.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)
+                        .getString(APIConstants.API_DATA_URL);
+                swagger.setVendorExtension(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS, prodUrls);
+            }
+            if (endpoints.has(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
+                String sandUrls = endpoints.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS)
+                        .getString(APIConstants.API_DATA_URL);
+                swagger.setVendorExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandUrls);
+            }
         }
         swagger.setVendorExtension(APIConstants.X_WSO2_BASEPATH, api.getContext());
         return getSwaggerJsonString(swagger);
