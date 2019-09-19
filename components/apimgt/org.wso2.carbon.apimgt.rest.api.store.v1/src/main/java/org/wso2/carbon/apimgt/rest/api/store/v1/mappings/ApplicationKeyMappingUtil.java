@@ -26,6 +26,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
@@ -114,5 +115,12 @@ public class ApplicationKeyMappingUtil {
         tokenDTO.setValidityTime(apiKey.getValidityPeriod());
         applicationKeyDTO.setToken(tokenDTO);
         return applicationKeyDTO;
+    }
+
+    public static APIKeyDTO formApiKeyToDTO(String apiKey, int validityTime){
+        APIKeyDTO apiKeyDto = new APIKeyDTO();
+        apiKeyDto.setApikey(apiKey);
+        apiKeyDto.setValidityTime(validityTime);
+        return apiKeyDto;
     }
 }

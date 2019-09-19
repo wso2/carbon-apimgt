@@ -58,6 +58,8 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -303,6 +305,44 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
             }
+        }
+        return null;
+    }
+
+    @Override
+    public Response applicationsApplicationIdApiKeysKeyTypeGeneratePost(
+            String applicationId, String keyType, APIKeyGenerateRequestDTO body, String ifMatch, MessageContext messageContext) {
+
+        String userName = RestApiUtil.getLoggedInUsername();
+        Application application;
+        int validityPeriod;
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(userName);
+            if ((application = apiConsumer.getApplicationByUUID(applicationId)) == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            } else {
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                } else {
+                    if (APIConstants.API_KEY_TYPE_PRODUCTION.equalsIgnoreCase(keyType)) {
+                        application.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+                    } else if (APIConstants.API_KEY_TYPE_SANDBOX.equalsIgnoreCase(keyType)) {
+                        application.setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
+                    } else {
+                        RestApiUtil.handleBadRequest("Invalid keyType. KeyType should be either PRODUCTION or SANDBOX", log);
+                    }
+                    if (body != null && body.getValidityPeriod() != null && body.getValidityPeriod() > 0) {
+                        validityPeriod = body.getValidityPeriod();
+                    } else {
+                        validityPeriod = -1;
+                    }
+                    String apiKey = apiConsumer.generateApiKey(application, userName, (long) validityPeriod);
+                    APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKey, validityPeriod);
+                    return Response.ok().entity(apiKeyDto).build();
+                }
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while generatig API Keys for application " + applicationId, e, log);
         }
         return null;
     }

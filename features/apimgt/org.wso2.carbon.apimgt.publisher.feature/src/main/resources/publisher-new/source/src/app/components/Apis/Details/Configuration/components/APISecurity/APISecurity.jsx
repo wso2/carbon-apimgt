@@ -31,8 +31,9 @@ import TransportLevel from './components/TransportLevel';
 
 const DEFAULT_API_SECURITY_OAUTH2 = 'oauth2';
 const API_SECURITY_BASIC_AUTH = 'basic_auth';
+const API_SECURITY_API_KEY = 'api_key';
 const API_SECURITY_MUTUAL_SSL = 'mutualssl';
-const API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY = 'oauth_basic_auth_mandatory';
+const API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = 'oauth_basic_auth_api_key_mandatory';
 const API_SECURITY_MUTUAL_SSL_MANDATORY = 'mutualssl_mandatory';
 
 const useStyles = makeStyles(theme => ({
@@ -58,7 +59,8 @@ export default function APISecurity(props) {
     } = props;
     const haveMultiLevelSecurity =
         securityScheme.includes(API_SECURITY_MUTUAL_SSL) &&
-        (securityScheme.includes(API_SECURITY_BASIC_AUTH) || securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2));
+        (securityScheme.includes(API_SECURITY_BASIC_AUTH) ||
+        securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2) || securityScheme.includes(API_SECURITY_API_KEY));
     const classes = useStyles();
 
     // Check the validation conditions and return an error message
@@ -66,7 +68,8 @@ export default function APISecurity(props) {
         if (
             !securityScheme.includes(API_SECURITY_MUTUAL_SSL) &&
             !securityScheme.includes(API_SECURITY_BASIC_AUTH) &&
-            !securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2)
+            !securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2) &&
+            !securityScheme.includes(API_SECURITY_API_KEY)
         ) {
             return (
                 <Typography className={classes.bottomSpace}>
@@ -81,7 +84,7 @@ export default function APISecurity(props) {
             haveMultiLevelSecurity &&
             !(
                 securityScheme.includes(API_SECURITY_MUTUAL_SSL_MANDATORY) ||
-                securityScheme.includes(API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY)
+                securityScheme.includes(API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)
             )
         ) {
             return (
@@ -127,7 +130,8 @@ APISecurity.propTypes = {
 export {
     DEFAULT_API_SECURITY_OAUTH2,
     API_SECURITY_BASIC_AUTH,
+    API_SECURITY_API_KEY,
     API_SECURITY_MUTUAL_SSL,
-    API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY,
+    API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY,
     API_SECURITY_MUTUAL_SSL_MANDATORY,
 };

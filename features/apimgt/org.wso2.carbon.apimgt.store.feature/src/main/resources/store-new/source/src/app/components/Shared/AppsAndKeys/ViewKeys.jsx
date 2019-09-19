@@ -418,7 +418,7 @@ class ViewKeys extends React.Component {
                                                     subscriptionScopes={subscriptionScopes}
                                                 />
                                             )}
-                                            {showToken && <ViewToken token={tokenResponse} />}
+                                            {showToken && <ViewToken token={{...tokenResponse, isOauth: true}}/>}
                                         </DialogContentText>
                                     )}
                                     {showCurl && (
@@ -428,7 +428,7 @@ class ViewKeys extends React.Component {
                                     )}
                                     {(isKeyJWT && tokenDetails) && (
                                         <DialogContentText>
-                                            <ViewToken token={tokenDetails} />
+                                            <ViewToken token={{...tokenDetails, isOauth: true}} />
                                         </DialogContentText>
                                     )}
                                 </DialogContent>

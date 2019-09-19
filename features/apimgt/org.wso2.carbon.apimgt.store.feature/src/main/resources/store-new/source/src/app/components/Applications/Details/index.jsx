@@ -29,8 +29,13 @@ import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
 import TokenManager from 'AppComponents/Shared/AppsAndKeys/TokenManager';
+import ApiKeyManager from 'AppComponents/Shared/AppsAndKeys/ApiKeyManager';
 import InfoBar from './InfoBar';
 import Subscriptions from './Subscriptions';
+import AppBar from '@material-ui/core/AppBar';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Paper from '@material-ui/core/Paper';
 /**
  *
  *
@@ -88,6 +93,7 @@ class Details extends Component {
         this.state = {
             application: null,
             active: 'overview',
+            secScheme: 'Oauth',
         };
     }
 
@@ -126,6 +132,55 @@ class Details extends Component {
         this.setState({ active: menuLink });
     };
 
+
+    handleChange = (event, secScheme) => {
+        this.setState({secScheme: secScheme});
+    }
+
+    renderManager = (application, keyType) => {
+        return (
+            <Paper>
+                <Tabs
+                    value={this.state.secScheme}
+                    onChange={this.handleChange}
+                    indicatorColor="primary"
+                    textColor="primary"
+                    variant="scrollable"
+                    scrollButtons="auto"
+                >
+                    <Tab label="Oauth" value = 'Oauth'/>
+                    <Tab label="ApiKey" value = 'ApiKey'/>
+                </Tabs>
+                {this.state.secScheme === 'Oauth' && (
+                    <div>
+                        <TokenManager
+                            keyType = {keyType}
+                            selectedApp = {{
+                                appId: application.applicationId,
+                                label: application.name,
+                                tokenType: application.tokenType,
+                                owner: application.owner,
+                            }}
+                        />
+                    </div>
+                )}
+                {this.state.secScheme === 'ApiKey' && (
+                    <div>
+                        <ApiKeyManager
+                            keyType = {keyType}
+                            selectedApp = {{
+                                appId: application.applicationId,
+                                label: application.name,
+                                tokenType: application.tokenType,
+                                owner: application.owner,
+                            }}
+                        />
+                    </div>
+                )}
+            </Paper>
+        );
+    }
+
     /**
      *
      *
@@ -160,31 +215,11 @@ class Details extends Component {
                             <Redirect exact from='/applications/:applicationId' to={redirectUrl} />
                             <Route
                                 path='/applications/:applicationId/productionkeys'
-                                component={() => (
-                                    <TokenManager
-                                        keyType='PRODUCTION'
-                                        selectedApp={{
-                                            appId: application.applicationId,
-                                            label: application.name,
-                                            tokenType: application.tokenType,
-                                            owner: application.owner,
-                                        }}
-                                    />
-                                )}
+                                component={() => (this.renderManager(application, 'PRODUCTION'))}
                             />
                             <Route
                                 path='/applications/:applicationId/sandBoxkeys'
-                                component={() => (
-                                    <TokenManager
-                                        keyType='SANDBOX'
-                                        selectedApp={{
-                                            appId: application.applicationId,
-                                            label: application.name,
-                                            tokenType: application.tokenType,
-                                            owner: application.owner,
-                                        }}
-                                    />
-                                )}
+                                component={() => (this.renderManager(application, 'SANDBOX'))}
                             />
                             <Route path='/applications/:applicationId/subscriptions' component={Subscriptions} />
                             <Route component={PageNotFound} />

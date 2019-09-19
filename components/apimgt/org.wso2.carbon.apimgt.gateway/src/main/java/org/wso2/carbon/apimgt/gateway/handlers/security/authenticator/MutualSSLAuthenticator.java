@@ -117,8 +117,11 @@ public class MutualSSLAuthenticator implements Authenticator {
                 log.debug("Mutual SSL authentication has not happened in the transport level for the API "
                         + getAPIIdentifier(messageContext).toString() + ", hence API invocation is not allowed");
             }
+            if (isMandatory) {
+                log.error("Mutual SSL authentication failure");
+            }
             return new AuthenticationResponse(false, isMandatory, !isMandatory,
-                    APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE, APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE_MESSAGE);
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
         } else {
             try {
                 setAuthContext(messageContext, sslCertObject);
@@ -150,8 +153,11 @@ public class MutualSSLAuthenticator implements Authenticator {
                 log.debug("The client certificate presented is available in gateway, however it was not added against "
                         + "the API " + getAPIIdentifier(messageContext));
             }
-            throw new APISecurityException(APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE,
-                    APISecurityConstants.MUTUAL_SSL_VALIDATION_FAILURE_MESSAGE);
+            if (isMandatory) {
+                log.error("Mutual SSL authentication failure. API is not associated with the certificate");
+            }
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
         }
         AuthenticationContext authContext = new AuthenticationContext();
         authContext.setAuthenticated(true);

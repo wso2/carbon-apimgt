@@ -836,6 +836,17 @@ public interface APIConsumer extends APIManager {
             APIManagementException;
 
     /**
+     * Generates a new api key
+     *
+     * @param application          The Application Object that represents the Application.
+     * @param userName             Username of the user requesting the api key.
+     * @param validityPeriod       Requested validity period for the api key.
+     * @return Generated api key.
+     * @throws APIManagementException
+     */
+    String generateApiKey(Application application, String userName, long validityPeriod) throws APIManagementException;
+
+    /**
      * Regenerate new consumer secret.
      *
      * @param clientId For which consumer key we need to regenerate consumer secret.

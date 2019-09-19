@@ -31,7 +31,7 @@ import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -42,14 +42,6 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.NoSuchAlgorithmException;
-import java.security.InvalidKeyException;
-import java.security.cert.Certificate;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,7 +58,7 @@ public class JWTValidator {
 
     public JWTValidator(String apiLevelPolicy) {
         this.apiLevelPolicy = apiLevelPolicy;
-        this.isGatewayTokenCacheEnabled = isGatewayTokenCacheEnabled();
+        this.isGatewayTokenCacheEnabled = GatewayUtils.isGatewayTokenCacheEnabled();
     }
 
     /**
@@ -96,8 +88,8 @@ public class JWTValidator {
                 getProperty(Constants.Configuration.HTTP_METHOD);
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
 
-        String cacheKey = getAccessTokenCacheKey(tokenSignature, apiContext, apiVersion, matchingResource, httpMethod);
-        String tenantDomain = getTenantDomain();
+        String cacheKey = GatewayUtils.getAccessTokenCacheKey(tokenSignature, apiContext, apiVersion, matchingResource, httpMethod);
+        String tenantDomain = GatewayUtils.getTenantDomain();
 
         // Validate from cache
         if (isGatewayTokenCacheEnabled) {
@@ -107,8 +99,9 @@ public class JWTValidator {
                 isVerified = true;
             } else if (getInvalidTokenCache().get(tokenSignature) != null) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Token retrieved from the invalid token cache. Token: " + getMaskedToken(splitToken));
+                    log.debug("Token retrieved from the invalid token cache. Token: " + GatewayUtils.getMaskedToken(splitToken));
                 }
+                log.error("Invalid JWT token.");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
@@ -121,12 +114,13 @@ public class JWTValidator {
                 payload = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[1])));
             } catch (JSONException | IllegalArgumentException e) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Invalid JWT token. Token: " + getMaskedToken(splitToken));
+                    log.debug("Invalid JWT token. Token: " + GatewayUtils.getMaskedToken(splitToken));
                 }
+                log.error("Invalid JWT token. Failed to decode the token.");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token. Failed to decode the token.", e);
             }
-            isVerified = verifyTokenSignature(splitToken);
+            isVerified = GatewayUtils.verifyTokenSignature(splitToken, APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS);
             if (isGatewayTokenCacheEnabled) {
                 // Add token to tenant token cache
                 if (isVerified) {
@@ -171,8 +165,9 @@ public class JWTValidator {
                     } catch (JSONException | IllegalArgumentException e) {
                         if (log.isDebugEnabled()) {
                             log.debug("Token decryption failure when retrieving payload. Token: "
-                                    + getMaskedToken(splitToken), e);
+                                    + GatewayUtils.getMaskedToken(splitToken), e);
                         }
+                        log.error("Invalid JWT token. Failed to decode the token");
                         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                 "Invalid JWT token");
                     }
@@ -185,118 +180,16 @@ public class JWTValidator {
                 }
             }
 
-            JSONObject api = validateAPISubscription(apiContext, apiVersion, payload);
+            JSONObject api = GatewayUtils.validateAPISubscription(apiContext, apiVersion, payload, splitToken, true);
 
             log.debug("JWT authentication successful.");
-            return generateAuthenticationContext(tokenSignature, payload, api, getApiLevelPolicy());
+            return GatewayUtils.generateAuthenticationContext(tokenSignature, payload, api, getApiLevelPolicy(), true);
         }
         if (log.isDebugEnabled()) {
-            log.debug("Token signature verification failure. Token: " + getMaskedToken(splitToken));
+            log.debug("Token signature verification failure. Token: " + GatewayUtils.getMaskedToken(splitToken));
         }
         throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                 "Invalid JWT token. Signature verification failed.");
-    }
-
-    /**
-     * Populate the authentication context given the token payload and API tier information.
-     *
-     * @param tokenSignature The signature of the JWT token
-     * @param payload        The payload of the JWT token
-     * @param api            A JSON object containing the API information of the subscribed API
-     * @param apiLevelPolicy The API level throttling tier
-     * @return an AuthenticationContext object generated using the token payload and API tier information
-     */
-    private AuthenticationContext generateAuthenticationContext(String tokenSignature, JSONObject payload, JSONObject api,
-                                                                String apiLevelPolicy) {
-        JSONObject applicationObj = payload.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION);
-
-        AuthenticationContext authContext = new AuthenticationContext();
-        authContext.setAuthenticated(true);
-        authContext.setApiKey(tokenSignature);
-        if (payload.has(APIConstants.JwtTokenConstants.KEY_TYPE)) {
-            authContext.setKeyType(payload.getString(APIConstants.JwtTokenConstants.KEY_TYPE));
-        } else {
-            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
-        }
-        authContext.setUsername(payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
-        authContext.setApiTier(apiLevelPolicy);
-        authContext.setApplicationId(String.valueOf(applicationObj.getInt(APIConstants.JwtTokenConstants.APPLICATION_ID)));
-        authContext.setApplicationName(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
-        authContext.setApplicationTier(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
-        authContext.setSubscriber(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
-        authContext.setConsumerKey(payload.getString(APIConstants.JwtTokenConstants.CONSUMER_KEY));
-
-        if (api != null) {
-            // If the user is subscribed to the API
-            String subscriptionTier = api.getString(APIConstants.JwtTokenConstants.SUBSCRIPTION_TIER);
-            authContext.setTier(subscriptionTier);
-            authContext.setSubscriberTenantDomain(
-                    api.getString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN));
-            JSONObject tierInfo = (JSONObject) payload.get(APIConstants.JwtTokenConstants.TIER_INFO);
-
-            if (tierInfo.has(subscriptionTier)) {
-                JSONObject subscriptionTierObj = (JSONObject) tierInfo.get(subscriptionTier);
-                authContext.setStopOnQuotaReach(
-                        subscriptionTierObj.getBoolean(APIConstants.JwtTokenConstants.STOP_ON_QUOTA_REACH));
-                authContext.setSpikeArrestLimit
-                        (subscriptionTierObj.getInt(APIConstants.JwtTokenConstants.SPIKE_ARREST_LIMIT));
-                if (!JSONObject.NULL.equals(
-                        subscriptionTierObj.get(APIConstants.JwtTokenConstants.SPIKE_ARREST_UNIT))) {
-                    authContext.setSpikeArrestUnit(
-                            subscriptionTierObj.getString(APIConstants.JwtTokenConstants.SPIKE_ARREST_UNIT));
-                }
-            }
-        }
-        // Set JWT token sent to the backend
-        if (payload.has(APIConstants.JwtTokenConstants.BACKEND_TOKEN)) {
-            authContext.setCallerToken(payload.getString(APIConstants.JwtTokenConstants.BACKEND_TOKEN));
-        }
-
-        return authContext;
-    }
-
-    /**
-     * Validate whether the user is subscribed to the invoked API. If subscribed, return a JSON object containing
-     * the API information.
-     *
-     * @param apiContext API context
-     * @param apiVersion API version
-     * @param payload    The payload of the JWT token
-     * @return an JSON object containing subscribed API information retrieved from token payload.
-     * If the subscription information is not found, return a null object.
-     * @throws APISecurityException if the user is not subscribed to the API
-     */
-    private JSONObject validateAPISubscription(String apiContext, String apiVersion, JSONObject payload)
-            throws APISecurityException {
-        JSONObject api = null;
-
-        if (payload.has(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS)) {
-            // Subscription validation
-            JSONArray subscribedAPIs = payload.getJSONArray(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
-            for (int i = 0; i < subscribedAPIs.length(); i++) {
-                JSONObject subscribedAPIsJSONObject = subscribedAPIs.getJSONObject(i);
-                if (apiContext.equals(subscribedAPIsJSONObject.getString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
-                        apiVersion.equals(subscribedAPIsJSONObject.getString(APIConstants.JwtTokenConstants.API_VERSION)
-                        )) {
-                    api = subscribedAPIsJSONObject;
-                    if (log.isDebugEnabled()) {
-                        log.debug("User is subscribed to the API: " + apiContext + ", version: " + apiVersion);
-                    }
-                    break;
-                }
-            }
-            if (api == null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("User is not subscribed to access the API: " + apiContext +
-                            ", version: " + apiVersion);
-                }
-                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
-                        "User is not subscribed to access the API: " + apiContext + ", version: " + apiVersion);
-            }
-        } else {
-            log.debug("No subscription information found in the token.");
-        }
-        return api;
     }
 
     /**
@@ -347,6 +240,7 @@ public class JWTValidator {
                     log.debug("Scope validation failed. User: " +
                             payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
                 }
+                log.error("Scope validation failed.");
                 throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
             }
             if (log.isDebugEnabled()) {
@@ -368,7 +262,7 @@ public class JWTValidator {
     private void checkTokenExpiration(String tokenSignature, JSONObject payload, String tenantDomain) throws APISecurityException {
         // Check whether the token is expired or not.
         long issuedTime = payload.getLong(APIConstants.JwtTokenConstants.ISSUED_TIME) * 1000;
-        long expiredTime = payload.getLong(APIConstants.JwtTokenConstants.EXPIRED_TIME) * 1000;
+        long expiredTime = payload.getLong(APIConstants.JwtTokenConstants.EXPIRY_TIME) * 1000;
         long validityPeriod = expiredTime - issuedTime;
         long timestampSkew = OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds() * 1000;
         long currentTime = System.currentTimeMillis();
@@ -380,6 +274,7 @@ public class JWTValidator {
                     getGatewayTokenCache().remove(tokenSignature);
                     getInvalidTokenCache().put(tokenSignature, tenantDomain);
                 }
+                log.error("JWT token is expired");
                 throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED,
                         "JWT token is expired");
             }
@@ -387,108 +282,6 @@ public class JWTValidator {
         if (log.isDebugEnabled()) {
             log.debug("Token is not expired. User: " + payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
         }
-    }
-
-    /**
-     * Verify the JWT token signature.
-     *
-     * @param splitToken The JWT token which is split into [header, payload, signature]
-     * @return whether the signature is verified or or not
-     * @throws APISecurityException in case of signature verification failure
-     */
-    private boolean verifyTokenSignature(String[] splitToken) throws APISecurityException {
-        // Retrieve signature algorithm from token header
-        String signatureAlgorithm = getSignatureAlgorithm(splitToken);
-
-        Certificate publicCert = null;
-        //Read the client-truststore.jks into a KeyStore
-        try {
-            KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
-            if (trustStore != null) {
-                // Read public certificate from trust store
-                publicCert = trustStore.getCertificate(APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS);
-            }
-        } catch (KeyStoreException e) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    "Error in retrieving public certificate from the trust store with alias : "
-                            + APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS, e);
-        }
-
-        if (publicCert != null) {
-            // Retrieve public key from the certificate
-            PublicKey publicKey = publicCert.getPublicKey();
-
-            try {
-                // Verify token signature
-                Signature signatureInstance = Signature.getInstance(signatureAlgorithm);
-                signatureInstance.initVerify(publicKey);
-                String assertion = splitToken[0] + "." + splitToken[1];
-                signatureInstance.update(assertion.getBytes());
-                byte[] decodedSignature = Base64.getUrlDecoder().decode(splitToken[2]);
-                return signatureInstance.verify(decodedSignature);
-            } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | IllegalArgumentException e) {
-                log.error("Signature verification failed. Token: " + getMaskedToken(splitToken), e);
-                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        "Invalid JWT token", e);
-            }
-        } else {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    "Couldn't find a public certificate to verify signature");
-        }
-    }
-
-    /**
-     * Retrieve the signature algorithm specified in the token header.
-     *
-     * @param splitToken The JWT token which is split into [header, payload, signature]
-     * @return whether the signature algorithm
-     * @throws APISecurityException in case of signature algorithm extraction failure
-     */
-    private String getSignatureAlgorithm(String[] splitToken) throws APISecurityException {
-        String signatureAlgorithm;
-        JSONObject header;
-        try {
-            header = new JSONObject(new String(Base64.getUrlDecoder().decode(splitToken[0])));
-        } catch (JSONException | IllegalArgumentException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Token decryption failure when retrieving header. Token: " +
-                        getMaskedToken(splitToken), e);
-            }
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                    "Invalid JWT token", e);
-        }
-        signatureAlgorithm = header.getString(APIConstants.JwtTokenConstants.SIGNATURE_ALGORITHM);
-        if (StringUtils.isBlank(signatureAlgorithm)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Signature algorithm not found in the token. Token: " + getMaskedToken(splitToken));
-            }
-            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
-        }
-        if (APIConstants.SIGNATURE_ALGORITHM_RS256.equals(signatureAlgorithm)) {
-            signatureAlgorithm = APIConstants.SIGNATURE_ALGORITHM_SHA256_WITH_RSA;
-        }
-        return signatureAlgorithm;
-    }
-
-    /**
-     * Return tenant domain of the API being invoked.
-     *
-     * @return tenant domain
-     */
-    private String getTenantDomain() {
-        return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-    }
-
-    private boolean isGatewayTokenCacheEnabled() {
-        try {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-            String cacheEnabled = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
-            return Boolean.parseBoolean(cacheEnabled);
-        } catch (Exception e) {
-            log.error("Did not found valid API Validation Information cache configuration. " +
-                    "Use default configuration.", e);
-        }
-        return true;
     }
 
     private Cache getGatewayTokenCache() {
@@ -508,21 +301,7 @@ public class JWTValidator {
                 APIConstants.API_MANAGER_CACHE_MANAGER).getCache(cacheName);
     }
 
-    private String getAccessTokenCacheKey(String accessToken, String apiContext, String apiVersion,
-                                          String resourceUri, String httpVerb) {
-        return accessToken + ":" + apiContext + ":" + apiVersion + ":" + resourceUri + ":" + httpVerb;
-    }
-
     private String getApiLevelPolicy() {
         return apiLevelPolicy;
-    }
-    
-    private String getMaskedToken(String[] splitToken) {
-        String concatToken = String.join(".", splitToken);
-        if (concatToken.length() >= 10) {
-            return "XXXXX" + concatToken.substring(concatToken.length() - 10);
-        } else {
-            return "XXXXX" + concatToken.substring(concatToken.length() / 2);
-        }
     }
 }

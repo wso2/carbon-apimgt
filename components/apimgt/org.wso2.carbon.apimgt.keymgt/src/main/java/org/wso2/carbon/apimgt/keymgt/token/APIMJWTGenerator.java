@@ -51,13 +51,11 @@ public class APIMJWTGenerator extends JWTGenerator {
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
     private String signatureAlgorithm = SHA256_WITH_RSA;
 
-    private static final String NONE = "NONE";
-
     private String userAttributeSeparator = APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT;
 
     public String generateJWT(JwtTokenInfoDTO jwtTokenInfoDTO) throws APIManagementException {
 
-        String jwtHeader = buildHeader(jwtTokenInfoDTO);
+        String jwtHeader = buildHeader(MultitenantUtils.getTenantAwareUsername(jwtTokenInfoDTO.getEndUserName()));
 
         String base64UrlEncodedHeader = "";
         if (jwtHeader != null) {
@@ -86,26 +84,6 @@ public class APIMJWTGenerator extends JWTGenerator {
         } else {
             return base64UrlEncodedHeader + '.' + base64UrlEncodedBody + '.';
         }
-    }
-
-    public String buildHeader(JwtTokenInfoDTO JwtTokenInfoDTO) throws APIManagementException {
-        String jwtHeader = null;
-
-        //if signature algo==NONE, header without cert
-        if (NONE.equals(signatureAlgorithm)) {
-            StringBuilder jwtHeaderBuilder = new StringBuilder();
-            jwtHeaderBuilder.append("{\"typ\":\"JWT\",");
-            jwtHeaderBuilder.append("\"alg\":\"");
-            jwtHeaderBuilder.append(getJWSCompliantAlgorithmCode(NONE));
-            jwtHeaderBuilder.append('\"');
-            jwtHeaderBuilder.append('}');
-
-            jwtHeader = jwtHeaderBuilder.toString();
-
-        } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
-            jwtHeader = addCertToHeader(JwtTokenInfoDTO.getEndUserName());
-        }
-        return jwtHeader;
     }
 
     public String buildBody(JwtTokenInfoDTO jwtTokenInfoDTO) throws APIManagementException {

@@ -72,14 +72,11 @@ import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
@@ -1329,6 +1326,26 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
+    @Override
+    public String generateApiKey(Application application, String userName, long validityPeriod) throws APIManagementException {
+
+        JwtTokenInfoDTO jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application, userName,
+                MultitenantUtils.getTenantDomain(userName));
+
+        ExtendedApplicationDTO applicationDTO = new ExtendedApplicationDTO();
+        applicationDTO.setUuid(application.getUUID());
+        applicationDTO.setId(application.getId());
+        applicationDTO.setName(application.getName());
+        applicationDTO.setOwner(application.getOwner());
+        applicationDTO.setTier(application.getTier());
+        jwtTokenInfoDTO.setApplication(applicationDTO);
+
+        jwtTokenInfoDTO.setSubscriber(userName);
+        jwtTokenInfoDTO.setExpirationTime(validityPeriod);
+        jwtTokenInfoDTO.setKeyType(application.getKeyType());
+
+        return ApiKeyGenerator.generateToken(jwtTokenInfoDTO);
+    }
 
     /**
      * The method to get All PUBLISHED and DEPRECATED APIs, to Store view

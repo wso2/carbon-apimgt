@@ -277,8 +277,9 @@ public final class APIConstants {
     public static final String DEFAULT_API_SECURITY_OAUTH2 = "oauth2";
     public static final String API_SECURITY_MUTUAL_SSL = "mutualssl";
     public static final String API_SECURITY_BASIC_AUTH = "basic_auth";
+    public static final String API_SECURITY_API_KEY = "api_key";
     public static final String API_SECURITY_MUTUAL_SSL_MANDATORY = "mutualssl_mandatory";
-    public static final String API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY = "oauth_basic_auth_mandatory";
+    public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
@@ -367,6 +368,7 @@ public final class APIConstants {
     public static final String API_LEVEL_POLICY = "APILevelPolicy";
     public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
+    public static final String API_KEY_HEADER_QUERY_PARAM = "apikey";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE = "RemoveOAuthHeadersFromOutMessage";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT = "true";
     public static final String REMOVE_OAUTH_HEADERS_FROM_MESSAGE = OAUTH_CONFIGS + "RemoveOAuthHeadersFromOutMessage";
@@ -616,6 +618,7 @@ public final class APIConstants {
     public static final String MULTI_TENANT_USER_ADMIN_SERVICE = "MultiTenantUserAdminService";
     public static final String API_STORE_GROUP_EXTRACTOR_CLAIM_URI = API_STORE + "DefaultGroupExtractorClaimUri";
     public static final String API_STORE_MAP_EXISTING_AUTH_APPS = API_STORE + "MapExistingAuthApps";
+    public static final String API_STORE_API_KEY_ALIAS = API_STORE + "ApiKeyAlias";
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
 
     public static final String API_PUBLISHER = "APIPublisher.";
@@ -849,6 +852,9 @@ public final class APIConstants {
     public static final String GATEWAY_INVALID_USERNAME_CACHE_NAME = "gatewayInvalidUsernameCache";
     public static final String GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME = "gatewayBasicAuthResourceCache";
     public static final String GATEWAY_CERTIFICATE_CACHE_NAME = "gatewayCertificateCache";
+    public static final String GATEWAY_API_KEY_CACHE_NAME = "gatewayApiKeyCache";
+    public static final String GATEWAY_API_KEY_KEY_CACHE_NAME = "gatewayApiKeyKeyCache";
+    public static final String GATEWAY_INVALID_API_KEY_CACHE_NAME = "gatewayInvalidApiKeyCache";
     public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
     public static final String GATEWAY_INVALID_TOKEN_CACHE_NAME = "GATEWAY_INVALID_TOKEN_CACHE";
     public static final String KEY_CACHE_NAME = "keyCache";
@@ -1520,7 +1526,8 @@ public final class APIConstants {
         public static final String SCOPE = "scope";
         public static final String SCOPE_DELIMITER = " ";
         public static final String ISSUED_TIME = "iat";
-        public static final String EXPIRED_TIME = "exp";
+        public static final String EXPIRY_TIME = "exp";
+        public static final String JWT_KID = "kid";
         public static final String SIGNATURE_ALGORITHM = "alg";
         public static final String TOKEN_TYPE = "typ";
         public static final String BACKEND_TOKEN = "backendJwt";

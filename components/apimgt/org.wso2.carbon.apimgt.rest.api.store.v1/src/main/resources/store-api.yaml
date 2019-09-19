@@ -75,6 +75,7 @@ securityDefinitions:
     scopes:
       openid: Authorize access to user details
       apim:subscribe: Subscribe API
+      apim:api_key: Generate API Keys
       apim:app_update: Update an application
       apim:app_manage: Manage application
       apim:sub_manage: Manage subscriptions
@@ -1935,6 +1936,60 @@ paths:
             Token is generated.
           schema:
             $ref: '#/definitions/ApplicationToken'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+  ######################################################
+  # The "Generate API Key" Processing Function resource API
+  ######################################################
+  '/applications/{applicationId}/api-keys/{keyType}/generate':
+
+    #-----------------------------------------------------
+    # Generate apikey for an application
+    #-----------------------------------------------------
+    post:
+      security:
+        - OAuth2Security:
+            - apim:api_key
+      summary: Generate API Key
+      description: |
+        Generate a self contained API Key for the application
+      parameters:
+        - $ref: '#/parameters/applicationId'
+        - $ref: '#/parameters/keyType'
+        - in: body
+          name: body
+          description: |
+            API Key generation request object
+          schema:
+            $ref: '#/definitions/APIKeyGenerateRequest'
+        - $ref: '#/parameters/If-Match'
+      tags:
+        - API Keys
+      responses:
+        200:
+          description: |
+            OK.
+            apikey generated.
+          schema:
+            $ref: '#/definitions/APIKey'
         400:
           description: |
             Bad Request.
@@ -4397,6 +4452,21 @@ definitions:
         description: Maximum validity time for the access token
         example: 3600
 
+  #-----------------------------------------------------
+  # The APIKey resource
+  #-----------------------------------------------------
+  APIKey :
+    title: API Key details to invoke APIs
+    properties:
+      apikey:
+        type: string
+        description: API Key
+        example: eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=
+      validityTime:
+        type: integer
+        format: int32
+        example: 3600
+
 #-----------------------------------------------------
 # The Application Key resource
 #-----------------------------------------------------
@@ -4557,6 +4627,19 @@ definitions:
         type: object
         description: Additional parameters if Authorization server needs any
 
+#-----------------------------------------------------
+# The APIKey Generation Request schema
+#-----------------------------------------------------
+  APIKeyGenerateRequest :
+    title: API Key generation request object
+    properties:
+      validityPeriod:
+        type: integer
+        format: int32
+        description: Token validity period
+      additionalProperties:
+        type: object
+        description: Additional parameters if Authorization server needs any
 
 #-----------------------------------------------------
 # Scope Info resource
