@@ -511,9 +511,11 @@ public class OAS2Parser extends APIDefinition {
             oAuth2Definition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
         }
         swagger.addSecurityDefinition(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, oAuth2Definition);
-        SecurityRequirement securityRequirement = new SecurityRequirement();
-        securityRequirement.setRequirements(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, new ArrayList<String>());
-        swagger.addSecurity(securityRequirement);
+        if (swagger.getSecurity() == null) {
+            SecurityRequirement securityRequirement = new SecurityRequirement();
+            securityRequirement.setRequirements(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, new ArrayList<String>());
+            swagger.addSecurity(securityRequirement);
+        }
     }
 
     /**
