@@ -2002,7 +2002,7 @@ class API extends Resource {
      * @static
      * Publish the given API to given set of external stores and remove from others which are not specified
      * @param {String} apiId uuid
-     * @param {Array} externalStoreIds 
+     * @param {Array} externalStoreIds
      */
     static publishAPIToExternalStores(apiId, externalStoreIds) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;
