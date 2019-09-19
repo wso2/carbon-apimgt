@@ -44,6 +44,7 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -543,16 +544,19 @@ public class OAS3Parser extends APIDefinition {
             openAPI.addExtension(APIConstants.X_THROTTLING_TIER, api.getApiLevelPolicy());
         }
         openAPI.addExtension(APIConstants.X_WSO2_CORS, api.getCorsConfiguration());
-        org.json.JSONObject endpoints = new org.json.JSONObject(api.getEndpointConfig());
-        if (endpoints.has(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
-            String prodUrls = endpoints.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)
-                    .getString(APIConstants.API_DATA_URL);
-            openAPI.addExtension(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS, prodUrls);
-        }
-        if (endpoints.has(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
-            String sandUrls = endpoints.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS)
-                    .getString(APIConstants.API_DATA_URL);
-            openAPI.addExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandUrls);
+        String endpointConfig = api.getEndpointConfig();
+        if (!StringUtils.isBlank(endpointConfig)) {
+            org.json.JSONObject endpoints = new org.json.JSONObject(endpointConfig);
+            if (endpoints.has(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
+                String prodUrls = endpoints.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)
+                        .getString(APIConstants.API_DATA_URL);
+                openAPI.addExtension(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS, prodUrls);
+            }
+            if (endpoints.has(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
+                String sandUrls = endpoints.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS)
+                        .getString(APIConstants.API_DATA_URL);
+                openAPI.addExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandUrls);
+            }
         }
         openAPI.addExtension(APIConstants.X_WSO2_BASEPATH, api.getContext());
         return Json.pretty(openAPI);
