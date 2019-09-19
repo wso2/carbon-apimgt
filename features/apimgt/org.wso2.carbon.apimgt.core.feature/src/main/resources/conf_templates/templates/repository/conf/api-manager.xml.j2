@@ -292,7 +292,7 @@
             <MaxIdle>{{apim.key_manager.pool.max_idle}}</MaxIdle>
             <InitIdleCapacity>{{apim.key_manager.pool.init_idle_capacity}}</InitIdleCapacity>
         </ConnectionPool>
-        <!-- Specifies the implementation to be used for KeyValidationHandler. Steps for validating a token can be controlled by plugging in a 
+        <!-- Specifies the implementation to be used for KeyValidationHandler. Steps for validating a token can be controlled by plugging in a
              custom KeyValidation Handler -->
         <KeyValidationHandlerClassName>{{apim.key_manager.key_validation_handler_impl}}</KeyValidationHandlerClassName>
     </APIKeyValidator>
@@ -448,7 +448,7 @@
     <!-- Status observers can be registered against the API Publisher to listen for
          API status update events. Each observer must implement the APIStatusObserver
          interface. Multiple observers can be engaged if necessary and in such situations
-         they will be notified in the order they are defined here. 
+         they will be notified in the order they are defined here.
          This configuration is unused from API Manager version 1.10.0 -->
     <!--StatusObservers>
         <Observer>org.wso2.carbon.apimgt.impl.observers.SimpleLoggingObserver</Observer>
@@ -475,7 +475,7 @@
              It is false by default and if you set it to true then make sure that the Access-Control-Allow-Origin header does not contain the wildcard (*) -->
         <Access-Control-Allow-Credentials>{{apim.cors.allow_credentials}}</Access-Control-Allow-Credentials>
     </CORSConfiguration>
-    
+
     <!-- This property is there to configure velocity log output into existing Log4j carbon Logger.
          You can enable this and set preferable Logger name. -->
     <!-- VelocityLogger>VELOCITY</VelocityLogger -->
@@ -521,6 +521,10 @@
             </WhiteListedURI>
             <WhiteListedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}/swagger</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </WhiteListedURI>
+            <WhiteListedURI>
+                <URI>/api/am/store/{version}/apis/{apiId}/wsdl</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </WhiteListedURI>
             <WhiteListedURI>
@@ -817,7 +821,7 @@
         <EnableJWTClaimConditions>{{apim.throttling.enable_jwt_claim_based_throttling}}</EnableJWTClaimConditions>
         <EnableQueryParamConditions>{{apim.throttling.enable_query_param_based_throttling}}</EnableQueryParamConditions>
     </ThrottlingConfigurations>
-    
+
     <WorkflowConfigurations>
         <Enabled>{{apim.workflow.enable}}</Enabled>
     	<ServerUrl>{{apim.workflow.service_url}}</ServerUrl>
