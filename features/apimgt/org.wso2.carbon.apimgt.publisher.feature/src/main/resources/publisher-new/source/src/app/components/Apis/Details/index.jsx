@@ -528,15 +528,16 @@ class Details extends Component {
                             to={pathPrefix + 'mediation policies'}
                             Icon={<ScopesIcon />}
                         />
-                        {!isAPIProduct && (
-                            <LeftMenuItem
-                                text={intl.formatMessage({
-                                    id: 'Apis.Details.index.monetization',
-                                    defaultMessage: 'monetization',
-                                })}
-                                to={pathPrefix + 'monetization'}
-                                Icon={<MonetizationIcon />}
-                            />)}
+                        {(!isAPIProduct && !isRestricted(['apim:api_publish'], api))
+                            && (
+                                <LeftMenuItem
+                                    text={intl.formatMessage({
+                                        id: 'Apis.Details.index.monetization',
+                                        defaultMessage: 'monetization',
+                                    })}
+                                    to={pathPrefix + 'monetization'}
+                                    Icon={<MonetizationIcon />}
+                                />)}
                         {settingsContext.externalStoresEnabled &&
                             <LeftMenuItem
                                 text={intl.formatMessage({

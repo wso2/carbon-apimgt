@@ -137,7 +137,7 @@ class Monetization extends Component {
                     <Grid item>
                         <Typography variant='body2' color='primary'>
                             <FormattedMessage
-                                id='Apis.Details.Monetization.index.update.not.allowed'
+                                id='Apis.Details.Monetization.Index.update.not.allowed'
                                 defaultMessage={'* You are not authorized to update API monetization'
                                     + ' due to insufficient permissions'}
                             />
