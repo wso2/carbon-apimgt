@@ -493,64 +493,66 @@ class InfoBar extends React.Component {
                                                 {!api.advertiseInfo.advertised ? (
                                                     <React.Fragment>
                                                         <TableRow>
-                                                        <TableCell
-                                                            component='th'
-                                                            scope='row'
-                                                            className={classes.contentToTop}
-                                                        >
-                                                            <div className={classes.iconAligner}>
-                                                                <Icon className={classes.iconEven}>
-                                                                    desktop_windows
-                                                                </Icon>
-                                                                <span className={classes.iconTextWrapper}>
-                                                                    <FormattedMessage
-                                                                        id='Apis.Details.InfoBar.available.environments'
-                                                                        defaultMessage='Available Environments'
-                                                                    />
-                                                                </span>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <Environments />
-                                                        </TableCell>
-                                                    </TableRow>
-                                                    <TableRow>
-                                                        <TableCell 
-                                                            component='th' 
-                                                            scope='row' 
-                                                            className={classes.contentToTop}
-                                                        >
-                                                            <div className={classes.iconAligner}>
-                                                                <Icon className={classes.iconEven}>games</Icon>
-                                                                <span className={classes.iconTextWrapper}>
-                                                                    <FormattedMessage
-                                                                        id='Apis.Details.InfoBar.available.mgLabels'
-                                                                        defaultMessage='Available Microgateways'
-                                                                    />
-                                                                </span>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <Labels />
-                                                        </TableCell>
-                                                    </TableRow>
-                                                    </React.Fragment>                           
-                                                    ) : (
-                                                        <TableRow>
-                                                            <TableCell component='th' scope='row'>
+                                                            <TableCell
+                                                                component='th'
+                                                                scope='row'
+                                                                className={classes.contentToTop}
+                                                            >
                                                                 <div className={classes.iconAligner}>
-                                                                    <Icon className={classes.iconOdd}>account_circle</Icon>
+                                                                    <Icon className={classes.iconEven}>
+                                                                        desktop_windows
+                                                                    </Icon>
                                                                     <span className={classes.iconTextWrapper}>
                                                                         <FormattedMessage
-                                                                            id='Apis.Details.InfoBar.owner'
-                                                                            defaultMessage='Owner'
+                                                                            id='Apis.Details.InfoBar.available.environments'
+                                                                            defaultMessage='Available Environments'
                                                                         />
                                                                     </span>
                                                                 </div>
                                                             </TableCell>
-                                                            <TableCell>{api.advertiseInfo.apiOwner}</TableCell>
+                                                            <TableCell>
+                                                                <Environments />
+                                                            </TableCell>
                                                         </TableRow>
-                                                    )}
+                                                        {api.labels.length !== 0 && (
+                                                            <TableRow>
+                                                                <TableCell
+                                                                    component='th'
+                                                                    scope='row'
+                                                                    className={classes.contentToTop}
+                                                                >
+                                                                    <div className={classes.iconAligner}>
+                                                                        <Icon className={classes.iconEven}>games</Icon>
+                                                                        <span className={classes.iconTextWrapper}>
+                                                                            <FormattedMessage
+                                                                                id='Apis.Details.InfoBar.available.mgLabels'
+                                                                                defaultMessage='Available Microgateways'
+                                                                            />
+                                                                        </span>
+                                                                    </div>
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <Labels />
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        )}
+                                                    </React.Fragment>
+                                                ) : (
+                                                    <TableRow>
+                                                        <TableCell component='th' scope='row'>
+                                                            <div className={classes.iconAligner}>
+                                                                <Icon className={classes.iconOdd}>account_circle</Icon>
+                                                                <span className={classes.iconTextWrapper}>
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.InfoBar.owner'
+                                                                        defaultMessage='Owner'
+                                                                    />
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell>{api.advertiseInfo.apiOwner}</TableCell>
+                                                    </TableRow>
+                                                )}
                                             </TableBody>
                                         </Table>
                                     </div>
@@ -565,12 +567,12 @@ class InfoBar extends React.Component {
                                             <FormattedMessage id='Apis.Details.InfoBar.less' defaultMessage='LESS' />
                                         </Typography>
                                     ) : (
-                                            <Typography className={classes.buttonOverviewText}>
-                                                <FormattedMessage
-                                                    id='Apis.Details.InfoBar.more'
-                                                    defaultMessage='MORE'
+                                        <Typography className={classes.buttonOverviewText}>
+                                            <FormattedMessage
+                                                id='Apis.Details.InfoBar.more'
+                                                defaultMessage='MORE'
                                                 />
-                                            </Typography>
+                                        </Typography>
                                         )}
                                     {showOverview ? <Icon>arrow_drop_up</Icon> : <Icon>arrow_drop_down</Icon>}
                                 </div>
