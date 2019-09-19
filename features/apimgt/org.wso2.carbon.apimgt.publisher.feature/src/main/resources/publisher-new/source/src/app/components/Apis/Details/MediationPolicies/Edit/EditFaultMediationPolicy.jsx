@@ -310,11 +310,7 @@ function EditFaultMediationPolicy(props) {
                                 name={seq.id}
                                 type={seq.type}
                                 control={<Radio />}
-                                label={<FormattedMessage
-                                    id={'Apis.Details.Edit.MediationPolicies.EditFaultMediationPolicies.custom' +
-                                    '.fault.policy'}
-                                    defaultMessage={seq.name}
-                                />}
+                                label={seq.name}
                                 value={seq.name}
                                 checked={selectedPolicyFile.name === seq.name}
                             />
@@ -346,11 +342,7 @@ function EditFaultMediationPolicy(props) {
                                 name={seq.id}
                                 type={seq.type}
                                 control={<Radio />}
-                                label={<FormattedMessage
-                                    id={'Apis.Details.Edit.MediationPolicies.EditFaultMediationPolicies.global' +
-                                        '.fault.policy'}
-                                    defaultMessage={seq.name}
-                                />}
+                                label={seq.name}
                                 value={seq.name}
                                 checked={selectedPolicyFile.name === seq.name}
                             />

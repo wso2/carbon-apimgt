@@ -41,7 +41,7 @@ import { Link } from 'react-router-dom';
  */
 export default function OperationGovernance(props) {
     const {
-        operation, operationActionsDispatcher, operationRateLimits, api,
+        operation, operationActionsDispatcher, operationRateLimits, api, disableUpdate,
     } = props;
     const isOperationRateLimiting = api.apiThrottlingPolicy === null;
     return (
@@ -57,11 +57,14 @@ export default function OperationGovernance(props) {
             </Grid>
             <Grid item md={1} />
             <Grid item md={11}>
-                <FormControl component='fieldset'>
+                <FormControl disabled={disableUpdate} component='fieldset'>
                     <FormControlLabel
                         control={
                             <Switch
-                                checked={operation.authType.toLowerCase() !== 'none'}
+                                // TODO: operation.authType should not be null,
+                                // Null check was added due to an issue in api product
+                                // https://github.com/wso2/product-apim/issues/5635 ~tmkb
+                                checked={operation.authType && operation.authType.toLowerCase() !== 'none'}
                                 onChange={({ target: { checked } }) =>
                                     operationActionsDispatcher({
                                         action: 'authType',
@@ -95,7 +98,7 @@ export default function OperationGovernance(props) {
                     select
                     fullWidth={!isOperationRateLimiting}
                     SelectProps={{ autoWidth: true }}
-                    disabled={!isOperationRateLimiting}
+                    disabled={disableUpdate || !isOperationRateLimiting}
                     label={
                         isOperationRateLimiting ? (
                             'Rate limiting policy'
@@ -144,6 +147,7 @@ export default function OperationGovernance(props) {
                 <TextField
                     id='operation_scope'
                     select
+                    disabled={disableUpdate}
                     label='Operation scope'
                     value={operation.scopes[0]}
                     onChange={({ target: { value } }) =>
@@ -152,7 +156,7 @@ export default function OperationGovernance(props) {
                             event: { value: [value] },
                         })
                     }
-                    helperText='Select a scopes to control permissions to this operation'
+                    helperText='Select a scope to control permissions to this operation'
                     margin='dense'
                     variant='outlined'
                 >
@@ -174,6 +178,7 @@ export default function OperationGovernance(props) {
 }
 
 OperationGovernance.propTypes = {
+    disableUpdate: PropTypes.bool,
     operation: PropTypes.shape({
         target: PropTypes.string.isRequired,
         verb: PropTypes.string.isRequired,
@@ -187,4 +192,5 @@ OperationGovernance.propTypes = {
 OperationGovernance.defaultProps = {
     operationRateLimits: [],
     api: { scopes: [] },
+    disableUpdate: false,
 };

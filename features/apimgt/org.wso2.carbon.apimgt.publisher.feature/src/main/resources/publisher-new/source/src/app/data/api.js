@@ -131,7 +131,7 @@ class API extends Resource {
         } else {
             payload = {
                 body: apiData,
-                'Content-Type': 'application/json',
+                openAPIVersion: 'v2',
             };
             promise_create = this.client.then(client => {
                 return client.apis['APIs'].post_apis(payload, this._requestMetaData());
@@ -277,7 +277,7 @@ class API extends Resource {
         }
     }
 
-    save(query = 'v2') {
+    save(openAPIVersion = 'v2') {
         const promisedAPIResponse = this.client.then((client) => {
             const properties = client.spec.definitions.API.properties;
             const data = {};
@@ -289,7 +289,7 @@ class API extends Resource {
             const payload = {
                 body: data,
                 'Content-Type': 'application/json',
-                openAPIVersion: query,
+                openAPIVersion,
             };
             return client.apis['APIs'].post_apis(payload, this._requestMetaData());
         });
@@ -404,10 +404,9 @@ class API extends Resource {
      * @param {string} query The parameters that should be validated.
      * @return {promise}
      * */
-    validateAPI(query) {
+    validateAPIParameter(query) {
         return this.client.then((client) => {
             return client.apis.Validation.validateAPI({ query: query }).then((resp) => {
-                console.log(resp);
                 return resp.ok;
             }).catch((err) => {
                 console.log(err);
@@ -422,12 +421,14 @@ class API extends Resource {
      * @param {string} name The document name
      * @return {promise}
      * */
-    validateDocument(id, name) {
+    validateDocumentExists(id, name) {
         return this.client.then((client) => {
-            return client.apis['API Documents'].validateDocument({
-                apiId: id,
-                name: name
-            })
+            return client.apis['API Documents'].validateDocument({ apiId: id, name: name }).then((resp) => {
+                return resp.ok;
+            }).catch((err) => {
+                console.log(err);
+                return false;
+            });
         });
     }
 

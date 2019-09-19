@@ -18,21 +18,21 @@
 
 import React, { useReducer, useEffect, useState } from 'react';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import cloneDeep from 'lodash.clonedeep';
 import Swagger from 'swagger-client';
 import isEmpty from 'lodash/isEmpty';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
-
+import CircularProgress from '@material-ui/core/CircularProgress';
+import PropTypes from 'prop-types';
 import Operation from './components/Operation';
 import GroupOfOperations from './components/GroupOfOperations';
 import SpecErrors from './components/SpecErrors';
 import AddOperation from './components/AddOperation';
 import GoToDefinitionLink from './components/GoToDefinitionLink';
 import APIRateLimiting from './components/APIRateLimiting';
+import { getTaggedOperations } from './operationUtils';
 
 /**
  * This component handles the Resource page in API details though it's written in a sharable way
@@ -41,7 +41,10 @@ import APIRateLimiting from './components/APIRateLimiting';
  * @export
  * @returns {React.Component} @inheritdoc
  */
-export default function Resources() {
+export default function Resources(props) {
+    const {
+        disableAddOperation, operationProps, disableRateLimiting, hideAPIDefinitionLink,
+    } = props;
     /**
      *
      * Reducer to handle actions related to OpenAPI specification
@@ -70,27 +73,13 @@ export default function Resources() {
      * @param {*} response
      * @returns
      */
-    function resolveAndUpdateSpec(response) {
-        return Swagger.resolve({ spec: response.body }).then(({ spec, errors }) => {
-            openAPIActionsDispatcher({ action: 'initState', event: { value: spec } });
+    function resolveAndUpdateSpec(rawSpec) {
+        return Swagger.resolve({ spec: rawSpec }).then(({ spec, errors }) => {
+            const value = spec;
+            delete value.$$normalized;
+            openAPIActionsDispatcher({ action: 'initState', event: { value } });
             setSpecErrors(errors);
         });
-    }
-    useEffect(() => {
-        // Update the Swagger spec object when API object gets changed
-        api.getSwagger().then(response => resolveAndUpdateSpec(response));
-        // TODO: need to handle the error cases through catch ~tmkb
-
-        // Fetch API level throttling policies only when the page get mounted for the first time `componentDidMount`
-        API.policies('api').then((response) => {
-            setOperationRateLimits(response.body.list);
-        });
-        // TODO: need to handle the error cases through catch ~tmkb
-    }, [api]);
-
-    // We don't give a * If openAPI object is null
-    if (isEmpty(openAPI)) {
-        return <CircularProgress />;
     }
 
     /**
@@ -101,7 +90,7 @@ export default function Resources() {
     function updateSwagger(targetOperation, spec) {
         return api
             .updateSwagger(spec)
-            .then(response => resolveAndUpdateSpec(response))
+            .then(response => resolveAndUpdateSpec(response.body))
             .then(() => updateAPI())
             .catch((error) => {
                 console.error(error);
@@ -151,7 +140,9 @@ export default function Resources() {
                     // If target is not there add an empty object
                     copyOfOpenAPI.paths[data.target] = {};
                 }
-                copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()] = {};
+                copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()] = {
+                    responses: { 200: { description: 'ok' } },
+                };
                 return updateSwagger(data, copyOfOpenAPI);
             case 'delete':
                 delete copyOfOpenAPI.paths[data.target][data.verb.toLowerCase()];
@@ -165,45 +156,37 @@ export default function Resources() {
         return Promise.reject(new Error());
     }
 
-    const taggedOperations = { Default: [] };
-    api.operations.map((apiOperation) => {
-        const { target, verb } = apiOperation;
-        const openAPIOperation = openAPI.paths[target] && openAPI.paths[target][verb.toLowerCase()];
-        if (!openAPIOperation) {
-            console.warn(`Could not find target = ${target} ` +
-                    `verb (lower cased) = ${verb.toLowerCase()} operation in OpenAPI definition`);
-            // Skipping not found operations
-            return null;
-        }
-        const operationInfo = { spec: openAPIOperation, ...apiOperation };
-        if (openAPIOperation.tags) {
-            openAPIOperation.tags.map((tag) => {
-                if (!taggedOperations[tag]) {
-                    taggedOperations[tag] = [];
-                }
-                taggedOperations[tag].push(operationInfo);
-                return operationInfo; // Just to satisfy an es-lint rule or could use `for ... of ...`
-            });
-        } else {
-            taggedOperations.Default.push(operationInfo);
-        }
-        return operationInfo; // Just to satisfy an es-lint rule
-    });
+    useEffect(() => {
+        // Update the Swagger spec object when API object gets changed
+        api.getSwagger().then((response) => {
+            resolveAndUpdateSpec(response.body);
+        });
+
+        // Fetch API level throttling policies only when the page get mounted for the first time `componentDidMount`
+        API.policies('api').then((response) => {
+            setOperationRateLimits(response.body.list);
+        });
+        // TODO: need to handle the error cases through catch ~tmkb
+    }, [api]);
+
+    if (isEmpty(openAPI)) {
+        return <CircularProgress />;
+    }
+    const taggedOperations = getTaggedOperations(api, openAPI);
 
     return (
         <Grid container direction='row' justify='flex-start' spacing={2} alignItems='stretch'>
-            <Grid item md={12}>
-                <Typography variant='h4' gutterBottom>
-                    Resources
-                    <SpecErrors specErrors={specErrors} />
-                </Typography>
-            </Grid>
-            <Grid item md={12}>
-                <APIRateLimiting operationRateLimits={operationRateLimits} api={api} updateAPI={updateAPI} />
-            </Grid>
-            <Grid item md={12}>
-                <AddOperation updateOpenAPI={updateOpenAPI} />
-            </Grid>
+            {!disableRateLimiting && (
+                <Grid item md={12}>
+                    <APIRateLimiting operationRateLimits={operationRateLimits} api={api} updateAPI={updateAPI} />
+                </Grid>
+            )}
+            {!disableAddOperation && (
+                <Grid item md={12}>
+                    <AddOperation updateOpenAPI={updateOpenAPI} />
+                </Grid>
+            )}
+            {specErrors.length > 0 && <SpecErrors specErrors={specErrors} />}
             <Grid item md={12}>
                 {Object.entries(taggedOperations).map(([tag, operations]) =>
                     !!operations.length && (
@@ -225,6 +208,7 @@ export default function Resources() {
                                                 operation={operation}
                                                 operationRateLimits={operationRateLimits}
                                                 api={api}
+                                                {...operationProps}
                                             />
                                         </Grid>
                                     ))}
@@ -234,7 +218,24 @@ export default function Resources() {
                     ))}
             </Grid>
 
-            <GoToDefinitionLink api={api} />
+            {!hideAPIDefinitionLink && <GoToDefinitionLink api={api} />}
         </Grid>
     );
 }
+
+Resources.defaultProps = {
+    operationProps: { disableUpdate: false, disableDelete: false },
+    disableRateLimiting: false,
+    hideAPIDefinitionLink: false,
+    disableAddOperation: false,
+};
+
+Resources.propTypes = {
+    disableRateLimiting: PropTypes.bool,
+    hideAPIDefinitionLink: PropTypes.bool,
+    disableAddOperation: PropTypes.bool,
+    operationProps: PropTypes.shape({
+        disableUpdate: PropTypes.bool,
+        disableDelete: PropTypes.bool,
+    }),
+};

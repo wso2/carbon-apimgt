@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState, useReducer, useEffect } from 'react';
+import React, { useState, useReducer, useEffect, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import Grid from '@material-ui/core/Grid';
@@ -52,7 +52,13 @@ import Parameters from './operationComponents/Parameters';
  */
 export default function Operation(props) {
     const {
-        operation: initOperation, updateOpenAPI, highlight, operationRateLimits, api,
+        operation: initOperation,
+        updateOpenAPI,
+        highlight,
+        operationRateLimits,
+        api,
+        disableDelete,
+        disableUpdate,
     } = props;
     const [isSaving, setIsSaving] = useState(false); // Use to show the loader and disable button
     const [isDeleting, setIsDeleting] = useState(false); // Use to disable the expansion panel
@@ -213,13 +219,14 @@ export default function Operation(props) {
                             </Typography>
                         </Typography>
                     </Grid>
-
-                    <Grid item md={1}>
-                        <IconButton onClick={deleteOperation} aria-label='delete'>
-                            <DeleteIcon fontSize='small' />
-                            {isDeleting && <CircularProgress size={24} />}
-                        </IconButton>
-                    </Grid>
+                    {!disableDelete && (
+                        <Grid item md={1}>
+                            <IconButton onClick={deleteOperation} aria-label='delete'>
+                                <DeleteIcon fontSize='small' />
+                                {isDeleting && <CircularProgress size={24} />}
+                            </IconButton>
+                        </Grid>
+                    )}
                 </Grid>
             </ExpansionPanelSummary>
             <Divider light className={classes.customDivider} />
@@ -228,48 +235,65 @@ export default function Operation(props) {
                     <DescriptionAndSummary
                         operation={operation}
                         operationActionsDispatcher={operationActionsDispatcher}
+                        disableUpdate={disableUpdate}
                     />
                     <OperationGovernance
                         operation={operation}
                         operationActionsDispatcher={operationActionsDispatcher}
                         operationRateLimits={operationRateLimits}
                         api={api}
+                        disableUpdate={disableUpdate}
                     />
                     <Parameters
                         operation={operation}
                         operationActionsDispatcher={operationActionsDispatcher}
                         operationRateLimits={operationRateLimits}
                         api={api}
+                        disableUpdate={disableUpdate}
                     />
                 </Grid>
             </ExpansionPanelDetails>
-            <Divider className={classes.customDivider} />
-            <ExpansionPanelActions style={{ justifyContent: 'flex-start' }}>
-                <Button disabled={isSaving} onClick={saveChanges} variant='outlined' size='small' color='primary'>
-                    Save
-                    {isSaving && <CircularProgress size={24} />}
-                </Button>
-                <Button
-                    size='small'
-                    onClick={() => {
-                        operationActionsDispatcher({ action: 'update', event: { value: initOperation } });
-                        setIsNotSaved(false);
-                    }}
-                >
-                    Reset
-                </Button>
-            </ExpansionPanelActions>
-            {isSaving && <LinearProgress classes={{ root: classes.linearProgress }} />}
+            {!disableUpdate && (
+                <Fragment>
+                    <Divider className={classes.customDivider} />
+                    <ExpansionPanelActions style={{ justifyContent: 'flex-start' }}>
+                        <Button
+                            disabled={isSaving}
+                            onClick={saveChanges}
+                            variant='outlined'
+                            size='small'
+                            color='primary'
+                        >
+                            Save
+                            {isSaving && <CircularProgress size={24} />}
+                        </Button>
+                        <Button
+                            size='small'
+                            onClick={() => {
+                                operationActionsDispatcher({ action: 'update', event: { value: initOperation } });
+                                setIsNotSaved(false);
+                            }}
+                        >
+                            Reset
+                        </Button>
+                    </ExpansionPanelActions>
+                    {isSaving && <LinearProgress classes={{ root: classes.linearProgress }} />}
+                </Fragment>
+            )}
         </ExpansionPanel>
     );
 }
 Operation.defaultProps = {
     highlight: false,
+    disableUpdate: false,
+    disableDelete: false,
     operationRateLimits: [], // Response body.list from apis policies for `api` throttling policies type
 };
 Operation.propTypes = {
     api: PropTypes.shape({ scopes: PropTypes.arrayOf(PropTypes.shape({})) }).isRequired,
     updateOpenAPI: PropTypes.func.isRequired,
+    disableDelete: PropTypes.bool,
+    disableUpdate: PropTypes.bool,
     operation: PropTypes.shape({
         target: PropTypes.string.isRequired,
         verb: PropTypes.string.isRequired,

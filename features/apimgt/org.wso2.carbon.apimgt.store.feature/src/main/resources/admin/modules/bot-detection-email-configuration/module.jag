@@ -1,0 +1,18 @@
+<%
+jagg.module("bot-detection-email-configuration", {
+
+    saveEmailList:function () {
+        return jagg.require(jagg.getModulesDir() + "bot-detection-email-configuration/bot-detection-email-configuration.jag")
+        .saveEmailList.apply(this, arguments);
+    },
+    retrieveSavedEmailList:function () {
+        return jagg.require(jagg.getModulesDir() + "bot-detection-email-configuration/bot-detection-email-configuration.jag")
+        .retrieveSavedEmailList.apply(this, arguments);
+    },
+    deleteEmails:function () {
+        return jagg.require(jagg.getModulesDir() + "bot-detection-email-configuration/bot-detection-email-configuration.jag")
+        .deleteEmails.apply(this, arguments);
+    }
+
+});
+%>

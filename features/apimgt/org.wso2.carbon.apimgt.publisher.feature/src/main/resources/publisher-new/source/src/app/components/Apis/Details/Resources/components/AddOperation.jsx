@@ -97,7 +97,7 @@ export default function AddOperation(props) {
     const inputLabel = useRef(null);
     const [labelWidth, setLabelWidth] = useState(0);
     const [isAdding, setIsAdding] = useState(false);
-    const [operation, setOperation] = useState({});
+    const [operation, setOperation] = useState({ });
     React.useEffect(() => {
         setLabelWidth(inputLabel.current.offsetWidth);
     }, []);

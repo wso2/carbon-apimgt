@@ -149,6 +149,14 @@
         "Roles": "admin,Internal/subscriber"
       },
       {
+        "Name": "apim:pub_alert_manage",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:sub_alert_manage",
+        "Roles": "admin,Internal/creator"
+      },
+      {
         "Name": "apim_analytics:admin",
         "Roles": "admin"
       },

@@ -126,6 +126,27 @@ class Environments extends React.Component {
             });
     }
 
+    /**
+     * Downloads the swagger of the api for the provided environment
+     *
+     * @param {string} apiId uuid of the API
+     * @param {string} environment name of the environment
+     */
+    downloadSwagger(apiId, environment) {
+        const promiseSwagger = this.apiClient.getSwaggerByAPIIdAndEnvironment(apiId, environment);
+        promiseSwagger
+            .then((done) => {
+                Utils.downloadFile(done);
+            })
+            .catch((error) => {
+                console.log(error);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Environments.download.wsdl.error',
+                    defaultMessage: 'Error downloading the Swagger',
+                }));
+            });
+    }
+
     render() {
         const { api } = this.context;
         const { classes } = this.props;
@@ -442,6 +463,20 @@ class Environments extends React.Component {
                                                 <FormattedMessage
                                                     id='Apis.Details.Environments.download.wsdl'
                                                     defaultMessage='WSDL'
+                                                />
+                                            </Button>
+                                        )}
+                                        {(api.type === 'HTTP' || api.type === 'SOAPTOREST') && (
+                                            <Button
+                                                size='small'
+                                                onClick={
+                                                    () => this.downloadSwagger(api.id, endpoint.environmentName)
+                                                }
+                                            >
+                                                <CloudDownloadRounded className={classes.buttonIcon} />
+                                                <FormattedMessage
+                                                    id='Apis.Details.Environments.download.wsdl'
+                                                    defaultMessage='Swagger'
                                                 />
                                             </Button>
                                         )}

@@ -315,7 +315,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     + " already exists.", log);
         }
         if (body.getAuthorizationHeader() == null) {
-            body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);          
+            body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
 
         //Get all existing versions of  api been adding
@@ -538,15 +538,21 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             //validation for tiers
             List<String> tiersFromDTO = body.getPolicies();
-            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
-                RestApiUtil.handleBadRequest("No tier defined for the API", log);
+            String originalStatus = originalAPI.getStatus();
+            if (tiersFromDTO == null || tiersFromDTO.isEmpty() &&
+                    !(APIConstants.CREATED.equals(originalStatus) || APIConstants.PROTOTYPED.equals(originalStatus))) {
+                RestApiUtil.handleBadRequest("A tier should be defined " +
+                        "if the API is not in CREATED or PROTOTYPED state", log);
             }
-            //check whether the added API's tiers are all valid
-            Set<Tier> definedTiers = apiProvider.getTiers();
-            List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
-            if (invalidTiers.size() > 0) {
-                RestApiUtil.handleBadRequest(
-                        "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
+
+            if (tiersFromDTO != null && !tiersFromDTO.isEmpty()) {
+                //check whether the added API's tiers are all valid
+                Set<Tier> definedTiers = apiProvider.getTiers();
+                List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
+                if (invalidTiers.size() > 0) {
+                    RestApiUtil.handleBadRequest(
+                            "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
+                }
             }
             if (body.getAccessControlRoles() != null) {
                 String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getAccessControlRoles());
@@ -2209,7 +2215,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             String updatedDefinition = parser.getOASDefinitionForPublisher(api, apiSwagger);
-            return Response.ok().entity(updatedDefinition).build();
+            return Response.ok().entity(updatedDefinition).header("Content-Disposition",
+                    "attachment; filename=\"" + "swagger.json" + "\"" ).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {

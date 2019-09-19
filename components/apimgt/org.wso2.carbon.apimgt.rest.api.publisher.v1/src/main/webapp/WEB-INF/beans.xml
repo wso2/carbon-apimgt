@@ -16,6 +16,9 @@
         <jaxrs:serviceBeans>
 
             <!-- Generated -->
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.AlertsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.AlertSubscriptionsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.AlertTypesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApi"/>
 	        <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.ApiProductsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.EndpointCertificatesApi"/>

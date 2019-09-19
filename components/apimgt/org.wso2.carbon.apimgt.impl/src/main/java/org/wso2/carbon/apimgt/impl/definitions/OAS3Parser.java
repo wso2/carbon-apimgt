@@ -715,23 +715,30 @@ public class OAS3Parser extends APIDefinition {
         operation.addExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
 
         updateLegacyScopesFromOperation(resource, operation);
-        if (resource.getScope() != null) {
-            List<SecurityRequirement> security = operation.getSecurity();
-            if (security == null) {
-                security = new ArrayList<>();
-                operation.setSecurity(security);
-            }
-            for (Map<String, List<String>> requirement : security) {
-                if (requirement.get(OPENAPI_SECURITY_SCHEMA_KEY) != null) {
-                    requirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Arrays.asList(resource.getScope().getKey()));
-                    return;
-                }
-            }
-            // if oauth2SchemeKey not present, add a new
-            SecurityRequirement defaultRequirement = new SecurityRequirement();
-            defaultRequirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Arrays.asList(resource.getScope().getKey()));
-            security.add(defaultRequirement);
+        List<SecurityRequirement> security = operation.getSecurity();
+        if (security == null) {
+            security = new ArrayList<>();
+            operation.setSecurity(security);
         }
+        for (Map<String, List<String>> requirement : security) {
+            if (requirement.get(OPENAPI_SECURITY_SCHEMA_KEY) != null) {
+
+                if (resource.getScope() == null) {
+                    requirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Collections.EMPTY_LIST);
+                } else {
+                    requirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Arrays.asList(resource.getScope().getKey()));
+                }
+                return;
+            }
+        }
+        // if oauth2SchemeKey not present, add a new
+        SecurityRequirement defaultRequirement = new SecurityRequirement();
+        if (resource.getScope() == null) {
+            defaultRequirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Collections.EMPTY_LIST);
+        } else {
+            defaultRequirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Arrays.asList(resource.getScope().getKey()));
+        }
+        security.add(defaultRequirement);
     }
 
     /**

@@ -38,4 +38,15 @@ export default class Resource {
             requestContentType: data['Content-Type'] || 'application/json',
         };
     }
+
+
+    /**
+     * Check whether current resource is of type APIProduct
+     *
+     * @returns {boolean} condition
+     * @memberof Resource
+     */
+    isAPIProduct() {
+        return this.apiType === 'APIProduct';
+    }
 }

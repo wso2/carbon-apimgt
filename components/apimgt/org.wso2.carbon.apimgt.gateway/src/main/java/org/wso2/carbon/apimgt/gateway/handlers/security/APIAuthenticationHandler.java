@@ -60,6 +60,7 @@ import org.wso2.carbon.metrics.manager.Timer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Map;
@@ -412,7 +413,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     protected boolean isAuthenticate(MessageContext messageContext) throws APISecurityException {
         boolean authenticated = false;
         AuthenticationResponse authenticationResponse;
-        ArrayList<AuthenticationResponse> authResponses = new ArrayList<>();
+        List<AuthenticationResponse> authResponses = new ArrayList<>();
 
         for (Authenticator authenticator : authenticators) {
             authenticationResponse = authenticator.authenticate(messageContext);
@@ -434,19 +435,19 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         return true;
     }
 
-    private Pair<Integer, String> getError(ArrayList<AuthenticationResponse> authResponses) {
+    private Pair<Integer, String> getError(List<AuthenticationResponse> authResponses) {
         Pair<Integer, String> error = null;
         boolean isMissingCredentials = false;
-        for (AuthenticationResponse authRespons : authResponses) {
+        for (AuthenticationResponse authResponse : authResponses) {
             // get error for transport level mandatory auth failure
-            if (!authRespons.isContinueToNextAuthenticator()) {
-                error = new Pair<>(authRespons.getErrorCode(), authRespons.getErrorMessage());
+            if (!authResponse.isContinueToNextAuthenticator()) {
+                error = new Pair<>(authResponse.getErrorCode(), authResponse.getErrorMessage());
                 return error;
             }
             // get error for application level mandatory auth failure
-            if (authRespons.isMandatoryAuthentication() &&
-                    (authRespons.getErrorCode() != APISecurityConstants.API_AUTH_MISSING_CREDENTIALS)) {
-                error = new Pair<>(authRespons.getErrorCode(), authRespons.getErrorMessage());
+            if (authResponse.isMandatoryAuthentication() &&
+                    (authResponse.getErrorCode() != APISecurityConstants.API_AUTH_MISSING_CREDENTIALS)) {
+                error = new Pair<>(authResponse.getErrorCode(), authResponse.getErrorMessage());
             } else {
                 isMissingCredentials = true;
             }
