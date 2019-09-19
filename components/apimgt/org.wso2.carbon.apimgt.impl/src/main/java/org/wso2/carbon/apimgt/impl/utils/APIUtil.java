@@ -123,12 +123,17 @@ import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
+import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
+import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
+import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
+import org.wso2.carbon.apimgt.impl.token.JWTSignatureAlg;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -140,6 +145,7 @@ import org.wso2.carbon.core.commons.stub.loggeduserinfo.LoggedUserInfoAdminStub;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.endpoints.EndpointManager;
@@ -215,8 +221,13 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
+import java.security.PrivateKey;
+import java.security.Signature;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.security.SignatureException;
+import java.security.InvalidKeyException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -285,6 +296,9 @@ public final class APIUtil {
     private static final String CONFIG_ELEM_OAUTH = "OAuth";
     private static final String REVOKE = "revoke";
     private static final String TOKEN = "token";
+
+    private static final String SHA256_WITH_RSA = "SHA256withRSA";
+    private static final String NONE = "NONE";
 
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
@@ -1275,7 +1289,8 @@ public final class APIUtil {
             }
 
             String apiSecurity = artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY);
-            if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
+                    !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
             }
         } catch (GovernanceException e) {
@@ -9004,5 +9019,170 @@ public final class APIUtil {
     public static JSONArray getMonetizationAttributes() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getMonetizationAttributes();
+    }
+
+    /**
+     * Utility method to sign a JWT assertion with a particular signature algorithm
+     *
+     * @param assertion valid JWT assertion
+     * @param privateKey private key which use to sign the JWT assertion
+     * @param signatureAlgorithm signature algorithm which use to sign the JWT assertion
+     * @return byte array of the JWT signature
+     * @throws APIManagementException
+     */
+    public static byte[] signJwt(String assertion, PrivateKey privateKey, String signatureAlgorithm) throws APIManagementException {
+        try {
+            //initialize signature with private key and algorithm
+            Signature signature = Signature.getInstance(signatureAlgorithm);
+            signature.initSign(privateKey);
+
+            //update signature with data to be signed
+            byte[] dataInBytes = assertion.getBytes(Charset.defaultCharset());
+            signature.update(dataInBytes);
+
+            //sign the assertion and return the signature
+            return signature.sign();
+        } catch (NoSuchAlgorithmException e) {
+            //do not log
+            throw new APIManagementException("Signature algorithm not found", e);
+        } catch (InvalidKeyException e) {
+            //do not log
+            throw new APIManagementException("Invalid private key provided for signing", e);
+        } catch (SignatureException e) {
+            //do not log
+            throw new APIManagementException("Error while signing JWT", e);
+        }
+    }
+
+    /**
+     * Utility method to generate JWT header with public certificate thumbprint for signature verification.
+     *
+     * @param publicCert - The public certificate which needs to include in the header as thumbprint
+     * @param signatureAlgorithm signature algorithm which needs to include in the header
+     * @throws APIManagementException
+     */
+    public static String generateHeader(Certificate publicCert, String signatureAlgorithm) throws APIManagementException {
+        try {
+            //generate the SHA-1 thumbprint of the certificate
+            MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
+            byte[] der = publicCert.getEncoded();
+            digestValue.update(der);
+            byte[] digestInBytes = digestValue.digest();
+            String publicCertThumbprint = hexify(digestInBytes);
+            String base64UrlEncodedThumbPrint;
+            base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
+                    .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
+            StringBuilder jwtHeader = new StringBuilder();
+            //Sample header
+            //{"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10"}
+            //{"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
+            jwtHeader.append("{\"typ\":\"JWT\",");
+            jwtHeader.append("\"alg\":\"");
+            jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
+            jwtHeader.append("\",");
+
+            jwtHeader.append("\"x5t\":\"");
+            jwtHeader.append(base64UrlEncodedThumbPrint);
+            jwtHeader.append('\"');
+
+            jwtHeader.append('}');
+            return jwtHeader.toString();
+
+        } catch (Exception e) {
+            throw new APIManagementException("Error in generating public certificate thumbprint", e);
+        }
+    }
+
+    /**
+     * Get the JWS compliant signature algorithm code of the algorithm used to sign the JWT.
+     * @param signatureAlgorithm - The algorithm used to sign the JWT. If signing is disabled, the value will be NONE.
+     * @return - The JWS Compliant algorithm code of the signature algorithm.
+     */
+    public static String getJWSCompliantAlgorithmCode(String signatureAlgorithm){
+        if (signatureAlgorithm == null || NONE.equals(signatureAlgorithm)){
+            return JWTSignatureAlg.NONE.getJwsCompliantCode();
+        }
+        else if(SHA256_WITH_RSA.equals(signatureAlgorithm)){
+            return JWTSignatureAlg.SHA256_WITH_RSA.getJwsCompliantCode();
+        }
+        else{
+            return signatureAlgorithm;
+        }
+    }
+
+    /**
+     * Helper method to hexify a byte array.
+     *
+     * @param bytes - The input byte array
+     * @return hexadecimal representation
+     */
+    public static String hexify(byte bytes[]) {
+        char[] hexDigits = {'0', '1', '2', '3', '4', '5', '6', '7',
+                '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+        StringBuilder buf = new StringBuilder(bytes.length * 2);
+        for (byte aByte : bytes) {
+            buf.append(hexDigits[(aByte & 0xf0) >> 4]);
+            buf.append(hexDigits[aByte & 0x0f]);
+        }
+        return buf.toString();
+    }
+
+    public static JwtTokenInfoDTO getJwtTokenInfoDTO(Application application, String userName, String tenantDomain)
+            throws APIManagementException {
+
+        String applicationName = application.getName();
+
+        String appOwner = application.getOwner();
+        APISubscriptionInfoDTO[] apis = ApiMgtDAO.getInstance()
+                .getSubscribedAPIsForAnApp(appOwner, applicationName);
+
+        JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
+        jwtTokenInfoDTO.setSubscriber("sub");
+        jwtTokenInfoDTO.setEndUserName(userName);
+        jwtTokenInfoDTO.setContentAware(true);
+
+        Set<String> subscriptionTiers = new HashSet<>();
+        List<SubscribedApiDTO> subscribedApiDTOList = new ArrayList<SubscribedApiDTO>();
+        for (APISubscriptionInfoDTO api : apis) {
+            subscriptionTiers.add(api.getSubscriptionTier());
+
+            SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
+            subscribedApiDTO.setName(api.getApiName());
+            subscribedApiDTO.setContext(api.getContext());
+            subscribedApiDTO.setVersion(api.getVersion());
+            subscribedApiDTO.setPublisher(api.getProviderId());
+            subscribedApiDTO.setSubscriptionTier(api.getSubscriptionTier());
+            subscribedApiDTO.setSubscriberTenantDomain(tenantDomain);
+            subscribedApiDTOList.add(subscribedApiDTO);
+        }
+        jwtTokenInfoDTO.setSubscribedApiDTOList(subscribedApiDTOList);
+
+        SubscriptionPolicy[] subscriptionPolicies = ApiMgtDAO.getInstance()
+                .getSubscriptionPolicies(subscriptionTiers.toArray(new String[0]), APIUtil.getTenantId(appOwner));
+
+        Map<String, SubscriptionPolicyDTO> subscriptionPolicyDTOList = new HashMap<>();
+        for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies) {
+            SubscriptionPolicyDTO subscriptionPolicyDTO = new SubscriptionPolicyDTO();
+            subscriptionPolicyDTO.setSpikeArrestLimit(subscriptionPolicy.getRateLimitCount());
+            subscriptionPolicyDTO.setSpikeArrestUnit(subscriptionPolicy.getRateLimitTimeUnit());
+            subscriptionPolicyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
+            subscriptionPolicyDTOList.put(subscriptionPolicy.getPolicyName(), subscriptionPolicyDTO);
+        }
+        jwtTokenInfoDTO.setSubscriptionPolicyDTOList(subscriptionPolicyDTOList);
+
+        return jwtTokenInfoDTO;
+    }
+
+    public static String getApiKeyAlias() {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String alias = config.getFirstProperty(APIConstants.API_STORE_API_KEY_ALIAS);
+        if (alias == null) {
+            log.warn("The configurations related to Api Key alias in APIStore " +
+                    "are missing in api-manager.xml.");
+            return APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
+        }
+        return alias;
     }
 }

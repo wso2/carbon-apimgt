@@ -96,7 +96,7 @@ public class BasicAuthAuthenticatorTest {
 
         AuthenticationResponse authenticationResponse = basicAuthAuthenticator.authenticate(messageContext);
         Assert.assertFalse(authenticationResponse.isAuthenticated());
-        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS);
+        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_MISSING_CREDENTIALS);
     }
 
     @Test
@@ -106,7 +106,7 @@ public class BasicAuthAuthenticatorTest {
 
         AuthenticationResponse authenticationResponse = basicAuthAuthenticator.authenticate(messageContext);
         Assert.assertFalse(authenticationResponse.isAuthenticated());
-        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS);
+        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_MISSING_CREDENTIALS);
     }
 
     @Test
@@ -117,7 +117,7 @@ public class BasicAuthAuthenticatorTest {
 
         AuthenticationResponse authenticationResponse = basicAuthAuthenticator.authenticate(messageContext);
         Assert.assertFalse(authenticationResponse.isAuthenticated());
-        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS);
+        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
     }
 
     @Test
@@ -128,7 +128,7 @@ public class BasicAuthAuthenticatorTest {
 
         AuthenticationResponse authenticationResponse = basicAuthAuthenticator.authenticate(messageContext);
         Assert.assertFalse(authenticationResponse.isAuthenticated());
-        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS);
+        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
     }
 
     @Test
@@ -164,6 +164,6 @@ public class BasicAuthAuthenticatorTest {
 
         AuthenticationResponse authenticationResponse = basicAuthAuthenticator.authenticate(messageContext);
         Assert.assertFalse(authenticationResponse.isAuthenticated());
-        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS);
+        Assert.assertEquals(authenticationResponse.getErrorCode(), APISecurityConstants.API_AUTH_MISSING_CREDENTIALS);
     }
 }

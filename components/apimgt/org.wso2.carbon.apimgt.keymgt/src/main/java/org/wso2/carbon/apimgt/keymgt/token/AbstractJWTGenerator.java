@@ -20,9 +20,6 @@ package org.wso2.carbon.apimgt.keymgt.token;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTClaimsSet;
-import org.apache.axiom.util.base64.Base64Utils;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,7 +36,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.KeyStoreManager;
-import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -141,7 +137,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     public String generateToken(TokenValidationContext validationContext) throws APIManagementException{
 
-        String jwtHeader = buildHeader(validationContext);
+        String jwtHeader = buildHeader(validationContext.getValidationInfoDTO().getEndUserName());
 
         String base64UrlEncodedHeader = "";
         if (jwtHeader != null) {
@@ -171,8 +167,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         }
     }
 
-
-    public String buildHeader(TokenValidationContext tokenValidationContext) throws APIManagementException {
+    public String buildHeader(String endUserName) throws APIManagementException {
         String jwtHeader = null;
 
         //if signature algo==NONE, header without cert
@@ -180,14 +175,14 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             StringBuilder jwtHeaderBuilder = new StringBuilder();
             jwtHeaderBuilder.append("{\"typ\":\"JWT\",");
             jwtHeaderBuilder.append("\"alg\":\"");
-            jwtHeaderBuilder.append(getJWSCompliantAlgorithmCode(NONE));
+            jwtHeaderBuilder.append(APIUtil.getJWSCompliantAlgorithmCode(NONE));
             jwtHeaderBuilder.append('\"');
             jwtHeaderBuilder.append('}');
 
             jwtHeader = jwtHeaderBuilder.toString();
 
         } else if (SHA256_WITH_RSA.equals(signatureAlgorithm)) {
-            jwtHeader = addCertToHeader(tokenValidationContext.getValidationInfoDTO().getEndUserName());
+            jwtHeader = addCertToHeader(endUserName);
         }
         return jwtHeader;
     }
@@ -250,7 +245,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         return null;
     }
 
-
     public byte[] signJWT(String assertion, String endUserName) throws APIManagementException {
 
         String tenantDomain = null;
@@ -288,30 +282,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             } else {
                 privateKey = privateKeys.get(tenantId);
             }
-
-            //initialize signature with private key and algorithm
-            Signature signature = Signature.getInstance(signatureAlgorithm);
-            signature.initSign((PrivateKey) privateKey);
-
-            //update signature with data to be signed
-            byte[] dataInBytes = assertion.getBytes(Charset.defaultCharset());
-            signature.update(dataInBytes);
-
-            //sign the assertion and return the signature
-            return signature.sign();
-
-        } catch (NoSuchAlgorithmException e) {
-            String error = "Signature algorithm not found.";
-            //do not log
-            throw new APIManagementException(error, e);
-        } catch (InvalidKeyException e) {
-            String error = "Invalid private key provided for the signature";
-            //do not log
-            throw new APIManagementException(error, e);
-        } catch (SignatureException e) {
-            String error = "Error in signature";
-            //do not log
-            throw new APIManagementException(error, e);
+            return APIUtil.signJwt(assertion, (PrivateKey) privateKey, signatureAlgorithm);
         } catch (RegistryException e) {
             String error = "Error in loading tenant registry for " + tenantDomain;
             //do not log
@@ -396,89 +367,18 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 publicCert = publicCerts.get(tenantId);
             }
 
-            //generate the SHA-1 thumbprint of the certificate
             //TODO: maintain a hashmap with tenants' pubkey thumbprints after first initialization
-            MessageDigest digestValue = MessageDigest.getInstance("SHA-1");
-            if (publicCert != null) {
-                byte[] der = publicCert.getEncoded();
-                digestValue.update(der);
-                byte[] digestInBytes = digestValue.digest();
-                String publicCertThumbprint = hexify(digestInBytes);
-                String base64UrlEncodedThumbPrint;
-                base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
-                        .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
-                StringBuilder jwtHeader = new StringBuilder();
-                //Sample header
-                //{"typ":"JWT", "alg":"SHA256withRSA", "x5t":"a_jhNus21KVuoFx65LmkW2O_l10"}
-                //{"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
-                jwtHeader.append("{\"typ\":\"JWT\",");
-                jwtHeader.append("\"alg\":\"");
-                jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
-                jwtHeader.append("\",");
-
-                jwtHeader.append("\"x5t\":\"");
-                jwtHeader.append(base64UrlEncodedThumbPrint);
-                jwtHeader.append('\"');
-
-                jwtHeader.append('}');
-                return jwtHeader.toString();
+            if (publicCert == null) {
+                throw new APIManagementException("Error in obtaining keystore for tenantDomain = " + tenantDomain);
             } else {
-                String error = "Error in obtaining tenant's keystore";
-                throw new APIManagementException(error);
+                return APIUtil.generateHeader(publicCert, signatureAlgorithm);
             }
-
         } catch (KeyStoreException e) {
             String error = "Error in obtaining tenant's keystore";
-            throw new APIManagementException(error, e);
-        } catch (CertificateEncodingException e) {
-            String error = "Error in generating public cert thumbprint";
-            throw new APIManagementException(error, e);
-        } catch (NoSuchAlgorithmException e) {
-            String error = "Error in generating public cert thumbprint";
             throw new APIManagementException(error, e);
         } catch (Exception e) {
             String error = "Error in obtaining tenant's keystore";
             throw new APIManagementException(error, e);
-        }
-    }
-
-    /**
-     * Helper method to hexify a byte array.
-     * TODO:need to verify the logic
-     *
-     * @param bytes - The input byte array
-     * @return hexadecimal representation
-     */
-    private String hexify(byte bytes[]) {
-
-        char[] hexDigits = {'0', '1', '2', '3', '4', '5', '6', '7',
-                '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-
-        StringBuilder buf = new StringBuilder(bytes.length * 2);
-
-        for (byte aByte : bytes) {
-            buf.append(hexDigits[(aByte & 0xf0) >> 4]);
-            buf.append(hexDigits[aByte & 0x0f]);
-        }
-
-        return buf.toString();
-    }
-
-    /**
-     * Get the JWS compliant signature algorithm code of the algorithm used to sign the JWT.
-     * @param signatureAlgorithm - The algorithm used to sign the JWT. If signing is disabled, the value will be NONE.
-     * @return - The JWS Compliant algorithm code of the signature algorithm.
-     */
-    public String getJWSCompliantAlgorithmCode(String signatureAlgorithm){
-
-        if (signatureAlgorithm == null || NONE.equals(signatureAlgorithm)){
-            return JWTSignatureAlg.NONE.getJwsCompliantCode();
-        }
-        else if(SHA256_WITH_RSA.equals(signatureAlgorithm)){
-            return JWTSignatureAlg.SHA256_WITH_RSA.getJwsCompliantCode();
-        }
-        else{
-            return signatureAlgorithm;
         }
     }
 

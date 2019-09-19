@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
+import javafx.util.Pair;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -43,6 +44,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.apikey.ApiKeyAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MutualSSLAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
@@ -234,6 +236,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         boolean isOAuthProtected = false;
         boolean isMutualSSLProtected = false;
         boolean isBasicAuthProtected = false;
+        boolean isApiKeyProtected = false;
         boolean isMutualSSLMandatory = false;
         boolean isOAuthBasicAuthMandatory = false;
 
@@ -251,15 +254,17 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     isBasicAuthProtected = true;
                 } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
                     isMutualSSLMandatory = true;
-                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY)) {
+                } else if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
                     isOAuthBasicAuthMandatory = true;
+                } else if (apiSecurityLevel.trim().equalsIgnoreCase((APIConstants.API_SECURITY_API_KEY))) {
+                    isApiKeyProtected = true;
                 }
             }
         }
         if (!isMutualSSLProtected && !isOAuthBasicAuthMandatory) {
             isOAuthBasicAuthMandatory = true;
         }
-        if (!isBasicAuthProtected && !isOAuthProtected && !isMutualSSLMandatory) {
+        if (!isBasicAuthProtected && !isOAuthProtected && !isMutualSSLMandatory && !isApiKeyProtected) {
             isMutualSSLMandatory = true;
         }
 
@@ -291,6 +296,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
         if (isBasicAuthProtected) {
             authenticator = new BasicAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory);
+            authenticator.init(synapseEnvironment);
+            authenticators.add(authenticator);
+        }
+        if (isApiKeyProtected) {
+            authenticator = new ApiKeyAuthenticator(APIConstants.API_KEY_HEADER_QUERY_PARAM, apiLevelPolicy, isOAuthBasicAuthMandatory);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
@@ -400,11 +410,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
     protected boolean isAuthenticate(MessageContext messageContext) throws APISecurityException {
-        int apiSecurityErrorCode = 0;
-        ArrayList<Integer> errorCodes = new ArrayList<>();
-        String errorMessage = "";
         boolean authenticated = false;
         AuthenticationResponse authenticationResponse;
+        ArrayList<AuthenticationResponse> authResponses = new ArrayList<>();
 
         for (Authenticator authenticator : authenticators) {
             authenticationResponse = authenticator.authenticate(messageContext);
@@ -413,43 +421,47 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 authenticated = authenticationResponse.isAuthenticated();
             }
             if (!authenticationResponse.isAuthenticated()) {
-                // Update error message if authentication failed
-                errorMessage = updateErrorMessage(errorMessage, authenticationResponse.getErrorMessage());
-                apiSecurityErrorCode = updateErrorCode(authenticationResponse.getErrorCode(),
-                        errorCodes);
+                authResponses.add(authenticationResponse);
             }
             if (!authenticationResponse.isContinueToNextAuthenticator()) {
                 break;
             }
         }
         if (!authenticated) {
-            throw new APISecurityException(apiSecurityErrorCode, errorMessage);
+            Pair<Integer, String> error = getError(authResponses);
+            throw new APISecurityException(error.getKey(), error.getValue());
         }
         return true;
     }
 
-    private String updateErrorMessage(String errorMessage, String newErrorMessage) {
-        if (StringUtils.isNotEmpty(errorMessage)) {
-            errorMessage += " | ";
-        }
-        errorMessage += newErrorMessage;
-        return errorMessage;
-    }
-
-    private int updateErrorCode(int newErrorCode, ArrayList<Integer> errorCodes) {
-        errorCodes.add(newErrorCode);
-        if (errorCodes.size() > 1) {
-            if (errorCodes.contains(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS) &&
-                    errorCodes.contains(APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS)) {
-                return APISecurityConstants.MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_AND_BASIC_AUTH_CREDENTIALS;
-            } else if (errorCodes.contains(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS)) {
-                return APISecurityConstants.MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_CREDENTIALS;
-            } else if (errorCodes.contains(APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS)) {
-                return APISecurityConstants.MULTI_AUTHENTICATION_FAILURE_AND_MISSING_BASIC_AUTH_CREDENTIALS;
+    private Pair<Integer, String> getError(ArrayList<AuthenticationResponse> authResponses) {
+        Pair<Integer, String> error = null;
+        boolean isMissingCredentials = false;
+        for (AuthenticationResponse authRespons : authResponses) {
+            // get error for transport level mandatory auth failure
+            if (!authRespons.isContinueToNextAuthenticator()) {
+                error = new Pair<>(authRespons.getErrorCode(), authRespons.getErrorMessage());
+                return error;
             }
-            return APISecurityConstants.MULTI_AUTHENTICATION_FAILURE;
+            // get error for application level mandatory auth failure
+            if (authRespons.isMandatoryAuthentication() &&
+                    (authRespons.getErrorCode() != APISecurityConstants.API_AUTH_MISSING_CREDENTIALS)) {
+                error = new Pair<>(authRespons.getErrorCode(), authRespons.getErrorMessage());
+            } else {
+                isMissingCredentials = true;
+            }
         }
-        return newErrorCode;
+        // finally checks whether it is missing credentials
+        if (error == null && isMissingCredentials) {
+            error = new Pair<>(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+            return error;
+        } else if (error == null) {
+            // ideally this should not exist
+            error = new Pair<>(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+        }
+        return error;
     }
 
     private String getAuthenticatorsChallengeString() {
@@ -551,24 +563,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         errorDetail.setText(APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()));
 
         // if custom auth header is configured, the error message should specify its name instead of default value
-        if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_CREDENTIALS ||
-                e.getErrorCode() == APISecurityConstants.MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_CREDENTIALS) {
-            String errorDescription =
-                    APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) + "'"
-                            + authorizationHeader + " : Bearer ACCESS_TOKEN" + "'";
-            errorDetail.setText(errorDescription);
-        } else if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS ||
-                e.getErrorCode() == APISecurityConstants.MULTI_AUTHENTICATION_FAILURE_AND_MISSING_BASIC_AUTH_CREDENTIALS) {
-            String errorDescription =
-                    APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) + "'"
-                            + authorizationHeader + " : Basic ACCESS_TOKEN" + "'";
-            errorDetail.setText(errorDescription);
-        } else if (e.getErrorCode() ==
-                APISecurityConstants.MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_AND_BASIC_AUTH_CREDENTIALS) {
+        if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_CREDENTIALS) {
             String errorDescription =
                     APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) + "'"
                             + authorizationHeader + " : Bearer ACCESS_TOKEN' or '" + authorizationHeader +
-                            " : Basic ACCESS_TOKEN'";
+                            " : Basic ACCESS_TOKEN' or 'apikey: API_KEY'" ;
             errorDetail.setText(errorDescription);
         }
 

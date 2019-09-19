@@ -150,7 +150,7 @@ public class RestAPIStoreUtils {
                 return true;
             }
         }
-        
+
         if (productIdentifier != null && application != null) {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             APIProduct product = apiConsumer.getAPIProduct(productIdentifier);
@@ -257,7 +257,8 @@ public class RestAPIStoreUtils {
             API api = apiTypeWrapper.getApi();
             providerName = api.getId().getProviderName();
             String apiSecurity = api.getApiSecurity();
-            if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+            if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
+                    !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
                 String msg = "Subscription is not allowed for API " + apiTypeWrapper.toString() + ". To access the API, "
                         + "please use the client certificate";
                 throw new APIMgtAuthorizationFailedException(msg);

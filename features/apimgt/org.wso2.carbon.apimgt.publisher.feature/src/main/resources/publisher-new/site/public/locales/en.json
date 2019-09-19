@@ -102,7 +102,7 @@
   "Apis.Details.Configuration.components.APISecurity.allOptional": "Please select at least one API security level mandatory!",
   "Apis.Details.Configuration.components.APISecurity.emptySchemas": "Please select at least one API security method!",
   "Apis.Details.Configuration.components.APISecurity.http.mandatory": "Choose whether Transport level security is mandatory or optional",
-  "Apis.Details.Configuration.components.APISecurity.tooltip": "This option determines the type of security that will be used to secure this API. An API can be secured with either one of them or it can be secured by both of them. If OAuth2 option is selected, relevant API will require a valid OAuth2 token for successful invocation. If Mutual SSL option is selected, a trusted client certificate should be presented to access the API",
+  "Apis.Details.Configuration.components.APISecurity.tooltip": "This option determines the type of security that will be used to secure this API. An API can be secured with one of them or it can be secured by all of them. If OAuth2 option is selected, relevant API will require a valid OAuth2 token for successful invocation. If Mutual SSL option is selected, a trusted client certificate should be presented to access the API",
   "Apis.Details.Configuration.components.AccessControl.dropdown.all": "All",
   "Apis.Details.Configuration.components.AccessControl.dropdown.restrict": "Restrict by role",
   "Apis.Details.Configuration.components.AccessControl.form.helper.text": "By default there is no access restrictions",

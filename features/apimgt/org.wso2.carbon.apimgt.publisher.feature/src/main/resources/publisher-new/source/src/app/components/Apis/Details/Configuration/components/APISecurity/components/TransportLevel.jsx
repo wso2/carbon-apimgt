@@ -39,6 +39,7 @@ import {
     API_SECURITY_MUTUAL_SSL_MANDATORY,
     DEFAULT_API_SECURITY_OAUTH2,
     API_SECURITY_BASIC_AUTH,
+    API_SECURITY_API_KEY,
 } from '../APISecurity';
 
 /**
@@ -139,7 +140,8 @@ function TransportLevel(props) {
     if (!isMutualSSLEnabled) {
         mandatoryValue = 'null';
     } else if (
-        !(securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2) || securityScheme.includes(API_SECURITY_BASIC_AUTH))
+        !(securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2) || securityScheme.includes(API_SECURITY_BASIC_AUTH)
+            || securityScheme.includes(API_SECURITY_API_KEY))
     ) {
         mandatoryValue = API_SECURITY_MUTUAL_SSL_MANDATORY;
     } else if (securityScheme.includes(API_SECURITY_MUTUAL_SSL_MANDATORY)) {

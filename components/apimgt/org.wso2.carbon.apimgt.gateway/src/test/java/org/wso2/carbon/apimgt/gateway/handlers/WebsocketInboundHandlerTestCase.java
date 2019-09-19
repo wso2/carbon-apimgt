@@ -207,7 +207,7 @@ public class WebsocketInboundHandlerTestCase {
             fail("Expected APISecurityException is not thrown (Invalid Credentials)");
         } catch (Exception e) {
             if (e instanceof APISecurityException) {
-                Assert.assertTrue(e.getMessage().startsWith("Invalid OAuth Credentials"));
+                Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
             } else {
                 e.printStackTrace();
                 fail(e.getMessage());
@@ -263,7 +263,7 @@ public class WebsocketInboundHandlerTestCase {
 
         } catch (Exception e) {
             if (e instanceof APISecurityException) {
-                Assert.assertTrue(e.getMessage().startsWith("Invalid OAuth Credentials"));
+                Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
             } else {
                 e.printStackTrace();
                 fail(e.getMessage());
@@ -331,7 +331,7 @@ public class WebsocketInboundHandlerTestCase {
             websocketInboundHandler1.channelRead(channelHandlerContext, fullHttpRequest);
             fail("Expected APISecurityException is not thrown (Invalid Credentials)");
         } catch (APISecurityException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Invalid OAuth Credentials"));
+            Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
         }
 
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL)).
@@ -378,7 +378,7 @@ public class WebsocketInboundHandlerTestCase {
             fail("Expected APISecurityException is not thrown (Invalid Credentials) when KeyValidatorClientType is provided.");
 
         } catch (APISecurityException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Invalid OAuth Credentials"));
+            Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
         }
         WebsocketInboundHandler websocketInboundHandler2 = new WebsocketInboundHandler() {
             APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
@@ -397,7 +397,7 @@ public class WebsocketInboundHandlerTestCase {
             websocketInboundHandler2.channelRead(channelHandlerContext, fullHttpRequest);
             fail("Expected APISecurityException is not thrown (Invalid Credentials)");
         } catch (APISecurityException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Invalid OAuth Credentials"));
+            Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
         }
 
         WebsocketInboundHandler websocketInboundHandler3 = new WebsocketInboundHandler() {
@@ -449,7 +449,7 @@ public class WebsocketInboundHandlerTestCase {
         try {
             websocketInboundHandler3.channelRead(channelHandlerContext, fullHttpRequest);
         } catch (APISecurityException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Invalid OAuth Credentials"));
+            Assert.assertTrue(e.getMessage().startsWith("Invalid Credentials"));
         }
 
     }

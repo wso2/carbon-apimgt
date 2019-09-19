@@ -34,7 +34,8 @@ import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 import {
     DEFAULT_API_SECURITY_OAUTH2,
     API_SECURITY_BASIC_AUTH,
-    API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY,
+    API_SECURITY_API_KEY,
+    API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
 } from '../APISecurity';
 
@@ -50,13 +51,14 @@ export default function ApplicationLevel(props) {
     const { api } = useContext(APIContext);
 
     let mandatoryValue = 'optional';
-    // If not Oauth2 or Basic auth security is selected, no mandatory values should be pre-selected
-    if (!(securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2) || securityScheme.includes(API_SECURITY_BASIC_AUTH))) {
+    // If not Oauth2, Basic auth or ApiKey security is selected, no mandatory values should be pre-selected
+    if (!(securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2) || securityScheme.includes(API_SECURITY_BASIC_AUTH) ||
+        securityScheme.includes(API_SECURITY_API_KEY))) {
         mandatoryValue = null;
     } else if (!securityScheme.includes(API_SECURITY_MUTUAL_SSL)) {
-        mandatoryValue = API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY;
-    } else if (securityScheme.includes(API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY)) {
-        mandatoryValue = API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY;
+        mandatoryValue = API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY;
+    } else if (securityScheme.includes(API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
+        mandatoryValue = API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY;
     }
 
     return (
@@ -100,13 +102,28 @@ export default function ApplicationLevel(props) {
                             )}
                             label='Basic'
                         />
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={securityScheme.includes(API_SECURITY_API_KEY)}
+                                    onChange={({ target: { checked, value } }) =>
+                                        configDispatcher({
+                                            action: 'securityScheme',
+                                            event: { checked, value },
+                                        })
+                                    }
+                                    value={API_SECURITY_API_KEY}
+                                />
+                            }
+                            label='Api Key'
+                        />
                     </FormGroup>
                 </FormControl>
                 <Grid item>
                     <FormControl component='fieldset'>
                         <RadioGroup
                             aria-label='HTTP security HTTP mandatory selection'
-                            name={API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY}
+                            name={API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY}
                             value={mandatoryValue}
                             onChange={({ target: { name, value } }) => configDispatcher({
                                 action: 'securityScheme',
@@ -116,7 +133,7 @@ export default function ApplicationLevel(props) {
                             row
                         >
                             <FormControlLabel
-                                value={API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY}
+                                value={API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY}
                                 control={<Radio disabled={!haveMultiLevelSecurity} color='default' />}
                                 label='Mandatory'
                                 labelPlacement='end'

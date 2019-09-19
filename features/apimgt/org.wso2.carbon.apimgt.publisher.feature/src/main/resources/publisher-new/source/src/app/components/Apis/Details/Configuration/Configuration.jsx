@@ -46,7 +46,8 @@ import SchemaValidation from './components/SchemaValidation';
 import APISecurity, {
     DEFAULT_API_SECURITY_OAUTH2,
     API_SECURITY_BASIC_AUTH,
-    API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY,
+    API_SECURITY_API_KEY,
+    API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY,
     API_SECURITY_MUTUAL_SSL_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
 } from './components/APISecurity/APISecurity';
@@ -161,7 +162,8 @@ export default function Configuration() {
                 return { ...copyAPIConfig(state), [action]: value };
             case 'securityScheme':
                 // If event came from mandatory selector of either Application level or Transport level
-                if ([API_SECURITY_MUTUAL_SSL_MANDATORY, API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY].includes(event.name)) {
+                if ([API_SECURITY_MUTUAL_SSL_MANDATORY,
+                    API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY].includes(event.name)) {
                     // If user select not mandatory (optional) , Remove the respective schema, else add it
                     if (event.value === 'optional') {
                         return {
@@ -174,7 +176,7 @@ export default function Configuration() {
                         return { ...copyAPIConfig(state), [action]: [...state[action], event.name] };
                     }
                 }
-                // User checked on one of api security schemas (either OAuth, Basic or Mutual SSL)
+                // User checked on one of api security schemas (either OAuth, Basic, ApiKey or Mutual SSL)
                 if (event.checked) {
                     if (state[action].includes(event.value)) {
                         return state; // Add for completeness, Ideally there couldn't exist this state
@@ -190,11 +192,12 @@ export default function Configuration() {
                     if (
                         !(
                             newState[action].includes(DEFAULT_API_SECURITY_OAUTH2) ||
-                            newState[action].includes(API_SECURITY_BASIC_AUTH)
+                            newState[action].includes(API_SECURITY_BASIC_AUTH) ||
+                            newState[action].includes(API_SECURITY_API_KEY)
                         )
                     ) {
                         const noMandatoryOAuthBasicAuth = newState[action]
-                            .filter(schema => schema !== API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+                            .filter(schema => schema !== API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
                         return {
                             ...newState,
                             [action]: noMandatoryOAuthBasicAuth,

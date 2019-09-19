@@ -1961,6 +1961,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             boolean isOauth2 = false;
             boolean isMutualSSL = false;
             boolean isBasicAuth = false;
+            boolean isApiKey = false;
             boolean isMutualSSLMandatory = false;
             boolean isOauthBasicAuthMandatory = false;
 
@@ -1982,13 +1983,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     securityLevels.add(APIConstants.API_SECURITY_BASIC_AUTH);
                     securitySchemeFound = true;
                 }
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)){
+                    isApiKey = true;
+                    securityLevels.add(APIConstants.API_SECURITY_API_KEY);
+                    securitySchemeFound = true;
+                }
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
                     isMutualSSLMandatory = true;
                     securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
                 }
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY)) {
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
                     isOauthBasicAuthMandatory = true;
-                    securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+                    securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
                 }
             }
 
@@ -1999,16 +2005,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             // If Only OAuth2/Basic-Auth specified, set it as mandatory
             if (!isMutualSSL && !isOauthBasicAuthMandatory) {
-                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
             }
             // If Only Mutual SSL specified, set it as mandatory
-            if (!isBasicAuth && !isOauth2 && !isMutualSSLMandatory) {
+            if (!isBasicAuth && !isOauth2 && !isApiKey && !isMutualSSLMandatory) {
                 securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
             }
             // If OAuth2/Basic-Auth and Mutual SSL protected and not specified the mandatory scheme,
             // set OAuth2/Basic-Auth as mandatory
-            if ((isOauth2 || isBasicAuth) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory) {
-                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+            if ((isOauth2 || isBasicAuth || isApiKey) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory) {
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
             }
 
             apiSecurity = String.join(",", securityLevels);
@@ -2017,9 +2023,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("API " + api.getId() + " has following enabled protocols : " + apiSecurity);
         }
         api.setApiSecurity(apiSecurity);
-        if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+        if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
+                !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
             if (log.isDebugEnabled()) {
-                log.info("API " + api.getId() + " does not supports oauth2 security, hence removing all the "
+                log.debug("API " + api.getId() + " does not supports oauth2 security, hence removing all the "
                         + "subscription tiers associated with it");
             }
             api.removeAllTiers();

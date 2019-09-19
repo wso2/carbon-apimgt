@@ -145,6 +145,10 @@
         "Roles": "admin,Internal/creator"
       },
       {
+        "Name": "apim:api_key",
+        "Roles": "admin,Internal/subscriber"
+      },
+      {
         "Name": "apim_analytics:admin",
         "Roles": "admin"
       },
