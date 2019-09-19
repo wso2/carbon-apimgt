@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core/';
+import Typography from '@material-ui/core/Typography';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Slide from '@material-ui/core/Slide';
 import PropTypes from 'prop-types';
@@ -151,7 +152,12 @@ class DeleteApiButton extends React.Component {
                             <div>
                                 <DeleteIcon />
                             </div>
-                            <div className={classes.linkText}>Delete</div>
+                            <Typography variant='caption'>
+                                <FormattedMessage
+                                    id='Apis.Details.components.DeleteApiButton.delete'
+                                    defaultMessage='Delete'
+                                />
+                            </Typography>
                         </a>
                     </div>
                 </ScopeValidation>
