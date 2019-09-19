@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ *DataBridgeBotDataDTO used get and set data to publish
  */
 public class DataBridgeBotDataDTO extends BotDataDTO {
 
