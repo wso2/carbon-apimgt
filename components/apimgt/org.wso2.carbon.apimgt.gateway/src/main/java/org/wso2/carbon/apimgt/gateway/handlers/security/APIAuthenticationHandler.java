@@ -18,7 +18,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -441,25 +441,25 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         for (AuthenticationResponse authResponse : authResponses) {
             // get error for transport level mandatory auth failure
             if (!authResponse.isContinueToNextAuthenticator()) {
-                error = new Pair<>(authResponse.getErrorCode(), authResponse.getErrorMessage());
+                error = Pair.of(authResponse.getErrorCode(), authResponse.getErrorMessage());
                 return error;
             }
             // get error for application level mandatory auth failure
             if (authResponse.isMandatoryAuthentication() &&
                     (authResponse.getErrorCode() != APISecurityConstants.API_AUTH_MISSING_CREDENTIALS)) {
-                error = new Pair<>(authResponse.getErrorCode(), authResponse.getErrorMessage());
+                error = Pair.of(authResponse.getErrorCode(), authResponse.getErrorMessage());
             } else {
                 isMissingCredentials = true;
             }
         }
         // finally checks whether it is missing credentials
         if (error == null && isMissingCredentials) {
-            error = new Pair<>(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
+            error = Pair.of(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
             return error;
         } else if (error == null) {
             // ideally this should not exist
-            error = new Pair<>(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+            error = Pair.of(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
         return error;
