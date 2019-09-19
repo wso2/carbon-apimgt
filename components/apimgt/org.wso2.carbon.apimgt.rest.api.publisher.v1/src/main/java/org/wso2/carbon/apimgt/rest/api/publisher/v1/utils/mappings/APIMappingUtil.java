@@ -616,7 +616,7 @@ public class APIMappingUtil {
 
         dto.setCacheTimeout(model.getCacheTimeout());
         String endpointConfig = model.getEndpointConfig();
-        if (!StringUtils.isAllEmpty(endpointConfig)) {
+        if (!StringUtils.isBlank(endpointConfig)) {
             try {
                 JSONParser parser = new JSONParser();
                 JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
