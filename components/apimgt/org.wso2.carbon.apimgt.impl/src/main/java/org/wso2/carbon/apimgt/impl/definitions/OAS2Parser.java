@@ -480,7 +480,7 @@ public class OAS2Parser extends APIDefinition {
         }
         swagger.setVendorExtension(APIConstants.X_WSO2_CORS, api.getCorsConfiguration());
         String endpointConfig = api.getEndpointConfig();
-        if (!StringUtils.isEmpty(endpointConfig)) {
+        if (!StringUtils.isBlank(endpointConfig)) {
             JSONObject endpoints = new JSONObject(endpointConfig);
             if (endpoints.has(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
                 String prodUrls = endpoints.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)
