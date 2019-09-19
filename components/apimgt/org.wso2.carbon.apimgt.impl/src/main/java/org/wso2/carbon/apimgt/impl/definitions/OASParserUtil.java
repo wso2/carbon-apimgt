@@ -33,7 +33,6 @@ import io.swagger.models.Swagger;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.v3.parser.ObjectMapperFactory;
-import io.swagger.v3.parser.util.OpenAPIDeserializer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -69,7 +68,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 

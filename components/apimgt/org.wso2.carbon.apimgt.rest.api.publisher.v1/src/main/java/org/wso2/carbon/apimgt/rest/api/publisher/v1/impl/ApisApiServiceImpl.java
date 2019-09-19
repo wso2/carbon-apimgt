@@ -2203,7 +2203,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier);
-            return Response.ok().entity(apiSwagger).build();
+            APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            String updatedDefinition = parser.getOASDefinitionForPublisher(api, apiSwagger);
+            return Response.ok().entity(updatedDefinition).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -2242,7 +2245,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIDefinition oasParser = response.getParser();
             Set<URITemplate> uriTemplates = null;
             try {
-                uriTemplates = oasParser.getURITemplates(response.getJsonContent());
+                uriTemplates = oasParser.getURITemplates(apiDefinition);
             } catch (APIManagementException e) {
                 // catch APIManagementException inside again to capture validation error
                 RestApiUtil.handleBadRequest(e.getMessage(), log);

@@ -34,6 +34,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -66,6 +67,7 @@ import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
@@ -5351,127 +5353,49 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public String getOpenAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
             throws APIManagementException {
-        String apiTenantDomain = "";
-        String basePath = "";
-        JSONObject swaggerObj = null;
-
+        String apiTenantDomain;
+        String updatedDefinition = null;
+        String hostWithScheme;
+        String definition = super.getOpenAPIDefinition(apiId);
+        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
         if (apiId instanceof APIIdentifier) {
             API api = getLightweightAPI((APIIdentifier) apiId);
+            //todo: use get api by id, so no need to set scopes or uri templates
+            api.setScopes(oasParser.getScopes(definition));
+            api.setUriTemplates(oasParser.getURITemplates(definition));
             apiTenantDomain = MultitenantUtils.getTenantDomain(api.getId().getProviderName());
-
-            swaggerObj = getModifiedOpenAPIDefinition(api);
-            assert swaggerObj != null;
-
-            basePath = api.getContext();
-        } else if (apiId instanceof  APIProductIdentifier) {
+            hostWithScheme = getHostWithSchemeForEnvironment(apiTenantDomain, environmentName);
+            api.setContext(getBasePath(apiTenantDomain, api.getContext()));
+            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostWithScheme);
+        } else if (apiId instanceof APIProductIdentifier) {
             APIProduct apiProduct = getAPIProduct((APIProductIdentifier) apiId);
             apiTenantDomain = MultitenantUtils.getTenantDomain(apiProduct.getId().getProviderName());
-
-            swaggerObj = getModifiedOpenAPIDefinition(apiProduct);
-            assert swaggerObj != null;
-
-            basePath = apiProduct.getContext();
+            hostWithScheme = getHostWithSchemeForEnvironment(apiTenantDomain, environmentName);
+            apiProduct.setContext(getBasePath(apiTenantDomain, apiProduct.getContext()));
+            updatedDefinition = oasParser.getOASDefinitionForStore(apiProduct, definition, hostWithScheme);
         }
-
-        Map<String, String> domains = getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
-
-        String host;
-        String hostWithScheme = null;
-        if (!domains.isEmpty()) {
-            basePath = basePath.replace("/t/" + apiTenantDomain, "");
-            hostWithScheme = domains.get(APIConstants.CUSTOM_URL);
-        } else {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            Map<String, Environment> allEnvironments = config.getApiGatewayEnvironments();
-            Environment environment = allEnvironments.get(environmentName);
-
-            if (environment == null) {
-                handleException(
-                        "Could not find provided environment '" + environmentName + "' attached to the api '" +
-                        apiId.toString() + "'");
-            }
-
-            assert environment != null;
-            String[] hostsWithScheme = environment.getApiGatewayEndpoint().split(",");
-            for (String url : hostsWithScheme) {
-                if (url.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
-                    hostWithScheme = url;
-                    break;
-                }
-            }
-
-            if (hostWithScheme == null) {
-                hostWithScheme = hostsWithScheme[0];
-            }
-        }
-
-        host = hostWithScheme.trim().replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "")
-                .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
-
-        JSONObject securityDefinitions = (JSONObject)swaggerObj.get(APIConstants.SWAGGER_SECURITY_DEFINITIONS);
-        JSONObject defaultImplicitSecurity = (JSONObject) securityDefinitions
-                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
-        defaultImplicitSecurity
-                .put(APIConstants.SWAGGER_SECURITY_OAUTH2_AUTHORIZATION_URL, hostWithScheme + "/authorize");
-
-        swaggerObj.put(APIConstants.SWAGGER_HOST, host);
-        swaggerObj.put(APIConstants.SWAGGER_BASEPATH, basePath);
-        return swaggerObj.toJSONString();
+        return updatedDefinition;
     }
 
     @Override
-    public String getOpenAPIDefinitionForLabel(Identifier apiId, String labelName)
-            throws APIManagementException {
-        JSONObject swaggerObj = null;
-        List<Label> gatewayLabels = new ArrayList<>();
-
-        if (apiId instanceof  APIIdentifier) {
+    public String getOpenAPIDefinitionForLabel(Identifier apiId, String labelName) throws APIManagementException {
+        List<Label> gatewayLabels;
+        String updatedDefinition = null;
+        String hostWithScheme;
+        String definition = super.getOpenAPIDefinition(apiId);
+        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+        if (apiId instanceof APIIdentifier) {
             API api = getLightweightAPI((APIIdentifier) apiId);
-
-            swaggerObj = getModifiedOpenAPIDefinition(api);
             gatewayLabels = api.getGatewayLabels();
-        } else if (apiId instanceof  APIProductIdentifier) {
+            hostWithScheme = getHostWithSchemeForLabel(gatewayLabels, labelName);
+            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostWithScheme);
+        } else if (apiId instanceof APIProductIdentifier) {
             APIProduct apiProduct = getAPIProduct((APIProductIdentifier) apiId);
-
-            swaggerObj = getModifiedOpenAPIDefinition(apiProduct);
             gatewayLabels = apiProduct.getGatewayLabels();
+            hostWithScheme = getHostWithSchemeForLabel(gatewayLabels, labelName);
+            updatedDefinition = oasParser.getOASDefinitionForStore(apiProduct, definition, hostWithScheme);
         }
-
-        Label labelObj = null;
-
-        for (Label label : gatewayLabels) {
-            if (label.getName().equals(labelName)) {
-                labelObj = label;
-                break;
-            }
-        }
-
-        if (labelObj == null) {
-            handleException(
-                    "Could not find provided label '" + labelName + "' attached to the api '" + apiId.toString()
-                            + "'");
-            return null;
-        }
-
-        String hostWithScheme = null;
-        List<String> accessUrls = labelObj.getAccessUrls();
-        for (String url : accessUrls) {
-            if (url.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
-                hostWithScheme = url;
-                break;
-            }
-        }
-
-        if (hostWithScheme == null) {
-            hostWithScheme = accessUrls.get(0);
-        }
-
-        String host = hostWithScheme.trim().replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "")
-                .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
-
-        swaggerObj.put(APIConstants.SWAGGER_HOST, host);
-        return swaggerObj.toJSONString();
+        return updatedDefinition;
     }
 
     private Map<String, Object> filterMultipleVersionedAPIs(Map<String, Object> searchResults) {
@@ -5546,151 +5470,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
-     * Retrieves the modified swagger definition of an API which is required for the try-out
-     *
-     * @param api API
-     * @return modified swagger definition of an API
-     * @throws APIManagementException when error occurs while performing operation
-     */
-    private JSONObject getModifiedOpenAPIDefinition(API api) throws APIManagementException {
-        String definition = super.getOpenAPIDefinition(api.getId());
-        definition = APIUtil.removeXMediationScriptsFromSwagger(definition);
-
-        try {
-            JSONObject swaggerObj = (JSONObject) new JSONParser().parse(definition);
-            String basePath = api.getContext();
-            JSONArray schemes = new JSONArray();
-            String[] apiTransports = api.getTransports().split(",");
-            if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL)) {
-                schemes.add(APIConstants.HTTPS_PROTOCOL);
-            }
-            if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)) {
-                schemes.add(APIConstants.HTTP_PROTOCOL);
-            }
-
-            JSONObject defaultImplicitSecurity = new JSONObject();
-            defaultImplicitSecurity.put(APIConstants.SWAGGER_SECURITY_TYPE, APIConstants.SWAGGER_SECURITY_OAUTH2);
-            defaultImplicitSecurity
-                    .put(APIConstants.SWAGGER_SECURITY_OAUTH2_AUTHORIZATION_URL, "https://wso2.gateway.com/authorize");
-            defaultImplicitSecurity
-                    .put(APIConstants.SWAGGER_SECURITY_OAUTH2_FLOW, APIConstants.SWAGGER_SECURITY_OAUTH2_IMPLICIT);
-            defaultImplicitSecurity.put(APIConstants.SWAGGER_SCOPES, new JSONArray());
-
-
-            swaggerObj.put(APIConstants.SWAGGER_BASEPATH, basePath);
-            swaggerObj.put(APIConstants.SWAGGER_SCHEMES, schemes);
-
-            JSONObject securityDefinitions = (JSONObject)swaggerObj.get(APIConstants.SWAGGER_SECURITY_DEFINITIONS);
-            if (securityDefinitions == null) {
-                securityDefinitions = new JSONObject();
-            }
-            securityDefinitions.put(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, defaultImplicitSecurity);
-            swaggerObj.put(APIConstants.SWAGGER_SECURITY_DEFINITIONS, securityDefinitions);
-            return swaggerObj;
-        } catch (ParseException e) {
-            handleException("Error while parsing API definition for " + api.getId().toString(), e);
-        }
-        return null;
-    }
-
-    /**
-     * Retrieves the modified swagger definition of an API Product which is required for the try-out
-     *
-     * @param api APIProduct
-     * @return modified swagger definition of an API
-     * @throws APIManagementException when error occurs while performing operation
-     */
-    private JSONObject getModifiedOpenAPIDefinition(APIProduct api) throws APIManagementException {
-        String definition = super.getOpenAPIDefinition(api.getId());
-        definition = APIUtil.removeXMediationScriptsFromSwagger(definition);
-
-        try {
-            JSONObject swaggerObj = (JSONObject) new JSONParser().parse(definition);
-            String basePath = api.getContext();
-            JSONArray schemes = new JSONArray();
-            String[] apiTransports = api.getTransports().split(",");
-            if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL)) {
-                schemes.add(APIConstants.HTTPS_PROTOCOL);
-            }
-            if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)) {
-                schemes.add(APIConstants.HTTP_PROTOCOL);
-            }
-
-            JSONObject defaultImplicitSecurity = new JSONObject();
-            defaultImplicitSecurity.put(APIConstants.SWAGGER_SECURITY_TYPE, APIConstants.SWAGGER_SECURITY_OAUTH2);
-            defaultImplicitSecurity
-                    .put(APIConstants.SWAGGER_SECURITY_OAUTH2_AUTHORIZATION_URL, "https://wso2.gateway.com/authorize");
-            defaultImplicitSecurity
-                    .put(APIConstants.SWAGGER_SECURITY_OAUTH2_FLOW, APIConstants.SWAGGER_SECURITY_OAUTH2_IMPLICIT);
-            defaultImplicitSecurity.put(APIConstants.SWAGGER_SCOPES, new JSONArray());
-
-
-            swaggerObj.put(APIConstants.SWAGGER_BASEPATH, basePath);
-            swaggerObj.put(APIConstants.SWAGGER_SCHEMES, schemes);
-
-            JSONObject securityDefinitions = (JSONObject)swaggerObj.get(APIConstants.SWAGGER_SECURITY_DEFINITIONS);
-            if (securityDefinitions == null) {
-                securityDefinitions = new JSONObject();
-            }
-            securityDefinitions.put(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, defaultImplicitSecurity);
-            swaggerObj.put(APIConstants.SWAGGER_SECURITY_DEFINITIONS, securityDefinitions);
-            return swaggerObj;
-        } catch (ParseException e) {
-            handleException("Error while parsing API definition for " + api.getId().toString(), e);
-        }
-        return null;
-    }
-
-    private Map<Documentation, API> filterDocumentResultsOfMultipleVersions(Map<Documentation, API> docMap) {
-        Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
-        if (!displayMultipleVersions) {
-            SortedSet<API> resultApis = new TreeSet<API>(new APINameComparator());
-            Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
-            Comparator<API> versionComparator = new APIVersionComparator();
-            String key;
-
-            for(Map.Entry<Documentation, API> mapEntry : docMap.entrySet()) {
-                resultApis.add(mapEntry.getValue());
-            }
-
-            //Run the result api list through API version comparator and filter out multiple versions
-            for (API api : resultApis) {
-                key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-                API existingAPI = latestPublishedAPIs.get(key);
-                if (existingAPI != null) {
-                    // If we have already seen an API with the same name, make sure
-                    // this one has a higher version number
-                    if (versionComparator.compare(api, existingAPI) > 0) {
-                        latestPublishedAPIs.put(key, api);
-                    }
-                } else {
-                    // We haven't seen this API before
-                    latestPublishedAPIs.put(key, api);
-                }
-            }
-
-            //filter docMap
-            if (docMap != null) {
-                Map<Documentation, API> tempDocMap = new HashMap<Documentation, API>();
-                for (Map.Entry<Documentation, API> mapEntry : docMap.entrySet()) {
-                    Documentation docKey = mapEntry.getKey();
-                    API apiValue = mapEntry.getValue();
-                    String mapKey = apiValue.getId().getProviderName() + COLON_CHAR + apiValue.getId().getApiName();
-
-                    if (latestPublishedAPIs.containsKey(mapKey)) {
-                        API latestAPI = latestPublishedAPIs.get(mapKey);
-                        if (latestAPI.getId().equals(apiValue.getId())) {
-                            tempDocMap.put(docKey, apiValue);
-                        }
-                    }
-                }
-                docMap = tempDocMap;
-            }
-        }
-        return docMap;
-    }
-
-    /**
      * Validate application attributes and remove attributes that does not exist in the config
      *
      * @param applicationAttributes Application attributes provided
@@ -5708,5 +5487,73 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return applicationAttributes;
+    }
+
+    private String getHostWithSchemeForEnvironment(String apiTenantDomain, String environmentName) throws APIManagementException {
+        Map<String, String> domains = getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
+        String hostWithScheme = null;
+        if (!domains.isEmpty()) {
+            hostWithScheme = domains.get(APIConstants.CUSTOM_URL);
+        } else {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            Map<String, Environment> allEnvironments = config.getApiGatewayEnvironments();
+            Environment environment = allEnvironments.get(environmentName);
+
+            if (environment == null) {
+                handleException(
+                        "Could not find provided environment '" + environmentName);
+            }
+
+            assert environment != null;
+            String[] hostsWithScheme = environment.getApiGatewayEndpoint().split(",");
+            for (String url : hostsWithScheme) {
+                if (url.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
+                    hostWithScheme = url;
+                    break;
+                }
+            }
+
+            if (hostWithScheme == null) {
+                hostWithScheme = hostsWithScheme[0];
+            }
+        }
+        return hostWithScheme;
+    }
+
+    private String getHostWithSchemeForLabel(List<Label> gatewayLabels, String labelName) throws APIManagementException {
+        Label labelObj = null;
+        for (Label label : gatewayLabels) {
+            if (label.getName().equals(labelName)) {
+                labelObj = label;
+                break;
+            }
+        }
+        if (labelObj == null) {
+            handleException(
+                    "Could not find provided label '" + labelName);
+            return null;
+        }
+        String hostWithScheme = null;
+        List<String> accessUrls = labelObj.getAccessUrls();
+        for (String url : accessUrls) {
+            if (url.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
+                hostWithScheme = url;
+                break;
+            }
+        }
+        if (hostWithScheme == null) {
+            hostWithScheme = accessUrls.get(0);
+        }
+        return hostWithScheme;
+    }
+
+    private String getBasePath(String apiTenantDomain, String basePath) throws APIManagementException {
+        Map<String, String> domains =
+                getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
+        if (!domains.isEmpty()) {
+            return basePath.replace("/t/" + apiTenantDomain, "");
+        }
+        return basePath;
     }
 }

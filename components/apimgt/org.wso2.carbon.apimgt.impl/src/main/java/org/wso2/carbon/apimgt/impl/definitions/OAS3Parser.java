@@ -27,8 +27,11 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.OAuthFlow;
@@ -36,26 +39,28 @@ import io.swagger.v3.oas.models.security.OAuthFlows;
 import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.parameters.RequestBody;
-import org.json.simple.JSONObject;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -227,7 +232,8 @@ public class OAS3Parser extends APIDefinition {
 
         info.setVersion(swaggerData.getVersion());
         openAPI.setInfo(info);
-        updateSwaggerSecurityDefinition(openAPI, swaggerData);
+        updateSwaggerSecurityDefinition(openAPI, swaggerData, "https://test.com");
+        updateLegacyScopesFromSwagger(openAPI, swaggerData);
         if (APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
             openAPI = modifyGraphQLSwagger(openAPI);
         } else {
@@ -317,6 +323,22 @@ public class OAS3Parser extends APIDefinition {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(swagger, null, null);
         OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
+        return generateAPIDefinition(swaggerData, openAPI);
+    }
+
+    /**
+     * This method generates API definition using the given api's URI templates and the swagger.
+     * It will alter the provided swagger definition based on the URI templates. For example: if there is a new
+     * URI template which is not included in the swagger, it will be added to the swagger as a basic resource. Any
+     * additional resources inside the swagger will be removed from the swagger. Changes to scopes, throtting policies,
+     * on the resource will be updated on the swagger
+     *
+     * @param swaggerData api
+     * @param openAPI     OpenAPI
+     * @return API definition in string format
+     * @throws APIManagementException if error occurred when generating API Definition
+     */
+    private String generateAPIDefinition(SwaggerData swaggerData, OpenAPI openAPI) throws APIManagementException {
         Set<SwaggerData.Resource> copy = new HashSet<>(swaggerData.getResources());
 
         Iterator<Map.Entry<String, PathItem>> itr = openAPI.getPaths().entrySet().iterator();
@@ -351,7 +373,8 @@ public class OAS3Parser extends APIDefinition {
         for (SwaggerData.Resource resource : copy) {
             addOrUpdatePathToSwagger(openAPI, resource);
         }
-        updateSwaggerSecurityDefinition(openAPI, swaggerData);
+        updateSwaggerSecurityDefinition(openAPI, swaggerData, "https://test.com");
+        updateLegacyScopesFromSwagger(openAPI, swaggerData);
         return Json.pretty(openAPI);
     }
 
@@ -427,7 +450,112 @@ public class OAS3Parser extends APIDefinition {
     @Override
     public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData)
             throws APIManagementException {
-        return generateAPIDefinition(swaggerData, oasDefinition);
+        OpenAPI openAPI = getOpenAPI(oasDefinition);
+        removePublisherSpecificInfo(openAPI);
+        return generateAPIDefinition(swaggerData, openAPI);
+    }
+
+    /**
+     * Remove MG related information
+     *
+     * @param openAPI OpenAPI
+     */
+    private void removePublisherSpecificInfo(OpenAPI openAPI) {
+        Map<String, Object> extensions = openAPI.getExtensions();
+        if (extensions.containsKey(APIConstants.X_WSO2_AUTH_HEADER)) {
+            extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
+        }
+        if (extensions.containsKey(APIConstants.X_THROTTLING_TIER)) {
+            extensions.remove(APIConstants.X_THROTTLING_TIER);
+        }
+        if (extensions.containsKey(APIConstants.X_WSO2_CORS)) {
+            extensions.remove(APIConstants.X_WSO2_CORS);
+        }
+        if (extensions.containsKey(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS)) {
+            extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
+        }
+        if (extensions.containsKey(APIConstants.X_WSO2_SANDBOX_ENDPOINTS)) {
+            extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
+        }
+        if (extensions.containsKey(APIConstants.X_WSO2_BASEPATH)) {
+            extensions.remove(APIConstants.X_WSO2_BASEPATH);
+        }
+    }
+
+    /**
+     * Update OAS definition for store
+     *
+     * @param api            API
+     * @param oasDefinition  OAS definition
+     * @param hostWithScheme host address with protocol
+     * @return OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
+    @Override
+    public String getOASDefinitionForStore(API api, String oasDefinition, String hostWithScheme)
+            throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(oasDefinition);
+        updateOperations(openAPI);
+        updateEndpoints(api, hostWithScheme, openAPI);
+        return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(api), hostWithScheme);
+    }
+
+    /**
+     * Update OAS definition for store
+     *
+     * @param product        APIProduct
+     * @param oasDefinition  OAS definition
+     * @param hostWithScheme host address with protocol
+     * @return OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
+    @Override
+    public String getOASDefinitionForStore(APIProduct product, String oasDefinition, String hostWithScheme)
+            throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(oasDefinition);
+        updateOperations(openAPI);
+        updateEndpoints(product, hostWithScheme, openAPI);
+        return updateSwaggerSecurityDefinitionForStore(openAPI, new SwaggerData(product), hostWithScheme);
+    }
+
+    /**
+     * Update OAS definition for API Publisher
+     *
+     * @param api           API
+     * @param oasDefinition
+     * @return OAS definition
+     * @throws APIManagementException throws if an error occurred
+     */
+    @Override
+    public String getOASDefinitionForPublisher(API api, String oasDefinition) throws APIManagementException {
+        OpenAPI openAPI = getOpenAPI(oasDefinition);
+        // setting scopes id it is null
+        // https://github.com/swagger-api/swagger-parser/issues/1202
+        OAuthFlow oAuthFlow = openAPI.getComponents().getSecuritySchemes().get("default").getFlows().getImplicit();
+        if (oAuthFlow.getScopes() == null) {
+            oAuthFlow.setScopes(new Scopes());
+        }
+
+        if (api.getAuthorizationHeader() != null) {
+            openAPI.addExtension(APIConstants.X_WSO2_AUTH_HEADER, api.getAuthorizationHeader());
+        }
+        if (api.getApiLevelPolicy() != null) {
+            openAPI.addExtension(APIConstants.X_THROTTLING_TIER, api.getApiLevelPolicy());
+        }
+        openAPI.addExtension(APIConstants.X_WSO2_CORS, api.getCorsConfiguration());
+        org.json.JSONObject endpoints = new org.json.JSONObject(api.getEndpointConfig());
+        if (endpoints.has(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
+            String prodUrls = endpoints.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)
+                    .getString(APIConstants.API_DATA_URL);
+            openAPI.addExtension(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS, prodUrls);
+        }
+        if (endpoints.has(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
+            String sandUrls = endpoints.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS)
+                    .getString(APIConstants.API_DATA_URL);
+            openAPI.addExtension(APIConstants.X_WSO2_SANDBOX_ENDPOINTS, sandUrls);
+        }
+        openAPI.addExtension(APIConstants.X_WSO2_BASEPATH, api.getContext());
+        return Json.pretty(openAPI);
     }
 
     /**
@@ -457,7 +585,7 @@ public class OAS3Parser extends APIDefinition {
      */
     private List<String> getScopeOfOperationsFromExtensions(Operation operation) {
         Map<String, Object> extensions = operation.getExtensions();
-        if (extensions !=null && extensions.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
+        if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
             String scopeKey = (String) extensions.get(APIConstants.SWAGGER_X_SCOPE);
             return Collections.singletonList(scopeKey);
         }
@@ -502,7 +630,7 @@ public class OAS3Parser extends APIDefinition {
      * @param openAPI     openapi definition
      * @param swaggerData Swagger related API data
      */
-    private void updateSwaggerSecurityDefinition(OpenAPI openAPI, SwaggerData swaggerData) {
+    private void updateSwaggerSecurityDefinition(OpenAPI openAPI, SwaggerData swaggerData, String authUrl) {
 
         if (openAPI.getComponents() == null) {
             openAPI.setComponents(new Components());
@@ -529,9 +657,9 @@ public class OAS3Parser extends APIDefinition {
         OAuthFlow oAuthFlow = securityScheme.getFlows().getImplicit();
         if (oAuthFlow == null) {
             oAuthFlow = new OAuthFlow();
-            oAuthFlow.setAuthorizationUrl("https://test.com");
             securityScheme.getFlows().setImplicit(oAuthFlow);
         }
+        oAuthFlow.setAuthorizationUrl(authUrl);
         Scopes oas3Scopes = new Scopes();
         Set<Scope> scopes = swaggerData.getScopes();
         if (scopes != null && !scopes.isEmpty()) {
@@ -543,7 +671,6 @@ public class OAS3Parser extends APIDefinition {
             oAuthFlow.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
         }
         oAuthFlow.setScopes(oas3Scopes);
-        updateLegacyScopesFromSwagger(openAPI, swaggerData);
     }
 
     /**
@@ -691,5 +818,138 @@ public class OAS3Parser extends APIDefinition {
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_SCOPE)) {
             extensions.remove(APIConstants.SWAGGER_X_SCOPE);
         }
+    }
+
+    /**
+     * Update OAS definition with authorization endpoints
+     *
+     * @param openAPI        OpenAPI
+     * @param swaggerData    SwaggerData
+     * @param hostWithScheme GW host with protocol
+     * @return updated OAS definition
+     */
+    private String updateSwaggerSecurityDefinitionForStore(OpenAPI openAPI, SwaggerData swaggerData,
+            String hostWithScheme) {
+        String authUrl = hostWithScheme + "/authorize";
+        updateSwaggerSecurityDefinition(openAPI, swaggerData, authUrl);
+
+        return Json.pretty(openAPI);
+    }
+
+    /**
+     * Update OAS definition with GW endpoints
+     *
+     * @param product        APIProduct
+     * @param hostWithScheme GW host with protocol
+     * @param openAPI        OpenAPI
+     * @throws APIManagementException
+     */
+    private void updateEndpoints(APIProduct product, String hostWithScheme, OpenAPI openAPI)
+            throws APIManagementException {
+        String basePath = product.getContext();
+        String transports = product.getTransports();
+        try {
+            updateEndpoints(openAPI, basePath, transports, hostWithScheme);
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Error occurred while setting server endpoints.", e);
+        }
+    }
+
+    /**
+     * Update OAS definition with GW endpoints
+     *
+     * @param api            API
+     * @param hostWithScheme GW host with protocol
+     * @param openAPI        OpenAPI
+     * @throws APIManagementException
+     */
+    private void updateEndpoints(API api, String hostWithScheme, OpenAPI openAPI) throws APIManagementException {
+        String basePath = api.getContext();
+        String transports = api.getTransports();
+        try {
+            updateEndpoints(openAPI, basePath, transports, hostWithScheme);
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Error occurred while setting server endpoints.", e);
+        }
+    }
+
+    /**
+     * Update OAS definition with GW endpoints and API information
+     *
+     * @param openAPI        OpenAPI
+     * @param basePath       API context
+     * @param transports     transports types
+     * @param hostWithScheme GW host with protocol
+     * @throws MalformedURLException
+     */
+    private void updateEndpoints(OpenAPI openAPI, String basePath, String transports, String hostWithScheme)
+            throws MalformedURLException {
+        String host = hostWithScheme.trim().replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "")
+                .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
+        String[] apiTransports = transports.split(",");
+        List<Server> servers = new ArrayList<>();
+        if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL)) {
+            String httpsURL = APIConstants.HTTPS_PROTOCOL + "://" + host + basePath;
+            Server httpsServer = new Server();
+            httpsServer.setUrl(httpsURL);
+            servers.add(httpsServer);
+        }
+        if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)) {
+            String httpURL = APIConstants.HTTP_PROTOCOL + "://" + host + basePath;
+            Server httpsServer = new Server();
+            httpsServer.setUrl(httpURL);
+            servers.add(httpsServer);
+        }
+        openAPI.setServers(servers);
+    }
+
+    /**
+     * Update OAS operations for Store
+     *
+     * @param openAPI OpenAPI to be updated
+     */
+    private void updateOperations(OpenAPI openAPI) {
+        for (String pathKey : openAPI.getPaths().keySet()) {
+            PathItem pathItem = openAPI.getPaths().get(pathKey);
+            for (Map.Entry<PathItem.HttpMethod, Operation> entry : pathItem.readOperationsMap().entrySet()) {
+                Operation operation = entry.getValue();
+                Map<String, Object> extensions = operation.getExtensions();
+                // remove mediation extension
+                if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
+                    extensions.remove(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
+                }
+                // set x-scope value to security definition if it not there.
+                if (extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SCOPES)) {
+                    String scope = (String) extensions.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+                    List<SecurityRequirement> security = operation.getSecurity();
+                    if (security == null) {
+                        security = new ArrayList<>();
+                        operation.setSecurity(security);
+                    }
+                    for (Map<String, List<String>> requirement : security) {
+                        if (requirement.get(OPENAPI_SECURITY_SCHEMA_KEY) == null || !requirement
+                                .get(OPENAPI_SECURITY_SCHEMA_KEY).contains(scope)) {
+                            requirement.put(OPENAPI_SECURITY_SCHEMA_KEY, Collections.singletonList(scope));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Get parsed OpenAPI object
+     *
+     * @param oasDefinition OAS definition
+     * @return OpenAPI
+     * @throws APIManagementException
+     */
+    private OpenAPI getOpenAPI(String oasDefinition) throws APIManagementException {
+        OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(oasDefinition, null, null);
+        if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
+            throw new APIManagementException("Error Occurred while parsing OpenAPI3 definition.");
+        }
+        return parseAttemptForV3.getOpenAPI();
     }
 }
