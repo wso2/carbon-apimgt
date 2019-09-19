@@ -28,7 +28,6 @@ public class DataBridgeBotDataDTO extends BotDataDTO {
      *  This method validates null for any mandatory field
      *
      *  @return Alist of mandatory values which are null
-     *
      * */
     public List<String> getMissingMandatoryValues() {
 
@@ -56,7 +55,6 @@ public class DataBridgeBotDataDTO extends BotDataDTO {
 
     @Override
     public String toString() {
-
         return "Current Time: " + getCurrentTime() +
                 ", Message ID: " + getMessageID() + ", API invoked method: " + getApiMethod() +
                 ", Header Set: " + getHeaderSet() + ", Message Body: " + getClientIp();
