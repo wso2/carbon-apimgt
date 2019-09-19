@@ -238,6 +238,19 @@ export default function ExternalStores() {
                                 </Button>
                             </Link>
                         </Grid>
+                        {(isRestricted(['apim:api_publish'], api))
+                            && (
+                                <Grid item>
+                                    <Typography variant='body2' color='primary'>
+                                        <FormattedMessage
+                                            id='Apis.Details.ExternalStores.ExternalStores.update.not.allowed'
+                                            defaultMessage={'* You are not authorized to publish the API' +
+                                            ' to external stores due to insufficient permissions'}
+                                        />
+                                    </Typography>
+                                </Grid>
+                            )
+                        }
                     </Grid>
                 </Grid>
             </div>
