@@ -307,10 +307,11 @@ public class OAS3Parser extends APIDefinition {
                 itr.remove();
             }
         }
-
-        //adding new operations to the definition
-        for (SwaggerData.Resource resource : copy) {
-            addOrUpdatePathToSwagger(openAPI, resource);
+        if (!APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
+            //adding new operations to the definition
+            for (SwaggerData.Resource resource : copy) {
+                addOrUpdatePathToSwagger(openAPI, resource);
+            }
         }
         updateSwaggerSecurityDefinition(openAPI, swaggerData, "https://test.com");
         updateLegacyScopesFromSwagger(openAPI, swaggerData);
