@@ -26,8 +26,6 @@ import API from 'AppData/api';
 import CONSTS from 'AppData/Constants';
 import ApiTagCloud from 'AppComponents/Apis/Listing/ApiTagCloud';
 import CustomIcon from '../../Shared/CustomIcon';
-import ApiTableView from './ApiTableView';
-import { ApiContext } from '../Details/ApiContext';
 
 const styles = theme => ({
     rightIcon: {
@@ -74,10 +72,10 @@ const styles = theme => ({
 /**
  * Shared listing page
  *
- * @class CommonListing
+ * @class TagCloudListing
  * @extends {Component}
  */
-class CommonListing extends React.Component {
+class TagCloudListing extends React.Component {
     /**
      * Constructor
      *
@@ -87,14 +85,33 @@ class CommonListing extends React.Component {
         super(props);
         this.state = {
             listType: props.theme.custom.defaultApiView,
+            allTags: null,
         };
     }
+
+    /**
+     * @memberof TagCloudListing
+     */
+    componentDidMount() {
+        const api = new API();
+        const promisedTags = api.getAllTags();
+        promisedTags
+            .then((response) => {
+                if (response.body.count !== 0) {
+                    this.setState({ allTags: response.body.list });
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
 
     /**
      *
      * Switch the view between grid and list view
      * @param {String} value view type
-     * @memberof CommonListing
+     * @memberof TagCloudListing
      */
     setListType = (value) => {
         this.setState({ listType: value });
@@ -104,14 +121,22 @@ class CommonListing extends React.Component {
      *
      * @inheritdoctheme
      * @returns {React.Component} @inheritdoc
-     * @memberof CommonListing
+     * @memberof TagCloudListing
      */
     render() {
         const {
-            apis, apiType, theme, classes, location: { search },
+            theme, classes,
         } = this.props;
-        const { listType } = this.state;
+        const { listType, allTags } = this.state;
+        const apiType = CONSTS.API_TYPE;
+        let apisTagCloudGroup;
+
+        if (allTags !== null) {
+            apisTagCloudGroup = allTags.filter(item => (theme.custom.tagWiseMode === true
+                && item.value.split(theme.custom.tagGroupKey).length > 1));
+        }
         const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
+
         return (
             <main className={classes.content}>
                 <div className={classes.root}>
@@ -120,13 +145,22 @@ class CommonListing extends React.Component {
                     </div>
                     <div className={classes.mainTitleWrapper}>
                         <Typography variant='display1' className={classes.mainTitle}>
-                            <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.main' />
+                            <FormattedMessage
+                                defaultMessage='API Groups'
+                                id='Apis.Listing.TagCloudListing.apigroups.main'
+                            />
                         </Typography>
-                        {apis && (
+                        {apisTagCloudGroup && apisTagCloudGroup.tags && (
                             <Typography variant='caption' gutterBottom align='left'>
-                                <FormattedMessage defaultMessage='Displaying' id='Apis.Listing.Listing.displaying' />
-                                {apis.count}
-                                <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.count' />
+                                <FormattedMessage
+                                    defaultMessage='Displaying'
+                                    id='Apis.Listing.TagCloudListing.displaying'
+                                />
+                                {apisTagCloudGroup.tags.count}
+                                <FormattedMessage
+                                    defaultMessage='API Groups'
+                                    id='Apis.Listing.TagCloudListing.apigroups.count'
+                                />
                             </Typography>
                         )}
                     </div>
@@ -139,39 +173,49 @@ class CommonListing extends React.Component {
                         </IconButton>
                     </div>
                 </div>
-                <div className={classes.listContentWrapper}>
-                    {listType === 'grid'
-                            && (
-                                <ApiContext.Provider value={{ apiType }}>
-                                    <ApiTableView gridView query={search} />
-                                </ApiContext.Provider>
-                            )}
-                    {listType === 'list'
-                            && (
-                                <ApiContext.Provider value={{ apiType }}>
-                                    <ApiTableView gridView={false} query={search} />
-                                </ApiContext.Provider>
-                            )}
-                </div>
+                {(apisTagCloudGroup && apisTagCloudGroup.length > 0)
+                    ? <ApiTagCloud data={apisTagCloudGroup} listType={listType} apiType={apiType} />
+                    : (
+                        <div className={classes.mainTitle}>
+                            <Typography variant='subheading' gutterBottom align='center'>
+                                <FormattedMessage
+                                    defaultMessage='Tags Connot be Found'
+                                    id='Apis.Listing.TagCloudListing.tagsNotFound'
+                                />
+                            </Typography>
+                        </div>
+                    )
+                }
             </main>
         );
     }
 }
 
-CommonListing.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    theme: PropTypes.shape({}).isRequired,
-    apiType: PropTypes.string.isRequired,
-    apis: PropTypes.shape({}).isRequired,
-    location: PropTypes.shape({
-        search: PropTypes.string,
-    }),
+TagCloudListing.propTypes = {
+    classes: PropTypes.shape({
+        listContentWrapper: PropTypes.shape({}).isRequired,
+        defaultApiView: PropTypes.shape({}).isRequired,
+        mainTitle: PropTypes.shape({}).isRequired,
+        buttonRight: PropTypes.shape({}).isRequired,
+        button: PropTypes.shape({}).isRequired,
+        mainTitleWrapper: PropTypes.shape({}).isRequired,
+        mainIconWrapper: PropTypes.shape({}).isRequired,
+        content: PropTypes.shape({}).isRequired,
+        root: PropTypes.shape({}).isRequired,
+    }).isRequired,
+    theme: PropTypes.shape({
+        palette: PropTypes.shape({
+            getContrastText: PropTypes.func.isRequired,
+            background: PropTypes.shape({
+                paper: PropTypes.shape({}).isRequired,
+            }).isRequired,
+        }).isRequired,
+        custom: PropTypes.shape({
+            tagWiseMode: PropTypes.bool.isRequired,
+            tagGroupKey: PropTypes.string.isRequired,
+            defaultApiView: PropTypes.string.isRequired,
+        }),
+    }).isRequired,
 };
 
-CommonListing.defaultProps = {
-    location: PropTypes.shape({
-        search: '',
-    }),
-};
-
-export default withStyles(styles, { withTheme: true })(CommonListing);
+export default withStyles(styles, { withTheme: true })(TagCloudListing);

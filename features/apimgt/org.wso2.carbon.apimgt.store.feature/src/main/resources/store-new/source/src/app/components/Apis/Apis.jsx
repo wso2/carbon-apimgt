@@ -17,9 +17,11 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, Redirect } from 'react-router-dom';
 import CONSTS from 'AppData/Constants';
+import { withStyles } from '@material-ui/core';
 import CommonListing from './Listing/CommonListing';
+import TagCloudListing from './Listing/TagCloudListing';
 import Details from './Details/index';
 import { PageNotFound } from '../Base/Errors';
 
@@ -31,6 +33,12 @@ import { PageNotFound } from '../Base/Errors';
 function Apis() {
     return (
         <Switch>
+            <Route
+                exact
+                path='/apiGroups'
+                render={props => (
+                    <TagCloudListing {...props} apiType={CONSTS.API_TYPE} />)}
+            />
             <Route
                 exact
                 path='/apis'
@@ -63,4 +71,4 @@ function Apis() {
     );
 }
 
-export default Apis;
+export default withStyles({}, { withTheme: true })(Apis);
