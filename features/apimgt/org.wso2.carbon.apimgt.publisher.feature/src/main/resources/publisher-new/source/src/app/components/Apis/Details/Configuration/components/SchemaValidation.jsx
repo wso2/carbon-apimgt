@@ -33,6 +33,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { isRestricted } from 'AppData/AuthManager';
+import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import Paper from '@material-ui/core/Paper';
 
 const styles = theme => ({
@@ -112,6 +113,7 @@ class SchemaValidation extends React.Component {
     render() {
         const { api, configDispatcher, classes } = this.props;
         const { isOpen } = this.state;
+        const { api: apiFromContext } = this.context;
 
         return (
             <Paper className={classes.paper}>
@@ -141,7 +143,7 @@ class SchemaValidation extends React.Component {
                             className={classes.actionSpace}
                             control={
                                 <Switch
-                                    disabled={isRestricted(['apim:api_create'], api)}
+                                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                     checked={
                                         api.enableSchemaValidation === undefined ? false : api.enableSchemaValidation
                                     }
@@ -219,5 +221,7 @@ SchemaValidation.propTypes = {
     configDispatcher: PropTypes.func.isRequired,
     classes: PropTypes.shape({}).isRequired,
 };
+
+SchemaValidation.contextType = ApiContext;
 
 export default withStyles(styles)(SchemaValidation);

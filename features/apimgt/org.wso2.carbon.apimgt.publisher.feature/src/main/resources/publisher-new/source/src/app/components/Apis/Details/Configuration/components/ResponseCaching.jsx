@@ -28,6 +28,7 @@ import HelpOutline from '@material-ui/icons/HelpOutline';
 import { isRestricted } from 'AppData/AuthManager';
 import { makeStyles } from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const useStyles = makeStyles(theme => ({
     iconSpace: {
@@ -59,6 +60,7 @@ const useStyles = makeStyles(theme => ({
 export default function ResponseCaching(props) {
     const { api, configDispatcher } = props;
     const classes = useStyles();
+    const [apiFromContext] = useAPI();
 
     return (
         <Paper className={classes.paper}>
@@ -90,7 +92,7 @@ export default function ResponseCaching(props) {
                         className={classes.actionSpace}
                         control={
                             <Switch
-                                disabled={isRestricted(['apim:api_create'], api)}
+                                disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                 checked={api.responseCachingEnabled}
                                 onChange={({ target: { checked } }) => configDispatcher({
                                     action: 'responseCachingEnabled',

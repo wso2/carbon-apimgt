@@ -20,6 +20,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import { isRestricted } from 'AppData/AuthManager';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 /**
  *
@@ -30,6 +31,7 @@ import { isRestricted } from 'AppData/AuthManager';
  */
 export default function Description(props) {
     const { api, configDispatcher } = props;
+    const [apiFromContext] = useAPI();
 
     return (
         <TextField
@@ -42,7 +44,7 @@ export default function Description(props) {
             fullWidth
             variant='outlined'
             onChange={e => configDispatcher({ action: 'description', value: e.target.value })}
-            disabled={isRestricted(['apim:api_create'], api)}
+            disabled={isRestricted(['apim:api_create'], apiFromContext)}
         />
     );
 }
