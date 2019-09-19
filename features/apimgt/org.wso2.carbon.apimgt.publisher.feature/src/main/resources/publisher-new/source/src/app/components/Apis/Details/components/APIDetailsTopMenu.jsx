@@ -79,10 +79,10 @@ const APIDetailsTopMenu = (props) => {
             </div>
             <VerticalDivider height={70} />
             <div className={classes.infoItem}>
-                <Typography variant='subtitle1' gutterBottom>
+                <Typography variant='subtitle1'>
                     {isAPIProduct ? api.state : api.lifeCycleStatus}
                 </Typography>
-                <Typography variant='caption' gutterBottom align='left'>
+                <Typography variant='caption' align='left'>
                     State
                 </Typography>
             </div>
@@ -97,12 +97,12 @@ const APIDetailsTopMenu = (props) => {
                     <div>
                         <LaunchIcon />
                     </div>
-                    <div className={classes.linkText}>
+                    <Typography variant='caption'>
                         <FormattedMessage
                             id='Apis.Details.components.APIDetailsTopMenu.view.in.portal'
                             defaultMessage='View in Dev portal'
                         />
-                    </div>
+                    </Typography>
                 </a>
             }
             {isVisibleInStore && <VerticalDivider height={70} />}
