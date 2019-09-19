@@ -553,24 +553,30 @@ public class OAS2Parser extends APIDefinition {
         operation.setVendorExtension(APIConstants.SWAGGER_X_THROTTLING_TIER, resource.getPolicy());
 
         updateLegacyScopesFromOperation(resource, operation);
-        if (resource.getScope() != null) {
-            String oauth2SchemeKey = APIConstants.SWAGGER_APIM_DEFAULT_SECURITY;
-            List<Map<String, List<String>>> security = operation.getSecurity();
-            if (security == null) {
-                security = new ArrayList<>();
-                operation.setSecurity(security);
-            }
-            for (Map<String, List<String>> requirement : security) {
-                if (requirement.get(oauth2SchemeKey) != null) {
-                    requirement.put(oauth2SchemeKey, Arrays.asList(resource.getScope().getKey()));
-                    return;
-                }
-            }
-            // if oauth2SchemeKey not present, add a new
-            Map<String, List<String>> defaultRequirement = new HashMap<>();
-            defaultRequirement.put(oauth2SchemeKey, Arrays.asList(resource.getScope().getKey()));
-            security.add(defaultRequirement);
+        String oauth2SchemeKey = APIConstants.SWAGGER_APIM_DEFAULT_SECURITY;
+        List<Map<String, List<String>>> security = operation.getSecurity();
+        if (security == null) {
+            security = new ArrayList<>();
+            operation.setSecurity(security);
         }
+        for (Map<String, List<String>> requirement : security) {
+            if (requirement.get(oauth2SchemeKey) != null) {
+                if (resource.getScope() == null) {
+                    requirement.put(oauth2SchemeKey, Collections.EMPTY_LIST);
+                } else {
+                    requirement.put(oauth2SchemeKey, Arrays.asList(resource.getScope().getKey()));
+                }
+                return;
+            }
+        }
+        // if oauth2SchemeKey not present, add a new
+        Map<String, List<String>> defaultRequirement = new HashMap<>();
+        if (resource.getScope() == null) {
+            defaultRequirement.put(oauth2SchemeKey, Collections.EMPTY_LIST);
+        } else {
+            defaultRequirement.put(oauth2SchemeKey, Arrays.asList(resource.getScope().getKey()));
+        }
+        security.add(defaultRequirement);
     }
 
     /**
