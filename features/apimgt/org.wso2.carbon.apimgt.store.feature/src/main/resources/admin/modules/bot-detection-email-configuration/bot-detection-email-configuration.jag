@@ -30,8 +30,6 @@ var saveEmailList  = function () {
             message:e.message.split(":")[1]
         };
     }
-
-
 };
 
 var deleteEmails = function (uuid){
@@ -39,7 +37,6 @@ var deleteEmails = function (uuid){
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
                 var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
                 if(!isAnalyticsEnabled) {
-
                     return {
                         error:true,
                         message:"Please enable statistics to see this page"
@@ -73,7 +70,6 @@ var retrieveSavedEmailList = function () {
        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
                var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
                if(!isAnalyticsEnabled) {
-
                    return {
                        error:true,
                        message:"Please enable statistics to see this page"
@@ -88,7 +84,6 @@ var retrieveSavedEmailList = function () {
            "allSavedEmailListJson": allSavedEmailListJson
         };
     } catch (e) {
-
         log.error(e.code);
         return {
            error: true,
