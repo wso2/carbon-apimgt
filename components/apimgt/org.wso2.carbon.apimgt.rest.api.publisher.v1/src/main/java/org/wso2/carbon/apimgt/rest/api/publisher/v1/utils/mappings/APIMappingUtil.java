@@ -617,14 +617,17 @@ public class APIMappingUtil {
         }
 
         dto.setCacheTimeout(model.getCacheTimeout());
-        try {
-            JSONParser parser = new JSONParser();
-            JSONObject endpointConfigJson = (JSONObject) parser.parse(model.getEndpointConfig());
-            dto.setEndpointConfig(endpointConfigJson);
-        } catch (ParseException e) {
-            //logs the error and continues as this is not a blocker
-            log.error("Cannot convert endpoint configurations when setting endpoint for API. " +
-                    "API ID = " + model.getId(), e);
+        String endpointConfig = model.getEndpointConfig();
+        if (!StringUtils.isAllEmpty(endpointConfig)) {
+            try {
+                JSONParser parser = new JSONParser();
+                JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
+                dto.setEndpointConfig(endpointConfigJson);
+            } catch (ParseException e) {
+                //logs the error and continues as this is not a blocker
+                log.error("Cannot convert endpoint configurations when setting endpoint for API. " +
+                        "API ID = " + model.getId(), e);
+            }
         }
       /*  if (!StringUtils.isBlank(model.getThumbnailUrl())) {todo
             dto.setThumbnailUri(getThumbnailUri(model.getUUID()));
