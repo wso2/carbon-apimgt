@@ -15,7 +15,6 @@
     <jaxrs:server id="services" address="/">
         <jaxrs:serviceBeans>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApisApi"/>
-	    <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApiProductsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SdkGenApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SearchApi"/>
