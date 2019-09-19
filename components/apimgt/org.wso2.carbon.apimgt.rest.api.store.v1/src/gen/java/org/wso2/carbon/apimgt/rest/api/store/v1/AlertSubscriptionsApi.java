@@ -43,7 +43,7 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get the list of API Store alert types subscribed by the user. ", notes = "This operation is used to get the list of subscribed alert types by the user. ", response = AlertsInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            
+            @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure store alert types")
         })
     }, tags={ "Alert Subscriptions",  })
     @ApiResponses(value = { 
@@ -59,7 +59,7 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Subscribe to the selected alert types by the user. ", notes = "This operation is used to get the list of subscribed alert types by the user. ", response = AlertsInfoResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            
+            @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure store alert types")
         })
     }, tags={ "Alert Subscriptions",  })
     @ApiResponses(value = { 
@@ -76,7 +76,7 @@ AlertSubscriptionsApiService delegate = new AlertSubscriptionsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Unsubscribe user from all the alert types. ", notes = "This operation is used to unsubscribe the respective user from all the alert types. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            
+            @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure store alert types")
         })
     }, tags={ "Alert Subscriptions" })
     @ApiResponses(value = { 

@@ -31,7 +31,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertsInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertsInfoResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.AlertsMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.store.v1.utils.AlertsAPIUtils;
+import org.wso2.carbon.apimgt.rest.api.store.v1.utils.SubscriberAlertsAPIUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
@@ -42,14 +42,14 @@ import java.util.Map;
 public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiService {
 
     private AlertConfigurator storeAlertConfigurator = null;
-    private static final Log log = LogFactory.getLog(ApiProductsApiServiceImpl.class);
+    private static final Log log = LogFactory.getLog(AlertSubscriptionsApiServiceImpl.class);
     private static final String AGENT = "subscriber";
 
     @Override
     public Response getSubscribedAlertTypes(MessageContext messageContext) {
 
         String userName = RestApiUtil.getLoggedInUsername();
-        String tenantAwareUserName = AlertsAPIUtils.getTenantAwareUserName(userName);
+        String tenantAwareUserName = SubscriberAlertsAPIUtils.getTenantAwareUserName(userName);
 
         try {
             storeAlertConfigurator = AlertConfigManager.getInstance().getAlertConfigurator(AGENT);
@@ -100,7 +100,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
             RestApiUtil.handleInternalServerError("Analytics not enabled", e, log);
         }
         String userName = RestApiUtil.getLoggedInUsername();
-        String tenantAwareUserName = AlertsAPIUtils.getTenantAwareUserName(userName);
+        String tenantAwareUserName = SubscriberAlertsAPIUtils.getTenantAwareUserName(userName);
 
         List<String> emailsList = body.getEmailList();
         if (emailsList == null || emailsList.size() == 0) {
@@ -143,7 +143,7 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
     }
 
     public Response unsubscribeAllAlerts(MessageContext messageContext) {
-        String tenantAwareUserName = AlertsAPIUtils.getTenantAwareUserName(RestApiUtil.getLoggedInUsername());
+        String tenantAwareUserName = SubscriberAlertsAPIUtils.getTenantAwareUserName(RestApiUtil.getLoggedInUsername());
         try {
             storeAlertConfigurator = AlertConfigManager.getInstance().getAlertConfigurator(AGENT);
             storeAlertConfigurator.unsubscribe(tenantAwareUserName);

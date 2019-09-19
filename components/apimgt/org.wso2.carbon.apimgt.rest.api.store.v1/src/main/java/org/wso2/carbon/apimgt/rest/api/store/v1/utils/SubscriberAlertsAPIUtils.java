@@ -29,9 +29,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Base64;
 
-public class AlertsAPIUtils {
+public class SubscriberAlertsAPIUtils {
 
-    private static final  Log log = LogFactory.getLog(AlertsAPIUtils.class);
+    private static final  Log log = LogFactory.getLog(SubscriberAlertsAPIUtils.class);
 
     /**
      * Utility method to get the application name by applicationId

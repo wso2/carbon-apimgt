@@ -44,7 +44,7 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add AbnormalRequestsPerMin alert configurations. ", notes = "This operation is used to add configuration for the AbnormalRequestsPerMin alert type. ", response = AlertConfigDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            
+            @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure store alert types")
         })
     }, tags={ "Alert Configuration",  })
     @ApiResponses(value = { 
@@ -61,7 +61,7 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete the selected configuration from AbnormalRequestsPerMin alert type. ", notes = "This operation is used to delete configuration from the AbnormalRequestsPerMin alert type. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            
+            @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure store alert types")
         })
     }, tags={ "Alert Configuration",  })
     @ApiResponses(value = { 
@@ -79,7 +79,7 @@ AlertsApiService delegate = new AlertsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get all AbnormalRequestsPerMin alert configurations ", notes = "This operation is used to get all configurations of the AbnormalRequestsPerMin alert type. ", response = AlertConfigListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            
+            @AuthorizationScope(scope = "apim:sub_alert_manage", description = "Retrieve, subscribe and configure store alert types")
         })
     }, tags={ "Alert Configuration" })
     @ApiResponses(value = { 

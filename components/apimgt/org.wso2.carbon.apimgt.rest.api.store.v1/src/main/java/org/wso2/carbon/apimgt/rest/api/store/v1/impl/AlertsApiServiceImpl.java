@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.AlertsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertConfigInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.AlertsMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.store.v1.utils.AlertsAPIUtils;
+import org.wso2.carbon.apimgt.rest.api.store.v1.utils.SubscriberAlertsAPIUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
@@ -39,14 +39,14 @@ import java.util.Map;
 public class AlertsApiServiceImpl implements AlertsApiService {
 
     private AlertConfigurator storeAlertConfigurator = null;
-    private static final Log log = LogFactory.getLog(ApiProductsApiServiceImpl.class);
+    private static final Log log = LogFactory.getLog(AlertsApiServiceImpl.class);
     private static final String AGENT = "subscriber";
 
     @Override
     public Response addAlertConfig(String alertType, String configurationId, AlertConfigInfoDTO body,
             MessageContext messageContext) {
         String tenantAwareUserName = RestApiUtil.getLoggedInUsername();
-        AlertsAPIUtils.validateConfigParameters(configurationId);
+        SubscriberAlertsAPIUtils.validateConfigParameters(configurationId);
         if (body == null) {
             RestApiUtil.handleBadRequest("Configuration should not be empty", log);
         }
@@ -66,7 +66,7 @@ public class AlertsApiServiceImpl implements AlertsApiService {
     public Response deleteAlertConfig(String alertType, String configurationId,
             MessageContext messageContext) {
         String tenantAwareUserName = RestApiUtil.getLoggedInUsername();
-        AlertsAPIUtils.validateConfigParameters(configurationId);
+        SubscriberAlertsAPIUtils.validateConfigParameters(configurationId);
         try {
             storeAlertConfigurator = AlertConfigManager.getInstance().getAlertConfigurator(AGENT);
             storeAlertConfigurator.removeAlertConfiguration(tenantAwareUserName, alertType,

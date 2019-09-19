@@ -22,7 +22,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertConfigInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AlertTypeDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.utils.AlertsAPIUtils;
+import org.wso2.carbon.apimgt.rest.api.store.v1.utils.SubscriberAlertsAPIUtils;
 
 import java.util.Base64;
 import java.util.HashMap;
@@ -42,7 +42,7 @@ public class AlertsMappingUtil {
     public static AlertConfigDTO toAlertConfigDTO(Map<String, String> configProperties) throws APIManagementException {
         AlertConfigDTO alertConfigDTO = new AlertConfigDTO();
         String applicationId = configProperties.get("applicationId");
-        String applicationName = AlertsAPIUtils.getApplicationNameById(Integer.parseInt(applicationId));
+        String applicationName = SubscriberAlertsAPIUtils.getApplicationNameById(Integer.parseInt(applicationId));
         configProperties.remove("applicationId");
         configProperties.put("applicationName", applicationName);
         alertConfigDTO.setConfiguration(configProperties);
@@ -81,7 +81,7 @@ public class AlertsMappingUtil {
         Map<String, String> configMap = new HashMap<>();
         configMap.put("apiName", parameters[0]);
         configMap.put("apiVersion", parameters[1]);
-        configMap.put("applicationId", String.valueOf(AlertsAPIUtils.getApplicationIdByName(parameters[2])));
+        configMap.put("applicationId", String.valueOf(SubscriberAlertsAPIUtils.getApplicationIdByName(parameters[2])));
         return configMap;
     }
 
@@ -110,7 +110,7 @@ public class AlertsMappingUtil {
         Map<String, String> configMap = new HashMap<>(alertConfigInfoDTO);
         String applicationName = configMap.get("applicationName");
         configMap.put("applicationId",
-                String.valueOf(AlertsAPIUtils.getApplicationIdByName(applicationName)));
+                String.valueOf(SubscriberAlertsAPIUtils.getApplicationIdByName(applicationName)));
         configMap.remove("applicationName");
         return configMap;
     }
