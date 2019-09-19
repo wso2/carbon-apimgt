@@ -16,7 +16,9 @@
  *  under the License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
+import { isRestricted } from 'AppData/AuthManager';
+import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import {
     Chip,
     ExpansionPanel,
@@ -57,6 +59,7 @@ function GenericResource(props) {
     const {
         resourcePath, resourceMethod, scriptContent, classes, theme, onChange,
     } = props;
+    const { api } = useContext(APIContext);
     let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[resourceMethod] : null;
     let chipTextColor = '#000000';
     if (!chipColor) {
@@ -103,7 +106,10 @@ function GenericResource(props) {
                             width='100%'
                             theme='vs-dark'
                             value={scriptContent}
-                            options={{ selectOnLineNumbers: true }}
+                            options={{
+                                selectOnLineNumbers: true,
+                                readOnly: `${(isRestricted(['apim:api_create'], api))}`,
+                            }}
                             language='javascript'
                             onChange={content => onChange(content, resourcePath, resourceMethod)}
                         />

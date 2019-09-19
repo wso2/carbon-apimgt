@@ -31,6 +31,7 @@ import { FormattedMessage } from 'react-intl';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
+import { isRestricted } from 'AppData/AuthManager';
 import Alert from 'AppComponents/Shared/Alert';
 import isEmpty from 'lodash/isEmpty';
 import InFlow from './InFlow';
@@ -139,9 +140,10 @@ function Overview(props) {
                         <Grid
                             container
                             direction='row'
-                            alignItems='flex-start'
-                            spacing={16}
+                            alignItems='center'
+                            spacing={4}
                             className={classes.buttonSection}
+                            style={{ marginTop: 20 }}
                         >
                             <Grid item>
                                 <div>
@@ -149,15 +151,22 @@ function Overview(props) {
                                         variant='contained'
                                         color='primary'
                                         onClick={() => saveAPI(updateAPI)}
+                                        disabled={isRestricted(['apim:api_create'], api)}
                                     >
-                                        <FormattedMessage id='save' defaultMessage='Save' />
+                                        <FormattedMessage
+                                            id='Apis.Details.MediationPolicies.Overview.save'
+                                            defaultMessage='Save'
+                                        />
                                     </Button>
                                 </div>
                             </Grid>
                             <Grid item>
                                 <Link to={'/apis/' + api.id + '/overview'}>
                                     <Button>
-                                        <FormattedMessage id='cancel' defaultMessage='Cancel' />
+                                        <FormattedMessage
+                                            id='Apis.Details.MediationPolicies.Overview.cancel'
+                                            defaultMessage='Cancel'
+                                        />
                                     </Button>
                                 </Link>
                             </Grid>

@@ -19,6 +19,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import { isRestricted } from 'AppData/AuthManager';
 import LifeCycleIcon from '@material-ui/icons/Autorenew';
 import EndpointIcon from '@material-ui/icons/GamesOutlined';
 import PersonPinCircleOutlinedIcon from '@material-ui/icons/PersonPinCircleOutlined';
@@ -469,8 +470,8 @@ class Details extends Component {
                             />
                         )}
                         {this.getLeftMenuItemForAPIType(api.type)}
-                        {!isAPIProduct && (
-                            <LeftMenuItem
+                        {(!isAPIProduct && !isRestricted(['apim:api_publish'], api))
+                            && (<LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.lifecycle',
                                     defaultMessage: 'lifecycle',

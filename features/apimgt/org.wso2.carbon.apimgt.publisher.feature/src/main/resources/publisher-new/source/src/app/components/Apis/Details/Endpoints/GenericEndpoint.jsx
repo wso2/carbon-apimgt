@@ -102,6 +102,7 @@ function GenericEndpoint(props) {
                                     className={classes.iconButton}
                                     aria-label='Settings'
                                     onClick={() => setAdvancedConfigOpen(index, type, category)}
+                                    disabled={(isRestricted(['apim:api_create'], api))}
                                 >
                                     <Icon>
                                         settings
@@ -115,6 +116,7 @@ function GenericEndpoint(props) {
                                     aria-label='Delete'
                                     color='secondary'
                                     onClick={() => deleteEndpoint(index, type, category)}
+                                    disabled={(isRestricted(['apim:api_create'], api))}
                                 >
                                     <Icon>
                                         delete

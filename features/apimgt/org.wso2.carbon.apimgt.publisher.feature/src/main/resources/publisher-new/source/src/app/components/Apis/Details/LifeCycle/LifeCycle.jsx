@@ -24,6 +24,8 @@ import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
+import { isRestricted } from 'AppData/AuthManager';
+import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 import LifeCycleUpdate from './LifeCycleUpdate';
 import LifeCycleHistory from './LifeCycleHistory';
@@ -157,6 +159,28 @@ class LifeCycle extends Component {
     render() {
         const { classes } = this.props;
         const { api, lcState, privateJetModeEnabled, checkList, lcHistory } = this.state;
+        const apiFromContext = this.context.api;
+        if (apiFromContext && isRestricted(['apim:api_publish'], apiFromContext)) {
+            return (
+                <Grid
+                    container
+                    direction='row'
+                    alignItems='center'
+                    spacing={4}
+                    style={{ marginTop: 20 }}
+                >
+                    <Grid item>
+                        <Typography variant='body2' color='primary'>
+                            <FormattedMessage
+                                id='Apis.Details.LifeCycle.LifeCycle.change.not.allowed'
+                                defaultMessage={'* You are not authorized to change the life cycle state of the API' +
+                                    ' due to insufficient permissions'}
+                            />
+                        </Typography>
+                    </Grid>
+                </Grid>
+            );
+        }
 
         if (!lcState) {
             return <Progress />;
@@ -200,5 +224,7 @@ class LifeCycle extends Component {
 LifeCycle.propTypes = {
     classes: PropTypes.object.isRequired,
 };
+
+LifeCycle.contextType = ApiContext;
 
 export default withStyles(styles)(LifeCycle);
