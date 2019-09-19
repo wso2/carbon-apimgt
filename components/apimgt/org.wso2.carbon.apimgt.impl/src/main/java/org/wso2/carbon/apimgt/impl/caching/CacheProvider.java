@@ -75,7 +75,7 @@ public class CacheProvider {
     }
 
     /**
-     * @return gateway user name cache
+     * @return gateway invalid user name cache
      */
     public static Cache getInvalidUsernameCache() {
         return getCache(APIConstants.GATEWAY_INVALID_USERNAME_CACHE_NAME);
