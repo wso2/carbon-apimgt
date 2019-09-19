@@ -84,6 +84,7 @@ class Environments extends React.Component {
             prodUrlCopied: false,
             epUrl: '',
         };
+        this.downloadWSDL = this.downloadWSDL.bind(this);
     }
 
     onCopy = name => () => {

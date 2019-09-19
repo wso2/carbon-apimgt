@@ -81,7 +81,6 @@ class Labels extends React.Component {
             prodUrlCopied: false,
             epUrl: '',
         };
-        this.downloadSwagger = this.downloadSwagger.bind(this);
     }
 
     onCopy = name => () => {
