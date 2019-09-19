@@ -31,7 +31,9 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.sql.SQLException;
 
+@Deprecated
 public class AlertTypesPublisher {
+
     private static final Log log = LogFactory.getLog(AlertTypesPublisher.class);
     protected boolean enabled;
     protected volatile APIMgtUsageDataPublisher publisher;
@@ -50,53 +52,48 @@ public class AlertTypesPublisher {
     public void saveAndPublishAlertTypesEvent(String checkedAlertList, String emailList, String userName, String agent,
             String checkedAlertListValues) throws APIManagementException {
 
-        try {
-            if (!enabled || skipEventReceiverConnection) {
-                throw new APIManagementException("Data publisher is not enabled");
-            }
-
-            if (publisher == null) {
-                this.initializeDataPublisher();
-            }
-            String conditionClause = "";
-            ApiMgtDAO apiMgtDAO = getApiMgtDao();
-            //data persist in the database.
-            apiMgtDAO.addAlertTypesConfigInfo(userName, emailList, checkedAlertList, agent);
-            //set DTO
-            AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
-            alertTypeDTO.setAlertTypes(checkedAlertListValues);
-            alertTypeDTO.setEmails(emailList);
-            alertTypeDTO.setUserName(userName);
-            if ("publisher".equals(agent)) {
-                conditionClause = "ApimAlertStakeholderInfo.isPublisher == isPublisher";
-                alertTypeDTO.setPublisher(true);
-                alertTypeDTO.setSubscriber(false);
-                alertTypeDTO.setAdmin(false);
-            } else if ("subscriber".equals(agent)) {
-                conditionClause = "ApimAlertStakeholderInfo.isSubscriber == isSubscriber";
-                alertTypeDTO.setSubscriber(true);
-                alertTypeDTO.setPublisher(false);
-                alertTypeDTO.setAdmin(false);
-            } else if ("admin-dashboard".equals(agent)) {
-                conditionClause = "ApimAlertStakeholderInfo.isAdmin == isAdmin";
-                alertTypeDTO.setSubscriber(false);
-                alertTypeDTO.setPublisher(false);
-                alertTypeDTO.setAdmin(true);
-            }
-            String appName = "APIM_ALERT_STAKEHOLDER";
-            String query = "select '" + alertTypeDTO.getUserName() + "' as userId, '" + alertTypeDTO.getAlertTypes()
-                    + "' as alertTypes, '" + alertTypeDTO.getEmails() + "' as emails, " + alertTypeDTO.isSubscriber()
-                    + " as isSubscriber, " + alertTypeDTO.isPublisher() + " as isPublisher, " + alertTypeDTO.isAdmin()
-                    + " as isAdmin update or insert into ApimAlertStakeholderInfo set ApimAlertStakeholderInfo.userId = userId, "
-                    + "ApimAlertStakeholderInfo.alertTypes = alertTypes , ApimAlertStakeholderInfo.emails = emails ,"
-                    + " ApimAlertStakeholderInfo.isSubscriber = isSubscriber, ApimAlertStakeholderInfo.isPublisher = isPublisher, "
-                    + "ApimAlertStakeholderInfo.isAdmin = isAdmin on ApimAlertStakeholderInfo.userId == userId and "
-                    + conditionClause;
-            APIUtil.executeQueryOnStreamProcessor(appName, query);
-
-        } catch (SQLException e) {
-            log.error("Error while saving alert types", e);
+        if (!enabled || skipEventReceiverConnection) {
+            throw new APIManagementException("Data publisher is not enabled");
         }
+
+        if (publisher == null) {
+            this.initializeDataPublisher();
+        }
+        String conditionClause = "";
+        ApiMgtDAO apiMgtDAO = getApiMgtDao();
+        //data persist in the database.
+        apiMgtDAO.addAlertTypesConfigInfo(userName, emailList, checkedAlertList, agent);
+        //set DTO
+        AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
+        alertTypeDTO.setAlertTypes(checkedAlertListValues);
+        alertTypeDTO.setEmails(emailList);
+        alertTypeDTO.setUserName(userName);
+        if ("publisher".equals(agent)) {
+            conditionClause = "ApimAlertStakeholderInfo.isPublisher == isPublisher";
+            alertTypeDTO.setPublisher(true);
+            alertTypeDTO.setSubscriber(false);
+            alertTypeDTO.setAdmin(false);
+        } else if ("subscriber".equals(agent)) {
+            conditionClause = "ApimAlertStakeholderInfo.isSubscriber == isSubscriber";
+            alertTypeDTO.setSubscriber(true);
+            alertTypeDTO.setPublisher(false);
+            alertTypeDTO.setAdmin(false);
+        } else if ("admin-dashboard".equals(agent)) {
+            conditionClause = "ApimAlertStakeholderInfo.isAdmin == isAdmin";
+            alertTypeDTO.setSubscriber(false);
+            alertTypeDTO.setPublisher(false);
+            alertTypeDTO.setAdmin(true);
+        }
+        String appName = "APIM_ALERT_STAKEHOLDER";
+        String query = "select '" + alertTypeDTO.getUserName() + "' as userId, '" + alertTypeDTO.getAlertTypes()
+                + "' as alertTypes, '" + alertTypeDTO.getEmails() + "' as emails, " + alertTypeDTO.isSubscriber()
+                + " as isSubscriber, " + alertTypeDTO.isPublisher() + " as isPublisher, " + alertTypeDTO.isAdmin()
+                + " as isAdmin update or insert into ApimAlertStakeholderInfo set ApimAlertStakeholderInfo.userId = userId, "
+                + "ApimAlertStakeholderInfo.alertTypes = alertTypes , ApimAlertStakeholderInfo.emails = emails ,"
+                + " ApimAlertStakeholderInfo.isSubscriber = isSubscriber, ApimAlertStakeholderInfo.isPublisher = isPublisher, "
+                + "ApimAlertStakeholderInfo.isAdmin = isAdmin on ApimAlertStakeholderInfo.userId == userId and "
+                + conditionClause;
+        APIUtil.executeQueryOnStreamProcessor(appName, query);
 
     }
 
@@ -143,48 +140,43 @@ public class AlertTypesPublisher {
      */
     public void unSubscribe(String userName, String agent) throws APIManagementException {
 
-        try {
-
-            if (!enabled || skipEventReceiverConnection) {
-                throw new APIManagementException("Data publisher is not enabled");
-            }
-
-            if (publisher == null) {
-                this.initializeDataPublisher();
-            }
-            String conditionClause = "";
-            ApiMgtDAO apiMgtDAO = getApiMgtDao();
-            //data persist in the database.
-            apiMgtDAO.unSubscribeAlerts(userName, agent);
-            //set DTO
-            AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
-            alertTypeDTO.setAlertTypes("");
-            alertTypeDTO.setEmails("");
-            alertTypeDTO.setUserName(userName);
-            if ("publisher".equals(agent)) {
-                conditionClause = "ApimAlertStakeholderInfo.isPublisher == true";
-                alertTypeDTO.setPublisher(true);
-                alertTypeDTO.setSubscriber(false);
-                alertTypeDTO.setAdmin(false);
-            } else if ("subscriber".equals(agent)) {
-                conditionClause = "ApimAlertStakeholderInfo.isSubscriber == true";
-                alertTypeDTO.setSubscriber(true);
-                alertTypeDTO.setPublisher(false);
-                alertTypeDTO.setAdmin(false);
-            } else if ("admin-dashboard".equals(agent)) {
-                conditionClause = "ApimAlertStakeholderInfo.isAdmin == true";
-                alertTypeDTO.setSubscriber(false);
-                alertTypeDTO.setPublisher(false);
-                alertTypeDTO.setAdmin(true);
-            }
-            String appName = "APIM_ALERT_STAKEHOLDER";
-            String query = "delete ApimAlertStakeholderInfo  on ApimAlertStakeholderInfo.userId == '"
-                    + alertTypeDTO.getUserName() + "' and " + conditionClause;
-            APIUtil.executeQueryOnStreamProcessor(appName, query);
-
-        } catch (SQLException e) {
-            log.error("Error while saving alert types", e);
+        if (!enabled || skipEventReceiverConnection) {
+            throw new APIManagementException("Data publisher is not enabled");
         }
+
+        if (publisher == null) {
+            this.initializeDataPublisher();
+        }
+        String conditionClause = "";
+        ApiMgtDAO apiMgtDAO = getApiMgtDao();
+        //data persist in the database.
+        apiMgtDAO.unSubscribeAlerts(userName, agent);
+        //set DTO
+        AlertTypeDTO alertTypeDTO = new AlertTypeDTO();
+        alertTypeDTO.setAlertTypes("");
+        alertTypeDTO.setEmails("");
+        alertTypeDTO.setUserName(userName);
+        if ("publisher".equals(agent)) {
+            conditionClause = "ApimAlertStakeholderInfo.isPublisher == true";
+            alertTypeDTO.setPublisher(true);
+            alertTypeDTO.setSubscriber(false);
+            alertTypeDTO.setAdmin(false);
+        } else if ("subscriber".equals(agent)) {
+            conditionClause = "ApimAlertStakeholderInfo.isSubscriber == true";
+            alertTypeDTO.setSubscriber(true);
+            alertTypeDTO.setPublisher(false);
+            alertTypeDTO.setAdmin(false);
+        } else if ("admin-dashboard".equals(agent)) {
+            conditionClause = "ApimAlertStakeholderInfo.isAdmin == true";
+            alertTypeDTO.setSubscriber(false);
+            alertTypeDTO.setPublisher(false);
+            alertTypeDTO.setAdmin(true);
+        }
+        String appName = "APIM_ALERT_STAKEHOLDER";
+        String query =
+                "delete ApimAlertStakeholderInfo  on ApimAlertStakeholderInfo.userId == '" + alertTypeDTO.getUserName()
+                        + "' and " + conditionClause;
+        APIUtil.executeQueryOnStreamProcessor(appName, query);
 
     }
 }

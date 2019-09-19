@@ -81,6 +81,7 @@ securityDefinitions:
       apim:self-signup: Self Sign-up
       apim:dedicated_gateway: Updating dedicated Gateway
       apim:store_settings: Retrieve store settings
+      apim:sub_alert_manage: Retrieve, subscribe and configure store alert types
 
 ######################################################
 # The "API Collection" resource APIs
@@ -3005,6 +3006,296 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  ####################################################
+  # Store Alerts management REST API
+  ####################################################
+  '/alert-types':
+    #--------------------------------------------------
+    # Retrieve the list of api store alert types.
+    #--------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:sub_alert_manage
+      x-examples:
+        $ref: docs/examples/alerts/alerts.yaml#/get
+      operationId: getStoreAlertTypes
+      summary: |
+        Get the list of API Store alert types.
+      description: |
+        This operation is used to get the list of supportd alert types for the 'subscriber' agent.
+      tags:
+        - Alerts
+      responses:
+        200:
+          description: |
+            OK.
+            The list of subscriber alert types are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertTypesList'
+        500:
+          description: |
+            Internal Server Error.
+            An internal server error occurred while retrieving the alert types.
+          schema:
+            $ref: '#/definitions/Error'
+
+  '/alert-subscriptions':
+    #--------------------------------------------------
+    # Retrieve the list of alerts subscribed by the user.
+    #--------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:sub_alert_manage
+      x-examples:
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/get
+      summary: |
+        Get the list of API Store alert types subscribed by the user.
+      operationId: getSubscribedAlertTypes
+      description: |
+        This operation is used to get the list of subscribed alert types by the user.
+      tags:
+        - Alert Subscriptions
+      responses:
+        200:
+          description: |
+            OK.
+            The list of subscribed alert types are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertsInfo'
+        500:
+          description: |
+            Internal Server Error
+            An error occurred while retrieving subscribed alert types by user.
+          schema:
+            $ref: '#/definitions/Error'
+
+    #--------------------------------------------------
+    # Subscribe to the selected alert types by the user.
+    #--------------------------------------------------
+    put:
+      security:
+        - OAuth2Security:
+            - apim:sub_alert_manage
+      x-examples:
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/put
+      summary: |
+        Subscribe to the selected alert types by the user.
+      operationId: subscribeToAlerts
+      description: |
+        This operation is used to get the list of subscribed alert types by the user.
+      parameters:
+        - in: body
+          name: body
+          description:
+            The alerts list and the email list to subscribe.
+          required: true
+          schema:
+            $ref: '#/definitions/AlertsInfo'
+      tags:
+        - Alert Subscriptions
+      responses:
+        201:
+          description: |
+            OK.
+            Successful response with the newly subscribed alerts.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertsInfoResponse'
+        400:
+          description: |
+            Bad Request.
+            Invalid Request or request validation failure.
+        500:
+          description: |
+            Internal Server Error
+            An internal server error occurred while subscribing to alerts.
+          schema:
+            $ref: '#/definitions/Error'
+    #--------------------------------------------------
+    # Unsubscribe the user from all the alerts types
+    #--------------------------------------------------
+    delete:
+      security:
+        - OAuth2Security:
+            - apim:sub_alert_manage
+      x-examples:
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/delete
+      summary: |
+        Unsubscribe user from all the alert types.
+      operationId: unsubscribeAllAlerts
+      description: |
+        This operation is used to unsubscribe the respective user from all the alert types.
+      tags:
+        - Alert Subscriptions
+      responses:
+        200:
+          description: |
+            OK.
+            The user is unsubscribed from the alerts successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        500:
+          description: |
+            Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+  ##################################################
+  # Alert configuration api
+  #################################################
+  '/alerts/{alert-type}/configurations':
+    #----------------------------------------------
+    # Get the alert configs
+    #----------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:sub_alert_manage
+      x-examples:
+        $ref: docs/examples/alerts/alerts_config.yaml#/get
+      summary: |
+        Get all AbnormalRequestsPerMin alert configurations
+      operationId: getAllAlertConfigs
+      description: |
+        This operation is used to get all configurations of the AbnormalRequestsPerMin alert type.
+      tags:
+        - Alert Configuration
+      parameters:
+        - $ref: '#/parameters/alert-type'
+      responses:
+        200:
+          description: |
+            OK.
+            The store alert configuration.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertConfigList'
+        500:
+          description: |
+            Internal Server Error
+            An error occurred while retrieving subscribed alert types by user.
+          schema:
+            $ref: '#/definitions/Error'
+
+  '/alerts/{alert-type}/configurations/{configuration-id}':
+    #----------------------------------------------
+    # Add alert config
+    #----------------------------------------------
+    put:
+      security:
+        - OAuth2Security:
+            - apim:sub_alert_manage
+      x-examples:
+        $ref: docs/examples/alerts/alerts_config.yaml#/put
+      summary: |
+        Add AbnormalRequestsPerMin alert configurations.
+      operationId: addAlertConfig
+      description: |
+        This operation is used to add configuration for the AbnormalRequestsPerMin alert type.
+      parameters:
+        - $ref: '#/parameters/alert-type'
+        - $ref: '#/parameters/configuration-id'
+        - in: body
+          name: body
+          description:
+            Configuration for AbnormalRequestCount alert type
+          required: true
+          schema:
+            $ref: '#/definitions/AlertConfigInfo'
+      tags:
+        - Alert Configuration
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with newly created object as entity.
+            Location header contains URL of newly created entity.
+          headers:
+            Location:
+              description: |
+                The location of the newly created entity.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertConfig'
+        400:
+          description: |
+            Bad Request
+            The request parameters validation failed.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error
+            An error occurred while retrieving subscribed alert types by user.
+          schema:
+            $ref: '#/definitions/Error'
+
+    #----------------------------------------------
+    # Delete alert configuration
+    #----------------------------------------------
+    delete:
+      security:
+        - OAuth2Security:
+            - apim:sub_alert_manage
+      x-examples:
+        $ref: docs/examples/alerts/alerts_config.yaml#/delete
+      summary: |
+        Delete the selected configuration from AbnormalRequestsPerMin alert type.
+      operationId: deleteAlertConfig
+      description: |
+        This operation is used to delete configuration from the AbnormalRequestsPerMin alert type.
+      parameters:
+        - $ref: '#/parameters/alert-type'
+        - $ref: '#/parameters/configuration-id'
+      tags:
+        - Alert Configuration
+      responses:
+        200:
+          description: |
+            OK.
+            The alert config is deleted successfully.
+        400:
+          description: |
+            Bad Request
+            The request parameters validation failed.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The provided alert configuration is not found.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error
+            An error occurred while retrieving subscribed alert types by user.
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -3238,6 +3529,24 @@ parameters:
     description: |
       Validator for conditional requests; based on ETag.
     type: string
+
+  # The alert-type parameter
+  alert-type:
+    name: alert-type
+    in: path
+    type: string
+    required: true
+    description: |
+      The alert type.
+
+  # The alert subscription id parameter
+  configuration-id:
+    name: configuration-id
+    type: string
+    in: path
+    required: true
+    description: |
+      The alert configuration id.
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -4627,6 +4936,141 @@ definitions:
       apiOwner:
         type: string
         example: admin
+  #----------------------------------------------
+  # The Alert list resource.
+  #----------------------------------------------
+  AlertTypesList:
+    title: Alert Types List
+    properties:
+      count:
+        type: integer
+        description: The number of alerts
+        example: 3
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/AlertType'
+
+  #----------------------------------------------
+  # The AlertType resource.
+  #----------------------------------------------
+  AlertType:
+    title: Alert Type
+    properties:
+      id:
+        type: integer
+        description: The alert Id
+        example: 1
+      name:
+        type: string
+        description: The name of the alert.
+        example: "AbnormalRequestsPerMin"
+      isRequireConfiguration:
+        type: boolean
+        example: true
+
+  #----------------------------------------------
+  # The Alert resource.
+  #----------------------------------------------
+  Alert:
+    title: Alert
+    properties:
+      id:
+        type: integer
+        description: The alert Id
+        example: 1
+      name:
+        type: string
+        description: The name of the alert.
+        example: "AbnormalRequestsPerMin"
+      configuration:
+        type: array
+        items:
+          $ref: '#/definitions/AlertConfig'
+
+  #-----------------------------------------------
+  # The Alert Info resource definition.
+  #-----------------------------------------------
+  AlertsInfo:
+    title: Alerts Info
+    properties:
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/Alert'
+      emailList:
+        type: array
+        items:
+          type: string
+
+  #-----------------------------------------------
+  # The Alert Info Response resource definition.
+  #-----------------------------------------------
+  AlertsInfoResponse:
+    title: Alerts Info Response
+    properties:
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/Alert'
+      emailList:
+        type: array
+        items:
+          type: string
+      failedConfigurations:
+        type: array
+        items:
+          $ref: '#/definitions/AlertConfig'
+
+  #-----------------------------------------------
+  # The Alert Config List resource definition.
+  #-----------------------------------------------
+  AlertConfigList:
+    title: Alert Configuration List
+    properties:
+      count:
+        type: integer
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/AlertConfig'
+
+  #-----------------------------------------------
+  # The Alert Config resource definition.
+  #-----------------------------------------------
+  AlertConfig:
+    title: Alert Configuration
+    properties:
+      configurationId:
+        type: string
+        description: The alert config subscription id.
+        example: UGl6emFTaGFja0FQSSsxLjAuMCtEZWZhdWx0QXBwbGljYXRpb24K
+      configuration:
+        type: object
+        description: The config parameters.
+        additionalProperties:
+          type: string
+        example:
+          apiName: 'PizzaShackAPI'
+          apiVersion: '1.0.0'
+          applicationName: 'DefaultApplication'
+          requestConunt: '12'
+
+  #-----------------------------------------------
+  # The Alert Config Info resource definition.
+  #-----------------------------------------------
+  AlertConfigInfo:
+    title: Alert Configuration Info
+    type: object
+    description: The config parameters.
+    additionalProperties:
+      type: string
+    example:
+      apiName: 'PizzaShackAPI'
+      apiVersion: '1.0.0'
+      applicationName: 'DefaultApplication'
+      requestConunt: '12'
 
 #-----------------------------------------------------
 # END-OF-FILE
