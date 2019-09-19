@@ -33,33 +33,6 @@ get:
             "john@wso2.com"
           ]
         }
-  - rawRequest: |
-          GET https://localhost:9443/api/am/publisher/v1.0/alert-subscriptions HTTP/1.1
-          Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-    curl: |
-          curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/publisher/v1.0/alert-subscriptions
-    rawResponse: |
-      {
-        "alerts": [
-          {
-            "id": 1,
-            "name": "AbnormalRequestTime",
-            "configuration": [
-              {
-                "configurationId": "UGl6emFTaGFja0FQSSMxLjAuMA",
-                "configuration": {
-                  "apiName": "PizzaShackAPI",
-                  "apiVersion": "1.0.0",
-                  "requestTime": "12"
-                }
-              }
-            ]
-          }
-        ],
-        "emailList": [
-          "john@wso2.com"
-        ]
-      }
 
 put:
   - id: PostAlertTypeUser
@@ -130,44 +103,6 @@ put:
           }
           ]
         }
-  - rawRequest: |
-          PUT https://localhost:9443/api/am/publisher/v1.0/alert-subscriptions HTTP/1.1
-          Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-          Content-Type: application/json
-    curl: |
-          curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" https://localhost:9443/api/am/publisher/v1.0/alert-subscriptions
-    rawResponse: |
-      {
-        "alerts": [
-          {
-            "id": 1,
-            "name": "AbnormalRequestTime",
-            "configuration": [
-              {
-                "configurationId": "UGl6emFTaGFja0FQSSMxLjAuMA",
-                "configuration": {
-                  "apiName": "PizzaShackAPI",
-                  "apiVersion": "1.0.0",
-                  "requestTime": "12"
-                }
-              }
-            ]
-          }
-        ],
-        "emailList": [
-          "string"
-        ],
-        "failedConfigurations": [
-          {
-            "configurationId": "UGl6emFTaGFja0FQSSMxLjAuMA",
-            "configuration": {
-              "apiName": "PizzaShackAPI",
-              "apiVersion": "1.0.0",
-              "requestTime": "12"
-            }
-          }
-        ]
-      }
 
 delete:
   - id: UnsubscribeFromAlerts
@@ -183,9 +118,3 @@ delete:
         msg: OK
       headers: |
           Content-Type: application/json
-  - rawRequest: |
-      DELETE https://localhost:9443/api/am/publisher/v1.0/alert-subscriptions HTTP/1.1
-      Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      Content-Type: application/json
-    curl: |
-      curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" https://localhost:9443/api/am/publisher/v1.0/alert-subscriptions

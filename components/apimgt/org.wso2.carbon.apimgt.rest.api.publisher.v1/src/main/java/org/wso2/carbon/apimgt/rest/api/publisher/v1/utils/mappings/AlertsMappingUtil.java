@@ -89,7 +89,7 @@ public class AlertsMappingUtil {
         AlertTypeDTO storeAlertTypeDTO = new AlertTypeDTO();
         storeAlertTypeDTO.setId(alertTypeDTO.getId());
         storeAlertTypeDTO.setName(alertTypeDTO.getName());
-        storeAlertTypeDTO.setIsRequireConfiguration(alertTypeDTO.isConfigurable());
+        storeAlertTypeDTO.setRequireConfiguration(alertTypeDTO.isConfigurable());
         return storeAlertTypeDTO;
     }
 }

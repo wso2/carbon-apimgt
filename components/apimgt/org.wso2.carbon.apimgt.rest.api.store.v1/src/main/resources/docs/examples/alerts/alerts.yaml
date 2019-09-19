@@ -25,24 +25,3 @@ get:
             "isRequireConfiguration":false
           }]
         }
-  - rawRequest: |
-        GET https://localhost:9443/api/am/store/v1.0/alert-types HTTP/1.1
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-    curl: |
-        curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" https://localhost:9443/api/am/store/v1.0/alert-types
-    rawResponse: |
-      {
-        "count":2,
-        "alerts":[
-          {
-            "id":3,
-            "name":"AbnormalRequestsPerMin",
-            "isRequireConfiguration":true
-          },
-          {
-            "id":4,
-            "name":"AbnormalRequestPattern",
-            "isRequireConfiguration":false
-          }
-        ]
-      }
