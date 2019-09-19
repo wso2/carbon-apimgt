@@ -213,7 +213,7 @@ function View(props) {
                                     <TableCell className={classes.leftCell}>
                                         <Typography variant='body1'>
                                             <FormattedMessage
-                                                id='Apis.Details.Documents.View.meta.summary'
+                                                id='Apis.Details.Documents.View.meta.name'
                                                 defaultMessage='Name'
                                             />
                                         </Typography>

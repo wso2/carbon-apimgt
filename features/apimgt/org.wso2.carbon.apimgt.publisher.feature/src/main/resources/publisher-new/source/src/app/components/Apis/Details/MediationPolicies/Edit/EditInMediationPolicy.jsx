@@ -310,10 +310,7 @@ function EditInMediationPolicy(props) {
                                 name={seq.id}
                                 type={seq.type}
                                 control={<Radio />}
-                                label={<FormattedMessage
-                                    id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.custom.in.policy'
-                                    defaultMessage={seq.name}
-                                />}
+                                label={seq.name}
                                 value={seq.name}
                                 checked={selectedPolicyFile.name === seq.name}
                             />
@@ -346,10 +343,7 @@ function EditInMediationPolicy(props) {
                                 name={seq.id}
                                 type={seq.type}
                                 control={<Radio />}
-                                label={<FormattedMessage
-                                    id='Apis.Details.Edit.MediationPolicies.EditInMediationPolicies.global.in.policy'
-                                    defaultMessage={seq.name}
-                                />}
+                                label={seq.name}
                                 value={seq.name}
                                 checked={selectedPolicyFile.name === seq.name}
                             />
