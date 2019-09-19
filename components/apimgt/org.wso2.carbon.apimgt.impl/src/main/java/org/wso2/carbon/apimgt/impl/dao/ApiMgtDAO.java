@@ -14144,6 +14144,7 @@ public class ApiMgtDAO {
             ps.execute();
             connection.commit();
         } catch (SQLException e) {
+            connection.rollback();
             handleException("Error while save email list.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
@@ -14202,6 +14203,7 @@ public class ApiMgtDAO {
             connection.commit();
 
         } catch (SQLException e) {
+            connection.rollback();
             handleException("Failed to delete alert email data.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, rs);
