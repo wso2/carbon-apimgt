@@ -3508,8 +3508,7 @@ public class SQLConstants {
     public static class BotDataConstants {
 
         public static final String ADD_NOTIFICATION = "INSERT INTO AM_NOTIFICATION_SUBSCRIBER (UUID, CATEGORY," +
-        "NOTIFICATION_METHOD, SUBSCRIBER_ADDRESS)" +
-                            " VALUES(?,?,?,?)";
+        "NOTIFICATION_METHOD, SUBSCRIBER_ADDRESS) VALUES(?,?,?,?)";
 
         public static final String GET_SAVED_ALERT_EMAILS =
                 " SELECT UUID, SUBSCRIBER_ADDRESS FROM AM_NOTIFICATION_SUBSCRIBER";
