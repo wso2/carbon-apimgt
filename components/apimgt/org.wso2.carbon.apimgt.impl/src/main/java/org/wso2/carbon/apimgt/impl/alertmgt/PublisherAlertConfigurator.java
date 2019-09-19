@@ -15,7 +15,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.wso2.carbon.apimgt.impl.alertmgt;
 
 import org.apache.commons.lang3.StringUtils;
@@ -79,7 +78,8 @@ public class PublisherAlertConfigurator extends AlertConfigurator {
             throws APIManagementException {
         String apiName = configProperties.get(AlertMgtConstants.API_NAME_KEY);
         String apiVersion = configProperties.get(AlertMgtConstants.API_VERSION_KEY);
-        String configValue = configProperties.get(AlertMgtConstants.CONFIG_PROPERTY_KEY);
+        String configPropertyName = AlertMgtConstants.alertTypeConfigMap.get(alertName);
+        String configValue = configProperties.get(configPropertyName);
         String query = buildAddConfigQuery(userName, apiName, apiVersion, alertName, configValue);
         APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_ALERT_CONFIG_APP, query);
     }
@@ -104,7 +104,7 @@ public class PublisherAlertConfigurator extends AlertConfigurator {
                 properties.put(AlertMgtConstants.API_VERSION_KEY, (String) config.get(1));
                 properties.put(AlertMgtConstants.API_CREATOR_KEY, (String) config.get(2));
                 properties.put(AlertMgtConstants.API_CREATOR_TENANT_DOMAIN_KEY, (String) config.get(3));
-                properties.put(AlertMgtConstants.CONFIG_VALUE_KEY, (String) config.get(4));
+                properties.put(configPropertyName, String.valueOf(config.get(4)));
                 alertConfigProps.add(properties);
             }
         }
@@ -129,10 +129,10 @@ public class PublisherAlertConfigurator extends AlertConfigurator {
 
         if (AlertMgtConstants.ABNORMAL_RESPONSE_TIME_ALERT.equals(alertType)) {
             thresholdResponseTime = Integer.parseInt(alertConfigValue);
-            conditionQuery = "set ApiCreatorAlertConfiguration.thresholdBackendTime = thresholdBackendTime " ;
+            conditionQuery = "set ApiCreatorAlertConfiguration.thresholdResponseTime = thresholdResponseTime " ;
         } else if (AlertMgtConstants.ABNORMAL_BACKEND_TIME_ALERT.equals(alertType)) {
             thresholdBackendTime = Integer.parseInt(alertConfigValue);
-            conditionQuery = "set ApiCreatorAlertConfiguration.thresholdResponseTime = thresholdResponseTime " ;
+            conditionQuery = "set ApiCreatorAlertConfiguration.thresholdBackendTime = thresholdBackendTime " ;
         } else {
             throw new APIManagementException("Alert type does not support adding configuration");
         }

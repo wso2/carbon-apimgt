@@ -15,7 +15,6 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-
 package org.wso2.carbon.apimgt.impl.alertmgt;
 
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +36,7 @@ public class AlertMgtUtils {
      * @param alertTypes: The alert types map.
      * @return A list of AlertTypeDTOs.
      * */
-    static List<AlertTypeDTO> toAlertTypeDTO(Map<Integer, String> alertTypes) {
+    public static List<AlertTypeDTO> toAlertTypeDTO(Map<Integer, String> alertTypes) {
         List<AlertTypeDTO> alertTypeDTOList = new ArrayList<>();
         if (alertTypes != null) {
             for (Map.Entry entry : alertTypes.entrySet()) {
