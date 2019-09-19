@@ -375,8 +375,8 @@ class TokenManager extends React.Component {
         if (!keys) {
             return <Loading />;
         }
-        const keysOfKeyType = keys.get(keyType);
-        if (keys.size > 0 && keysOfKeyType && keysOfKeyType.keyState === 'APPROVED' && !keysOfKeyType.consumerKey) {
+        const key = keys.get(keyType);
+        if (keys.size > 0 && key && key.keyState === 'APPROVED' && !key.consumerKey) {
             return (
                 <Fragment>
                     <Typography className={classes.cleanUpInfoText} variant='subtitle1'>
@@ -400,7 +400,6 @@ class TokenManager extends React.Component {
                 </Fragment>
             );
         }
-        const key = keys.get(keyType);
         if (key && (key.keyState === this.keyStates.CREATED || key.keyState === this.keyStates.REJECTED)) {
             return <WaitingForApproval keyState={key.keyState} states={this.keyStates} />;
         }
