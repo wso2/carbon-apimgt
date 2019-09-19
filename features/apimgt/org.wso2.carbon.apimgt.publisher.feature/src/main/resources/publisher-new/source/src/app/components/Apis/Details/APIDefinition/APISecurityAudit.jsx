@@ -205,14 +205,13 @@ class APISecurityAudit extends Component {
      * @return {*} dataObject array
      */
     getRowData(issues, category) {
-        const dataObject = [];
-        issues.forEach((issue) => {
-            const rowData = [];
-            rowData.push(
-                this.criticalityObject[issue.criticality],
-                issue.message, (Math.round(issue.score * 100) / 100), issue.pointer, category,
+        const dataObject = issues.map((issue) => {
+            const rowObject = [];
+            rowObject.push(
+                this.criticalityObject[issue.criticality], issue.message,
+                (Math.round(issue.score * 100) / 100), issue.pointer, category,
             );
-            dataObject.push(rowData);
+            return rowObject;
         });
         return dataObject;
     }
@@ -253,20 +252,19 @@ class APISecurityAudit extends Component {
         const { classes } = this.props;
         if (searchTerm !== 'none') {
             const termObject = searchTerm.split('/');
-            const lastTerm = [];
-            for (let i = 0; i < termObject.length; i++) {
-                lastTerm.push(editor.getModel().findNextMatch(termObject[i], 1, false, false, null, false));
-            }
-            const finalMatchIndex = lastTerm.length - 1;
-            if (lastTerm[finalMatchIndex] != null) {
-                editor.revealLineInCenter(lastTerm[finalMatchIndex].range.startLineNumber);
+            const lastTerms = termObject.map((term) => {
+                return editor.getModel().findNextMatch(term, 1, false, false, null, false);
+            });
+            const finalMatchIndex = lastTerms.length - 1;
+            if (lastTerms[finalMatchIndex] != null) {
+                editor.revealLineInCenter(lastTerms[finalMatchIndex].range.startLineNumber);
                 editor.deltaDecorations([], [
                     {
                         range: new monaco.Range(
-                            lastTerm[finalMatchIndex].range.startLineNumber,
-                            lastTerm[finalMatchIndex].range.startColumn,
-                            lastTerm[finalMatchIndex].range.endLineNumber,
-                            lastTerm[finalMatchIndex].range.endColumn,
+                            lastTerms[finalMatchIndex].range.startLineNumber,
+                            lastTerms[finalMatchIndex].range.startColumn,
+                            lastTerms[finalMatchIndex].range.endLineNumber,
+                            lastTerms[finalMatchIndex].range.endColumn,
                         ),
                         options: {
                             isWholeLine: true,
