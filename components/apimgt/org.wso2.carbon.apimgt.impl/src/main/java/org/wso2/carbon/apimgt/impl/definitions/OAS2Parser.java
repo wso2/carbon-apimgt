@@ -399,7 +399,20 @@ public class OAS2Parser extends APIDefinition {
     public String populateCustomManagementInfo(String oasDefinition, SwaggerData swaggerData)
             throws APIManagementException {
         Swagger swagger = getSwagger(oasDefinition);
+        removePublisherSpecificInfo(swagger);
+        return generateAPIDefinition(swaggerData, swagger);
+    }
+
+    /**
+     * Remove MG related information
+     *
+     * @param swagger Swagger
+     */
+    private void removePublisherSpecificInfo(Swagger swagger) {
         Map<String, Object> extensions = swagger.getVendorExtensions();
+        if (extensions == null) {
+            return;
+        }
         if (extensions.containsKey(APIConstants.X_WSO2_AUTH_HEADER)) {
             extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
         }
@@ -418,7 +431,6 @@ public class OAS2Parser extends APIDefinition {
         if (extensions.containsKey(APIConstants.X_WSO2_BASEPATH)) {
             extensions.remove(APIConstants.X_WSO2_BASEPATH);
         }
-        return generateAPIDefinition(swaggerData, swagger);
     }
 
     /**
@@ -794,7 +806,7 @@ public class OAS2Parser extends APIDefinition {
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(oasDefinition);
         if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
-            throw new APIManagementException("Error Occurred while parsing OpenAPI3 definition.");
+            log.debug("Errors found when parsing OAS definition");
         }
         return parseAttemptForV2.getSwagger();
     }

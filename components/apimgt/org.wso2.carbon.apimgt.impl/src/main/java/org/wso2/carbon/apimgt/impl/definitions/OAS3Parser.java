@@ -388,6 +388,9 @@ public class OAS3Parser extends APIDefinition {
      */
     private void removePublisherSpecificInfo(OpenAPI openAPI) {
         Map<String, Object> extensions = openAPI.getExtensions();
+        if (extensions == null) {
+            return;
+        }
         if (extensions.containsKey(APIConstants.X_WSO2_AUTH_HEADER)) {
             extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
         }
@@ -874,7 +877,7 @@ public class OAS3Parser extends APIDefinition {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(oasDefinition, null, null);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
-            throw new APIManagementException("Error Occurred while parsing OpenAPI3 definition.");
+            log.debug("Errors found when parsing OAS definition");
         }
         return parseAttemptForV3.getOpenAPI();
     }
