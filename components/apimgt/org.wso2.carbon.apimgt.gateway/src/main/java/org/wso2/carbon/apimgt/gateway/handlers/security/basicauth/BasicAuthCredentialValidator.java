@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -62,8 +62,6 @@ import java.util.LinkedHashMap;
 public class BasicAuthCredentialValidator {
 
     private boolean gatewayKeyCacheEnabled;
-    private static boolean gatewayUsernameCacheInit = false;
-    private static boolean gatewayBasicAuthResourceCacheInit = false;
 
     protected Log log = LogFactory.getLog(getClass());
     private AuthenticationAdminStub authAdminStub;
@@ -323,83 +321,24 @@ public class BasicAuthCredentialValidator {
     }
 
     /**
-     * Returns the basic authenticated resource request cache.
-     *
      * @return the resource cache
      */
     private Cache getGatewayBasicAuthResourceCache() {
-        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
-        if (!gatewayBasicAuthResourceCacheInit) {
-            gatewayBasicAuthResourceCacheInit = true;
-            if (apimGWCacheExpiry != null) {
-                return createCache(APIConstants.GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME,
-                        Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
-            } else {
-                long defaultCacheTimeout =
-                        getDefaultCacheTimeout();
-                return createCache(APIConstants.GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME,
-                        defaultCacheTimeout, defaultCacheTimeout);
-            }
-        }
-        return getCacheFromCacheManager(APIConstants.GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME);
+        return CacheProvider.getGatewayBasicAuthResourceCache();
     }
 
     /**
-     * Returns the valid username cache.
-     *
      * @return the valid username cache
      */
     private Cache getGatewayUsernameCache() {
-        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
-        if (!gatewayUsernameCacheInit) {
-            gatewayUsernameCacheInit = true;
-            if (apimGWCacheExpiry != null) {
-                return createCache(APIConstants.GATEWAY_USERNAME_CACHE_NAME,
-                        Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
-            } else {
-                long defaultCacheTimeout =
-                        getDefaultCacheTimeout();
-                return createCache(APIConstants.GATEWAY_USERNAME_CACHE_NAME,
-                        defaultCacheTimeout, defaultCacheTimeout);
-            }
-        }
-        return getCacheFromCacheManager(APIConstants.GATEWAY_USERNAME_CACHE_NAME);
+        return CacheProvider.getGatewayUsernameCache();
     }
 
     /**
-     * Returns the invalid username cache.
-     *
      * @return the invalid username cache
      */
     private Cache getInvalidUsernameCache() {
-        String apimGWCacheExpiry = getApiManagerConfiguration().
-                getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
-
-        if (!gatewayUsernameCacheInit) {
-            gatewayUsernameCacheInit = true;
-            if (apimGWCacheExpiry != null) {
-                return createCache(APIConstants.GATEWAY_INVALID_USERNAME_CACHE_NAME,
-                        Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
-            } else {
-                long defaultCacheTimeout = getDefaultCacheTimeout();
-                return createCache(APIConstants.GATEWAY_INVALID_USERNAME_CACHE_NAME,
-                        defaultCacheTimeout, defaultCacheTimeout);
-            }
-        }
-        return getCacheFromCacheManager(APIConstants.GATEWAY_INVALID_USERNAME_CACHE_NAME);
-    }
-
-    /**
-     * Create the Cache object from the given parameters.
-     *
-     * @param cacheName   name of the Cache
-     * @param modifiedExp value of the modified expiry type
-     * @param accessExp   value of the accessed expiry type
-     * @return the cache object
-     */
-    private Cache createCache(final String cacheName, final long modifiedExp,
-                              long accessExp) {
-        return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER, cacheName, modifiedExp, accessExp);
+        return CacheProvider.getInvalidUsernameCache();
     }
 
     /**
@@ -420,16 +359,6 @@ public class BasicAuthCredentialValidator {
     private Cache getCacheFromCacheManager(String cacheName) {
         return Caching.getCacheManager(
                 APIConstants.API_MANAGER_CACHE_MANAGER).getCache(cacheName);
-    }
-
-    /**
-     * Returns the default cache timeout.
-     *
-     * @return the default cache timeout
-     */
-    private long getDefaultCacheTimeout() {
-        return Long.valueOf(ServerConfiguration.getInstance().getFirstProperty(APIConstants.DEFAULT_CACHE_TIMEOUT))
-                * 60;
     }
 
     /**
