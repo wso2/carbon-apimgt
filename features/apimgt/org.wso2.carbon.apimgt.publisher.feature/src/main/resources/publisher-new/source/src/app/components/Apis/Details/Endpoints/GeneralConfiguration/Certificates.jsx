@@ -77,6 +77,18 @@ const useStyles = makeStyles(theme => ({
     uploadCertDialogHeader: {
         fontWeight: '600',
     },
+    alertWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    warningIcon: {
+        marginRight: 13,
+        color: theme.custom.warningColor,
+        '& .material-icons': {
+            fontSize: 30,
+        },
+    },
 }));
 /**
  * TODO: Generalize this component to work in Configuration page , upload mutual SSL certificates action
@@ -220,25 +232,27 @@ function Certificates(props) {
             </Grid>
             <Dialog open={certificateToDelete.open}>
                 <DialogTitle>
-                    <Icon style={{ color: '#dd1c30' }}>warning</Icon>
-                    {'Delete Certificate'}
+                    <Typography className={classes.uploadCertDialogHeader}>
+                        <FormattedMessage
+                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.deleteCertificate'
+                            defaultMessage='Delete Certificate'
+                        />
+                    </Typography>
                 </DialogTitle>
-                <DialogContent>
+                <DialogContent className={classes.alertWrapper}>
+                    <Icon className={classes.warningIcon}>warning</Icon>
                     <Typography>
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.confirm.certificate.delete'
                             defaultMessage='Do you want to delete the Certificate'
                         />{' '}
-                        {' ' + certificateToDelete.alias + '?'}
-                        <FormattedMessage
-                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.delete.cannot.undone'
-                            defaultMessage=' This cannot be undone.'
-                        />
+                        {' "' + certificateToDelete.alias + '"?'}
                     </Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button
                         onClick={() => deleteCertificateByAlias(certificateToDelete.alias)}
+                        variant='contained'
                         color='primary'
                         disabled={isDeleting}
                         autoFocus
@@ -250,7 +264,7 @@ function Certificates(props) {
                         {isDeleting && <CircularProgress size={24} />}
 
                     </Button>
-                    <Button onClick={() => setCertificateToDelete({ open: false, alias: '' })} color='secondary'>
+                    <Button onClick={() => setCertificateToDelete({ open: false, alias: '' })}>
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.delete.cancel.button'
                             defaultMessage='Cancel'

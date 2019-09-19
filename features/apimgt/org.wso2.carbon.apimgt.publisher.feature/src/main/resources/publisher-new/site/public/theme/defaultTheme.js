@@ -94,6 +94,7 @@ const Configurations = {
                     backgroundMain: '#15b8cf',
                     backgroundChip: '#5aebf9',
                 },
+                warningColor: '#ffc439',
             },
         },
     },

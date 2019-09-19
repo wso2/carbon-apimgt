@@ -32,7 +32,9 @@ import {
 } from '@material-ui/core';
 import { FormattedMessage } from 'react-intl';
 import Dropzone from 'react-dropzone';
+import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import SelectPolicies from '../../../Create/Components/SelectPolicies';
 
 const dropzoneStyles = {
@@ -250,8 +252,10 @@ export default function UploadCertificate(props) {
                                             </div>
                                         ) : (
                                             <div className={classes.uploadedFile}>
-                                                <Icon style={{ fontSize: 56 }}>insert_drive_file</Icon>
-                                                {certificate.name}
+                                                <InsertDriveFileIcon color='primary' fontSize='large' />
+                                                <Box fontSize='h6.fontSize' fontWeight='fontWeightLight'>
+                                                    {certificate.name}
+                                                </Box>
                                             </div>
                                         )}
                                     </div>
@@ -264,6 +268,7 @@ export default function UploadCertificate(props) {
             <DialogActions>
                 <Button
                     onClick={saveCertificate}
+                    variant='contained'
                     color='primary'
                     autoFocus
                     disabled={
@@ -280,7 +285,7 @@ export default function UploadCertificate(props) {
                     />
                     {isSaving && <CircularProgress size={24} />}
                 </Button>
-                <Button onClick={closeCertificateUpload} color='secondary'>
+                <Button onClick={closeCertificateUpload}>
                     <FormattedMessage
                         id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.cancel.button'
                         defaultMessage='Close'
