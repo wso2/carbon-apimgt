@@ -19,6 +19,9 @@
 import React, { Component } from 'react';
 import { FormattedMessage, injectIntl, defineMessages } from 'react-intl';
 import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Dialog from '@material-ui/core/Dialog';
 import InputBase from '@material-ui/core/InputBase';
 import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
@@ -35,6 +38,7 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
+import moment from 'moment';
 import withStyles from '@material-ui/core/styles/withStyles';
 import PropTypes from 'prop-types';
 
@@ -42,12 +46,18 @@ import Alert from 'AppComponents/Shared/Alert';
 import SubscriptionsBlock from 'AppComponents/Apis/Details/Subscriptions/SubscriptionsBlock';
 import API from 'AppData/api';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
+import AuthManager from 'AppData/AuthManager';
 
 const styles = theme => ({
     button: {
         margin: theme.spacing.unit,
     },
     headline: { paddingTop: theme.spacing.unit * 1.25, paddingLeft: theme.spacing.unit * 2.5 },
+    popupHeadline: {
+        alignItems: 'center',
+        borderBottom: '2px solid #40E0D0',
+        textAlign: 'center',
+    },
     table: {
         '& td': {
             fontSize: theme.typography.fontSize,
@@ -86,10 +96,26 @@ const styles = theme => ({
         width: '100%',
     },
     tableColumnSize: {
-        width: '15%',
+        width: '14%',
     },
     tableColumnSize2: {
-        width: '40%',
+        width: '30%',
+    },
+    dialogColumnSize: {
+        width: '50%',
+    },
+    dialog: {
+        float: 'center',
+        alignItems: 'center',
+    },
+    invoiceTable: {
+        '& td': {
+            fontSize: theme.typography.fontSize * 1.5,
+        },
+    },
+    uniqueCell: {
+        borderTop: '1px solid #000000',
+        fontWeight: 'bold',
     },
 });
 
@@ -129,6 +155,18 @@ const tableHeaders = (
                     defaultMessage='Actions'
                 />
             </ScopeValidation>
+        </TableCell>
+        <TableCell>
+            <FormattedMessage
+                id='Apis.Details.Subscriptions.SubscriptionsTable.invoice.heading'
+                defaultMessage='Invoice'
+            />
+            <Typography component='p' variant='body1'>
+                <FormattedMessage
+                    id='Apis.Details.Subscriptions.SubscriptionsTable.invoice.sub'
+                    defaultMessage='(Only for Usage based plans)'
+                />
+            </Typography>
         </TableCell>
     </TableRow>
 );
@@ -242,14 +280,22 @@ class SubscriptionsTable extends Component {
             searchQuery: null,
             rowsPerPageOptions: [5, 10, 25, 50, 100],
             emptyColumnHeight: 60,
+            invoice: {},
+            policies: [],
+            showPopup: false,
         };
         this.formatSubscriptionStateString = this.formatSubscriptionStateString.bind(this);
         this.blockSubscription = this.blockSubscription.bind(this);
         this.blockProductionOnly = this.blockProductionOnly.bind(this);
         this.unblockSubscription = this.unblockSubscription.bind(this);
         this.handleChangePage = this.handleChangePage.bind(this);
+        this.handlePopup = this.handlePopup.bind(this);
         this.handleChangeRowsPerPage = this.handleChangeRowsPerPage.bind(this);
         this.filterSubscriptions = this.filterSubscriptions.bind(this);
+        this.handleClose = this.handleClose.bind(this);
+        this.isMonetizedPolicy = this.isMonetizedPolicy.bind(this);
+        this.isNotCreator = AuthManager.isNotCreator();
+        this.isNotPublisher = AuthManager.isNotPublisher();
     }
 
     componentDidMount() {
@@ -394,6 +440,13 @@ class SubscriptionsTable extends Component {
                 console.error(errorMessage);
                 Alert.error(JSON.stringify(errorMessage));
             });
+        api.getMonetization(this.props.api.id).then((status) => {
+            this.setState({ monetizationStatus: status.enabled });
+        });
+        api.getSubscriptionPolicies(this.api.id).then((policies) => {
+            const filteredPolicies = policies.filter(policy => policy.tierPlan === 'COMMERCIAL');
+            this.setState({ policies: filteredPolicies });
+        });
     }
 
     /**
@@ -403,6 +456,42 @@ class SubscriptionsTable extends Component {
      * */
     handleChangePage(page) {
         this.setState({ page }, this.fetchSubscriptionData);
+    }
+
+    /**
+     * handle Popup dialog
+     *
+     * @param id subscription uuid
+     * */
+    handlePopup(id) {
+        this.setState({ showPopup: true, invoice: {} });
+        const api = new API();
+        api.getMonetizationInvoice(id).then((response) => {
+            this.setState({ invoice: response.properties });
+        });
+    }
+
+    /**
+     * Checks whether the policy is a usage based monetization plan
+     *
+     * */
+    isMonetizedPolicy(policyName) {
+        const { policies, monetizationStatus } = this.state;
+        if (policies.length > 0) {
+            const filteredPolicies = policies.filter(policy =>
+                policy.name === policyName && policy.monetizationAttributes.pricePerRequest != null);
+            return (filteredPolicies.length > 0 && monetizationStatus);
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * handle closing the popup
+     *
+     * */
+    handleClose() {
+        this.setState({ showPopup: false });
     }
 
     /**
@@ -425,14 +514,120 @@ class SubscriptionsTable extends Component {
 
     render() {
         const {
-            subscriptions, page, rowsPerPage, totalSubscription, rowsPerPageOptions, emptyColumnHeight,
+            showPopup, invoice, subscriptions, page, rowsPerPage, totalSubscription,
+            rowsPerPageOptions, emptyColumnHeight,
         } = this.state;
         const { classes, intl } = this.props;
         const emptyRows = totalSubscription > 0 ?
             (rowsPerPage - Math.min(rowsPerPage, totalSubscription - (page * rowsPerPage))) : 0;
-
         return (
             <div>
+                <Dialog open={showPopup} onClose={this.handleClose} class={classes.dialog} fullWidth='true'>
+                    <DialogTitle id='simple-dialog-title' className={classes.popupHeadline} >
+                        <Typography gutterBottom variant='headline' component='h3' text-align='center'>
+                            <FormattedMessage
+                                id='Apis.Details.Subscriptions.SubscriptionsTable.dialog.title'
+                                defaultMessage='Upcoming Monetization Invoice'
+                            />
+                        </Typography>
+                    </DialogTitle>
+                    <Paper>
+                        <Table className={classes.invoiceTable}>
+                            <colgroup>
+                                <col className={classes.dialogColumnSize} />
+                                <col className={classes.dialogColumnSize} />
+                            </colgroup>
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Apis.Details.Subscriptions.SubscriptionsTable.customer.email'
+                                            defaultMessage='Customer Email'
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                         : {
+                                            (invoice.customer_email === null) ? (
+                                                <FormattedMessage
+                                                    id='Apis.Details.Subscriptions.SubscriptionsTable.not.registered'
+                                                    defaultMessage='Not Registered'
+                                                />
+                                            ) : (
+                                                invoice.customer_email
+                                            )
+                                        }
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Apis.Details.Subscriptions.SubscriptionsTable.billing.type'
+                                            defaultMessage='Billing Type'
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                         : {invoice.billing}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Apis.Details.Subscriptions.SubscriptionsTable.start.of.billing.period'
+                                            defaultMessage='Start of Billing Period'
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        : {moment.unix(invoice.period_start).format('MM/DD/YYYY HH:mm:ss')}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Apis.Details.Subscriptions.SubscriptionsTable.end.of.billing.period'
+                                            defaultMessage='End of Billing Period'
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        : {moment.unix(invoice.period_end).format('MM/DD/YYYY HH:mm:ss')}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Apis.Details.Subscriptions.SubscriptionsTable.total'
+                                            defaultMessage='Total Amount'
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        : {invoice.total} {invoice.currency}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Apis.Details.Subscriptions.SubscriptionsTable.amount.paid'
+                                            defaultMessage='Amount Paid'
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        : {invoice.amount_paid} {invoice.currency}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow class={classes.uniqueCell}>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Apis.Details.Subscriptions.SubscriptionsTable.amount.due'
+                                            defaultMessage='Amount Due'
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        : {invoice.amount_due} {invoice.currency}
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </Paper>
+                </Dialog>
                 <Typography className={classes.headline} gutterBottom variant='headline' component='h2'>
                     <FormattedMessage
                         id='Apis.Details.Subscriptions.SubscriptionsTable.manage.subscriptions'
@@ -473,6 +668,7 @@ class SubscriptionsTable extends Component {
                                     <col className={classes.tableColumnSize} />
                                     <col className={classes.tableColumnSize} />
                                     <col className={classes.tableColumnSize2} />
+                                    <col className={classes.tableColumnSize} />
                                 </colgroup>
                                 <TableHead>
                                     {tableHeaders}
@@ -501,6 +697,21 @@ class SubscriptionsTable extends Component {
                                                         />
                                                     </ScopeValidation>
                                                 </TableCell>
+                                                <TableCell>
+                                                    <Button
+                                                        onClick={() => this.handlePopup(sub.subscriptionId)}
+                                                        color='primary'
+                                                        variant='contained'
+                                                        disabled={(this.isNotCreator && this.isNotPublisher) ||
+                                                            !this.isMonetizedPolicy(sub.throttlingPolicy)}
+                                                        className={classes.button}
+                                                    >
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Subscriptions.SubscriptionsTable.view.inv'
+                                                            defaultMessage='View Invoice'
+                                                        />
+                                                    </Button>
+                                                </TableCell>
                                             </TableRow>
                                         ))
                                     }
@@ -508,7 +719,7 @@ class SubscriptionsTable extends Component {
                                         emptyRows > 0 && (
                                             <TableRow>
                                                 <TableCell
-                                                    colSpan={5}
+                                                    colSpan={6}
                                                     style={{ height: emptyRows * emptyColumnHeight }}
                                                 />
                                             </TableRow>
@@ -519,7 +730,7 @@ class SubscriptionsTable extends Component {
                                     <TableRow>
                                         <TablePagination
                                             rowsPerPageOptions={rowsPerPageOptions}
-                                            colSpan={5}
+                                            colSpan={6}
                                             count={totalSubscription}
                                             rowsPerPage={rowsPerPage}
                                             page={page}
