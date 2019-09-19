@@ -2773,7 +2773,7 @@ public class APIStoreHostObject extends ScriptableObject {
             if (!subscriptionAllowed) {
                 throw new APIManagementException("Subscription is not allowed for " + userDomain);
             }
-            apiIdentifier.setTier(tier);
+            api.getId().setTier(tier);
             addSubscriptionResponse = apiConsumer.addSubscription(new ApiTypeWrapper(api), userId, applicationId, groupId);
         } catch (APIManagementException e) {
 
@@ -2819,7 +2819,7 @@ public class APIStoreHostObject extends ScriptableObject {
         //Check whether tier is denied or not before adding
         Set<String> tiers = apiConsumer.getDeniedTiers();
         if (!tiers.contains(tier)) {
-            apiIdentifier.setTier(tier);
+            api.getId().setTier(tier);
             try {
                 int applicationId = APIUtil.getApplicationId(applicationName, userId);
                 addSubscriptionResponse = apiConsumer.addSubscription(new ApiTypeWrapper(api), userId, applicationId,
@@ -2855,7 +2855,7 @@ public class APIStoreHostObject extends ScriptableObject {
         //Check whether tier is denied or not before adding
         Set<String> tiers = apiConsumer.getDeniedTiers();
         if (!tiers.contains(tier)) {
-            apiIdentifier.setTier(tier);
+            api.getId().setTier(tier);
             try {
                 addSubscriptionResponse = apiConsumer.addSubscription(new ApiTypeWrapper(api), userId, applicationId,
                         groupId);
