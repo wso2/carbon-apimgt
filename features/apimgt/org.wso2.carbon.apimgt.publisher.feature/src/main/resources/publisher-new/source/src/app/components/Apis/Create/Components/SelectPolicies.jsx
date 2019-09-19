@@ -45,7 +45,7 @@ export default function SelectPolicies(props) {
             >
                 {policies.list.map(policy => (
                     <MenuItem dense disableGutters={multiple} key={policy.name} value={policy.displayName}>
-                        {multiple && <Checkbox checked={selectedPolicies.includes(policy.name)} />}
+                        {multiple && <Checkbox color='primary' checked={selectedPolicies.includes(policy.name)} />}
                         <ListItemText primary={policy.displayName} secondary={policy.description} />
                     </MenuItem>
                 ))}

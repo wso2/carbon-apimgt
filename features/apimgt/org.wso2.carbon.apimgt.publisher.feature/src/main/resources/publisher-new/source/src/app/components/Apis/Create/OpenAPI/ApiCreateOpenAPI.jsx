@@ -217,20 +217,7 @@ export default function ApiCreateOpenAPI(props) {
                 </Grid>
                 <Grid item md={1} />
                 <Grid item md={9}>
-                    <Grid container direction='row' justify='space-between'>
-                        <Grid item>
-                            {wizardStep === 0 && (
-                                <Link to='/apis/'>
-                                    <Button variant='outlined'>
-                                        <FormattedMessage
-                                            id='Apis.Create.OpenAPI.ApiCreateOpenAPI.cancel'
-                                            defaultMessage='Cancel'
-                                        />
-                                    </Button>
-                                </Link>
-                            )}
-                            {wizardStep === 1 && <Button onClick={() => setWizardStep(step => step - 1)}>Back</Button>}
-                        </Grid>
+                    <Grid container direction='row' justify='flex-start' alignItems='center' spacing={2}>
                         <Grid item>
                             {wizardStep === 0 && (
                                 <Button
@@ -252,6 +239,19 @@ export default function ApiCreateOpenAPI(props) {
                                     Create {isCreating && <CircularProgress size={24} />}
                                 </Button>
                             )}
+                        </Grid>
+                        <Grid item>
+                            {wizardStep === 0 && (
+                                <Link to='/apis/'>
+                                    <Button variant='outlined'>
+                                        <FormattedMessage
+                                            id='Apis.Create.OpenAPI.ApiCreateOpenAPI.cancel'
+                                            defaultMessage='Cancel'
+                                        />
+                                    </Button>
+                                </Link>
+                            )}
+                            {wizardStep === 1 && <Button onClick={() => setWizardStep(step => step - 1)}>Back</Button>}
                         </Grid>
                     </Grid>
                 </Grid>

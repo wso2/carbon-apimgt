@@ -97,7 +97,12 @@ const APIDetailsTopMenu = (props) => {
                     <div>
                         <LaunchIcon />
                     </div>
-                    <div className={classes.linkText}>View In store</div>
+                    <div className={classes.linkText}>
+                        <FormattedMessage
+                            id='Apis.Details.components.APIDetailsTopMenu.view.in.portal'
+                            defaultMessage='View in Dev portal'
+                        />
+                    </div>
                 </a>
             }
             {isVisibleInStore && <VerticalDivider height={70} />}

@@ -90,6 +90,8 @@ const definition = {
     userRole: userRoleSchema.userRole().role(),
     apiParameter: apiSchema.api().isAPIParameterExist(),
     apiDocument: documentSchema.document().isDocumentPresent(),
+    operationVerb: Joi.string().required(),
+    operationTarget: Joi.string().required(),
 };
 
 export default definition;
