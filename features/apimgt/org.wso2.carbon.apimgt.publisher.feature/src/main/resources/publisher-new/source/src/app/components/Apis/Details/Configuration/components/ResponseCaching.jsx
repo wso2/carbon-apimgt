@@ -20,13 +20,34 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Switch from '@material-ui/core/Switch';
-import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormLabel from '@material-ui/core/FormLabel';
 import { FormattedMessage } from 'react-intl';
 import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { isRestricted } from 'AppData/AuthManager';
+import { makeStyles } from '@material-ui/core';
+import Paper from '@material-ui/core/Paper';
+
+const useStyles = makeStyles(theme => ({
+    iconSpace: {
+        marginLeft: theme.spacing(0.5),
+    },
+    actionSpace: {
+        margin: 'auto',
+        float: 'right',
+    },
+    subHeading: {
+        fontSize: '1rem',
+        fontWeight: 400,
+        margin: 0,
+        display: 'inline-flex',
+        lineHeight: '38px',
+    },
+    paper: {
+        padding: theme.spacing(1, 3),
+    },
+}));
 
 /**
  *
@@ -37,20 +58,37 @@ import { isRestricted } from 'AppData/AuthManager';
  */
 export default function ResponseCaching(props) {
     const { api, configDispatcher } = props;
-
+    const classes = useStyles();
 
     return (
-        <Grid container spacing={1} alignItems='flex-start'>
-            <Grid item>
-                <FormControl component='fieldset'>
-                    <FormLabel component='legend'>
+        <Paper className={classes.paper}>
+            <Grid container spacing={1} alignItems='flex-start'>
+                <Grid item md={12}>
+                    <Typography className={classes.subHeading} variant='h6'>
                         <FormattedMessage
                             id='Apis.Details.Configuration.Configuration.response.caching'
-                            defaultMessage='Response caching'
+                            defaultMessage='Response Caching'
                         />
-                    </FormLabel>
+                        <Tooltip
+                            title={
+                                <FormattedMessage
+                                    id='Apis.Details.Configuration.components.ResponseCaching.tooltip'
+                                    defaultMessage={
+                                        'If enabled, API response will be cached at the gateway level'
+                                        + ' to improve the response time and minimize the backend load'
+                                    }
+                                />
+                            }
+                            aria-label='Response cache'
+                            placement='right-end'
+                            interactive
+                        >
+                            <HelpOutline className={classes.iconSpace} />
+                        </Tooltip>
+                    </Typography>
                     <FormControlLabel
-                        control={(
+                        className={classes.actionSpace}
+                        control={
                             <Switch
                                 disabled={isRestricted(['apim:api_create'], api)}
                                 checked={api.responseCachingEnabled}
@@ -61,29 +99,11 @@ export default function ResponseCaching(props) {
                                 }
                                 color='primary'
                             />
-                        )}
+                        }
                     />
-                </FormControl>
+                </Grid>
             </Grid>
-            <Grid item>
-                <Tooltip
-                    title={(
-                        <FormattedMessage
-                            id='Apis.Details.Configuration.components.ResponseCaching.tooltip'
-                            defaultMessage={
-                                'If enabled, API response will be cached at the gateway level'
-                                + ' to improve the response time and minimize the backend load'
-                            }
-                        />
-                    )}
-                    aria-label='Response cache'
-                    placement='right-end'
-                    interactive
-                >
-                    <HelpOutline />
-                </Tooltip>
-            </Grid>
-        </Grid>
+        </Paper>
     );
 }
 

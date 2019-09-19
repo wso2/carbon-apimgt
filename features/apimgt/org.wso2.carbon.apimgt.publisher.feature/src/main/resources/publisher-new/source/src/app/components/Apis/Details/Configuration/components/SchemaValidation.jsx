@@ -20,9 +20,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Switch from '@material-ui/core/Switch';
-import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormLabel from '@material-ui/core/FormLabel';
+import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
@@ -34,6 +33,27 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { isRestricted } from 'AppData/AuthManager';
+import Paper from '@material-ui/core/Paper';
+
+const styles = theme => ({
+    subHeading: {
+        fontSize: '1rem',
+        fontWeight: 400,
+        margin: 0,
+        display: 'inline-flex',
+        lineHeight: '38px',
+    },
+    iconSpace: {
+        marginLeft: theme.spacing(0.5),
+    },
+    actionSpace: {
+        margin: 'auto',
+        float: 'right',
+    },
+    paper: {
+        padding: theme.spacing(1, 3),
+    },
+});
 
 /**
  *
@@ -42,7 +62,7 @@ import { isRestricted } from 'AppData/AuthManager';
  * @param {*} props
  * @returns
  */
-export default class SchemaValidation extends React.Component {
+class SchemaValidation extends React.Component {
     /**
      *Creates an instance of SchemaValidation.
      * @param {*} props
@@ -90,20 +110,35 @@ export default class SchemaValidation extends React.Component {
      * @memberof SchemaValidation
      */
     render() {
-        const { api, configDispatcher } = this.props;
+        const { api, configDispatcher, classes } = this.props;
         const { isOpen } = this.state;
 
         return (
-            <Grid container spacing={1} alignItems='flex-start'>
-                <Grid item>
-                    <FormControl component='fieldset' style={{ marginTop: 20 }}>
-                        <FormLabel component='legend'>
+            <Paper className={classes.paper}>
+                <Grid container spacing={1} alignItems='flex-start'>
+                    <Grid item md={12}>
+                        <Typography className={classes.subHeading} variant='h6'>
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.schema.validation'
-                                defaultMessage='Schema validation'
+                                defaultMessage='Schema Validation'
                             />
-                        </FormLabel>
+                            <Tooltip
+                                title={
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.components.schema.validation.tooltip'
+                                        defaultMessage={'Enable the request and response ' +
+                                        'validation against the OpenAPI definition'}
+                                    />
+                                }
+                                aria-label='Schema Validation'
+                                placement='right-end'
+                                interactive
+                            >
+                                <HelpOutline className={classes.iconSpace} />
+                            </Tooltip>
+                        </Typography>
                         <FormControlLabel
+                            className={classes.actionSpace}
                             control={
                                 <Switch
                                     disabled={isRestricted(['apim:api_create'], api)}
@@ -120,80 +155,61 @@ export default class SchemaValidation extends React.Component {
                                 />
                             }
                         />
-                    </FormControl>
+                    </Grid>
                 </Grid>
-                <Grid item>
-                    <Tooltip
-                        title={
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.components.schema.validation.tooltip'
-                                defaultMessage={'Enable the request and response ' +
-                                'validation against the OpenAPI definition'}
-                            />
-                        }
-                        aria-label='Schema Validation'
-                        placement='right-end'
-                        interactive
-                        style={{ marginTop: 20 }}
-                    >
-                        <HelpOutline />
-                    </Tooltip>
-                </Grid>
-                <Grid item>
-                    <Dialog
-                        open={isOpen}
-                        onClose={() => this.setIsOpen(false)}
-                        aria-labelledby='alert-dialog-title'
-                        aria-describedby='alert-dialog-description'
-                    >
-                        <DialogTitle id='alert-dialog-title'>
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.components.SchemaValidation.title'
-                                defaultMessage='Caution!'
-                            />
-                        </DialogTitle>
-                        <DialogContent>
-                            <DialogContentText id='alert-dialog-description'>
-                                <Typography variant='subtitle1' display='block' gutterBottom>
-                                    <FormattedMessage
-                                        id='Apis.Details.Configuration.components.SchemaValidation.description'
-                                        defaultMessage={
-                                            'Enabling JSON schema validation will cause to build the' +
+                <Dialog
+                    open={isOpen}
+                    onClose={() => this.setIsOpen(false)}
+                    aria-labelledby='alert-dialog-title'
+                    aria-describedby='alert-dialog-description'
+                >
+                    <DialogTitle id='alert-dialog-title'>
+                        <FormattedMessage
+                            id='Apis.Details.Configuration.components.SchemaValidation.title'
+                            defaultMessage='Caution!'
+                        />
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id='alert-dialog-description'>
+                            <Typography variant='subtitle1' display='block' gutterBottom>
+                                <FormattedMessage
+                                    id='Apis.Details.Configuration.components.SchemaValidation.description'
+                                    defaultMessage={
+                                        'Enabling JSON schema validation will cause to build the' +
                                         ' payload in every requests and responses. This will have an impact ' +
                                         'on the round trip time of an API request!'
-                                        }
+                                    }
+                                />
+                            </Typography>
+                            <Typography variant='subtitle2' display='block' gutterBottom>
+                                <b>
+                                    <FormattedMessage
+                                        id={'Apis.Details.Configuration.components.SchemaValidation' +
+                                        '.description.question'}
+                                        defaultMessage='Do you want  to enable schema validation?'
                                     />
-                                </Typography>
-                                <Typography variant='subtitle2' display='block' gutterBottom>
-                                    <b>
-                                        <FormattedMessage
-                                            id={'Apis.Details.Configuration.components.SchemaValidation' +
-                                            '.description.question'}
-                                            defaultMessage='Do you want  to enable schema validation?'
-                                        />
-                                    </b>
-                                </Typography>
-                            </DialogContentText>
-                        </DialogContent>
-                        <DialogActions>
-                            <Button color='primary' onClick={() => this.setIsOpen(false)}>
-                                Yes
-                            </Button>
-                            <Button
-                                onClick={() => {
-                                    this.setIsOpen(false);
-                                    configDispatcher({
-                                        action: 'enableSchemaValidation',
-                                        value: false,
-                                    });
-                                }}
-                            >
-                                No
-                            </Button>
-                        </DialogActions>
-                    </Dialog>
-                </Grid>
-            </Grid>
+                                </b>
+                            </Typography>
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button color='primary' onClick={() => this.setIsOpen(false)}>
+                            Yes
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                this.setIsOpen(false);
+                                configDispatcher({
+                                    action: 'enableSchemaValidation',
+                                    value: false,
+                                });
+                            }}
+                        >
+                            No
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </Paper>
         );
     }
 }
@@ -201,4 +217,7 @@ export default class SchemaValidation extends React.Component {
 SchemaValidation.propTypes = {
     api: PropTypes.shape({ enableSchemaValidation: PropTypes.bool }).isRequired,
     configDispatcher: PropTypes.func.isRequired,
+    classes: PropTypes.shape({}).isRequired,
 };
+
+export default withStyles(styles)(SchemaValidation);
