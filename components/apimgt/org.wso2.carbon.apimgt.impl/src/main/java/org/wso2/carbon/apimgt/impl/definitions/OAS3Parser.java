@@ -235,75 +235,13 @@ public class OAS3Parser extends APIDefinition {
         updateSwaggerSecurityDefinition(openAPI, swaggerData, "https://test.com");
         updateLegacyScopesFromSwagger(openAPI, swaggerData);
         if (APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
-            openAPI = modifyGraphQLSwagger(openAPI);
+            modifyGraphQLSwagger(openAPI);
         } else {
             for (SwaggerData.Resource resource : swaggerData.getResources()) {
                 addOrUpdatePathToSwagger(openAPI, resource);
             }
         }
         return Json.pretty(openAPI);
-    }
-
-    /**
-     * Construct openAPI definition for graphQL. Add get and post operations
-     *
-     * @param openAPI OpenAPI
-     * @return modified openAPI for GraphQL
-     */
-    private OpenAPI modifyGraphQLSwagger(OpenAPI openAPI) {
-        SwaggerData.Resource resource = new SwaggerData.Resource();
-        resource.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
-        resource.setPolicy(APIConstants.DEFAULT_SUB_POLICY_UNLIMITED);
-        resource.setPath("/*");
-
-        resource.setVerb(APIConstants.HTTP_GET);
-        Operation getOperation = createOperation(resource);
-        resource.setVerb(APIConstants.HTTP_POST);
-        Operation postOperation = createOperation(resource);
-
-        //get operation
-        Parameter getParameter = new Parameter();
-        getParameter.setName(APIConstants.GRAPHQL_QUERY);
-        getParameter.setIn(APIConstants.GRAPHQL_QUERY);
-        getParameter.setRequired(true);
-        getParameter.setDescription("Query to be passed to graphQL API");
-
-        Schema getSchema = new Schema();
-        getSchema.setType("string");
-        getParameter.setSchema(getSchema);
-        getOperation.addParametersItem(getParameter);
-
-        //post operation
-        RequestBody requestBody = new RequestBody();
-        requestBody.setDescription("Query or mutation to be passed to graphQL API");
-        requestBody.setRequired(true);
-
-        JSONObject typeOfPayload = new JSONObject();
-        JSONObject payload = new JSONObject();
-        typeOfPayload.put(APIConstants.TYPE, "string");
-        payload.put(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME, typeOfPayload);
-
-        Schema postSchema = new Schema();
-        postSchema.setType("object");
-        postSchema.setProperties(payload);
-
-        MediaType mediaType = new MediaType();
-        mediaType.setSchema(postSchema);
-
-        Content content = new Content();
-        content.addMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE, mediaType);
-        requestBody.setContent(content);
-        postOperation.setRequestBody(requestBody);
-
-        //add post and get operations to path /*
-        PathItem pathItem = new PathItem();
-        pathItem.setGet(getOperation);
-        pathItem.setPost(postOperation);
-        Paths paths = new Paths();
-        paths.put("/*", pathItem);
-
-        openAPI.setPaths(paths);
-        return openAPI;
     }
 
     /**
@@ -951,5 +889,66 @@ public class OAS3Parser extends APIDefinition {
             throw new APIManagementException("Error Occurred while parsing OpenAPI3 definition.");
         }
         return parseAttemptForV3.getOpenAPI();
+    }
+
+    /**
+     * Construct openAPI definition for graphQL. Add get and post operations
+     *
+     * @param openAPI OpenAPI
+     * @return modified openAPI for GraphQL
+     */
+    private void modifyGraphQLSwagger(OpenAPI openAPI) {
+        SwaggerData.Resource resource = new SwaggerData.Resource();
+        resource.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+        resource.setPolicy(APIConstants.DEFAULT_SUB_POLICY_UNLIMITED);
+        resource.setPath("/*");
+
+        resource.setVerb(APIConstants.HTTP_GET);
+        Operation getOperation = createOperation(resource);
+        resource.setVerb(APIConstants.HTTP_POST);
+        Operation postOperation = createOperation(resource);
+
+        //get operation
+        Parameter getParameter = new Parameter();
+        getParameter.setName(APIConstants.GRAPHQL_QUERY);
+        getParameter.setIn("query");
+        getParameter.setRequired(true);
+        getParameter.setDescription("Query to be passed to graphQL API");
+
+        Schema getSchema = new Schema();
+        getSchema.setType("string");
+        getParameter.setSchema(getSchema);
+        getOperation.addParametersItem(getParameter);
+
+        //post operation
+        RequestBody requestBody = new RequestBody();
+        requestBody.setDescription("Query or mutation to be passed to graphQL API");
+        requestBody.setRequired(true);
+
+        JSONObject typeOfPayload = new JSONObject();
+        JSONObject payload = new JSONObject();
+        typeOfPayload.put(APIConstants.TYPE, "string");
+        payload.put(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME, typeOfPayload);
+
+        Schema postSchema = new Schema();
+        postSchema.setType("object");
+        postSchema.setProperties(payload);
+
+        MediaType mediaType = new MediaType();
+        mediaType.setSchema(postSchema);
+
+        Content content = new Content();
+        content.addMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE, mediaType);
+        requestBody.setContent(content);
+        postOperation.setRequestBody(requestBody);
+
+        //add post and get operations to path /*
+        PathItem pathItem = new PathItem();
+        pathItem.setGet(getOperation);
+        pathItem.setPost(postOperation);
+        Paths paths = new Paths();
+        paths.put("/*", pathItem);
+
+        openAPI.setPaths(paths);
     }
 }
