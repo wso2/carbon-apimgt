@@ -40,6 +40,8 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
@@ -135,7 +137,7 @@ public class APIExportUtil {
             }
 
             //export certificates
-            exportEndpointCertificates(archivePath, apiToReturn, tenantId, provider, exportFormat);
+            exportEndpointCertificates(archivePath, apiToReturn, tenantId, exportFormat);
 
             //export meta information
             exportMetaInformation(archivePath, apiToReturn, registry, exportFormat);
@@ -556,13 +558,13 @@ public class APIExportUtil {
 
             String apiInJson = gson.toJson(apiToReturn);
             switch (exportFormat) {
-            case JSON:
-                CommonUtil.writeFile(archivePath + APIImportExportConstants.JSON_API_FILE_LOCATION, apiInJson);
-                break;
-            case YAML:
-                String apiInYaml = CommonUtil.jsonToYaml(apiInJson);
-                CommonUtil.writeFile(archivePath + APIImportExportConstants.YAML_API_FILE_LOCATION, apiInYaml);
-                break;
+                case JSON:
+                    CommonUtil.writeFile(archivePath + APIImportExportConstants.JSON_API_FILE_LOCATION, apiInJson);
+                    break;
+                case YAML:
+                    String apiInYaml = CommonUtil.jsonToYaml(apiInJson);
+                    CommonUtil.writeFile(archivePath + APIImportExportConstants.YAML_API_FILE_LOCATION, apiInYaml);
+                    break;
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Swagger definition for API: "
@@ -604,12 +606,11 @@ public class APIExportUtil {
      *
      * @param api          API to be exported
      * @param tenantId     tenant id of the user
-     * @param apiProvider  api Provider
      * @param exportFormat Export format of file
      * @throws APIImportExportException If an error occurs while exporting endpoint certificates
      */
-    private static void exportEndpointCertificates(String archivePath, API api, int tenantId, APIProvider apiProvider,
-                                                   ExportFormat exportFormat) throws APIImportExportException {
+    private static void exportEndpointCertificates(String archivePath, API api, int tenantId, ExportFormat exportFormat)
+            throws APIImportExportException {
 
         JSONObject endpointConfig;
         JSONTokener tokener = new JSONTokener(api.getEndpointConfig());
@@ -627,7 +628,7 @@ public class APIExportUtil {
             uniqueHostNames.addAll(productionHostNames); // Remove duplicate and append result
             uniqueHostNames.addAll(sandboxEndpoints);
             for (String hostname : uniqueHostNames) {
-                List<CertificateDetail> list = getCertificateContentAndMetaData(tenantId, hostname, apiProvider);
+                List<CertificateDetail> list = getCertificateContentAndMetaData(tenantId, hostname);
                 endpointCertificatesDetails.addAll(list);
             }
             if (!endpointCertificatesDetails.isEmpty()) {
@@ -736,19 +737,20 @@ public class APIExportUtil {
     /**
      * Get Certificate MetaData and Certificate detail and build JSON list.
      *
-     * @param tenantId    tenant id of the user
-     * @param hostname    hostname of the endpoint
-     * @param apiProvider api Provider
+     * @param tenantId tenant id of the user
+     * @param hostname hostname of the endpoint     *
      * @return list of certificate detail JSON objects
      * @throws APIImportExportException If an error occurs while retrieving endpoint certificate metadata and content
      */
-    private static List<CertificateDetail> getCertificateContentAndMetaData(int tenantId, String hostname,
-                                                                            APIProvider apiProvider)
+    private static List<CertificateDetail> getCertificateContentAndMetaData(int tenantId, String hostname)
             throws APIImportExportException {
+
         List<CertificateDetail> certificateDetails = new ArrayList<>();
         List<CertificateMetadataDTO> certificateMetadataDTOS;
+        CertificateManager certificateManager = CertificateManagerImpl.getInstance();
+
         try {
-            certificateMetadataDTOS = apiProvider.searchCertificates(tenantId, null, hostname);
+            certificateMetadataDTOS = certificateManager.getCertificates(tenantId, null, hostname);
         } catch (APIManagementException e) {
             String errorMsg = "Error retrieving certificate meta data. For tenantId: " + tenantId + " hostname: "
                     + hostname;
@@ -758,7 +760,7 @@ public class APIExportUtil {
         certificateMetadataDTOS.forEach(metadataDTO -> {
             ByteArrayInputStream certificate = null;
             try {
-                certificate = apiProvider.getCertificateContent(metadataDTO.getAlias());
+                certificate = certificateManager.getCertificateContent(metadataDTO.getAlias());
                 certificate.close();
                 byte[] certificateContent = IOUtils.toByteArray(certificate);
                 String encodedCertificate = new String(Base64.encodeBase64(certificateContent));
