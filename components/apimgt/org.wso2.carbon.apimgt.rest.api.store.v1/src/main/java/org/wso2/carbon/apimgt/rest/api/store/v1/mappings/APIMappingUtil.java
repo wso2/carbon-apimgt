@@ -40,11 +40,6 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationAttributesDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductEndpointURLsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefaultVersionURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
@@ -52,7 +47,6 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
@@ -797,72 +791,9 @@ public class APIMappingUtil {
     //        }
     //        return scopeDto;
     //    }
-
-    /**
-     * Converts a List object of API Products into a DTO
-     *
-     * @param productList List of APIs
-     * @return APIListDTO object containing APIDTOs
-     */
-    public static APIProductListDTO fromAPIProductListtoDTO(List<APIProduct> productList) {
-        APIProductListDTO listDto = new APIProductListDTO();
-        List<APIProductInfoDTO> list = new ArrayList<APIProductInfoDTO>();
-        for (APIProduct apiProduct : productList) {
-            APIProductInfoDTO productDto = new APIProductInfoDTO();
-            productDto.setName(apiProduct.getId().getName());
-            productDto.setProvider(apiProduct.getId().getProviderName());
-            productDto.setDescription(apiProduct.getDescription());
-            productDto.setId(apiProduct.getUuid());
-            productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
-                    .replace(RestApiConstants.APIPRODUCTID_PARAM, apiProduct.getUuid()));
-            Set<Tier> availableTiers = apiProduct.getAvailableTiers();
-            List<String> tiers = new ArrayList<>();
-            for (Tier tier : availableTiers) {
-                tiers.add(tier.getName());
-            }
-            productDto.setThrottlingPolicies(tiers);
-            list.add(productDto);
-        }
-
-        listDto.setList(list);
-        listDto.setCount(list.size());
-        return listDto;
-    }
     
 
 
-    /**
-     * Sets pagination urls for a APIProductListDTO object given pagination parameters and url parameters
-     *
-     * @param apiProductListDTO a APIProductListDTO object
-     * @param query      search condition
-     * @param limit      max number of objects returned
-     * @param offset     starting index
-     * @param size       max offset
-     */
-    public static void setPaginationParams(APIProductListDTO apiProductListDTO, String query, int offset, int limit, int size) {
-
-        //acquiring pagination parameters and setting pagination urls
-        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
-        String paginatedPrevious = "";
-        String paginatedNext = "";
-
-        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = RestApiUtil
-                    .getAPIProductPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
-        }
-
-        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = RestApiUtil
-                    .getAPIProductPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
-        }
-
-        PaginationDTO paginationDTO = CommonMappingUtil
-                .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
-        apiProductListDTO.setPagination(paginationDTO);
-    }
 
     /**
      * Maps external store advertise API properties to AdvertiseInfoDTO object.

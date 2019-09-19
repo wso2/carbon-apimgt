@@ -339,6 +339,7 @@ function Properties(props) {
                                     color='primary'
                                     className={classes.button}
                                     onClick={toggleAddProperty}
+                                    disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
                                 >
                                     <FormattedMessage
                                         id='Apis.Details.Properties.Properties.add.new.property'

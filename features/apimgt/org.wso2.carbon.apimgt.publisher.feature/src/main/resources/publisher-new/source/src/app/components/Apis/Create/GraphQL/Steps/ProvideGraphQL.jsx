@@ -61,11 +61,11 @@ export default function ProvideGraphQL(props) {
         API.validateGraphQLFile(file)
             .then((response) => {
                 const {
-                    body: { isValid: isValidFile, info: graphQLInfo },
+                    body: { isValid: isValidFile, graphQLInfo },
                 } = response;
                 if (isValidFile) {
                     validFile = file;
-                    inputsDispatcher({ action: 'graphQLBean', value: graphQLInfo });
+                    inputsDispatcher({ action: 'graphQLInfo', value: graphQLInfo });
                     setValidity({ ...isValid, file: null });
                 } else {
                     setValidity({ ...isValid, file: { message: 'GraphQL content validation failed!' } });

@@ -30,6 +30,8 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -44,7 +46,9 @@ import javax.cache.Caching;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({WebsocketUtilTestCase.class, ServiceReferenceHolder.class, Caching.class, APIUtil.class,
-        PrivilegedCarbonContext.class, MultitenantUtils.class})
+        PrivilegedCarbonContext.class, MultitenantUtils.class,
+        org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class, Caching.class,
+        Cache.class, APIManagerConfigurationService.class, CacheProvider.class})
 public class WebsocketUtilTestCase {
     private String apiKey = "abc";
     private String apiContext = "/ishara";
@@ -91,30 +95,20 @@ public class WebsocketUtilTestCase {
 
     @Test
     public void testValidateCache() {
-//        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-//        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-//        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-//        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-//        Mockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-//        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL))
-//                .thenReturn(apiKeyValidationURL);
-//        CacheManager cacheManager = Mockito.mock(CacheManager.class);
-
-//        PowerMockito.mockStatic(Caching.class);
-//        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
-
         // returns null if cachedToken is not found
         Assert.assertNull(WebsocketUtil.validateCache(apiKey, cacheKey));
 
         // If cachedToken is found
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
         apiKeyValidationInfoDTO.setApiName(apiName);
+        WebsocketUtil.putCache(apiKeyValidationInfoDTO, apiKey, cacheKey);
         PowerMockito.mockStatic(APIUtil.class);
 
+        Mockito.when(CacheProvider.getGatewayTokenCache()).thenReturn(gwTokenCache);
+        Mockito.when(CacheProvider.getGatewayKeyCache()).thenReturn(gwKeyCache);
         Mockito.when(gwTokenCache.get(apiKey)).thenReturn(cachedToken);
         Mockito.when(gwKeyCache.get(cacheKey)).thenReturn(apiKeyValidationInfoDTO);
         PowerMockito.when(APIUtil.isAccessTokenExpired(apiKeyValidationInfoDTO)).thenReturn(true);
-
         Assert.assertEquals(apiName, WebsocketUtil.validateCache(apiKey, cacheKey).getApiName());
     }
 

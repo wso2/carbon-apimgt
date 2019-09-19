@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -50,6 +51,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
 import java.security.cert.Certificate;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A Validator class to validate JWT tokens in an API request.
@@ -307,8 +310,22 @@ public class JWTValidator {
      */
     private void validateScopes(MessageContext synCtx, OpenAPI openAPI, JSONObject payload)
             throws APISecurityException {
-        String resourceScope = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
+        if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
+            HashMap<String, String>  operationScopeMappingList =
+                    (HashMap<String, String>) synCtx.getProperty(APIConstants.SCOPE_OPERATION_MAPPING);
+            String[] operationList = ((String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE)).split(",");
+            for (String operation: operationList) {
+                String operationScope = operationScopeMappingList.get(operation);
+                checkTokenWithTheScope(operation, operationScope, payload);
+            }
+        } else {
+            String resource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+            String resourceScope = OpenAPIUtils.getScopesOfResource(openAPI, synCtx);
+            checkTokenWithTheScope(resource, resourceScope, payload);
+        }
+    }
 
+    private void checkTokenWithTheScope(String resource, String resourceScope, JSONObject payload) throws APISecurityException {
         if (StringUtils.isNotBlank(resourceScope)) {
             if (!payload.has(APIConstants.JwtTokenConstants.SCOPE)) {
                 log.error("Scopes not found in the token.");
@@ -316,7 +333,9 @@ public class JWTValidator {
             }
             String[] tokenScopes = payload.getString(APIConstants.JwtTokenConstants.SCOPE)
                     .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER);
+
             boolean scopeFound = false;
+
             for (String scope : tokenScopes) {
                 if (scope.trim().equals(resourceScope)) {
                     scopeFound = true;
@@ -331,11 +350,11 @@ public class JWTValidator {
                 throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, "Scope validation failed");
             }
             if (log.isDebugEnabled()) {
-                log.debug("Scope validation successful. Resource Scope: " + resourceScope
+                log.debug("Scope validation successful for the resource: " + resource + ", Resource Scope: " + resourceScope
                         + ", User: " + payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
             }
         }
-        log.debug("No scopes assigned to the resource.");
+        log.debug("No scopes assigned to the resource: " + resource);
     }
 
     /**
@@ -473,15 +492,15 @@ public class JWTValidator {
     }
 
     private Cache getGatewayTokenCache() {
-        return getCacheFromCacheManager(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
+        return CacheProvider.getGatewayTokenCache();
     }
 
     private Cache getInvalidTokenCache() {
-        return getCacheFromCacheManager(APIConstants.GATEWAY_INVALID_TOKEN_CACHE_NAME);
+        return CacheProvider.getInvalidTokenCache();
     }
 
     private Cache getGatewayKeyCache() {
-        return getCacheFromCacheManager(APIConstants.GATEWAY_KEY_CACHE_NAME);
+        return CacheProvider.getGatewayKeyCache();
     }
 
     private Cache getCacheFromCacheManager(String cacheName) {

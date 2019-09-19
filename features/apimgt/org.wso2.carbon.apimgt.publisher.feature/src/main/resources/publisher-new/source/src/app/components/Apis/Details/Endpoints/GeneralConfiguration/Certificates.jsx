@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { isRestricted } from 'AppData/AuthManager';
+import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
+import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import {
     Button,
@@ -30,28 +33,14 @@ import {
     ListItemAvatar,
     ListItemSecondaryAction,
     ListItemText,
-    TextField,
     Typography,
-    withStyles,
 } from '@material-ui/core';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import Dropzone from 'react-dropzone';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import UploadCertificate from 'AppComponents/Apis/Details/Endpoints/GeneralConfiguration/UploadCertificate';
 import API from '../../../../../data/api';
-import SelectPolicies from '../../../Create/Components/SelectPolicies';
 
-const dropzoneStyles = {
-    border: '1px dashed ',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    height: 75,
-    padding: '8px 0px',
-    position: 'relative',
-    textAlign: 'center',
-    width: '100%',
-    margin: '10px 0',
-};
-
-const styles = theme => ({
+const useStyles = makeStyles(theme => ({
     fileinput: {
         display: 'none',
     },
@@ -88,7 +77,7 @@ const styles = theme => ({
     uploadCertDialogHeader: {
         fontWeight: '600',
     },
-});
+}));
 /**
  * TODO: Generalize this component to work in Configuration page , upload mutual SSL certificates action
  * in source/src/app/components/Apis/Details/Configuration/components/APISecurity/components/TransportLevel.jsx ~tmkb
@@ -98,36 +87,16 @@ const styles = theme => ({
  */
 function Certificates(props) {
     const {
-        classes, certificates, uploadCertificate, deleteCertificate, isMutualSSLEnabled, apiId,
+        certificates, uploadCertificate, deleteCertificate, isMutualSSLEnabled, apiId,
     } = props;
-    const [certificate, setCertificate] = useState({ name: '', content: {} });
     const [certificateList, setCertificateList] = useState([]);
-    const [alias, setAlias] = useState('');
-    const [policy, setPolicy] = useState('');
-    const [endpoint, setEndpoint] = useState('');
-    const [uploadCertificateOpen, setUploadCertificateOpen] = useState(false);
     const [openCertificateDetails, setOpenCertificateDetails] = useState({ open: false, anchor: null, details: {} });
     const [certificateToDelete, setCertificateToDelete] = useState({ open: false, alias: '' });
+    const [isDeleting, setDeleting] = useState(false);
+    const [uploadCertificateOpen, setUploadCertificateOpen] = useState(false);
+    const classes = useStyles();
+    const { api } = useContext(APIContext);
 
-    const closeCertificateUpload = () => {
-        setUploadCertificateOpen(false);
-        setCertificate({ name: '', content: '' });
-        setAlias('');
-        setEndpoint('');
-        setPolicy('');
-    };
-
-    /**
-     * Method to upload the certificate content by calling the rest api.
-     * */
-    const saveCertificate = () => {
-        if (isMutualSSLEnabled) {
-            uploadCertificate(certificate.content, policy, alias);
-        } else {
-            uploadCertificate(certificate.content, endpoint, alias);
-        }
-        closeCertificateUpload();
-    };
 
     /**
      * Show the selected certificate details in a popover.
@@ -171,31 +140,11 @@ function Certificates(props) {
      * @param {string} certificateAlias The alias of the certificate that is needed to be deleted.
      * */
     const deleteCertificateByAlias = (certificateAlias) => {
-        deleteCertificate(certificateAlias);
-        setCertificateToDelete({ open: false, alias: '' });
+        setDeleting(true);
+        deleteCertificate(certificateAlias)
+            .then(() => setCertificateToDelete({ open: false, alias: '' }))
+            .finally(() => setDeleting(false));
     };
-
-    /**
-     * Handled the file upload action of the dropzone.
-     *
-     * @param {array} file The accepted file list by the dropzone.
-     * */
-    const onDrop = (file) => {
-        const certificateFile = file[0];
-        if (certificateFile) {
-            setCertificate({ name: certificateFile.name, content: certificateFile });
-        }
-    };
-
-    /**
-     * On change functionality to handle the policy dropdown
-     *
-     * @param {*} event
-     */
-    function handleOnChange(event) {
-        const { value } = event.target;
-        setPolicy(value);
-    }
 
     useEffect(() => {
         setCertificateList(certificates);
@@ -236,7 +185,9 @@ function Certificates(props) {
                                         <IconButton
                                             onClick={() => setCertificateToDelete({ open: true, alias: cert.alias })}
                                         >
-                                            <Icon color='error'>delete</Icon>
+                                            <Icon color='error'>
+                                                delete
+                                            </Icon>
                                         </IconButton>
                                     </ListItemSecondaryAction>
                                 </ListItem>
@@ -254,6 +205,7 @@ function Certificates(props) {
                 <List>
                     <ListItem
                         button
+                        disabled={(isRestricted(['apim:api_create'], api))}
                         className={classes.addCertificateBtn}
                         onClick={() => setUploadCertificateOpen(true)}
                     >
@@ -288,12 +240,15 @@ function Certificates(props) {
                     <Button
                         onClick={() => deleteCertificateByAlias(certificateToDelete.alias)}
                         color='primary'
+                        disabled={isDeleting}
                         autoFocus
                     >
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.delete.ok.button'
                             defaultMessage='OK'
                         />
+                        {isDeleting && <CircularProgress size={24} />}
+
                     </Button>
                     <Button onClick={() => setCertificateToDelete({ open: false, alias: '' })} color='secondary'>
                         <FormattedMessage
@@ -341,139 +296,13 @@ function Certificates(props) {
                     </Button>
                 </DialogActions>
             </Dialog>
-            <Dialog open={uploadCertificateOpen}>
-                <DialogTitle>
-                    <Typography className={classes.uploadCertDialogHeader}>
-                        <FormattedMessage
-                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.uploadCertificate'
-                            defaultMessage='Upload Certificate'
-                        />
-                    </Typography>
-                </DialogTitle>
-                <DialogContent>
-                    <Grid>
-                        <div>
-                            {isMutualSSLEnabled ? (
-                                <SelectPolicies
-                                    multiple={false}
-                                    policies={policy}
-                                    helperText='Select a throttling policy for the certificate'
-                                    onChange={handleOnChange}
-                                    required
-                                />
-                            ) :
-                                <TextField
-                                    required
-                                    id='certificateEndpoint'
-                                    label={
-                                        <FormattedMessage
-                                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.endpoint'
-                                            defaultMessage='Endpoint'
-                                        />
-                                    }
-                                    value={endpoint}
-                                    placeholder='Endpoint'
-                                    onChange={event => setEndpoint(event.target.value)}
-                                    margin='normal'
-                                    fullWidth
-                                />
-                            }
-
-                            <TextField
-                                required
-                                id='certificateAlias'
-                                label={
-                                    <FormattedMessage
-                                        id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.alias'
-                                        defaultMessage='Alias'
-                                    />
-                                }
-                                value={alias}
-                                placeholder='My Alias'
-                                onChange={event => setAlias(event.target.value)}
-                                margin='normal'
-                                variant='outlined'
-                                fullWidth
-                            />
-                            <Dropzone
-                                multiple={false}
-                                accept={
-                                    'application/pkcs8,' +
-                                    'application/pkcs10, application/pkix-crl,' +
-                                    'application/pkcs7-mime,' +
-                                    'application/x-x509-ca-cert,' +
-                                    'application/x-x509-user-cert,' +
-                                    'application/x-pkcs7-crl,' +
-                                    'application/x-pkcs12,' +
-                                    'application/x-pkcs7-certificates,' +
-                                    'application/x-pkcs7-certreqresp,' +
-                                    '.p8, .p10, .csr, .cer, .crl, .p7c, .crt, .der, .p12, .pfx, .p7b, .spc, .p7r'
-                                }
-                                className={classes.dropzone}
-                                activeClassName={classes.acceptDrop}
-                                rejectClassName={classes.rejectDrop}
-                                onDrop={(dropFile) => {
-                                    onDrop(dropFile);
-                                }}
-                            >
-                                {({ getRootProps, getInputProps }) => (
-                                    <div {...getRootProps({ style: dropzoneStyles })}>
-                                        <input {...getInputProps()} />
-                                        <div className={classes.dropZoneWrapper}>
-                                            {certificate.name === '' ? (
-                                                <div>
-                                                    <Icon style={{ fontSize: 56 }}>cloud_upload</Icon>
-                                                    <Typography>
-                                                        <FormattedMessage
-                                                            id={
-                                                                'Apis.Details.Endpoints.GeneralConfiguration' +
-                                                                '.Certificates.click.or.drop.to.upload.file'
-                                                            }
-                                                            defaultMessage={
-                                                                'Click or drag the certificate ' +
-                                                                ' file to upload.'
-                                                            }
-                                                        />
-                                                    </Typography>
-                                                </div>
-                                            ) : (
-                                                <div className={classes.uploadedFile}>
-                                                    <Icon style={{ fontSize: 56 }}>insert_drive_file</Icon>
-                                                    {certificate.name}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </Dropzone>
-                        </div>
-                    </Grid>
-                </DialogContent>
-                <DialogActions>
-                    <Button
-                        onClick={saveCertificate}
-                        color='primary'
-                        autoFocus
-                        disabled={
-                            alias === '' ||
-                            (!isMutualSSLEnabled && endpoint === '') ||
-                            certificate.name === '' ||
-                            (isMutualSSLEnabled && policy === '')
-                        }
-                    >
-                        <FormattedMessage
-                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.config.save.button'
-                            defaultMessage='Save'
-                        />
-                    </Button>
-                    <Button onClick={closeCertificateUpload} color='secondary'>
-                        <FormattedMessage
-                            id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.cancel.button'
-                            defaultMessage='Close'
-                        />
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <UploadCertificate
+                certificates={certificates}
+                uploadCertificate={uploadCertificate}
+                isMutualSSLEnabled={isMutualSSLEnabled}
+                setUploadCertificateOpen={setUploadCertificateOpen}
+                uploadCertificateOpen={uploadCertificateOpen}
+            />
         </Grid>
     );
 }
@@ -494,4 +323,4 @@ Certificates.propTypes = {
     apiId: PropTypes.string,
     isMutualSSLEnabled: PropTypes.bool,
 };
-export default injectIntl(withStyles(styles)(Certificates));
+export default injectIntl((Certificates));

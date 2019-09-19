@@ -27,6 +27,7 @@ import {
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import { isRestricted } from 'AppData/AuthManager';
 import cloneDeep from 'lodash.clonedeep';
 
 import EndpointListing from './EndpointListing';
@@ -495,12 +496,20 @@ function EndpointOverview(props) {
                                             >
                                                 <FormControlLabel
                                                     value='failover'
-                                                    control={<Radio />}
+                                                    control={
+                                                        <Radio
+                                                            disabled={(isRestricted(['apim:api_create'], api))}
+                                                        />
+                                                    }
                                                     label='Failover'
                                                 />
                                                 <FormControlLabel
                                                     value='load_balance'
-                                                    control={<Radio />}
+                                                    control={
+                                                        <Radio
+                                                            disabled={(isRestricted(['apim:api_create'], api))}
+                                                        />
+                                                    }
                                                     label='Load balance'
                                                 />
                                             </RadioGroup>
