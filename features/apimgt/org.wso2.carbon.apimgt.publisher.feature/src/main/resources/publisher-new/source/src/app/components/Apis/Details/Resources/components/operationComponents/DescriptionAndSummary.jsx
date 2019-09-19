@@ -31,7 +31,7 @@ import Typography from '@material-ui/core/Typography';
  * @returns
  */
 export default function DescriptionAndSummary(props) {
-    const { operation, operationActionsDispatcher } = props;
+    const { operation, operationActionsDispatcher, disableUpdate } = props;
     return (
         <Fragment>
             <Grid item md={12}>
@@ -47,6 +47,7 @@ export default function DescriptionAndSummary(props) {
                     fullWidth
                     label='Description'
                     multiline
+                    disabled={disableUpdate}
                     rows='4'
                     value={operation.spec.description}
                     variant='outlined'
@@ -62,6 +63,7 @@ export default function DescriptionAndSummary(props) {
                     margin='dense'
                     variant='outlined'
                     fullWidth
+                    disabled={disableUpdate}
                     value={operation.spec.summary}
                     onChange={({ target: { value } }) =>
                         operationActionsDispatcher({ action: 'summary', event: { operation, value } })
@@ -73,6 +75,7 @@ export default function DescriptionAndSummary(props) {
 }
 
 DescriptionAndSummary.propTypes = {
+    disableUpdate: PropTypes.bool,
     operation: PropTypes.shape({
         target: PropTypes.string.isRequired,
         verb: PropTypes.string.isRequired,
@@ -81,4 +84,6 @@ DescriptionAndSummary.propTypes = {
     operationActionsDispatcher: PropTypes.func.isRequired,
 };
 
-DescriptionAndSummary.defaultProps = {};
+DescriptionAndSummary.defaultProps = {
+    disableUpdate: false,
+};

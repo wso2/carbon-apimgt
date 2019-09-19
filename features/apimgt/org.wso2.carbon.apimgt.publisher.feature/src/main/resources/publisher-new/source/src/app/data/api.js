@@ -131,7 +131,7 @@ class API extends Resource {
         } else {
             payload = {
                 body: apiData,
-                'Content-Type': 'application/json',
+                openAPIVersion: 'v2',
             };
             promise_create = this.client.then(client => {
                 return client.apis['APIs'].post_apis(payload, this._requestMetaData());
@@ -277,7 +277,7 @@ class API extends Resource {
         }
     }
 
-    save(query = 'v2') {
+    save(openAPIVersion = 'v2') {
         const promisedAPIResponse = this.client.then((client) => {
             const properties = client.spec.definitions.API.properties;
             const data = {};
@@ -289,7 +289,7 @@ class API extends Resource {
             const payload = {
                 body: data,
                 'Content-Type': 'application/json',
-                openAPIVersion: query,
+                openAPIVersion,
             };
             return client.apis['APIs'].post_apis(payload, this._requestMetaData());
         });
