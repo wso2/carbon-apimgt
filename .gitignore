@@ -29,4 +29,3 @@ components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/publis
 components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/store-api.yaml
 components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/swagger.json
 components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/swagger.json
-
