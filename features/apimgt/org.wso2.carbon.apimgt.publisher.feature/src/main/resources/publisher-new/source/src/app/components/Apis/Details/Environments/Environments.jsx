@@ -203,7 +203,7 @@ export default function Environments() {
                                         {row.name}
                                     </TableCell>
                                     <TableCell align='left'>{row.description}</TableCell>
-                                    <TableCell align='left'>{row.access_urls}</TableCell>
+                                    <TableCell align='left'>{row.access_urls.join(', ')}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
