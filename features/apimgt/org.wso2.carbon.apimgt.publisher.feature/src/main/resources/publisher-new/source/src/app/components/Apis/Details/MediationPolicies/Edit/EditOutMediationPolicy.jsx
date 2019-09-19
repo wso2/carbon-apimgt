@@ -310,10 +310,7 @@ function EditOutMediationPolicy(props) {
                                 name={seq.id}
                                 type={seq.type}
                                 control={<Radio />}
-                                label={<FormattedMessage
-                                    id='Apis.Details.Edit.MediationPolicies.EditOutMediationPolicies.custom.out.policy'
-                                    defaultMessage={seq.name}
-                                />}
+                                label={seq.name}
                                 value={seq.name}
                                 checked={selectedPolicyFile.name === seq.name}
                             />
@@ -345,10 +342,7 @@ function EditOutMediationPolicy(props) {
                                 name={seq.id}
                                 type={seq.type}
                                 control={<Radio />}
-                                label={<FormattedMessage
-                                    id='Apis.Details.Edit.MediationPolicies.EditOutMediationPolicies.global.out.policy'
-                                    defaultMessage={seq.name}
-                                />}
+                                label={seq.name}
                                 value={seq.name}
                                 checked={selectedPolicyFile.name === seq.name}
                             />
