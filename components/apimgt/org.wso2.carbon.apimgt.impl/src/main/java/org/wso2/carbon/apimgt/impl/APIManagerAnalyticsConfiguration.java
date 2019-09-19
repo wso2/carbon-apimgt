@@ -50,7 +50,7 @@ public class APIManagerAnalyticsConfiguration {
     private boolean skipWorkFlowEventReceiverConnection;
     private String datacenterId;
     private String botDataStreamName;
-    private  String botDataStreamVersion;
+    private String botDataStreamVersion;
     
     private APIManagerAnalyticsConfiguration() {
     }
