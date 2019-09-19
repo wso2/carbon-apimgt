@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -77,7 +76,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.sql.Timestamp;
 
@@ -2113,7 +2111,7 @@ public class APIMappingUtil {
             scopeDTO.setDescription(aScope.getDescription());
             ScopeBindingsDTO bindingsDTO = new ScopeBindingsDTO();
             String roles = aScope.getRoles();
-            if (roles.isEmpty()) {
+            if (roles == null || roles.isEmpty()) {
                 bindingsDTO.setValues(Collections.emptyList());
             } else {
                 bindingsDTO.setValues(Arrays.asList((roles).split(",")));
