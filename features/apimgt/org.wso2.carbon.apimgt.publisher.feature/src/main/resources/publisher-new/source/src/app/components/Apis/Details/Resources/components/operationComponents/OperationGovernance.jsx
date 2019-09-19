@@ -156,7 +156,7 @@ export default function OperationGovernance(props) {
                             event: { value: [value] },
                         })
                     }
-                    helperText='Select a scopes to control permissions to this operation'
+                    helperText='Select a scope to control permissions to this operation'
                     margin='dense'
                     variant='outlined'
                 >
