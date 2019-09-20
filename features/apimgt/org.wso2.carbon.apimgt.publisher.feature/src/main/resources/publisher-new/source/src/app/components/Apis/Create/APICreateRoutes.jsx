@@ -22,7 +22,7 @@ import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import { PageNotFound } from 'AppComponents/Base/Errors/index';
 
-import APICreateWrapper from './Default/APICreateWrapper';
+import APICreateDefault from './Default/APICreateDefault';
 import APIProductCreateWrapper from './Default/APIProductCreateWrapper';
 import ApiCreateSwagger from './OpenAPI/ApiCreateOpenAPI';
 import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
@@ -38,16 +38,17 @@ const styles = {
 
 /**
  *
- * Handle routing for APIs create
+ * Handle routing for all types of API create creations, If you want to add new API type create page,
+ * Please use `APICreateBase` and `DefaultAPIForm` components to do so , Don't wrap `APICreateDefault` component
  * @param {*} props
  * @returns @inheritdoc
  */
-function ApiCreate(props) {
+function APICreateRoutes(props) {
     const { classes } = props;
     return (
         <main className={classes.content}>
             <Switch>
-                <Route path='/apis/create/rest' component={APICreateWrapper} />
+                <Route path='/apis/create/rest' component={APICreateDefault} />
                 <Route path='/api-products/create' component={APIProductCreateWrapper} />
                 <Route path='/apis/create/graphQL' component={ApiCreateGraphQL} />
                 <Route path='/apis/create/openapi' component={ApiCreateSwagger} />
@@ -59,8 +60,8 @@ function ApiCreate(props) {
     );
 }
 
-ApiCreate.propTypes = {
+APICreateRoutes.propTypes = {
     classes: PropTypes.shape({ content: PropTypes.string }).isRequired,
 };
 
-export default withStyles(styles)(ApiCreate);
+export default withStyles(styles)(APICreateRoutes);

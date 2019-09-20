@@ -1,13 +1,35 @@
+/*
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+/*
+ `max-len` es-lint rule has been disabled for the entire file due to the generated svg elements in the file.
+ it's impossible to get them under 120 columns rule
+  */
+/* eslint-disable max-len */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 
-const styles = theme => ({
+const styles = () => ({
     root: {
         marginTop: 30,
     },
 });
-
 
 /**
  *
@@ -16,10 +38,20 @@ const styles = theme => ({
  * @extends {React.Component}
  */
 class LifeCycleImage extends React.Component {
+    /**
+     *
+     *
+     * @param {*} element
+     * @returns
+     * @memberof LifeCycleImage
+     */
     highLightMe(element) {
-        if (!element.startsWith(this.props.lifeCycleStatus.toLowerCase())) return { opacity: 0.2 };
+        const style = {};
+        if (!element.startsWith(this.props.lifeCycleStatus.toLowerCase())) {
+            style.opacity = 0.2;
+        }
+        return style;
     }
-
 
     /**
      *
@@ -519,6 +551,7 @@ class LifeCycleImage extends React.Component {
 }
 LifeCycleImage.propTypes = {
     classes: PropTypes.shape({}).isRequired,
+    lifeCycleStatus: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles)(LifeCycleImage);

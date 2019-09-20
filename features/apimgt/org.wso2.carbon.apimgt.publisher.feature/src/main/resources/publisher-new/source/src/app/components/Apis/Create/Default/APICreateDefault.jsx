@@ -26,6 +26,7 @@ import { withRouter } from 'react-router';
 import Alert from 'AppComponents/Shared/Alert';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import API from 'AppData/api';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
 
 import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
 import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm';
@@ -39,6 +40,7 @@ import APIProduct from 'AppData/APIProduct';
  * @returns
  */
 function APICreateDefault(props) {
+    const { settings } = useAppContext();
     /**
      *
      * Reduce the events triggered from API input fields to current state
@@ -113,10 +115,11 @@ function APICreateDefault(props) {
                 },
             };
         }
-        apiData.gatewayEnvironments = ['Production and Sandbox'];
+        apiData.gatewayEnvironments = settings.environment.map(env => env.name);
         if (props.isAPIProduct) {
             const newAPIProduct = new APIProduct(apiData);
-            newAPIProduct.saveProduct(apiData)
+            newAPIProduct
+                .saveProduct(apiData)
                 .then((apiProduct) => {
                     Alert.info('API Product created successfully');
                     props.history.push(`/api-products/${apiProduct.id}/overview`);
@@ -165,33 +168,30 @@ function APICreateDefault(props) {
                                 id='Apis.Create.Default.APICreateDefault.apiProduct.sub.heading'
                                 defaultMessage={
                                     'Create an API Product providing Name, Context parameters' +
-                                ' and optionally bushiness plans'
+                                    ' and optionally bushiness plans'
                                 }
                             />
                         </Typography>
                     </React.Fragment>
-                ) :
-                    (
-                        <React.Fragment>
-                            <Typography variant='h5'>
-                                <FormattedMessage
-                                    id='Apis.Create.Default.APICreateDefault.api.heading'
-                                    defaultMessage='Create an API'
-                                />
-                            </Typography>
-                            <Typography variant='caption'>
-                                <FormattedMessage
-                                    id='Apis.Create.Default.APICreateDefault.api.sub.heading'
-                                    defaultMessage={
-                                        'Create an API providing Name, Version and Context parameters' +
-                                ' and optionally backend endpoint and bushiness plans'
-                                    }
-                                />
-                            </Typography>
-                        </React.Fragment>
-
-                    )
-
+                ) : (
+                    <React.Fragment>
+                        <Typography variant='h5'>
+                            <FormattedMessage
+                                id='Apis.Create.Default.APICreateDefault.api.heading'
+                                defaultMessage='Create an API'
+                            />
+                        </Typography>
+                        <Typography variant='caption'>
+                            <FormattedMessage
+                                id='Apis.Create.Default.APICreateDefault.api.sub.heading'
+                                defaultMessage={
+                                    'Create an API providing Name, Version and Context parameters' +
+                                    ' and optionally backend endpoint and bushiness plans'
+                                }
+                            />
+                        </Typography>
+                    </React.Fragment>
+                )
             }
         >
             <Grid container spacing={3}>
