@@ -65,5 +65,11 @@ public interface Authenticator {
     
     String getRequestOrigin();
 
+    /**
+     * Returns an integer with the authenticator priority.
+     * Authenticator with the lowest value will have the highest priority
+     *
+     * @return An integer with the Authenticator priority
+     */
     int getPriority();
 }

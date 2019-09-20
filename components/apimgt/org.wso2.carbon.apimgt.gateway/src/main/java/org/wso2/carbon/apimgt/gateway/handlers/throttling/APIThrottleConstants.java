@@ -51,6 +51,8 @@ public class APIThrottleConstants {
     public static final int SC_TOO_MANY_REQUESTS = 429;
     public static final String BLOCKED_REASON = APIConstants.BLOCKED_REASON_KEY;
     public static final String UTC = "UTC";
+    public static final String GMT = "GMT";
+    public static final String HEADER_RETRY_AFTER = "Retry-After";
     public static final String IS_THROTTLED = "isThrottled";
     public static final String THROTTLE_KEY = "throttleKey";
     public static final String EXPIRY_TIMESTAMP = "expiryTimeStamp";

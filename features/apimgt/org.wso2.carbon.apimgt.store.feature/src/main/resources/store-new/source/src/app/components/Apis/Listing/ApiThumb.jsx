@@ -26,7 +26,6 @@ import classNames from 'classnames';
 import { FormattedMessage } from 'react-intl';
 import MaterialIcons from 'MaterialIcons';
 import CONSTS from 'AppData/Constants';
-import APIProduct from 'AppData/APIProduct';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import ImageGenerator from './ImageGenerator';
 import Api from '../../../data/api';
@@ -129,15 +128,9 @@ class ApiThumb extends React.Component {
      * @memberof ApiThumb
      */
     componentDidMount() {
-        const { apiType } = this.context;
         const { api } = this.props;
-        let restApi = null;
+        const restApi = new Api();
 
-        if (apiType === CONSTS.API_TYPE) {
-            restApi = new Api();
-        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
-            restApi = new APIProduct();
-        }
         const promisedThumbnail = restApi.getAPIThumbnail(api.id);
 
         promisedThumbnail.then((response) => {
@@ -174,13 +167,7 @@ class ApiThumb extends React.Component {
      * @memberof ApiThumb
      */
     getPathPrefix() {
-        const { apiType } = this.context;
-
-        let path = '/apis/';
-        if (apiType === CONSTS.API_PRODUCT_TYPE) {
-            path = '/api-products/';
-        }
-
+        const path = '/apis/';
         return path;
     }
 

@@ -33,10 +33,11 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeMap;
+import java.util.Map;
 
 /**
  * An API consumer authenticator which authenticates user requests using
@@ -106,7 +107,7 @@ public class BasicAuthAuthenticator implements Authenticator {
         }
 
         openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
-        if (openAPI == null) {
+        if (openAPI == null && !APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
             log.error("OpenAPI definition is missing in the gateway. Basic authentication cannot be performed.");
             return new AuthenticationResponse(false, isMandatory, true,
                     APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF, "Basic authentication cannot be performed.");
@@ -116,7 +117,39 @@ public class BasicAuthAuthenticator implements Authenticator {
         String basicAuthHeader = extractBasicAuthHeader(synCtx);
 
         // Check for resource level authentication
-        String authenticationScheme = OpenAPIUtils.getResourceAuthenticationScheme(openAPI, synCtx);
+        String authenticationScheme;
+
+        List<VerbInfoDTO> verbInfoList;
+        if (APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
+            HashMap<String, Boolean> operationAuthSchemeMappingList =
+                    (HashMap<String, Boolean>) synCtx.getProperty(APIConstants.OPERATION_AUTH_SCHEME_MAPPING);
+            HashMap<String, String> operationThrottlingMappingList =
+                    (HashMap<String, String>) synCtx.getProperty(APIConstants.OPERATION_THROTTLING_MAPPING);
+
+            String[] operationList = ((String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE)).split(",");
+            verbInfoList = new ArrayList<>(1);
+            authenticationScheme = APIConstants.AUTH_NO_AUTHENTICATION;
+            for (String operation: operationList) {
+                boolean operationAuthSchemeEnabled = operationAuthSchemeMappingList.get(operation);
+                VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+                if (operationAuthSchemeEnabled) {
+                    verbInfoDTO.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                    authenticationScheme = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+                } else {
+                    verbInfoDTO.setAuthType(APIConstants.AUTH_NO_AUTHENTICATION);
+                }
+                verbInfoDTO.setThrottling(operationThrottlingMappingList.get(operation));
+                verbInfoList.add(verbInfoDTO);
+            }
+        } else {
+            authenticationScheme = OpenAPIUtils.getResourceAuthenticationScheme(openAPI, synCtx);
+            verbInfoList = new ArrayList<>(1);
+            VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+            verbInfoDTO.setAuthType(authenticationScheme);
+            verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
+            verbInfoList.add(verbInfoDTO);
+        }
+
 
         if (APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)) {
             if (log.isDebugEnabled()) {
@@ -186,12 +219,14 @@ public class BasicAuthAuthenticator implements Authenticator {
             return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
         }
         if (!authenticated) {
-            log.debug("Basic Authentication: Username and Password mismatch");
+            log.error("Basic Authentication failure: Username and Password mismatch");
             return new AuthenticationResponse(false, isMandatory, true,
-                    APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS,
-                    APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE);
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
         } else { // username password matches
-            log.debug("Basic Authentication: Username and Password authenticated");
+            if (log.isDebugEnabled()) {
+                log.debug("Basic Authentication: Username and Password authenticated");
+            }
             //scope validation
             boolean scopesValid = false;
             try {
@@ -209,13 +244,7 @@ public class BasicAuthAuthenticator implements Authenticator {
                     authContext.setAuthenticated(true);
                     authContext.setTier(APIConstants.UNAUTHENTICATED_TIER);
                     authContext.setStopOnQuotaReach(true);//Since we don't have details on unauthenticated tier we setting stop on quota reach true
-                    //Resource level throttling
-                    List<VerbInfoDTO> verbInfoList = new ArrayList<>(1);
-                    VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
-                    verbInfoDTO.setThrottling(OpenAPIUtils.getResourceThrottlingTier(openAPI, synCtx));
-                    verbInfoList.add(verbInfoDTO);
                     synCtx.setProperty(APIConstants.VERB_INFO_DTO, verbInfoList);
-
                     //In basic authentication scenario, we will use the username for throttling.
                     authContext.setApiKey(username);
                     authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
@@ -243,9 +272,11 @@ public class BasicAuthAuthenticator implements Authenticator {
      */
     private String[] extractBasicAuthCredentials(String basicAuthHeader) throws APISecurityException {
         if (basicAuthHeader == null) {
-            log.debug("Basic Authentication: No Basic Auth Header found");
-            throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS,
-                    APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS_MESSAGE);
+            if (log.isDebugEnabled()) {
+                log.debug("Basic Authentication: No Basic Auth Header found");
+            }
+            throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_MISSING_CREDENTIALS_MESSAGE);
         } else {
             if (basicAuthHeader.contains(basicAuthKeyHeaderSegment)) {
                 try {
@@ -254,19 +285,21 @@ public class BasicAuthAuthenticator implements Authenticator {
                     if (basicAuthKey.contains(":")) {
                         return basicAuthKey.split(":");
                     } else {
-                        log.debug("Basic Authentication: Invalid Basic Auth token");
-                        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS,
-                                APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE);
+                        log.error("Basic Authentication: Invalid Basic Auth token");
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                     }
                 } catch (WSSecurityException e) {
-                    log.debug("Basic Authentication: Invalid Basic Auth token");
-                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS,
-                            APISecurityConstants.API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE);
+                    log.error("Error occured during Basic Authentication: Invalid Basic Auth token");
+                    throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
             } else {
-                log.debug("Basic Authentication: No Basic Auth Header found");
-                throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS,
-                        APISecurityConstants.API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS_MESSAGE);
+                if (log.isDebugEnabled()) {
+                    log.debug("Basic Authentication: No Basic Auth Header found");
+                }
+                throw new APISecurityException(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_MISSING_CREDENTIALS_MESSAGE);
             }
         }
     }

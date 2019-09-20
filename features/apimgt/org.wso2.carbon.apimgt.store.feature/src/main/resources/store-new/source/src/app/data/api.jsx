@@ -18,6 +18,7 @@
 import CONSTS from 'AppData/Constants';
 import APIClientFactory from './APIClientFactory';
 import Resource from './Resource';
+import Wsdl from './Wsdl';
 import Utils from './Utils';
 
 /**
@@ -31,6 +32,7 @@ export default class API extends Resource {
     constructor() {
         super();
         this.client = new APIClientFactory().getAPIClient(Utils.getEnvironment().label).client;
+        this.wsdlClient = new Wsdl(this.client);
         this._requestMetaData = Resource._requestMetaData;
     }
 
@@ -461,6 +463,17 @@ export default class API extends Resource {
         }
     }
 
+    generateApiKey(applicationId, keyType, validityPeriod) {
+        const promiseGet = this.client.then((client) => {
+            const payload = { applicationId: applicationId, keyType: keyType, body: {validityPeriod: validityPeriod} };
+            return client.apis['API Keys'].post_applications__applicationId__api_keys__keyType__generate(
+                payload,
+                this._requestMetaData(),
+            );
+        });
+        return promiseGet;
+    }
+
     /**
      * Get keys of an application
      * @param applicationId id of the application that needs to get the keys
@@ -624,6 +637,16 @@ export default class API extends Resource {
         return this.client.then((client) => {
             return client.apis['Unified Search'].get_search(params, Resource._requestMetaData());
         });
+    }
+
+
+    /**
+     * Returns the WSDL API client
+     *
+     * @return {Wsdl} WSDL API client
+     */
+    getWsdlClient() {
+        return this.wsdlClient;
     }
 
     /**

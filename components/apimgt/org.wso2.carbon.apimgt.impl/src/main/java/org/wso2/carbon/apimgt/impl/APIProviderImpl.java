@@ -37,7 +37,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -60,6 +59,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -1795,8 +1795,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Collections.sort(sortedAPIs, comparator);
         for (int i = sortedAPIs.size() - 1; i >= 0; i--) {
             String oldVersion = sortedAPIs.get(i).getId().getVersion();
-            apiMgtDAO.makeKeysForwardCompatible(provider, apiName, oldVersion, api.getId().getVersion(),
-                    api.getContext());
+            apiMgtDAO.makeKeysForwardCompatible(new ApiTypeWrapper(api), oldVersion
+            );
         }
     }
 
@@ -1961,6 +1961,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             boolean isOauth2 = false;
             boolean isMutualSSL = false;
             boolean isBasicAuth = false;
+            boolean isApiKey = false;
             boolean isMutualSSLMandatory = false;
             boolean isOauthBasicAuthMandatory = false;
 
@@ -1982,13 +1983,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     securityLevels.add(APIConstants.API_SECURITY_BASIC_AUTH);
                     securitySchemeFound = true;
                 }
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)){
+                    isApiKey = true;
+                    securityLevels.add(APIConstants.API_SECURITY_API_KEY);
+                    securitySchemeFound = true;
+                }
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
                     isMutualSSLMandatory = true;
                     securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
                 }
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY)) {
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
                     isOauthBasicAuthMandatory = true;
-                    securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+                    securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
                 }
             }
 
@@ -1999,16 +2005,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             // If Only OAuth2/Basic-Auth specified, set it as mandatory
             if (!isMutualSSL && !isOauthBasicAuthMandatory) {
-                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
             }
             // If Only Mutual SSL specified, set it as mandatory
-            if (!isBasicAuth && !isOauth2 && !isMutualSSLMandatory) {
+            if (!isBasicAuth && !isOauth2 && !isApiKey && !isMutualSSLMandatory) {
                 securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
             }
             // If OAuth2/Basic-Auth and Mutual SSL protected and not specified the mandatory scheme,
             // set OAuth2/Basic-Auth as mandatory
-            if ((isOauth2 || isBasicAuth) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory) {
-                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+            if ((isOauth2 || isBasicAuth || isApiKey) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory) {
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
             }
 
             apiSecurity = String.join(",", securityLevels);
@@ -2017,9 +2023,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("API " + api.getId() + " has following enabled protocols : " + apiSecurity);
         }
         api.setApiSecurity(apiSecurity);
-        if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+        if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
+                !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
             if (log.isDebugEnabled()) {
-                log.info("API " + api.getId() + " does not supports oauth2 security, hence removing all the "
+                log.debug("API " + api.getId() + " does not supports oauth2 security, hence removing all the "
                         + "subscription tiers associated with it");
             }
             api.removeAllTiers();
@@ -6917,11 +6924,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             GenericArtifact artifact = APIUtil.createAPIProductArtifactContent(genericArtifact, apiProduct);
             artifactManager.addGenericArtifact(artifact);
-
+            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             String providerPath = APIUtil.getAPIProductProviderPath(apiProduct.getId());
             //provider ------provides----> APIProduct
             registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
+
+            // Make the LC status of the API Product published by default
+            saveAPIStatus(artifactPath, APIConstants.PUBLISHED);
 
             String visibleRolesList = apiProduct.getVisibleRoles();
             String[] visibleRoles = new String[0];
@@ -6944,6 +6954,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + " created";
                 log.debug(logMessage);
             }
+            changeLifeCycleStatusToPublish(apiProduct.getId());
         } catch (RegistryException e) {
             try {
                 registry.rollbackTransaction();
@@ -6962,6 +6973,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } catch (RegistryException ex) {
                 handleException("Error while rolling back the transaction for API Product : " + apiProduct.getId().getName(), ex);
             }
+        }
+    }
+
+    private void changeLifeCycleStatusToPublish(APIProductIdentifier apiIdentifier) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
+
+            String productArtifactId = registry.get(APIUtil.getAPIProductPath(apiIdentifier)).getUUID();
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(productArtifactId);
+
+            if (apiArtifact != null) {
+                apiArtifact.invokeAction("Publish", APIConstants.API_LIFE_CYCLE);
+                if (log.isDebugEnabled()) {
+                    String logMessage = "API Product Status changed successfully. API Product Name: "
+                            + apiIdentifier.getName();
+                    log.debug(logMessage);
+                }
+            }
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while Changing Lifecycle status of API Product "
+                    + apiIdentifier.getName(), e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 

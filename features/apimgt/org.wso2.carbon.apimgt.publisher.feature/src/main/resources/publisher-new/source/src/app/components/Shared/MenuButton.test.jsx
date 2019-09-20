@@ -18,6 +18,8 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import { unwrap } from '@material-ui/core/test-utils';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+
 import MenuButton from './MenuButton';
 
 const UnwrappedMenuButton = unwrap(MenuButton);
@@ -50,7 +52,7 @@ describe('<MenuButton/> tests', () => {
         // Menu should be opened when clicked on it
         expect(wrapper.state().open).toBeTruthy();
         wrapper
-            .find('ClickAwayListener')
+            .find(ClickAwayListener)
             .props()
             .onClickAway(mockedEvent);
         // Menu should be closed when clicked away from it
@@ -63,7 +65,7 @@ describe('<MenuButton/> tests', () => {
         const mockedEvent = { target: null };
         expect(wrapper.state().open).toBeTruthy();
         wrapper
-            .find('ClickAwayListener')
+            .find(ClickAwayListener)
             .props()
             .onClickAway(mockedEvent);
         expect(wrapper.state().open).toBeFalsy();

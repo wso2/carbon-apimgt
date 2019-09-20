@@ -314,6 +314,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " + body.getName()
                     + " already exists.", log);
         }
+        if (body.getAuthorizationHeader() == null) {
+            body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
+        }
 
         //Get all existing versions of  api been adding
         List<String> apiVersions = apiProvider.getApiVersionsMatchingApiName(body.getName(), username);
@@ -508,8 +511,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = originalAPI.getId();
-            boolean isWSAPI = originalAPI.getType() != null && APIConstants.APITransportType.WS == APIConstants.APITransportType
-                    .valueOf(originalAPI.getType());
+            boolean isWSAPI = originalAPI.getType() != null
+                            && APIConstants.APITransportType.WS.toString().equals(originalAPI.getType());
 
             org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] apiDtoClassAnnotatedScopes =
                     APIDTO.class.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
@@ -535,15 +538,21 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             //validation for tiers
             List<String> tiersFromDTO = body.getPolicies();
-            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
-                RestApiUtil.handleBadRequest("No tier defined for the API", log);
+            String originalStatus = originalAPI.getStatus();
+            if (tiersFromDTO == null || tiersFromDTO.isEmpty() &&
+                    !(APIConstants.CREATED.equals(originalStatus) || APIConstants.PROTOTYPED.equals(originalStatus))) {
+                RestApiUtil.handleBadRequest("A tier should be defined " +
+                        "if the API is not in CREATED or PROTOTYPED state", log);
             }
-            //check whether the added API's tiers are all valid
-            Set<Tier> definedTiers = apiProvider.getTiers();
-            List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
-            if (invalidTiers.size() > 0) {
-                RestApiUtil.handleBadRequest(
-                        "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
+
+            if (tiersFromDTO != null && !tiersFromDTO.isEmpty()) {
+                //check whether the added API's tiers are all valid
+                Set<Tier> definedTiers = apiProvider.getTiers();
+                List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
+                if (invalidTiers.size() > 0) {
+                    RestApiUtil.handleBadRequest(
+                            "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
+                }
             }
             if (body.getAccessControlRoles() != null) {
                 String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getAccessControlRoles());
@@ -2203,7 +2212,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier);
-            return Response.ok().entity(apiSwagger).build();
+            APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            String updatedDefinition = parser.getOASDefinitionForPublisher(api, apiSwagger);
+            return Response.ok().entity(updatedDefinition).header("Content-Disposition",
+                    "attachment; filename=\"" + "swagger.json" + "\"" ).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -2242,7 +2255,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIDefinition oasParser = response.getParser();
             Set<URITemplate> uriTemplates = null;
             try {
-                uriTemplates = oasParser.getURITemplates(response.getJsonContent());
+                uriTemplates = oasParser.getURITemplates(apiDefinition);
             } catch (APIManagementException e) {
                 // catch APIManagementException inside again to capture validation error
                 RestApiUtil.handleBadRequest(e.getMessage(), log);
@@ -2826,7 +2839,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             ResourceFile getWSDLResponse = apiProvider.getWSDL(apiIdentifier);
-            return Response.ok(getWSDLResponse.getContent(), getWSDLResponse.getContentType()).build();
+            return RestApiUtil.getResponseFromResourceFile(apiIdentifier.toString(), getWSDLResponse);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
@@ -3232,19 +3245,18 @@ public class ApisApiServiceImpl implements ApisApiService {
      * This method is used to assign micro gateway labels to the DTO
      *
      * @param apiDTO API DTO
-     * @param api the API object
+     * @param api    the API object
      * @return the API object with labels
      */
     private API assignLabelsToDTO(APIDTO apiDTO, API api) {
 
         if (apiDTO.getLabels() != null) {
-            List<LabelDTO> dtoLabels = apiDTO.getLabels();
+            List<String> labels = apiDTO.getLabels();
             List<Label> labelList = new ArrayList<>();
-            for (LabelDTO labelDTO : dtoLabels) {
-                Label label = new Label();
-                label.setName(labelDTO.getName());
-//                label.setDescription(labelDTO.getDescription()); todo add description
-                labelList.add(label);
+            for (String label : labels) {
+                Label mgLabel = new Label();
+                mgLabel.setName(label);
+                labelList.add(mgLabel);
             }
             api.setGatewayLabels(labelList);
         }

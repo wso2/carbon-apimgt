@@ -37,7 +37,7 @@ public enum ExceptionCodes implements ErrorHandler {
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, " The tier cannot be null"),
     TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, " The tier name is invalid"),
     APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Application not found"),
-    API_NOT_FOUND(900308, "API not found", 404, "API could not be found"),
+    API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id %s not found"),
     APPLICATION_INACTIVE(900309, "Application is not active", 400, "Application is not active"),
     SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 404, "Couldn't retrieve Subscriptions for API"),
     UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be " +
@@ -97,6 +97,9 @@ public enum ExceptionCodes implements ErrorHandler {
     TEMPLATE_EXCEPTION(900501, "Service configuration Error", 500, " Error generate service config"),
     GATEWAY_EXCEPTION(900502, "Gateway publishing Error", 500, " Error occurred while publishing to Gateway"),
     BROKER_EXCEPTION(900503, "Broker Connection Error", 500, " Error occurred while obtaining broker connection"),
+    GATEWAY_ENVIRONMENT_NOT_FOUND(900504, "Invalid Gateway Environment", 400, "Gateway Environment with name '%s' not found"),
+    NO_GATEWAY_ENVIRONMENTS_ADDED(900505, "No Gateway Environments Available", 400, "No gateway environments " +
+            "available for the API : %s."),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -160,6 +163,7 @@ public enum ExceptionCodes implements ErrorHandler {
     CONTENT_NOT_RECOGNIZED_AS_WSDL(900682, "Invalid WSDL Content", 400, "Provided content is not recognized as a WSDL"),
     URL_NOT_RECOGNIZED_AS_WSDL(900683, "Invalid WSDL URL", 400, "Provided URL is not recognized as a WSDL"),
     NO_WSDL_AVAILABLE_FOR_API(900684, "WSDL Not Found", 404, "No WSDL Available for the API %s:%s"),
+    CORRUPTED_STORED_WSDL(900685, "Corrupted Stored WSDL", 500, "The WSDL of the API %s is corrupted."),
 
 
     //OpenAPI/Swagger related codes [900750 900???)

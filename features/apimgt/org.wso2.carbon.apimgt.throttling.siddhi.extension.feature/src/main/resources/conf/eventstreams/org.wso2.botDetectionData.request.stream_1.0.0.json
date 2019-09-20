@@ -1,0 +1,32 @@
+{
+  "name": "org.wso2.botDetectionData.request.stream",
+  "version": "1.0.0",
+  "nickName": "",
+  "description": "",
+  "payloadData": [
+    {
+      "name":"REQUEST_TIME",
+      "type":"LONG"
+    },
+    {
+      "name": "MESSAGE_ID",
+      "type": "STRING"
+    },
+    {
+      "name": "HTTP_METHOD",
+      "type": "STRING"
+    },
+    {
+      "name":"HEADERS",
+      "type": "STRING"
+    },
+    {
+      "name":"MESSAGE_BODY",
+      "type":"STRING"
+    },
+    {
+      "name":"CLIENT_IP",
+      "type":"STRING"
+    }
+  ]
+}

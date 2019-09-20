@@ -55,36 +55,39 @@ export default function ProvideWSDL(props) {
     const classes = useStyles();
     const [isError, setValidity] = useState(); // If valid value is `null` else an error object will be there
     const [isValidating, setIsValidating] = useState(false);
+
     /**
+     * Handles WSDL validation response and trigger the callback when validation is successful.
      *
-     *
-     * @param {*} files
+     * @param {*} response WSDL validation response
+     * @param {function} onSuccess function to call if the validation is successful
      */
-    function onDrop(files) {
-        // Why `files[0]` below is , We only handle one wsdl file at a time, So if use provide multiple, We would only
-        // accept the first file. This information is shown in the dropdown helper text
-        inputsDispatcher({ action: 'inputValue', value: [files[0]] });
+    function handleWSDLValidationResponse(response, onSuccess = null) {
+        const {
+            body: { isValid },
+        } = response;
+        if (isValid) {
+            setValidity(null);
+            if (onSuccess) {
+                onSuccess();
+            }
+        } else {
+            setValidity({ message: 'WSDL content validation failed!' });
+        }
+        onValidate(isValid);
+        setIsValidating(false);
     }
 
     /**
-     * Trigger the provided onValidate call back on each input validation run
+     * Trigger the onValidate call back after validating WSDL url from the state.
      * Do the validation state aggregation and call the onValidate method with aggregated value
      * @param {Object} state Validation state object
      */
-    function validate(state) {
+    function validateUrl(state) {
         if (state === null) {
             setIsValidating(true);
-            Wsdl.validate(apiInputs.inputValue).then((response) => {
-                const {
-                    body: { isValid },
-                } = response;
-                if (isValid) {
-                    setValidity(null);
-                } else {
-                    setValidity({ message: 'WSDL content validation failed!' });
-                }
-                onValidate(isValid);
-                setIsValidating(false);
+            Wsdl.validateUrl(apiInputs.inputValue).then((response) => {
+                handleWSDLValidationResponse(response);
             });
             // Valid URL string
             // TODO: Handle catch network or api call failures ~tmkb
@@ -93,6 +96,39 @@ export default function ProvideWSDL(props) {
             onValidate(false);
         }
     }
+
+    /**
+     * Trigger the provided onValidate callback after validating the provided WSDL file.
+     * Do the validation state aggregation and call the onValidate method with aggregated value
+     * @param {*} file WSDL file or archive
+     * @param {Object} state Validation state object
+     */
+    function validateFileOrArchive(file, state = null) {
+        if (state === null) {
+            setIsValidating(true);
+            Wsdl.validateFileOrArchive(file).then((response) => {
+                handleWSDLValidationResponse(response, () => {
+                    inputsDispatcher({ action: 'inputValue', value: file });
+                });
+            });
+            // TODO: Handle catch network or api call failures
+        } else {
+            setValidity(state);
+            onValidate(false);
+        }
+    }
+
+    /**
+     *
+     *
+     * @param {*} files
+     */
+    function onDrop(files) {
+        // Why `files[0]` below is , We only handle one wsdl file at a time, So if use provide multiple, We would only
+        // accept the first file. This information is shown in the dropdown helper text
+        validateFileOrArchive(files[0]);
+    }
+
     return (
         <React.Fragment>
             <Grid container spacing={5}>
@@ -113,7 +149,7 @@ export default function ProvideWSDL(props) {
                             onChange={event => inputsDispatcher({ action: 'type', value: event.target.value })}
                         >
                             <FormControlLabel
-                                value='PASS'
+                                value='SOAP'
                                 control={<Radio />}
                                 label={<FormattedMessage
                                     id='Apis.Create.WSDL.Steps.ProvideWSDL.passthrough.label'
@@ -121,7 +157,7 @@ export default function ProvideWSDL(props) {
                                 />}
                             />
                             <FormControlLabel
-                                value='SOAPtoREST'
+                                value='SOAPTOREST'
                                 control={<Radio />}
                                 label={<FormattedMessage
                                     id='Apis.Create.WSDL.Steps.ProvideWSDL.SOAPtoREST.label'
@@ -199,7 +235,7 @@ export default function ProvideWSDL(props) {
                             }}
                             InputProps={{
                                 onBlur: ({ target: { value } }) => {
-                                    validate(APIValidation.url.required().validate(value).error);
+                                    validateUrl(APIValidation.url.required().validate(value).error);
                                 },
                                 endAdornment: isValidating && (
                                     <InputAdornment position='end'>

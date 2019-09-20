@@ -20,6 +20,7 @@ import React, { useState, useEffect } from 'react';
 import FormControl from '@material-ui/core/FormControl';
 import { FormattedMessage } from 'react-intl';
 import { withStyles, Switch, FormControlLabel } from '@material-ui/core';
+import { isRestricted } from 'AppData/AuthManager';
 import PropTypes from 'prop-types';
 import API from 'AppData/api.js';
 import Alert from 'AppComponents/Shared/Alert';
@@ -85,7 +86,11 @@ function OutFlow(props) {
             <FormControlLabel
                 value='start'
                 checked={editable}
-                control={<Switch color='primary' />}
+                control={
+                    <Switch
+                        color='primary'
+                        disabled={isRestricted(['apim:api_create'], api)}
+                    />}
                 label={<FormattedMessage
                     id='Apis.Details.MediationPolicies.out.flow.desc'
                     defaultMessage='Out Flow'

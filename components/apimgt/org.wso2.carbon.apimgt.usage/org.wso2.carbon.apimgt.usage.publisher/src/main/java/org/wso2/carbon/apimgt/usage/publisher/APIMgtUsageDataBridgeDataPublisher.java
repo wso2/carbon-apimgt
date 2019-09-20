@@ -177,4 +177,22 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
         }
     }
 
+    @Override
+    public void publishEvent(BotDataDTO botDataDTO) {
+        DataBridgeBotDataDTO dataBridgeBotDataDTO = new DataBridgeBotDataDTO(botDataDTO);
+        List<String> missingMandatoryValues = dataBridgeBotDataDTO.getMissingMandatoryValues();
+        if (missingMandatoryValues.isEmpty()) {
+            try {
+                String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getBotDataStreamName() + ":"
+                        + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getBotStreamVersion();
+                dataPublisher.tryPublish(streamID, null, (Object[]) dataBridgeBotDataDTO.createPayload(),
+                        null);
+            } catch (Exception e) {
+                log.error("Error while publishing bot detection event", e);
+            }
+        } else {
+            log.error("Bot detection event dropped due to unavailability of mandatory data: "
+                    + missingMandatoryValues.toString() + " in event: " + dataBridgeBotDataDTO.toString());
+        }
+    }
 }

@@ -125,19 +125,40 @@ class Monetization extends Component {
     render() {
         const { api, classes } = this.props;
         const { monetizationAttributes, monStatus } = this.state;
+        if (api && isRestricted(['apim:api_publish'], api)) {
+            return (
+                <Grid
+                    container
+                    direction='row'
+                    alignItems='center'
+                    spacing={4}
+                    style={{ marginTop: 20 }}
+                >
+                    <Grid item>
+                        <Typography variant='body2' color='primary'>
+                            <FormattedMessage
+                                id='Apis.Details.Monetization.Index.update.not.allowed'
+                                defaultMessage={'* You are not authorized to update API monetization'
+                                    + ' due to insufficient permissions'}
+                            />
+                        </Typography>
+                    </Grid>
+                </Grid>
+            );
+        }
         if (!monetizationAttributes || monStatus === null) {
             return <Progress />;
         }
         return (
             <Grid item xs={6}>
-                <Typography variant='title' gutterBottom>
+                <Typography variant='headline' component='h2' gutterBottom>
                     <FormattedMessage id='Apis.Details.Monetization.Index.monetization' defaultMessage='Monetization' />
                 </Typography>
                 <form method='post' onSubmit={this.handleSubmit}>
                     <FormControlLabel
                         control={
                             <Checkbox
-                                disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                disabled={isRestricted(['apim:api_publish'], api)}
                                 id='monStatus'
                                 name='monStatus'
                                 checked={monStatus}
@@ -160,7 +181,7 @@ class Monetization extends Component {
                                     (monetizationAttributes.length > 0) ?
                                         (monetizationAttributes.map((monetizationAttribute, i) => (
                                             <TextField
-                                                disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                                disabled={isRestricted(['apim:api_publish'], api)}
                                                 fullWidth
                                                 id={'attribute' + i}
                                                 label={monetizationAttribute.displayName}

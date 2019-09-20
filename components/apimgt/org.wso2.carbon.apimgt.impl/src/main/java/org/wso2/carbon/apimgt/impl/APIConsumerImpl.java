@@ -34,8 +34,10 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -45,6 +47,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
@@ -64,17 +67,16 @@ import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
+import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
@@ -89,6 +91,7 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -113,6 +116,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -1322,6 +1326,26 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
+    @Override
+    public String generateApiKey(Application application, String userName, long validityPeriod) throws APIManagementException {
+
+        JwtTokenInfoDTO jwtTokenInfoDTO = APIUtil.getJwtTokenInfoDTO(application, userName,
+                MultitenantUtils.getTenantDomain(userName));
+
+        ExtendedApplicationDTO applicationDTO = new ExtendedApplicationDTO();
+        applicationDTO.setUuid(application.getUUID());
+        applicationDTO.setId(application.getId());
+        applicationDTO.setName(application.getName());
+        applicationDTO.setOwner(application.getOwner());
+        applicationDTO.setTier(application.getTier());
+        jwtTokenInfoDTO.setApplication(applicationDTO);
+
+        jwtTokenInfoDTO.setSubscriber(userName);
+        jwtTokenInfoDTO.setExpirationTime(validityPeriod);
+        jwtTokenInfoDTO.setKeyType(application.getKeyType());
+
+        return ApiKeyGenerator.generateToken(jwtTokenInfoDTO);
+    }
 
     /**
      * The method to get All PUBLISHED and DEPRECATED APIs, to Store view
@@ -1884,7 +1908,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public int getUserRating(APIIdentifier apiId, String user) throws APIManagementException {
+    public int getUserRating(Identifier apiId, String user) throws APIManagementException {
         return apiMgtDAO.getUserRating(apiId, user);
     }
 
@@ -1900,12 +1924,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public JSONArray getAPIRatings(APIIdentifier apiId) throws APIManagementException {
+    public JSONArray getAPIRatings(Identifier apiId) throws APIManagementException {
         return apiMgtDAO.getAPIRatings(apiId);
     }
 
     @Override
-    public float getAverageAPIRating(APIIdentifier apiId) throws APIManagementException {
+    public float getAverageAPIRating(Identifier apiId) throws APIManagementException {
         return apiMgtDAO.getAverageRating(apiId);
     }
 
@@ -2754,31 +2778,32 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public SubscriptionResponse addSubscription(Identifier identifier, String userId, int applicationId)
+    public SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, int applicationId)
             throws APIManagementException {
 
         API api = null;
         APIProduct product = null;
-        APIIdentifier apiIdentifier = null;
-        APIProductIdentifier apiProdIdentifier = null;
+        Identifier identifier = null;
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
         String tenantDomain = MultitenantUtils.getTenantDomain(tenantAwareUsername);
-        String state = "";
-        if (identifier instanceof APIIdentifier) {
-            apiIdentifier = (APIIdentifier) identifier;
-            api = getAPI(apiIdentifier);
-            state = api.getStatus();
-        }
-        if (identifier instanceof APIProductIdentifier) {
-            apiProdIdentifier = (APIProductIdentifier) identifier;
-            product = getAPIProductbyUUID(apiProdIdentifier.getUUID(), tenantDomain);
+        final boolean isApiProduct = apiTypeWrapper.isAPIProduct();
+        String state;
+
+        if (isApiProduct) {
+            product = apiTypeWrapper.getApiProduct();
             state = product.getState();
+            identifier = product.getId();
+        } else {
+            api = apiTypeWrapper.getApi();
+            state = api.getStatus();
+            identifier = api.getId();
         }
+
         WorkflowResponse workflowResponse = null;
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state)) {
-            subscriptionId = apiMgtDAO.addSubscription(identifier, "", applicationId,
-                    APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
+            subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, applicationId,
+                    APIConstants.SubscriptionStatus.ON_HOLD);
 
             boolean isTenantFlowStarted = false;
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -2799,31 +2824,30 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setWorkflowReference(String.valueOf(subscriptionId));
                 workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
                 workflowDTO.setCallbackUrl(addSubscriptionWFExecutor.getCallbackURL());
-                if (apiIdentifier != null) {
-                    workflowDTO.setApiName(apiIdentifier.getApiName());
+                if (!isApiProduct) {
+                    workflowDTO.setApiName(identifier.getName());
                     workflowDTO.setApiContext(api.getContext());
-                    workflowDTO.setApiVersion(apiIdentifier.getVersion());
-                } else if (apiProdIdentifier != null) {
-                    workflowDTO.setProductIdentifier(apiProdIdentifier);
+                    workflowDTO.setApiVersion(api.getId().getVersion());
+                    workflowDTO.setApiProvider(identifier.getProviderName());
+                    workflowDTO.setTierName(identifier.getTier());
+                } else {
+                    workflowDTO.setProductIdentifier(product.getId());
+                    workflowDTO.setApiProvider(identifier.getProviderName());
+                    workflowDTO.setTierName(identifier.getTier());
                 }
-                workflowDTO.setApiProvider(identifier.getProviderName());
-                workflowDTO.setTierName(identifier.getTier());
                 workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
                 workflowDTO.setApplicationId(applicationId);
                 workflowDTO.setSubscriber(userId);
 
                 Tier tier = null;
                 Set<Tier> policies = Collections.emptySet();
-                if (api != null) {
+                if (!isApiProduct) {
                     policies = api.getAvailableTiers();
-                } else if (product != null) {
+                } else {
                     policies = product.getAvailableTiers();
                 }
 
-                Iterator<Tier> iterator = policies.iterator();
-                boolean isPolicyAllowed = false;
-                while (iterator.hasNext()) {
-                    Tier policy = iterator.next();
+                for (Tier policy : policies) {
                     if (policy.getName() != null && (policy.getName()).equals(workflowDTO.getTierName())) {
                         tier = policy;
                     }
@@ -2880,10 +2904,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 subscriptionUUID = addedSubscription.getUUID();
 
                 JSONObject subsLogObject = new JSONObject();
-                if (apiIdentifier != null) {
-                    subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, apiIdentifier.getApiName());
-                } else if (apiProdIdentifier != null) {
-                    subsLogObject.put(APIConstants.AuditLogConstants.API_PRODUCT_NAME, apiProdIdentifier.getName());
+                if (!isApiProduct) {
+                    subsLogObject.put(APIConstants.AuditLogConstants.API_NAME, identifier.getName());
+                } else {
+                    subsLogObject.put(APIConstants.AuditLogConstants.API_PRODUCT_NAME, identifier.getName());
                 }
                 subsLogObject.put(APIConstants.AuditLogConstants.PROVIDER, identifier.getProviderName());
                 subsLogObject.put(APIConstants.AuditLogConstants.APPLICATION_ID, applicationId);
@@ -2913,7 +2937,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public SubscriptionResponse addSubscription(APIIdentifier identifier, String userId, int applicationId,
+    public SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, int applicationId,
                                                 String groupId) throws APIManagementException {
 
         boolean isValid = validateApplication(userId, applicationId, groupId);
@@ -2921,7 +2945,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             log.error("Application " + applicationId + " is not accessible to user " + userId);
             throw new APIManagementException("Application is not accessible to user " + userId);
         }
-        return addSubscription(identifier, userId, applicationId);
+        return addSubscription(apiTypeWrapper, userId, applicationId);
     }
 
     /**
@@ -3137,7 +3161,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public void updateSubscriptions(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
         API api = getAPI(identifier);
-        apiMgtDAO.updateSubscriptions(identifier, api.getContext(), applicationId, userId);
+        apiMgtDAO.updateSubscriptions(new ApiTypeWrapper(api), applicationId);
     }
 
     /**
@@ -5000,7 +5024,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             wsdlFiles.add(updatedWSDLFile);
                         }
                         wsdlFiles.addAll(xsdFiles);
-                        getZipFileFromFileList(folderToImport.getCanonicalPath() + APIConstants.UPDATED_WSDL_ZIP,
+                        ZIPUtils.zipFiles(folderToImport.getCanonicalPath() + APIConstants.UPDATED_WSDL_ZIP,
                                 wsdlFiles);
                         wsdlContent = folderToImport.getCanonicalPath() + APIConstants.UPDATED_WSDL_ZIP;
                     }
@@ -5033,8 +5057,25 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public ResourceFile getWSDL(APIIdentifier apiIdentifier, String environmentName, String environmentType) throws APIManagementException {
-        return null;
+    public ResourceFile getWSDL(APIIdentifier apiIdentifier, String environmentName, String environmentType)
+            throws APIManagementException {
+        WSDLValidationResponse validationResponse;
+        ResourceFile resourceFile = getWSDL(apiIdentifier);
+        if (resourceFile.getContentType().contains(APIConstants.APPLICATION_ZIP)) {
+            validationResponse = APIMWSDLReader.extractAndValidateWSDLArchive(resourceFile.getContent());
+        } else {
+            validationResponse = APIMWSDLReader.validateWSDLFile(resourceFile.getContent());
+        }
+        if (validationResponse.isValid()) {
+            API api = getAPI(apiIdentifier);
+            WSDLProcessor wsdlProcessor = validationResponse.getWsdlProcessor();
+            wsdlProcessor.updateEndpoints(api, environmentName, environmentType);
+            InputStream wsdlDataStream = wsdlProcessor.getWSDL();
+            return new ResourceFile(wsdlDataStream, resourceFile.getContentType());
+        } else {
+            throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.CORRUPTED_STORED_WSDL,
+                    apiIdentifier.toString()));
+        }
     }
 
     @Override
@@ -5055,30 +5096,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return apikeys;
     }
 
-    private void getZipFileFromFileList(String zipFile, Collection<File> fileList) throws APIManagementException {
-        byte[] buffer = new byte[1024];
-        try {
-            FileOutputStream fos = new FileOutputStream(zipFile);
-            ZipOutputStream zos = new ZipOutputStream(fos);
-            for (File file : fileList) {
-                String path = file.getAbsolutePath().substring(
-                        file.getAbsolutePath().indexOf(APIConstants.API_WSDL_EXTRACTED_DIRECTORY)
-                                + APIConstants.API_WSDL_EXTRACTED_DIRECTORY.length() + 1);
-                ZipEntry ze = new ZipEntry(path);
-                zos.putNextEntry(ze);
-                try (FileInputStream in = new FileInputStream(file)) {
-                    int len;
-                    while ((len = in.read(buffer)) > 0) {
-                        zos.write(buffer, 0, len);
-                    }
-                }
-            }
-            zos.closeEntry();
-            zos.close();
-        } catch (IOException e) {
-            handleException("Error occurred while creating the ZIP file: " + zipFile, e);
-        }
-    }
+
 
     /**
      * To check authorization of the API against current logged in user. If the user is not authorized an exception
@@ -5352,127 +5370,49 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public String getOpenAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
             throws APIManagementException {
-        String apiTenantDomain = "";
-        String basePath = "";
-        JSONObject swaggerObj = null;
-
+        String apiTenantDomain;
+        String updatedDefinition = null;
+        String hostWithScheme;
+        String definition = super.getOpenAPIDefinition(apiId);
+        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
         if (apiId instanceof APIIdentifier) {
             API api = getLightweightAPI((APIIdentifier) apiId);
+            //todo: use get api by id, so no need to set scopes or uri templates
+            api.setScopes(oasParser.getScopes(definition));
+            api.setUriTemplates(oasParser.getURITemplates(definition));
             apiTenantDomain = MultitenantUtils.getTenantDomain(api.getId().getProviderName());
-
-            swaggerObj = getModifiedOpenAPIDefinition(api);
-            assert swaggerObj != null;
-
-            basePath = api.getContext();
-        } else if (apiId instanceof  APIProductIdentifier) {
+            hostWithScheme = getHostWithSchemeForEnvironment(apiTenantDomain, environmentName);
+            api.setContext(getBasePath(apiTenantDomain, api.getContext()));
+            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostWithScheme);
+        } else if (apiId instanceof APIProductIdentifier) {
             APIProduct apiProduct = getAPIProduct((APIProductIdentifier) apiId);
             apiTenantDomain = MultitenantUtils.getTenantDomain(apiProduct.getId().getProviderName());
-
-            swaggerObj = getModifiedOpenAPIDefinition(apiProduct);
-            assert swaggerObj != null;
-
-            basePath = apiProduct.getContext();
+            hostWithScheme = getHostWithSchemeForEnvironment(apiTenantDomain, environmentName);
+            apiProduct.setContext(getBasePath(apiTenantDomain, apiProduct.getContext()));
+            updatedDefinition = oasParser.getOASDefinitionForStore(apiProduct, definition, hostWithScheme);
         }
-
-        Map<String, String> domains = getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
-
-        String host;
-        String hostWithScheme = null;
-        if (!domains.isEmpty()) {
-            basePath = basePath.replace("/t/" + apiTenantDomain, "");
-            hostWithScheme = domains.get(APIConstants.CUSTOM_URL);
-        } else {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            Map<String, Environment> allEnvironments = config.getApiGatewayEnvironments();
-            Environment environment = allEnvironments.get(environmentName);
-
-            if (environment == null) {
-                handleException(
-                        "Could not find provided environment '" + environmentName + "' attached to the api '" +
-                        apiId.toString() + "'");
-            }
-
-            assert environment != null;
-            String[] hostsWithScheme = environment.getApiGatewayEndpoint().split(",");
-            for (String url : hostsWithScheme) {
-                if (url.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
-                    hostWithScheme = url;
-                    break;
-                }
-            }
-
-            if (hostWithScheme == null) {
-                hostWithScheme = hostsWithScheme[0];
-            }
-        }
-
-        host = hostWithScheme.trim().replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "")
-                .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
-
-        JSONObject securityDefinitions = (JSONObject)swaggerObj.get(APIConstants.SWAGGER_SECURITY_DEFINITIONS);
-        JSONObject defaultImplicitSecurity = (JSONObject) securityDefinitions
-                .get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY);
-        defaultImplicitSecurity
-                .put(APIConstants.SWAGGER_SECURITY_OAUTH2_AUTHORIZATION_URL, hostWithScheme + "/authorize");
-
-        swaggerObj.put(APIConstants.SWAGGER_HOST, host);
-        swaggerObj.put(APIConstants.SWAGGER_BASEPATH, basePath);
-        return swaggerObj.toJSONString();
+        return updatedDefinition;
     }
 
     @Override
-    public String getOpenAPIDefinitionForLabel(Identifier apiId, String labelName)
-            throws APIManagementException {
-        JSONObject swaggerObj = null;
-        List<Label> gatewayLabels = new ArrayList<>();
-
-        if (apiId instanceof  APIIdentifier) {
+    public String getOpenAPIDefinitionForLabel(Identifier apiId, String labelName) throws APIManagementException {
+        List<Label> gatewayLabels;
+        String updatedDefinition = null;
+        String hostWithScheme;
+        String definition = super.getOpenAPIDefinition(apiId);
+        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+        if (apiId instanceof APIIdentifier) {
             API api = getLightweightAPI((APIIdentifier) apiId);
-
-            swaggerObj = getModifiedOpenAPIDefinition(api);
             gatewayLabels = api.getGatewayLabels();
-        } else if (apiId instanceof  APIProductIdentifier) {
+            hostWithScheme = getHostWithSchemeForLabel(gatewayLabels, labelName);
+            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostWithScheme);
+        } else if (apiId instanceof APIProductIdentifier) {
             APIProduct apiProduct = getAPIProduct((APIProductIdentifier) apiId);
-
-            swaggerObj = getModifiedOpenAPIDefinition(apiProduct);
             gatewayLabels = apiProduct.getGatewayLabels();
+            hostWithScheme = getHostWithSchemeForLabel(gatewayLabels, labelName);
+            updatedDefinition = oasParser.getOASDefinitionForStore(apiProduct, definition, hostWithScheme);
         }
-
-        Label labelObj = null;
-
-        for (Label label : gatewayLabels) {
-            if (label.getName().equals(labelName)) {
-                labelObj = label;
-                break;
-            }
-        }
-
-        if (labelObj == null) {
-            handleException(
-                    "Could not find provided label '" + labelName + "' attached to the api '" + apiId.toString()
-                            + "'");
-            return null;
-        }
-
-        String hostWithScheme = null;
-        List<String> accessUrls = labelObj.getAccessUrls();
-        for (String url : accessUrls) {
-            if (url.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
-                hostWithScheme = url;
-                break;
-            }
-        }
-
-        if (hostWithScheme == null) {
-            hostWithScheme = accessUrls.get(0);
-        }
-
-        String host = hostWithScheme.trim().replace(APIConstants.HTTP_PROTOCOL_URL_PREFIX, "")
-                .replace(APIConstants.HTTPS_PROTOCOL_URL_PREFIX, "");
-
-        swaggerObj.put(APIConstants.SWAGGER_HOST, host);
-        return swaggerObj.toJSONString();
+        return updatedDefinition;
     }
 
     private Map<String, Object> filterMultipleVersionedAPIs(Map<String, Object> searchResults) {
@@ -5547,151 +5487,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
-     * Retrieves the modified swagger definition of an API which is required for the try-out
-     *
-     * @param api API
-     * @return modified swagger definition of an API
-     * @throws APIManagementException when error occurs while performing operation
-     */
-    private JSONObject getModifiedOpenAPIDefinition(API api) throws APIManagementException {
-        String definition = super.getOpenAPIDefinition(api.getId());
-        definition = APIUtil.removeXMediationScriptsFromSwagger(definition);
-
-        try {
-            JSONObject swaggerObj = (JSONObject) new JSONParser().parse(definition);
-            String basePath = api.getContext();
-            JSONArray schemes = new JSONArray();
-            String[] apiTransports = api.getTransports().split(",");
-            if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL)) {
-                schemes.add(APIConstants.HTTPS_PROTOCOL);
-            }
-            if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)) {
-                schemes.add(APIConstants.HTTP_PROTOCOL);
-            }
-
-            JSONObject defaultImplicitSecurity = new JSONObject();
-            defaultImplicitSecurity.put(APIConstants.SWAGGER_SECURITY_TYPE, APIConstants.SWAGGER_SECURITY_OAUTH2);
-            defaultImplicitSecurity
-                    .put(APIConstants.SWAGGER_SECURITY_OAUTH2_AUTHORIZATION_URL, "https://wso2.gateway.com/authorize");
-            defaultImplicitSecurity
-                    .put(APIConstants.SWAGGER_SECURITY_OAUTH2_FLOW, APIConstants.SWAGGER_SECURITY_OAUTH2_IMPLICIT);
-            defaultImplicitSecurity.put(APIConstants.SWAGGER_SCOPES, new JSONArray());
-
-
-            swaggerObj.put(APIConstants.SWAGGER_BASEPATH, basePath);
-            swaggerObj.put(APIConstants.SWAGGER_SCHEMES, schemes);
-
-            JSONObject securityDefinitions = (JSONObject)swaggerObj.get(APIConstants.SWAGGER_SECURITY_DEFINITIONS);
-            if (securityDefinitions == null) {
-                securityDefinitions = new JSONObject();
-            }
-            securityDefinitions.put(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, defaultImplicitSecurity);
-            swaggerObj.put(APIConstants.SWAGGER_SECURITY_DEFINITIONS, securityDefinitions);
-            return swaggerObj;
-        } catch (ParseException e) {
-            handleException("Error while parsing API definition for " + api.getId().toString(), e);
-        }
-        return null;
-    }
-
-    /**
-     * Retrieves the modified swagger definition of an API Product which is required for the try-out
-     *
-     * @param api APIProduct
-     * @return modified swagger definition of an API
-     * @throws APIManagementException when error occurs while performing operation
-     */
-    private JSONObject getModifiedOpenAPIDefinition(APIProduct api) throws APIManagementException {
-        String definition = super.getOpenAPIDefinition(api.getId());
-        definition = APIUtil.removeXMediationScriptsFromSwagger(definition);
-
-        try {
-            JSONObject swaggerObj = (JSONObject) new JSONParser().parse(definition);
-            String basePath = api.getContext();
-            JSONArray schemes = new JSONArray();
-            String[] apiTransports = api.getTransports().split(",");
-            if (ArrayUtils.contains(apiTransports, APIConstants.HTTPS_PROTOCOL)) {
-                schemes.add(APIConstants.HTTPS_PROTOCOL);
-            }
-            if (ArrayUtils.contains(apiTransports, APIConstants.HTTP_PROTOCOL)) {
-                schemes.add(APIConstants.HTTP_PROTOCOL);
-            }
-
-            JSONObject defaultImplicitSecurity = new JSONObject();
-            defaultImplicitSecurity.put(APIConstants.SWAGGER_SECURITY_TYPE, APIConstants.SWAGGER_SECURITY_OAUTH2);
-            defaultImplicitSecurity
-                    .put(APIConstants.SWAGGER_SECURITY_OAUTH2_AUTHORIZATION_URL, "https://wso2.gateway.com/authorize");
-            defaultImplicitSecurity
-                    .put(APIConstants.SWAGGER_SECURITY_OAUTH2_FLOW, APIConstants.SWAGGER_SECURITY_OAUTH2_IMPLICIT);
-            defaultImplicitSecurity.put(APIConstants.SWAGGER_SCOPES, new JSONArray());
-
-
-            swaggerObj.put(APIConstants.SWAGGER_BASEPATH, basePath);
-            swaggerObj.put(APIConstants.SWAGGER_SCHEMES, schemes);
-
-            JSONObject securityDefinitions = (JSONObject)swaggerObj.get(APIConstants.SWAGGER_SECURITY_DEFINITIONS);
-            if (securityDefinitions == null) {
-                securityDefinitions = new JSONObject();
-            }
-            securityDefinitions.put(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, defaultImplicitSecurity);
-            swaggerObj.put(APIConstants.SWAGGER_SECURITY_DEFINITIONS, securityDefinitions);
-            return swaggerObj;
-        } catch (ParseException e) {
-            handleException("Error while parsing API definition for " + api.getId().toString(), e);
-        }
-        return null;
-    }
-
-    private Map<Documentation, API> filterDocumentResultsOfMultipleVersions(Map<Documentation, API> docMap) {
-        Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
-        if (!displayMultipleVersions) {
-            SortedSet<API> resultApis = new TreeSet<API>(new APINameComparator());
-            Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
-            Comparator<API> versionComparator = new APIVersionComparator();
-            String key;
-
-            for(Map.Entry<Documentation, API> mapEntry : docMap.entrySet()) {
-                resultApis.add(mapEntry.getValue());
-            }
-
-            //Run the result api list through API version comparator and filter out multiple versions
-            for (API api : resultApis) {
-                key = api.getId().getProviderName() + COLON_CHAR + api.getId().getApiName();
-                API existingAPI = latestPublishedAPIs.get(key);
-                if (existingAPI != null) {
-                    // If we have already seen an API with the same name, make sure
-                    // this one has a higher version number
-                    if (versionComparator.compare(api, existingAPI) > 0) {
-                        latestPublishedAPIs.put(key, api);
-                    }
-                } else {
-                    // We haven't seen this API before
-                    latestPublishedAPIs.put(key, api);
-                }
-            }
-
-            //filter docMap
-            if (docMap != null) {
-                Map<Documentation, API> tempDocMap = new HashMap<Documentation, API>();
-                for (Map.Entry<Documentation, API> mapEntry : docMap.entrySet()) {
-                    Documentation docKey = mapEntry.getKey();
-                    API apiValue = mapEntry.getValue();
-                    String mapKey = apiValue.getId().getProviderName() + COLON_CHAR + apiValue.getId().getApiName();
-
-                    if (latestPublishedAPIs.containsKey(mapKey)) {
-                        API latestAPI = latestPublishedAPIs.get(mapKey);
-                        if (latestAPI.getId().equals(apiValue.getId())) {
-                            tempDocMap.put(docKey, apiValue);
-                        }
-                    }
-                }
-                docMap = tempDocMap;
-            }
-        }
-        return docMap;
-    }
-
-    /**
      * Validate application attributes and remove attributes that does not exist in the config
      *
      * @param applicationAttributes Application attributes provided
@@ -5709,5 +5504,73 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return applicationAttributes;
+    }
+
+    private String getHostWithSchemeForEnvironment(String apiTenantDomain, String environmentName) throws APIManagementException {
+        Map<String, String> domains = getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
+        String hostWithScheme = null;
+        if (!domains.isEmpty()) {
+            hostWithScheme = domains.get(APIConstants.CUSTOM_URL);
+        } else {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            Map<String, Environment> allEnvironments = config.getApiGatewayEnvironments();
+            Environment environment = allEnvironments.get(environmentName);
+
+            if (environment == null) {
+                handleException(
+                        "Could not find provided environment '" + environmentName);
+            }
+
+            assert environment != null;
+            String[] hostsWithScheme = environment.getApiGatewayEndpoint().split(",");
+            for (String url : hostsWithScheme) {
+                if (url.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
+                    hostWithScheme = url;
+                    break;
+                }
+            }
+
+            if (hostWithScheme == null) {
+                hostWithScheme = hostsWithScheme[0];
+            }
+        }
+        return hostWithScheme;
+    }
+
+    private String getHostWithSchemeForLabel(List<Label> gatewayLabels, String labelName) throws APIManagementException {
+        Label labelObj = null;
+        for (Label label : gatewayLabels) {
+            if (label.getName().equals(labelName)) {
+                labelObj = label;
+                break;
+            }
+        }
+        if (labelObj == null) {
+            handleException(
+                    "Could not find provided label '" + labelName);
+            return null;
+        }
+        String hostWithScheme = null;
+        List<String> accessUrls = labelObj.getAccessUrls();
+        for (String url : accessUrls) {
+            if (url.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
+                hostWithScheme = url;
+                break;
+            }
+        }
+        if (hostWithScheme == null) {
+            hostWithScheme = accessUrls.get(0);
+        }
+        return hostWithScheme;
+    }
+
+    private String getBasePath(String apiTenantDomain, String basePath) throws APIManagementException {
+        Map<String, String> domains =
+                getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
+        if (!domains.isEmpty()) {
+            return basePath.replace("/t/" + apiTenantDomain, "");
+        }
+        return basePath;
     }
 }

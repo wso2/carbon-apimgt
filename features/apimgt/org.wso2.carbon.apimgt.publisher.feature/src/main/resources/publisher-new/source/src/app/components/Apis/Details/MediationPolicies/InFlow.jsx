@@ -22,6 +22,7 @@ import { withStyles, Switch, FormControlLabel } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import API from 'AppData/api.js';
 import Alert from 'AppComponents/Shared/Alert';
+import { isRestricted } from 'AppData/AuthManager';
 import EngagedInMediationPolicy from './Engaged/EngagedInMediationPolicy';
 import EditInMediationPolicy from './Edit/EditInMediationPolicy';
 
@@ -94,7 +95,11 @@ function InFlow(props) {
             <FormControlLabel
                 value='start'
                 checked={editable}
-                control={<Switch color='primary' />}
+                control={
+                    <Switch
+                        color='primary'
+                        disabled={isRestricted(['apim:api_create'], api)}
+                    />}
                 label={<FormattedMessage
                     id='Apis.Details.MediationPolicies.MediationPolicies.in.flow.desc'
                     defaultMessage='In Flow'

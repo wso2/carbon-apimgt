@@ -45,6 +45,12 @@ const styles = theme => ({
     button: {
         marginLeft: 0,
     },
+    cleanUpButton: {
+        marginLeft: 15,
+    },
+    cleanUpInfoText: {
+        padding: '10px 0px 10px 15px',
+    },
     tokenSection: {
         marginTop: theme.spacing.unit * 2,
         marginBottom: theme.spacing.unit * 2,
@@ -109,6 +115,7 @@ class TokenManager extends React.Component {
         this.updateKeyRequest = this.updateKeyRequest.bind(this);
         this.generateKeys = this.generateKeys.bind(this);
         this.updateKeys = this.updateKeys.bind(this);
+        this.cleanUpKeys = this.cleanUpKeys.bind(this);
         this.handleOnChangeProvidedOAuth = this.handleOnChangeProvidedOAuth.bind(this);
         this.provideOAuthKeySecret = this.provideOAuthKeySecret.bind(this);
     }
@@ -119,6 +126,13 @@ class TokenManager extends React.Component {
      * @memberof TokenManager
      */
     componentDidMount() {
+        this.loadApplication();
+    }
+
+    /**
+     * load application key generation ui
+     */
+    loadApplication = () => {
         this.getserverSupportedGrantTypes();
         this.checkOwner();
         if (this.appId) {
@@ -275,6 +289,37 @@ class TokenManager extends React.Component {
     }
 
     /**
+     * Cleanup application keys
+     */
+    cleanUpKeys() {
+        const { keyType, intl } = this.props;
+        this.application
+            .then((application) => {
+                return application.cleanUpKeys(keyType);
+            })
+            .then(() => {
+                this.loadApplication();
+                Alert.info(intl.formatMessage({
+                    id: 'Shared.AppsAndKeys.TokenManager.key.cleanup.success',
+                    defaultMessage: 'Application keys cleaned successfully',
+                }));
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.error(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                }
+                Alert.error(intl.formatMessage({
+                    id: 'Shared.AppsAndKeys.TokenManager.key.cleanup.error',
+                    defaultMessage: 'Error occurred while cleaning up application keys',
+                }));
+            });
+    }
+
+    /**
      * Handle on change of provided consumer key and consumer secret
      *
      * @param event onChange event
@@ -331,6 +376,30 @@ class TokenManager extends React.Component {
             return <Loading />;
         }
         const key = keys.get(keyType);
+        if (keys.size > 0 && key && key.keyState === 'APPROVED' && !key.consumerKey) {
+            return (
+                <Fragment>
+                    <Typography className={classes.cleanUpInfoText} variant='subtitle1'>
+                        <FormattedMessage
+                            id='Shared.AppsAndKeys.TokenManager.cleanup.text'
+                            defaultMessage='Error! You have partially-created keys.
+                            Please click the Clean Up button and try again.'
+                        />
+                    </Typography>
+                    <Button
+                        variant='contained'
+                        color='primary'
+                        className={classes.cleanUpButton}
+                        onClick={this.cleanUpKeys}
+                    >
+                        <FormattedMessage
+                            defaultMessage='Clean up'
+                            id='Shared.AppsAndKeys.TokenManager.cleanup'
+                        />
+                    </Button>
+                </Fragment>
+            );
+        }
         if (key && (key.keyState === this.keyStates.CREATED || key.keyState === this.keyStates.REJECTED)) {
             return <WaitingForApproval keyState={key.keyState} states={this.keyStates} />;
         }

@@ -120,7 +120,8 @@ public class APIMWSDLReader {
      * @return Validation information
      * @throws APIManagementException Error occurred during validation
      */
-    public static WSDLValidationResponse extractAndValidateWSDLArchive(InputStream inputStream) throws APIManagementException {
+    public static WSDLValidationResponse extractAndValidateWSDLArchive(InputStream inputStream)
+            throws APIManagementException {
         String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator
                 + APIConstants.WSDL_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
         String archivePath = path + File.separator + APIConstants.WSDL_ARCHIVE_ZIP_FILE;
@@ -146,6 +147,7 @@ public class APIMWSDLReader {
                     processor.getWsdlInfo());
             wsdlValidationResponse.setWsdlArchiveInfo(wsdlArchiveInfo);
             wsdlValidationResponse.setWsdlInfo(processor.getWsdlInfo());
+            wsdlValidationResponse.setWsdlProcessor(processor);
         }
         return wsdlValidationResponse;
     }
@@ -1004,6 +1006,7 @@ public class APIMWSDLReader {
         } else {
             wsdlValidationResponse.setValid(true);
             wsdlValidationResponse.setWsdlInfo(processor.getWsdlInfo());
+            wsdlValidationResponse.setWsdlProcessor(processor);
         }
         return wsdlValidationResponse;
     }

@@ -45,7 +45,7 @@ export default function SelectPolicies(props) {
             >
                 {policies.list.map(policy => (
                     <MenuItem dense disableGutters={multiple} key={policy.name} value={policy.displayName}>
-                        {multiple && <Checkbox checked={selectedPolicies.includes(policy.name)} />}
+                        {multiple && <Checkbox color='primary' checked={selectedPolicies.includes(policy.name)} />}
                         <ListItemText primary={policy.displayName} secondary={policy.description} />
                     </MenuItem>
                 ))}
@@ -56,7 +56,7 @@ export default function SelectPolicies(props) {
 
 SelectPolicies.defaultProps = {
     policies: [],
-    multiSelect: true,
+    multiple: true,
     required: false,
     helperText: 'Select one or multiple throttling policy for the API',
 };

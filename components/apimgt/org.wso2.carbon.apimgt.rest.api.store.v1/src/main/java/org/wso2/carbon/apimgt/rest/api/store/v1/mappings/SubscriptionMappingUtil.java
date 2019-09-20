@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
@@ -62,9 +61,9 @@ public class SubscriptionMappingUtil {
         }
         if (apiProdId != null) {
             APIProduct apiProduct = apiConsumer.getAPIProduct(apiProdId);
-            APIProductInfoDTO apiProdInfo = APIMappingUtil.fromAPIProductToInfoDTO(apiProduct);
-            subscriptionDTO.setApiProductId(apiProduct.getUuid());
-            subscriptionDTO.setApiProductInfo(apiProdInfo);
+            subscriptionDTO.setApiId(apiProduct.getUuid());
+            APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(apiProduct);
+            subscriptionDTO.setApiInfo(apiInfo);
             subscriptionDTO.setType(SubscriptionDTO.TypeEnum.API_PRODUCT);
         }
         Application application = subscription.getApplication();

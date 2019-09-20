@@ -180,8 +180,7 @@ public class APIClientGenerationManager {
         generateClient(apiName, specFileLocation, sdkLanguage, temporaryOutputPath);
         String temporaryZipFilePath = temporaryOutputPath + APIConstants.ZIP_FILE_EXTENSION;
         try {
-            ZIPUtils zipUtils = new ZIPUtils();
-            zipUtils.zipDir(temporaryOutputPath, temporaryZipFilePath);
+            ZIPUtils.zipDir(temporaryOutputPath, temporaryZipFilePath);
         } catch (IOException e) {
             handleSDKGenException("Error while generating .zip archive for the generated SDK.", e);
         }

@@ -6,7 +6,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>6.5.108-SNAPSHOT</version>
+    <version>6.5.120-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>http://wso2.org</url>
 
@@ -1566,7 +1566,7 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>6.5.108-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>6.5.120-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
         <carbon.analytics.common.version>5.2.10</carbon.analytics.common.version>
@@ -1577,23 +1577,24 @@
 
         <carbon.commons.version>4.7.11</carbon.commons.version>
         <carbon.registry.version>4.7.12</carbon.registry.version>
-	<carbon.mediation.version>4.7.13</carbon.mediation.version>
+        <carbon.mediation.version>4.7.14</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
-        <carbon.identity.version>5.14.4</carbon.identity.version>
-        <carbon.identity.governance.version>1.3.0</carbon.identity.governance.version>
-        <carbon.identity-inbound-auth-oauth.version>6.2.0</carbon.identity-inbound-auth-oauth.version>
-        <carbon.identity-user-ws.version>5.3.2</carbon.identity-user-ws.version>
-        <carbon.identity-inbound-auth-saml2.version>5.4.1</carbon.identity-inbound-auth-saml2.version>
-        <carbon.identity-inbound-auth-openid.version>5.4.0</carbon.identity-inbound-auth-openid.version>
-        <carbon.identity-local-auth-basicauth.version>6.2.0</carbon.identity-local-auth-basicauth.version>
-        <carbon.identity-outbound-auth-samlsso.version>5.2.3</carbon.identity-outbound-auth-samlsso.version>
+        <carbon.identity.version>5.14.62</carbon.identity.version>
+        <carbon.identity.governance.version>1.3.8</carbon.identity.governance.version>
+        <carbon.identity-inbound-auth-oauth.version>6.2.17</carbon.identity-inbound-auth-oauth.version>
+        <carbon.identity-user-ws.version>5.3.3</carbon.identity-user-ws.version>
+        <carbon.identity-inbound-auth-saml2.version>5.4.3</carbon.identity-inbound-auth-saml2.version>
+        <carbon.identity-inbound-auth-openid.version>5.4.2</carbon.identity-inbound-auth-openid.version>
+        <carbon.identity-local-auth-basicauth.version>6.2.2</carbon.identity-local-auth-basicauth.version>
+        <carbon.identity-outbound-auth-samlsso.version>5.2.5</carbon.identity-outbound-auth-samlsso.version>
         <carbon.identity-data-publisher-application-authentication.version>5.3.2</carbon.identity-data-publisher-application-authentication.version>
+
         <graphql.java.version>13.0.wso2v1</graphql.java.version>
 
-        <carbon.governance.version>4.8.7</carbon.governance.version>
+        <carbon.governance.version>4.8.8</carbon.governance.version>
         <carbon.deployment.version>4.9.4</carbon.deployment.version>
-        <carbon.multitenancy.version>4.7.9</carbon.multitenancy.version>
+        <carbon.multitenancy.version>4.7.11</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
         <apimserver.version>1.10.0</apimserver.version>
         <siddhi.version>3.2.6</siddhi.version>
@@ -1603,11 +1604,11 @@
         <commons.logging.imp.pkg.version>[1.2.0, 1.3.0)</commons.logging.imp.pkg.version>
 
         <!-- Carbon Identity import version ranges -->
-        <carbon.identity.imp.pkg.version>[5.13.6, 6.0.0)</carbon.identity.imp.pkg.version>
+        <carbon.identity.imp.pkg.version>[5.14.0, 6.0.0)</carbon.identity.imp.pkg.version>
         <carbon.identity.recovery.pkg.version>[1.3.0, 1.4.0)</carbon.identity.recovery.pkg.version>
         <carbon.identity-inbound-auth-oauth.imp.pkg.version>[6.0.0, 7.0.0)
         </carbon.identity-inbound-auth-oauth.imp.pkg.version>
-        <carbon.identity-user-ws.imp.pkg.version>[5.2.0, 6.0.0)</carbon.identity-user-ws.imp.pkg.version>
+        <carbon.identity-user-ws.imp.pkg.version>[5.3.0, 6.0.0)</carbon.identity-user-ws.imp.pkg.version>
 
         <carbon.mediation.imp.pkg.version>[4.7.0, 5.0.0)</carbon.mediation.imp.pkg.version>
         <carbon.governance.imp.pkg.version>[4.8.0, 4.9.0)</carbon.governance.imp.pkg.version>

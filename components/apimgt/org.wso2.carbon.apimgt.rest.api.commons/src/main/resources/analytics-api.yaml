@@ -1,0 +1,759 @@
+swagger: '2.0'
+######################################################
+# Prolog
+######################################################
+info:
+  version: "v1.0"
+  title: "WSO2 API Manager - Analytics"
+  description: |
+    This document specifies a **RESTful API** for WSO2 **API Manager** - Analytics.
+    It is written with [swagger 2](http://swagger.io/).
+  contact:
+    name: "WSO2"
+    url: "http://wso2.com/products/api-manager/"
+    email: "architecture@wso2.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+######################################################
+# The fixed parts of the URLs of the API
+######################################################
+
+# The schemes supported by the API
+schemes:
+  - https
+  - http
+
+# The domain of the API.
+# This is configured by the customer during deployment.
+# The given host is just an example.
+host: apis.wso2.com
+
+# The base path of the API.
+# Will be prefixed to all paths.
+basePath: /api/am/analytics/v1.0
+
+# The following media types can be passed as input in message bodies of the API.
+# The actual media type must be specified in the Content-Type header field of the request.
+# The default is json, i.e. the Content-Type header is not needed to
+# be set, but supporting it serves extensibility.
+consumes:
+  - application/json
+
+# The following media types may be passed as output in message bodies of the API.
+# The media type(s) consumable by the requestor is specified in the Accept header field
+# of the corresponding request.
+# The actual media type returned will be specfied in the Content-Type header field
+# of the of the response.
+# The default of the Accept header is json, i.e. there is not needed to
+# set the value, but supporting it serves extensibility.
+produces:
+  - application/json
+
+
+securityDefinitions:
+  OAuth2Security:
+    type: oauth2
+    flow: password
+    tokenUrl: https://localhost:9443/token
+    scopes:
+      apim:application_graph: View Graphs Releated to applications
+      apim:api_graph: View Graphs Releated to APIs
+      apim:subscription_graph: View Graphs Releated to subscriptions
+
+security:
+  - OAuth2Security:
+    - apim:application_graph
+    - apim:api_graph
+    - apim:subscription_graph
+
+paths:
+
+#-----------------------------------------------------
+#  Retrieve application created over time details
+#-----------------------------------------------------
+
+  /application/count-over-time:
+    get:
+      x-wso2-curl: |
+        curl -X GET \
+        'https://localhost:9292/api/am/analytics/v1.0/application/count-over-time?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30' \
+        -H 'accept: application/json' \
+        -H 'authorization: Bearer b35a145f-3ca0-39be-8234-7509e3d97198' \
+        -H 'cache-control: no-cache' \
+        -H 'content-type: application/json' \
+      x-wso2-request: |
+        GET /api/am/analytics/v1.0/application/count-over-time?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30 HTTP/1.1
+        Host: localhost:9292
+        accept: application/json
+        authorization: Bearer b35a145f-3ca0-39be-8234-7509e3d97198
+        cache-control: no-cache
+        content-type: application/json
+      x-wso2-response: |
+        HTTP/1.1 200 OK
+        Connection: keep-alive
+        Content-Length: 21
+        Content-Type: application/json
+        {"count":1,"list":[{"time":"2017-09-13T11:59:44.367Z","count":1}]}
+      security:
+        - OAuth2Security:
+           - apim:application_graph
+      summary: |
+        Retrieve application created over time details
+      description: |
+        Get application count over time details from summarized data.
+      parameters:
+        - $ref: '#/parameters/startTime'
+        - $ref: '#/parameters/endTime'
+        - $ref: '#/parameters/createdBy'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested applications count over time information is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/ApplicationCountList'
+        400:
+          description: |
+            Bad Request.
+            Request paramters attribute does not meet requiremnts.
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+
+#-----------------------------------------------------
+#  Retrieve APIs created over time details
+#-----------------------------------------------------
+
+  /api/count-over-time:
+    get:
+      x-wso2-curl: |
+        curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\"
+        https://localhost:9292/api/am/analytics/v1.0/api/count-over-time?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI
+      x-wso2-request: |
+        GET /api/am/analytics/v1.0/api/count-over-time?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30&createdBy=admin HTTP/1.1
+        Host: localhost:9292
+        accept: application/json
+        authorization: Bearer b6b8d5ab-1118-362d-a6a9-2233956d80a0
+        cache-control: no-cache
+        content-type: application/json
+      x-wso2-response: |
+        HTTP/1.1 200 OK
+        Connection: keep-alive
+        Content-Length: 112
+        Content-Type: application/json
+        {"count":2,"list":[{"time":"2017-09-11T09:55:49.204Z","count":1},{"time":"2017-09-12T11:34:56.560Z","count":2}]}
+      security:
+        - OAuth2Security:
+           - apim:api_graph
+      summary: |
+        Retrieve APIs created over time details
+      description: |
+        Get application created over time details from summarized data.
+      parameters:
+        - $ref: '#/parameters/startTime'
+        - $ref: '#/parameters/endTime'
+        - $ref: '#/parameters/createdBy'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested APIs created over time information is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/APICountList'
+        400:
+          description: |
+            Bad Request.
+            Request paramters attribute does not meet requiremnts.
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+
+#-----------------------------------------------------
+#  Retrieve API subscriber count details
+#-----------------------------------------------------
+
+  /api/subscriber-count-by-api:
+    get:
+      x-wso2-curl: |
+        curl -X GET \
+        'https://localhost:9292/api/am/analytics/v1.0/api/subscriber-count-by-api?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30' \
+        -H 'accept: application/json' \
+        -H 'authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6' \
+        -H 'content-type: application/json' \
+      x-wso2-request: |
+        GET /api/am/analytics/v1.0/api/subscriber_count_by_apis
+        Host: localhost:9292
+        accept: application/json
+        authorization: Bearer b6b8d5ab-1118-362d-a6a9-2233956d80a0
+        cache-control: no-cache
+        content-type: application/json
+      x-wso2-response: |
+        HTTP/1.1 200 OK
+        Connection: keep-alive
+        Content-Length: 228
+        Content-Type: application/json
+        {"count":0,"list":[]}
+      security:
+        - OAuth2Security:
+           - apim:api_graph
+      summary: |
+        Retrieve Subscriber count by APIs
+      description: |
+        Get subscriber count by APIs from summarized data.
+      parameters:
+        - $ref: '#/parameters/startTime'
+        - $ref: '#/parameters/endTime'
+        - $ref: '#/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested subscriber count by API information is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/APISubscriptionCountList'
+        400:
+          description: |
+            Bad Request.
+            Request paramters attribute does not meet requiremnts.
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+
+#-----------------------------------------------------
+#  Retrieve APIs details
+#-----------------------------------------------------
+
+  /api/list:
+    get:
+      x-wso2-curl: |
+        curl -X GET \
+        'https://localhost:9292/api/am/analytics/v1.0/api/list?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30' \
+        -H 'accept: application/json' \
+        -H 'authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6' \
+        -H 'content-type: application/json' \
+      x-wso2-request: |
+        GET /api/am/analytics/v1.0/api/list?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30 HTTP/1.1
+        Host: localhost:9292
+        accept: application/json
+        authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6
+        content-type: application/json
+      x-wso2-response: |
+        HTTP/1.1 200 OK
+        Connection: keep-alive
+        Content-Length: 228
+        Content-Type: application/json
+        {"count":1,"list":[{"id":"be36fd10-7b3d-4bec-a54b-4ea754654c19","name":"PetStore","context":"store","version":"v1","provider":"admin","lifeCycleStatus":"Published","workflowStatus":"APPROVED","time":"2017-09-13T09:02:40.230Z"}]}
+      security:
+        - OAuth2Security:
+           - apim:api_graph
+      summary: |
+        Retrieve API information for a given time peroid
+      description: |
+        Get application created over time details from summarized data.
+      parameters:
+        - $ref: '#/parameters/startTime'
+        - $ref: '#/parameters/endTime'
+        - $ref: '#/parameters/createdBy'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested APIs created over time information is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/APIInfoList'
+        400:
+          description: |
+            Bad Request.
+            Request paramters attribute does not meet requiremnts.
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+
+#-----------------------------------------------------
+#  Retrieve Subscriptions created over time details
+#-----------------------------------------------------
+
+  /subscription/count-over-time:
+    get:
+      x-wso2-curl: |
+        curl -X GET \
+        'https://localhost:9292/api/am/analytics/v1.0/subscription/count-over-time?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30' \
+        -H 'accept: application/json' \
+        -H 'authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6' \
+        -H 'content-type: application/json' \
+      x-wso2-request: |
+        GET /api/am/analytics/v1.0/subscription/count-over-time?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30 HTTP/1.1
+        Host: localhost:9292
+        accept: application/json
+        authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6
+        content-type: application/json
+      x-wso2-response: |
+        HTTP/1.1 200 OK
+        Connection: keep-alive
+        Content-Length: 228
+        Content-Type: application/json
+        {"count":0,"list":[]}
+      security:
+        - OAuth2Security:
+           - apim:subscription_graph
+      summary: |
+        Retrieve APIs created over time details
+      description: |
+        Get application created over time details from summarized data.
+      parameters:
+        - $ref: '#/parameters/startTime'
+        - $ref: '#/parameters/endTime'
+        - $ref: '#/parameters/createdBy'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested subscription count created over time information is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/SubscriptionCountList'
+        400:
+           description: |
+             Bad Request.
+             Request paramters attribute does not meet requiremnts.
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+
+#-----------------------------------------------------
+#  Retrieve Subscriptions information
+#-----------------------------------------------------
+
+  /subscription/list:
+    get:
+      x-wso2-curl: |
+        curl -X GET \
+        'https://localhost:9292/api/am/analytics/v1.0/subscription/list?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30' \
+        -H 'accept: application/json' \
+        -H 'authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6' \
+        -H 'content-type: application/json' \
+      x-wso2-request: |
+        GET /api/am/analytics/v1.0/subscription/subscription/list?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30 HTTP/1.1
+        Host: localhost:9292
+        accept: application/json
+        authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6
+        content-type: application/json
+      x-wso2-response: |
+        HTTP/1.1 200 OK
+        Connection: keep-alive
+        Content-Length: 228
+        Content-Type: application/json
+        {"count":0,"list":[]}
+      security:
+        - OAuth2Security:
+           - apim:subscription_graph
+      summary: |
+        Retrieve Subscription details
+      description: |
+        Get Subscription details from summarized data.
+      parameters:
+        - $ref: '#/parameters/startTime'
+        - $ref: '#/parameters/endTime'
+        - $ref: '#/parameters/createdBy'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested Subscription Information is returned for the given time period
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/SubscriptionInfoList'
+        400:
+          description: |
+            Bad Request.
+            Request paramters attribute does not meet requiremnts.
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+
+######################################################
+# Parameter definitions
+######################################################
+parameters:
+
+# Specified as part of the query string
+  startTime:
+    name: startTime
+    in: query
+    description: |
+      Defines the starting timestamp of the interval
+    required: true
+    type: string
+
+  endTime:
+    name: endTime
+    in: query
+    description: |
+      Defines the ending timestamp of the interval
+    required: true
+    type: string
+
+  createdBy:
+    name: createdBy
+    in: query
+    description: |
+     application/api creator name. In case of any creator is not provided all the details will be provided
+    required: false
+    type: string
+
+  apiId:
+    name: apiId
+    in: query
+    description: |
+     UUID of the API.
+    required: false
+    type: string
+
+
+######################################################
+# The resources used by some of the APIs above within the message body
+######################################################
+
+definitions:
+
+#-----------------------------------------------------
+# The ApplicationCount resource
+#-----------------------------------------------------
+  ApplicationCount:
+    title: Applications Created Over Time
+    properties:
+      time:
+        type: string
+        format: string
+        description: |
+          Timestamp
+      count:
+        type: integer
+        format: int64
+        description: |
+          Number of application registrations
+
+#-----------------------------------------------------
+# The ApplicationCountList resource
+#-----------------------------------------------------
+  ApplicationCountList:
+    title: ApplicationCount List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of applications.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ApplicationCount'
+
+#-----------------------------------------------------
+# The APICount resource
+#-----------------------------------------------------
+  APICount:
+    title: APIs Created Over Time
+    properties:
+      time:
+        type: string
+        description: |
+          Timestamps of created APIs
+      count:
+        type: integer
+        format: int64
+        description: |
+          Number of APIs created
+
+#-----------------------------------------------------
+# The APICountList resource
+#-----------------------------------------------------
+  APICountList:
+    title: APICountList List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of APIs.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/APICount'
+#-----------------------------------------------------
+# The API Info resource
+#-----------------------------------------------------
+  APIInfo:
+    title: APIInfo object with basic API details.
+    properties:
+      id:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        example: CalculatorAPI
+      description:
+        type: string
+        example: A calculator API that supports basic operations
+      context:
+        type: string
+        example: CalculatorAPI
+      version:
+        type: string
+        example: 1.0.0
+      provider:
+        description: |
+          If the provider value is not given, the user invoking the API will be used as the provider.
+        type: string
+        example: admin
+      lifeCycleStatus:
+        type: string
+        example: CREATED
+      workflowStatus:
+        type: string
+        example: APPROVED
+      time:
+        type: string
+        format: string
+        description: |
+          Timestamp in UTC
+#-----------------------------------------------------
+# The APIInfoList resource
+#-----------------------------------------------------
+  APIInfoList:
+    title: APIInfoList List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of APIs.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/APIInfo'
+
+#-----------------------------------------------------
+# The API Subscription Count resource
+#-----------------------------------------------------
+  APISubscriptionCount:
+    title: APISubscription object with subscription details.
+    properties:
+      id:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+        description: Subscription UUID
+      name:
+        type: string
+        example: CalculatorAPI
+      version:
+        type: string
+        example: 1.0.0
+      provider:
+        description: |
+          If the provider value is not given, the user invoking the API will be used as the provider.
+        type: string
+        example: admin
+      count:
+        description: |
+          No of subscriptions.
+        type: integer
+        example: 4
+
+#-----------------------------------------------------
+# The APISubscriptionCountList resource
+#-----------------------------------------------------
+  APISubscriptionCountList:
+    title: APISubscriptionCountList List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of APIs.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/APISubscriptionCount'
+
+#-----------------------------------------------------
+# The SubscriptionCount resource
+#-----------------------------------------------------
+  SubscriptionCount:
+    title: Subscriptions Created Over Time
+    properties:
+      time:
+        type: string
+        format: string
+        description: |
+          Timestamp in UTC
+      count:
+        type: integer
+        format: int64
+        description: |
+          Number of subscriptions created
+
+#-----------------------------------------------------
+# The SubscriptionCountList resource
+#-----------------------------------------------------
+  SubscriptionCountList:
+    title: SubscriptionCount List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of APIs.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/SubscriptionCount'
+
+#-----------------------------------------------------
+# The SubscriptionInfo resource
+#-----------------------------------------------------
+  SubscriptionInfo:
+    title: Subscription Information
+    properties:
+      id:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        description: |
+          API Name
+        example: CalculatorAPI
+      version:
+        type: string
+        description: |
+          API version
+        example: 1.0.0
+      appName:
+        description: |
+          Name of the subscribed Application
+        type: string
+        example: Calculator Application
+      description:
+        type: string
+        description: |
+          Application desciprtion
+        example: A calculator Application that supports basic operations
+      createdTime:
+        type: string
+        description: |
+          Timestamp
+      subscriptionTier:
+        description: |
+          Subscribed application tier
+        type: string
+        example: Gold
+      subscriptionStatus:
+        description: |
+          Subscription Status
+        type: string
+        example: ACTIVE
+#-----------------------------------------------------
+# The SubscriptionInfoList resource
+#-----------------------------------------------------
+  SubscriptionInfoList:
+    title: SubscriptionInfoList List
+    properties:
+      count:
+        type: integer
+        description: |
+          Subscription Information
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/SubscriptionInfo'

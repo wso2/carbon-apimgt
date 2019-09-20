@@ -72,9 +72,9 @@ public class APISecurityConstantsTestCase {
         String incorrectResourceDesc = "No matching resource found in the API for the given request. Check the API " +
                 "documentation and add a proper REST resource path to the invocation URL";
         String tokenInactiveDesc = "Access Token Inactive. Generate a new access token and try again";
-        String missingCredentialsDesc = "Missing OAuth Credentials. Make sure your API invocation call has a header: ";
+        String missingCredentialsDesc = "Missing Credentials. Make sure your API invocation call has a header: ";
         String tokenExpiredDesc = "Access Token Expired. Renew the access token and try again";
-        String invalidCredentialsDesc = "Invalid OAuth Credentials. Make sure you have given the correct access token";
+        String invalidCredentialsDesc = "Invalid Credentials. Make sure you have provided the correct security credentials";
 
         Assert.assertEquals(incorrectResourceDesc, APISecurityConstants
                 .getFailureMessageDetailDescription(APISecurityConstants.API_AUTH_INCORRECT_API_RESOURCE,

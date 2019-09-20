@@ -38,6 +38,7 @@ import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import AuthManager from '../../../data/AuthManager';
 import { ApiContext } from './ApiContext';
 import Environments from './Environments';
+import Labels from './Labels';
 /**
  *
  *
@@ -460,7 +461,7 @@ class InfoBar extends React.Component {
                                                         </TableCell>
                                                     </TableRow>
                                                 )}
-                                                { api.type === 'GRAPHQL' && (
+                                                {api.type === 'GRAPHQL' && (
                                                     <TableRow>
                                                         <TableCell component='th' scope='row'>
                                                             <div className={classes.iconAligner}>
@@ -490,28 +491,52 @@ class InfoBar extends React.Component {
                                                     </TableRow>
                                                 )}
                                                 {!api.advertiseInfo.advertised ? (
-                                                    <TableRow>
-                                                        <TableCell
-                                                            component='th'
-                                                            scope='row'
-                                                            className={classes.contentToTop}
-                                                        >
-                                                            <div className={classes.iconAligner}>
-                                                                <Icon className={classes.iconEven}>
-                                                                    desktop_windows
-                                                                </Icon>
-                                                                <span className={classes.iconTextWrapper}>
-                                                                    <FormattedMessage
-                                                                        id='Apis.Details.InfoBar.available.environments'
-                                                                        defaultMessage='Available Environments'
-                                                                    />
-                                                                </span>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <Environments />
-                                                        </TableCell>
-                                                    </TableRow>
+                                                    <React.Fragment>
+                                                        <TableRow>
+                                                            <TableCell
+                                                                component='th'
+                                                                scope='row'
+                                                                className={classes.contentToTop}
+                                                            >
+                                                                <div className={classes.iconAligner}>
+                                                                    <Icon className={classes.iconEven}>
+                                                                        desktop_windows
+                                                                    </Icon>
+                                                                    <span className={classes.iconTextWrapper}>
+                                                                        <FormattedMessage
+                                                                            id='Apis.Details.InfoBar.available.environments'
+                                                                            defaultMessage='Available Environments'
+                                                                        />
+                                                                    </span>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Environments />
+                                                            </TableCell>
+                                                        </TableRow>
+                                                        {api.labels.length !== 0 && (
+                                                            <TableRow>
+                                                                <TableCell
+                                                                    component='th'
+                                                                    scope='row'
+                                                                    className={classes.contentToTop}
+                                                                >
+                                                                    <div className={classes.iconAligner}>
+                                                                        <Icon className={classes.iconEven}>games</Icon>
+                                                                        <span className={classes.iconTextWrapper}>
+                                                                            <FormattedMessage
+                                                                                id='Apis.Details.InfoBar.available.mgLabels'
+                                                                                defaultMessage='Available Microgateways'
+                                                                            />
+                                                                        </span>
+                                                                    </div>
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <Labels />
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        )}
+                                                    </React.Fragment>
                                                 ) : (
                                                     <TableRow>
                                                         <TableCell component='th' scope='row'>
@@ -546,9 +571,9 @@ class InfoBar extends React.Component {
                                             <FormattedMessage
                                                 id='Apis.Details.InfoBar.more'
                                                 defaultMessage='MORE'
-                                            />
+                                                />
                                         </Typography>
-                                    )}
+                                        )}
                                     {showOverview ? <Icon>arrow_drop_up</Icon> : <Icon>arrow_drop_down</Icon>}
                                 </div>
                             </div>

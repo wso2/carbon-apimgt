@@ -1,0 +1,9 @@
+<%
+jagg.module("bot-detected-data", {
+
+    getAlert:function () {
+        return jagg.require(jagg.getModulesDir() + "bot-detected-data/alert-list.jag").getAlert.apply(this, arguments);
+    }
+
+});
+%>

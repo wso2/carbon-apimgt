@@ -1877,7 +1877,7 @@ public class SQLConstants {
     public static final String GET_API_ID_SQL =
             "SELECT API.API_ID FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND API.API_VERSION = ?";
     public static final String GET_API_PRODUCT_ID_SQL =
-            "SELECT API_PRODUCT_ID FROM AM_API_PRODUCT WHERE API_PRODUCT_PROVIDER = ? AND API_PRODUCT_NAME = ? "
+            "SELECT API_PRODUCT_ID AS API_ID FROM AM_API_PRODUCT WHERE API_PRODUCT_PROVIDER = ? AND API_PRODUCT_NAME = ? "
                     + "AND API_PRODUCT_VERSION = ?";
 
     public static final String ADD_API_LIFECYCLE_EVENT_SQL =
@@ -3503,6 +3503,18 @@ public class SQLConstants {
 
         public static final String CHECK_CLIENT_CREDENTIALS_EXISTS = "SELECT CONSUMER_KEY,CONSUMER_SECRET " +
                 "FROM AM_SYSTEM_APPS WHERE NAME = ?";
+    }
+
+    public static class BotDataConstants {
+
+        public static final String ADD_NOTIFICATION = "INSERT INTO AM_NOTIFICATION_SUBSCRIBER (UUID, CATEGORY," +
+        "NOTIFICATION_METHOD, SUBSCRIBER_ADDRESS) VALUES(?,?,?,?)";
+
+        public static final String GET_SAVED_ALERT_EMAILS =
+                " SELECT UUID, SUBSCRIBER_ADDRESS FROM AM_NOTIFICATION_SUBSCRIBER";
+
+        public static final String DELETE_EMAIL_BY_UUID =
+                "DELETE FROM AM_NOTIFICATION_SUBSCRIBER WHERE UUID= ?";
 
     }
 }

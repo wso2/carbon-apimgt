@@ -30,8 +30,8 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -150,7 +150,7 @@ public class RestAPIStoreUtils {
                 return true;
             }
         }
-        
+
         if (productIdentifier != null && application != null) {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             APIProduct product = apiConsumer.getAPIProduct(productIdentifier);
@@ -232,42 +232,43 @@ public class RestAPIStoreUtils {
     /**
      * Check if the specified subscription is allowed for the logged in user
      *
-     * @param identifier identifier
+     * @param apiTypeWrapper Api Type wrapper that contains either an API or API Product
      * @param tier          the subscribing tier of the API/API Product
      * @throws APIManagementException if the subscription allow check was failed. If the user is not allowed to add the
      *                                subscription, this will throw an instance of APIMgtAuthorizationFailedException with the reason as the message
      */
-    public static void checkSubscriptionAllowed(Identifier identifier, String tier)
+    public static void checkSubscriptionAllowed(ApiTypeWrapper apiTypeWrapper, String tier)
             throws APIManagementException {
-
         String username = RestApiUtil.getLoggedInUsername();
         String userTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        String providerName = identifier.getProviderName();
-        String apiTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-        Set<Tier> tiers = null;
-        String subscriptionAvailability = null;
-        String subscriptionAllowedTenants = null;
-        if(identifier instanceof APIIdentifier) {
-            API api = apiConsumer.getAPI((APIIdentifier)identifier);
+        Set<Tier> tiers;
+        String providerName;
+        String subscriptionAvailability;
+        String subscriptionAllowedTenants;
 
+        if (apiTypeWrapper.isAPIProduct()) {
+            APIProduct product = apiTypeWrapper.getApiProduct();
+            providerName = product.getId().getProviderName();
+            tiers = product.getAvailableTiers();
+            subscriptionAvailability = product.getSubscriptionAvailability();
+            subscriptionAllowedTenants = product.getSubscriptionAvailableTenants();
+        } else {
+            API api = apiTypeWrapper.getApi();
+            providerName = api.getId().getProviderName();
             String apiSecurity = api.getApiSecurity();
-            if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
-                String msg = "Subscription is not allowed for API " + identifier.toString() + ". To access the API, "
+            if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
+                    !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
+                String msg = "Subscription is not allowed for API " + apiTypeWrapper.toString() + ". To access the API, "
                         + "please use the client certificate";
                 throw new APIMgtAuthorizationFailedException(msg);
             }
             tiers = api.getAvailableTiers();
             subscriptionAvailability = api.getSubscriptionAvailability();
             subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
-        } 
-        if (identifier instanceof APIProductIdentifier) {
-            APIProduct product = apiConsumer.getAPIProduct((APIProductIdentifier) identifier);
-            tiers = product.getAvailableTiers();
-            subscriptionAvailability = product.getSubscriptionAvailability();
-            subscriptionAllowedTenants = product.getSubscriptionAvailableTenants();    
         }
+
+        String apiTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
 
         //Tenant based validation for subscription
         boolean subscriptionAllowed = false;
@@ -304,7 +305,7 @@ public class RestAPIStoreUtils {
             allowedTierList.add(t.getName());
         }
         if (!isTierAllowed) {
-            String msg = "Tier " + tier + " is not allowed for API/API Product " + identifier.toString() + ". Only "
+            String msg = "Tier " + tier + " is not allowed for API/API Product " + apiTypeWrapper.toString() + ". Only "
                     + Arrays.toString(allowedTierList.toArray()) + " Tiers are allowed.";
             throw new APIMgtAuthorizationFailedException(msg);
         }

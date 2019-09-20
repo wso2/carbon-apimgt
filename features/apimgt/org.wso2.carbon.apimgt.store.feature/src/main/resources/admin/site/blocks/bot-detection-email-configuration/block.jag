@@ -1,0 +1,27 @@
+<%
+include("/jagg/jagg.jag");
+
+jagg.block("bot-detection-email-configuration", {
+
+    initializer: function (data) {
+    },
+
+    getInputs: function () {
+        return {};
+    },
+    getOutputs:function (inputs) {
+        var result;
+        var notificationData;
+        result = jagg.module("bot-detection-email-configuration").retrieveSavedEmailList();
+        notificationData = result.allSavedEmailListJson;
+
+
+        // we put results to the session.
+       // session.put("notificationData", notificationData);
+
+        return {
+            "notificationData":notificationData
+        };
+    }
+});
+%>

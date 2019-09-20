@@ -42,7 +42,7 @@
       },
       {
         "Name": "apim:subscription_view",
-        "Roles": "admin,Internal/creator"
+        "Roles": "admin,Internal/creator,Internal/publisher"
       },
       {
         "Name": "apim:subscription_block",
@@ -50,11 +50,11 @@
       },
       {
         "Name": "apim:mediation_policy_view",
-        "Roles": "admin"
+        "Roles": "admin,Internal/creator"
       },
       {
         "Name": "apim:mediation_policy_create",
-        "Roles": "admin"
+        "Roles": "admin,Internal/creator"
       },
       {
         "Name": "apim:api_workflow",
@@ -142,6 +142,54 @@
       },
       {
         "Name": "apim:ep_certificates_view",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:api_key",
+        "Roles": "admin,Internal/subscriber"
+      },
+      {
+        "Name": "apim_analytics:admin",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim_analytics:creator",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim_analytics:publisher_owner",
+        "Roles": "admin,Internal/publisher"
+      },
+      {
+        "Name": "apim_analytics:publisher_editor",
+        "Roles": "admin,Internal/publisher"
+      },
+      {
+        "Name": "apim_analytics:publisher_viewer",
+        "Roles": "admin,Internal/publisher"
+      },
+      {
+        "Name": "apim_analytics:subscriber_owner",
+        "Roles": "admin,Internal/subscriber"
+      },
+      {
+        "Name": "apim_analytics:subscriber_editor",
+        "Roles": "admin,Internal/subscriber"
+      },
+      {
+        "Name": "apim_analytics:subscriber_viewer",
+        "Roles": "admin,Internal/subscriber"
+      },
+      {
+        "Name": "apim_analytics:everyone",
+        "Roles": "Internal/everyone"
+      },
+      {
+        "Name": "apim:pub_alert_manage",
+        "Roles": "admin,Internal/creator"
+      },
+      {
+        "Name": "apim:sub_alert_manage",
         "Roles": "admin,Internal/creator"
       }
     ]

@@ -18,6 +18,7 @@
 import APIClientFactory from './APIClientFactory';
 import Utils from './Utils';
 import Resource from './Resource';
+import cloneDeep from 'lodash.clonedeep';
 
 /**
  * An abstract representation of an API
@@ -72,21 +73,21 @@ class API extends Resource {
      * which is API body friendly to use with REST api requests
      * Use this method instead of accessing the private _data object for
      * converting to a JSON representation of an API object.
-     * Note: This is shallow coping
+     * Note: This is deep coping, Use sparingly, Else will have a bad impact on performance
      * Basically this is the revers operation in constructor.
-     * This method simply iterate through all the object properties
-     * and copy their values to new object excluding the properties in excludes list.
-     * So use this method sparingly!!
+     * This method simply iterate through all the object properties (excluding the properties in `excludes` list)
+     * and copy their values to new object.
+     * So use this method with care!!
      * @memberof API
      * @param {Array} [userExcludes=[]] List of properties that are need to be excluded from the generated JSON object
      * @returns {JSON} JSON representation of the API
      */
-    toJSON(resource = this, userExcludes = []) {
+    toJSON(userExcludes = []) {
         var copy = {},
             excludes = ['_data', 'client', 'apiType', ...userExcludes];
-        for (var prop in resource) {
+        for (var prop in this) {
             if (!excludes.includes(prop)) {
-                copy[prop] = resource[prop];
+                copy[prop] = cloneDeep(this[prop]);
             }
         }
         return copy;
@@ -130,7 +131,7 @@ class API extends Resource {
         } else {
             payload = {
                 body: apiData,
-                'Content-Type': 'application/json',
+                openAPIVersion: 'v2',
             };
             promise_create = this.client.then(client => {
                 return client.apis['APIs'].post_apis(payload, this._requestMetaData());
@@ -276,8 +277,7 @@ class API extends Resource {
         }
     }
 
-    save(query) {
-        query = query ? query : 'v2';
+    save(openAPIVersion = 'v2') {
         const promisedAPIResponse = this.client.then((client) => {
             const properties = client.spec.definitions.API.properties;
             const data = {};
@@ -289,7 +289,7 @@ class API extends Resource {
             const payload = {
                 body: data,
                 'Content-Type': 'application/json',
-                openAPIVersion: query,
+                openAPIVersion,
             };
             return client.apis['APIs'].post_apis(payload, this._requestMetaData());
         });
@@ -404,10 +404,9 @@ class API extends Resource {
      * @param {string} query The parameters that should be validated.
      * @return {promise}
      * */
-    validateAPI(query) {
+    validateAPIParameter(query) {
         return this.client.then((client) => {
             return client.apis.Validation.validateAPI({ query: query }).then((resp) => {
-                console.log(resp);
                 return resp.ok;
             }).catch((err) => {
                 console.log(err);
@@ -422,12 +421,14 @@ class API extends Resource {
      * @param {string} name The document name
      * @return {promise}
      * */
-    validateDocument(id, name) {
+    validateDocumentExists(id, name) {
         return this.client.then((client) => {
-            return client.apis['API Documents'].validateDocument({
-                apiId: id,
-                name: name
-            })
+            return client.apis['API Documents'].validateDocument({ apiId: id, name: name }).then((resp) => {
+                return resp.ok;
+            }).catch((err) => {
+                console.log(err);
+                return false;
+            });
         });
     }
 
@@ -462,7 +463,7 @@ class API extends Resource {
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getSwagger(id, callback = null) {
+    getSwagger(id = this.id, callback = null) {
         const promise_get = this.client.then(client => {
             return client.apis['APIs'].get_apis__apiId__swagger(
                 {
@@ -471,12 +472,9 @@ class API extends Resource {
                 this._requestMetaData(),
             );
         });
-        if (callback) {
-            return promise_get.then(callback);
-        } else {
-            return promise_get;
-        }
+        return promise_get;
     }
+
 
     /**
      * Get the graphQL schema of an API
@@ -506,7 +504,7 @@ class API extends Resource {
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getScopes(id, callback = null) {
+    getScopes(id = this.id, callback = null) {
         const promise_get = this.client.then(client => {
             return client.apis['API Scopes'].get_apis__apiId__scopes(
                 {
@@ -553,7 +551,7 @@ class API extends Resource {
     /**
      * Get monettization status of an API
      * @param id {String} UUID of the API in which the swagger is needed
-     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @param callback {function} Function which needs to be called upon success of get Monetization status
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getMonetization(id, callback = null) {
@@ -566,6 +564,24 @@ class API extends Resource {
             );
         });
         return promiseMonetization.then(response => response.body);
+    }
+
+    /**
+     * Get monettization Invoice
+     * @param id {String} UUID of the subscription
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getMonetizationInvoice(id, callback = null) {
+        const promiseInvoice = this.client.then(client => {
+            return client.apis['API Monetization'].get_subscriptions__subscriptionId__usage(
+                {
+                    subscriptionId: id
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promiseInvoice.then(response => response.body);
     }
 
     /**
@@ -714,9 +730,7 @@ class API extends Resource {
                 }),
             );
         });
-        return promised_update.then(response => {
-            return this;
-        });
+        return promised_update;
     }
 
     /**
@@ -860,7 +874,7 @@ class API extends Resource {
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
     update(updatedProperties) {
-        const updatedAPI = { ...this.toJSON(), ...this.toJSON(updatedProperties) };
+        const updatedAPI = { ...this.toJSON(), ...updatedProperties };
         const promisedUpdate = this.client.then(client => {
             const payload = {
                 apiId: updatedAPI.id,
@@ -1494,6 +1508,15 @@ class API extends Resource {
     }
 
     /**
+     * Get list of microgateway labels
+     */
+    microgatewayLabelsGet() {
+        return this.client.then((client) => {
+            return client.apis['Label Collection'].get_labels();
+        });
+    }
+
+    /**
      *
      * Static method for get all APIs for current environment user.
      * @static
@@ -1981,7 +2004,7 @@ class API extends Resource {
      * @static
      * Publish the given API to given set of external stores and remove from others which are not specified
      * @param {String} apiId uuid
-     * @param {Array} externalStoreIds 
+     * @param {Array} externalStoreIds
      */
     static publishAPIToExternalStores(apiId, externalStoreIds) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment()).client;

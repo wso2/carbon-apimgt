@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -77,7 +76,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.sql.Timestamp;
 
@@ -617,14 +615,17 @@ public class APIMappingUtil {
         }
 
         dto.setCacheTimeout(model.getCacheTimeout());
-        try {
-            JSONParser parser = new JSONParser();
-            JSONObject endpointConfigJson = (JSONObject) parser.parse(model.getEndpointConfig());
-            dto.setEndpointConfig(endpointConfigJson);
-        } catch (ParseException e) {
-            //logs the error and continues as this is not a blocker
-            log.error("Cannot convert endpoint configurations when setting endpoint for API. " +
-                    "API ID = " + model.getId(), e);
+        String endpointConfig = model.getEndpointConfig();
+        if (!StringUtils.isBlank(endpointConfig)) {
+            try {
+                JSONParser parser = new JSONParser();
+                JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
+                dto.setEndpointConfig(endpointConfigJson);
+            } catch (ParseException e) {
+                //logs the error and continues as this is not a blocker
+                log.error("Cannot convert endpoint configurations when setting endpoint for API. " +
+                        "API ID = " + model.getId(), e);
+            }
         }
       /*  if (!StringUtils.isBlank(model.getThumbnailUrl())) {todo
             dto.setThumbnailUri(getThumbnailUri(model.getUUID()));
@@ -809,14 +810,11 @@ public class APIMappingUtil {
 
         //setting micro-gateway labels if there are any
         if (model.getGatewayLabels() != null) {
-            List<LabelDTO> labels = new ArrayList<>();
+            List<String> labels = new ArrayList<>();
             List<Label> gatewayLabels = model.getGatewayLabels();
             for (Label label : gatewayLabels) {
-                LabelDTO labelDTO = new LabelDTO();
-                labelDTO.setName(label.getName());
-                labelDTO.setAccessUrls(label.getAccessUrls());
-                labelDTO.setDescription(label.getDescription());
-                labels.add(labelDTO);
+                String labelName = label.getName();
+                labels.add(labelName);
             }
             dto.setLabels(labels);
         }
@@ -2116,7 +2114,7 @@ public class APIMappingUtil {
             scopeDTO.setDescription(aScope.getDescription());
             ScopeBindingsDTO bindingsDTO = new ScopeBindingsDTO();
             String roles = aScope.getRoles();
-            if (roles.isEmpty()) {
+            if (roles == null || roles.isEmpty()) {
                 bindingsDTO.setValues(Collections.emptyList());
             } else {
                 bindingsDTO.setValues(Arrays.asList((roles).split(",")));

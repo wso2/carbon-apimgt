@@ -22,6 +22,8 @@ import LibraryAdd from '@material-ui/icons/LibraryAdd';
 import PropTypes from 'prop-types';
 import { Link, withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import { FormattedMessage } from 'react-intl';
 
 import { resourceMethod, resourcePath, ScopeValidation } from 'AppData/ScopeValidation';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
@@ -92,7 +94,12 @@ function CreateNewVersionButton(props) {
                         <div>
                             <LibraryAdd />
                         </div>
-                        <div className={classes.linkText}>Create New Version</div>
+                        <Typography variant='caption'>
+                            <FormattedMessage
+                                id='Apis.Details.components.CreateNewVersionButton.create.new.version'
+                                defaultMessage='Create New Version'
+                            />
+                        </Typography>
                     </Link>
                 </div>
             </ScopeValidation>

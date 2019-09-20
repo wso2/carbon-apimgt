@@ -63,7 +63,7 @@ import static org.mockito.Matchers.any;
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ MultitenantUtils.class, PrivilegedCarbonContext.class, OAuthApplicationInfo.class, ApplicationManagementService.class,
+@PrepareForTest({ MultitenantUtils.class, PrivilegedCarbonContext.class, CarbonContext.class, OAuthApplicationInfo.class, ApplicationManagementService.class,
         APIKeyMgtSubscriberService.class, ApiMgtDAO.class, OAuthServerConfiguration.class, OAuthCache.class,
         ServiceReferenceHolder.class, CarbonUtils.class, ServerConfiguration.class, APIUtil.class,
         APIKeyMgtUtil.class, OAuthServerConfiguration.class })

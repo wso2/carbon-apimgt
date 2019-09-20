@@ -140,6 +140,22 @@ export default class Application extends Resource {
     }
 
     /** *
+     * Cleanup Consumer Secret and Consumer Key for this application instance
+     * @param {string} keyType Key type either `Production` or `SandBox`
+     * @returns {promise} Set the generated token into current instance and return tokenObject
+     * received as Promise object
+     */
+    cleanUpKeys(keyType) {
+        return this.client.then(client => client.apis['Application Keys']
+            .post_applications__applicationId__keys__keyType__clean_up({ applicationId: this.id, keyType }))
+            .then((response) => {
+                this.keys = new Map();
+                this.tokens = new Map();
+                return response.ok;
+            });
+    }
+
+    /** *
      * Generate Consumer Secret and Consumer Key for this application instance
      * @param  {string} tokenType Token Type either `OAUTH` or `JWT`
      * @param  {string} keyType Key type either `Production` or `SandBox`

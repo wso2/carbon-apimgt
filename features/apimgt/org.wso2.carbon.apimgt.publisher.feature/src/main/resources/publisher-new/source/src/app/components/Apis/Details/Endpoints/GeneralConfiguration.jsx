@@ -105,7 +105,7 @@ function GeneralConfiguration(props) {
      * Method to upload the certificate content by calling the rest api.
      * */
     const saveCertificate = (certificate, endpoint, alias) => {
-        API.addCertificate(certificate, endpoint, alias)
+        return API.addCertificate(certificate, endpoint, alias)
             .then((resp) => {
                 if (resp.status === 201) {
                     Alert.info(intl.formatMessage({
@@ -175,7 +175,7 @@ function GeneralConfiguration(props) {
      * @param {string} alias The alias of the certificate to be deleted.
      * */
     const deleteCertificate = (alias) => {
-        API.deleteEndpointCertificate(alias)
+        return API.deleteEndpointCertificate(alias)
             .then((resp) => {
                 setEndpointCertificates(() => {
                     if (resp.status === 200) {
