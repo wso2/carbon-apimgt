@@ -24,6 +24,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 /**
  *
@@ -34,12 +35,13 @@ import { isRestricted } from 'AppData/AuthManager';
  */
 export default function AuthorizationHeader(props) {
     const { api, configDispatcher } = props;
+    const [apiFromContext] = useAPI();
 
     return (
         <Grid container spacing={1} alignItems='center'>
             <Grid item xs={11}>
                 <TextField
-                    disabled={isRestricted(['apim:api_create'], api)}
+                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
                     id='outlined-name'
                     label={(
                         <FormattedMessage

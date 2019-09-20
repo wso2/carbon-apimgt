@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -34,7 +34,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Certificates from 'AppComponents/Apis/Details/Endpoints/GeneralConfiguration/Certificates';
 import { isRestricted } from 'AppData/AuthManager';
-import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import Transports from 'AppComponents/Apis/Details/Configuration/components/Transports.jsx';
@@ -75,10 +75,10 @@ const useStyles = makeStyles(theme => ({
  */
 function TransportLevel(props) {
     const {
-        haveMultiLevelSecurity, securityScheme, configDispatcher, intl, id,
+        haveMultiLevelSecurity, securityScheme, configDispatcher, intl, id, api,
     } = props;
     const isMutualSSLEnabled = securityScheme.includes(API_SECURITY_MUTUAL_SSL);
-    const { api } = useContext(APIContext);
+    const [apiFromContext] = useAPI();
     const [clientCertificates, setClientCertificates] = useState([]);
     const classes = useStyles();
 
@@ -186,11 +186,11 @@ function TransportLevel(props) {
                         </Typography>
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails className={classes.expansionPanelDetails}>
-                        <Transports api={securityScheme} configDispatcher={configDispatcher} />
+                        <Transports api={api} configDispatcher={configDispatcher} />
                         <FormControlLabel
                             control={(
                                 <Checkbox
-                                    disabled={isRestricted(['apim:api_create'], api)}
+                                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                     checked={isMutualSSLEnabled}
                                     onChange={({ target: { checked, value } }) => configDispatcher({
                                         action: 'securityScheme',
@@ -217,13 +217,25 @@ function TransportLevel(props) {
                                 >
                                     <FormControlLabel
                                         value={API_SECURITY_MUTUAL_SSL_MANDATORY}
-                                        control={<Radio disabled={!haveMultiLevelSecurity} color='default' />}
+                                        control={
+                                            <Radio
+                                                disabled={!haveMultiLevelSecurity ||
+                                                isRestricted(['apim:api_create'], apiFromContext)}
+                                                color='default'
+                                            />
+                                        }
                                         label='Mandatory'
                                         labelPlacement='end'
                                     />
                                     <FormControlLabel
                                         value='optional'
-                                        control={<Radio disabled={!haveMultiLevelSecurity} color='default' />}
+                                        control={
+                                            <Radio
+                                                disabled={!haveMultiLevelSecurity ||
+                                                isRestricted(['apim:api_create'], apiFromContext)}
+                                                color='default'
+                                            />
+                                        }
                                         label='Optional'
                                         labelPlacement='end'
                                     />
@@ -263,6 +275,7 @@ TransportLevel.propTypes = {
     securityScheme: PropTypes.arrayOf(PropTypes.string).isRequired,
     intl: PropTypes.shape({}).isRequired,
     id: PropTypes.string.isRequired,
+    api: PropTypes.shape({}).isRequired,
 };
 
 export default injectIntl((TransportLevel));

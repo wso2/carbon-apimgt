@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -37,7 +37,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { FormattedMessage } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
-import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 import {
     DEFAULT_API_SECURITY_OAUTH2,
@@ -77,8 +77,10 @@ const useStyles = makeStyles(theme => ({
  * @returns
  */
 export default function ApplicationLevel(props) {
-    const { haveMultiLevelSecurity, securityScheme, configDispatcher } = props;
-    const { api } = useContext(APIContext);
+    const {
+        haveMultiLevelSecurity, securityScheme, configDispatcher, api,
+    } = props;
+    const [apiFromContext] = useAPI();
     const classes = useStyles();
 
     let mandatoryValue = 'optional';
@@ -131,7 +133,7 @@ export default function ApplicationLevel(props) {
                             <FormControlLabel
                                 control={(
                                     <Checkbox
-                                        disabled={isRestricted(['apim:api_create'], api)}
+                                        disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                         checked={securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2)}
                                         onChange={({ target: { checked, value } }) => configDispatcher({
                                             action: 'securityScheme',
@@ -146,7 +148,7 @@ export default function ApplicationLevel(props) {
                             <FormControlLabel
                                 control={(
                                     <Checkbox
-                                        disabled={isRestricted(['apim:api_create'], api)}
+                                        disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                         checked={securityScheme.includes(API_SECURITY_BASIC_AUTH)}
                                         onChange={({ target: { checked, value } }) => configDispatcher({
                                             action: 'securityScheme',
@@ -162,6 +164,7 @@ export default function ApplicationLevel(props) {
                                 control={
                                     <Checkbox
                                         checked={securityScheme.includes(API_SECURITY_API_KEY)}
+                                        disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                         onChange={({ target: { checked, value } }) =>
                                             configDispatcher({
                                                 action: 'securityScheme',
@@ -188,13 +191,25 @@ export default function ApplicationLevel(props) {
                             >
                                 <FormControlLabel
                                     value={API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY}
-                                    control={<Radio disabled={!haveMultiLevelSecurity} color='default' />}
+                                    control={
+                                        <Radio
+                                            disabled={!haveMultiLevelSecurity ||
+                                                isRestricted(['apim:api_create'], apiFromContext)}
+                                            color='default'
+                                        />
+                                    }
                                     label='Mandatory'
                                     labelPlacement='end'
                                 />
                                 <FormControlLabel
                                     value='optional'
-                                    control={<Radio disabled={!haveMultiLevelSecurity} color='default' />}
+                                    control={
+                                        <Radio
+                                            disabled={!haveMultiLevelSecurity ||
+                                                isRestricted(['apim:api_create'], apiFromContext)}
+                                            color='default'
+                                        />
+                                    }
                                     label='Optional'
                                     labelPlacement='end'
                                 />
@@ -206,7 +221,7 @@ export default function ApplicationLevel(props) {
                                 />
                             </FormHelperText>
                         </FormControl>
-                        <AuthorizationHeader api={securityScheme} configDispatcher={configDispatcher} />
+                        <AuthorizationHeader api={api} configDispatcher={configDispatcher} />
                     </ExpansionPanelDetails>
                 </ExpansionPanel>
             </Grid>
@@ -218,4 +233,5 @@ ApplicationLevel.propTypes = {
     configDispatcher: PropTypes.func.isRequired,
     haveMultiLevelSecurity: PropTypes.bool.isRequired,
     securityScheme: PropTypes.arrayOf(PropTypes.string).isRequired,
+    api: PropTypes.shape({}).isRequired,
 };

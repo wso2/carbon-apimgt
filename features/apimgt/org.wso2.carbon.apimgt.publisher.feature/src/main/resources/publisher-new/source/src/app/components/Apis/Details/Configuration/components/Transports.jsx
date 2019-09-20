@@ -29,6 +29,7 @@ import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import { isRestricted } from 'AppData/AuthManager';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const useStyles = makeStyles(theme => ({
     error: {
@@ -44,6 +45,7 @@ const useStyles = makeStyles(theme => ({
  */
 export default function Transports(props) {
     const { api, configDispatcher } = props;
+    const [apiFromContext] = useAPI();
     const classes = useStyles();
     const Validate = () => {
         if (api.transport && api.transport.length === 0) {
@@ -70,8 +72,10 @@ export default function Transports(props) {
                         <FormControlLabel
                             control={(
                                 <Checkbox
-                                    disabled={isRestricted(['apim:api_create'], api)}
-                                    checked={api.transport ? api.transport.includes('http') : null}
+                                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                                    checked={api.transport ?
+                                        api.transport.includes('http') : null
+                                    }
                                     onChange={({ target: { checked } }) => configDispatcher({
                                         action: 'transport',
                                         event: { checked, value: 'http' },
@@ -85,8 +89,9 @@ export default function Transports(props) {
                         <FormControlLabel
                             control={(
                                 <Checkbox
-                                    disabled={isRestricted(['apim:api_create'], api)}
-                                    checked={api.transport ? api.transport.includes('https') : null}
+                                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                                    checked={api.transport ?
+                                        api.transport.includes('https') : null}
                                     onChange={({ target: { checked } }) => configDispatcher({
                                         action: 'transport',
                                         event: { checked, value: 'https' },

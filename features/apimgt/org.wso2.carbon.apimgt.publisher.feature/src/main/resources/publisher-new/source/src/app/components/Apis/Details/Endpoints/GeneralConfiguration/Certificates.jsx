@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { isRestricted } from 'AppData/AuthManager';
-import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import {
@@ -107,7 +107,7 @@ function Certificates(props) {
     const [isDeleting, setDeleting] = useState(false);
     const [uploadCertificateOpen, setUploadCertificateOpen] = useState(false);
     const classes = useStyles();
-    const { api } = useContext(APIContext);
+    const [apiFromContext] = useAPI();
 
 
     /**
@@ -217,7 +217,7 @@ function Certificates(props) {
                 <List>
                     <ListItem
                         button
-                        disabled={(isRestricted(['apim:api_create'], api))}
+                        disabled={(isRestricted(['apim:api_create'], apiFromContext))}
                         className={classes.addCertificateBtn}
                         onClick={() => setUploadCertificateOpen(true)}
                     >
