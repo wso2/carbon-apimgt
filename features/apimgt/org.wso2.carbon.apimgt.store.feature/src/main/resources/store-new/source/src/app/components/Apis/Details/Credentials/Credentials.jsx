@@ -266,7 +266,7 @@ class Credentials extends React.Component {
         } = this.state;
         return (
             <div className={classes.contentWrapper}>
-                <Typography onClick={this.handleExpandClick} variant='display1' className={classes.titleSub}>
+                <Typography onClick={this.handleExpandClick} variant='h4' className={classes.titleSub}>
                     <FormattedMessage
                         id='Apis.Details.Credentials.Credentials.api.credentials'
                         defaultMessage='API Credentials'

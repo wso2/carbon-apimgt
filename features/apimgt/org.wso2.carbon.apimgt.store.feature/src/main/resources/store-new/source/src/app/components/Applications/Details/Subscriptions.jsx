@@ -277,7 +277,7 @@ class Subscriptions extends React.Component {
         if (subscriptions) {
             return (
                 <div className={classes.root}>
-                    <Typography variant='headline' className={classes.keyTitle}>
+                    <Typography variant='h5' className={classes.keyTitle}>
                         <FormattedMessage
                             id='Applications.Details.Subscriptions.subscription.management'
                             defaultMessage='Subscription Management'

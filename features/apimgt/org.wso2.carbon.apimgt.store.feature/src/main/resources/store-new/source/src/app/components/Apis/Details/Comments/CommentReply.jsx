@@ -215,7 +215,7 @@ class CommentReply extends React.Component {
                                 <Icon className={classes.commentIcon}>account_box</Icon>
                             </Grid>
                             <Grid item xs zeroMinWidth>
-                                <Typography noWrap className={classes.commentText} variant='body2'>
+                                <Typography noWrap className={classes.commentText} variant='body1'>
                                     {comment.createdBy}
                                 </Typography>
 

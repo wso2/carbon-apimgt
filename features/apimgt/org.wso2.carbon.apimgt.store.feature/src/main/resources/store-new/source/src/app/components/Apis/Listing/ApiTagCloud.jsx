@@ -99,7 +99,7 @@ class ApiTagCloud extends React.Component {
                     <div className={classes.listContentWrapper}>
                         <div>
                             <div>
-                                <Typography variant='display1' className={classes.mainTitle}>
+                                <Typography variant='h4' className={classes.mainTitle}>
                                     <FormattedMessage
                                         defaultMessage='Tags'
                                         id='Apis.Listing.ApiTagCloud.tags.heading'
@@ -122,7 +122,7 @@ class ApiTagCloud extends React.Component {
                 )}
                 { theme.custom.tagWiseMode === true && selectedTag && (
                     <div className={classes.selectedTagSpacing}>
-                        <Typography variant='display1' className={classes.mainTitle}>
+                        <Typography variant='h4' className={classes.mainTitle}>
                             {' ('}
                             {selectedTag}
                             {') '}

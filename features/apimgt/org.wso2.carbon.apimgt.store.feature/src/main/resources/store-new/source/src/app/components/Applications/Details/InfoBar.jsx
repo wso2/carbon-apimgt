@@ -276,7 +276,7 @@ class InfoBar extends React.Component {
                     </Link>
                     <VerticalDivider height={70} />
                     <div style={{ marginLeft: theme.spacing.unit }}>
-                        <Typography variant='display1'>{application.name}</Typography>
+                        <Typography variant='h4'>{application.name}</Typography>
                         <Typography variant='caption' gutterBottom align='left'>
                             { application.subscriptionCount }
                             {' '}
@@ -295,7 +295,7 @@ class InfoBar extends React.Component {
                             <div className={classes.contentWrapper}>
                                 <div className={classes.topBar}>
                                     <div className={classes.infoItem}>
-                                        <Typography variant='subheading' gutterBottom>
+                                        <Typography variant='subtitle1' gutterBottom>
                                             {application.throttlingPolicy}
                                             {' '}
                                             <Typography variant='caption'>
@@ -315,7 +315,7 @@ class InfoBar extends React.Component {
                                     {Object.entries(application.attributes).map(([key, value]) => (
                                         value !== '' ? (
                                             <div className={classes.infoItem} key={key}>
-                                                <Typography variant='subheading' gutterBottom>
+                                                <Typography variant='subtitle1' gutterBottom>
                                                     { key }
                                                     {' : '}
                                                     <Typography variant='caption'>
@@ -329,7 +329,7 @@ class InfoBar extends React.Component {
                                         {application.status === 'APPROVED' ? (
                                             <Icon>check_circle</Icon>
                                         ) : (
-                                            <Typography variant='subheading' gutterBottom>
+                                            <Typography variant='subtitle1' gutterBottom>
                                                 {application.status}
                                             </Typography>
                                         )}

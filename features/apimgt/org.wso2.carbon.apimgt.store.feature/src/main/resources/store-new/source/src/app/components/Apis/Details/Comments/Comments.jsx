@@ -218,7 +218,7 @@ class Comments extends Component {
                                 </Icon>
                                 <Typography
                                     onClick={this.handleExpandClick}
-                                    variant='display1'
+                                    variant='h4'
                                     className={classes.titleSub}
                                 >
                                     <FormattedMessage id='Apis.Details.Comments.title' defaultMessage='Comments' />
@@ -245,7 +245,7 @@ class Comments extends Component {
                             <div className={classes.contentWrapper}>
                                 <Grid container spacing={4} className={classes.root}>
                                     <Grid item>
-                                        <Typography className={classes.verticalSpace} variant='body2'>
+                                        <Typography className={classes.verticalSpace} variant='body1'>
                                             <a
                                                 className={classes.link + ' ' + classes.loadMoreLink}
                                                 onClick={this.handleLoadMoreComments}
@@ -266,7 +266,7 @@ class Comments extends Component {
                                         </Icon>
                                     </Grid>
                                     <Grid item>
-                                        <Typography className={classes.verticalSpace} variant='body2'>
+                                        <Typography className={classes.verticalSpace} variant='body1'>
                                             <FormattedMessage
                                                 id='Apis.Details.Comments.showing.comments'
                                                 defaultMessage='Showing comments '
