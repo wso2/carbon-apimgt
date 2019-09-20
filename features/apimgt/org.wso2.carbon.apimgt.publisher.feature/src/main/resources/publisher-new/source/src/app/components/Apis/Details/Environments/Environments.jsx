@@ -44,10 +44,8 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         flexWrap: 'wrap',
     },
-    headline: {
+    mainTitle: {
         paddingTop: theme.spacing.unit * 3,
-        paddingLeft: theme.spacing.unit * 2.5,
-        fontSize: theme.typography.fontSize * 2,
     },
     gatewayPaper: {
         marginTop: theme.spacing.unit * 2,
@@ -58,6 +56,13 @@ const useStyles = makeStyles(theme => ({
     content: {
         marginTop: theme.spacing.unit * 2,
         margin: `${theme.spacing.unit * 2}px 0 ${theme.spacing.unit * 2}px 0`,
+    },
+    emptyBox: {
+        marginTop: theme.spacing.unit * 2,
+    },
+    contentWrapper: {
+        maxWidth: theme.custom.contentAreaWidth,
+        paddingLeft: theme.spacing.unit * 3,
     },
 }));
 
@@ -108,7 +113,7 @@ export default function Environments() {
 
     return (
         <div>
-            <Typography align='left' className={classes.headline}>
+            <Typography variant='h4' align='left' className={classes.mainTitle}>
                 <FormattedMessage
                     id='Apis.Details.Environments.Environments.APIGateways'
                     defaultMessage='API Gateways'
@@ -161,7 +166,7 @@ export default function Environments() {
                 </Table>
             </Paper>
 
-            <Typography align='left' className={classes.headline}>
+            <Typography variant='h4' align='left' className={classes.mainTitle}>
                 <FormattedMessage
                     id='Apis.Details.Environments.Environments.Microgateways'
                     defaultMessage='Microgateways'
@@ -210,12 +215,16 @@ export default function Environments() {
                     </Table>
                 </Paper>) :
                 (
-                    <InlineMessage type='info' height={80} >
+                    <InlineMessage type='info' height={100} className={classes.emptyBox} >
                         <div className={classes.contentWrapper}>
                             <Typography component='p' className={classes.content}>
                                 <FormattedMessage
-                                    id='Apis.Details.Environments.microgateway.labels.empty'
+                                    id='Apis.Details.Environments.microgateway.labels.emptym1'
                                     defaultMessage='Microgateway labels are not available.'
+                                />
+                                <FormattedMessage
+                                    id='Apis.Details.Environments.microgateway.labels.emptym2'
+                                    defaultMessage=' You can request the administrator to add labels.'
                                 />
                             </Typography>
                         </div>
