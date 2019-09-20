@@ -399,7 +399,7 @@ export default function Configuration() {
                             />
                         </Typography>
                         <Paper className={classes.paperCenter} style={{ minHeight: paperHeight }}>
-                            <Link to='/apis/:api_uuid/endpoints'>
+                            <Link to={'/apis/' + api.id + '/endpoints'}>
                                 <Typography
                                     className={classes.subHeading}
                                     color='primary'
