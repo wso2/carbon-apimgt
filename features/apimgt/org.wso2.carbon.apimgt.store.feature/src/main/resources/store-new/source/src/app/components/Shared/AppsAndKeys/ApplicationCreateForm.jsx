@@ -20,7 +20,6 @@ import React from 'react';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -30,6 +29,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { FormLabel } from '@material-ui/core';
 import ChipInput from 'material-ui-chip-input';
+import FormHelperText from '@material-ui/core/FormHelperText';
 
 /**
  * @inheritdoc
@@ -159,14 +159,14 @@ const ApplicationCreate = (props) => {
                                     </MenuItem>
                                 ))}
                             </Select>
-                            <Typography variant='caption'>
+                            <FormHelperText>
                                 <FormattedMessage
                                     defaultMessage={`Assign API request quota per access token. 
                                     Allocated quota will be shared among all
                                     the subscribed APIs of the application.`}
                                     id='Shared.AppsAndKeys.ApplicationCreateForm.assign.api.request'
                                 />
-                            </Typography>
+                            </FormHelperText>
                         </FormControl>
                     )}
                     <FormControl margin='normal' className={classes.FormControlOdd}>
@@ -241,12 +241,12 @@ const ApplicationCreate = (props) => {
                     {isApplicationSharingEnabled && (
                         <FormControl margin='normal' className={classes.FormControl}>
                             <FormLabel component='legend'>
-                                <Typography variant='caption'>
+                                <FormHelperText>
                                     <FormattedMessage
                                         defaultMessage='Application Groups'
                                         id='Shared.AppsAndKeys.ApplicationCreateForm.add.groups.label'
                                     />
-                                </Typography>
+                                </FormHelperText>
                             </FormLabel>
                             <ChipInput
                                 {...applicationRequest}

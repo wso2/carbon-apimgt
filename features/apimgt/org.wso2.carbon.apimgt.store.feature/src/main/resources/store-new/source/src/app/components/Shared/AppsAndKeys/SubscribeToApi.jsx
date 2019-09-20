@@ -95,8 +95,8 @@ const subscribeToApi = (props) => {
     const { classes, throttlingPolicyList, applicationsAvailable } = props;
 
     useEffect(() => {
-        if (throttlingPolicyList) {
-            setPolicySelected(throttlingPolicyList[0]);
+        if (throttlingPolicyList && throttlingPolicyList[0]) {
+            setPolicySelected(throttlingPolicyList[0].tierName);
         }
     }, [throttlingPolicyList]);
 
@@ -190,14 +190,21 @@ const subscribeToApi = (props) => {
                                                 secondary={
                                                     policy.monetizationAttributes.pricePerRequest ? (
                                                         <Typography>
-                                                            {policy.monetizationAttributes.pricePerRequest} {` `}
-                                                            {policy.monetizationAttributes.currencyType} {` per `} 
+                                                            {policy.monetizationAttributes.pricePerRequest}
+                                                            {' '}
+                                                            {' '}
+                                                            {policy.monetizationAttributes.currencyType}
+                                                            {' '}
+                                                            {' per '}
                                                             {policy.monetizationAttributes.billingCycle}
                                                         </Typography>
                                                     ) : (
                                                         <Typography>
-                                                            {policy.monetizationAttributes.fixedPrice} {` `}
-                                                            {policy.monetizationAttributes.currencyType}{` per `}
+                                                            {policy.monetizationAttributes.fixedPrice}
+                                                            {' '}
+                                                            {' '}
+                                                            {policy.monetizationAttributes.currencyType}
+                                                            {' per '}
                                                             {policy.monetizationAttributes.billingCycle}
                                                         </Typography>
                                                     )}
