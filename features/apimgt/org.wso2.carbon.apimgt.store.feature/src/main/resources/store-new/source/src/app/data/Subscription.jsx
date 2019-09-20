@@ -60,5 +60,21 @@ export default class Subscription extends Resource {
         });
         return promised_delete_subscription;
     }
+
+    /**
+     * Get pending invoice
+     * @param subscriptionId id of the subscription
+     * @param {*} subscriptionId 
+     */
+    getPendingInvoice(subscriptionId) {
+        const promised_get_pending_invoice = this.client.then((client) => {
+            return client.apis["API Monetization"].get_subscriptions__subscriptionId__usage(
+                {
+                    subscriptionId: subscriptionId,
+                }
+            );
+        });
+        return promised_get_pending_invoice;
+    }
 }
 

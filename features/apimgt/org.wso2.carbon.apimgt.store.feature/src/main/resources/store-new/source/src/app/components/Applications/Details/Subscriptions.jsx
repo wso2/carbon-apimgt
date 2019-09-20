@@ -30,6 +30,13 @@ import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Divider from '@material-ui/core/Divider';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Dialog from '@material-ui/core/Dialog';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import Button from '@material-ui/core/Button';
+import DialogActions from '@material-ui/core/DialogActions';
+import Paper from '@material-ui/core/Paper';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Alert from 'AppComponents/Shared/Alert';
 import APIList from 'AppComponents/Apis/Listing/APICardView';
@@ -89,8 +96,12 @@ class Subscriptions extends React.Component {
             subscriptionsNotFound: false,
             isAuthorize: true,
             apiType: CONSTS.API_TYPE,
+            invoice: {},
+            showPopup: false,
         };
         this.handleSubscriptionDelete = this.handleSubscriptionDelete.bind(this);
+        this.handleGetPendingInvoice = this.handleGetPendingInvoice.bind(this);
+        this.handleClose = this.handleClose.bind(this);
         this.updateSubscriptions = this.updateSubscriptions.bind(this);
         this.updateUnsubscribedAPIsList = this.updateUnsubscribedAPIsList.bind(this);
         this.handleSubscribe = this.handleSubscribe.bind(this);
@@ -197,7 +208,33 @@ class Subscriptions extends React.Component {
             });
     }
 
+    /**
+     * Handle closing the popup
+     *
+     * */
+    handleClose() {
+        this.setState({ showPopup: false });
+    }
 
+    /**
+     * Handle view invoice for metered billing
+     * @param {*} subscriptionId subscription id
+     * @memberof Subscriptions
+     */
+    handleGetPendingInvoice(subscriptionId) {
+        this.setState({ showPopup: true, invoice: {} });
+        const client = new Subscription();
+        const promisedInvoice = client.getPendingInvoice(subscriptionId);
+        promisedInvoice.then((response) => {
+            if (response.status !== 200) {
+                this.setState({ invoice: response.properties });
+            }
+            this.setState({ invoice: response.properties });
+        }).catch((error) => {
+            this.setState({showPopup: true})
+        });
+    }
+    
     /**
      *
      * Update list of unsubscribed APIs
@@ -293,8 +330,7 @@ class Subscriptions extends React.Component {
      * @memberof Subscriptions
      */
     render() {
-        const { isAuthorize } = this.state;
-
+        const { isAuthorize, showPopup, invoice } = this.state;
         if (!isAuthorize) {
             window.location = '/store-new/services/configs';
         }
@@ -333,7 +369,7 @@ class Subscriptions extends React.Component {
                     </div>
 
                     <Grid container className='tab-grid' spacing={16}>
-                        <Grid item xs={6} className={classes.cardGrid}>
+                        <Grid item xs={5} className={classes.cardGrid}>
                             <APIList
                                 apisNotFound={apisNotFound}
                                 unsubscribedAPIList={unsubscribedAPIList}
@@ -341,7 +377,7 @@ class Subscriptions extends React.Component {
                                 handleSubscribe={(app, api, policy) => this.handleSubscribe(app, api, policy)}
                             />
                         </Grid>
-                        <Grid item xs={6} xl={10}>
+                        <Grid item xs={7} xl={10}>
                             <Card className={classes.card}>
                                 <CardActions>
                                     <Typography variant='h6' gutterBottom className={classes.cardTitle}>
@@ -385,6 +421,18 @@ class Subscriptions extends React.Component {
                                                                     defaultMessage='Action'
                                                                 />
                                                             </TableCell>
+                                                            <TableCell>
+                                                                <FormattedMessage
+                                                                    id='Applications.Details.Subscriptions.invoice'
+                                                                    defaultMessage='Invoice'
+                                                                />
+                                                                <Typography component='p' variant='body1'>
+                                                                    <FormattedMessage
+                                                                        id='Applications.Details.Subscriptions.SubscriptionsTable.invoice.sub'
+                                                                        defaultMessage='(metered billing)'
+                                                                    />
+                                                                </Typography>
+                                                            </TableCell>
                                                         </TableRow>
                                                     </TableHead>
                                                     <TableBody>
@@ -395,6 +443,9 @@ class Subscriptions extends React.Component {
                                                                     subscription={subscription}
                                                                     handleSubscriptionDelete={
                                                                         this.handleSubscriptionDelete
+                                                                    }
+                                                                    handleGetPendingInvoice={
+                                                                        this.handleGetPendingInvoice
                                                                     }
                                                                 />
                                                             );
@@ -407,6 +458,27 @@ class Subscriptions extends React.Component {
                             </Card>
                         </Grid>
                     </Grid>
+                    <Dialog
+                        open={showPopup}
+                        keepMounted
+                        onClose={this.handleClose}
+                        aria-labelledby="alert-dialog-slide-title"
+                        aria-describedby="alert-dialog-slide-description"
+                    >
+                        <DialogTitle id="alert-dialog-slide-title">
+                            Error
+                        </DialogTitle>
+                        <DialogContent>
+                            <DialogContentText id="alert-dialog-description">
+                                Please configure monetization to view invoice!
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={this.handleClose} color="primary">
+                                Close
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
                 </div>
             );
         } else {

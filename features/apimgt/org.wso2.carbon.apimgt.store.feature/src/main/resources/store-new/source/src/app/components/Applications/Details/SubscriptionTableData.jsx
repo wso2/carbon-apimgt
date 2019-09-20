@@ -52,6 +52,7 @@ class SubscriptionTableData extends React.Component {
         this.handleRequestClose = this.handleRequestClose.bind(this);
         this.handleRequestOpen = this.handleRequestOpen.bind(this);
         this.handleRequestDelete = this.handleRequestDelete.bind(this);
+        this.handleRequestInvoice = this.handleRequestInvoice.bind(this);
     }
 
     /**
@@ -83,6 +84,18 @@ class SubscriptionTableData extends React.Component {
         this.setState({ openMenu: false });
         if (handleSubscriptionDelete) {
             handleSubscriptionDelete(subscriptionId);
+        }
+    }
+
+    /**
+     * Handle onclick for view invoice
+     * @param {*} subscriptionId subscription id
+     * @memberof SubscriptionTableData
+     */
+    handleRequestInvoice(subscriptionId) {
+        const { handleGetPendingInvoice } = this.props;
+        if (handleGetPendingInvoice) {
+            handleGetPendingInvoice(subscriptionId);
         }
     }
 
@@ -149,6 +162,22 @@ class SubscriptionTableData extends React.Component {
                                 </Button>
                             </DialogActions>
                         </Dialog>
+                    </div>
+                </TableCell>
+                <TableCell>
+                    <div>
+                        <Button
+                            variant='outlined'
+                            size='small'
+                            color='primary'
+                            onClick={() => this.handleRequestInvoice(subscriptionId)}
+                            disabled={(false)}
+                        >
+                            <FormattedMessage
+                                id='Applications.Details.SubscriptionTableData.view.subscription.invoice'
+                                defaultMessage='View Invoice'
+                            />
+                        </Button>
                     </div>
                 </TableCell>
             </TableRow>
