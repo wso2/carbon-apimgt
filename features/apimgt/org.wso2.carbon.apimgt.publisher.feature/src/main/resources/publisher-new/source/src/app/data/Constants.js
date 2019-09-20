@@ -24,6 +24,7 @@ const CONSTS = {
         NO_TOKEN_FOUND: '901401: No partial token found!',
     },
     TENANT_STATE_ACTIVE: 'ACTIVE',
+    DEFAULT_GATEWAY_ENVIRONMENTS: 'Production and Sandbox',
 };
 
 export default CONSTS;

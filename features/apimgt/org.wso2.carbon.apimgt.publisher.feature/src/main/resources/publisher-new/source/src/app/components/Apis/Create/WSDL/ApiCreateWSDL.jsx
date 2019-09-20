@@ -33,6 +33,7 @@ import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm'
 import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
 
 import ProvideWSDL from './Steps/ProvideWSDL';
+import CONSTS from 'AppData/Constants';
 
 /**
  * Handle API creation from WSDL.
@@ -126,8 +127,8 @@ export default function ApiCreateWSDL(props) {
                 },
             };
         }
-        additionalProperties.gatewayEnvironments = ['Production and Sandbox'];
-        
+        additionalProperties.gatewayEnvironments = [CONSTS.DEFAULT_GATEWAY_ENVIRONMENTS];
+
         let promisedWSDLImport;
         if (apiInputs.inputType === 'url') {
             promisedWSDLImport = Wsdl.importByUrl(apiInputs.inputValue, additionalProperties, apiInputs.type);
