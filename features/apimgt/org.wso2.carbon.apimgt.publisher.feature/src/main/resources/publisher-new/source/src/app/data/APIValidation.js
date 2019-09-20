@@ -86,6 +86,7 @@ const definition = {
     apiVersion: Joi.string().regex(/^[a-zA-Z0-9.]{1,30}$/),
     apiContext: Joi.string().regex(/^[a-zA-Z0-9{}/]{1,30}$/),
     role: roleSchema.systemRole().role(),
+    url: Joi.string().uri(),
     userRole: userRoleSchema.userRole().role(),
     apiParameter: apiSchema.api().isAPIParameterExist(),
     apiDocument: documentSchema.document().isDocumentPresent(),
