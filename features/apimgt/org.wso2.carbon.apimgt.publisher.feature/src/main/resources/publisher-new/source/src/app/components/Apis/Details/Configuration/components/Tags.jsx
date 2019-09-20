@@ -23,6 +23,7 @@ import Typography from '@material-ui/core/Typography';
 import ChipInput from 'material-ui-chip-input';
 import { FormattedMessage } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 /**
  *
@@ -33,6 +34,8 @@ import { isRestricted } from 'AppData/AuthManager';
  */
 export default function Tags(props) {
     const { api, configDispatcher } = props;
+    const [apiFromContext] = useAPI();
+
     return (
         <React.Fragment>
             <Grid container>
@@ -46,7 +49,7 @@ export default function Tags(props) {
                 </Grid>
                 <Grid item xs={12}>
                     <ChipInput
-                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], apiFromContext)}
                         value={api.tags}
                         helperText={(
                             <FormattedMessage

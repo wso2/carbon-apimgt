@@ -56,6 +56,7 @@ export default function APISecurity(props) {
     const {
         api: { securityScheme, id },
         configDispatcher,
+        api,
     } = props;
     const haveMultiLevelSecurity =
         securityScheme.includes(API_SECURITY_MUTUAL_SSL) &&
@@ -105,10 +106,13 @@ export default function APISecurity(props) {
                     haveMultiLevelSecurity={haveMultiLevelSecurity}
                     securityScheme={securityScheme}
                     configDispatcher={configDispatcher}
+                    api={api}
+                    id={id}
                 />
                 <ApplicationLevel
                     haveMultiLevelSecurity={haveMultiLevelSecurity}
                     securityScheme={securityScheme}
+                    api={api}
                     configDispatcher={configDispatcher}
                     id={id}
                 />

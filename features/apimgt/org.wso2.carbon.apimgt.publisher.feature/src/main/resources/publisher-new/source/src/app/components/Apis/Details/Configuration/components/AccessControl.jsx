@@ -37,6 +37,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import Chip from '@material-ui/core/Chip';
 import { red } from '@material-ui/core/colors/';
 import Alert from 'AppComponents/Shared/Alert';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 /**
  *
@@ -49,6 +50,8 @@ export default function AccessControl(props) {
     const [roleValidity, setRoleValidity] = useState(true);
     const [userRoleValidity, setUserRoleValidity] = useState(true);
     const { api, configDispatcher } = props;
+    const isNone = api.accessControl === 'NONE';
+    const [apiFromContext] = useAPI();
 
     const [invalidRoles, setInvalidRoles] = useState([]);
     useEffect(() => {
@@ -132,7 +135,7 @@ export default function AccessControl(props) {
                         />
                     </InputLabel>
                     <Select
-                        disabled={isRestricted(['apim:api_create'], api)}
+                        disabled={isRestricted(['apim:api_create'], apiFromContext)}
                         value={api.accessControl}
                         onChange={({ target: { value } }) => configDispatcher({ action: 'accessControl', value })}
                         input={<Input name='accessControl' id='accessControl-selector' />}
@@ -198,10 +201,11 @@ export default function AccessControl(props) {
                     <HelpOutline />
                 </Tooltip>
             </Grid>
-            {isRestricted && (
+
+            {!isNone && (
                 <Grid item>
                     <ChipInput
-                        disabled={isRestricted(['apim:api_create'], api)}
+                        disabled={isRestricted(['apim:api_create'], apiFromContext)}
                         value={api.accessControlRoles.concat(invalidRoles)}
                         alwaysShowPlaceholder={false}
                         placeholder='Enter roles and press Enter'
