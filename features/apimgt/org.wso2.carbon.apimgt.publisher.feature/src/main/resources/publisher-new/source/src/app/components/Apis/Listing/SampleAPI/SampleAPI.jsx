@@ -89,24 +89,22 @@ class SampleAPI extends Component {
         const { intl } = this.props;
         this.setState({ deploying: true });
         const promisedSampleAPI = this.createSampleAPI();
+        let api;
         const swaggerUpdatePromise = promisedSampleAPI.then((sampleAPI) => {
-            Alert.info(intl.formatMessage({
-                id: 'Apis.Listing.SampleAPI.SampleAPI.created',
-                defaultMessage: 'Sample PizzaShackAPI API created successfully',
-            }));
-            return sampleAPI.updateSwagger(getSampleSwagger('Unlimited'));
+            api = sampleAPI;
+            return api.updateSwagger(getSampleSwagger('Unlimited'));
         });
         swaggerUpdatePromise.catch((error) => {
             console.error(error);
             Alert.error(error);
         });
-        swaggerUpdatePromise.then((api) => {
+        swaggerUpdatePromise.then(() => {
             api.publish()
                 .then(() => {
                     this.setState({ published: true, api });
                     Alert.info(intl.formatMessage({
-                        id: 'Apis.Listing.SampleAPI.SampleAPI.published',
-                        defaultMessage: 'PizzaShackAPI API published successfully',
+                        id: 'Apis.Listing.SampleAPI.SampleAPI.created',
+                        defaultMessage: 'Sample PizzaShackAPI API created successfully',
                     }));
                 })
                 .catch((error) => {
