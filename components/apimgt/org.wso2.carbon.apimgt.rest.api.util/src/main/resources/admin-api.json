@@ -105,6 +105,12 @@
           "roles": "admin",
           "name": "apim:api_workflow",
           "key": "apim:api_workflow"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:bot_data",
+          "key": "apim:bot_data"
         }
       ]
     }
