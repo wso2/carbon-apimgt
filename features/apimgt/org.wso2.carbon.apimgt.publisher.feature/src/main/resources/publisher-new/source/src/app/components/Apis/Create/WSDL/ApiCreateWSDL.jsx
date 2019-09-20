@@ -129,7 +129,6 @@ export default function ApiCreateWSDL(props) {
             };
         }
         additionalProperties.gatewayEnvironments = settings.environment;
-        
         let promisedWSDLImport;
         if (apiInputs.inputType === 'url') {
             promisedWSDLImport = Wsdl.importByUrl(apiInputs.inputValue, additionalProperties, apiInputs.type);
