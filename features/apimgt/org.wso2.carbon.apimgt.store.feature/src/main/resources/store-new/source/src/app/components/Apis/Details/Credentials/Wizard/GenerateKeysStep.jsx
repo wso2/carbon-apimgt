@@ -22,8 +22,8 @@ import Tab from '@material-ui/core/Tab';
 import KeyConfiguration from 'AppComponents/Shared/AppsAndKeys/KeyConfiguration';
 import Application from 'AppData/Application';
 import { injectIntl } from 'react-intl';
-import ButtonPanel from './ButtonPanel';
 import API from "AppData/api";
+import ButtonPanel from './ButtonPanel';
 
 const generateKeysStep = (props) => {
     const keyStates = {
@@ -117,7 +117,7 @@ const generateKeysStep = (props) => {
 
     return (
         <React.Fragment>
-            <Tabs value={tab} onChange={handleTabChange} fullWidth indicatorColor='secondary' textColor='secondary'>
+            <Tabs value={tab} onChange={handleTabChange} variant='fullWidth' indicatorColor='secondary' textColor='secondary'>
                 <Tab label={intl.formatMessage({
                     defaultMessage: 'PRODUCTION',
                     id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.production',
