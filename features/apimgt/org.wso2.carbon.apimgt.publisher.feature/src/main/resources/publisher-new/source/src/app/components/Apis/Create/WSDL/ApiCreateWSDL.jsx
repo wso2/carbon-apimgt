@@ -126,7 +126,8 @@ export default function ApiCreateWSDL(props) {
                 },
             };
         }
-
+        additionalProperties.gatewayEnvironments = ['Production and Sandbox'];
+        
         let promisedWSDLImport;
         if (apiInputs.inputType === 'url') {
             promisedWSDLImport = Wsdl.importByUrl(apiInputs.inputValue, additionalProperties, apiInputs.type);
