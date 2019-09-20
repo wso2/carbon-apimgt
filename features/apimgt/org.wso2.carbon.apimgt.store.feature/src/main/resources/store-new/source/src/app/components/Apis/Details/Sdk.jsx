@@ -46,7 +46,7 @@ class Sdk extends React.Component {
             items: null,
         };
         const { match, apiId } = this.props;
-        this.api_uuid = match ? match.params.api_uuid : apiId;
+        this.api_uuid = match ? match.params.apiUuid : apiId;
         this.filter_threshold = 5;
         this.getSdkForApi = this.getSdkForApi.bind(this);
         this.handleClick = this.handleClick.bind(this);
