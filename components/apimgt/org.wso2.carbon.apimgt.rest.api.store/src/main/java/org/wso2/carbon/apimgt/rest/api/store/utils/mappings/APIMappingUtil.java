@@ -70,16 +70,29 @@ public class APIMappingUtil {
 
     public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
             throws APIManagementException, UnsupportedEncodingException {
-        APIIdentifier apiIdentifier;
-        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-        if (RestApiUtil.isUUID(apiId)) {
-            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain).getId();
-        } else {
-            apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId)).getId();
-        }
-        return  apiIdentifier;
+        return getAPIInfoFromApiIdOrUUID(apiId, requestedTenantDomain).getId();
     }
 
+    /**
+     * Returns an API with minimal info given the uuid or the id in {provider}-{api}-{version} format
+     *
+     * @param apiId                 uuid or the id in {provider}-{api}-{version} format
+     * @param requestedTenantDomain tenant domain of the API
+     * @return API which represents the given id
+     * @throws APIManagementException
+     */
+    public static API getAPIInfoFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+            throws APIManagementException, UnsupportedEncodingException {
+        API api;
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+        if (RestApiUtil.isUUID(apiId)) {
+            api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
+        } else {
+            api = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId));
+        }
+
+        return api;
+    }
     public static APIDTO fromAPItoDTO(API model, String tenantDomain) throws APIManagementException {
 
         APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
