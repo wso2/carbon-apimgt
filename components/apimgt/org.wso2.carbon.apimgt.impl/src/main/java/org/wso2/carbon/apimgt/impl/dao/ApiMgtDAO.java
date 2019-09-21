@@ -5647,6 +5647,7 @@ public class ApiMgtDAO {
                         } else {
                             subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
                         }
+                        apiTypeWrapper.setTier(info.tierId);
                         int subscriptionId = addSubscription(apiTypeWrapper, info.applicationId, subscriptionStatus);
                         if (subscriptionId == -1) {
                             String msg = "Unable to add a new subscription for the API: " + apiIdentifier.getName() +
@@ -5698,6 +5699,7 @@ public class ApiMgtDAO {
                         } else {
                             subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
                         }
+                        apiTypeWrapper.setTier(rs.getString("TIER_ID"));
                         addSubscription(apiTypeWrapper, applicationId, subscriptionStatus);
                         // catching the exception because when copy the api without the option "require re-subscription"
                         // need to go forward rather throwing the exception
