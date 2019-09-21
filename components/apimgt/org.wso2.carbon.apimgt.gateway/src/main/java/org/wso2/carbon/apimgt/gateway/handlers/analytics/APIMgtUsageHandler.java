@@ -54,7 +54,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
                 APIConstants.GRAPHQL_API.equals(mc.getProperty(APIConstants.API_TYPE).toString())) {
             ((Axis2MessageContext) mc).getAxis2MessageContext().
                     setProperty(Constants.Configuration.HTTP_METHOD, mc.getProperty(APIConstants.HTTP_VERB));
-            mc.setProperty(APIConstants.API_ELECTED_RESOURCE, "/*");
+            mc.setProperty(APIConstants.API_ELECTED_RESOURCE, APIConstants.GRAPHQL_RESOURCE_PATH);
         }
 
         if (Util.tracingEnabled()) {
