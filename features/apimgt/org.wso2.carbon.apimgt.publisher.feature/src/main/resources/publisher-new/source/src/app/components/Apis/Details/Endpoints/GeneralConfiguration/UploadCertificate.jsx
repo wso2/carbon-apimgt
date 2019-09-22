@@ -38,7 +38,7 @@ import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import SelectPolicies from '../../../Create/Components/SelectPolicies';
 
 const dropzoneStyles = {
-    border: '1px dashed ',
+    border: '1px dashed #c4c4c4',
     borderRadius: '5px',
     cursor: 'pointer',
     height: 75,
