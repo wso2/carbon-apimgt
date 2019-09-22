@@ -295,7 +295,9 @@ public class OAS3Parser extends APIDefinition {
                 itr.remove();
             }
         }
-        if (!APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
+        if (APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
+            modifyGraphQLSwagger(openAPI);
+        } else {
             //adding new operations to the definition
             for (SwaggerData.Resource resource : copy) {
                 addOrUpdatePathToSwagger(openAPI, resource);
