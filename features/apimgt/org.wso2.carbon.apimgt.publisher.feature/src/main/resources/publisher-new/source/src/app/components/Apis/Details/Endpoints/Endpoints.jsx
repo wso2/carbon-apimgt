@@ -145,9 +145,8 @@ function Endpoints(props) {
                             }),
                         };
                     }
-                } else {
-                    isValidEndpoint = true;
                 }
+                isValidEndpoint = true;
             } else if (endpointConfig.production_endpoints && !endpointConfig.sandbox_endpoints) {
                 isValidEndpoint = endpointConfig.production_endpoints.url !== '';
             } else if (endpointConfig.sandbox_endpoints && !endpointConfig.production_endpoints) {
