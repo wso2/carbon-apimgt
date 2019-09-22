@@ -39,7 +39,7 @@ const styles = theme => ({
     suggestionsContainerOpen: {
         display: 'block',
         position: 'absolute',
-        width: '415px',
+        width: '535px',
         zIndex: theme.zIndex.modal + 1,
     },
     suggestion: {

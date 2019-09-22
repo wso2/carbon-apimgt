@@ -23,7 +23,7 @@ import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import Configurations from 'Config';
 import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
 import APIs from './Apis';
-import ApiCreate from './Create/ApiCreate';
+import APICreateRoutes from './Create/APICreateRoutes';
 
 import { PageNotFound } from '../Base/Errors';
 
@@ -69,7 +69,7 @@ describe('Test APIs main routing component', () => {
         );
 
         const wrapper = mountWithIntl(createAPI);
-        expect(wrapper.find(ApiCreate)).toHaveLength(1);
+        expect(wrapper.find(APICreateRoutes)).toHaveLength(1);
 
         // Page not found is expected here, Because we are navigating to exact /apis/create path
         const pageNotFoundWrapper = wrapper.find(PageNotFound);

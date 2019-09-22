@@ -17,10 +17,7 @@
  */
 
 import React from 'react';
-import List from '@material-ui/core/List';
 import Avatar from '@material-ui/core/Avatar';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import Person from '@material-ui/icons/Person';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
@@ -45,7 +42,7 @@ const styles = theme => ({
         height: 25,
     },
 });
-const LifeCycleHistory = props => {
+const LifeCycleHistory = (props) => {
     const { classes } = props;
     return (
         <Paper>
@@ -56,7 +53,10 @@ const LifeCycleHistory = props => {
                             <FormattedMessage id='Apis.Details.LifeCycle.LifeCycleHistory.user' defaultMessage='User' />
                         </TableCell>
                         <TableCell>
-                            <FormattedMessage id='Apis.Details.LifeCycle.LifeCycleHistory.action' defaultMessage='Action' />
+                            <FormattedMessage
+                                id='Apis.Details.LifeCycle.LifeCycleHistory.action'
+                                defaultMessage='Action'
+                            />
                         </TableCell>
                         <TableCell>
                             <FormattedMessage id='Apis.Details.LifeCycle.LifeCycleHistory.time' defaultMessage='Time' />
@@ -64,33 +64,34 @@ const LifeCycleHistory = props => {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {props.lcHistory.map(
-                        entry =>
-                            entry.previousState && (
-                                <TableRow key={entry.postState}>
-                                    <TableCell component="th" scope="row">
-                                        <Avatar className={classes.avatar}>
-                                            <Person className={classes.personIcon} />
-                                        </Avatar>
-                                        <div>{entry.user}</div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {<FormattedMessage
+                    {props.lcHistory.map(entry =>
+                        entry.previousState && (
+                            <TableRow key={entry.postState}>
+                                <TableCell component='th' scope='row'>
+                                    <Avatar className={classes.avatar}>
+                                        <Person className={classes.personIcon} />
+                                    </Avatar>
+                                    <div>{entry.user}</div>
+                                </TableCell>
+                                <TableCell>
+                                    {
+                                        <FormattedMessage
                                             id='Apis.Details.LifeCycle.LifeCycleHistory.lifecycle.state.history'
                                             defaultMessage='LC has changed from {previous} to {post}'
                                             values={{ previous: entry.previousState, post: entry.postState }}
-                                        />}
-                                    </TableCell>
-                                    <TableCell>{moment(entry.updatedTime).fromNow()}</TableCell>
-                                </TableRow>
-                            ),
-                    )}
+                                        />
+                                    }
+                                </TableCell>
+                                <TableCell>{moment(entry.updatedTime).fromNow()}</TableCell>
+                            </TableRow>
+                        ))}
                 </TableBody>
             </Table>
         </Paper>
     );
 };
 LifeCycleHistory.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    lcHistory: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
 };
 export default withStyles(styles)(LifeCycleHistory);

@@ -189,6 +189,7 @@ export default function UploadCertificate(props) {
                                 placeholder='Endpoint'
                                 onChange={event => setEndpoint(event.target.value)}
                                 margin='normal'
+                                variant='outlined'
                                 fullWidth
                             />
                         }
