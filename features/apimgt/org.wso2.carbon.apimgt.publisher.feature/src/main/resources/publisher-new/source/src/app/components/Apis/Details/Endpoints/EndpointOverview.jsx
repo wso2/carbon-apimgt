@@ -394,9 +394,10 @@ function EndpointOverview(props) {
      * @param {string} category The endpoint category (production/ sandbox)
      * */
     const removeEndpoint = (index, epType, category) => {
+        const tmpEndpointConfig = cloneDeep(epConfig);
         const endpointConfigProperty = getEndpointTypeProperty(epType, category);
         const indexToRemove = epType === 'failover' ? index - 1 : index;
-        const tmpEndpoints = epConfig[endpointConfigProperty];
+        const tmpEndpoints = tmpEndpointConfig[endpointConfigProperty];
         tmpEndpoints.splice(indexToRemove, 1);
         setEpConfig({ ...epConfig, [endpointConfigProperty]: tmpEndpoints });
     };
