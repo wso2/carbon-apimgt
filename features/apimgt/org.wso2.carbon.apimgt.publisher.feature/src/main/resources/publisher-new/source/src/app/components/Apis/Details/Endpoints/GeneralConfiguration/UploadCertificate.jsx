@@ -35,6 +35,7 @@ import Dropzone from 'react-dropzone';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import SelectEndpoint from 'AppComponents/Apis/Details/Endpoints/GeneralConfiguration/SelectEndpoint';
 import SelectPolicies from '../../../Create/Components/SelectPolicies';
 
 const dropzoneStyles = {
@@ -95,6 +96,7 @@ const useStyles = makeStyles(theme => ({
  */
 export default function UploadCertificate(props) {
     const {
+        endpoints,
         uploadCertificate,
         isMutualSSLEnabled,
         uploadCertificateOpen,
@@ -176,24 +178,20 @@ export default function UploadCertificate(props) {
                                 required
                             />
                         ) :
-                            <TextField
-                                required
-                                id='certificateEndpoint'
-                                label={
+                            <SelectEndpoint
+                                endpoints={endpoints}
+                                onChange={setEndpoint}
+                                endpoint={endpoint}
+                                helperText={
                                     <FormattedMessage
-                                        id='Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.endpoint'
-                                        defaultMessage='Endpoint'
+                                        id={'Apis.Details.Endpoints.GeneralConfiguration.UploadCertificate.' +
+                                        'select.an.endpoint.for.certificate'}
+                                        defaultMessage='Select an Endpoint for the certificate'
                                     />
                                 }
-                                value={endpoint}
-                                placeholder='Endpoint'
-                                onChange={event => setEndpoint(event.target.value)}
-                                margin='normal'
-                                variant='outlined'
-                                fullWidth
+                                required
                             />
                         }
-
                         <TextField
                             required
                             id='certificateAlias'
@@ -299,6 +297,7 @@ export default function UploadCertificate(props) {
 
 UploadCertificate.defaultProps = {
     isMutualSSLEnabled: false,
+    endpoints: [],
 };
 
 UploadCertificate.propTypes = {
@@ -307,5 +306,5 @@ UploadCertificate.propTypes = {
     isMutualSSLEnabled: PropTypes.bool,
     setUploadCertificateOpen: PropTypes.func.isRequired,
     uploadCertificateOpen: PropTypes.bool.isRequired,
-
+    endpoints: PropTypes.shape([]),
 };

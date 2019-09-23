@@ -368,6 +368,7 @@ function GeneralConfiguration(props) {
                             hidden={endpointType.key === 'default' || endpointType.key === 'awslambda'}
                         >
                             <Certificates
+                                endpoints={endpointsToList(epConfig)}
                                 certificates={endpointCertificates}
                                 uploadCertificate={saveCertificate}
                                 deleteCertificate={deleteCertificate}
