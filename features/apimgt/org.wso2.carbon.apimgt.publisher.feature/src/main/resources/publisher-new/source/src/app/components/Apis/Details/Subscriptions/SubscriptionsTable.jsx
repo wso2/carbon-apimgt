@@ -692,8 +692,8 @@ class SubscriptionsTable extends Component {
                                                     defaultMessage='Not Registered'
                                                 />
                                             ) : (
-                                                    invoice.customer_email
-                                                )
+                                                invoice.customer_email
+                                            )
                                         }
                                     </TableCell>
                                 </TableRow>
