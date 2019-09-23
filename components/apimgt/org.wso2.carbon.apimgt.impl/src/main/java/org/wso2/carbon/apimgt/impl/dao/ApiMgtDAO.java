@@ -13205,9 +13205,11 @@ public class ApiMgtDAO {
         String loginUserName = getLoginUserName(userId);
         int tenantId = APIUtil.getTenantId(loginUserName);
 
-        String sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_BY_APP_SQL;
+        String sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_BY_APP_SQL + "  UNION  " +
+                SQLConstants.GET_SUBSCRIBED_API_PRODUCTS_OF_USER_BY_APP_SQL;
         if (forceCaseInsensitiveComparisons) {
-            sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_BY_APP_CASE_INSENSITIVE_SQL;
+            sqlQuery = SQLConstants.GET_SUBSCRIBED_APIS_OF_USER_BY_APP_CASE_INSENSITIVE_SQL + "  UNION  " +
+            SQLConstants.GET_SUBSCRIBED_API_PRODUCTS_OF_USER_BY_APP_CASE_INSENSITIVE_SQL;
         }
 
         try {
@@ -13215,6 +13217,8 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, tenantId);
             ps.setString(2, applicationName);
+            ps.setInt(3, tenantId);
+            ps.setString(4, applicationName);
             rs = ps.executeQuery();
             while (rs.next()) {
                 APISubscriptionInfoDTO infoDTO = new APISubscriptionInfoDTO();

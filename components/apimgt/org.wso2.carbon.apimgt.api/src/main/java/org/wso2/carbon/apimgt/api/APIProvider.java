@@ -1171,7 +1171,14 @@ public interface APIProvider extends APIManager {
      * @return UUID of the api product
      * @throws APIManagementException exception
      */
-    void addAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException;
+    void addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException;
+
+    /**
+     * Publish API Product to Gateway
+     * @param product product object containing details of the product
+     * @throws FaultGatewaysException
+     */
+    void saveToGateway(APIProduct product) throws FaultGatewaysException, APIManagementException;
 
     /**
      * Delete an API Product
