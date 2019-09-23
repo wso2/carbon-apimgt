@@ -33,6 +33,9 @@ const useStyles = makeStyles(theme => ({
     button: {
         margin: theme.spacing.unit,
     },
+    emptyBox: {
+        marginTop: theme.spacing.unit * 2,
+    },
 }));
 
 /**
@@ -63,10 +66,13 @@ function Subscriptions(props) {
 
     return (
         <div>
+            {tenants !== 0 && (
+                <SubscriptionAvailability api={api} updateAPI={updateAPI} />
+            )}
             {subscriptions !== 0 ? (
                 <SubscriptionsTable api={api} />
             ) : (
-                <InlineMessage type='info' height={80} >
+                <InlineMessage type='info' height={80} className={classes.emptyBox}>
                     <div className={classes.contentWrapper}>
                         <Typography component='p' className={classes.content}>
                             <FormattedMessage
@@ -77,10 +83,7 @@ function Subscriptions(props) {
                     </div>
                 </InlineMessage>
             )}
-            <SubscriptionPoliciesManage api={api} updateAPI={updateAPI} />
-            {tenants !== 0 && (
-                <SubscriptionAvailability api={api} updateAPI={updateAPI} />
-            )}
+            <SubscriptionPoliciesManage api={api} updateAPI={updateAPI} />           
         </div>
     );
 }

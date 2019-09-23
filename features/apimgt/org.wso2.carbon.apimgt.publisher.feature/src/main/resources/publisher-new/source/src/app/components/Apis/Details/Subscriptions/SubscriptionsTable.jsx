@@ -118,6 +118,7 @@ const styles = theme => ({
     },
     mainTitle: {
         paddingLeft: 0,
+        marginTop: theme.spacing.unit * 2,
     },
     titleWrapper: {
         display: 'flex',
@@ -164,18 +165,14 @@ const tableHeaders = (
                 />
             </ScopeValidation>
         </TableCell>
-        <TableCell>
-            <FormattedMessage
-                id='Apis.Details.Subscriptions.SubscriptionsTable.invoice.heading'
-                defaultMessage='Invoice'
-            />
-            <Typography component='p' variant='body1'>
+        <Tooltip title='Only for Usage based plans'>
+            <TableCell>
                 <FormattedMessage
-                    id='Apis.Details.Subscriptions.SubscriptionsTable.invoice.sub'
-                    defaultMessage='(Only for Usage based plans)'
+                    id='Apis.Details.Subscriptions.SubscriptionsTable.invoice.heading'
+                    defaultMessage='Invoice'
                 />
-            </Typography>
-        </TableCell>
+            </TableCell>
+        </Tooltip>
     </TableRow>
 );
 
@@ -695,8 +692,8 @@ class SubscriptionsTable extends Component {
                                                     defaultMessage='Not Registered'
                                                 />
                                             ) : (
-                                                invoice.customer_email
-                                            )
+                                                    invoice.customer_email
+                                                )
                                         }
                                     </TableCell>
                                 </TableRow>
