@@ -8166,7 +8166,7 @@ public class ApiMgtDAO {
     /**
      * Retrieves the IDs of pending subscriptions of a given API
      * @param apiId API Identifier
-     * @return  set of subscriptions ids
+     * @return set of subscriptions ids
      * @throws APIManagementException
      */
     public Set<Integer> getPendingSubscriptionsByAPIId(APIIdentifier apiId) throws APIManagementException {
@@ -8188,7 +8188,7 @@ public class ApiMgtDAO {
                 pendingSubscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
             }
         } catch (SQLException e) {
-            handleException("Error occurred while retrieving subscription entries for " + "API : " + apiId, e);
+            handleException("Error occurred while retrieving subscription entries for API : " + apiId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }

@@ -1689,7 +1689,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         } else { // API Status : RETIRED or CREATED
                             Map<String, String> failedToRemoveEnvironments = failedGatewaysMap;
                             if(!APIConstants.CREATED.equals(newStatus)) {
-                                cleanUpPendingSubscriptionCreationTasks(api.getId());
+                                cleanUpPendingSubscriptionCreationProcessesByAPI(api.getId());
                                 apiMgtDAO.removeAllSubscriptions(api.getId());
                             }
                             if (!failedToRemoveEnvironments.isEmpty()) {
@@ -6105,13 +6105,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Clean up pending subscriptions of a given API
-     * @param apiId
+     * Clean-up pending subscriptions of a given API
+     *
+     * @param apiId API Identifier
      * @throws APIManagementException
      */
-    private void cleanUpPendingSubscriptionCreationTasks(APIIdentifier apiId) throws APIManagementException {
-        WorkflowExecutor createSubscriptionWFExecutor =
-                getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+    private void cleanUpPendingSubscriptionCreationProcessesByAPI(APIIdentifier apiId) throws APIManagementException {
+
+        WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(
+                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
         Set<Integer> pendingSubscriptions = apiMgtDAO.getPendingSubscriptionsByAPIId(apiId);
         String workflowExtRef = null;
 
@@ -6120,13 +6122,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(subscription);
                 createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
             } catch (APIManagementException ex) {
-
-                // failed cleanup processes are ignored to prevent failing the application removal process
-                log.warn("Failed to get external workflow reference for subscription " + subscription);
+                // failed clean-up processes are ignored to prevent failures in API state change flow
+                log.warn("Failed to retrieve external workflow reference for subscription for subscription ID: "
+                        + subscription);
             } catch (WorkflowException ex) {
-
-                // failed cleanup processes are ignored to prevent failing the application removal process
-                log.warn("Failed to clean pending subscription approval task: " + subscription);
+                // failed clean-up processes are ignored to prevent failures in API state change flow
+                log.warn("Failed to clean-up pending subscription approval task for subscription ID: " + subscription);
             }
         }
     }
