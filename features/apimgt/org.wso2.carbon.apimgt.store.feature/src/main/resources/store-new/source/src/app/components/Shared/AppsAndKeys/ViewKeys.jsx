@@ -287,7 +287,7 @@ class ViewKeys extends React.Component {
         return consumerKey ? (
             <React.Fragment>
                 <div className={classes.inputWrapper}>
-                    <Grid container spacing={24} className={classes.gridWrapper}>
+                    <Grid container spacing={3} className={classes.gridWrapper}>
                         <Grid item xs={6}>
                             <InputLabel htmlFor='adornment-amount'>
                                 <FormattedMessage

@@ -126,7 +126,7 @@ class ViewToken extends React.Component {
         return (
             <div className={classes.root}>
                 <InlineMessage type='warn'>
-                    <Typography variant='headline' component='h3'>
+                    <Typography variant='h5' component='h3'>
                         {(token.isOauth) && <FormattedMessage
                             id='Shared.AppsAndKeys.ViewToken.please.copy'
                             defaultMessage='Please Copy the Access Token'

@@ -348,7 +348,7 @@ class InfoBar extends React.Component {
                             <VerticalDivider height={70} />
                             <ImageGenerator api={api} width='70' height='50' />
                             <div style={{ marginLeft: theme.spacing.unit }}>
-                                <Typography variant='display1'>{api.name}</Typography>
+                                <Typography variant='h4'>{api.name}</Typography>
                                 <Typography variant='caption' gutterBottom align='left'>
                                     {api.provider}
                                 </Typography>

@@ -148,7 +148,7 @@ class ApiKeyManager extends React.Component {
         const {showToken, accessTokenRequest, open, apikey} = this.state;
         return (
             <div className={classes.root}>
-                    <Typography variant='headline' className={classes.keyTitle}>
+                    <Typography variant='h5' className={classes.keyTitle}>
                         {keyType + ' '}
                         <FormattedMessage
                             defaultMessage='Api Key'

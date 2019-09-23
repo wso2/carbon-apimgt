@@ -265,7 +265,7 @@ class Login extends Component {
                                             />
                                         </Grid>
                                         <Grid item>
-                                            <Typography type='subheading' align='right' gutterBottom>
+                                            <Typography variant='subtitle1' align='right' gutterBottom>
                                                 {`API ${appLabel}`}
                                             </Typography>
                                         </Grid>
@@ -277,7 +277,7 @@ class Login extends Component {
                                     <div className='login-main-content'>
                                         <Paper elevation={1} square className='login-paper'>
                                             <form className='login-form'>
-                                                <Typography type='body1' gutterBottom>
+                                                <Typography variant='body1' gutterBottom>
                                                     <FormattedMessage
                                                         defaultMessage='Sign in to your account'
                                                         id='Base.Login.Login.sign.in'
@@ -388,7 +388,7 @@ class Login extends Component {
                                                     />
                                                 </Button>
 
-                                                <Typography type='body1' style={{ marginTop: 10 }}>
+                                                <Typography variant='body1' style={{ marginTop: 10 }}>
                                                     <FormattedMessage
                                                         defaultMessage="Don't have an account?"
                                                         id='Base.Login.Login.dont.have.account'

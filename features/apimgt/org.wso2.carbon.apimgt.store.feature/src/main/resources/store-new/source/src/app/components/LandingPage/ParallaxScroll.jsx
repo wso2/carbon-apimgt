@@ -47,7 +47,7 @@ const styles = theme => ({
     },
     slideContentTitle: {
         fontWeight: theme.typography.fontWeightLight,
-        fontSize: theme.typography.display2.fontSize,
+        fontSize: theme.typography.h3.fontSize,
     },
     slideContentContent: {
         fontWeight: theme.typography.fontWeightLight,

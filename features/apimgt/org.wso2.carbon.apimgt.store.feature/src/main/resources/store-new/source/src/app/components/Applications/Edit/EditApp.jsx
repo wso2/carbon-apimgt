@@ -349,7 +349,7 @@ class EditApp extends React.Component {
                                     <Icon>close</Icon>
                                 </IconButton>
                             </Link>
-                            <Typography variant='title' color='inherit' className={classes.flex}>
+                            <Typography variant='h6' color='inherit' className={classes.flex}>
                                 <FormattedMessage id='Applications.Edit.edit.app' defaultMessage='Edit Application' />
                             </Typography>
                         </Toolbar>

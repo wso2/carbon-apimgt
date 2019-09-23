@@ -228,7 +228,7 @@ class CommentEdit extends React.Component {
                 <Typography className={classes.commentText} align='right'>
                     {currentLength + '/' + theme.custom.maxCommentLength}
                 </Typography>
-                <Grid container spacing={8}>
+                <Grid container spacing={1}>
                     <Grid item>
                         <Button variant='contained' color='primary' onClick={() => this.handleClickUpdateComment()}>
                             <FormattedMessage id='Apis.Details.Comments.CommentEdit.btn.save' defaultMessage='Save' />

@@ -54,7 +54,7 @@ function StarRatingSummary(props) {
                     <StarRate className={classes.starRate} />
                     <div className={classes.ratingSummary}>
                         <div className={classes.userRating}>
-                            <Typography variant='display1'>{avgRating}</Typography>
+                            <Typography variant='h4'>{avgRating}</Typography>
                             <Typography variant='caption'>/5.0</Typography>
                         </div>
                         <Typography variant='caption' gutterBottom align='left'>

@@ -52,7 +52,7 @@ const styles = theme => ({
     },
     slideContentTitle: {
         fontWeight: theme.typography.fontWeightLight,
-        fontSize: theme.typography.display2.fontSize,
+        fontSize: theme.typography.h3.fontSize,
     },
     slideContentContent: {
         fontWeight: theme.typography.fontWeightLight,
@@ -100,7 +100,7 @@ function Carousel(props) {
                     unmountOnExit
                 >
                     <div className={classes.slideContainer}>
-                        <div className={classNames(classes.slideContentWrapper,'slideContentWrapper')}>
+                        <div className={classNames(classes.slideContentWrapper, 'slideContentWrapper')}>
                             <div className={classNames(classes.slideContentTitle, 'slideContentTitle')}><ReactSafeHtml html={slide.title} /></div>
                             <div className={classes.slideContentContent}><ReactSafeHtml html={slide.content} /></div>
                         </div>

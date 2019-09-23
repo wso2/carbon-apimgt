@@ -30,12 +30,12 @@ import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
 import TokenManager from 'AppComponents/Shared/AppsAndKeys/TokenManager';
 import ApiKeyManager from 'AppComponents/Shared/AppsAndKeys/ApiKeyManager';
-import InfoBar from './InfoBar';
-import Subscriptions from './Subscriptions';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Paper from '@material-ui/core/Paper';
+import Subscriptions from './Subscriptions';
+import InfoBar from './InfoBar';
 /**
  *
  *
@@ -134,7 +134,7 @@ class Details extends Component {
 
 
     handleChange = (event, secScheme) => {
-        this.setState({secScheme: secScheme});
+        this.setState({ secScheme });
     }
 
     renderManager = (application, keyType) => {
@@ -143,19 +143,19 @@ class Details extends Component {
                 <Tabs
                     value={this.state.secScheme}
                     onChange={this.handleChange}
-                    indicatorColor="primary"
-                    textColor="primary"
-                    variant="scrollable"
-                    scrollButtons="auto"
+                    indicatorColor='primary'
+                    textColor='primary'
+                    variant='fullWidth'
+                    scrollButtons='auto'
                 >
-                    <Tab label="Oauth" value = 'Oauth'/>
-                    <Tab label="ApiKey" value = 'ApiKey'/>
+                    <Tab label='Oauth' value='Oauth' />
+                    <Tab label='ApiKey' value='ApiKey' />
                 </Tabs>
                 {this.state.secScheme === 'Oauth' && (
                     <div>
                         <TokenManager
-                            keyType = {keyType}
-                            selectedApp = {{
+                            keyType={keyType}
+                            selectedApp={{
                                 appId: application.applicationId,
                                 label: application.name,
                                 tokenType: application.tokenType,
@@ -167,8 +167,8 @@ class Details extends Component {
                 {this.state.secScheme === 'ApiKey' && (
                     <div>
                         <ApiKeyManager
-                            keyType = {keyType}
-                            selectedApp = {{
+                            keyType={keyType}
+                            selectedApp={{
                                 appId: application.applicationId,
                                 label: application.name,
                                 tokenType: application.tokenType,
