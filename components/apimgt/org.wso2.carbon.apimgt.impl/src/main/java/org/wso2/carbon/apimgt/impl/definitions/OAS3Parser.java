@@ -906,7 +906,7 @@ public class OAS3Parser extends APIDefinition {
         SwaggerData.Resource resource = new SwaggerData.Resource();
         resource.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
         resource.setPolicy(APIConstants.DEFAULT_SUB_POLICY_UNLIMITED);
-        resource.setPath("/*");
+        resource.setPath("/");
 
         resource.setVerb(APIConstants.HTTP_GET);
         Operation getOperation = createOperation(resource);
@@ -915,8 +915,8 @@ public class OAS3Parser extends APIDefinition {
 
         //get operation
         Parameter getParameter = new Parameter();
-        getParameter.setName(APIConstants.GRAPHQL_QUERY);
-        getParameter.setIn("query");
+        getParameter.setName(APIConstants.GRAPHQL_SWAGGER_QUERY);
+        getParameter.setIn(APIConstants.GRAPHQL_SWAGGER_QUERY);
         getParameter.setRequired(true);
         getParameter.setDescription("Query to be passed to graphQL API");
 
@@ -952,7 +952,7 @@ public class OAS3Parser extends APIDefinition {
         pathItem.setGet(getOperation);
         pathItem.setPost(postOperation);
         Paths paths = new Paths();
-        paths.put("/*", pathItem);
+        paths.put("/", pathItem);
 
         openAPI.setPaths(paths);
     }
