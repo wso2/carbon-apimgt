@@ -192,6 +192,25 @@ public final class APIImportUtil {
     }
 
     /**
+     * Load the graphQL schema definition from archive.
+     *
+     * @param pathToArchive Path to archive
+     * @return Schema definition content
+     * @throws IOException When SDL file not found
+     */
+    private static String loadGraphqlSDLFile(String pathToArchive) throws IOException {
+        if (CommonUtil.checkFileExistence(pathToArchive + APIImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Found graphQL sdl file " + pathToArchive
+                        + APIImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION);
+            }
+            return FileUtils.readFileToString(
+                    new File(pathToArchive, APIImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION));
+        }
+        throw new IOException("Missing graphQL schema definition file. graphql_schema.sdl should be present.");
+    }
+
+    /**
      * This method imports an API.
      *
      * @param pathToArchive            location of the extracted folder of the API
@@ -348,27 +367,31 @@ public final class APIImportUtil {
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(importedApi.getType())) {
                 String swaggerContent = loadSwaggerFile(pathToArchive);
                 addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider);
-
-                //Load required properties from swagger to the API
-                APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerContent);
-                Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerContent);
-                for (URITemplate uriTemplate : uriTemplates) {
-                    Scope scope = uriTemplate.getScope();
-                    if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))
-                            && apiProvider.isScopeKeyAssigned(importedApi.getId(), scope.getKey(), tenantId)) {
-                        String errorMessage =
-                                "Error in adding API. Scope " + scope.getKey() + " is already assigned by another API.";
-                        log.error(errorMessage);
-                        throw new APIImportExportException(errorMessage);
+                //If graphQL API, import graphQL schema definition to registry
+                if (StringUtils.equals(importedApi.getType(), APIConstants.APITransportType.GRAPHQL.toString())) {
+                    String schemaDefinition = loadGraphqlSDLFile(pathToArchive);
+                    addGraphqlSchemaDefinition(importedApi, schemaDefinition, apiProvider);
+                } else {
+                    //Load required properties from swagger to the API
+                    APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerContent);
+                    Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(swaggerContent);
+                    for (URITemplate uriTemplate : uriTemplates) {
+                        Scope scope = uriTemplate.getScope();
+                        if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))
+                                && apiProvider.isScopeKeyAssigned(importedApi.getId(), scope.getKey(), tenantId)) {
+                            String errorMessage =
+                                    "Error in adding API. Scope " + scope.getKey() + " is already assigned by another API.";
+                            log.error(errorMessage);
+                            throw new APIImportExportException(errorMessage);
+                        }
                     }
+                    importedApi.setUriTemplates(uriTemplates);
+                    Set<Scope> scopes = apiDefinition.getScopes(swaggerContent);
+                    importedApi.setScopes(scopes);
+                    // This is required to make url templates and scopes get effected
+                    apiProvider.updateAPI(importedApi);
                 }
-                importedApi.setUriTemplates(uriTemplates);
-                Set<Scope> scopes = apiDefinition.getScopes(swaggerContent);
-                importedApi.setScopes(scopes);
             }
-
-            // This is required to make url templates and scopes get effected
-            apiProvider.updateAPI(importedApi);
 
             //Since Image, documents, sequences and WSDL are optional, exceptions are logged and ignored in implementation
             addAPIImage(pathToArchive, importedApi, apiProvider);
@@ -757,6 +780,19 @@ public final class APIImportUtil {
             log.error(errorMessage, e);
             throw new APIImportExportException(errorMessage, e);
         }
+    }
+
+    /**
+     * This method adds GraphQL schema definition to the registry.
+     *
+     * @param api              API to import
+     * @param schemaDefinition Content of schema definition
+     * @param apiProvider      API Provider
+     * @throws APIManagementException if there is an error occurs when adding schema definition
+     */
+    private static void addGraphqlSchemaDefinition(API api, String schemaDefinition, APIProvider apiProvider)
+            throws APIManagementException {
+        apiProvider.saveGraphqlSchemaDefinition(api, schemaDefinition);
     }
 
     /**

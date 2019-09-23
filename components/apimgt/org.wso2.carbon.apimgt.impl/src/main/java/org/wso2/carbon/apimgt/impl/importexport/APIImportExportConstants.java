@@ -49,6 +49,9 @@ public final class APIImportExportConstants {
     //location of the api swagger definition file
     public static final String YAML_SWAGGER_DEFINITION_LOCATION = File.separator
             + APIImportExportConstants.META_INFO_DIRECTORY + File.separator + "swagger.yaml";
+    //location of the graphql schema definition file
+    public static final String GRAPHQL_SCHEMA_DEFINITION_LOCATION = File.separator
+            + APIImportExportConstants.META_INFO_DIRECTORY + File.separator + "graphql_schema.sdl";
     //Image resource
     public static final String IMAGE_RESOURCE = "Image";
     //Sequences resource

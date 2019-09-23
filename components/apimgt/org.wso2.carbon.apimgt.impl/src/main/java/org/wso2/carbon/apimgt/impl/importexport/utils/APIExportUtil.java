@@ -89,8 +89,10 @@ public class APIExportUtil {
      * This method retrieves all meta information and registry resources required for an API to
      * recreate.
      *
+     * @param archiveBasePath   temp location to save the API artifacts
      * @param apiToReturn       Exporting API
      * @param userName          User name of the requester
+     * @param provider          API Provider
      * @param exportFormat      Export format of the API meta data, could be yaml or json
      * @param isStatusPreserved Whether API status is preserved while export
      * @throws APIImportExportException If an error occurs while retrieving API related resources
@@ -140,7 +142,7 @@ public class APIExportUtil {
             exportEndpointCertificates(archivePath, apiToReturn, tenantId, exportFormat);
 
             //export meta information
-            exportMetaInformation(archivePath, apiToReturn, registry, exportFormat);
+            exportMetaInformation(archivePath, apiToReturn, registry, exportFormat, provider);
         } catch (APIManagementException e) {
             String errorMessage = "Unable to retrieve API Documentation for API: " + apiIDToReturn.getApiName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + " : " + apiIDToReturn.getVersion();
@@ -520,10 +522,12 @@ public class APIExportUtil {
      * @param apiToReturn  API to be exported
      * @param registry     Current tenant registry
      * @param exportFormat Export format of file
+     * @param apiProvider  API Provider
      * @throws APIImportExportException If an error occurs while exporting meta information
      */
     private static void exportMetaInformation(String archivePath, API apiToReturn, Registry registry,
-                                              ExportFormat exportFormat) throws APIImportExportException {
+                                              ExportFormat exportFormat, APIProvider apiProvider)
+            throws APIImportExportException {
 
         CommonUtil.createDirectory(archivePath + File.separator + APIImportExportConstants.META_INFO_DIRECTORY);
         //Remove unnecessary data from exported Api
@@ -535,6 +539,16 @@ public class APIExportUtil {
             //If a web socket API is exported, it does not contain a swagger file.
             //Therefore swagger export is only required for REST or SOAP based APIs
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiToReturn.getType())) {
+                //For Graphql APIs, the graphql schema definition is exported along with the swagger and api definition.
+                //For Graphql APIs, the URI templates in the API object is not cleared as operation info are not
+                //in the swagger.
+                if (StringUtils.equals(apiToReturn.getType(), APIConstants.APITransportType.GRAPHQL.toString())) {
+                    String schemaContent = apiProvider.getGraphqlSchema(apiToReturn.getId());
+                    CommonUtil.writeFile(archivePath + APIImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
+                            schemaContent);
+                } else {
+                    apiToReturn.setUriTemplates(new LinkedHashSet<>());
+                }
                 String swaggerDefinition = OASParserUtil.getAPIDefinition(apiToReturn.getId(), registry);
                 JsonParser parser = new JsonParser();
                 JsonObject json = parser.parse(swaggerDefinition).getAsJsonObject();
@@ -590,10 +604,8 @@ public class APIExportUtil {
         api.setThumbnailUrl(null);
         // WSDL file path will be set according to the importing environment. Therefore current path is removed
         api.setWsdlUrl(null);
-        // Swagger.json contains complete details about scopes and URI templates. Therefore scope and URI template
-        // details are removed from api.json
+        // Swagger.json contains complete details about scopes. Therefore scope details are removed from api.json
         api.setScopes(new LinkedHashSet<>());
-        api.setUriTemplates(new LinkedHashSet<>());
         // Secure endpoint password is removed, as it causes security issues. When importing need to add it manually,
         // if Secure Endpoint is enabled.
         if (api.getEndpointUTPassword() != null) {
