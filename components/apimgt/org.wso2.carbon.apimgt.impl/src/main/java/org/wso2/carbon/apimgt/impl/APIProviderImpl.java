@@ -1689,6 +1689,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         } else { // API Status : RETIRED or CREATED
                             Map<String, String> failedToRemoveEnvironments = failedGatewaysMap;
                             if(!APIConstants.CREATED.equals(newStatus)) {
+                                cleanUpPendingSubscriptionCreationProcessesByAPI(api.getId());
                                 apiMgtDAO.removeAllSubscriptions(api.getId());
                             }
                             if (!failedToRemoveEnvironments.isEmpty()) {
@@ -6094,8 +6095,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void cleanUpPendingAPIStateChangeTask(int apiId) throws WorkflowException, APIManagementException {
         //Run cleanup task for workflow
-        WorkflowExecutor apiStateChangeWFExecutor = WorkflowExecutorFactory.getInstance().
-                getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+        WorkflowExecutor apiStateChangeWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
 
         WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
@@ -6103,6 +6103,51 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiStateChangeWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
         }
     }
+
+    /**
+     * Clean-up pending subscriptions of a given API
+     *
+     * @param apiId API Identifier
+     * @throws APIManagementException
+     */
+    private void cleanUpPendingSubscriptionCreationProcessesByAPI(APIIdentifier apiId) throws APIManagementException {
+
+        WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(
+                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+        Set<Integer> pendingSubscriptions = apiMgtDAO.getPendingSubscriptionsByAPIId(apiId);
+        String workflowExtRef = null;
+
+        for (int subscription : pendingSubscriptions) {
+            try {
+                workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(subscription);
+                createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
+            } catch (APIManagementException ex) {
+                // failed clean-up processes are ignored to prevent failures in API state change flow
+                log.warn("Failed to retrieve external workflow reference for subscription for subscription ID: "
+                        + subscription);
+            } catch (WorkflowException ex) {
+                // failed clean-up processes are ignored to prevent failures in API state change flow
+                log.warn("Failed to clean-up pending subscription approval task for subscription ID: " + subscription);
+            }
+        }
+    }
+
+    /**
+     * Returns a workflow executor
+     *
+     * @param workflowType Workflow executor type
+     * @return WorkflowExecutor of given type
+     * @throws WorkflowException if an error occurred while getting WorkflowExecutor
+     */
+    protected WorkflowExecutor getWorkflowExecutor(String workflowType) throws APIManagementException {
+        try {
+            return WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
+        } catch (WorkflowException e) {
+            handleException("Error while obtaining WorkflowExecutor instance for workflow type :" + workflowType);
+        }
+        return null;
+    }
+
 
     protected String getTenantConfigContent() throws RegistryException, UserStoreException {
         APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();

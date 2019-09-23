@@ -8164,6 +8164,38 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Retrieves the IDs of pending subscriptions of a given API
+     * @param apiId API Identifier
+     * @return set of subscriptions ids
+     * @throws APIManagementException
+     */
+    public Set<Integer> getPendingSubscriptionsByAPIId(APIIdentifier apiId) throws APIManagementException {
+        Set<Integer> pendingSubscriptions = new HashSet<Integer>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = SQLConstants.GET_SUBSCRIPTIONS_BY_API_SQL;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, apiId.getApiName());
+            ps.setString(2, apiId.getVersion());
+            ps.setString(3, apiId.getProviderName());
+            ps.setString(4, APIConstants.SubscriptionStatus.ON_HOLD);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                pendingSubscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while retrieving subscription entries for API : " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return pendingSubscriptions;
+    }
+
+    /**
      * Retrieves registration workflow reference for applicationId and key type
      *
      * @param applicationId id of the application with registration
