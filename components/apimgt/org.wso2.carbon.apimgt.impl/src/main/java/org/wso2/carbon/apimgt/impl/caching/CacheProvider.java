@@ -186,7 +186,7 @@ public class CacheProvider {
     }
 
     /**
-     * Create and return basic authenticated resource request cache.
+     * Create and return basic authenticated resource request cache
      */
     public static Cache createGatewayBasicAuthResourceCache() {
         String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
@@ -201,7 +201,7 @@ public class CacheProvider {
     }
 
     /**
-     * Create and return the valid username cache.
+     * Create and return the valid username cache
      */
     public static Cache createGatewayUsernameCache() {
         String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
@@ -216,7 +216,7 @@ public class CacheProvider {
     }
 
     /**
-     * Create and return the invalid username cache.
+     * Create and return the invalid username cache
      */
     public static Cache createInvalidUsernameCache() {
         String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
