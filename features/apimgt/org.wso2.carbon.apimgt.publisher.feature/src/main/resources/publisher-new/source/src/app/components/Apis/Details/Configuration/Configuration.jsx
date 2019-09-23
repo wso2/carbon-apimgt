@@ -41,6 +41,7 @@ import StoreVisibility from './components/StoreVisibility';
 import CORSConfiguration from './components/CORSConfiguration';
 import Tags from './components/Tags';
 import SchemaValidation from './components/SchemaValidation';
+import MaxBackendTps from './components/MaxBackendTps';
 
 import APISecurity, {
     DEFAULT_API_SECURITY_OAUTH2,
@@ -133,6 +134,7 @@ function copyAPIConfig(api) {
         accessControlRoles: [...api.accessControlRoles],
         visibleRoles: [...api.visibleRoles],
         tags: [...api.tags],
+        maxTps: api.maxTps,
         transport: [...api.transport],
         securityScheme: [...api.securityScheme],
         corsConfiguration: {
@@ -172,6 +174,9 @@ export default function Configuration() {
             case 'accessControl':
             case 'visibility':
             case 'tags':
+                nextState[action] = value;
+                return nextState;
+            case 'maxTps':
                 nextState[action] = value;
                 return nextState;
             case 'accessControlRoles':
@@ -398,22 +403,33 @@ export default function Configuration() {
                                 defaultMessage='Backend'
                             />
                         </Typography>
-                        <Paper className={classes.paperCenter} style={{ minHeight: paperHeight }}>
-                            <Link to={'/apis/' + api.id + '/endpoints'}>
-                                <Typography
-                                    className={classes.subHeading}
-                                    color='primary'
-                                    display='inline'
-                                    variant='caption'
-                                >
-                                    <FormattedMessage
-                                        id='Apis.Details.Configuration.Configuration.endpoints'
-                                        defaultMessage='Endpoints'
-                                    />
-                                    <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
-                                </Typography>
-                            </Link>
-                        </Paper>
+                        <Grid
+                            direction=' column'
+                            justify='space-between'
+                            alignItems='flex-start'
+                            spacing={6}
+                            style={{ minHeight: paperHeight }}
+                        >
+                            <Grid item xs={12} style={{ marginBottom: 30, position: 'relative' }}>
+                                <Paper className={classes.paper} style={{ minHeight: paperHeight }}>
+                                    <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
+                                    <Link to={'/apis/' + api.id + '/endpoints'}>
+                                        <Typography
+                                            className={classes.subHeading}
+                                            color='primary'
+                                            display='inline'
+                                            variant='caption'
+                                        >
+                                            <FormattedMessage
+                                                id='Apis.Details.Configuration.Configuration.endpoints'
+                                                defaultMessage='Endpoints'
+                                            />
+                                            <LaunchIcon style={{ marginLeft: '2px' }} fontSize='small' />
+                                        </Typography>
+                                    </Link>
+                                </Paper>
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Grid>
                 <Grid container>
