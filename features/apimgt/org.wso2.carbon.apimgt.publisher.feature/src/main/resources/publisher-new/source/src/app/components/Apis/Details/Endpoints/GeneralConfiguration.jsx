@@ -271,7 +271,7 @@ function GeneralConfiguration(props) {
                                 id='Apis.Details.Endpoints.GeneralConfiguration.endpoint.security.sub.heading'
                                 defaultMessage='Endpoint Security'
                             />
-                            : {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'None'}
+                            : {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'NONE'}
                             {' | '}
                         </Typography>
                     )}
