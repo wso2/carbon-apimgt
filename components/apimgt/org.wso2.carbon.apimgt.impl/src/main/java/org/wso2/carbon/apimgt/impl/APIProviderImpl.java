@@ -6133,7 +6133,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Returns a workflow executor
+     * Returns the given workflow executor
      *
      * @param workflowType Workflow executor type
      * @return WorkflowExecutor of given type
