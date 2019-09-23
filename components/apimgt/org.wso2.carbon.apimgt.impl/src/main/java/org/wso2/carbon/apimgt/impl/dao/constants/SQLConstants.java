@@ -2404,6 +2404,19 @@ public class SQLConstants {
             "   APPLICATION_ID=? " +
             "   AND SUB_STATUS=?";
 
+    public static final String GET_SUBSCRIPTIONS_BY_API_SQL =
+            "SELECT" +
+                    "   SUBSCRIPTION_ID" +
+                    " FROM " +
+                    "   AM_SUBSCRIPTION SUBS," +
+                    "   AM_API API " +
+                    " WHERE " +
+                    "   API.API_NAME = ? " +
+                    "   AND API.API_VERSION = ? " +
+                    "   AND API.API_PROVIDER = ? " +
+                    "   AND API.API_ID = SUBS.API_ID " +
+                    "   AND SUB_STATUS = ?";
+
     public static final String GET_REGISTRATION_WORKFLOW_SQL =
             "SELECT WF_REF FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ? AND TOKEN_TYPE = ?";
 
