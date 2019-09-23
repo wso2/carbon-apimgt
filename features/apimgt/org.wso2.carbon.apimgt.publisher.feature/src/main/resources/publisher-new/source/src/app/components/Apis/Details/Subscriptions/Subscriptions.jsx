@@ -83,7 +83,7 @@ function Subscriptions(props) {
                     </div>
                 </InlineMessage>
             )}
-            <SubscriptionPoliciesManage api={api} updateAPI={updateAPI} />           
+            <SubscriptionPoliciesManage api={api} updateAPI={updateAPI} />
         </div>
     );
 }
