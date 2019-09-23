@@ -29,6 +29,7 @@ import SelectPolicies from './SelectPolicies';
 const useStyles = makeStyles(theme => ({
     mandatoryStar: {
         color: theme.palette.error.main,
+        marginLeft: theme.spacing(0.1),
     },
 }));
 
@@ -167,8 +168,8 @@ export default function DefaultAPIForm(props) {
                     error={validity.name}
                     label={
                         <React.Fragment>
-                            <sup className={classes.mandatoryStar}>*</sup>{' '}
                             <FormattedMessage id='Apis.Create.WSDL.Steps.DefaultAPIForm.name' defaultMessage='Name' />
+                            <sup className={classes.mandatoryStar}>*</sup>
                         </React.Fragment>
                     }
                     helperText={
@@ -196,11 +197,11 @@ export default function DefaultAPIForm(props) {
                                     error={validity.context}
                                     label={
                                         <React.Fragment>
-                                            <sup className={classes.mandatoryStar}>*</sup>{' '}
                                             <FormattedMessage
                                                 id='Apis.Create.WSDL.Steps.DefaultAPIForm.context'
                                                 defaultMessage='Context'
                                             />
+                                            <sup className={classes.mandatoryStar}>*</sup>
                                         </React.Fragment>
                                     }
                                     name='context'
@@ -226,11 +227,11 @@ export default function DefaultAPIForm(props) {
                                     id='outlined-name'
                                     label={
                                         <React.Fragment>
-                                            <sup className={classes.mandatoryStar}>*</sup>{' '}
                                             <FormattedMessage
                                                 id='Apis.Create.WSDL.Steps.DefaultAPIForm.version'
                                                 defaultMessage='Version'
                                             />
+                                            <sup className={classes.mandatoryStar}>*</sup>
                                         </React.Fragment>
                                     }
                                     name='version'
@@ -256,11 +257,11 @@ export default function DefaultAPIForm(props) {
                                     error={validity.context}
                                     label={
                                         <React.Fragment>
-                                            <sup className={classes.mandatoryStar}>*</sup>{' '}
                                             <FormattedMessage
                                                 id='Apis.Create.WSDL.Steps.DefaultAPIForm.context'
                                                 defaultMessage='Context'
                                             />
+                                            <sup className={classes.mandatoryStar}>*</sup>
                                         </React.Fragment>
                                     }
                                     name='context'
