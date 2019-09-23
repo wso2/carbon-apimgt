@@ -272,7 +272,7 @@ class Credentials extends React.Component {
                         defaultMessage='API Credentials'
                     />
                 </Typography>
-                <Typography variant='body1' gutterBottom>
+                <Typography variant='body2' gutterBottom>
                     <FormattedMessage
                         id='Apis.Details.Credentials.Credentials.'
                         defaultMessage={`API Credentials are grouped in to applications. An application is 
