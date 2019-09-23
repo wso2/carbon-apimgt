@@ -83,12 +83,7 @@ import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.workflow.APIStateChangeSimpleWorkflowExecutor;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -3186,8 +3181,9 @@ public class APIProviderImplTest {
     }
 
     @Test
-    public void testUpdateAPIforStateChange_ToRetired() throws RegistryException, UserStoreException,
-            APIManagementException, FaultGatewaysException {
+    public void testUpdateAPIforStateChange_ToRetired()
+            throws RegistryException, UserStoreException, APIManagementException, FaultGatewaysException,
+            WorkflowException {
         APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
         Set<String> environments = new HashSet<String>();
         environments.add("Production");
@@ -3220,6 +3216,8 @@ public class APIProviderImplTest {
         PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, "12640983654")).
                 thenReturn(apiSourcePath);
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
+        WorkflowExecutorFactory wfe = PowerMockito.mock(WorkflowExecutorFactory.class);
+        Mockito.when(WorkflowExecutorFactory.getInstance()).thenReturn(wfe);
         boolean status = apiProvider.updateAPIforStateChange(apiId, APIConstants.RETIRED, failedGWEnv);
 
         Assert.assertEquals(2, api.getEnvironments().size());
@@ -3308,6 +3306,8 @@ public class APIProviderImplTest {
         PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, "12640983654")).
                 thenReturn(apiSourcePath);
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
+        WorkflowExecutorFactory wfe = PowerMockito.mock(WorkflowExecutorFactory.class);
+        Mockito.when(WorkflowExecutorFactory.getInstance()).thenReturn(wfe);
         try {
             apiProvider.updateAPIforStateChange(apiId, APIConstants.RETIRED, failedGWEnv);
         } catch(FaultGatewaysException e) {
