@@ -164,24 +164,36 @@ class DeleteApiButton extends React.Component {
                 <Dialog open={this.state.openMenu} transition={Slide}>
                     <DialogTitle>
                         <FormattedMessage
-                            id='Apis.Details.components.DeleteApiButton.title.confirm'
-                            defaultMessage='Confirm'
+                            id='Apis.Details.components.DeleteApiButton.title'
+                            defaultMessage='Delete {type}'
+                            values={{ type }}
                         />
                     </DialogTitle>
                     <DialogContent>
                         <DialogContentText>
                             <FormattedMessage
-                                id='Apis.Details.components.DeleteApiButton.text.content'
-                                defaultMessage='Are you sure you want to delete the {type} {name} {version} ?'
-                                values={{ type, name: api.name, version }}
+                                id='Apis.Details.components.DeleteApiButton.text.description'
+                                defaultMessage='{type} <b> {name} {version} </b> will be deleted immediately and
+                                permanently. <p> Do you want to delete the {type} ? </p>'
+                                values={{
+                                    b: msg => <b>{msg}</b>,
+                                    p: msg => <p>{msg}</p>,
+                                    type,
+                                    name: api.name,
+                                    version,
+                                }}
                             />
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
+                        <Button onClick={this.handleRequestClose} color='primary'>
+                            <FormattedMessage
+                                id='Apis.Details.components.DeleteApiButton.button.cancel'
+                                defaultMessage='Cancel'
+                            />
+                        </Button>
                         <Button
-                            dense
-                            variant='outlined'
-                            color='secondary'
+                            color='primary'
                             onClick={() => {
                                 deleteHandler();
                                 this.handleRequestClose();
@@ -190,12 +202,6 @@ class DeleteApiButton extends React.Component {
                             <FormattedMessage
                                 id='Apis.Details.components.DeleteApiButton.button.delete'
                                 defaultMessage='Delete'
-                            />
-                        </Button>
-                        <Button dense onClick={this.handleRequestClose}>
-                            <FormattedMessage
-                                id='Apis.Details.components.DeleteApiButton.button.cancel'
-                                defaultMessage='Cancel'
                             />
                         </Button>
                     </DialogActions>
