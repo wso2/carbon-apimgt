@@ -277,14 +277,14 @@ class Subscriptions extends React.Component {
         if (subscriptions) {
             return (
                 <div className={classes.root}>
-                    <Typography variant='headline' className={classes.keyTitle}>
+                    <Typography variant='h5' className={classes.keyTitle}>
                         <FormattedMessage
                             id='Applications.Details.Subscriptions.subscription.management'
                             defaultMessage='Subscription Management'
                         />
                     </Typography>
 
-                    <Grid container className='tab-grid' spacing={16}>
+                    <Grid container className='tab-grid' spacing={2}>
                         <Grid item xs={6} className={classes.cardGrid}>
                             <APIList
                                 apisNotFound={apisNotFound}

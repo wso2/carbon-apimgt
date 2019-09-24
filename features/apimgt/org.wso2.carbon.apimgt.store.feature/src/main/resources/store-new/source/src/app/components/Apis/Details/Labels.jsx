@@ -124,7 +124,7 @@ class Labels extends React.Component {
         const { prodUrlCopied, epUrl } = this.state;
 
         return (
-            <Grid container spacing={16} item xs={12}>
+            <Grid container spacing={2} item xs={12}>
                 {api.labels.map((label) => {
                     return (
                         <Grid key={label} item xs={12}>
@@ -144,7 +144,7 @@ class Labels extends React.Component {
                                     </div>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
-                                    <Grid container item xs={12} spacing={16}>
+                                    <Grid container item xs={12} spacing={2}>
                                         <Typography className={classes.heading}>
                                             <FormattedMessage
                                                 id='Apis.Details.InfoBar.gateway.urls'

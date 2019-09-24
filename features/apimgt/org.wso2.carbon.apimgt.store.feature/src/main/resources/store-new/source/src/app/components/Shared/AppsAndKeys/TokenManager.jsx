@@ -412,7 +412,7 @@ class TokenManager extends React.Component {
 
         return (
             <div className={classes.root}>
-                <Typography variant='headline' className={classes.keyTitle}>
+                <Typography variant='h5' className={classes.keyTitle}>
                     {keyType + ' '}
                     <FormattedMessage
                         defaultMessage='Key and Secret'

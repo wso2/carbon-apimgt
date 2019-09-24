@@ -423,7 +423,7 @@ class Subscribe extends Component {
         return (
             this.state.applicationsAvailable
             && this.state.applicationsAvailable.length > 0 && (
-                <Grid container spacing={24} className={classes.root}>
+                <Grid container spacing={3} className={classes.root}>
                     <Grid item xs={12} md={6}>
                         <FormControl className={classes.FormControl}>
                             <InputLabel shrink htmlFor='age-label-placeholder' className={classes.quotaHelp}>

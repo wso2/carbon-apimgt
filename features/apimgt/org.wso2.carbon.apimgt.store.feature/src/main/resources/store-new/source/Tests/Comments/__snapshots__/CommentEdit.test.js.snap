@@ -90,7 +90,7 @@ ShallowWrapper {
         </WithStyles(Typography)>,
         <WithStyles(Grid)
           container={true}
-          spacing={8}
+          spacing={1}
         >
           <WithStyles(Grid)
             item={true}
@@ -398,7 +398,7 @@ ShallowWrapper {
           </WithStyles(Typography)>,
           <WithStyles(Grid)
             container={true}
-            spacing={8}
+            spacing={1}
           >
             <WithStyles(Grid)
               item={true}
