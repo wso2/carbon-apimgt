@@ -542,6 +542,9 @@ paths:
         - APIs
       responses:
         200:
+          schema:
+            type: string
+            example: ""
           description: |
             OK.
             Successful response with updated Swagger definition
