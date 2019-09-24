@@ -115,7 +115,7 @@ function EndpointListing(props) {
     }, [props]);
 
     return (
-        <React.Fragment className={classes.listingWrapper} ref={selectedRef}>
+        <div className={classes.listingWrapper} ref={selectedRef}>
             <Grid container direction='column' xs={12}>
                 <Grid xs={12}>
                     {(endpointType === 'failover' || endpointType === 'load_balance') ?
@@ -143,7 +143,7 @@ function EndpointListing(props) {
                     }
                 </Grid>
             </Grid>
-        </React.Fragment>
+        </div>
     );
 }
 

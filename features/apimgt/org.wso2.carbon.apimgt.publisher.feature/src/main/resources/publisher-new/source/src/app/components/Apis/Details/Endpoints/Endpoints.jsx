@@ -44,9 +44,6 @@ const styles = theme => ({
     buttonSection: {
         marginTop: theme.spacing(2),
     },
-    titleWrapper: {
-        paddingTop: '10px',
-    },
     radioGroup: {
         display: 'flex',
         flexDirection: 'row',
@@ -57,6 +54,12 @@ const styles = theme => ({
     },
     errorMessageContainer: {
         marginTop: theme.spacing(),
+    },
+    titleGrid: {
+        marginBottom: theme.spacing(),
+    },
+    implSelectRadio: {
+        padding: theme.spacing() / 2,
     },
 });
 
@@ -143,6 +146,7 @@ function Endpoints(props) {
                         };
                     }
                 }
+                isValidEndpoint = true;
             } else if (endpointConfig.production_endpoints && !endpointConfig.sandbox_endpoints) {
                 isValidEndpoint = endpointConfig.production_endpoints.url !== '';
             } else if (endpointConfig.sandbox_endpoints && !endpointConfig.production_endpoints) {
@@ -246,7 +250,7 @@ function Endpoints(props) {
             {api.endpointConfig === null && apiObject.endpointConfig === null ?
                 <NewEndpointCreate generateEndpointConfig={generateEndpointConfig} /> :
                 <div className={classes.root}>
-                    <Grid container spacing={16}>
+                    <Grid container spacing={16} className={classes.titleGrid}>
                         <Grid item>
                             <Typography variant='h4' align='left' className={classes.titleWrapper}>
                                 <FormattedMessage
@@ -266,7 +270,7 @@ function Endpoints(props) {
                                 >
                                     <FormControlLabel
                                         value='managed'
-                                        control={<Radio />}
+                                        control={<Radio className={classes.implSelectRadio} />}
                                         label={<FormattedMessage
                                             id='Apis.Details.Endpoints.Endpoints.managed'
                                             defaultMessage='Managed'
@@ -274,7 +278,7 @@ function Endpoints(props) {
                                     />
                                     <FormControlLabel
                                         value='PROTOTYPED'
-                                        control={<Radio />}
+                                        control={<Radio className={classes.implSelectRadio} />}
                                         label={<FormattedMessage
                                             id='Apis.Details.Endpoints.Endpoints.prototyped'
                                             defaultMessage='Prototyped'

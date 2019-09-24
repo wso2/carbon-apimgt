@@ -79,11 +79,15 @@ function getEndpointTemplateByType(endpointType, isAddressEndpoint, currentEndpo
         tmpEndpointConfig.algoCombo = 'org.apache.synapse.endpoints.algorithms.RoundRobin';
         tmpEndpointConfig.sessionManagement = '';
         tmpEndpointConfig.sessionTimeOut = '';
-        tmpEndpointConfig.production_endpoints = Array.isArray(currentEndpointConfig.production_endpoints) ?
-            currentEndpointConfig.production_endpoints : [currentEndpointConfig.production_endpoints];
-        tmpEndpointConfig.sandbox_endpoints =
-            Array.isArray(currentEndpointConfig.sandbox_endpoints) ?
-                currentEndpointConfig.sandbox_endpoints : [currentEndpointConfig.sandbox_endpoints];
+        if (currentEndpointConfig.production_endpoints) {
+            tmpEndpointConfig.production_endpoints = Array.isArray(currentEndpointConfig.production_endpoints) ?
+                currentEndpointConfig.production_endpoints : [currentEndpointConfig.production_endpoints];
+        }
+        if (currentEndpointConfig.sandbox_endpoints) {
+            tmpEndpointConfig.sandbox_endpoints =
+                Array.isArray(currentEndpointConfig.sandbox_endpoints) ?
+                    currentEndpointConfig.sandbox_endpoints : [currentEndpointConfig.sandbox_endpoints];
+        }
         tmpEndpointConfig.failOver = 'False';
     } else {
         tmpEndpointConfig.endpoint_type = isAddressEndpoint === true ? 'address' : endpointType;
@@ -106,15 +110,14 @@ function getEndpointTemplateByType(endpointType, isAddressEndpoint, currentEndpo
 function endpointsToList(endpointConfig) {
     const config = cloneDeep(endpointConfig);
     const endpoints = [];
-
     if (Array.isArray(config.production_endpoints)) {
-        endpoints.concat(config.production_endpoints);
+        endpoints.push(...config.production_endpoints);
     } else {
         endpoints.push(config.production_endpoints);
     }
 
     if (Array.isArray(config.sandbox_endpoints)) {
-        endpoints.concat(config.sandbox_endpoints);
+        endpoints.push(...config.sandbox_endpoints);
     } else {
         endpoints.push(config.sandbox_endpoints);
     }

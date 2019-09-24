@@ -394,9 +394,10 @@ function EndpointOverview(props) {
      * @param {string} category The endpoint category (production/ sandbox)
      * */
     const removeEndpoint = (index, epType, category) => {
+        const tmpEndpointConfig = cloneDeep(epConfig);
         const endpointConfigProperty = getEndpointTypeProperty(epType, category);
         const indexToRemove = epType === 'failover' ? index - 1 : index;
-        const tmpEndpoints = epConfig[endpointConfigProperty];
+        const tmpEndpoints = tmpEndpointConfig[endpointConfigProperty];
         tmpEndpoints.splice(indexToRemove, 1);
         setEpConfig({ ...epConfig, [endpointConfigProperty]: tmpEndpoints });
     };
@@ -440,7 +441,7 @@ function EndpointOverview(props) {
     };
 
     return (
-        <React.Fragment className={classes.overviewWrapper}>
+        <div className={classes.overviewWrapper}>
             <Grid container xs={12}>
                 <Grid container item xs={12}>
                     <GeneralConfiguration
@@ -621,7 +622,7 @@ function EndpointOverview(props) {
                     />
                 </DialogContent>
             </Dialog>
-        </React.Fragment>
+        </div>
     );
 }
 
