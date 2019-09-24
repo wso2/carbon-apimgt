@@ -173,10 +173,8 @@ export default function Configuration() {
             case 'enableSchemaValidation':
             case 'accessControl':
             case 'visibility':
-            case 'tags':
-                nextState[action] = value;
-                return nextState;
             case 'maxTps':
+            case 'tags':
                 nextState[action] = value;
                 return nextState;
             case 'accessControlRoles':

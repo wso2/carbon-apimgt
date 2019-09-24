@@ -100,25 +100,24 @@ export default function MaxBackendTps(props) {
                             <FormLabel component='legend'>Maximum Throughput</FormLabel>
                             <RadioGroup
                                 aria-label='change-max-TPS'
-                                name={api.maxTps}
-                                value={api.maxTps === null}
+                                value={api.maxTps === null ? 'unlimited' : 'specify'}
                                 onChange={(event) => {
                                     configDispatcher({
                                         action: 'maxTps',
                                         value:
-                                            event.target.value === 'false' ? { production: null, sandbox: null } : null,
+                                            event.target.value === 'specify' ? { production: null, sandbox: null } : null,
                                     });
                                 }}
                                 row
                             >
                                 <FormControlLabel
-                                    value
+                                    value={'unlimited'}
                                     control={<Radio color='default' />}
                                     label='Unlimited'
                                     labelPlacement='end'
                                 />
                                 <FormControlLabel
-                                    value={false}
+                                    value={'specify'}
                                     control={<Radio color='default' />}
                                     label='Specify'
                                     labelPlacement='end'
@@ -128,17 +127,13 @@ export default function MaxBackendTps(props) {
                         <Collapse in={api.maxTps !== null}>
                             <Grid item xs={12} style={{ marginBottom: 15, position: 'relative' }}>
                                 <TextField
-                                    id='outlined-name'
                                     label='Max Production TPS'
                                     margin='normal'
                                     variant='outlined'
                                     onChange={(event) => {
                                         configDispatcher({
                                             action: 'maxTps',
-                                            value: {
-                                                production: event.target.value,
-                                                sandbox: api.maxTps !== null ? api.maxTps.sandbox : null,
-                                            },
+                                            value: {...api.maxTps, production: event.target.value},
                                         });
                                     }}
                                     value={api.maxTps !== null ? api.maxTps.production : ''}
@@ -148,17 +143,13 @@ export default function MaxBackendTps(props) {
                             </Grid>
                             <Grid item xs={12} style={{ marginBottom: 15, position: 'relative' }}>
                                 <TextField
-                                    id='outlined-name'
                                     label='Max Sandbox TPS'
                                     margin='normal'
                                     variant='outlined'
                                     onChange={(event) => {
                                         configDispatcher({
                                             action: 'maxTps',
-                                            value: {
-                                                production: api.maxTps !== null ? api.maxTps.production : null,
-                                                sandbox: event.target.value,
-                                            },
+                                            value: {...api.maxTps, sandbox: event.target.value},
                                         });
                                     }}
                                     value={api.maxTps !== null ? api.maxTps.sandbox : ''}
