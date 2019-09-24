@@ -27,6 +27,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import InputAdornment from '@material-ui/core/InputAdornment';
 import FormLabel from '@material-ui/core/FormLabel';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Radio from '@material-ui/core/Radio';
@@ -111,13 +112,13 @@ export default function MaxBackendTps(props) {
                                 row
                             >
                                 <FormControlLabel
-                                    value={'unlimited'}
+                                    value='unlimited'
                                     control={<Radio color='default' />}
                                     label='Unlimited'
                                     labelPlacement='end'
                                 />
                                 <FormControlLabel
-                                    value={'specify'}
+                                    value='specify'
                                     control={<Radio color='default' />}
                                     label='Specify'
                                     labelPlacement='end'
@@ -125,7 +126,7 @@ export default function MaxBackendTps(props) {
                             </RadioGroup>
                         </FormControl>
                         <Collapse in={api.maxTps !== null}>
-                            <Grid item xs={12} style={{ marginBottom: 15, position: 'relative' }}>
+                            <Grid item xs={12} style={{ marginBottom: 10, position: 'relative' }}>
                                 <TextField
                                     label='Max Production TPS'
                                     margin='normal'
@@ -133,15 +134,17 @@ export default function MaxBackendTps(props) {
                                     onChange={(event) => {
                                         configDispatcher({
                                             action: 'maxTps',
-                                            value: {...api.maxTps, production: event.target.value},
+                                            value: { ...api.maxTps, production: event.target.value },
                                         });
                                     }}
                                     value={api.maxTps !== null ? api.maxTps.production : ''}
                                     disabled={isRestricted(['apim:api_create'], api)}
-                                    style={{ display: 'flex' }}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position='end'>TPS</InputAdornment>,
+                                    }}
                                 />
                             </Grid>
-                            <Grid item xs={12} style={{ marginBottom: 15, position: 'relative' }}>
+                            <Grid item xs={12} style={{ marginBottom: 10, position: 'relative' }}>
                                 <TextField
                                     label='Max Sandbox TPS'
                                     margin='normal'
@@ -149,21 +152,23 @@ export default function MaxBackendTps(props) {
                                     onChange={(event) => {
                                         configDispatcher({
                                             action: 'maxTps',
-                                            value: {...api.maxTps, sandbox: event.target.value},
+                                            value: { ...api.maxTps, sandbox: event.target.value },
                                         });
                                     }}
                                     value={api.maxTps !== null ? api.maxTps.sandbox : ''}
                                     disabled={isRestricted(['apim:api_create'], api)}
-                                    style={{ display: 'flex' }}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position='end'>TPS</InputAdornment>,
+                                    }}
                                 />
+                                <FormHelperText>
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.components.MaxBackendTps.formattedMessage'
+                                        defaultMessage='Maximum backend transactions per seconds in integers'
+                                    />
+                                </FormHelperText>
                             </Grid>
                         </Collapse>
-                        <FormHelperText>
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.components.MaxBackendTps.formattedMessage'
-                                defaultMessage='Maximum backend transactions per seconds in integers'
-                            />
-                        </FormHelperText>
                     </ExpansionPanelDetails>
                 </ExpansionPanel>
             </Grid>
