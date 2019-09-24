@@ -85,7 +85,7 @@ const applicationTableHead = (props) => {
                     return (
                         <TableCell
                             key={column.id}
-                            align='right'
+                            align='left'
                             sortDirection={orderBy === column.id ? order : false}
                         >
                             {column.sorting ? (
