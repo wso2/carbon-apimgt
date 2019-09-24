@@ -162,8 +162,6 @@ function Certificates(props) {
         setCertificateList(certificates);
     }, [certificates]);
 
-    console.log(endpoints);
-
     return (
         <Grid container direction='column'>
             {/* TODO: Add list of existing certificates */}
