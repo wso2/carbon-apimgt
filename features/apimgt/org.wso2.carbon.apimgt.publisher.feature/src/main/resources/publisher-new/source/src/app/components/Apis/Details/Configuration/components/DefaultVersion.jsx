@@ -27,7 +27,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 /**
  *
@@ -38,8 +39,7 @@ import AuthManager from 'AppData/AuthManager';
  */
 export default function DefaultVersion(props) {
     const { api, configDispatcher } = props;
-    const isNotCreator = AuthManager.isNotCreator();
-
+    const [apiFromContext] = useAPI();
     return (
         <Grid container spacing={1} alignItems='flex-start' xs={11}>
             <Grid item>
@@ -62,7 +62,7 @@ export default function DefaultVersion(props) {
                         style={{ display: 'flow-root' }}
                     >
                         <FormControlLabel
-                            disabled={isNotCreator}
+                            disabled={isRestricted(['apim:api_create'], apiFromContext)}
                             value
                             control={<Radio />}
                             label={(
@@ -73,7 +73,7 @@ export default function DefaultVersion(props) {
                             )}
                         />
                         <FormControlLabel
-                            disabled={isNotCreator}
+                            disabled={isRestricted(['apim:api_create'], apiFromContext)}
                             value={false}
                             control={<Radio />}
                             label={(

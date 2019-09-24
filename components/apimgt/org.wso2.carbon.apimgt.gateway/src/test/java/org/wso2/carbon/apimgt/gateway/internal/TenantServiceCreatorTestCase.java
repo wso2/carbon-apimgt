@@ -37,6 +37,13 @@ import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.mediation.initializer.configurations.ConfigurationManager;
 import org.wso2.carbon.mediation.initializer.configurations.ConfigurationTracker;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+
+import javax.cache.Cache;
+import javax.cache.Caching;
 
 import java.io.File;
 import java.net.URL;
@@ -45,7 +52,10 @@ import java.net.URL;
  * Test class for TenantServiceCreator
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({PrivilegedCarbonContext.class, TenantServiceCreator.class, FileUtils.class})
+
+@PrepareForTest({PrivilegedCarbonContext.class, TenantServiceCreator.class, FileUtils.class, CacheProvider.class,
+        ServiceReferenceHolder.class, Caching.class, Cache.class, APIManagerConfigurationService.class})
+
 public class TenantServiceCreatorTestCase {
 
     @Before
@@ -58,6 +68,27 @@ public class TenantServiceCreatorTestCase {
         TenantServiceCreator tenantServiceCreator = new TenantServiceCreator();
         ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
         // Failed to create Tenant's synapse sequences Error
+        PowerMockito.mockStatic(Cache.class);
+        Cache cache = Mockito.mock(Cache.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(APIManagerConfigurationService.class);
+        PowerMockito.mockStatic(CacheProvider.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        final APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        APIManagerConfigurationService apiManagerConfigurationService =
+                Mockito.mock(APIManagerConfigurationService.class);
+        PowerMockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).
+                thenReturn(apiManagerConfigurationService);
+        PowerMockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).
+                thenReturn(apiManagerConfiguration);
+        CacheProvider cacheProvider = Mockito.mock(CacheProvider.class);
+        PowerMockito.when(cacheProvider.getDefaultCacheTimeout()).thenReturn((long) 900);
+
+        Mockito.when(CacheProvider.getGatewayKeyCache()).thenReturn(cache);
+        Mockito.when(CacheProvider.getResourceCache()).thenReturn(cache);
+        Mockito.when(CacheProvider.getGatewayTokenCache()).thenReturn(cache);
+        Mockito.when(CacheProvider.getInvalidTokenCache()).thenReturn(cache);
         tenantServiceCreator.createdConfigurationContext(configurationContext);
 
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);

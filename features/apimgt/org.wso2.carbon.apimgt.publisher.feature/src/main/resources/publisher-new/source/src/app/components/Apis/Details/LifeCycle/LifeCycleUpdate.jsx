@@ -26,13 +26,12 @@ import Checkbox from '@material-ui/core/Checkbox';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 import API from 'AppData/api';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
-import ApiPermissionValidation from 'AppData/ApiPermissionValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import LifeCycleImage from './LifeCycleImage';
-import { FormattedMessage, injectIntl } from 'react-intl';
 
 const styles = theme => ({
     buttonsWrapper: {
@@ -75,10 +74,10 @@ class LifeCycleUpdate extends Component {
             promisedUpdate = this.api.updateLcState(apiUUID, action);
         }
         promisedUpdate
-            .then(response => {
+            .then((response) => {
                 /* TODO: Handle IO erros ~tmkb */
                 this.props.handleUpdate(true);
-                let newState = response.body.lifecycleState.state;
+                const newState = response.body.lifecycleState.state;
                 this.context.updateAPI();
                 this.setState({ newState });
                 const { intl } = this.props;
@@ -89,9 +88,9 @@ class LifeCycleUpdate extends Component {
                 }));
                 /* TODO: add i18n ~tmkb */
             })
-            .catch(error_response => {
-                console.log(error_response);
-                Alert.error(JSON.stringify(error_response.message));
+            .catch((errorResponse) => {
+                console.log(errorResponse);
+                Alert.error(JSON.stringify(errorResponse.message));
             });
     }
 
@@ -103,42 +102,64 @@ class LifeCycleUpdate extends Component {
      */
     updateLifeCycleState(event) {
         event.preventDefault();
-        let action = event.currentTarget.getAttribute('data-value');
-        const apiUUID = this.props.api.id;
-        const { privateJetModeEnabled } = this.props;
+        const action = event.currentTarget.getAttribute('data-value');
+        const {
+            api: { id: apiUUID },
+        } = this.props;
         this.updateLCStateOfAPI(apiUUID, action);
     }
 
+    /**
+     *
+     *
+     * @returns
+     * @memberof LifeCycleUpdate
+     */
     render() {
-        const { api, lcState, classes, theme, handleChangeCheckList, checkList } = this.props;
+        const {
+            api, lcState, classes, theme, handleChangeCheckList, checkList,
+        } = this.props;
         const { newState } = this.state;
-        const is_workflow_pending = api.workflowStatus && api.workflowStatus.toLowerCase() === 'pending';
+        const isWorkflowPending = api.workflowStatus && api.workflowStatus.toLowerCase() === 'pending';
+        const lcMap = new Map();
+        lcMap.set('Published', 'Publish');
+        lcMap.set('Prototyped', 'Deploy as a prototype');
+        lcMap.set('Deprecated', 'Deprecate');
+        lcMap.set('Blocked', 'Block');
+        lcMap.set('Created', 'Create');
+        lcMap.set('Retired', 'Retire');
         return (
             <Grid container>
-                {is_workflow_pending ? (
+                {isWorkflowPending ? (
                     <Grid item xs={12}>
-                        <Typography variant="h5">
-                            <FormattedMessage id='Apis.Details.LifeCycle.LifeCycleUpdate.pending' defaultMessage='Pending lifecycle state change.' />
+                        <Typography variant='h5'>
+                            <FormattedMessage
+                                id='Apis.Details.LifeCycle.LifeCycleUpdate.pending'
+                                defaultMessage='Pending lifecycle state change.'
+                            />
                         </Typography>
                         <Typography>
-                            <FormattedMessage id='Apis.Details.LifeCycle.LifeCycleUpdate.adjective' defaultMessage='adjective' />
+                            <FormattedMessage
+                                id='Apis.Details.LifeCycle.LifeCycleUpdate.adjective'
+                                defaultMessage='adjective'
+                            />
                         </Typography>
                     </Grid>
                 ) : (
-                        <Grid item xs={12}>
-                            {theme.custom.lifeCycleImage ? (
-                                <img src={theme.custom.lifeCycleImage} alt="Lifecycle image" />
-                            ) : (
-                                    <LifeCycleImage lifeCycleStatus={newState || api.lifeCycleStatus} />
-                                )}
-                        </Grid>
-                    )}
+                    <Grid item xs={12}>
+                        {theme.custom.lifeCycleImage ? (
+                            <img src={theme.custom.lifeCycleImage} alt='life cycles' />
+                        ) : (
+                            <LifeCycleImage lifeCycleStatus={newState || api.lifeCycleStatus} />
+                        )}
+                    </Grid>
+                )}
                 <Grid item xs={12}>
-                    {!is_workflow_pending && (
+                    {!isWorkflowPending && (
                         <FormGroup row>
                             {checkList.map((checkItem, index) => (
                                 <FormControlLabel
-                                    key={index}
+                                    key={checkList[index].value}
                                     control={
                                         <Checkbox
                                             checked={checkList[index].checked}
@@ -153,30 +174,30 @@ class LifeCycleUpdate extends Component {
                     )}
                     <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
                         <div className={classes.buttonsWrapper}>
-                            {is_workflow_pending ? (
-                                <div className="btn-group" role="group">
+                            {isWorkflowPending ? (
+                                <div className='btn-group' role='group'>
                                     <input
-                                        type="button"
-                                        className="btn btn-primary wf-cleanup-btn"
-                                        defaultValue="Delete pending lifecycle state change request"
+                                        type='button'
+                                        className='btn btn-primary wf-cleanup-btn'
+                                        defaultValue='Delete pending lifecycle state change request'
                                     />
                                 </div>
                             ) : (
-                                    lcState.availableTransitions.map(
-                                        transition_state =>
-                                            lcState.state !== transition_state.targetState && (
-                                                <Button
-                                                    variant="outlined"
-                                                    className={classes.stateButton}
-                                                    key={transition_state.event}
-                                                    data-value={transition_state.event}
-                                                    onClick={this.updateLifeCycleState}
-                                                >
-                                                    {transition_state.event}
-                                                </Button>
-                                            ),
-                                    ) /* Skip when transitions available for current state , this occurs in states where have allowed re-publishing in prototype and published sates */
-                                )}
+                                lcState.availableTransitions.map(transitionState =>
+                                    transitionState.event !== lcMap.get(lcState.state) && (
+                                        <Button
+                                            variant='outlined'
+                                            className={classes.stateButton}
+                                            key={transitionState.event}
+                                            data-value={transitionState.event}
+                                            onClick={this.updateLifeCycleState}
+                                        >
+                                            {transitionState.event}
+                                        </Button>
+                                    ))
+                                /* Skip when transitions available for current state ,
+                            this occurs in states where have allowed re-publishing in prototype and published sates */
+                            )}
                         </div>
                     </ScopeValidation>
                 </Grid>
@@ -186,7 +207,12 @@ class LifeCycleUpdate extends Component {
 }
 
 LifeCycleUpdate.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({}).isRequired,
+    checkList: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+    lcState: PropTypes.shape({}).isRequired,
+    handleChangeCheckList: PropTypes.func.isRequired,
+    handleUpdate: PropTypes.func.isRequired,
     theme: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,

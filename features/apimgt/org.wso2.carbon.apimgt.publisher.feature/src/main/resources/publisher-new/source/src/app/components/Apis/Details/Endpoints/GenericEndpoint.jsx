@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
     Divider,
     Icon,
@@ -25,7 +25,8 @@ import {
 } from '@material-ui/core';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = theme => ({
     endpointInputWrapper: {
@@ -69,16 +70,16 @@ function GenericEndpoint(props) {
         readOnly,
     } = props;
     const [serviceUrl, setServiceUrl] = useState(endpointURL);
+    const { api } = useContext(APIContext);
 
     useEffect(() => {
         setServiceUrl(endpointURL);
     }, [endpointURL]);
-    const isNotCreator = AuthManager.isNotCreator();
 
     return (
         <React.Fragment className={classes.endpointInputWrapper}>
             <TextField
-                disabled={isNotCreator}
+                disabled={isRestricted(['apim:api_create'], api)}
                 label={<FormattedMessage
                     id='Apis.Details.Endpoints.GenericEndpoint.service.url.input'
                     defaultMessage='Service URL'
@@ -101,6 +102,7 @@ function GenericEndpoint(props) {
                                     className={classes.iconButton}
                                     aria-label='Settings'
                                     onClick={() => setAdvancedConfigOpen(index, type, category)}
+                                    disabled={(isRestricted(['apim:api_create'], api))}
                                 >
                                     <Icon>
                                         settings
@@ -114,6 +116,7 @@ function GenericEndpoint(props) {
                                     aria-label='Delete'
                                     color='secondary'
                                     onClick={() => deleteEndpoint(index, type, category)}
+                                    disabled={(isRestricted(['apim:api_create'], api))}
                                 >
                                     <Icon>
                                         delete

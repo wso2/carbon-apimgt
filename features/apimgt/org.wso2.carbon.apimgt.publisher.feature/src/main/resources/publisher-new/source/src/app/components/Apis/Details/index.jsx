@@ -15,10 +15,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/* eslint no-underscore-dangle: ["error", { "allow": ["_data"] }] */
+
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import { isRestricted } from 'AppData/AuthManager';
 import LifeCycleIcon from '@material-ui/icons/Autorenew';
 import EndpointIcon from '@material-ui/icons/GamesOutlined';
 import PersonPinCircleOutlinedIcon from '@material-ui/icons/PersonPinCircleOutlined';
@@ -31,6 +32,7 @@ import ConfigurationIcon from '@material-ui/icons/Build';
 import PropertiesIcon from '@material-ui/icons/List';
 import SubscriptionsIcon from '@material-ui/icons/RssFeed';
 import MonetizationIcon from '@material-ui/icons/LocalAtm';
+import StoreIcon from '@material-ui/icons/Store';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl, defineMessages } from 'react-intl';
 import { Redirect, Route, Switch, Link, matchPath } from 'react-router-dom';
@@ -40,32 +42,33 @@ import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
 import { PageNotFound } from 'AppComponents/Base/Errors';
-import Api from 'AppData/api';
+import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
+import AppContext from 'AppComponents/Shared/AppContext';
 import Overview from './NewOverview/Overview';
 import Configuration from './Configuration/Configuration';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
 import Operations from './Operations/Operations';
-import Resources from './Resources/Resources';
-import ProductResourcesView from './Resources/ProductResourcesView';
+import APIOperations from './Resources/APIOperations';
+import APIProductOperations from './ProductResources/APIProductOperations';
 import ProductResourcesEdit from './ProductResources/ProductResourcesEdit';
 import Endpoints from './Endpoints/Endpoints';
 import Environments from './Environments/Environments';
 import Subscriptions from './Subscriptions/Subscriptions';
 import Comments from './Comments/Comments';
-import Scope from './Scopes/Scopes';
+import Scope from './Scopes';
 import Security from './Security';
 import APIDefinition from './APIDefinition/APIDefinition';
 import APIDetailsTopMenu from './components/APIDetailsTopMenu';
 import MediationPoliciesOverview from './MediationPolicies/Overview';
-import MediationPolicyComponent from './MediationPolicies/MediationPolicyComponent';
 import BusinessInformation from './BusinessInformation/BusinessInformation';
 import Properties from './Properties/Properties';
 import Monetization from './Monetization';
+import ExternalStores from './ExternalStores/ExternalStores';
 import { APIProvider } from './components/ApiContext';
 import CreateNewVersion from './NewVersion/NewVersion';
 
@@ -210,7 +213,7 @@ class Details extends Component {
             this.setState({ api: newAPI });
         } else {
             const { apiUUID } = this.props.match.params;
-            const promisedApi = Api.get(apiUUID);
+            const promisedApi = API.get(apiUUID);
             promisedApi
                 .then((api) => {
                     this.setState({ api });
@@ -305,19 +308,26 @@ class Details extends Component {
                 );
         }
     }
+
     /**
+     * This method is similar to ReactJS `setState` method, In this `updateAPI()` method, we accept partially updated
+     * API object or comple API object. When updating , the provided updatedAPI object will be merged with the existing
+     * API object in the state and use it as the payload in the /apis PUT operation.
      *
-     *
-     * @param {*} updatedProperties
-     * @param {*} isAPIProduct
-     * @memberof Details
+     * Partially updated API object means: {description: "Here is my new description.."} kind of object. It should have
+     * a key in API object and value contains the updated value of that property
+     * @param {Object} [_updatedProperties={}] Partially updated API object or complete API object
+     * (even an instance of API class is accepted here)
+     * @param {Boolean} isAPIProduct Whether the update operation should execute on an API or API Product
+     * @returns {Promise} promise object that resolve to update (/apis PUT operation) response
      */
-    updateAPI(updatedProperties = {}) {
+    updateAPI(_updatedProperties = {}) {
         const { api } = this.state;
         let isAPIProduct = false;
         if (api.apiType === 'APIProduct') {
             isAPIProduct = true;
         }
+        const updatedProperties = _updatedProperties instanceof API ? _updatedProperties.toJson() : _updatedProperties;
         let promisedUpdate;
         // TODO: Ideally, The state should hold the corresponding API object
         // which we could call it's `update` method safely ~tmkb
@@ -325,8 +335,10 @@ class Details extends Component {
             // newApi object has to be provided as the updatedProperties. Then api will be updated.
             promisedUpdate = api.update(updatedProperties);
         } else {
-            // this is to get the updated api when api properties are updated, but we do not have the newApi object
-            promisedUpdate = Api.get(api.id);
+            // Just like calling noArg `setState()` will just trigger a re-render without modifying the state,
+            // Calling `updateAPI()` without args wil return the API without any update.
+            // Just sync-up the api state with backend
+            promisedUpdate = API.get(api.id);
         }
         return promisedUpdate
             .then((updatedAPI) => {
@@ -366,6 +378,8 @@ class Details extends Component {
             location: pageLocation,
             location: { pathname }, // nested destructuring
         } = this.props;
+
+        const settingsContext = this.context.settings;
 
         // pageLocation renaming is to prevent es-lint errors saying can't use global name location
         if (!Details.isValidURL(pathname)) {
@@ -448,16 +462,16 @@ class Details extends Component {
                         {!isAPIProduct && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
-                                    id: 'Apis.Details.index.environments',
-                                    defaultMessage: 'environments',
+                                    id: 'Apis.Details.index.gateways',
+                                    defaultMessage: 'gateways',
                                 })}
                                 to={pathPrefix + 'environments'}
                                 Icon={<PersonPinCircleOutlinedIcon />}
                             />
                         )}
                         {this.getLeftMenuItemForAPIType(api.type)}
-                        {!isAPIProduct && (
-                            <LeftMenuItem
+                        {(!isAPIProduct && !isRestricted(['apim:api_publish'], api))
+                            && (<LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.lifecycle',
                                     defaultMessage: 'lifecycle',
@@ -514,15 +528,26 @@ class Details extends Component {
                             to={pathPrefix + 'mediation policies'}
                             Icon={<ScopesIcon />}
                         />
-                        {!isAPIProduct && (
+                        {(!isAPIProduct && !isRestricted(['apim:api_publish'], api))
+                            && (
+                                <LeftMenuItem
+                                    text={intl.formatMessage({
+                                        id: 'Apis.Details.index.monetization',
+                                        defaultMessage: 'monetization',
+                                    })}
+                                    to={pathPrefix + 'monetization'}
+                                    Icon={<MonetizationIcon />}
+                                />)}
+                        {settingsContext.externalStoresEnabled &&
                             <LeftMenuItem
                                 text={intl.formatMessage({
-                                    id: 'Apis.Details.index.monetization',
-                                    defaultMessage: 'monetization',
+                                    id: 'Apis.Details.index.external-stores',
+                                    defaultMessage: 'external stores',
                                 })}
-                                to={pathPrefix + 'monetization'}
-                                Icon={<MonetizationIcon />}
-                            />)}
+                                to={pathPrefix + 'external-stores'}
+                                Icon={<StoreIcon />}
+                            />
+                        }
                     </div>
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} />
@@ -531,6 +556,7 @@ class Details extends Component {
                                 <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
                                 <Route
                                     path={Details.subPaths.OVERVIEW_PRODUCT}
+                                    key={Details.subPaths.OVERVIEW_PRODUCT}
                                     component={() => <Overview api={api} />}
                                 />
                                 <Route path={Details.subPaths.OVERVIEW} component={() => <Overview api={api} />} />
@@ -564,14 +590,18 @@ class Details extends Component {
                                 <Route
                                     exact
                                     path={Details.subPaths.RESOURCES_PRODUCT}
-                                    component={() => <ProductResourcesView api={api} />}
+                                    component={APIProductOperations}
                                 />
                                 <Route
                                     path={Details.subPaths.RESOURCES_PRODUCT_EDIT}
-                                    component={() => <ProductResourcesEdit />}
+                                    component={ProductResourcesEdit}
                                 />
 
-                                <Route path={Details.subPaths.RESOURCES} component={() => <Resources api={api} />} />
+                                <Route
+                                    path={Details.subPaths.RESOURCES}
+                                    key={Details.subPaths.RESOURCES}
+                                    component={APIOperations}
+                                />
 
                                 <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
                                 <Route
@@ -610,12 +640,12 @@ class Details extends Component {
                                     component={() => <Monetization api={api} />}
                                 />
                                 <Route
-                                    path={Details.subPaths.MEDIATION_POLICIES}
-                                    component={() => <MediationPoliciesOverview api={api} />}
+                                    path={Details.subPaths.EXTERNAL_STORES}
+                                    component={ExternalStores}
                                 />
                                 <Route
-                                    path={Details.subPaths.MEDIATION_POLICY}
-                                    component={() => <MediationPolicyComponent api={api} />}
+                                    path={Details.subPaths.MEDIATION_POLICIES}
+                                    component={() => <MediationPoliciesOverview api={api} />}
                                 />
                             </Switch>
                         </div>
@@ -626,6 +656,7 @@ class Details extends Component {
     }
 }
 
+Details.contextType = AppContext;
 // Add your path here and refer it in above <Route/> component,
 // Paths that are not defined here will be returned with Not Found error
 // key name doesn't matter here, Use an appropriate name as the key
@@ -660,6 +691,7 @@ Details.subPaths = {
     NEW_VERSION: '/apis/:api_uuid/new_version',
     MONETIZATION: '/apis/:api_uuid/monetization',
     MEDIATION_POLICIES: '/apis/:api_uuid/Mediation Policies',
+    EXTERNAL_STORES: '/apis/:api_uuid/external-stores',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum

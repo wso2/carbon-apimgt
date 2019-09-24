@@ -27,10 +27,16 @@ import {
 } from '@material-ui/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import { isRestricted } from 'AppData/AuthManager';
 import cloneDeep from 'lodash.clonedeep';
 
 import EndpointListing from './EndpointListing';
-import { getEndpointTemplateByType, getEndpointTypeProperty, createEndpointConfig } from './endpointUtils';
+import {
+    getEndpointTemplateByType,
+    getEndpointTypeProperty,
+    createEndpointConfig,
+    getEndpointTemplate,
+} from './endpointUtils';
 import GeneralConfiguration from './GeneralConfiguration';
 import GenericEndpoint from './GenericEndpoint';
 import LoadBalanceConfig from './LoadBalanceConfig';
@@ -170,8 +176,18 @@ function EndpointOverview(props) {
     useEffect(() => {
     }, [endpointType]);
 
+    const getEndpoints = (type) => {
+        if (epConfig[type]) {
+            return epConfig[type].length > 0 ?
+                epConfig[type][0].url : epConfig[type].url;
+        }
+        return '';
+    };
+
     /**
      * Method to modify the endpoint represented by the given parameters.
+     *
+     * If url is null, remove the endpoint from the endpoint config.
      *
      * @param {number} index The index of the endpoint in the listing.
      * @param {string} category The endpoint category. (production/ sand box)
@@ -181,7 +197,6 @@ function EndpointOverview(props) {
         let modifiedEndpoint = null;
         // Make a copy of the endpoint config.
         const endpointConfigCopy = cloneDeep(epConfig);
-
         /*
         * If the index > 0, it means that the endpoint is load balance or fail over.
         * Otherwise it is the default endpoint. (index = 0)
@@ -200,21 +215,34 @@ function EndpointOverview(props) {
                 modifiedEndpoint[index].url = url;
             }
             endpointConfigCopy[endpointTypeProperty] = modifiedEndpoint;
-        } else {
+        } else if (url !== '') {
             modifiedEndpoint = endpointConfigCopy[category];
+
             /*
             * In this case, we are editing the default endpoint.
             * If the endpoint type is load balance, the production_endpoints or the sandbox_endpoint object is an
             *  array. Otherwise, in failover mode, the default endpoint is an object.
             *
             * So, we check whether the endpoints is an array or an object.
+            *
+            * If This is the first time a user creating an endpoint endpoint config object does not have
+            *  production_endpoints or sandbox_endpoints object.
+            * Therefore create new object and add to the endpoint config.
             * */
-            if (Array.isArray(modifiedEndpoint)) {
-                modifiedEndpoint[0].url = url;
+            if (!modifiedEndpoint) {
+                modifiedEndpoint = getEndpointTemplate(endpointConfigCopy.endpoint_type);
+                modifiedEndpoint.url = url;
+            } else if (Array.isArray(modifiedEndpoint)) {
+                modifiedEndpoint = url === '' ? modifiedEndpoint.splice(0, 1) : modifiedEndpoint[0].url = url;
             } else {
                 modifiedEndpoint.url = url;
             }
             endpointConfigCopy[category] = modifiedEndpoint;
+        } else {
+            /*
+            * If the url is empty, delete the respective endpoint object.
+            * */
+            delete endpointConfigCopy[category];
         }
         setEpConfig(endpointConfigCopy);
     };
@@ -441,9 +469,7 @@ function EndpointOverview(props) {
                                 </div>
                                 <GenericEndpoint
                                     className={classes.defaultEndpointWrapper}
-                                    endpointURL={
-                                        epConfig.production_endpoints && epConfig.production_endpoints.length > 0 ?
-                                            epConfig.production_endpoints[0].url : epConfig.production_endpoints.url}
+                                    endpointURL={getEndpoints('production_endpoints')}
                                     type=''
                                     index={0}
                                     category='production_endpoints'
@@ -462,8 +488,7 @@ function EndpointOverview(props) {
                                 </div>
                                 <GenericEndpoint
                                     className={classes.defaultEndpointWrapper}
-                                    endpointURL={epConfig.sandbox_endpoints && epConfig.sandbox_endpoints.length > 0 ?
-                                        epConfig.sandbox_endpoints[0].url : epConfig.sandbox_endpoints.url}
+                                    endpointURL={getEndpoints('sandbox_endpoints')}
                                     type=''
                                     index={0}
                                     category='sandbox_endpoints'
@@ -495,12 +520,20 @@ function EndpointOverview(props) {
                                             >
                                                 <FormControlLabel
                                                     value='failover'
-                                                    control={<Radio />}
+                                                    control={
+                                                        <Radio
+                                                            disabled={(isRestricted(['apim:api_create'], api))}
+                                                        />
+                                                    }
                                                     label='Failover'
                                                 />
                                                 <FormControlLabel
                                                     value='load_balance'
-                                                    control={<Radio />}
+                                                    control={
+                                                        <Radio
+                                                            disabled={(isRestricted(['apim:api_create'], api))}
+                                                        />
+                                                    }
                                                     label='Load balance'
                                                 />
                                             </RadioGroup>

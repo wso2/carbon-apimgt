@@ -28,7 +28,8 @@ import FormLabel from '@material-ui/core/FormLabel';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const useStyles = makeStyles(theme => ({
     error: {
@@ -44,9 +45,10 @@ const useStyles = makeStyles(theme => ({
  */
 export default function Transports(props) {
     const { api, configDispatcher } = props;
+    const [apiFromContext] = useAPI();
     const classes = useStyles();
     const Validate = () => {
-        if (api.transport.length === 0) {
+        if (api.transport && api.transport.length === 0) {
             return (
                 <FormattedMessage
                     id='Apis.Details.Configuration.components.transport.empty'
@@ -56,7 +58,6 @@ export default function Transports(props) {
         }
         return null; // No errors :-)
     };
-    const isNotCreator = AuthManager.isNotCreator();
     return (
         <Grid container spacing={1} alignItems='flex-start'>
             <Grid item>
@@ -67,12 +68,14 @@ export default function Transports(props) {
                             defaultMessage='Transports'
                         />
                     </FormLabel>
-                    <FormGroup>
+                    <FormGroup style={{ display: 'flow-root' }}>
                         <FormControlLabel
                             control={(
                                 <Checkbox
-                                    disabled={isNotCreator}
-                                    checked={api.transport.includes('http')}
+                                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                                    checked={api.transport ?
+                                        api.transport.includes('http') : null
+                                    }
                                     onChange={({ target: { checked } }) => configDispatcher({
                                         action: 'transport',
                                         event: { checked, value: 'http' },
@@ -86,8 +89,9 @@ export default function Transports(props) {
                         <FormControlLabel
                             control={(
                                 <Checkbox
-                                    disabled={isNotCreator}
-                                    checked={api.transport.includes('https')}
+                                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                                    checked={api.transport ?
+                                        api.transport.includes('https') : null}
                                     onChange={({ target: { checked } }) => configDispatcher({
                                         action: 'transport',
                                         event: { checked, value: 'https' },

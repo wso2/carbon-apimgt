@@ -23,7 +23,6 @@ import { withStyles, withTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
 import { injectIntl } from 'react-intl';
-import APIProduct from 'AppData/APIProduct';
 import CONSTS from 'AppData/Constants';
 import Api from 'AppData/api';
 import { ApiContext } from './ApiContext';
@@ -51,7 +50,7 @@ RenderMethodBase.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-const RenderMethod = withTheme()(RenderMethodBase);
+const RenderMethod = withTheme(RenderMethodBase);
 /**
  *
  *
@@ -96,16 +95,10 @@ class Resources extends React.Component {
      */
     componentDidMount() {
         const { api } = this.props;
-        const { apiType } = this.context;
         let promisedApi = null;
 
-        if (apiType === CONSTS.API_TYPE) {
-            const apiClient = new Api();
-            promisedApi = apiClient.getSwaggerByAPIId(api.id);
-        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
-            const apiProductClient = new APIProduct();
-            promisedApi = apiProductClient.getSwaggerByAPIId(api.id);
-        }
+        const apiClient = new Api();
+        promisedApi = apiClient.getSwaggerByAPIId(api.id);
 
         promisedApi
             .then((response) => {

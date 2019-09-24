@@ -84,7 +84,7 @@ class NewApp extends React.Component {
                 name: '',
                 throttlingPolicy: '',
                 description: '',
-                tokenType: 'OAUTH',
+                tokenType: 'JWT',
                 groups: null,
                 attributes: {},
             },
@@ -349,7 +349,7 @@ class NewApp extends React.Component {
                             <IconButton color='inherit' onClick={handleClose} aria-label='Close'>
                                 <Icon>close</Icon>
                             </IconButton>
-                            <Typography variant='title' color='inherit' className={classes.flex}>
+                            <Typography variant='h6' color='inherit' className={classes.flex}>
                                 <FormattedMessage
                                     id='Applications.Create.NewApp.create.new.application'
                                     defaultMessage='Create New Application'

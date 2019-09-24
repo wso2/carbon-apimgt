@@ -95,6 +95,7 @@ securityDefinitions:
       apim:ep_certificates_add: Add backend endpoint certificates
       apim:ep_certificates_update: Update and delete backend endpoint certificates
       apim:publisher_settings: Retrieve store settings
+      apim:pub_alert_manage: Get/ subscribe/ configure publisher alerts.
 
 security:
   - OAuth2Security:
@@ -2643,7 +2644,7 @@ paths:
         - OAuth2Security:
           - apim:mediation_policy_view
       x-examples:
-          $ref: docs/examples/apis/apis_id_mediationpolicies_get.yaml
+          $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_get.yaml
       summary: |
         Get all mediation policies of an API
       operationId:  apisApiIdMediationPoliciesGet
@@ -2696,7 +2697,7 @@ paths:
         - OAuth2Security:
           - apim:mediation_policy_create
       x-examples:
-        $ref: docs/examples/apis/apis_id_mediationpolicies_post.yaml
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_post.yaml
       summary: Add an API specific mediation policy
       operationId: apisApiIdMediationPoliciesPost
       description: |
@@ -2779,7 +2780,7 @@ paths:
         - OAuth2Security:
           - apim:api_view
       x-examples:
-        $ref: docs/examples/apis/apis_id_mediationpolicies_id_get.yaml
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_get.yaml
       summary: Get an API specific mediation policy
       operationId:  apisApiIdMediationPoliciesMediationPolicyIdGet
       description: |
@@ -2837,7 +2838,7 @@ paths:
         - OAuth2Security:
           - apim:mediation_policy_manage
       x-examples:
-        $ref: docs/examples/apis/apis_id_mediationpolicies_id_delete.yaml
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_delete.yaml
       summary: Delete an API specific mediation policy
       operationId:  apisApiIdMediationPoliciesMediationPolicyIdDelete
       description: |
@@ -2884,7 +2885,7 @@ paths:
       - OAuth2Security:
         - apim:api_view
       x-examples:
-        $ref: docs/examples/apis/apis_id_mediationpolicies_id_content_get.yaml
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_content_get.yaml
       summary: Download an API specific mediation policy
       operationId:  apisApiIdMediationPoliciesMediationPolicyIdContentGet
       description: |
@@ -2935,7 +2936,7 @@ paths:
       - OAuth2Security:
         - apim:mediation_policy_manage
       x-examples:
-        $ref: docs/examples/apis/apis_id_mediationpolicies_id_content_put.yaml
+        $ref: docs/examples/mediation-policies/apis_id_mediationpolicies_id_content_put.yaml
       summary: Update an API specific mediation policy
       operationId:  apisApiIdMediationPoliciesMediationPolicyIdContentPut
       description: |
@@ -3021,7 +3022,8 @@ paths:
 #-----------------------------------------------------
     get:
       produces:
-        - application/wsdl+xml
+        - application/json
+        - application/wsdl
         - application/zip
       security:
         - OAuth2Security:
@@ -3920,6 +3922,7 @@ paths:
       operationId: getAllThrottlingPolicies
       description: |
         This operation can be used to list the available policies for a given policy level. Tier level should be specified as a path parameter and should be one of `subscription` and `api`.
+        `subscription` is for Subscription Level policies and `api` is for Resource Level policies
       parameters:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
@@ -4038,6 +4041,8 @@ paths:
         GET https://localhost:9443/api/am/publisher/v0.14/mediation-policies
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n   \"count\": 10,\r\n   \"next\": null,\r\n   \"previous\": null,\r\n   \"list\":    [\r\n            {\r\n         \"name\": \"debug_json_fault\",\r\n         \"id\": \"563de8f3-dd1d-4ec7-afc2-d158c663ed34\",\r\n         \"type\": \"fault\"\r\n      },\r\n            {\r\n         \"name\": \"json_fault\",\r\n         \"id\": \"f9c36f4d-a2b6-41e7-b311-d358a47916be\",\r\n         \"type\": \"fault\"\r\n      },\r\n            {\r\n         \"name\": \"json_to_xml_in_message\",\r\n         \"id\": \"3921225b-7918-4b95-a851-22c4e4e3e911\",\r\n         \"type\": \"in\"\r\n      },\r\n            {\r\n         \"name\": \"debug_in_flow\",\r\n         \"id\": \"2bc15f93-4455-4763-89b8-83600fb9d731\",\r\n         \"type\": \"in\"\r\n      },\r\n            {\r\n         \"name\": \"log_in_message\",\r\n         \"id\": \"4d287cca-76ab-44ca-b22e-919fc27c50e3\",\r\n         \"type\": \"in\"\r\n      },\r\n            {\r\n         \"name\": \"preserve_accept_header\",\r\n         \"id\": \"3776b215-b3bc-40b6-bdcb-06efa7de64be\",\r\n         \"type\": \"in\"\r\n      },\r\n            {\r\n         \"name\": \"xml_to_json_in_message\",\r\n         \"id\": \"50ac2002-769e-4f90-8549-6d0248dff7d2\",\r\n         \"type\": \"in\"\r\n      },\r\n            {\r\n         \"name\": \"xml_to_json_out_message\",\r\n         \"id\": \"2af75853-ed75-4d25-81aa-0ebbeca691ea\",\r\n         \"type\": \"out\"\r\n      },\r\n            {\r\n         \"name\": \"json_to_xml_out_message\",\r\n         \"id\": \"d9fa3ffc-f6b6-4171-ab97-eb44196cb66e\",\r\n         \"type\": \"out\"\r\n      },\r\n            {\r\n         \"name\": \"debug_out_flow\",\r\n         \"id\": \"260b7701-4071-46bd-9b66-900ac6fffed6\",\r\n         \"type\": \"out\"\r\n      },\r\n            {\r\n         \"name\": \"apply_accept_header\",\r\n         \"id\": \"15c17c2f-33e3-4c37-a262-04dfa49983a4\",\r\n         \"type\": \"out\"\r\n      },\r\n            {\r\n         \"name\": \"log_out_message\",\r\n         \"id\": \"d37dca41-c048-492a-82cf-9a2292c6fff0\",\r\n         \"type\": \"out\"\r\n      }\r\n   ]\r\n}"
+      x-examples:
+        $ref: docs/examples/mediation-policies/mediation_policies_get.yaml
       summary: |
         Get all global level mediation policies
       operationId: getAllGlobalMediationPolicies
@@ -6184,6 +6189,295 @@ paths:
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+  ####################################################
+  # Publisher Alerts management REST API
+  ####################################################
+  '/alert-types':
+    #--------------------------------------------------
+    # Retrieve the list of api store alert types.
+    #--------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:pub_alert_manage
+      x-examples:
+        $ref: docs/examples/alerts/alerts.yaml#/get
+      operationId: getPublisherAlertTypes
+      summary: |
+        Get the list of API Publisher alert types.
+      description: |
+        This operation is used to get the list of supportd alert types for the 'publisher' agent.
+      tags:
+        - Alerts
+      responses:
+        200:
+          description: |
+            OK.
+            The list of publisher alert types are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertTypesList'
+        500:
+          description: |
+            Internal Server Error.
+            An internal server error occurred while retrieving the alert types.
+          schema:
+            $ref: '#/definitions/Error'
+
+  '/alert-subscriptions':
+    #--------------------------------------------------
+    # Retrieve the list of alerts subscribed by the user.
+    #--------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:pub_alert_manage
+      x-examples:
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/get
+      summary: |
+        Get the list of API Publisher alert types subscribed by the user.
+      operationId: getSubscribedAlertTypes
+      description: |
+        This operation is used to get the list of subscribed alert types by the user.
+      tags:
+        - Alert Subscriptions
+      responses:
+        200:
+          description: |
+            OK.
+            The list of subscribed alert types are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertsInfo'
+        500:
+          description: |
+            Internal Server Error
+            An error occurred while retrieving subscribed alert types by user.
+          schema:
+            $ref: '#/definitions/Error'
+
+    #--------------------------------------------------
+    # Subscribe to the selected alert types by the user.
+    #--------------------------------------------------
+    put:
+      security:
+        - OAuth2Security:
+            - apim:pub_alert_manage
+      x-examples:
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/put
+      summary: |
+        Subscribe to the selected alert types by the user.
+      operationId: subscribeToAlerts
+      description: |
+        This operation is used to get the list of subscribed alert types by the user.
+      parameters:
+        - in: body
+          name: body
+          description:
+            The alerts list and the email list to subscribe.
+          required: true
+          schema:
+            $ref: '#/definitions/AlertsInfo'
+      tags:
+        - Alert Subscriptions
+      responses:
+        201:
+          description: |
+            OK.
+            Successful response with the newly subscribed alerts.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertsInfoResponse'
+        400:
+          description: |
+            Bad Request.
+            Invalid Request or request validation failure.
+        500:
+          description: |
+            Internal Server Error
+            An internal server error occurred while subscribing to alerts.
+          schema:
+            $ref: '#/definitions/Error'
+    #--------------------------------------------------
+    # Unsubscribe the user from all the alerts types
+    #--------------------------------------------------
+    delete:
+      security:
+        - OAuth2Security:
+            - apim:pub_alert_manage
+      x-examples:
+        $ref: docs/examples/alerts/alerts_subscriptions.yaml#/delete
+      summary: |
+        Unsubscribe user from all the alert types.
+      operationId: unsubscribeAllAlerts
+      description: |
+        This operation is used to unsubscribe the respective user from all the alert types.
+      tags:
+        - Alert Subscriptions
+      responses:
+        200:
+          description: |
+            OK.
+            The user is unsubscribed from the alerts successfully.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        500:
+          description: |
+            Internal Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+  ##################################################
+  # Alert configuration api
+  #################################################
+  '/alerts/{alert-type}/configurations':
+    #----------------------------------------------
+    # Get the alert configs
+    #----------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+            - apim:pub_alert_manage
+      x-examples:
+        $ref: docs/examples/alerts/alerts_config.yaml#/get
+      summary: |
+        Get all AbnormalRequestsPerMin alert configurations
+      operationId: getAllAlertConfigs
+      description: |
+        This operation is used to get all configurations of the AbnormalRequestsPerMin alert type.
+      tags:
+        - Alert Configuration
+      parameters:
+        - $ref: '#/parameters/alert-type'
+      responses:
+        200:
+          description: |
+            OK.
+            The store alert configuration.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertConfigList'
+        500:
+          description: |
+            Internal Server Error
+            An error occurred while retrieving subscribed alert types by user.
+          schema:
+            $ref: '#/definitions/Error'
+
+  '/alerts/{alert-type}/configurations/{configuration-id}':
+    #----------------------------------------------
+    # Add alert config
+    #----------------------------------------------
+    put:
+      security:
+        - OAuth2Security:
+            - apim:pub_alert_manage
+      x-examples:
+        $ref: docs/examples/alerts/alerts_config.yaml#/put
+      summary: |
+        Add AbnormalRequestsPerMin alert configurations.
+      operationId: addAlertConfig
+      description: |
+        This operation is used to add configuration for the AbnormalRequestsPerMin alert type.
+      parameters:
+        - $ref: '#/parameters/alert-type'
+        - $ref: '#/parameters/configuration-id'
+        - in: body
+          name: body
+          description:
+            Configuration for AbnormalRequestCount alert type
+          required: true
+          schema:
+            $ref: '#/definitions/AlertConfigInfo'
+      tags:
+        - Alert Configuration
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with newly created object as entity.
+            Location header contains URL of newly created entity.
+          headers:
+            Location:
+              description: |
+                The location of the newly created entity.
+              type: string
+          schema:
+            $ref: '#/definitions/AlertConfig'
+        400:
+          description: |
+            Bad Request
+            The request parameters validation failed.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error
+            An error occurred while retrieving subscribed alert types by user.
+          schema:
+            $ref: '#/definitions/Error'
+
+    #----------------------------------------------
+    # Delete alert configuration
+    #----------------------------------------------
+    delete:
+      security:
+        - OAuth2Security:
+            - apim:pub_alert_manage
+      x-examples:
+        $ref: docs/examples/alerts/alerts_config.yaml#/delete
+      summary: |
+        Delete the selected configuration from AbnormalRequestsPerMin alert type.
+      operationId: deleteAlertConfig
+      description: |
+        This operation is used to delete configuration from the AbnormalRequestsPerMin alert type.
+      parameters:
+        - $ref: '#/parameters/alert-type'
+        - $ref: '#/parameters/configuration-id'
+      tags:
+        - Alert Configuration
+      responses:
+        200:
+          description: |
+            OK.
+            The alert config is deleted successfully.
+        400:
+          description: |
+            Bad Request
+            The request parameters validation failed.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The provided alert configuration is not found.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: |
+            Internal Server Error
+            An error occurred while retrieving subscribed alert types by user.
+          schema:
+            $ref: '#/definitions/Error'
 
   ######################################################
   # Check tenant existence
@@ -6217,7 +6511,33 @@ paths:
             Not Found.
             Requested role name does not exist.
 
+  ####################################################
+  # The "Label" resource API
+  ######################################################
+  /labels:
 
+    #-----------------------------------------------------
+    # Retrieve all labels
+    #-----------------------------------------------------
+    get:
+      x-scope: apim:api_view
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/publisher/v1.0/labels
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/publisher/v1.0/labels\""
+      x-wso2-response: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\r\n  \"count\": 1,\r\n  \"list\": [\r\n	{\r\n	\"id\":\"d7cf8523-9180-4255-84fa-6cb171c1f779\",\r\n	\"name\":\"internal\",\r\n	\"description\":\"label used for internal purpose\",\r\n	\"accessUrls\":[\r\n	  \"https://localhost:9095\"\r\n         ]\r\n       }\r\n   ]\r\n}"
+      summary: Get all registered Labels
+      description: |
+        Get all registered Labels
+      tags:
+      - Label Collection
+      responses:
+        200:
+          description: |
+            OK.
+            Labels returned
+          schema:
+            $ref: '#/definitions/LabelList'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -6377,8 +6697,7 @@ parameters:
     type: string
     enum:
       - api
-      - application
-      - resource
+      - subcription
     required: true
 
 # Tier Type
@@ -6391,8 +6710,7 @@ parameters:
     type: string
     enum:
       - api
-      - application
-      - resource
+      - subcription
     required: true
 
 # Used for pagination:
@@ -6521,6 +6839,21 @@ parameters:
     required: true
     type: string
 
+  # The alert-type parameter
+  alert-type:
+    name: alert-type
+    in: path
+    type: string
+    required: true
+    description: The alert type.
+
+  # The alert subscription id parameter
+  configuration-id:
+    name: configuration-id
+    type: string
+    in: path
+    required: true
+    description: The alert configuration id.
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
@@ -6745,7 +7078,8 @@ definitions:
           Labels of micro-gateway environments attached to the API.
         type: array
         items:
-          $ref: '#/definitions/Label'
+          type: string
+          example: ["Pizzashack, Petstore"]
       mediationPolicies:
         type: array
         items:
@@ -8504,6 +8838,7 @@ definitions:
         enum:
           - DOC
           - API
+          - APIProduct
         example: API
 
   APISearchResult:
@@ -8535,6 +8870,34 @@ definitions:
           thumbnailUri:
             type: string
             example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+
+  APIProductSearchResult:
+    title: API Result
+    allOf:
+    - $ref: '#/definitions/SearchResult'
+    - properties:
+        description:
+          type: string
+          description: A brief description about the API
+          example: A calculator API that supports basic operations
+        context:
+          type: string
+          description: A string that represents the context of the user's request
+          example: CalculatorAPI
+        provider:
+          description: |
+            If the provider value is not given, the user invoking the API will be used as the provider.
+          type: string
+          example: admin
+        status:
+          type: string
+          description: This describes in which status of the lifecycle the APIPRODUCT is
+          example: PUBLISHED
+        thumbnailUri:
+          type: string
+          example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
+
+
 
   #-----------------------------------------------------
   # The API monetization resource
@@ -8605,6 +8968,8 @@ definitions:
             type: string
             example: admin
           apiUUID:
+              type: string
+          associatedType:
               type: string
   #-----------------------------------------------------
   # The Resource policy List resource
@@ -8772,6 +9137,143 @@ definitions:
           $ref: '#/definitions/Tenant'
       pagination:
         $ref: '#/definitions/Pagination'
+  #----------------------------------------------
+  # The Alert list resource.
+  #----------------------------------------------
+  AlertTypesList:
+    title: Alert Types List
+    properties:
+      count:
+        type: integer
+        description: The number of alerts
+        example: 3
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/AlertType'
+
+  #----------------------------------------------
+  # The AlertType resource.
+  #----------------------------------------------
+  AlertType:
+    title: Alert Type
+    properties:
+      id:
+        type: integer
+        description: The alert Id
+        example: 1
+      name:
+        type: string
+        description: The name of the alert.
+        example: "AbnormalRequestTime"
+      requireConfiguration:
+        type: boolean
+        description: Whether the alert type require additional configurations.
+        example: true
+
+  #----------------------------------------------
+  # The Alert resource.
+  #----------------------------------------------
+  Alert:
+    title: Alert
+    properties:
+      id:
+        type: integer
+        description: The alert Id
+        example: 1
+      name:
+        type: string
+        description: The name of the alert.
+        example: "AbnormalRequestsPerMin"
+      configuration:
+        type: array
+        items:
+          $ref: '#/definitions/AlertConfig'
+
+  #-----------------------------------------------
+  # The Alert Info resource definition.
+  #-----------------------------------------------
+  AlertsInfo:
+    title: Alerts Info
+    properties:
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/Alert'
+      emailList:
+        type: array
+        items:
+          type: string
+
+  #-----------------------------------------------
+  # The Alert Info Response resource definition.
+  #-----------------------------------------------
+  AlertsInfoResponse:
+    title: Alerts Info Response
+    properties:
+      alerts:
+        type: array
+        items:
+          $ref: '#/definitions/Alert'
+      emailList:
+        type: array
+        items:
+          type: string
+      failedConfigurations:
+        type: array
+        items:
+          $ref: '#/definitions/AlertConfig'
+
+  #-----------------------------------------------
+  # The Alert Config List resource definition.
+  #-----------------------------------------------
+  AlertConfigList:
+    title: Alert Configuration List
+    properties:
+      count:
+        type: integer
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/AlertConfig'
+
+  #-----------------------------------------------
+  # The Alert Config resource definition.
+  #-----------------------------------------------
+  AlertConfig:
+    title: Alert Configuration
+    properties:
+      configurationId:
+        type: string
+        description: The alert config subscription id.
+        example: UGl6emFTaGFja0FQSSsxLjAuMCtEZWZhdWx0QXBwbGljYXRpb24K
+      configuration:
+        type: object
+        description: The config parameters.
+        additionalProperties:
+          type: string
+        example:
+          apiName: 'PizzaShackAPI'
+          apiVersion: '1.0.0'
+          applicationName: 'DefaultApplication'
+          requestConunt: '12'
+
+  #-----------------------------------------------
+  # The Alert Config Info resource definition.
+  #-----------------------------------------------
+  AlertConfigInfo:
+    title: Alert Configuration Info
+    type: object
+    description: The config parameters.
+    additionalProperties:
+      type: string
+    example:
+      apiName: 'PizzaShackAPI'
+      apiVersion: '1.0.0'
+      applicationName: 'DefaultApplication'
+      requestConunt: '12'
+
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

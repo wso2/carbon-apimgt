@@ -28,6 +28,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import InputAdornment from '@material-ui/core/InputAdornment';
+import CheckIcon from '@material-ui/icons/Check';
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 
 import APIValidation from 'AppData/APIValidation';
 import API from 'AppData/api';
@@ -51,7 +53,7 @@ export default function ProvideOpenAPI(props) {
     const isFileInput = apiInputs.inputType === 'file';
     const classes = useStyles();
     // If valid value is `null`,that means valid, else an error object will be there
-    const [isValid, setValidity] = useState({ url: null, file: null });
+    const [isValid, setValidity] = useState({});
     const [isValidating, setIsValidating] = useState(false);
     /**
      *
@@ -120,6 +122,32 @@ export default function ProvideOpenAPI(props) {
             onValidate(false);
         }
     }
+
+    // TODO: Use validation + input to separate component that can be share with wsdl,swagger,graphql URL inputs ~tmkb
+    const isInvalidURL = Boolean(isValid.url);
+    let urlStateEndAdornment = null;
+    if (isValidating) {
+        urlStateEndAdornment = (
+            <InputAdornment position='end'>
+                <CircularProgress />
+            </InputAdornment>
+        );
+    } else if (isValid.url !== undefined) {
+        if (isInvalidURL) {
+            urlStateEndAdornment = (
+                <InputAdornment position='end'>
+                    <ErrorOutlineIcon fontSize='large' color='error' />
+                </InputAdornment>
+            );
+        } else {
+            urlStateEndAdornment = (
+                <InputAdornment position='end'>
+                    <CheckIcon fontSize='large' color='primary' />
+                </InputAdornment>
+            );
+        }
+    }
+
     return (
         <React.Fragment>
             <Grid container spacing={5}>
@@ -177,15 +205,11 @@ export default function ProvideOpenAPI(props) {
                                 onBlur: ({ target: { value } }) => {
                                     validateURL(APIValidation.url.required().validate(value).error);
                                 },
-                                endAdornment: isValidating && (
-                                    <InputAdornment position='end'>
-                                        <CircularProgress />
-                                    </InputAdornment>
-                                ),
+                                endAdornment: urlStateEndAdornment,
                             }}
                             // 'Give the URL of OpenAPI endpoint'
-                            helperText={isValid.url && isValid.url.message}
-                            error={Boolean(isValid.url)}
+                            helperText={(isValid.url && isValid.url.message) || 'Click away to validate the URL'}
+                            error={isInvalidURL}
                             disabled={isValidating}
                         />
                     )}

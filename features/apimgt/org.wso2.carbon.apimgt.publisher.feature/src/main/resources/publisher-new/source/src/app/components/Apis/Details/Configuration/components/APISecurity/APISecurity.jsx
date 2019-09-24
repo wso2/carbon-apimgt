@@ -19,8 +19,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
-import Tooltip from '@material-ui/core/Tooltip';
-import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
@@ -33,15 +31,20 @@ import TransportLevel from './components/TransportLevel';
 
 const DEFAULT_API_SECURITY_OAUTH2 = 'oauth2';
 const API_SECURITY_BASIC_AUTH = 'basic_auth';
+const API_SECURITY_API_KEY = 'api_key';
 const API_SECURITY_MUTUAL_SSL = 'mutualssl';
-const API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY = 'oauth_basic_auth_mandatory';
+const API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = 'oauth_basic_auth_api_key_mandatory';
 const API_SECURITY_MUTUAL_SSL_MANDATORY = 'mutualssl_mandatory';
 
 const useStyles = makeStyles(theme => ({
     error: {
         color: theme.palette.error.main,
     },
+    bottomSpace: {
+        marginBottom: theme.spacing(4),
+    },
 }));
+
 /**
  *
  *
@@ -51,12 +54,14 @@ const useStyles = makeStyles(theme => ({
  */
 export default function APISecurity(props) {
     const {
-        api: { securityScheme },
+        api: { securityScheme, id },
         configDispatcher,
+        api,
     } = props;
     const haveMultiLevelSecurity =
         securityScheme.includes(API_SECURITY_MUTUAL_SSL) &&
-        (securityScheme.includes(API_SECURITY_BASIC_AUTH) || securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2));
+        (securityScheme.includes(API_SECURITY_BASIC_AUTH) ||
+        securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2) || securityScheme.includes(API_SECURITY_API_KEY));
     const classes = useStyles();
 
     // Check the validation conditions and return an error message
@@ -64,27 +69,32 @@ export default function APISecurity(props) {
         if (
             !securityScheme.includes(API_SECURITY_MUTUAL_SSL) &&
             !securityScheme.includes(API_SECURITY_BASIC_AUTH) &&
-            !securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2)
+            !securityScheme.includes(DEFAULT_API_SECURITY_OAUTH2) &&
+            !securityScheme.includes(API_SECURITY_API_KEY)
         ) {
             return (
-                <FormattedMessage
-                    id='Apis.Details.Configuration.components.APISecurity.emptySchemas'
-                    defaultMessage='Please select at least one API security method!'
-                />
+                <Typography className={classes.bottomSpace}>
+                    <FormattedMessage
+                        id='Apis.Details.Configuration.components.APISecurity.emptySchemas'
+                        defaultMessage='Please select at least one API security method!'
+                    />
+                </Typography>
             );
         } else if (
             // User has enabled both security levels and set both levels as optional
             haveMultiLevelSecurity &&
             !(
                 securityScheme.includes(API_SECURITY_MUTUAL_SSL_MANDATORY) ||
-                securityScheme.includes(API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY)
+                securityScheme.includes(API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)
             )
         ) {
             return (
-                <FormattedMessage
-                    id='Apis.Details.Configuration.components.APISecurity.allOptional'
-                    defaultMessage='Please select at least one API security level mandatory!'
-                />
+                <Typography className={classes.bottomSpace}>
+                    <FormattedMessage
+                        id='Apis.Details.Configuration.components.APISecurity.allOptional'
+                        defaultMessage='Please select at least one API security level mandatory!'
+                    />
+                </Typography>
             );
         }
         return null; // No errors :-)
@@ -92,45 +102,19 @@ export default function APISecurity(props) {
     return (
         <React.Fragment>
             <Grid container spacing={2} alignItems='flex-start'>
-                <Grid item>
-                    <Typography variant='subtitle1'>
-                        API Security
-                    </Typography>
-                </Grid>
-                <Grid item>
-                    <Tooltip
-                        title={
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.components.APISecurity.tooltip'
-                                defaultMessage={
-                                    'This option determines the type of security' +
-                                    ' that will be used to secure this API. An API can be secured ' +
-                                    'with either one of them or it can be secured by both of them. ' +
-                                    'If OAuth2 option is selected, relevant API will require a valid ' +
-                                    'OAuth2 token for successful invocation. If Mutual SSL option is selected,' +
-                                    ' a trusted client certificate should be presented to access the API'
-                                }
-                            />
-                        }
-                        aria-label='APISecurity'
-                        placement='right-end'
-                        interactive
-                    >
-                        <HelpOutline />
-                    </Tooltip>
-                </Grid>
-            </Grid>
-
-            <Grid container spacing={5} alignItems='flex-start'>
-                <ApplicationLevel
-                    haveMultiLevelSecurity={haveMultiLevelSecurity}
-                    securityScheme={securityScheme}
-                    configDispatcher={configDispatcher}
-                />
                 <TransportLevel
                     haveMultiLevelSecurity={haveMultiLevelSecurity}
                     securityScheme={securityScheme}
                     configDispatcher={configDispatcher}
+                    api={api}
+                    id={id}
+                />
+                <ApplicationLevel
+                    haveMultiLevelSecurity={haveMultiLevelSecurity}
+                    securityScheme={securityScheme}
+                    api={api}
+                    configDispatcher={configDispatcher}
+                    id={id}
                 />
                 <Grid item>
                     <span className={classes.error}>
@@ -150,7 +134,8 @@ APISecurity.propTypes = {
 export {
     DEFAULT_API_SECURITY_OAUTH2,
     API_SECURITY_BASIC_AUTH,
+    API_SECURITY_API_KEY,
     API_SECURITY_MUTUAL_SSL,
-    API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY,
+    API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY,
     API_SECURITY_MUTUAL_SSL_MANDATORY,
 };

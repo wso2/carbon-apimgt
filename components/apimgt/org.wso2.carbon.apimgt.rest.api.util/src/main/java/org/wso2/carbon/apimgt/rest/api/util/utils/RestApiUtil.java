@@ -44,7 +44,7 @@ import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
@@ -79,7 +79,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -88,7 +87,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -254,6 +252,28 @@ public class RestApiUtil {
 
     public static String getLoggedInUserTenantDomain() {
         return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    }
+
+    /**
+     * Create a JAXRS Response object based on the provided ResourceFile
+     *
+     * @param fileNameWithoutExtension Filename without the extension. The extension is determined from the method
+     * @param resourceFile ResourceFile object
+     * @return JAXRS Response object
+     */
+    public static Response getResponseFromResourceFile(String fileNameWithoutExtension, ResourceFile resourceFile) {
+        String contentType;
+        String extension;
+        if (resourceFile.getContentType().contains(APIConstants.APPLICATION_ZIP)) {
+            contentType = APIConstants.APPLICATION_ZIP;
+            extension = APIConstants.ZIP_FILE_EXTENSION;
+        } else {
+            contentType = APIConstants.APPLICATION_WSDL_MEDIA_TYPE;
+            extension = APIConstants.WSDL_FILE_EXTENSION;
+        }
+        String filename = fileNameWithoutExtension + extension;
+        return Response.ok(resourceFile.getContent(), contentType).header("Content-Disposition",
+                "attachment; filename=\"" + filename + "\"" ).build();
     }
 
     /**
@@ -1230,13 +1250,7 @@ public class RestApiUtil {
 
         APIDefinition oasParser;
         try {
-            Optional<APIDefinition> optional = OASParserUtil.getOASParser(swagger);
-            if (optional.isPresent()) {
-                oasParser = optional.get();
-            } else {
-                log.error("Error occurred while parsing swagger definition");
-                return false;
-            }
+            oasParser = OASParserUtil.getOASParser(swagger);
         } catch (APIManagementException e) {
             log.error("Error occurred while parsing swagger definition");
             return false;
@@ -1330,14 +1344,7 @@ public class RestApiUtil {
                     definition = IOUtils
                             .toString(RestApiUtil.class.getResourceAsStream("/store-api.yaml"), "UTF-8");
                 }
-                Optional<APIDefinition> optional = OASParserUtil.getOASParser(definition);
-                APIDefinition oasParser;
-                if(optional.isPresent()){
-                    oasParser = optional.get();
-                } else {
-                    log.error("Error occurred while parsing swagger definition");
-                    return Collections.EMPTY_SET;
-                }
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content w created
                 storeResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {
@@ -1373,14 +1380,7 @@ public class RestApiUtil {
                     definition = IOUtils
                             .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.yaml"), "UTF-8");
                 }
-                Optional<APIDefinition> optional = OASParserUtil.getOASParser(definition);
-                APIDefinition oasParser;
-                if(optional.isPresent()){
-                    oasParser = optional.get();
-                } else {
-                    log.error("Error occurred while parsing swagger definition");
-                    return Collections.EMPTY_SET;
-                }
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content we created
                 publisherResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {
@@ -1410,14 +1410,7 @@ public class RestApiUtil {
             try {
                 String definition = IOUtils
                         .toString(RestApiUtil.class.getResourceAsStream("/admin-api.json"), "UTF-8");
-                Optional<APIDefinition> optional = OASParserUtil.getOASParser(definition);
-                APIDefinition oasParser;
-                if(optional.isPresent()){
-                    oasParser = optional.get();
-                } else {
-                    log.error("Error occurred while parsing swagger definition");
-                    return Collections.EMPTY_SET;
-                }
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content we created
                 adminAPIResourceMappings = oasParser.getURITemplates(definition);
             } catch (APIManagementException e) {

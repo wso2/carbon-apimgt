@@ -45,9 +45,11 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -64,11 +66,17 @@ public class GraphQLSchemaDefinition {
     public String buildSchemaWithScopesAndRoles(API api) {
         Swagger swagger = null;
         Map<String, String> scopeRoleMap = new HashMap<>();
-        Map<String, String> scopeOperationMap = new HashMap<>();
+        Map<String, String> operationScopeMap = new HashMap<>();
+        Map<String, String> operationAuthSchemeMap = new HashMap<>();
+        Map<String, String> operationThrottlingMap = new HashMap<>();
+
         String operationScopeType;
         StringBuilder schemaDefinitionBuilder = new StringBuilder(api.getGraphQLSchema());
         StringBuilder operationScopeMappingBuilder = new StringBuilder();
         StringBuilder scopeRoleMappingBuilder = new StringBuilder();
+        StringBuilder operationAuthSchemeMappingBuilder = new StringBuilder();
+        StringBuilder operationThrottlingMappingBuilder = new StringBuilder();
+
         SwaggerParser parser = new SwaggerParser();
         String swaggerDef = api.getSwaggerDefinition();
 
@@ -94,7 +102,7 @@ public class GraphQLSchemaDefinition {
                                         template.getScope().getName() : null;
                                 if (scopeInURITemplate != null && scopeInURITemplate.
                                         equals(scope.get(APIConstants.SWAGGER_SCOPE_KEY))) {
-                                    scopeOperationMap.put(template.getUriTemplate(), scopeInURITemplate);
+                                    operationScopeMap.put(template.getUriTemplate(), scopeInURITemplate);
                                     if (!scopeRoleMap.containsKey(scopeInURITemplate)) {
                                         scopeRoleMap.put(scopeInURITemplate,
                                                 scope.get(APIConstants.SWAGGER_ROLES).toString());
@@ -106,10 +114,15 @@ public class GraphQLSchemaDefinition {
                 }
             }
 
-            if (scopeOperationMap.size() > 0) {
+            for (URITemplate template : api.getUriTemplates()) {
+                operationThrottlingMap.put(template.getUriTemplate(), template.getThrottlingTier());
+                operationAuthSchemeMap.put(template.getUriTemplate(), template.getAuthType());
+            }
+
+            if (operationScopeMap.size() > 0) {
                 String base64EncodedURLOperationKey;
                 String base64EncodedURLScope;
-                for (Map.Entry<String, String> entry : scopeOperationMap.entrySet()) {
+                for (Map.Entry<String, String> entry : operationScopeMap.entrySet()) {
                     base64EncodedURLOperationKey = Base64.getUrlEncoder().withoutPadding().
                             encodeToString(entry.getKey().getBytes(Charset.defaultCharset()));
                     base64EncodedURLScope = Base64.getUrlEncoder().withoutPadding().
@@ -154,67 +167,38 @@ public class GraphQLSchemaDefinition {
                 }
                 schemaDefinitionBuilder.append(scopeRoleMappingBuilder.toString());
             }
+            if (operationThrottlingMap.size() > 0) {
+                String operationThrottlingType;
+                for (Map.Entry<String, String> entry : operationThrottlingMap.entrySet()) {
+                    String base64EncodedURLOperationKey = Base64.getUrlEncoder().withoutPadding().
+                            encodeToString(entry.getKey().getBytes(Charset.defaultCharset()));
+                    String base64EncodedURLThrottilingTier = Base64.getUrlEncoder().withoutPadding().
+                            encodeToString(entry.getValue().getBytes(Charset.defaultCharset()));
+                    operationThrottlingType = "type OperationThrottlingMapping_" +
+                            base64EncodedURLOperationKey + "{\n" + base64EncodedURLThrottilingTier + ": String\n}\n";
+                    operationThrottlingMappingBuilder.append(operationThrottlingType);
+                }
+                schemaDefinitionBuilder.append(operationThrottlingMappingBuilder.toString());
+            }
+
+            if (operationAuthSchemeMap.size() > 0) {
+                String operationAuthSchemeType;
+                String isSecurityEnabled;
+                for (Map.Entry<String, String> entry : operationAuthSchemeMap.entrySet()) {
+                    if (entry.getValue().equalsIgnoreCase(APIConstants.AUTH_NO_AUTHENTICATION)) {
+                        isSecurityEnabled = APIConstants.OPERATION_SECURITY_DISABLED;
+                    } else {
+                        isSecurityEnabled = APIConstants.OPERATION_SECURITY_ENABLED;
+                    }
+                    operationAuthSchemeType = "type OperationAuthSchemeMapping_" +
+                            entry.getKey() + "{\n" + isSecurityEnabled + ": String\n}\n";
+                    operationAuthSchemeMappingBuilder.append(operationAuthSchemeType);
+                }
+                schemaDefinitionBuilder.append(operationAuthSchemeMappingBuilder.toString());
+            }
         }
         return schemaDefinitionBuilder.toString();
     }
-
-    /** This method add paths from URI Template For GraphQLAPI
-     *
-     * @param pathsObject
-     */
-    protected void addQueryParams(JSONObject pathsObject) {
-        String parameter = "";
-        String type = "";
-        String inValue = "";
-        String description = "";
-        Map.Entry resourceObject;
-        JSONObject pathsObjectValues;
-        JSONObject pathItemObject = new JSONObject();
-
-        for (Object pathObject : pathsObject.entrySet()) {
-            Map.Entry resourcePath = (Map.Entry) pathObject;
-            pathsObjectValues = (JSONObject) resourcePath.getValue();
-            for (Object resource : pathsObjectValues.entrySet()) {
-                JSONArray parametersObj = new JSONArray();
-                JSONObject queryParamObj = new JSONObject();
-                resourceObject = (Map.Entry) resource;
-                JSONObject resourceParams = (JSONObject) resourceObject.getValue();
-
-                if (resourceObject.getKey() != null) {
-                    if (resourceObject.getKey().toString().equals("get")) {
-                        parameter = "query";
-                        inValue = "query";
-                        type = "string";
-                        description = "Query to be passed to graphQL API";
-                    } else if (resourceObject.getKey().toString().equals("post")) {
-                        JSONObject schema = new JSONObject();
-                        JSONObject payload = new JSONObject();
-                        JSONObject typeOfPayload = new JSONObject();
-                        schema.put("type", "object");
-                        typeOfPayload.put("type", "string");
-                        payload.put("payload", typeOfPayload);
-                        schema.put("properties", payload);
-                        queryParamObj.put("schema", schema);
-                        parameter = "payload";
-                        inValue = "body";
-                        description = "Query or mutation to be passed to graphQL API";
-                    }
-                }
-
-                queryParamObj.put("name", parameter);
-                queryParamObj.put("in", inValue);
-                queryParamObj.put("required", true);
-                queryParamObj.put("type", type);
-                queryParamObj.put("description", description);
-
-                parametersObj.add(queryParamObj);
-                resourceParams.put("parameters", parametersObj);
-                pathItemObject.put(resourceObject.getKey().toString(), resourceParams);
-                pathsObject.put(resourcePath.getKey().toString(), pathItemObject);
-            }
-        }
-    }
-
 
     /**
      * This method saves schema definition of GraphQL APIs in the registry

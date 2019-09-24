@@ -66,7 +66,7 @@ export default function ApiCreateGraphQL(props) {
                 return { ...currentState, [action]: value };
             case 'inputType':
                 return { ...currentState, [action]: value, inputValue: value === 'url' ? '' : null };
-            case 'graphQLBean':
+            case 'graphQLInfo':
                 return { ...currentState, [action]: value };
             case 'preSetAPI':
                 return {
@@ -119,13 +119,21 @@ export default function ApiCreateGraphQL(props) {
     function createAPI() {
         setCreating(true);
         const {
-            name, version, context, endpoint, policies, implementationType, inputValue,
+            name,
+            version,
+            context,
+            endpoint,
+            policies,
+            implementationType,
+            inputValue,
+            graphQLInfo: { operations },
         } = apiInputs;
         const additionalProperties = {
             name,
             version,
             context,
             policies,
+            operations,
         };
         const uploadMethod = 'file';
         if (endpoint) {
@@ -162,7 +170,8 @@ export default function ApiCreateGraphQL(props) {
                     Alert.error('Something went wrong while adding the API');
                 }
                 console.error(error);
-            }).finally(() => setCreating(false));
+            })
+            .finally(() => setCreating(false));
     }
 
     return (

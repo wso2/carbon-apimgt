@@ -25,7 +25,7 @@ import { Link } from 'react-router-dom';
 import NewEndpointCreate from 'AppComponents/Apis/Details/Endpoints/NewEndpointCreate';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import cloneDeep from 'lodash.clonedeep';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 import EndpointOverview from './EndpointOverview';
 import PrototypeEndpoints from './Prototype/PrototypeEndpoints';
 import { getEndpointConfigByImpl, createEndpointConfig } from './endpointUtils';
@@ -74,7 +74,7 @@ function Endpoints(props) {
     const [apiObject, setModifiedAPI] = useState(api);
     const [endpointImplementation, setEndpointImplementation] = useState('');
     const [swagger, setSwagger] = useState(defaultSwagger);
-    const isNotCreator = AuthManager.isNotCreator();
+
     const [endpointValidity, setAPIEndpointsValid] = useState({ isValid: true, message: '' });
 
     /**
@@ -108,54 +108,58 @@ function Endpoints(props) {
             return { isValid: false, message: '' };
         }
         const endpointType = endpointConfig.endpoint_type;
-        switch (endpointType) {
-            case 'awslambda':
-                if (endpointConfig.accessKey === '' || endpointConfig.secretKey === '') {
-                    return {
-                        isValid: false,
-                        message: intl.formatMessage({
-                            id: 'Apis.Details.Endpoints.Endpoints.missing.accessKey.secretKey.error',
-                            defaultMessage: 'Access Key and/ or Secret Key should not be empty',
-                        }),
-                    };
-                }
-                break;
-            case 'load_balance':
-                if (endpointConfig.production_endpoints[0].url === ''
+        if (endpointType === 'awslambda') {
+            if (endpointConfig.accessKey === '' || endpointConfig.secretKey === '') {
+                return {
+                    isValid: false,
+                    message: intl.formatMessage({
+                        id: 'Apis.Details.Endpoints.Endpoints.missing.accessKey.secretKey.error',
+                        defaultMessage: 'Access Key and/ or Secret Key should not be empty',
+                    }),
+                };
+            }
+        } else if (endpointType === 'load_balance') {
+            if (endpointConfig.production_endpoints[0].url === ''
                     && endpointConfig.sandbox_endpoints[0].url === '') {
-                    return {
-                        isValid: false,
-                        message: intl.formatMessage({
-                            id: 'Apis.Details.Endpoints.Endpoints.missing.endpoint.loadbalance',
-                            defaultMessage: 'Production or Sandbox Endpoints should not be empty',
-                        }),
-                    };
-                }
-                break;
-            default:
-                if (endpointConfig.implementation_status === 'prototyped') {
-                    if (implementationType === 'ENDPOINT') {
-                        if (endpointConfig.production_endpoints.url === '') {
-                            return {
-                                isValid: false,
-                                message: intl.formatMessage({
-                                    id: 'Apis.Details.Endpoints.Endpoints.missing.prototype.url',
-                                    defaultMessage: 'Prototype Endpoint URL should not be empty',
-                                }),
-                            };
-                        }
+                return {
+                    isValid: false,
+                    message: intl.formatMessage({
+                        id: 'Apis.Details.Endpoints.Endpoints.missing.endpoint.loadbalance',
+                        defaultMessage: 'Production or Sandbox Endpoints should not be empty',
+                    }),
+                };
+            }
+        } else {
+            let isValidEndpoint = false;
+            if (endpointConfig.implementation_status === 'prototyped') {
+                if (implementationType === 'ENDPOINT') {
+                    if (endpointConfig.production_endpoints && endpointConfig.production_endpoints.url === '') {
+                        return {
+                            isValid: false,
+                            message: intl.formatMessage({
+                                id: 'Apis.Details.Endpoints.Endpoints.missing.prototype.url',
+                                defaultMessage: 'Prototype Endpoint URL should not be empty',
+                            }),
+                        };
                     }
-                } else if (endpointConfig.production_endpoints.url === '' &&
-                    endpointConfig.sandbox_endpoints.url === '') {
-                    return {
-                        isValid: false,
-                        message: intl.formatMessage({
-                            id: 'Apis.Details.Endpoints.Endpoints.missing.endpoint.error',
-                            defaultMessage: 'Either one of Production or Sandbox Endpoints should be added.',
-                        }),
-                    };
                 }
-                break;
+            } else if (endpointConfig.production_endpoints && !endpointConfig.sandbox_endpoints) {
+                isValidEndpoint = endpointConfig.production_endpoints.url !== '';
+            } else if (endpointConfig.sandbox_endpoints && !endpointConfig.production_endpoints) {
+                isValidEndpoint = endpointConfig.sandbox_endpoints.url !== '';
+            } else if (!endpointConfig.sandbox_endpoints && !endpointConfig.production_endpoints) {
+                isValidEndpoint = false;
+            } else {
+                isValidEndpoint = endpointConfig.sandbox_endpoints.url !== '' ||
+                        endpointConfig.production_endpoints.url !== '';
+            }
+            return !isValidEndpoint ? {
+                isValid: false,
+                message: intl.formatMessage({
+                    id: 'Apis.Details.Endpoints.Endpoints.missing.endpoint.error',
+                    defaultMessage: 'Either one of Production or Sandbox Endpoints should be added.',
+                }),
+            } : { isValid: true, message: '' };
         }
         return {
             isValid: true,
@@ -313,7 +317,7 @@ function Endpoints(props) {
                         >
                             <Grid item>
                                 <Button
-                                    disabled={!endpointValidity.isValid || isNotCreator}
+                                    disabled={!endpointValidity.isValid || isRestricted(['apim:api_create'], api)}
                                     type='submit'
                                     variant='contained'
                                     color='primary'
@@ -335,7 +339,7 @@ function Endpoints(props) {
                                     </Button>
                                 </Link>
                             </Grid>
-                            {isNotCreator
+                            {isRestricted(['apim:api_create'], api)
                                 && (
                                     <Grid item>
                                         <Typography variant='body2' color='primary'>

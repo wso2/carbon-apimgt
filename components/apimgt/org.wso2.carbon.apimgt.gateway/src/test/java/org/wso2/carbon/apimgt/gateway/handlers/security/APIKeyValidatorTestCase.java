@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 import org.apache.axis2.Constants;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.transport.http.util.RESTUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.SynapseConfiguration;
@@ -30,7 +29,6 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.DispatcherHelper;
-import org.apache.synapse.rest.dispatch.RESTDispatcher;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,6 +44,8 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -72,8 +72,9 @@ import static org.junit.Assert.fail;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({PrivilegedCarbonContext.class, APISecurityUtils.class, ServiceReferenceHolder.class,
-        ServerConfiguration.class, APIUtil.class, Util.class, CarbonContext.class, CarbonConstants.class,
-        Caching.class, APIKeyValidator.class, RESTUtils.class})
+        ServerConfiguration.class, APIUtil.class, Util.class, CarbonContext.class, Caching.class,
+        APIKeyValidator.class, RESTUtils.class, org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class,
+        Cache.class, APIManagerConfigurationService.class, CacheProvider.class, Cache.class, CarbonConstants.class})
 public class APIKeyValidatorTestCase {
     private APIManagerConfiguration apiManagerConfiguration;
     private ServerConfiguration serverConfiguration;
@@ -154,6 +155,26 @@ public class APIKeyValidatorTestCase {
             List<VerbInfoDTO> verbList = apiKeyValidator.findMatchingVerb(synCtx);
             int length = verbList.toArray().length;
             //Test for ResourceNotFoundexception
+            PowerMockito.mockStatic(Cache.class);
+            Cache cache = Mockito.mock(Cache.class);
+            PowerMockito.mockStatic(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+            PowerMockito.mockStatic(APIManagerConfigurationService.class);
+            PowerMockito.mockStatic(CacheProvider.class);
+            org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder serviceReferenceHolder =
+                    Mockito.mock(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+            final APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            PowerMockito.when(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()).
+                    thenReturn(serviceReferenceHolder);
+            APIManagerConfigurationService apiManagerConfigurationService =
+                    Mockito.mock(APIManagerConfigurationService.class);
+            PowerMockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).
+                    thenReturn(apiManagerConfigurationService);
+            PowerMockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).
+                    thenReturn(apiManagerConfiguration);
+            CacheProvider cacheProvider = Mockito.mock(CacheProvider.class);
+            PowerMockito.when(cacheProvider.getDefaultCacheTimeout()).thenReturn((long) 900);
+
+            Mockito.when(CacheProvider.getResourceCache()).thenReturn(cache);
             assertNotNull(verbList.get(0));
 //        todo    Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION_STRATEGY)).thenReturn("url");
 
@@ -176,6 +197,26 @@ public class APIKeyValidatorTestCase {
             List<VerbInfoDTO> verbInfoList = new ArrayList<>();
             verbInfoList.add(verbInfoDTO);
             //Test for matching verb is found path
+            PowerMockito.mockStatic(Cache.class);
+            Cache cache = Mockito.mock(Cache.class);
+            PowerMockito.mockStatic(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+            PowerMockito.mockStatic(APIManagerConfigurationService.class);
+            PowerMockito.mockStatic(CacheProvider.class);
+            org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder serviceReferenceHolder =
+                    Mockito.mock(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+            final APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            PowerMockito.when(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()).
+                    thenReturn(serviceReferenceHolder);
+            APIManagerConfigurationService apiManagerConfigurationService =
+                    Mockito.mock(APIManagerConfigurationService.class);
+            PowerMockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).
+                    thenReturn(apiManagerConfigurationService);
+            PowerMockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).
+                    thenReturn(apiManagerConfiguration);
+            CacheProvider cacheProvider = Mockito.mock(CacheProvider.class);
+            PowerMockito.when(cacheProvider.getDefaultCacheTimeout()).thenReturn((long) 900);
+
+            Mockito.when(CacheProvider.getResourceCache()).thenReturn(cache);
             assertEquals("", verbInfoList, apiKeyValidator1.findMatchingVerb(synCtx));
         } catch (ResourceNotFoundException e) {
             fail("ResourceNotFoundException exception is thrown " + e);
@@ -213,6 +254,26 @@ public class APIKeyValidatorTestCase {
 
         try {
             //Test for matching verb is Not found path
+            PowerMockito.mockStatic(Cache.class);
+            Cache cache = Mockito.mock(Cache.class);
+            PowerMockito.mockStatic(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+            PowerMockito.mockStatic(APIManagerConfigurationService.class);
+            PowerMockito.mockStatic(CacheProvider.class);
+            org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder serviceReferenceHolder =
+                    Mockito.mock(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+            final APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            PowerMockito.when(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()).
+                    thenReturn(serviceReferenceHolder);
+            APIManagerConfigurationService apiManagerConfigurationService =
+                    Mockito.mock(APIManagerConfigurationService.class);
+            PowerMockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).
+                    thenReturn(apiManagerConfigurationService);
+            PowerMockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).
+                    thenReturn(apiManagerConfiguration);
+            CacheProvider cacheProvider = Mockito.mock(CacheProvider.class);
+            PowerMockito.when(cacheProvider.getDefaultCacheTimeout()).thenReturn((long) 900);
+
+            Mockito.when(CacheProvider.getResourceCache()).thenReturn(cache);
             assertNull(apiKeyValidator.findMatchingVerb(synCtx));
         } catch (ResourceNotFoundException e) {
             fail("ResourceNotFoundException exception is thrown " + e);
@@ -264,6 +325,26 @@ public class APIKeyValidatorTestCase {
 
         try {
             //Test for ResourceNotFoundexception
+            PowerMockito.mockStatic(Cache.class);
+            Cache cache = Mockito.mock(Cache.class);
+            PowerMockito.mockStatic(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+            PowerMockito.mockStatic(APIManagerConfigurationService.class);
+            PowerMockito.mockStatic(CacheProvider.class);
+            org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder serviceReferenceHolder =
+                    Mockito.mock(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+            final APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            PowerMockito.when(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()).
+                    thenReturn(serviceReferenceHolder);
+            APIManagerConfigurationService apiManagerConfigurationService =
+                    Mockito.mock(APIManagerConfigurationService.class);
+            PowerMockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).
+                    thenReturn(apiManagerConfigurationService);
+            PowerMockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).
+                    thenReturn(apiManagerConfiguration);
+            CacheProvider cacheProvider = Mockito.mock(CacheProvider.class);
+            PowerMockito.when(cacheProvider.getDefaultCacheTimeout()).thenReturn((long) 900);
+
+            Mockito.when(CacheProvider.getResourceCache()).thenReturn(cache);
             assertNotNull(apiKeyValidator.findMatchingVerb(synCtx));
 //        todo    Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION_STRATEGY)).thenReturn("url");
 
@@ -311,6 +392,30 @@ public class APIKeyValidatorTestCase {
                 getDefaultURITemplates("/menu", "GET"), verbDTO);
         //If isAPIResourceValidationEnabled==true
         apiKeyValidator.setGatewayAPIResourceValidationEnabled(true);
+        PowerMockito.mockStatic(Cache.class);
+        Cache cache = Mockito.mock(Cache.class);
+        PowerMockito.mockStatic(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(APIManagerConfigurationService.class);
+        PowerMockito.mockStatic(CacheProvider.class);
+        org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder serviceReferenceHolder =
+                Mockito.mock(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+        final APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        PowerMockito.when(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()).
+                thenReturn(serviceReferenceHolder);
+        APIManagerConfigurationService apiManagerConfigurationService =
+                Mockito.mock(APIManagerConfigurationService.class);
+        PowerMockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).
+                thenReturn(apiManagerConfigurationService);
+        PowerMockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).
+                thenReturn(apiManagerConfiguration);
+        CacheProvider cacheProvider = Mockito.mock(CacheProvider.class);
+        PowerMockito.when(cacheProvider.getDefaultCacheTimeout()).thenReturn((long) 900);
+        Mockito.when(CacheProvider.getResourceCache()).thenReturn(cache);
+        VerbInfoDTO verbInfoDTO1 = new VerbInfoDTO();
+        verbInfoDTO1.setHttpVerb("get");
+        Mockito.when(APIUtil.getAPIInfoDTOCacheKey("", "1.0")).thenReturn("abc");
+        Mockito.when((VerbInfoDTO) CacheProvider.getResourceCache().get("abc"))
+                .thenReturn(verbInfoDTO1);
         VerbInfoDTO verbInfoDTOFromAPIData = apiKeyValidator.getVerbInfoDTOFromAPIData(context, apiVersion,
                 requestPath, httpMethod);
         Assert.assertEquals("", verbDTO, verbInfoDTOFromAPIData);
@@ -330,6 +435,31 @@ public class APIKeyValidatorTestCase {
                 getDefaultURITemplates("/menu", "GET"), verbDTO);
         // If isAPIResourceValidationEnabled==true
         apiKeyValidator.setGatewayAPIResourceValidationEnabled(true);
+        PowerMockito.mockStatic(Cache.class);
+        Cache cache = Mockito.mock(Cache.class);
+        PowerMockito.mockStatic(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(APIManagerConfigurationService.class);
+        PowerMockito.mockStatic(CacheProvider.class);
+        org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder serviceReferenceHolder =
+                Mockito.mock(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+        final APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        PowerMockito.when(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()).
+                thenReturn(serviceReferenceHolder);
+        APIManagerConfigurationService apiManagerConfigurationService =
+                Mockito.mock(APIManagerConfigurationService.class);
+        PowerMockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).
+                thenReturn(apiManagerConfigurationService);
+        PowerMockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).
+                thenReturn(apiManagerConfiguration);
+        CacheProvider cacheProvider = Mockito.mock(CacheProvider.class);
+        PowerMockito.when(cacheProvider.getDefaultCacheTimeout()).thenReturn((long) 900);
+
+        Mockito.when(CacheProvider.getResourceCache()).thenReturn(cache);
+        VerbInfoDTO verbInfoDTO1 = new VerbInfoDTO();
+        verbInfoDTO1.setHttpVerb("get");
+        Mockito.when(APIUtil.getAPIInfoDTOCacheKey("", "1.0")).thenReturn("abc");
+        Mockito.when((VerbInfoDTO) CacheProvider.getResourceCache().get("abc"))
+                .thenReturn(verbInfoDTO1);
         Assert.assertEquals("", verbDTO,
                 apiKeyValidator.getVerbInfoDTOFromAPIData(context, apiVersion, requestPath, httpMethod));
 
@@ -345,6 +475,26 @@ public class APIKeyValidatorTestCase {
                 getDefaultURITemplates("/menu", "GET"), getDefaultVerbInfoDTO());
         // If isAPIResourceValidationEnabled==true
         apiKeyValidator.setGatewayAPIResourceValidationEnabled(true);
+        PowerMockito.mockStatic(Cache.class);
+        Cache cache = Mockito.mock(Cache.class);
+        PowerMockito.mockStatic(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(APIManagerConfigurationService.class);
+        PowerMockito.mockStatic(CacheProvider.class);
+        org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder serviceReferenceHolder =
+                Mockito.mock(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+        final APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        PowerMockito.when(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()).
+                thenReturn(serviceReferenceHolder);
+        APIManagerConfigurationService apiManagerConfigurationService =
+                Mockito.mock(APIManagerConfigurationService.class);
+        PowerMockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).
+                thenReturn(apiManagerConfigurationService);
+        PowerMockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).
+                thenReturn(apiManagerConfiguration);
+        CacheProvider cacheProvider = Mockito.mock(CacheProvider.class);
+        PowerMockito.when(cacheProvider.getDefaultCacheTimeout()).thenReturn((long) 900);
+
+        Mockito.when(CacheProvider.getResourceCache()).thenReturn(cache);
         Assert.assertEquals("", null,
                 apiKeyValidator.getVerbInfoDTOFromAPIData(context, apiVersion, requestPath, httpMethod));
 
@@ -372,6 +522,26 @@ public class APIKeyValidatorTestCase {
                 getDefaultURITemplates("/menu", "GET"), getDefaultVerbInfoDTO());
         //test for ResourceNotFoundException path
         try {
+            PowerMockito.mockStatic(Cache.class);
+            Cache cache = Mockito.mock(Cache.class);
+            PowerMockito.mockStatic(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+            PowerMockito.mockStatic(APIManagerConfigurationService.class);
+            PowerMockito.mockStatic(CacheProvider.class);
+            org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder serviceReferenceHolder =
+                    Mockito.mock(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+            final APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            PowerMockito.when(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()).
+                    thenReturn(serviceReferenceHolder);
+            APIManagerConfigurationService apiManagerConfigurationService =
+                    Mockito.mock(APIManagerConfigurationService.class);
+            PowerMockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).
+                    thenReturn(apiManagerConfigurationService);
+            PowerMockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).
+                    thenReturn(apiManagerConfiguration);
+            CacheProvider cacheProvider = Mockito.mock(CacheProvider.class);
+            PowerMockito.when(cacheProvider.getDefaultCacheTimeout()).thenReturn((long) 900);
+
+            Mockito.when(CacheProvider.getResourceCache()).thenReturn(cache);
             String result = apiKeyValidator.getResourceAuthenticationScheme(synCtx);
             Assert.assertEquals("noMatchedAuthScheme", result);
         } catch (APISecurityException e) {
@@ -391,6 +561,27 @@ public class APIKeyValidatorTestCase {
 
         String result1 = null;
         try {
+            PowerMockito.mockStatic(Cache.class);
+            Cache cache = Mockito.mock(Cache.class);
+            PowerMockito.mockStatic(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+            PowerMockito.mockStatic(APIManagerConfigurationService.class);
+            PowerMockito.mockStatic(CacheProvider.class);
+            org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder serviceReferenceHolder =
+                    Mockito.mock(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+            final APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            PowerMockito.when(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()).
+                    thenReturn(serviceReferenceHolder);
+            APIManagerConfigurationService apiManagerConfigurationService =
+                    Mockito.mock(APIManagerConfigurationService.class);
+            PowerMockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).
+                    thenReturn(apiManagerConfigurationService);
+            PowerMockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).
+                    thenReturn(apiManagerConfiguration);
+            CacheProvider cacheProvider = Mockito.mock(CacheProvider.class);
+            PowerMockito.when(cacheProvider.getDefaultCacheTimeout()).thenReturn((long) 900);
+
+            Mockito.when(CacheProvider.getResourceCache()).thenReturn(cache);
+            Mockito.when(APIUtil.getAPIInfoDTOCacheKey("", "1.0")).thenReturn("abc");
             result1 = apiKeyValidator1.getResourceAuthenticationScheme(synCtx);
         } catch (APISecurityException e) {
             e.printStackTrace();
@@ -430,27 +621,6 @@ public class APIKeyValidatorTestCase {
             }
 
             @Override
-            protected long getDefaultCacheTimeout() {
-                return 900L;
-            }
-
-            @Override
-            protected Cache getCacheFromCacheManager(String cacheName) {
-                if (isWithEmptyCache) {
-                    return Mockito.mock(Cache.class);
-                } else {
-                    Cache cache = Mockito.mock(Cache.class);
-                    if (cacheName.equals("resourceCache")) {
-                        Mockito.when(cache.get("abc")).thenReturn(verbInfoDTOList);
-                    } else if (cacheName.equals("GATEWAY_TOKEN_CACHE")) {
-                        Mockito.when(cache.get("abc")).thenReturn("token");
-                    }
-                    return cache;
-                }
-
-            }
-
-            @Override
             protected ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion) throws
                     APISecurityException {
                 return urlTemplates;
@@ -485,6 +655,29 @@ public class APIKeyValidatorTestCase {
                 getDefaultURITemplates("/menu", "GET"), getDefaultVerbInfoDTO());
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
         apiKeyValidationInfoDTO.setApiName(apiKey);
+        PowerMockito.mockStatic(CacheProvider.class);
+        PowerMockito.mockStatic(Cache.class);
+        Cache cache = Mockito.mock(Cache.class);
+        PowerMockito.mockStatic(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(APIManagerConfigurationService.class);
+        PowerMockito.mockStatic(CacheProvider.class);
+        org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder MockServiceReferenceHolder =
+                Mockito.mock(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+        final APIManagerConfiguration MockApiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        PowerMockito.when(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()).
+                thenReturn(MockServiceReferenceHolder);
+        APIManagerConfigurationService MockApiManagerConfigurationService =
+                Mockito.mock(APIManagerConfigurationService.class);
+        PowerMockito.when(MockServiceReferenceHolder.getAPIManagerConfigurationService()).
+                thenReturn(MockApiManagerConfigurationService);
+        PowerMockito.when(MockApiManagerConfigurationService.getAPIManagerConfiguration()).
+                thenReturn(MockApiManagerConfiguration);
+
+        PowerMockito.when(CacheProvider.getDefaultCacheTimeout()).thenReturn((long) 900);
+        Mockito.when(CacheProvider.getGatewayKeyCache()).thenReturn(cache);
+        Mockito.when(CacheProvider.getResourceCache()).thenReturn(cache);
+        Mockito.when(CacheProvider.getGatewayTokenCache()).thenReturn(cache);
+        Mockito.when(CacheProvider.getInvalidTokenCache()).thenReturn(cache);
 
         Assert.assertEquals(apiKeyValidationInfoDTO.getApiName(), apiKeyValidator.getKeyValidationInfo(context,
                 apiKey, apiVersion, authenticationScheme,
@@ -515,20 +708,6 @@ public class APIKeyValidatorTestCase {
             @Override
             protected Cache getCache(String cacheManagerName, String cacheName, long modifiedExp, long accessExp) {
                 return Mockito.mock(Cache.class);
-            }
-
-            @Override
-            protected Cache getCacheFromCacheManager(String cacheName) {
-                Cache cache = Mockito.mock(Cache.class);
-                VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
-                verbInfoDTO.setHttpVerb("get");
-                verbInfoDTO.setAuthType("None");
-                if (cacheName.equals("resourceCache")) {
-                    Mockito.when(cache.get("abc")).thenReturn(verbInfoDTO);
-                } else if (cacheName.equals("GATEWAY_TOKEN_CACHE")) {
-                    Mockito.when(cache.get("abc")).thenReturn("token");
-                }
-                return cache;
             }
 
             @Override
@@ -581,7 +760,6 @@ public class APIKeyValidatorTestCase {
         AxisConfiguration axisConfig = Mockito.mock(AxisConfiguration.class);
         WSAPIKeyDataStore wsDataStore = Mockito.mock(WSAPIKeyDataStore.class);
         PowerMockito.whenNew(WSAPIKeyDataStore.class).withNoArguments().thenReturn(wsDataStore);
-
 
         APIKeyValidator wsKeyValidator = new APIKeyValidator(axisConfig) {
             @Override

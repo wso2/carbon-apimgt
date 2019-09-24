@@ -31,7 +31,7 @@ function Landing(props) {
     return (
         <div className={classes.superRoot}>
             <div className={classes.root}>
-                <Grid container spacing={24}>
+                <Grid container spacing={3}>
                     {carouselActive && (
                         <Grid item xs={12}>
                             <Carousel />
@@ -56,7 +56,7 @@ function Landing(props) {
                 <ParallaxScroll index={0} />
             </div>}
             <div className={classes.root}>
-                <Grid container spacing={24}>
+                <Grid container spacing={3}>
                     {listByTagActive && listByTagContent.length > 1 && (
                         <Grid item xs={12}>
                             <Typography variant='h2' gutterBottom>

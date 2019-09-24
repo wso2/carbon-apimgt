@@ -2,183 +2,6 @@
     <h1><a name="APIs"></a>APIs</h1>
 
             <hr/>
-            <h4 class="operation-heading"><a name="apiProductsApiProductIdSubscriptionPoliciesGet"></a>Get details of the subscription throttling policies of an API Product
-</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/api-products/{apiProductId}/subscription-policies</code>
-            <p class="marked"></p>
-
-            <p class="marked">This operation can be used to retrieve details of the subscription throttling policy of an API Product by specifying the API Product Id.
-
-&#x60;X-WSO2-Tenant&#x60; header can be used to retrive API Product subscription throttling policies that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
-</p>
-
-            <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <p>Not required</p>
-
-            <h4 class="section-heading">
-                Examples
-            </h4>
-
-            <h4 class="section-heading" id="scroll-to">Parameters</h4>
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                    <col style="width: 40%;"/>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                    <th>Default</th>
-                </tr>
-                </thead>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            <span class="param-in">Path </span>
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>apiProductId</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">**API Product ID** consisting of the **UUID** of the API Product.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>X-WSO2-Tenant</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-  retirieved from.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-None-Match</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-            </table>
-
-            <h4 class="section-heading">Responses</h4>
-
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 15%;"/>
-                    <col style="width: 70%;"/>
-                    <col style="width: 15%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>HTTP Code</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. Throttling Policy returned </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#ThrottlingPolicy">ThrottlingPolicy</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested Throttling Policy does not exist. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <hr/>
             <h4 class="operation-heading"><a name="apisApiIdGet"></a>Get details of an API
 </h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/apis/{apiId}</code>
             <p class="marked"></p>
@@ -1131,180 +954,6 @@ variant of the resourec.
                 </tbody>
             </table>
             <hr/>
-            <h4 class="operation-heading"><a name="apisApiIdWsdlGet"></a>Get API WSDL definition</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/apis/{apiId}/wsdl</code>
-            <p class="marked"></p>
-
-            <p class="marked">This operation can be used to retrieve the swagger definition of an API.
-</p>
-
-            <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <p>Not required</p>
-
-            <h4 class="section-heading">
-                Examples
-            </h4>
-
-            <h4 class="section-heading" id="scroll-to">Parameters</h4>
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                    <col style="width: 40%;"/>
-                    <col style="width: 10%;"/>
-                    <col style="width: 20%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                    <th>Default</th>
-                </tr>
-                </thead>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            <span class="param-in">Path </span>
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>apiId</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-None-Match</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>X-WSO2-Tenant</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
-  retirieved from.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-            </table>
-
-            <h4 class="section-heading">Responses</h4>
-
-            <table class="table table-hover">
-                <colgroup>
-                    <col style="width: 15%;"/>
-                    <col style="width: 70%;"/>
-                    <col style="width: 15%;"/>
-                </colgroup>
-                <thead>
-                <tr class="active">
-                    <th>HTTP Code</th>
-                    <th>Description</th>
-                    <th>Schema</th>
-                </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">OK. Requested WSDL document of the API is returned </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter"><p class="marked">406</p></td>
-                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
-                        <td class="parameter">
-                            <span class="parameter">
-                                    <a href="#!/models#Error">Error</a>
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <hr/>
             <h4 class="operation-heading"><a name="apisGet"></a>Retrieve/Search APIs
 </h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/apis</code>
             <p class="marked"></p>
@@ -1335,7 +984,7 @@ This operation supports retriving APIs of other tenants. The required tenant dom
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis HTTP 1/1
+                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.0/apis HTTP 1/1
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -1372,7 +1021,7 @@ Content-Type: application/json
 }</code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/publisher/v1.0/apis&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.0/apis&#39; -H &#39;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&#39; </code></div>
 
             <h4 class="section-heading">
                 <u></u>
@@ -1383,7 +1032,7 @@ Content-Type: application/json
                             <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
                     </h5>
                 </div>
-                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v1.0/apis HTTP/1.1
+                    <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.0/apis HTTP/1.1
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -1439,7 +1088,7 @@ Content-Type: application/json
 </code></div>
 
                 <h5 class="section-heading">CURL</h5>
-                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/publisher/v1.0/apis
+                    <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/store/v1.0/apis
 </code></div>
 
 
@@ -1643,6 +1292,308 @@ variant of the resourec.
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#APIList">APIList</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h4 class="operation-heading"><a name="getWSDLOfAPI"></a>Get API WSDL definition</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/apis/{apiId}/wsdl</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to retrieve the swagger definition of an API.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <p>Not required</p>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u>Retrieve the WSDL of an API</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-getWSDLOfAPI">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-getWSDLOfAPI"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.0/apis/db8566ee-6260-47f1-a15f-e71bd2ecb68f/wsdl?environmentName&#x3D;Production%20and%20Sandbox HTTP 1/1
+Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-getWSDLOfAPI">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-getWSDLOfAPI" class="pre collapse in"><code class="json">HTTP/1.1 200
+Content-Type: application/wsdl
+Content-Disposition: attachment; filename&#x3D;&quot;admin-IP2Geo-1.0.0.zip&quot;
+Content-Length: 7670
+
+&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;UTF-8&quot;?&gt;
+&lt;wsdl:definitions targetNamespace&#x3D;&quot;http://ws.cdyne.com/&quot; xmlns:s&#x3D;&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:wsdl&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/&quot; xmlns:mime&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/mime/&quot; xmlns:tns&#x3D;&quot;http://ws.cdyne.com/&quot; xmlns:http&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/http/&quot; xmlns:tm&#x3D;&quot;http://microsoft.com/wsdl/mime/textMatching/&quot; xmlns:soap12&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/soap12/&quot; xmlns:soap&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/soap/&quot; xmlns:soapenc&#x3D;&quot;http://schemas.xmlsoap.org/soap/encoding/&quot;&gt;
+  &lt;wsdl:documentation xmlns:wsdl&#x3D;&quot;http://schemas.xmlsoap.org/wsdl/&quot;&gt;Our system uses a multiple sources for resolution.  Including a host database, trace route information, and other systems.  Resolves IP addresses to Organization, Country, City..
+  ...
+  ...
+    &lt;wsdl:port name&#x3D;&quot;IP2GeoHttpGet&quot; binding&#x3D;&quot;tns:IP2GeoHttpGet&quot;&gt;
+      &lt;http:address location&#x3D;&quot;https://localhost:8243/ip2geo/1.0&quot;/&gt;
+    &lt;/wsdl:port&gt;
+    &lt;wsdl:port name&#x3D;&quot;IP2GeoHttpPost&quot; binding&#x3D;&quot;tns:IP2GeoHttpPost&quot;&gt;
+      &lt;http:address location&#x3D;&quot;https://localhost:8243/ip2geo/1.0&quot;/&gt;
+    &lt;/wsdl:port&gt;
+  &lt;/wsdl:service&gt;
+&lt;/wsdl:definitions&gt;
+</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.0/apis/db8566ee-6260-47f1-a15f-e71bd2ecb68f/wsdl?environmentName&#x3D;Production%20and%20Sandbox&#39; -H &#39;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&#39; </code></div>
+
+            <h4 class="section-heading">
+                <u>Retrieve the WSDL Archive of an API</u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-getWSDLOfAPI">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-getWSDLOfAPI"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl?environmentName&#x3D;Production%20and%20Sandbox HTTP 1/1
+Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-getWSDLOfAPI">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-getWSDLOfAPI" class="pre collapse in"><code class="json">HTTP/1.1 200
+Content-Disposition: attachment; filename&#x3D;&quot;admin-StockQuoteArchiveAPI-1.0.0.zip&quot;
+Content-Type: application/zip
+Content-Length: 1493
+
+&lt;binary-data&gt;
+</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.0/apis/7369e7ba-ac2e-4492-9fa5-9d2cd6029db4/wsdl?environmentName&#x3D;Production%20and%20Sandbox&#39; -H &#39;Authorization: Bearer 6cc80644-dd9b-3213-a3ca-0037da5caae7&#39; </code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>labelName</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Name of the API microgateway labels
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>environmentName</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Name of the API gateway environment.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>X-WSO2-Tenant</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
+  retirieved from.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Requested WSDL document of the API is returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
                             </span>
                         </td>
                     </tr>

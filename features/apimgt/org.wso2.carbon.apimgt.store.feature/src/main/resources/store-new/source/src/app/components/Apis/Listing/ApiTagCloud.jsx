@@ -17,15 +17,9 @@
  */
 
 import React from 'react';
-import { TagCloud } from 'react-tagcloud';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
-import { FormattedMessage } from 'react-intl';
-import API from 'AppData/api';
-import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
-import ApiTableView from './ApiTableView';
+import ApiTagThumb from './ApiTagThumb';
 
 const styles = theme => ({
     root: {
@@ -52,6 +46,14 @@ const styles = theme => ({
     clickablePointer: {
         cursor: 'pointer',
     },
+
+    tagedApisWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        paddingLeft: theme.spacing.unit * 3,
+        flexWrap: 'wrap',
+    },
+
 });
 
 /**
@@ -67,29 +69,9 @@ class ApiTagCloud extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            allTags: null,
             selectedTag: null,
         };
         this.handleOnClick = this.handleOnClick.bind(this);
-    }
-
-    /**
-     * @memberof ApiTagCloud
-     */
-    componentDidMount() {
-        const api = new API();
-        const promisedTags = api.getAllTags();
-        promisedTags
-            .then((response) => {
-                if (response.body.count !== 0) {
-                    this.setState({ allTags: response.body.list });
-                }
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-            });
     }
 
     /**
@@ -106,61 +88,51 @@ class ApiTagCloud extends React.Component {
      * @memberof ApiTagCloud
      */
     render() {
-        const { classes, listType, apiType } = this.props;
-        const { allTags, selectedTag } = this.state;
-        const options = {
-            luminosity: 'dark',
-            hue: 'blue',
-        };
+        const {
+            classes, data, listType,
+        } = this.props;
+        const tagWiseURL = '/apis?limit=10&offset=0&query=tag';
         return (
-            <div className={classes.tagCloudWrapper}>
-                {allTags && (
-                    <Paper className={classes.root}>
+            <div className={classes.tagedApisWrapper}>
+                {/* Todo: api tag wise grouping */}
+                {/* {theme.custom.tagWiseMode === true && data && (
+                    <div className={classes.listContentWrapper}>
                         <div>
                             <div>
-                                <Typography variant='display1' className={classes.mainTitle}>
-                                    <FormattedMessage defaultMessage='Tags' id='Apis.Listing.ApiTagCloud.tags.heading' />
+                                <Typography variant='h4' className={classes.mainTitle}>
+                                    <FormattedMessage
+                                        defaultMessage='Tags'
+                                        id='Apis.Listing.ApiTagCloud.tags.heading'
+                                    />
                                 </Typography>
                             </div>
                             <div>
                                 <TagCloud
                                     minSize={18}
                                     maxSize={40}
-                                    colorOptions={options}
-                                    tags={allTags}
+                                    colorOptions={Coloroptions}
+                                    tags={data}
                                     shuffle={false}
                                     className={classes.clickablePointer}
                                     onClick={tag => this.handleOnClick(tag)}
                                 />
                             </div>
                         </div>
-                    </Paper>
+                    </div>
                 )}
-                { selectedTag && (
+                { theme.custom.tagWiseMode === true && selectedTag && (
                     <div className={classes.selectedTagSpacing}>
-                        <Typography variant='display1' className={classes.mainTitle}>
+                        <Typography variant='h4' className={classes.mainTitle}>
                             {' ('}
                             {selectedTag}
                             {') '}
                         </Typography>
                     </div>
                 )}
-                <div>
-                    <div className={classes.listContentWrapper}>
-                        {listType === 'grid'
-                            && (
-                                <ApiContext.Provider value={{ apiType }}>
-                                    <ApiTableView selectedTag={selectedTag} gridView />
-                                </ApiContext.Provider>
-                            )}
-                        {listType === 'list'
-                            && (
-                                <ApiContext.Provider value={{ apiType }}>
-                                    <ApiTableView selectedTag={selectedTag} gridView={false} />
-                                </ApiContext.Provider>
-                            )}
-                    </div>
-                </div>
+                <div /> */}
+                {Object.keys(data).map((key) => {
+                    return <ApiTagThumb tag={data[key]} listType={listType} path={tagWiseURL} />;
+                })}
             </div>
         );
     }
@@ -169,8 +141,9 @@ class ApiTagCloud extends React.Component {
 ApiTagCloud.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     tag: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
     listType: PropTypes.string.isRequired,
-    apiType: PropTypes.string.isRequired,
+    data: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(ApiTagCloud);

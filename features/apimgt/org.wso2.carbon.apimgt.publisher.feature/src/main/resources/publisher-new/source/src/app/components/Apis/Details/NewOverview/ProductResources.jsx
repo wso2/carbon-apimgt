@@ -20,12 +20,8 @@ import React from 'react';
 import { withStyles, withTheme } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
-import { Link } from 'react-router-dom';
-
-import classNames from 'classnames';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import { FormattedMessage } from 'react-intl';
 
 /**
  * Render method base.
@@ -83,16 +79,14 @@ class ProductResources extends React.PureComponent {
         const { classes, parentClasses, api } = this.props;
         const apiResources = api.apis;
         return (
-            <Paper className={classNames({ [parentClasses.root]: true, [parentClasses.specialGap]: true })}>
-                <div className={parentClasses.titleWrapper}>
+            <React.Fragment>
+                <div className={parentClasses.titleWrapper} style={{ margin: '20px 0 0' }}>
                     <Typography variant='h5' component='h3' className={parentClasses.title}>
-                        API Resources
+                        <FormattedMessage
+                            id='Apis.Details.Overview.ProductResources.resources'
+                            defaultMessage='Resources'
+                        />
                     </Typography>
-                    <Link to={'/api-products/' + api.id + '/resources/edit'}>
-                        <Button variant='contained' color='default'>
-                            Edit
-                        </Button>
-                    </Link>
                 </div>
                 <div className={classes.root}>
                     <div className={classes.contentWrapper}>
@@ -121,7 +115,7 @@ class ProductResources extends React.PureComponent {
                         })}
                     </div>
                 </div>
-            </Paper>
+            </React.Fragment>
         );
     }
 }

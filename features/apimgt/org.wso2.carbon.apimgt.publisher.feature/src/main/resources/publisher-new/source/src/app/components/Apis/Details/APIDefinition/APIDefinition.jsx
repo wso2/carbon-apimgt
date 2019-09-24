@@ -48,7 +48,7 @@ import { withRouter } from 'react-router';
 import Dropzone from 'react-dropzone';
 import json2yaml from 'json2yaml';
 import SwaggerParser from 'swagger-parser';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import APISecurityAudit from './APISecurityAudit';
 
@@ -119,7 +119,6 @@ class APIDefinition extends React.Component {
         this.validateAndUpdateApiDefinition = this.validateAndUpdateApiDefinition.bind(this);
         this.validateAndImportSchema = this.validateAndImportSchema.bind(this);
         this.updateGraphQLAPIDefinition = this.updateGraphQLAPIDefinition.bind(this);
-        this.isNotCreator = AuthManager.isNotCreator();
     }
 
     /**
@@ -477,7 +476,7 @@ class APIDefinition extends React.Component {
                                 size='small'
                                 className={classes.button}
                                 onClick={this.openEditor}
-                                disabled={this.isNotCreator}
+                                disabled={isRestricted(['apim:api_create'], api)}
                             >
                                 <EditRounded className={classes.buttonIcon} />
                                 <FormattedMessage
@@ -499,7 +498,7 @@ class APIDefinition extends React.Component {
                                     <Button
                                         size='small'
                                         className={classes.button}
-                                        disabled={this.isNotCreator}
+                                        disabled={isRestricted(['apim:api_create'], api)}
                                     >
                                         <CloudUploadRounded className={classes.buttonIcon} />
                                         <FormattedMessage
@@ -534,6 +533,7 @@ class APIDefinition extends React.Component {
                         }
 
                         {this.isNotCreator
+                        {isRestricted(['apim:api_create'], api)
                             && (
                                 <Typography variant='body2' color='primary'>
                                     <FormattedMessage

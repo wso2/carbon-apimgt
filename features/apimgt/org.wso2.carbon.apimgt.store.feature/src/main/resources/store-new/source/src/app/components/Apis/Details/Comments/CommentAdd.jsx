@@ -163,7 +163,7 @@ class CommentAdd extends React.Component {
         } = this.props;
         const { content, currentLength } = this.state;
         return (
-            <Grid container spacing={24} className={classes.contentWrapper}>
+            <Grid container spacing={3} className={classes.contentWrapper}>
                 <Grid item xs zeroMinWidth>
                     <TextField
                         id='standard-multiline-flexible'
@@ -182,7 +182,7 @@ class CommentAdd extends React.Component {
                     <Typography className={classes.content} align='right'>
                         {currentLength + '/' + theme.custom.maxCommentLength}
                     </Typography>
-                    <Grid container spacing={8}>
+                    <Grid container spacing={1}>
                         <Grid item>
                             <Button variant='contained' color='primary' onClick={() => this.handleClickAddComment()}>
                                 <FormattedMessage

@@ -21,7 +21,7 @@
  * @param {any} props The props passed to the layout
  * @returns {any} HTML representation.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Grid } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
@@ -31,6 +31,7 @@ import { FormattedMessage } from 'react-intl';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
+import { isRestricted } from 'AppData/AuthManager';
 import Alert from 'AppComponents/Shared/Alert';
 import isEmpty from 'lodash/isEmpty';
 import InFlow from './InFlow';
@@ -72,14 +73,15 @@ function Overview(props) {
     const [faultPolicyName, setFaultPolicyName] = useState(faultFlowMediationPolicy !== (null || undefined) ?
         { id: faultFlowMediationPolicy.id, name: faultFlowMediationPolicy.name, type: faultFlowMediationPolicy.type } :
         {});
+    const NONE = 'none';
     const mediationPolicies = [];
-    if (!isEmpty(inPolicyName)) {
+    if (!(isEmpty(inPolicyName) || inPolicyName.name === NONE)) {
         mediationPolicies.push(inPolicyName);
     }
-    if (!isEmpty(outPolicyName)) {
+    if (!(isEmpty(outPolicyName) || outPolicyName.name === NONE)) {
         mediationPolicies.push(outPolicyName);
     }
-    if (!isEmpty(faultPolicyName)) {
+    if (!(isEmpty(faultPolicyName) || faultPolicyName.name === NONE)) {
         mediationPolicies.push(faultPolicyName);
     }
 
@@ -88,23 +90,13 @@ function Overview(props) {
      *
      * @param {function} updateAPI The api update function.
      */
-    const saveAPI = () => {
-        // oldAPI.mediationPolicies = mediationPolicies;
-        // updateAPI(oldAPI);
+    const saveAPI = (updateAPI) => {
         const promisedApi = api.get(api.id);
         promisedApi
             .then((getResponse) => {
                 const apiData = getResponse.body;
                 apiData.mediationPolicies = mediationPolicies;
-                const promisedUpdate = api.update(apiData);
-                promisedUpdate
-                    .then(() => {
-                        Alert.info('Mediation Policies updated successfully.');
-                    })
-                    .catch((errorResponse) => {
-                        console.error(errorResponse);
-                        Alert.error('Error occurred while updating API mediation policies');
-                    });
+                updateAPI(apiData);
             })
             .catch((errorResponse) => {
                 console.error(errorResponse);
@@ -120,15 +112,6 @@ function Overview(props) {
     const updateFaultMediationPolicy = (policies) => {
         setFaultPolicyName({ id: policies.id, name: policies.name, type: policies.type });
     };
-    useEffect(() => {
-        setInPolicyName(inPolicyName);
-    }, [inPolicyName]);
-    useEffect(() => {
-        setOutPolicyName(outPolicyName);
-    }, [outPolicyName]);
-    useEffect(() => {
-        setFaultPolicyName(faultPolicyName);
-    }, [faultPolicyName]);
     return (
         <div >
             <div className={classes.titleWrapper}>
@@ -157,9 +140,10 @@ function Overview(props) {
                         <Grid
                             container
                             direction='row'
-                            alignItems='flex-start'
-                            spacing={16}
+                            alignItems='center'
+                            spacing={4}
                             className={classes.buttonSection}
+                            style={{ marginTop: 20 }}
                         >
                             <Grid item>
                                 <div>
@@ -167,15 +151,22 @@ function Overview(props) {
                                         variant='contained'
                                         color='primary'
                                         onClick={() => saveAPI(updateAPI)}
+                                        disabled={isRestricted(['apim:api_create'], api)}
                                     >
-                                        <FormattedMessage id='save' defaultMessage='Save' />
+                                        <FormattedMessage
+                                            id='Apis.Details.MediationPolicies.Overview.save'
+                                            defaultMessage='Save'
+                                        />
                                     </Button>
                                 </div>
                             </Grid>
                             <Grid item>
                                 <Link to={'/apis/' + api.id + '/overview'}>
                                     <Button>
-                                        <FormattedMessage id='cancel' defaultMessage='Cancel' />
+                                        <FormattedMessage
+                                            id='Apis.Details.MediationPolicies.Overview.cancel'
+                                            defaultMessage='Cancel'
+                                        />
                                     </Button>
                                 </Link>
                             </Grid>

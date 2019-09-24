@@ -25,6 +25,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -91,10 +92,20 @@ public class SearchApiServiceImpl implements SearchApiService {
                     API api = (API) searchResult;
                     SearchResultDTO apiResult = SearchResultMappingUtil.fromAPIToAPIResultDTO(api);
                     allmatchedResults.add(apiResult);
+                } else if (searchResult instanceof APIProduct) {
+                    APIProduct apiproduct = (APIProduct) searchResult;
+                    SearchResultDTO apiResult = SearchResultMappingUtil.fromAPIProductToAPIResultDTO(apiproduct);
+                    allmatchedResults.add(apiResult);
                 } else if (searchResult instanceof Map.Entry) {
                     Map.Entry pair = (Map.Entry) searchResult;
-                    SearchResultDTO docResult = SearchResultMappingUtil.fromDocumentationToDocumentResultDTO(
-                            (Documentation) pair.getKey(), (API) pair.getValue());
+                    SearchResultDTO docResult;
+                    if (pair.getValue() instanceof API) {
+                        docResult = SearchResultMappingUtil.fromDocumentationToDocumentResultDTO(
+                                (Documentation) pair.getKey(), (API) pair.getValue());
+                    } else {
+                        docResult = SearchResultMappingUtil.fromDocumentationToProductDocumentResultDTO(
+                                (Documentation) pair.getKey(), (APIProduct) pair.getValue());
+                    }
                     allmatchedResults.add(docResult);
                 }
             }

@@ -16,6 +16,7 @@
  * under the License.
  */
 import React, { useReducer, useState } from 'react';
+import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -30,6 +31,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm';
 import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
 
 import ProvideWSDL from './Steps/ProvideWSDL';
 
@@ -40,8 +42,10 @@ import ProvideWSDL from './Steps/ProvideWSDL';
  * @param {*} props
  * @returns
  */
-export default function SOAPToREST() {
+export default function ApiCreateWSDL(props) {
     const [wizardStep, setWizardStep] = useState(0);
+    const { history } = props;
+    const { settings } = useAppContext();
 
     /**
      *
@@ -67,7 +71,7 @@ export default function SOAPToREST() {
     }
 
     const [apiInputs, inputsDispatcher] = useReducer(apiInputsReducer, {
-        type: 'SOAPtoREST',
+        type: 'SOAP',
         inputType: 'url',
         inputValue: '',
         formValidity: false,
@@ -124,11 +128,17 @@ export default function SOAPToREST() {
                 },
             };
         }
-
-        const promisedWSDLImport = Wsdl.import(apiInputs.inputValue, additionalProperties, 'SOAPTOREST');
+        additionalProperties.gatewayEnvironments = settings.environment.map(env => env.name);
+        let promisedWSDLImport;
+        if (apiInputs.inputType === 'url') {
+            promisedWSDLImport = Wsdl.importByUrl(apiInputs.inputValue, additionalProperties, apiInputs.type);
+        } else {
+            promisedWSDLImport = Wsdl.importByFileOrArchive(apiInputs.inputValue, additionalProperties, apiInputs.type);
+        }
         promisedWSDLImport
-            .then(() => {
+            .then((api) => {
                 Alert.info('API created successfully');
+                history.push(`/apis/${api.id}/overview`);
             })
             .catch((error) => {
                 if (error.response) {
@@ -234,3 +244,7 @@ export default function SOAPToREST() {
         </APICreateBase>
     );
 }
+
+ApiCreateWSDL.propTypes = {
+    history: PropTypes.shape({ push: PropTypes.func }).isRequired,
+};

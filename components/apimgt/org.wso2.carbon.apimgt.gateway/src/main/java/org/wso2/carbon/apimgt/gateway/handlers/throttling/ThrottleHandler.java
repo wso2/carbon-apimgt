@@ -694,6 +694,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
         messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
         messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
+        setRetryAfterHeader(messageContext);
         Mediator sequence = messageContext.getSequence(APIThrottleConstants.API_THROTTLE_OUT_HANDLER);
 
         // Invoke the custom error handler specified by the user
@@ -1114,6 +1115,25 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         }
         return null;
     }
+    /**
+     * When sent with a 429 (Too Many Requests) response, this indicates how long to wait before making a new request.
+     * Retry-After: <http-date> format header will be set. ex: Retry-After: Fri, 31 Dec 1999 23:59:59 GMT
+     * @param messageContext
+     */
+    private void setRetryAfterHeader(MessageContext messageContext) {
+        Object timestampOb = messageContext.getProperty(APIThrottleConstants.THROTTLED_NEXT_ACCESS_TIMESTAMP);
+        if (timestampOb != null) {
+            long timestamp = (Long) timestampOb;
+            SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+            dateFormat.setTimeZone(TimeZone.getTimeZone(APIThrottleConstants.GMT));
+            Date date = new Date(timestamp);
+            String retryAfterValue = dateFormat.format(date);
+            Map headers = (Map) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                    .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            headers.put(APIThrottleConstants.HEADER_RETRY_AFTER, retryAfterValue);
+        }
+    }
+    
 
     public void destroy() {
 

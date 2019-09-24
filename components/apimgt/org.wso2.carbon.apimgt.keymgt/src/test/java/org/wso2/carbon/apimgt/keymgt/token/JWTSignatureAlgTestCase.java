@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 public class JWTSignatureAlgTestCase {
 
@@ -39,21 +40,19 @@ public class JWTSignatureAlgTestCase {
     @Test
     public void testJwtSignatureAlgorithm(){
 
-        JWTGenerator jwtGenerator = new JWTGenerator();
-
-        String noneAlg = jwtGenerator.getJWSCompliantAlgorithmCode(null);
+        String noneAlg = APIUtil.getJWSCompliantAlgorithmCode(null);
 
         Assert.assertTrue("Expected 'none', but was " + noneAlg, "none".equals(noneAlg));
 
-        noneAlg = jwtGenerator.getJWSCompliantAlgorithmCode("NONE");
+        noneAlg = APIUtil.getJWSCompliantAlgorithmCode("NONE");
 
         Assert.assertTrue("Expected 'none', but was " + noneAlg, "none".equals(noneAlg));
 
-        String shaWithRsa256Code = jwtGenerator.getJWSCompliantAlgorithmCode("SHA256withRSA");
+        String shaWithRsa256Code = APIUtil.getJWSCompliantAlgorithmCode("SHA256withRSA");
 
         Assert.assertTrue("Expected 'RS256' but was " + shaWithRsa256Code, "RS256".equals(shaWithRsa256Code));
 
-        shaWithRsa256Code = jwtGenerator.getJWSCompliantAlgorithmCode("RS256");
+        shaWithRsa256Code = APIUtil.getJWSCompliantAlgorithmCode("RS256");
 
         Assert.assertTrue("Expected 'RS256' but was " + shaWithRsa256Code, "RS256".equals(shaWithRsa256Code));
     }

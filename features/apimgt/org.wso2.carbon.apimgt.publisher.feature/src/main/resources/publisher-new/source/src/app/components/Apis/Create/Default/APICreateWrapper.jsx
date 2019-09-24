@@ -25,6 +25,8 @@ import APICreateDefault from './APICreateDefault';
 /**
  * Wrapper for API create component. this wrapper is used when creating
  * an API
+ * @deprecated don't use `APICreateWrapper` to create new type of api create page,
+ * instead use use `APICreateBase` and `DefaultAPIForm` components.
  */
 class APICreateWrapper extends Component {
     constructor(props) {

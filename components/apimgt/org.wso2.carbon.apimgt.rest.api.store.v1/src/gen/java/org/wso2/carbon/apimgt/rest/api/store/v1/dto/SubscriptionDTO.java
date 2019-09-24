@@ -3,7 +3,6 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import javax.validation.constraints.*;
 
@@ -22,8 +21,6 @@ public class SubscriptionDTO   {
     private String applicationId = null;
     private String apiId = null;
     private APIInfoDTO apiInfo = null;
-    private String apiProductId = null;
-    private APIProductInfoDTO apiProductInfo = null;
     private ApplicationInfoDTO applicationInfo = null;
     private String throttlingPolicy = null;
 
@@ -168,41 +165,6 @@ public enum StatusEnum {
   }
 
   /**
-   * The unique identifier of the API Product.
-   **/
-  public SubscriptionDTO apiProductId(String apiProductId) {
-    this.apiProductId = apiProductId;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "The unique identifier of the API Product.")
-  @JsonProperty("apiProductId")
-  public String getApiProductId() {
-    return apiProductId;
-  }
-  public void setApiProductId(String apiProductId) {
-    this.apiProductId = apiProductId;
-  }
-
-  /**
-   **/
-  public SubscriptionDTO apiProductInfo(APIProductInfoDTO apiProductInfo) {
-    this.apiProductInfo = apiProductInfo;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("apiProductInfo")
-  public APIProductInfoDTO getApiProductInfo() {
-    return apiProductInfo;
-  }
-  public void setApiProductInfo(APIProductInfoDTO apiProductInfo) {
-    this.apiProductInfo = apiProductInfo;
-  }
-
-  /**
    **/
   public SubscriptionDTO applicationInfo(ApplicationInfoDTO applicationInfo) {
     this.applicationInfo = applicationInfo;
@@ -285,8 +247,6 @@ public enum StatusEnum {
         Objects.equals(applicationId, subscription.applicationId) &&
         Objects.equals(apiId, subscription.apiId) &&
         Objects.equals(apiInfo, subscription.apiInfo) &&
-        Objects.equals(apiProductId, subscription.apiProductId) &&
-        Objects.equals(apiProductInfo, subscription.apiProductInfo) &&
         Objects.equals(applicationInfo, subscription.applicationInfo) &&
         Objects.equals(throttlingPolicy, subscription.throttlingPolicy) &&
         Objects.equals(type, subscription.type) &&
@@ -295,7 +255,7 @@ public enum StatusEnum {
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionId, applicationId, apiId, apiInfo, apiProductId, apiProductInfo, applicationInfo, throttlingPolicy, type, status);
+    return Objects.hash(subscriptionId, applicationId, apiId, apiInfo, applicationInfo, throttlingPolicy, type, status);
   }
 
   @Override
@@ -307,8 +267,6 @@ public enum StatusEnum {
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    apiInfo: ").append(toIndentedString(apiInfo)).append("\n");
-    sb.append("    apiProductId: ").append(toIndentedString(apiProductId)).append("\n");
-    sb.append("    apiProductInfo: ").append(toIndentedString(apiProductInfo)).append("\n");
     sb.append("    applicationInfo: ").append(toIndentedString(applicationInfo)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");

@@ -31,6 +31,7 @@ import Paper from '@material-ui/core/Paper';
 import Alert from 'AppComponents/Shared/Alert';
 import Progress from 'AppComponents/Shared/Progress';
 import API from 'AppData/api';
+import { isRestricted } from 'AppData/AuthManager';
 
 const styles = theme => ({
     subscriptionPoliciesPaper: {
@@ -43,6 +44,9 @@ const styles = theme => ({
     },
     gridLabel: {
         marginTop: theme.spacing.unit * 1.5,
+    },
+    mainTitle: {
+        paddingLeft: 0,
     },
 });
 
@@ -130,7 +134,7 @@ class SubscriptionPoliciesManage extends Component {
                             <FormHelperText>
                                 <FormattedMessage
                                     id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.policies.update'
-                                    defaultMessage='Add/remove subscription policies'
+                                    defaultMessage='Attach subscription policies to API'
                                 />
                             </FormHelperText>
                         </Grid>
@@ -140,6 +144,7 @@ class SubscriptionPoliciesManage extends Component {
                                     <FormControlLabel
                                         key={value[1].name}
                                         control={<Checkbox
+                                            disabled={isRestricted(['apim:api_publish', 'apim:api_create'], api)}
                                             color='primary'
                                             checked={api.policies.includes(value[1].name)}
                                             onChange={e => this.handleChange(e)}

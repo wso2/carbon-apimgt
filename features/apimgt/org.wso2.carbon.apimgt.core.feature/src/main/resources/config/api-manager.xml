@@ -125,6 +125,7 @@
         <!--JWTClaimCacheExpiry>900</JWTClaimCacheExpiry-->
         <!-- Expiry time for the apim key mgt validation info cache -->
         <!--TokenCacheExpiry>900</TokenCacheExpiry-->
+        <!-- GatewayResourceCacheExpiry>3600</GatewayResourceCacheExpiry -->
         <!-- This parameter specifies the expiration time of the TagCache. TagCache will
              only be created when this element is uncommented. When the specified
              time duration gets elapsed ,tag cache will get re-generated. -->
@@ -206,6 +207,10 @@
                 <Name>org.wso2.analytics.apim.alertStakeholderInfo</Name>
                 <Version>1.0.1</Version>
             </AlertTypes>
+            <botData>
+                <Name>org.wso2.botDetectionData.request.stream</Name>
+                <Version>1.0.0</Version>
+            </botData>
         </Streams>
 
     </Analytics>

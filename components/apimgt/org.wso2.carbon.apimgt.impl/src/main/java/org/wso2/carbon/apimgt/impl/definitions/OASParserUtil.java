@@ -21,8 +21,10 @@ package org.wso2.carbon.apimgt.impl.definitions;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.models.RefModel;
 import io.swagger.models.RefPath;
 import io.swagger.models.RefResponse;
@@ -30,6 +32,7 @@ import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.v3.parser.ObjectMapperFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -65,7 +68,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
@@ -81,16 +83,33 @@ public class OASParserUtil {
      * Return correct OAS parser by validating give definition with OAS 2/3 parsers.
      *
      * @param apiDefinition OAS definition
-     * @return Optional APIDefinition
+     * @return APIDefinition APIDefinition parser
      * @throws APIManagementException If error occurred while parsing definition.
      */
-    public static Optional<APIDefinition> getOASParser(String apiDefinition) throws APIManagementException {
-        APIDefinitionValidationResponse response = validateAPIDefinition(apiDefinition, false);
-        if (response.isValid()) {
-            return Optional.of(response.getParser());
+    public static APIDefinition getOASParser(String apiDefinition) throws APIManagementException {
+        ObjectMapper mapper;
+        if (apiDefinition.trim().startsWith("{")) {
+            mapper = ObjectMapperFactory.createJson();
         } else {
-            return Optional.empty();
+            mapper = ObjectMapperFactory.createYaml();
         }
+        JsonNode rootNode;
+        try {
+            rootNode = mapper.readTree(apiDefinition.getBytes());
+        } catch (IOException e) {
+            throw new APIManagementException("Error occurred while parsing OAS definition", e);
+        }
+        ObjectNode node = (ObjectNode) rootNode;
+        JsonNode openapi = node.get("openapi");
+        if (openapi != null && openapi.asText().startsWith("3.")) {
+            return oas3Parser;
+        }
+        JsonNode swagger = node.get("swagger");
+        if (swagger != null) {
+            return oas2Parser;
+        }
+
+        throw new APIManagementException("Invalid OAS definition provided.");
     }
 
     /**

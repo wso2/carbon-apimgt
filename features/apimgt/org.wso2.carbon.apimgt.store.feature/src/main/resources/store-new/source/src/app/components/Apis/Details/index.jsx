@@ -24,7 +24,6 @@ import {
 import Typography from '@material-ui/core/Typography';
 import Loadable from 'react-loadable';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import APIProduct from 'AppData/APIProduct';
 import Api from 'AppData/api';
 import CONSTS from 'AppData/Constants';
 import AuthManager from 'AppData/AuthManager';
@@ -84,7 +83,7 @@ const LoadableSwitch = withRouter(Loadable.Map({
         ),
     },
     render(loaded, props) {
-        const { apiType, match } = props;
+        const { match, advertised } = props;
         const ApiConsole = loaded.ApiConsole.default;
         const Overview = loaded.Overview.default;
         const Documentation = loaded.Documentation.default;
@@ -92,10 +91,8 @@ const LoadableSwitch = withRouter(Loadable.Map({
         const Comments = loaded.Comments.default;
         const Sdk = loaded.Sdk.default;
         const apiUuid = match.params.api_uuid;
-        let path = '/apis/';
-        if (apiType === CONSTS.API_PRODUCT_TYPE) {
-            path = '/api-products/';
-        }
+        const path = '/apis/';
+
         const redirectURL = path + apiUuid + '/overview';
 
         return (
@@ -106,11 +103,17 @@ const LoadableSwitch = withRouter(Loadable.Map({
                     render={props => (
                         <Overview {...props} />)}
                 />
-                <Route path='/apis/:apiUuid/credentials' component={Credentials} />
-                <Route path='/apis/:apiUuid/comments' component={Comments} />
-                <Route path='/apis/:apiUuid/test' component={ApiConsole} />
+                {!advertised
+                    && (
+                        <React.Fragment>
+                            <Route path='/apis/:apiUuid/credentials' component={Credentials} />
+                            <Route path='/apis/:apiUuid/comments' component={Comments} />
+                            <Route path='/apis/:apiUuid/test' component={ApiConsole} />
+                            <Route path='/apis/:apiUuid/sdk' component={Sdk} />
+                        </React.Fragment>
+                    )
+                }
                 <Route path='/apis/:apiUuid/docs' component={Documentation} />
-                <Route path='/apis/:apiUuid/sdk' component={Sdk} />
                 <Redirect exact from='/api-products/:apiUuid' to={redirectURL} />
                 <Route
                     path='/api-products/:apiUuid/overview'
@@ -201,22 +204,13 @@ class Details extends React.Component {
          * @memberof Details
          */
         this.updateSubscriptionData = (callback) => {
-            const { apiType } = this.props;
-            this.setState({ apiType });
-
-            let promisedAPI = null;
             let existingSubscriptions = null;
             let promisedApplications = null;
-            let restApi = null;
 
-            if (apiType === CONSTS.API_TYPE) {
-                restApi = new Api();
-            } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
-                restApi = new APIProduct();
-            }
+            const restApi = new Api();
 
             // const subscriptionClient = new Subscription();
-            promisedAPI = restApi.getAPIById(this.api_uuid);
+            const promisedAPI = restApi.getAPIById(this.api_uuid);
 
             promisedAPI.then((api) => {
                 this.setState({ api: api.body });
@@ -289,7 +283,7 @@ class Details extends React.Component {
                     });
             }
         };
-        const { apiType } = this.props;
+
         this.state = {
             active: 'overview',
             overviewHiden: false,
@@ -301,7 +295,6 @@ class Details extends React.Component {
             applicationsAvailable: [],
             item: 1,
             xo: null,
-            apiType,
         };
         this.setDetailsAPI = this.setDetailsAPI.bind(this);
         this.api_uuid = this.props.match.params.api_uuid;
@@ -313,12 +306,7 @@ class Details extends React.Component {
      * @memberof Details
      */
     handleMenuSelect = (menuLink) => {
-        const { apiType } = this.state;
-        let path = '/apis/';
-        if (apiType === CONSTS.API_PRODUCT_TYPE) {
-            path = '/api-products/';
-        }
-
+        const path = '/apis/';
         this.props.history.push({ pathname: path + this.props.match.params.api_uuid + '/' + menuLink });
         menuLink === 'overview' ? this.infoBar.toggleOverview(true) : this.infoBar.toggleOverview(false);
         this.setState({ active: menuLink });
@@ -387,16 +375,35 @@ class Details extends React.Component {
                         </div>
                     </Link>
                     <LeftMenuItem text='overview' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    <LeftMenuItem text='credentials' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    {/* TODO: uncomment when the feature is working */}
-                    <LeftMenuItem text='comments' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    <LeftMenuItem text='test' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    {!api.advertiseInfo.advertised
+                        && (
+                            <React.Fragment>
+                                <LeftMenuItem
+                                    text='credentials'
+                                    handleMenuSelect={this.handleMenuSelect}
+                                    active={active}
+                                />
+                                <LeftMenuItem
+                                    text='comments'
+                                    handleMenuSelect={this.handleMenuSelect}
+                                    active={active}
+                                />
+                                <LeftMenuItem
+                                    text='test'
+                                    handleMenuSelect={this.handleMenuSelect}
+                                    active={active}
+                                />
+                            </React.Fragment>
+                        )
+                    }
                     <LeftMenuItem text='docs' handleMenuSelect={this.handleMenuSelect} active={active} />
-                    <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    {!api.advertiseInfo.advertised
+                        && <LeftMenuItem text='sdk' handleMenuSelect={this.handleMenuSelect} active={active} />
+                    }
                 </div>
                 <div className={classes.content}>
                     <InfoBar apiId={apiUuid} innerRef={node => (this.infoBar = node)} intl={intl} />
-                    <LoadableSwitch api_uuid={apiUuid} apiType={apiType} />
+                    <LoadableSwitch api_uuid={apiUuid} advertised={api.advertiseInfo.advertised} />
                 </div>
                 {theme.custom.showApiHelp && <RightPanel />}
             </ApiContext.Provider>
@@ -410,7 +417,6 @@ Details.propTypes = {
     theme: PropTypes.shape({}).isRequired,
     match: PropTypes.shape({}).isRequired,
     params: PropTypes.shape({}).isRequired,
-    apiType: PropTypes.string.isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,

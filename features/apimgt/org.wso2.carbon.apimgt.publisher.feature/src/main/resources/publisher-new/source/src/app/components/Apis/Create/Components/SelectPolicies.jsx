@@ -14,7 +14,9 @@ import API from 'AppData/api';
  * @returns {React.Component}
  */
 export default function SelectPolicies(props) {
-    const { onChange, policies: currentPolicies } = props;
+    const {
+        onChange, policies: selectedPolicies, multiple, required, helperText,
+    } = props;
     const [policies, setPolicies] = useState({});
     useEffect(() => {
         API.policies('subscription').then(response => setPolicies(response.body));
@@ -25,24 +27,25 @@ export default function SelectPolicies(props) {
     } else {
         return (
             <TextField
+                required={required}
                 fullWidth
                 id='outlined-select-currency'
                 select
                 label='Business plan(s)'
-                value={currentPolicies}
+                value={selectedPolicies}
                 name='policies'
                 onChange={onChange}
                 SelectProps={{
-                    multiple: true,
-                    renderValue: selected => selected.join(', '),
+                    multiple,
+                    renderValue: selected => (Array.isArray(selected) ? selected.join(', ') : selected),
                 }}
-                helperText='Select one or multiple throttling policy for the API'
+                helperText={helperText}
                 margin='normal'
                 variant='outlined'
             >
                 {policies.list.map(policy => (
-                    <MenuItem dense disableGutters key={policy.name} value={policy.displayName}>
-                        <Checkbox checked={currentPolicies.includes(policy.name)} />
+                    <MenuItem dense disableGutters={multiple} key={policy.name} value={policy.displayName}>
+                        {multiple && <Checkbox color='primary' checked={selectedPolicies.includes(policy.name)} />}
                         <ListItemText primary={policy.displayName} secondary={policy.description} />
                     </MenuItem>
                 ))}
@@ -53,4 +56,7 @@ export default function SelectPolicies(props) {
 
 SelectPolicies.defaultProps = {
     policies: [],
+    multiple: true,
+    required: false,
+    helperText: 'Select one or multiple throttling policy for the API',
 };

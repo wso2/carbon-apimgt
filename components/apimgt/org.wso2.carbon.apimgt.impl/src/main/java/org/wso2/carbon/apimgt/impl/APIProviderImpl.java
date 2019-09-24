@@ -37,7 +37,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -60,12 +59,14 @@ import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
@@ -90,7 +91,6 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -1689,6 +1689,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         } else { // API Status : RETIRED or CREATED
                             Map<String, String> failedToRemoveEnvironments = failedGatewaysMap;
                             if(!APIConstants.CREATED.equals(newStatus)) {
+                                cleanUpPendingSubscriptionCreationProcessesByAPI(api.getId());
                                 apiMgtDAO.removeAllSubscriptions(api.getId());
                             }
                             if (!failedToRemoveEnvironments.isEmpty()) {
@@ -1795,8 +1796,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Collections.sort(sortedAPIs, comparator);
         for (int i = sortedAPIs.size() - 1; i >= 0; i--) {
             String oldVersion = sortedAPIs.get(i).getId().getVersion();
-            apiMgtDAO.makeKeysForwardCompatible(provider, apiName, oldVersion, api.getId().getVersion(),
-                    api.getContext());
+            apiMgtDAO.makeKeysForwardCompatible(new ApiTypeWrapper(api), oldVersion
+            );
         }
     }
 
@@ -1961,6 +1962,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             boolean isOauth2 = false;
             boolean isMutualSSL = false;
             boolean isBasicAuth = false;
+            boolean isApiKey = false;
             boolean isMutualSSLMandatory = false;
             boolean isOauthBasicAuthMandatory = false;
 
@@ -1982,13 +1984,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     securityLevels.add(APIConstants.API_SECURITY_BASIC_AUTH);
                     securitySchemeFound = true;
                 }
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)){
+                    isApiKey = true;
+                    securityLevels.add(APIConstants.API_SECURITY_API_KEY);
+                    securitySchemeFound = true;
+                }
                 if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY)) {
                     isMutualSSLMandatory = true;
                     securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
                 }
-                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY)) {
+                if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY)) {
                     isOauthBasicAuthMandatory = true;
-                    securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+                    securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
                 }
             }
 
@@ -1999,16 +2006,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             // If Only OAuth2/Basic-Auth specified, set it as mandatory
             if (!isMutualSSL && !isOauthBasicAuthMandatory) {
-                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
             }
             // If Only Mutual SSL specified, set it as mandatory
-            if (!isBasicAuth && !isOauth2 && !isMutualSSLMandatory) {
+            if (!isBasicAuth && !isOauth2 && !isApiKey && !isMutualSSLMandatory) {
                 securityLevels.add(APIConstants.API_SECURITY_MUTUAL_SSL_MANDATORY);
             }
             // If OAuth2/Basic-Auth and Mutual SSL protected and not specified the mandatory scheme,
             // set OAuth2/Basic-Auth as mandatory
-            if ((isOauth2 || isBasicAuth) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory) {
-                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY);
+            if ((isOauth2 || isBasicAuth || isApiKey) && isMutualSSL && !isOauthBasicAuthMandatory && !isMutualSSLMandatory) {
+                securityLevels.add(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
             }
 
             apiSecurity = String.join(",", securityLevels);
@@ -2017,9 +2024,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("API " + api.getId() + " has following enabled protocols : " + apiSecurity);
         }
         api.setApiSecurity(apiSecurity);
-        if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+        if (!apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
+                !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
             if (log.isDebugEnabled()) {
-                log.info("API " + api.getId() + " does not supports oauth2 security, hence removing all the "
+                log.debug("API " + api.getId() + " does not supports oauth2 security, hence removing all the "
                         + "subscription tiers associated with it");
             }
             api.removeAllTiers();
@@ -3408,14 +3416,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                String resourcePath = identifier.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +
-                        identifier.getApiName() + identifier.getVersion() +
-                        APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION;
-                resourcePath = APIConstants.API_GRAPHQL_SCHEMA_RESOURCE_LOCATION + resourcePath;
-                registry.delete(resourcePath);
-            }
-
             cleanUpPendingAPIStateChangeTask(apiId);
             //Run cleanup task for workflow
             /*
@@ -4594,6 +4594,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
+    }
+
+    /**
+     * Returns all labels associated with given tenant domain.
+     *
+     * @param tenantDomain tenant domain
+     * @return List<Label>  List of label of given tenant domain.
+     * @throws APIManagementException
+     */
+    @Override
+    public List<Label> getAllLabels(String tenantDomain) throws APIManagementException {
+        return apiMgtDAO.getAllLabels(tenantDomain);
     }
 
     @Override
@@ -6083,8 +6095,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private void cleanUpPendingAPIStateChangeTask(int apiId) throws WorkflowException, APIManagementException {
         //Run cleanup task for workflow
-        WorkflowExecutor apiStateChangeWFExecutor = WorkflowExecutorFactory.getInstance().
-                getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+        WorkflowExecutor apiStateChangeWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
 
         WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(apiId),
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
@@ -6092,6 +6103,51 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiStateChangeWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
         }
     }
+
+    /**
+     * Clean-up pending subscriptions of a given API
+     *
+     * @param apiId API Identifier
+     * @throws APIManagementException
+     */
+    private void cleanUpPendingSubscriptionCreationProcessesByAPI(APIIdentifier apiId) throws APIManagementException {
+
+        WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(
+                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+        Set<Integer> pendingSubscriptions = apiMgtDAO.getPendingSubscriptionsByAPIId(apiId);
+        String workflowExtRef = null;
+
+        for (int subscription : pendingSubscriptions) {
+            try {
+                workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(subscription);
+                createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
+            } catch (APIManagementException ex) {
+                // failed clean-up processes are ignored to prevent failures in API state change flow
+                log.warn("Failed to retrieve external workflow reference for subscription for subscription ID: "
+                        + subscription);
+            } catch (WorkflowException ex) {
+                // failed clean-up processes are ignored to prevent failures in API state change flow
+                log.warn("Failed to clean-up pending subscription approval task for subscription ID: " + subscription);
+            }
+        }
+    }
+
+    /**
+     * Returns the given workflow executor
+     *
+     * @param workflowType Workflow executor type
+     * @return WorkflowExecutor of given type
+     * @throws WorkflowException if an error occurred while getting WorkflowExecutor
+     */
+    protected WorkflowExecutor getWorkflowExecutor(String workflowType) throws APIManagementException {
+        try {
+            return WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
+        } catch (WorkflowException e) {
+            handleException("Error while obtaining WorkflowExecutor instance for workflow type :" + workflowType);
+        }
+        return null;
+    }
+
 
     protected String getTenantConfigContent() throws RegistryException, UserStoreException {
         APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
@@ -6791,14 +6847,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
 
-        Map<String, String> failedToPublishEnvironments = publishToGateway(product);
-        if (!failedToPublishEnvironments.isEmpty()) {
-            Set<String> publishedEnvironments =
-                    new HashSet<String>(product.getEnvironments());
-            publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
-            product.setEnvironments(publishedEnvironments);
-            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-            failedGateways.put("UNPUBLISHED", Collections.<String,String>emptyMap());
+        if (resources.size() > 0) {
+            Map<String, String> failedToPublishEnvironments = publishToGateway(product);
+            if (!failedToPublishEnvironments.isEmpty()) {
+                Set<String> publishedEnvironments = new HashSet<String>(product.getEnvironments());
+                publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
+                product.setEnvironments(publishedEnvironments);
+                failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+                failedGateways.put("UNPUBLISHED", Collections.<String, String>emptyMap());
+            }
         }
 
         //todo : check whether permissions need to be updated and pass it along
@@ -6912,11 +6969,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             GenericArtifact artifact = APIUtil.createAPIProductArtifactContent(genericArtifact, apiProduct);
             artifactManager.addGenericArtifact(artifact);
-
+            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             String providerPath = APIUtil.getAPIProductProviderPath(apiProduct.getId());
             //provider ------provides----> APIProduct
             registry.addAssociation(providerPath, artifactPath, APIConstants.PROVIDER_ASSOCIATION);
+
+            // Make the LC status of the API Product published by default
+            saveAPIStatus(artifactPath, APIConstants.PUBLISHED);
 
             String visibleRolesList = apiProduct.getVisibleRoles();
             String[] visibleRoles = new String[0];
@@ -6939,6 +6999,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + " created";
                 log.debug(logMessage);
             }
+            changeLifeCycleStatusToPublish(apiProduct.getId());
         } catch (RegistryException e) {
             try {
                 registry.rollbackTransaction();
@@ -6957,6 +7018,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } catch (RegistryException ex) {
                 handleException("Error while rolling back the transaction for API Product : " + apiProduct.getId().getName(), ex);
             }
+        }
+    }
+
+    private void changeLifeCycleStatusToPublish(APIProductIdentifier apiIdentifier) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
+
+            String productArtifactId = registry.get(APIUtil.getAPIProductPath(apiIdentifier)).getUUID();
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(productArtifactId);
+
+            if (apiArtifact != null) {
+                apiArtifact.invokeAction("Publish", APIConstants.API_LIFE_CYCLE);
+                if (log.isDebugEnabled()) {
+                    String logMessage = "API Product Status changed successfully. API Product Name: "
+                            + apiIdentifier.getName();
+                    log.debug(logMessage);
+                }
+            }
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while Changing Lifecycle status of API Product "
+                    + apiIdentifier.getName(), e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
 

@@ -31,7 +31,7 @@ const copyAccessTokenStep = (props) => {
 
     return (
         <React.Fragment>
-            <ViewToken token={createdToken} />
+            <ViewToken token={{...createdToken, isOauth:true}} />
             <ButtonPanel
                 classes={classes}
                 currentStep={currentStep}

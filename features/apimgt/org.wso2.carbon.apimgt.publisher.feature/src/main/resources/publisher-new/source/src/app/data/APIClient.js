@@ -138,6 +138,13 @@ class APIClient {
         };
     }
 
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof APIClient
+     */
     _getRequestInterceptor() {
         return (request) => {
             const existingUser = AuthManager.getUser(this.environment.label);

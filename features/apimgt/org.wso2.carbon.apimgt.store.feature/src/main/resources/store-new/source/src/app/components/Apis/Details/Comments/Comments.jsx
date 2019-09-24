@@ -22,7 +22,6 @@ import Icon from '@material-ui/core/Icon';
 import { Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import APIProduct from 'AppData/APIProduct';
 import CONSTS from 'AppData/Constants';
 import AuthManager from 'AppData/AuthManager';
 import Comment from './Comment';
@@ -89,18 +88,12 @@ class Comments extends Component {
      * @memberof Comments
      */
     componentDidMount() {
-        const { apiType } = this.context;
         let {
-            apiId, theme, match, intl, isOverview, setCount
+            apiId, theme, match, intl, isOverview, setCount,
         } = this.props;
         if (match) apiId = match.params.apiUuid;
 
-        let restApi = null;
-        if (apiType === CONSTS.API_TYPE) {
-            restApi = new API();
-        } else if (apiType === CONSTS.API_PRODUCT_TYPE) {
-            restApi = new APIProduct();
-        }
+        const restApi = new API();
 
         const user = AuthManager.getUser();
         if (user != null) {
@@ -225,7 +218,7 @@ class Comments extends Component {
                                 </Icon>
                                 <Typography
                                     onClick={this.handleExpandClick}
-                                    variant='display1'
+                                    variant='h4'
                                     className={classes.titleSub}
                                 >
                                     <FormattedMessage id='Apis.Details.Comments.title' defaultMessage='Comments' />
@@ -244,15 +237,15 @@ class Comments extends Component {
                                 commentsUpdate={this.updateCommentList}
                                 allComments={allComments}
                                 parentCommentId={null}
-                                cancelButton={true}
+                                cancelButton
                             />
                         )}
 
                         {startCommentsToDisplay !== 0 && (
                             <div className={classes.contentWrapper}>
-                                <Grid container spacing={32} className={classes.root}>
+                                <Grid container spacing={4} className={classes.root}>
                                     <Grid item>
-                                        <Typography className={classes.verticalSpace} variant='body2'>
+                                        <Typography className={classes.verticalSpace} variant='body1'>
                                             <a
                                                 className={classes.link + ' ' + classes.loadMoreLink}
                                                 onClick={this.handleLoadMoreComments}
@@ -273,7 +266,7 @@ class Comments extends Component {
                                         </Icon>
                                     </Grid>
                                     <Grid item>
-                                        <Typography className={classes.verticalSpace} variant='body2'>
+                                        <Typography className={classes.verticalSpace} variant='body1'>
                                             <FormattedMessage
                                                 id='Apis.Details.Comments.showing.comments'
                                                 defaultMessage='Showing comments '

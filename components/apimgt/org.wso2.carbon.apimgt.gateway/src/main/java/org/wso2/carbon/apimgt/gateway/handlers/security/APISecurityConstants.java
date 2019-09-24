@@ -22,12 +22,12 @@ public class APISecurityConstants {
     public static final String API_AUTH_GENERAL_ERROR_MESSAGE = "Unclassified Authentication Failure";
 
     public static final int API_AUTH_INVALID_CREDENTIALS = 900901;
-    public static final String API_AUTH_INVALID_CREDENTIALS_MESSAGE = "Invalid OAuth Credentials";
+    public static final String API_AUTH_INVALID_CREDENTIALS_MESSAGE = "Invalid Credentials";
     public static final String API_AUTH_INVALID_CREDENTIALS_DESCRIPTION =
-            "Make sure you have given the correct access token";
+            "Make sure you have provided the correct security credentials";
 
     public static final int API_AUTH_MISSING_CREDENTIALS = 900902;
-    public static final String API_AUTH_MISSING_CREDENTIALS_MESSAGE = "Missing OAuth Credentials";
+    public static final String API_AUTH_MISSING_CREDENTIALS_MESSAGE = "Missing Credentials";
     public static final String API_AUTH_MISSING_CREDENTIALS_DESCRIPTION =
             "Make sure your API invocation call has a header: ";
 
@@ -61,24 +61,7 @@ public class APISecurityConstants {
     public static final int INVALID_SCOPE = 900910;
     public static final String INVALID_SCOPE_MESSAGE = "The access token does not allow you to access the requested resource";
 
-    public static final int MUTUAL_SSL_VALIDATION_FAILURE = 900911;
-    public static final String MUTUAL_SSL_VALIDATION_FAILURE_MESSAGE = "The mutual SSL authentication has failed due "
-            + "to invalid/missing client certificate";
-
-    public static final int MULTI_AUTHENTICATION_FAILURE = 900912;
-    public static final String MULTI_AUTHENTICATION_FAILURE_MESSAGE = "Authentication has failed after trying with "
-            + "multiple authenticators";
-
-    public static final int API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS = 900913;
-    public static final String API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS_MESSAGE = "Missing Basic Auth Credentials";
-    public static final int API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS = 900914;
-    public static final String API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE = "Invalid Basic Auth Credentials";
-
-    public static final int MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_CREDENTIALS = 900915;
-    public static final int MULTI_AUTHENTICATION_FAILURE_AND_MISSING_BASIC_AUTH_CREDENTIALS = 900916;
-    public static final int MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_AND_BASIC_AUTH_CREDENTIALS = 900917;
-
-    public static final int API_AUTH_MISSING_OPEN_API_DEF = 900918;
+    public static final int API_AUTH_MISSING_OPEN_API_DEF = 900911;
     public static final String API_AUTH_MISSING_OPEN_API_DEF_ERROR_MESSAGE = "Internal Server Error";
     public static final String GRAPHQL_API_FAILURE_HANDLER = "_graphql_failure_handler";
 
@@ -109,14 +92,8 @@ public class APISecurityConstants {
             case API_AUTH_INVALID_CREDENTIALS:
                 errorMessage = API_AUTH_INVALID_CREDENTIALS_MESSAGE;
                 break;
-            case API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS:
-                errorMessage = API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS_MESSAGE;
-                break;
             case API_AUTH_MISSING_CREDENTIALS:
                 errorMessage = API_AUTH_MISSING_CREDENTIALS_MESSAGE;
-                break;
-            case API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS:
-                errorMessage = API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS_MESSAGE;
                 break;
             case API_AUTH_INCORRECT_API_RESOURCE:
                 errorMessage = API_AUTH_INCORRECT_API_RESOURCE_MESSAGE;
@@ -135,21 +112,6 @@ public class APISecurityConstants {
                 break;
             case INVALID_SCOPE:
                 errorMessage = INVALID_SCOPE_MESSAGE;
-                break;
-            case MUTUAL_SSL_VALIDATION_FAILURE:
-                errorMessage = MUTUAL_SSL_VALIDATION_FAILURE_MESSAGE;
-                break;
-            case MULTI_AUTHENTICATION_FAILURE:
-                errorMessage = MULTI_AUTHENTICATION_FAILURE_MESSAGE;
-                break;
-            case MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_CREDENTIALS:
-                errorMessage = MULTI_AUTHENTICATION_FAILURE_MESSAGE;
-                break;
-            case MULTI_AUTHENTICATION_FAILURE_AND_MISSING_BASIC_AUTH_CREDENTIALS:
-                errorMessage = MULTI_AUTHENTICATION_FAILURE_MESSAGE;
-                break;
-            case MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_AND_BASIC_AUTH_CREDENTIALS:
-                errorMessage = MULTI_AUTHENTICATION_FAILURE_MESSAGE;
                 break;
             default:
                 errorMessage = API_AUTH_GENERAL_ERROR_MESSAGE;
@@ -177,25 +139,10 @@ public class APISecurityConstants {
             case API_AUTH_MISSING_CREDENTIALS:
                 errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_MISSING_CREDENTIALS_DESCRIPTION;
                 break;
-            case API_AUTH_MISSING_BASIC_AUTH_CREDENTIALS:
-                errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_MISSING_CREDENTIALS_DESCRIPTION;
-                break;
-            case MULTI_AUTHENTICATION_FAILURE_AND_MISSING_BASIC_AUTH_CREDENTIALS:
-                errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_MISSING_CREDENTIALS_DESCRIPTION;
-                break;
-            case MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_CREDENTIALS:
-                errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_MISSING_CREDENTIALS_DESCRIPTION;
-                break;
-            case MULTI_AUTHENTICATION_FAILURE_AND_MISSING_OAUTH_AND_BASIC_AUTH_CREDENTIALS:
-                errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_MISSING_CREDENTIALS_DESCRIPTION;
-                break;
             case API_AUTH_ACCESS_TOKEN_EXPIRED:
                 errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_ACCESS_TOKEN_EXPIRED_DESCRIPTION;
                 break;
             case API_AUTH_INVALID_CREDENTIALS:
-                errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_INVALID_CREDENTIALS_DESCRIPTION;
-                break;
-            case API_AUTH_INVALID_BASIC_AUTH_CREDENTIALS:
                 errorDescription += DESCRIPTION_SEPARATOR + API_AUTH_INVALID_CREDENTIALS_DESCRIPTION;
                 break;
             default:

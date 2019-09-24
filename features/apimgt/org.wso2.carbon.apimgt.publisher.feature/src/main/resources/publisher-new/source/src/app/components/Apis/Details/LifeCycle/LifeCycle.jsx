@@ -24,6 +24,8 @@ import Api from 'AppData/api';
 import { Progress } from 'AppComponents/Shared';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
+import { isRestricted } from 'AppData/AuthManager';
+import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 import LifeCycleUpdate from './LifeCycleUpdate';
 import LifeCycleHistory from './LifeCycleHistory';
@@ -77,7 +79,7 @@ class LifeCycle extends Component {
     }
 
     handleChangeCheckList = index => (event, checked) => {
-        const checkList = this.state.checkList;
+        const { checkList } = this.state;
         checkList[index].checked = checked;
         this.setState({ checkList });
     };
@@ -88,16 +90,16 @@ class LifeCycle extends Component {
      * @memberof LifeCycle
      */
     updateData() {
-        const { api } = this.props;
-        const promised_api = Api.get(api.id);
+        const { api: { id } } = this.props;
+        const promisedAPI = Api.get(id);
         // const promised_tiers = Api.policies('api');
-        const promised_lcState = this.api.getLcState(api.id);
-        let privateJetModeEnabled = false;
+        const promisedLcState = this.api.getLcState(id);
+        const privateJetModeEnabled = false;
 
-        const promised_lcHistory = this.api.getLcHistory(api.id);
+        const promisedLcHistory = this.api.getLcHistory(id);
         // const promised_labels = this.api.labels();
-        Promise.all([promised_api, promised_lcState, promised_lcHistory])
-            .then(response => {
+        Promise.all([promisedAPI, promisedLcState, promisedLcHistory])
+            .then((response) => {
                 const api = response[0];
                 const lcState = response[1].body;
                 const lcHistory = response[2].body.list;
@@ -109,11 +111,11 @@ class LifeCycle extends Component {
 
                         for (const transition of transitions) {
                             if (transition.targetState === PUBLISHED && lcState.state !== PUBLISHED) {
-                                const publish_in_private_jet_mode = {
+                                const publishInPrivateJetMode = {
                                     event: 'Publish In Private Jet Mode',
                                     targetState: 'Published In Private Jet Mode',
                                 };
-                                lcState.availableTransitionBeanList.push(publish_in_private_jet_mode);
+                                lcState.availableTransitionBeanList.push(publishInPrivateJetMode);
                             }
                         }
                     }
@@ -138,13 +140,9 @@ class LifeCycle extends Component {
                     checkList,
                 });
             })
-            .catch(error => {
+            .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
+                    console.error(error);
                 }
             });
     }
@@ -156,7 +154,27 @@ class LifeCycle extends Component {
      */
     render() {
         const { classes } = this.props;
-        const { api, lcState, privateJetModeEnabled, checkList, lcHistory } = this.state;
+        const {
+            api, lcState, privateJetModeEnabled, checkList, lcHistory,
+        } = this.state;
+        const apiFromContext = this.context.api;
+        if (apiFromContext && isRestricted(['apim:api_publish'], apiFromContext)) {
+            return (
+                <Grid container direction='row' alignItems='center' spacing={4} style={{ marginTop: 20 }}>
+                    <Grid item>
+                        <Typography variant='body2' color='primary'>
+                            <FormattedMessage
+                                id='Apis.Details.LifeCycle.LifeCycle.change.not.allowed'
+                                defaultMessage={
+                                    '* You are not authorized to change the life cycle state of the API' +
+                                    ' due to insufficient permissions'
+                                }
+                            />
+                        </Typography>
+                    </Grid>
+                </Grid>
+            );
+        }
 
         if (!lcState) {
             return <Progress />;
@@ -164,7 +182,7 @@ class LifeCycle extends Component {
         return (
             <div className={classes.root}>
                 <div className={classes.titleWrapper}>
-                    <Typography variant="h4" align="left" className={classes.mainTitle}>
+                    <Typography variant='h4' align='left' className={classes.mainTitle}>
                         <FormattedMessage id='Apis.Details.LifeCycle.LifeCycle.lifecycle' defaultMessage='Lifecycle' />
                     </Typography>
                 </div>
@@ -183,8 +201,11 @@ class LifeCycle extends Component {
                         <Grid item xs={12}>
                             {lcHistory.length > 1 && (
                                 <div>
-                                    <Typography variant="h6" gutterBottom className={classes.historyHead}>
-                                        <FormattedMessage id='Apis.Details.LifeCycle.LifeCycle.history' defaultMessage='History' />
+                                    <Typography variant='h6' gutterBottom className={classes.historyHead}>
+                                        <FormattedMessage
+                                            id='Apis.Details.LifeCycle.LifeCycle.history'
+                                            defaultMessage='History'
+                                        />
                                     </Typography>
                                     <LifeCycleHistory lcHistory={lcHistory} />
                                 </div>
@@ -198,7 +219,10 @@ class LifeCycle extends Component {
 }
 
 LifeCycle.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    api: PropTypes.shape({}).isRequired,
 };
+
+LifeCycle.contextType = ApiContext;
 
 export default withStyles(styles)(LifeCycle);

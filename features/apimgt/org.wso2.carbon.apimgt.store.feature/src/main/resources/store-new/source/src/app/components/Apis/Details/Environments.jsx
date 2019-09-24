@@ -22,15 +22,23 @@ import Typography from '@material-ui/core/Typography';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
+import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField';
 import Icon from '@material-ui/core/Icon';
-import { FormattedMessage } from 'react-intl';
+import API from 'AppData/api';
+import Utils from 'AppData/Utils';
+import Alert from 'AppComponents/Shared/Alert';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import { ApiContext } from './ApiContext';
 
 const styles = theme => ({
+    buttonIcon: {
+        marginRight: 10,
+    },
     iconAligner: {
         display: 'flex',
         justifyContent: 'flex-start',
@@ -71,10 +79,12 @@ const styles = theme => ({
 class Environments extends React.Component {
     constructor(props) {
         super(props);
+        this.apiClient = new API();
         this.state = {
             prodUrlCopied: false,
             epUrl: '',
         };
+        this.downloadWSDL = this.downloadWSDL.bind(this);
     }
 
     onCopy = name => () => {
@@ -91,13 +101,59 @@ class Environments extends React.Component {
         setTimeout(caller, 4000);
     };
 
+    /**
+     * Downloads the WSDL of the api for the provided environment
+     *
+     * @param {string} apiId uuid of the API
+     * @param {string} environmentName name of the environment
+     */
+    downloadWSDL(apiId, environmentName) {
+        const { intl } = this.props;
+        const wsdlClient = this.apiClient.getWsdlClient();
+        const promisedGet = wsdlClient.downloadWSDLForEnvironment(apiId, environmentName);
+        promisedGet
+            .then((done) => {
+                Utils.downloadFile(done);
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Environments.download.wsdl.error',
+                        defaultMessage: 'Error downloading the WSDL',
+                    }));
+                }
+            });
+    }
+
+    /**
+     * Downloads the swagger of the api for the provided environment
+     *
+     * @param {string} apiId uuid of the API
+     * @param {string} environment name of the environment
+     */
+    downloadSwagger(apiId, environment) {
+        const promiseSwagger = this.apiClient.getSwaggerByAPIIdAndEnvironment(apiId, environment);
+        promiseSwagger
+            .then((done) => {
+                Utils.downloadFile(done);
+            })
+            .catch((error) => {
+                console.log(error);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Environments.download.wsdl.error',
+                    defaultMessage: 'Error downloading the Swagger',
+                }));
+            });
+    }
+
     render() {
         const { api } = this.context;
         const { classes } = this.props;
         const { prodUrlCopied, epUrl } = this.state;
 
         return (
-            <Grid container spacing={16} item xs={12}>
+            <Grid container spacing={2} item xs={12}>
                 {api.endpointURLs.map((endpoint) => {
                     return (
                         <Grid key={endpoint} item xs={12}>
@@ -125,7 +181,7 @@ class Environments extends React.Component {
                                     </div>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
-                                    <Grid container item xs={12} spacing={16}>
+                                    <Grid container item xs={12} spacing={2}>
                                         {(endpoint.URLs.http !== null
                                             || endpoint.URLs.https !== null
                                             || endpoint.URLs.ws !== null
@@ -144,6 +200,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,
@@ -174,6 +231,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,
@@ -204,6 +262,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,
@@ -234,6 +293,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,
@@ -275,6 +335,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,
@@ -305,6 +366,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,
@@ -335,6 +397,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,
@@ -365,6 +428,7 @@ class Environments extends React.Component {
                                                     id='bootstrap-input'
                                                     InputProps={{
                                                         disableUnderline: true,
+                                                        readOnly: true,
                                                         classes: {
                                                             root: classes.bootstrapRoot,
                                                             input: classes.bootstrapInput,
@@ -388,6 +452,34 @@ class Environments extends React.Component {
                                                 </Tooltip>
                                             </Grid>
                                         )}
+                                        {api.type === 'SOAP' && (
+                                            <Button
+                                                size='small'
+                                                onClick={
+                                                    () => this.downloadWSDL(api.id, endpoint.environmentName)
+                                                }
+                                            >
+                                                <CloudDownloadRounded className={classes.buttonIcon} />
+                                                <FormattedMessage
+                                                    id='Apis.Details.Environments.download.wsdl'
+                                                    defaultMessage='WSDL'
+                                                />
+                                            </Button>
+                                        )}
+                                        {(api.type === 'HTTP' || api.type === 'SOAPTOREST') && (
+                                            <Button
+                                                size='small'
+                                                onClick={
+                                                    () => this.downloadSwagger(api.id, endpoint.environmentName)
+                                                }
+                                            >
+                                                <CloudDownloadRounded className={classes.buttonIcon} />
+                                                <FormattedMessage
+                                                    id='Apis.Details.Environments.download.wsdl'
+                                                    defaultMessage='Swagger'
+                                                />
+                                            </Button>
+                                        )}
                                     </Grid>
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>
@@ -401,7 +493,8 @@ class Environments extends React.Component {
 
 Environments.propTypes = {
     classes: PropTypes.object.isRequired,
+    intl: PropTypes.func.isRequired,
 };
 Environments.contextType = ApiContext;
 
-export default withStyles(styles)(Environments);
+export default injectIntl(withStyles(styles)(Environments));

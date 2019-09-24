@@ -20,6 +20,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import Tooltip from '@material-ui/core/Tooltip';
+import FileCopy from '@material-ui/icons/FileCopy';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Icon from '@material-ui/core/Icon';
@@ -44,6 +45,7 @@ const styles = theme => ({
         border: '1px solid #ced4da',
         padding: '5px 12px',
         width: 350,
+        height: 100,
         transition: theme.transitions.create(['border-color', 'box-shadow']),
         fontFamily: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"',
             'Arial', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"'].join(','),
@@ -60,6 +62,7 @@ const styles = theme => ({
         lineHeight: '30px',
         marginRight: 10,
         width: 100,
+        'text-align-last': 'center',
     },
     contentWrapper: {
         width: theme.custom.contentAreaWidth - theme.custom.leftMenuWidth,
@@ -123,11 +126,17 @@ class ViewToken extends React.Component {
         return (
             <div className={classes.root}>
                 <InlineMessage type='warn'>
-                    <Typography variant='headline' component='h3'>
-                        <FormattedMessage
+                    <Typography variant='h5' component='h3'>
+                        {(token.isOauth) && <FormattedMessage
                             id='Shared.AppsAndKeys.ViewToken.please.copy'
                             defaultMessage='Please Copy the Access Token'
                         />
+                        }
+                        {(!token.isOauth) && <FormattedMessage
+                            id='Shared.AppsAndKeys.ViewToken.please.copy.apikey'
+                            defaultMessage='Please Copy the Api Key'
+                        />
+                        }
                     </Typography>
                     <Typography component='p'>
                         <FormattedMessage
@@ -139,14 +148,22 @@ class ViewToken extends React.Component {
                 </InlineMessage>
                 <div className={classes.epWrapper}>
                     <Typography className={classes.prodLabel}>
-                        <FormattedMessage
+                    {(token.isOauth) && <FormattedMessage
                             id='Shared.AppsAndKeys.ViewToken.access.token'
                             defaultMessage='Access Token'
                         />
+                    }
+                    {(!token.isOauth) && <FormattedMessage
+                            id='Shared.AppsAndKeys.ViewToken.apikey'
+                            defaultMessage='Api Key'
+                        />
+                    }
                     </Typography>
                     <TextField
                         defaultValue={token.accessToken}
                         id='bootstrap-input'
+                        multiline
+                        rows={4}
                         InputProps={{
                             disableUnderline: true,
                             classes: {
@@ -161,26 +178,31 @@ class ViewToken extends React.Component {
                     />
                     <Tooltip title={tokenCopied ? 'Copied' : 'Copy to clipboard'} placement='right'>
                         <CopyToClipboard text={token.accessToken} onCopy={this.onCopy('tokenCopied')}>
-                            <Icon color='secondary'>file_copy</Icon>
+                            <FileCopy color='secondary'>file_copy</FileCopy>
                         </CopyToClipboard>
                     </Tooltip>
                 </div>
                 <FormHelperText>
                     <FormattedMessage
                         id='Shared.AppsAndKeys.ViewToken.info.first'
-                        defaultMessage='Above token has a validity period of'
+                        defaultMessage='Above token has a validity period of '
                     />
                     {token.validityTime}
                     <FormattedMessage
                         id='Shared.AppsAndKeys.ViewToken.info.second'
-                        defaultMessage='seconds. And the token has ('
+                        defaultMessage=' seconds'
                     />
+                    {token.isOauth && <FormattedMessage
+                        id='Shared.AppsAndKeys.ViewToken.info.second'
+                        defaultMessage=' and the token has ('
+                    />
+                    }
                     {this.getTokeScopesString(token.tokenScopes)}
-                    <FormattedMessage
+                    {token.isOauth && <FormattedMessage
                         id='Shared.AppsAndKeys.ViewToken.info.third'
-                        defaultMessage=') scopes.'
+                        defaultMessage=') scopes'
                     />
-
+                    }.
                 </FormHelperText>
             </div>
         );

@@ -36,7 +36,8 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import Chip from '@material-ui/core/Chip';
 import { red } from '@material-ui/core/colors/';
 import Alert from 'AppComponents/Shared/Alert';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 /**
  *
@@ -50,8 +51,8 @@ export default function StoreVisibility(props) {
     const { api, configDispatcher } = props;
     const [invalidRoles, setInvalidRoles] = useState([]);
     const isPublic = api.visibility === 'PUBLIC';
-    const isNotCreator = AuthManager.isNotCreator();
-    const isNotPublisher = AuthManager.isNotPublisher();
+    const [apiFromContext] = useAPI();
+
     useEffect(() => {
         if (invalidRoles.length === 0) {
             setRoleValidity(true);
@@ -97,7 +98,7 @@ export default function StoreVisibility(props) {
                         />
                     </InputLabel>
                     <Select
-                        disabled={isNotCreator && isNotPublisher}
+                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], apiFromContext)}
                         value={api.visibility}
                         onChange={({ target: { value } }) => configDispatcher({ action: 'visibility', value })}
                         input={<Input name='storeVisibility' id='storeVisibility-selector' />}
@@ -171,7 +172,7 @@ export default function StoreVisibility(props) {
             {!isPublic && (
                 <Grid item>
                     <ChipInput
-                        disabled={isNotCreator && isNotPublisher}
+                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], apiFromContext)}
                         value={api.visibleRoles.concat(invalidRoles)}
                         alwaysShowPlaceholder={false}
                         placeholder='Enter roles and press Enter'

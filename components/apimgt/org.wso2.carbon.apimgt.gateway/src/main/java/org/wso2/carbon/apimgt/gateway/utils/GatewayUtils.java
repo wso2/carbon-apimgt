@@ -30,13 +30,20 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.Pipe;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -44,7 +51,6 @@ import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.InputStream;
@@ -53,6 +59,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.security.*;
+import java.security.cert.Certificate;
 import java.util.Map;
 import java.util.Collection;
 import java.util.HashMap;
@@ -452,5 +460,236 @@ public class GatewayUtils {
             endpointAddress = endpointAddress.substring(0, endpointAddress.indexOf("?"));
         }
         return endpointAddress;
+    }
+
+    public static AuthenticationContext generateAuthenticationContext(String tokenSignature, JSONObject payload, JSONObject api,
+                                                                String apiLevelPolicy, boolean isOauth) {
+        JSONObject applicationObj = payload.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION);
+
+        AuthenticationContext authContext = new AuthenticationContext();
+        authContext.setAuthenticated(true);
+        authContext.setApiKey(tokenSignature);
+        if (payload.has(APIConstants.JwtTokenConstants.KEY_TYPE)) {
+            authContext.setKeyType(payload.getString(APIConstants.JwtTokenConstants.KEY_TYPE));
+        } else {
+            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        }
+        authContext.setUsername(payload.getString(APIConstants.JwtTokenConstants.SUBJECT));
+        authContext.setApiTier(apiLevelPolicy);
+        authContext.setApplicationId(String.valueOf(applicationObj.getInt(APIConstants.JwtTokenConstants.APPLICATION_ID)));
+        authContext.setApplicationName(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
+        authContext.setApplicationTier(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
+        authContext.setSubscriber(applicationObj.getString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
+
+        if (isOauth) {
+            authContext.setConsumerKey(payload.getString(APIConstants.JwtTokenConstants.CONSUMER_KEY));
+        }
+
+        if (api != null) {
+            // If the user is subscribed to the API
+            String subscriptionTier = api.getString(APIConstants.JwtTokenConstants.SUBSCRIPTION_TIER);
+            authContext.setTier(subscriptionTier);
+            authContext.setSubscriberTenantDomain(
+                    api.getString(APIConstants.JwtTokenConstants.SUBSCRIBER_TENANT_DOMAIN));
+            JSONObject tierInfo = (JSONObject) payload.get(APIConstants.JwtTokenConstants.TIER_INFO);
+
+            if (tierInfo.has(subscriptionTier)) {
+                JSONObject subscriptionTierObj = (JSONObject) tierInfo.get(subscriptionTier);
+                authContext.setStopOnQuotaReach(
+                        subscriptionTierObj.getBoolean(APIConstants.JwtTokenConstants.STOP_ON_QUOTA_REACH));
+                authContext.setSpikeArrestLimit
+                        (subscriptionTierObj.getInt(APIConstants.JwtTokenConstants.SPIKE_ARREST_LIMIT));
+                if (!JSONObject.NULL.equals(
+                        subscriptionTierObj.get(APIConstants.JwtTokenConstants.SPIKE_ARREST_UNIT))) {
+                    authContext.setSpikeArrestUnit(
+                            subscriptionTierObj.getString(APIConstants.JwtTokenConstants.SPIKE_ARREST_UNIT));
+                }
+            }
+        }
+        // Set JWT token sent to the backend
+        if (payload.has(APIConstants.JwtTokenConstants.BACKEND_TOKEN)) {
+            authContext.setCallerToken(payload.getString(APIConstants.JwtTokenConstants.BACKEND_TOKEN));
+        }
+
+        return authContext;
+    }
+
+    /**
+     * Validate whether the user is subscribed to the invoked API. If subscribed, return a JSON object containing
+     * the API information.
+     *
+     * @param apiContext API context
+     * @param apiVersion API version
+     * @param payload    The payload of the JWT token
+     * @return an JSON object containing subscribed API information retrieved from token payload.
+     * If the subscription information is not found, return a null object.
+     * @throws APISecurityException if the user is not subscribed to the API
+     */
+    public static JSONObject validateAPISubscription(String apiContext, String apiVersion, JSONObject payload, String[] splitToken, boolean isOauth)
+            throws APISecurityException {
+        JSONObject api = null;
+
+        if (payload.has(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS)) {
+            // Subscription validation
+            JSONArray subscribedAPIs = payload.getJSONArray(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
+            for (int i = 0; i < subscribedAPIs.length(); i++) {
+                JSONObject subscribedAPIsJSONObject = subscribedAPIs.getJSONObject(i);
+                if (apiContext.equals(subscribedAPIsJSONObject.getString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
+                        apiVersion.equals(subscribedAPIsJSONObject.getString(APIConstants.JwtTokenConstants.API_VERSION)
+                        )) {
+                    api = subscribedAPIsJSONObject;
+                    if (log.isDebugEnabled()) {
+                        log.debug("User is subscribed to the API: " + apiContext + ", " +
+                                "version: " + apiVersion + ". Token: " + getMaskedToken(splitToken));
+                    }
+                    break;
+                }
+            }
+            if (api == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("User is not subscribed to access the API: " + apiContext +
+                            ", version: " + apiVersion+ ". Token: " + getMaskedToken(splitToken));
+                }
+                log.error("User is not subscribed to access the API.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                        APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("No subscription information found in the token.");
+            }
+            // we perform mandatory authentication for Api Keys
+            if (!isOauth) {
+                log.error("User is not subscribed to access the API.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_FORBIDDEN,
+                        APISecurityConstants.API_AUTH_FORBIDDEN_MESSAGE);
+            }
+        }
+        return api;
+    }
+
+    /**
+     * Verify the JWT token signature.
+     *
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @param alias public certificate keystore alias
+     * @return whether the signature is verified or or not
+     * @throws APISecurityException in case of signature verification failure
+     */
+    public static boolean verifyTokenSignature(String[] splitToken, String alias) throws APISecurityException {
+        // Retrieve signature algorithm from token header
+        String signatureAlgorithm = getSignatureAlgorithm(splitToken);
+
+        Certificate publicCert = null;
+        //Read the client-truststore.jks into a KeyStore
+        try {
+            KeyStore trustStore = ServiceReferenceHolder.getInstance().getTrustStore();
+            if (trustStore != null) {
+                // Read public certificate from trust store
+                publicCert = trustStore.getCertificate(alias);
+            }
+        } catch (KeyStoreException e) {
+            log.error("Error in retrieving public certificate from the trust store with alias : "
+                    + alias, e);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+        }
+
+        if (publicCert != null) {
+            // Retrieve public key from the certificate
+            PublicKey publicKey = publicCert.getPublicKey();
+
+            try {
+                // Verify token signature
+                Signature signatureInstance = Signature.getInstance(signatureAlgorithm);
+                signatureInstance.initVerify(publicKey);
+                String assertion = splitToken[0] + "." + splitToken[1];
+                signatureInstance.update(assertion.getBytes());
+                byte[] decodedSignature = java.util.Base64.getUrlDecoder().decode(splitToken[2]);
+                return signatureInstance.verify(decodedSignature);
+            } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | IllegalArgumentException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error while verifying JWT signature. Token: " + getMaskedToken(splitToken), e);
+                }
+                log.error("Error while verifying JWT signature");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, e);
+            }
+        } else {
+            log.error("Couldn't find a public certificate to verify signature with alias " + alias);
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
+                    APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Retrieve the signature algorithm specified in the token header.
+     *
+     * @param splitToken The JWT token which is split into [header, payload, signature]
+     * @return whether the signature algorithm
+     * @throws APISecurityException in case of signature algorithm extraction failure
+     */
+    public static String getSignatureAlgorithm(String[] splitToken) throws APISecurityException {
+        String signatureAlgorithm;
+        JSONObject header;
+        try {
+            header = new JSONObject(new String(java.util.Base64.getUrlDecoder().decode(splitToken[0])));
+        } catch (JSONException | IllegalArgumentException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Token decryption failure when retrieving header. Token: " +
+                        getMaskedToken(splitToken), e);
+            }
+            log.error("Invalid Api Key. Failed to decode the Api Key header.");
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, e);
+        }
+        signatureAlgorithm = header.getString(APIConstants.JwtTokenConstants.SIGNATURE_ALGORITHM);
+        if (org.apache.commons.lang.StringUtils.isBlank(signatureAlgorithm)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Signature algorithm not found in the token. Token: " + getMaskedToken(splitToken));
+            }
+            log.error("Invalid JWT token. Signature algorithm not found in the token.");
+            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+        }
+        if (APIConstants.SIGNATURE_ALGORITHM_RS256.equals(signatureAlgorithm)) {
+            signatureAlgorithm = APIConstants.SIGNATURE_ALGORITHM_SHA256_WITH_RSA;
+        }
+        return signatureAlgorithm;
+    }
+
+    public static String getMaskedToken(String[] splitToken) {
+        String concatToken = String.join(".", splitToken);
+        if (concatToken.length() >= 10) {
+            return "XXXXX" + concatToken.substring(concatToken.length() - 10);
+        } else {
+            return "XXXXX" + concatToken.substring(concatToken.length() / 2);
+        }
+    }
+
+    public static boolean isGatewayTokenCacheEnabled() {
+        try {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+            String cacheEnabled = config.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED);
+            return Boolean.parseBoolean(cacheEnabled);
+        } catch (Exception e) {
+            log.error("Did not found valid API Validation Information cache configuration. " +
+                    "Use default configuration.", e);
+        }
+        return true;
+    }
+
+    /**
+     * Return tenant domain of the API being invoked.
+     *
+     * @return tenant domain
+     */
+    public static String getTenantDomain() {
+        return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    }
+
+    public static String getAccessTokenCacheKey(String accessToken, String apiContext, String apiVersion,
+                                          String resourceUri, String httpVerb) {
+        return accessToken + ":" + apiContext + ":" + apiVersion + ":" + resourceUri + ":" + httpVerb;
     }
 }

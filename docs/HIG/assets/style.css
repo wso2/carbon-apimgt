@@ -1,0 +1,413 @@
+/*
+  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  *
+  * WSO2 Inc. licenses this file to you under the Apache License,
+  * Version 2.0 (the "License"); you may not use this file except
+  * in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  * http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing,
+  * software distributed under the License is distributed on an
+  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  * KIND, either express or implied. See the License for the
+  * specific language governing permissions and limitations
+  * under the License.
+*/
+
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700);
+
+body {
+    background-color: #eee;
+    color: #666;
+    font: 13px/150% 'Open Sans';
+    font-weight: 400;
+    margin: 0;
+    padding: 0;
+}
+
+hr {
+    border-bottom: 1px dotted #fff;
+    border-left: none;
+    border-right: none;
+    border-top: 1px dotted #999;
+    height: 0;
+    margin: 20px 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #333;
+    font-family: 'Open Sans';
+    font-weight: 300;
+    margin: 1em 0;
+}
+
+h1 {
+    display: inline;
+    font-size: 1.75em;
+    margin: 0;
+}
+
+h2 {
+    font-size: 1.75em;
+    padding-top: 10px;
+    text-align: center;
+}
+
+h2:before, h2:after {
+    color: rgba(0, 0, 0, 0.25);
+    content: '❖';
+    display: block;
+    font-size: 0.75em;
+    margin: 30px 0;
+}
+
+h3 {
+    background: #666;
+    color: #fff;
+    font-size: 1.5em;
+    height: 40px;
+    line-height: 40px;
+    margin: 2em 0 1em -10px;
+    padding: 0 10px;
+    position: relative;
+}
+
+h3 a {
+    background: transparent;
+    border-radius: 11px;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.75) inset;
+    color: rgba(255, 255, 255, 0.75);
+    display: block;
+    font-size: 1em;
+    height: 22px;
+    line-height: 16px;
+    position: absolute;
+    right: 10px;
+    text-align: center;
+    top: 9px;
+    width: 22px;
+}
+
+h3 a:hover {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 1) inset;
+    color: #fff;
+}
+
+h3 a:active {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5) inset;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+h4 {
+    font-size: 1.25em;
+}
+
+h5 {
+    font-size: 1.1em;
+}
+
+h6 {
+    font-size: 1em;
+    font-weight: 600;
+}
+
+ol.padded li, ul.padded li {
+    padding: 20px 0;
+}
+
+code {
+    background-color: #e5e5e5;
+    border: 1px dotted #bbb;
+    padding: 1px 4px;
+}
+
+header {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.85), 0 2px 6px rgba(0, 0, 0, 0.15);
+    height: 50px;
+    line-height: 50px;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1;
+}
+
+header small {
+    color: #999;
+    display: inline;
+    float: right;
+    font-size: 0.75em;
+    font-style: italic;
+    text-align: right;
+}
+
+.wrapper {
+    margin: 0 auto;
+    padding: 0;
+    position: static;
+    width: 960px;
+}
+
+nav {
+    bottom: 0;
+    max-height: 100%;
+    overflow-y: scroll;
+    position: fixed;
+    top: 60px;
+    width: 240px;
+}
+
+article {
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+    margin: 0 0 20px 240px;
+    padding: 0 60px;
+    position: absolute;
+    top: 70px;
+    width: 600px;
+}
+
+nav a.current {
+    color: #666;
+    font-weight: 700;
+}
+
+nav ol {
+    margin: 0;
+    padding: 0.5em 1.5em;
+}
+
+nav ol ol {
+    list-style-type: lower-roman;
+}
+
+nav ol ol li {
+    padding: 0.25em 0;
+}
+
+section {
+    padding: 20px 0;
+}
+
+div.download {
+    border: 2px dashed #ccc;
+    border-radius: 20px;
+    clear: both;
+    padding: 10px 20px;
+}
+
+div.download small {
+    color: #999;
+    float: right;
+    font-style: italic;
+}
+
+div.tray {
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    padding: 20px;
+}
+
+div.tray.dark {
+    background-color: #666;
+    color: #ccc;
+}
+
+span.colour-sample {
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25) inset;
+    display: inline-block;
+    height: 1em;
+    margin: 0 0.5em 0 0.25em;
+    width: 1em;
+}
+
+span.colour-sample.bluekoi {
+    background: #659ec7;
+}
+
+span.colour-sample.charcoal {
+    background: #333;
+}
+
+span.colour-sample.cherryred {
+    background: #c24641;
+}
+
+span.colour-sample.compassblue {
+    background: #609fbf;
+}
+
+span.colour-sample.green {
+    background: #339933;
+}
+
+span.colour-sample.mustard {
+    background: #ffdb58;
+}
+
+span.colour-sample.orange {
+    background: #cc6600;
+}
+
+span.colour-sample.purple {
+    background: #666699;
+}
+
+span.colour-sample.red {
+    background: #993333;
+}
+
+span.colour-sample.slate {
+    background: #607580;
+}
+
+span.colour-sample.smoke {
+    background: #eee;
+}
+
+span.colour-sample.white {
+    background: #fff;
+}
+
+span.colour-sample.whitesmoke {
+    background: #f5f5f5;
+}
+
+.font-specimen {
+    color: #333;
+    font-size: 2em;
+}
+
+footer {
+    margin: 40px 0;
+    text-align: center;
+}
+
+/* Text links */
+a {
+    color: #3399cc;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #40bfff;
+}
+
+a:active {
+    color: #267399;
+}
+
+a.link-action {
+    color: #33cc33;
+}
+
+a.link-action:hover {
+    color: #40ff40;
+}
+
+a.link-action:active {
+    color: #269926;
+}
+
+a.link-warning {
+    color: #cc3333;
+}
+
+a.link-warning:hover {
+    color: #ff4040;
+}
+
+a.link-warning:active {
+    color: #992626;
+}
+
+.dark a {
+    color: #80d4ff;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+}
+
+.dark a:hover {
+    color: #bfeaff;
+}
+
+.dark a:active {
+    color: #66aacc;
+}
+
+.dark a.link-action {
+    color: #80ff80;
+}
+
+.dark a.link-action:hover {
+    color: #bfffbf;
+}
+
+.dark a.link-action:active {
+    color: #66cc66;
+}
+
+.dark a.link-warning {
+    color: #ff8080;
+}
+
+.dark a.link-warning:hover {
+    color: #ffbfbf;
+}
+
+.dark a.link-warning:active {
+    color: #cc6666;
+}
+
+/* Font weights */
+.font-light {
+    font-weight: 300;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.font-extrabold {
+    font-weight: 800;
+}
+
+/* Radio buttons and Checkboxes */
+input[type="checkbox"], input[type="radio"] {
+    display: none;
+}
+
+input[type="checkbox"] + label:before, input[type="radio"] + label:before {
+    background: rgba(255, 255, 255, 0.25);
+    border: 0.25em solid rgba(255, 255, 255, 0.75);
+    box-shadow: 0 0.1em 0.1em 0em rgba(0, 0, 0, 0.5), 0 0.1em 0.1em 0.05em rgba(0, 0, 0, 0.25) inset;
+    content: '';
+    display: inline-block;
+    height: 0.5em;
+    margin-right: 0.5em;
+    width: 0.5em;
+}
+
+input[type="checkbox"]:checked + label:before, input[type="radio"]:checked + label:before {
+    background: #80d4ff;
+}
+
+input[type="radio"] + label:before {
+    border-radius: 1em;
+}
+
+form label:hover {
+    cursor: pointer;
+}
+
+form.horizontal label {
+    margin-right: 1.5em;
+}
+
+form.vertical label {
+    display: block;
+    margin: 0.25em 0;
+}

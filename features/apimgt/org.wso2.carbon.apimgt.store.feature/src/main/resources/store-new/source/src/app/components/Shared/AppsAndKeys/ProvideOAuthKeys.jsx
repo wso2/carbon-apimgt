@@ -56,7 +56,7 @@ function ProvideOAuthKeys(props) {
 
     return (
         <div>
-            <Grid container spacing={24} direction='column'>
+            <Grid container spacing={3} direction='column'>
                 <Grid item xs={6}>
                     <TextField
                         id='provided-consumer-key'

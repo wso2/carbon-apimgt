@@ -16,8 +16,9 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
-import intl, { FormattedMessage, injectIntl } from 'react-intl';
+import React, { useState, useContext } from 'react';
+import { withRouter } from 'react-router-dom';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -33,6 +34,7 @@ import draftToHtml from 'draftjs-to-html';
 import Api from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import Alert from 'AppComponents/Shared/Alert';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = {
     appBar: {
@@ -57,7 +59,6 @@ const styles = {
         height: 30,
         marginLeft: 30,
     },
-
 };
 
 function Transition(props) {
@@ -65,8 +66,12 @@ function Transition(props) {
 }
 
 function TextEditor(props) {
-    const { intl, apiType } = props;
-    const [open, setOpen] = useState(false);
+    const {
+        intl, apiType, showAtOnce, history, docId,
+    } = props;
+    const { api, isAPIProduct } = useContext(APIContext);
+
+    const [open, setOpen] = useState(showAtOnce);
 
     const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
@@ -75,12 +80,18 @@ function TextEditor(props) {
     };
     const toggleOpen = () => {
         if (!open) updateDoc();
+
+        if (open && showAtOnce) {
+            const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
+            const listingPath = `/${urlPrefix}/${api.id}/documents`;
+            history.push(listingPath);
+        }
         setOpen(!open);
     };
     const addContentToDoc = () => {
-        const restAPI = (apiType === Api.CONSTS.APIProduct) ? new APIProduct() : new Api();
+        const restAPI = isAPIProduct ? new APIProduct() : new Api();
         const contentToSave = draftToHtml(convertToRaw(editorState.getCurrentContent()));
-        const docPromise = restAPI.addInlineContentToDocument(props.apiId, props.docId, 'INLINE', contentToSave);
+        const docPromise = restAPI.addInlineContentToDocument(api.id, docId, 'INLINE', contentToSave);
         docPromise
             .then((response) => {
                 Alert.info(`${response.obj.name} ${intl.formatMessage({
@@ -93,16 +104,16 @@ function TextEditor(props) {
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(error);
                 }
-                Alert.info(`${error} ${intl.formatMessage({
+                Alert.error(`${error} ${intl.formatMessage({
                     id: 'Apis.Details.Documents.TextEditor.update.error.message',
                     defaultMessage: 'update failed.',
                 })}`);
             });
     };
     const updateDoc = () => {
-        const restAPI = (apiType === Api.CONSTS.APIProduct) ? new APIProduct() : new Api();
+        const restAPI = isAPIProduct ? new APIProduct() : new Api();
 
-        const docPromise = restAPI.getInlineContentOfDocument(props.apiId, props.docId);
+        const docPromise = restAPI.getInlineContentOfDocument(api.id, docId);
         docPromise
             .then((doc) => {
                 const blocksFromHTML = convertFromHTML(doc.text);
@@ -126,10 +137,7 @@ function TextEditor(props) {
         <div>
             <Button onClick={toggleOpen}>
                 <Icon>description</Icon>
-                <FormattedMessage
-                    id='Apis.Details.Documents.TextEditor.edit.content'
-                    defaultMessage='Edit Content'
-                />
+                <FormattedMessage id='Apis.Details.Documents.TextEditor.edit.content' defaultMessage='Edit Content' />
             </Button>
             <Dialog fullScreen open={open} onClose={toggleOpen} TransitionComponent={Transition}>
                 <Paper square className={classes.popupHeader}>
@@ -171,10 +179,10 @@ function TextEditor(props) {
 
 TextEditor.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    apiId: PropTypes.string.isRequired,
     docId: PropTypes.string.isRequired,
     apiType: PropTypes.oneOf([Api.CONSTS.API, Api.CONSTS.APIProduct]).isRequired,
     intl: PropTypes.shape({}).isRequired,
+    showAtOnce: PropTypes.bool.isRequired,
 };
 
-export default injectIntl(withStyles(styles)(TextEditor));
+export default injectIntl(withRouter(withStyles(styles)(TextEditor)));

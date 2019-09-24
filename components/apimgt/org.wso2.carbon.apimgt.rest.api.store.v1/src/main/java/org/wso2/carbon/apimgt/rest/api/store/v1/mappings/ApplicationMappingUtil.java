@@ -83,8 +83,13 @@ public class ApplicationMappingUtil {
         application.setDescription(applicationDTO.getDescription());
         application.setUUID(applicationDTO.getApplicationId());
         application.setTokenType(APIConstants.DEFAULT_TOKEN_TYPE);
-        if (applicationDTO.getTokenType() != null && !ApplicationDTO.TokenTypeEnum.OAUTH
-                .equals(applicationDTO.getTokenType())) {
+
+        //Check if the token type is not set in the request.
+        if (StringUtils.isEmpty(applicationDTO.getTokenType().toString())) {
+            //Set the default to JWT.
+            application.setTokenType(APIConstants.TOKEN_TYPE_JWT);
+        } else {
+            //Otherwise set it to the type in the request.
             application.setTokenType(applicationDTO.getTokenType().toString());
         }
         Map <String, String> appAttributes = applicationDTO.getAttributes();

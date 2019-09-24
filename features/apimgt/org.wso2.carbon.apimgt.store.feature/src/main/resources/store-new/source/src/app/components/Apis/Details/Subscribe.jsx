@@ -451,7 +451,7 @@ class Subscribe extends Component {
 
                 {this.state.applications && this.state.applications.length > 0 ? (
                     <div>
-                        <Typography variant='headline' className={classes.headline}>
+                        <Typography variant='h5' className={classes.headline}>
                             <FormattedMessage
                                 id='Apis.Details.Subscribe.test.this.api'
                                 defaultMessage='Test this API?'
@@ -484,7 +484,7 @@ class Subscribe extends Component {
                     </div>
                 ) : (
                     <div>
-                        <Typography variant='headline' className={classes.headline}>
+                        <Typography variant='h5' className={classes.headline}>
                             <FormattedMessage
                                 id='Apis.Details.Subscribe.subscriptions.title'
                                 defaultMessage='Subscriptions'

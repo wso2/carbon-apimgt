@@ -33,16 +33,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
@@ -67,13 +66,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -140,7 +137,7 @@ public class APIExportUtil {
             }
 
             //export certificates
-            exportEndpointCertificates(archivePath, apiToReturn, tenantId, provider, exportFormat);
+            exportEndpointCertificates(archivePath, apiToReturn, tenantId, exportFormat);
 
             //export meta information
             exportMetaInformation(archivePath, apiToReturn, registry, exportFormat);
@@ -243,9 +240,8 @@ public class APIExportUtil {
                     //Inline/Markdown content file name would be same as the documentation name
                     //Markdown content files will also be stored in InlineContents directory
                     localFileName = doc.getName();
-                    resourcePath = APIUtil.getAPIDocPath(apiIdentifier) + RegistryConstants.PATH_SEPARATOR
-                            + APIConstants.INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR
-                            + localFileName;
+                    resourcePath = APIUtil.getAPIDocPath(apiIdentifier) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
+                            + RegistryConstants.PATH_SEPARATOR + localFileName;
                     localDocDirectoryPath += File.separator + APIImportExportConstants.INLINE_DOCUMENT_DIRECTORY;
                 }
 
@@ -261,10 +257,11 @@ public class APIExportUtil {
                             IOUtils.copy(fileInputStream, outputStream);
                         }
                     } else {
+                        //Log error and avoid throwing as we give capability to export document artifact without the
+                        //content if does not exists
                         String errorMessage = "Documentation resource for API: " + apiIdentifier.getApiName()
                                 + " not found in " + resourcePath;
                         log.error(errorMessage);
-                        throw new APIImportExportException(errorMessage);
                     }
                 }
             }
@@ -528,7 +525,6 @@ public class APIExportUtil {
     private static void exportMetaInformation(String archivePath, API apiToReturn, Registry registry,
                                               ExportFormat exportFormat) throws APIImportExportException {
 
-        APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
         CommonUtil.createDirectory(archivePath + File.separator + APIImportExportConstants.META_INFO_DIRECTORY);
         //Remove unnecessary data from exported Api
         cleanApiDataToExport(apiToReturn);
@@ -543,7 +539,6 @@ public class APIExportUtil {
                 JsonParser parser = new JsonParser();
                 JsonObject json = parser.parse(swaggerDefinition).getAsJsonObject();
                 String formattedSwaggerJson = gson.toJson(json);
-                apiToReturn.setUriTemplates(Collections.EMPTY_SET);
                 switch (exportFormat) {
                     case YAML:
                         String swaggerInYaml = CommonUtil.jsonToYaml(formattedSwaggerJson);
@@ -563,13 +558,13 @@ public class APIExportUtil {
 
             String apiInJson = gson.toJson(apiToReturn);
             switch (exportFormat) {
-            case JSON:
-                CommonUtil.writeFile(archivePath + APIImportExportConstants.JSON_API_FILE_LOCATION, apiInJson);
-                break;
-            case YAML:
-                String apiInYaml = CommonUtil.jsonToYaml(apiInJson);
-                CommonUtil.writeFile(archivePath + APIImportExportConstants.YAML_API_FILE_LOCATION, apiInYaml);
-                break;
+                case JSON:
+                    CommonUtil.writeFile(archivePath + APIImportExportConstants.JSON_API_FILE_LOCATION, apiInJson);
+                    break;
+                case YAML:
+                    String apiInYaml = CommonUtil.jsonToYaml(apiInJson);
+                    CommonUtil.writeFile(archivePath + APIImportExportConstants.YAML_API_FILE_LOCATION, apiInYaml);
+                    break;
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Swagger definition for API: "
@@ -598,6 +593,7 @@ public class APIExportUtil {
         // Swagger.json contains complete details about scopes and URI templates. Therefore scope and URI template
         // details are removed from api.json
         api.setScopes(new LinkedHashSet<>());
+        api.setUriTemplates(new LinkedHashSet<>());
         // Secure endpoint password is removed, as it causes security issues. When importing need to add it manually,
         // if Secure Endpoint is enabled.
         if (api.getEndpointUTPassword() != null) {
@@ -610,12 +606,11 @@ public class APIExportUtil {
      *
      * @param api          API to be exported
      * @param tenantId     tenant id of the user
-     * @param apiProvider  api Provider
      * @param exportFormat Export format of file
      * @throws APIImportExportException If an error occurs while exporting endpoint certificates
      */
-    private static void exportEndpointCertificates(String archivePath, API api, int tenantId, APIProvider apiProvider,
-                                                   ExportFormat exportFormat) throws APIImportExportException {
+    private static void exportEndpointCertificates(String archivePath, API api, int tenantId, ExportFormat exportFormat)
+            throws APIImportExportException {
 
         JSONObject endpointConfig;
         JSONTokener tokener = new JSONTokener(api.getEndpointConfig());
@@ -633,7 +628,7 @@ public class APIExportUtil {
             uniqueHostNames.addAll(productionHostNames); // Remove duplicate and append result
             uniqueHostNames.addAll(sandboxEndpoints);
             for (String hostname : uniqueHostNames) {
-                List<CertificateDetail> list = getCertificateContentAndMetaData(tenantId, hostname, apiProvider);
+                List<CertificateDetail> list = getCertificateContentAndMetaData(tenantId, hostname);
                 endpointCertificatesDetails.addAll(list);
             }
             if (!endpointCertificatesDetails.isEmpty()) {
@@ -742,19 +737,20 @@ public class APIExportUtil {
     /**
      * Get Certificate MetaData and Certificate detail and build JSON list.
      *
-     * @param tenantId    tenant id of the user
-     * @param hostname    hostname of the endpoint
-     * @param apiProvider api Provider
+     * @param tenantId tenant id of the user
+     * @param hostname hostname of the endpoint     *
      * @return list of certificate detail JSON objects
      * @throws APIImportExportException If an error occurs while retrieving endpoint certificate metadata and content
      */
-    private static List<CertificateDetail> getCertificateContentAndMetaData(int tenantId, String hostname,
-                                                                            APIProvider apiProvider)
+    private static List<CertificateDetail> getCertificateContentAndMetaData(int tenantId, String hostname)
             throws APIImportExportException {
+
         List<CertificateDetail> certificateDetails = new ArrayList<>();
         List<CertificateMetadataDTO> certificateMetadataDTOS;
+        CertificateManager certificateManager = CertificateManagerImpl.getInstance();
+
         try {
-            certificateMetadataDTOS = apiProvider.searchCertificates(tenantId, null, hostname);
+            certificateMetadataDTOS = certificateManager.getCertificates(tenantId, null, hostname);
         } catch (APIManagementException e) {
             String errorMsg = "Error retrieving certificate meta data. For tenantId: " + tenantId + " hostname: "
                     + hostname;
@@ -764,7 +760,7 @@ public class APIExportUtil {
         certificateMetadataDTOS.forEach(metadataDTO -> {
             ByteArrayInputStream certificate = null;
             try {
-                certificate = apiProvider.getCertificateContent(metadataDTO.getAlias());
+                certificate = certificateManager.getCertificateContent(metadataDTO.getAlias());
                 certificate.close();
                 byte[] certificateContent = IOUtils.toByteArray(certificate);
                 String encodedCertificate = new String(Base64.encodeBase64(certificateContent));

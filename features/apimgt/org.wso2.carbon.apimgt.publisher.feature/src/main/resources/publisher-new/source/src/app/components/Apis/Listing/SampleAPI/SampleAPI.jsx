@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -45,10 +45,11 @@ const styles = theme => ({
         paddingLeft: theme.spacing.unit * 2.5,
     },
     head: {
-        paddingBottom: theme.spacing.unit,
+        paddingBottom: theme.spacing.unit * 2,
+        fontWeight: 200,
     },
     content: {
-        paddingBottom: theme.spacing.unit,
+        paddingBottom: theme.spacing.unit * 2,
     },
     buttonLeft: {
         marginRight: theme.spacing.unit,
@@ -89,23 +90,20 @@ class SampleAPI extends Component {
         this.setState({ deploying: true });
         const promisedSampleAPI = this.createSampleAPI();
         const swaggerUpdatePromise = promisedSampleAPI.then((sampleAPI) => {
-            Alert.info(intl.formatMessage({
-                id: 'Apis.Listing.SampleAPI.SampleAPI.created',
-                defaultMessage: 'Sample PizzaShackAPI API created successfully',
-            }));
-            return sampleAPI.updateSwagger(getSampleSwagger('Unlimited'));
+            sampleAPI.updateSwagger(getSampleSwagger('Unlimited'));
+            return sampleAPI;
         });
         swaggerUpdatePromise.catch((error) => {
             console.error(error);
             Alert.error(error);
         });
-        swaggerUpdatePromise.then((api) => {
-            api.publish()
+        swaggerUpdatePromise.then((sampleAPI) => {
+            sampleAPI.publish()
                 .then(() => {
-                    this.setState({ published: true, api });
+                    this.setState({ published: true, api: sampleAPI });
                     Alert.info(intl.formatMessage({
-                        id: 'Apis.Listing.SampleAPI.SampleAPI.published',
-                        defaultMessage: 'PizzaShackAPI API published successfully',
+                        id: 'Apis.Listing.SampleAPI.SampleAPI.created',
+                        defaultMessage: 'Sample PizzaShackAPI API created successfully',
                     }));
                 })
                 .catch((error) => {
@@ -251,8 +249,8 @@ class SampleAPI extends Component {
                         >
                             <GetApp />
                             <FormattedMessage id='deploy.sample.api' defaultMessage='Deploy Sample API' />
+                            {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
                         </Button>
-                        {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
                     </div>
                 </div>
             </InlineMessage>

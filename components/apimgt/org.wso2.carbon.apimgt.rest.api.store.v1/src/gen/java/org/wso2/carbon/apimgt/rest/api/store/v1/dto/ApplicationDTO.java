@@ -57,7 +57,7 @@ public enum TokenTypeEnum {
     }
 }
 
-    private TokenTypeEnum tokenType = TokenTypeEnum.OAUTH;
+    private TokenTypeEnum tokenType = TokenTypeEnum.JWT;
     private String status = "";
     private List<String> groups = new ArrayList<>();
     private Integer subscriptionCount = null;
@@ -145,7 +145,7 @@ public enum TokenTypeEnum {
   }
 
   
-  @ApiModelProperty(example = "OAUTH", value = "Type of the access token generated for this application.  **OAUTH:** A UUID based access token which is issued by default. **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments. ")
+  @ApiModelProperty(example = "JWT", value = "Type of the access token generated for this application.  **OAUTH:** A UUID based access token which is issued by default. **JWT:** A self-contained, signed JWT based access token. **Note:** This can be only used in Microgateway environments. ")
   @JsonProperty("tokenType")
   public TokenTypeEnum getTokenType() {
     return tokenType;

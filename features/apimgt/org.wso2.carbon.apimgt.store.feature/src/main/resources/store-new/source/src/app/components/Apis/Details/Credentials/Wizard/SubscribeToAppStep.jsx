@@ -66,7 +66,8 @@ const subscribeToAppStep = (props) => {
     useEffect(() => {
         const newSubscriptionRequest = { ...subscriptionRequest, apiId };
         if (throttlingPolicyList) {
-            [newSubscriptionRequest.throttlingPolicy] = throttlingPolicyList;
+            const [tierData] = throttlingPolicyList;
+            newSubscriptionRequest.throttlingPolicy = tierData.tierName;
         }
         if (createdApp) {
             newSubscriptionRequest.applicationId = createdApp.value;

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -28,6 +29,7 @@ public class APIInfoDTO   {
     private String thumbnailUri = null;
     private String avgRating = null;
     private List<String> throttlingPolicies = new ArrayList<>();
+    private AdvertiseInfoDTO advertiseInfo = null;
 
   /**
    **/
@@ -219,6 +221,24 @@ public class APIInfoDTO   {
     this.throttlingPolicies = throttlingPolicies;
   }
 
+  /**
+   * The advertise info of the API
+   **/
+  public APIInfoDTO advertiseInfo(AdvertiseInfoDTO advertiseInfo) {
+    this.advertiseInfo = advertiseInfo;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "The advertise info of the API")
+  @JsonProperty("advertiseInfo")
+  public AdvertiseInfoDTO getAdvertiseInfo() {
+    return advertiseInfo;
+  }
+  public void setAdvertiseInfo(AdvertiseInfoDTO advertiseInfo) {
+    this.advertiseInfo = advertiseInfo;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -239,12 +259,13 @@ public class APIInfoDTO   {
         Objects.equals(lifeCycleStatus, apIInfo.lifeCycleStatus) &&
         Objects.equals(thumbnailUri, apIInfo.thumbnailUri) &&
         Objects.equals(avgRating, apIInfo.avgRating) &&
-        Objects.equals(throttlingPolicies, apIInfo.throttlingPolicies);
+        Objects.equals(throttlingPolicies, apIInfo.throttlingPolicies) &&
+        Objects.equals(advertiseInfo, apIInfo.advertiseInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, type, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies);
+    return Objects.hash(id, name, description, context, version, type, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo);
   }
 
   @Override
@@ -263,6 +284,7 @@ public class APIInfoDTO   {
     sb.append("    thumbnailUri: ").append(toIndentedString(thumbnailUri)).append("\n");
     sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");
     sb.append("    throttlingPolicies: ").append(toIndentedString(throttlingPolicies)).append("\n");
+    sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -19,8 +19,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
-import AuthManager from 'AppData/AuthManager';
-
+import { isRestricted } from 'AppData/AuthManager';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 /**
  *
@@ -31,7 +31,7 @@ import AuthManager from 'AppData/AuthManager';
  */
 export default function Description(props) {
     const { api, configDispatcher } = props;
-    const isNotCreator = AuthManager.isNotCreator();
+    const [apiFromContext] = useAPI();
 
     return (
         <TextField
@@ -44,7 +44,7 @@ export default function Description(props) {
             fullWidth
             variant='outlined'
             onChange={e => configDispatcher({ action: 'description', value: e.target.value })}
-            disabled={isNotCreator}
+            disabled={isRestricted(['apim:api_create'], apiFromContext)}
         />
     );
 }

@@ -169,6 +169,7 @@ public final class APIConstants {
     public static final String API_WSDL_EXTRACTED_DIRECTORY = "extracted";
     public static final String WSDL_ARCHIVES_TEMP_FOLDER = "WSDL-archives";
     public static final String WSDL_ARCHIVE_ZIP_FILE = "wsdl-archive.zip";
+    public static final String WSDL_ARCHIVE_UPDATED_ZIP_FILE = "wsdl-archive-updated.zip";
     public static final String WSDL_FILE = "wsdlFile";
     public static final String UPDATED_WSDL_ZIP = "updated.zip";
     public static final String FILE_URI_PREFIX = "file://";
@@ -297,8 +298,9 @@ public final class APIConstants {
     public static final String DEFAULT_API_SECURITY_OAUTH2 = "oauth2";
     public static final String API_SECURITY_MUTUAL_SSL = "mutualssl";
     public static final String API_SECURITY_BASIC_AUTH = "basic_auth";
+    public static final String API_SECURITY_API_KEY = "api_key";
     public static final String API_SECURITY_MUTUAL_SSL_MANDATORY = "mutualssl_mandatory";
-    public static final String API_SECURITY_OAUTH_BASIC_AUTH_MANDATORY = "oauth_basic_auth_mandatory";
+    public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
 
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
@@ -387,6 +389,7 @@ public final class APIConstants {
     public static final String API_LEVEL_POLICY = "APILevelPolicy";
     public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
+    public static final String API_KEY_HEADER_QUERY_PARAM = "apikey";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE = "RemoveOAuthHeadersFromOutMessage";
     public static final String REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT = "true";
     public static final String REMOVE_OAUTH_HEADERS_FROM_MESSAGE = OAUTH_CONFIGS + "RemoveOAuthHeadersFromOutMessage";
@@ -475,6 +478,7 @@ public final class APIConstants {
     public static final String ORGANIZATION_CLAIM_ATTRIBUTE = "OrganizationClaimAttribute";
     public static final String DEFAULT_ORGANIZATION_CLAIM_NAME = "http://wso2.org/claims/organization";
     public static final String DEFAULT_TOKEN_TYPE = "DEFAULT";
+    public static final String TOKEN_TYPE_JWT = "JWT";
 
     public static final String PASSWORD_RESOLVER_IMPL_CLASS = "PasswordResolverImpl";
 
@@ -559,8 +563,10 @@ public final class APIConstants {
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = CACHE_CONFIGS + "EnableRecentlyAddedAPICache";
     public static final String SCOPE_CACHE_ENABLED = CACHE_CONFIGS + "EnableScopeCache";
     public static final String PUBLISHER_ROLE_CACHE_ENABLED = CACHE_CONFIGS + "EnablePublisherRoleCache";
+    public static final String GATEWAY_RESOURCE_CACHE_TIMEOUT = CACHE_CONFIGS + "GatewayResourceCacheExpiry";
     public static final String DEFAULT_CACHE_TIMEOUT = "Cache.DefaultCacheTimeout";
     public static final String REST_API_SCOPE_CACHE = "REST_API_SCOPE_CACHE";
+    public static final long DEFAULT_TIMEOUT = 900;
 
     public static final String API_KEY_VALIDATOR = "APIKeyValidator.";
     public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
@@ -633,6 +639,7 @@ public final class APIConstants {
     public static final String MULTI_TENANT_USER_ADMIN_SERVICE = "MultiTenantUserAdminService";
     public static final String API_STORE_GROUP_EXTRACTOR_CLAIM_URI = API_STORE + "DefaultGroupExtractorClaimUri";
     public static final String API_STORE_MAP_EXISTING_AUTH_APPS = API_STORE + "MapExistingAuthApps";
+    public static final String API_STORE_API_KEY_ALIAS = API_STORE + "ApiKeyAlias";
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
 
     public static final String API_PUBLISHER = "APIPublisher.";
@@ -866,6 +873,9 @@ public final class APIConstants {
     public static final String GATEWAY_INVALID_USERNAME_CACHE_NAME = "gatewayInvalidUsernameCache";
     public static final String GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME = "gatewayBasicAuthResourceCache";
     public static final String GATEWAY_CERTIFICATE_CACHE_NAME = "gatewayCertificateCache";
+    public static final String GATEWAY_API_KEY_CACHE_NAME = "gatewayApiKeyCache";
+    public static final String GATEWAY_API_KEY_KEY_CACHE_NAME = "gatewayApiKeyKeyCache";
+    public static final String GATEWAY_INVALID_API_KEY_CACHE_NAME = "gatewayInvalidApiKeyCache";
     public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
     public static final String GATEWAY_INVALID_TOKEN_CACHE_NAME = "GATEWAY_INVALID_TOKEN_CACHE";
     public static final String KEY_CACHE_NAME = "keyCache";
@@ -1014,8 +1024,15 @@ public final class APIConstants {
     public static final String GRAPHQL_SCHEMA_PROVIDER_SEPERATOR = "--";
     public static final String GRAPHQL_SCHEMA_DEFINITION_SEPARATOR = "schemaDefinition=";
     public static final String GRAPHQL_QUERY = "Query";
+    public static final String GRAPHQL_SWAGGER_QUERY = "query";
     public static final String GRAPHQL_MUTATION = "Mutation";
     public static final String GRAPHQL_SUBSCRIPTION = "Subscription";
+    public static final String SCOPE_ROLE_MAPPING = "ScopeRoleMapping";
+    public static final String SCOPE_OPERATION_MAPPING = "ScopeOperationMapping";
+    public static final String OPERATION_THROTTLING_MAPPING = "OperationThrottlingMapping";
+    public static final String OPERATION_AUTH_SCHEME_MAPPING = "OperationAuthSchemeMapping";
+    public static final String OPERATION_SECURITY_ENABLED = "Enabled";
+    public static final String OPERATION_SECURITY_DISABLED = "Disabled";
 
     //URI Authentication Schemes
     public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
@@ -1205,6 +1222,13 @@ public final class APIConstants {
     public static final String SWAGGER_RESOURCE_PATH = "resourcePath";
     public static final String API_VERSION = "apiVersion";
 
+    //swagger MG related constants
+    public static final String X_WSO2_AUTH_HEADER = "x-wso2-auth-header";
+    public static final String X_THROTTLING_TIER = "x-throttling-tier";
+    public static final String X_WSO2_CORS = "x-wso2-cors";
+    public static final String X_WSO2_PRODUCTION_ENDPOINTS = "x-wso2-production-endpoints";
+    public static final String X_WSO2_SANDBOX_ENDPOINTS = "x-wso2-sandbox-endpoints";
+    public static final String X_WSO2_BASEPATH = "x-wso2-basePath";
 
     //API Constants
     public static final String API_DATA_NAME = "name";
@@ -1393,7 +1417,7 @@ public final class APIConstants {
     public static final String API_PRODUCT_VERSION = "1.0.0";
     public static final String API_IDENTIFIER_TYPE = "API";
     public static final String API_PRODUCT_IDENTIFIER_TYPE = "API Product";
-    public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS" , "SOAPTOREST", "GRAPHQL"};
+    public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS" , "SOAPTOREST", "GRAPHQL", "SOAP"};
 
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
@@ -1462,6 +1486,7 @@ public final class APIConstants {
     public static final String MULTI_ATTRIBUTE_SEPARATOR_DEFAULT = ",";
     public static final String MULTI_ATTRIBUTE_SEPARATOR = "MultiAttributeSeparator";
     public static final String CUSTOM_URL = "customUrl";
+    public static final String API_PRODUCT = "APIProduct";
 
     public static class AuditLogConstants {
         public static final String CREATED = "created";
@@ -1523,7 +1548,8 @@ public final class APIConstants {
         public static final String SCOPE = "scope";
         public static final String SCOPE_DELIMITER = " ";
         public static final String ISSUED_TIME = "iat";
-        public static final String EXPIRED_TIME = "exp";
+        public static final String EXPIRY_TIME = "exp";
+        public static final String JWT_KID = "kid";
         public static final String SIGNATURE_ALGORITHM = "alg";
         public static final String TOKEN_TYPE = "typ";
         public static final String BACKEND_TOKEN = "backendJwt";

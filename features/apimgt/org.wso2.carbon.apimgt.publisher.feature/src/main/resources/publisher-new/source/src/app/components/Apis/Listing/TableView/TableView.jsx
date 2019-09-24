@@ -31,6 +31,7 @@ import DocThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/DocTh
 import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import SampleAPI from 'AppComponents/Apis/Listing/SampleAPI/SampleAPI';
+import SampleAPIProduct from 'AppComponents/Apis/Listing/SampleAPI/SampleAPIProduct';
 import TopMenu from 'AppComponents/Apis/Listing/components/TopMenu';
 
 const styles = theme => ({
@@ -78,7 +79,26 @@ class TableView extends React.Component {
             this.getData();
         }
     }
-
+    componentWillUnmount() {
+        // The foollowing is resetting the styles for the mui-datatables
+        const { theme } = this.props;
+        const themeAdditions = {
+            overrides: {
+                MUIDataTable: {
+                    tableRoot: {
+                        display: 'table',
+                        '& tbody': {
+                            display: 'table-row-group',
+                        },
+                        '& thead': {
+                            display: 'table-header-group',
+                        },
+                    },
+                },
+            },
+        };
+        Object.assign(theme, themeAdditions);
+    }
     getMuiTheme = () => {
         const { listType } = this.state;
         const { theme } = this.props;
@@ -211,7 +231,6 @@ class TableView extends React.Component {
             return API.all({ limit: this.rowsPerPage, offset: page * rowsPerPage });
         }
     };
-
 
     /**
      *
@@ -350,6 +369,13 @@ class TableView extends React.Component {
                 if (artifact) {
                     if (artifact.type === 'DOC') {
                         return (<DocThumb doc={artifact} />);
+                    } else if (artifact.type === 'APIPRODUCT') {
+                        artifact.state = 'PUBLISHED';
+                        return (<ApiThumb
+                            api={artifact}
+                            isAPIProduct
+                            updateData={tableViewObj.updateData}
+                        />);
                     } else {
                         return (<ApiThumb
                             api={artifact}
@@ -391,9 +417,7 @@ class TableView extends React.Component {
                         isAPIProduct={isAPIProduct}
                         listType={listType}
                     />
-                    <div className={classes.contentInside}>
-                        <SampleAPI isAPIProduct={isAPIProduct} />
-                    </div>
+                    <div className={classes.contentInside}>{isAPIProduct ? <SampleAPIProduct /> : <SampleAPI />}</div>
                 </React.Fragment>
             );
         }

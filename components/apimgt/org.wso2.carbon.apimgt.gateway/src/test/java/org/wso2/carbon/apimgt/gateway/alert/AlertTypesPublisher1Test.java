@@ -74,7 +74,7 @@ public class AlertTypesPublisher1Test {
     }
 
     @Test
-    public void saveAlertWhileDatabaseConnectionFailed() throws APIManagementException, SQLException {
+    public void saveAlertWhileDatabaseConnectionFailed() throws APIManagementException {
         String checkedAlertList = "health-availability";
         String emailList = "abc@de.com";
         String userName = "admin@carbon.super";
@@ -93,13 +93,13 @@ public class AlertTypesPublisher1Test {
         alertTypesPublisher.publisher = apiMgtUsageDataPublisher;
         alertTypesPublisher.enabled = true;
         alertTypesPublisher.skipEventReceiverConnection = false;
-        Mockito.doThrow(SQLException.class).when(apiMgtDAO).addAlertTypesConfigInfo(userName, emailList,
+        Mockito.doThrow(APIManagementException.class).when(apiMgtDAO).addAlertTypesConfigInfo(userName, emailList,
                 checkedAlertList, agent);
         try{
             alertTypesPublisher.saveAndPublishAlertTypesEvent(checkedAlertList, emailList, userName, agent,
                     checkedAlertListValues);
         }catch (Exception e){
-            if (e instanceof SQLException){
+            if (e instanceof APIManagementException){
                 Assert.assertTrue(true);
             }else{
                 Assert.assertTrue(false);

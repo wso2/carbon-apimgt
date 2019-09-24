@@ -22,7 +22,8 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import ChipInput from 'material-ui-chip-input';
 import { FormattedMessage } from 'react-intl';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 /**
  *
@@ -33,8 +34,8 @@ import AuthManager from 'AppData/AuthManager';
  */
 export default function Tags(props) {
     const { api, configDispatcher } = props;
-    const isNotCreator = AuthManager.isNotCreator();
-    const isNotPublisher = AuthManager.isNotPublisher();
+    const [apiFromContext] = useAPI();
+
     return (
         <React.Fragment>
             <Grid container>
@@ -48,7 +49,7 @@ export default function Tags(props) {
                 </Grid>
                 <Grid item xs={12}>
                     <ChipInput
-                        disabled={isNotCreator && isNotPublisher}
+                        disabled={isRestricted(['apim:api_create', 'apim:api_publish'], apiFromContext)}
                         value={api.tags}
                         helperText={(
                             <FormattedMessage

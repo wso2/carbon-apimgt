@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -2772,8 +2773,8 @@ public class APIStoreHostObject extends ScriptableObject {
             if (!subscriptionAllowed) {
                 throw new APIManagementException("Subscription is not allowed for " + userDomain);
             }
-            apiIdentifier.setTier(tier);
-            addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId, groupId);
+            api.getId().setTier(tier);
+            addSubscriptionResponse = apiConsumer.addSubscription(new ApiTypeWrapper(api), userId, applicationId, groupId);
         } catch (APIManagementException e) {
 
             if (e.getMessage() != null && e.getMessage().contains("was blocked")) {
@@ -2813,14 +2814,16 @@ public class APIStoreHostObject extends ScriptableObject {
             groupId = (String) args[6];
         }
         APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
+        API api = apiConsumer.getAPI(apiIdentifier);
 
         //Check whether tier is denied or not before adding
         Set<String> tiers = apiConsumer.getDeniedTiers();
         if (!tiers.contains(tier)) {
-            apiIdentifier.setTier(tier);
+            api.getId().setTier(tier);
             try {
                 int applicationId = APIUtil.getApplicationId(applicationName, userId);
-                addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId, groupId);
+                addSubscriptionResponse = apiConsumer.addSubscription(new ApiTypeWrapper(api), userId, applicationId,
+                        groupId);
             } catch (APIManagementException e) {
                 handleException("Error while adding the subscription for user: " + userId, e);
             }
@@ -2848,12 +2851,14 @@ public class APIStoreHostObject extends ScriptableObject {
             groupId = (String) args[6];
         }
         APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
+        API api = apiConsumer.getAPI(apiIdentifier);
         //Check whether tier is denied or not before adding
         Set<String> tiers = apiConsumer.getDeniedTiers();
         if (!tiers.contains(tier)) {
-            apiIdentifier.setTier(tier);
+            api.getId().setTier(tier);
             try {
-                addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId, groupId);
+                addSubscriptionResponse = apiConsumer.addSubscription(new ApiTypeWrapper(api), userId, applicationId,
+                        groupId);
             } catch (APIManagementException e) {
                 handleException("Error while adding the subscription for user: " + userId, e);
             }

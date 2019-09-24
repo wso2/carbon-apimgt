@@ -1,0 +1,9 @@
+<%
+jagg.initializer("bot-detected-data-list", {
+    preInitialize:function (){
+        jagg.addHeaderJS("bot-detected-data-list", "jagg", "templates/bot-detected-data-list/js/manage.js");
+        jagg.addHeaderJS("bot-detected-data-list", "bot-detected-data-list", "templates/bot-detected-data-list/js/datatables.min.js");
+        jagg.addHeaderCSS("bot-detected-data-list", "bot-detected-data-list", "templates/bot-detected-data-list/css/datatables.min.css");
+    }
+});
+%>

@@ -166,22 +166,10 @@ function createEndpointConfig(endpointType) {
     switch (endpointType) {
         case 'http':
             tmpEndpointConfig.endpoint_type = 'http';
-            tmpEndpointConfig.production_endpoints = { url: '' };
-            tmpEndpointConfig.sandbox_endpoints = { url: '' };
             tmpEndpointConfig.failOver = 'False';
             break;
         case 'address':
             tmpEndpointConfig.endpoint_type = 'address';
-            tmpEndpointConfig.production_endpoints = {
-                url: '',
-                endpoint_type: 'address',
-                template_not_supported: false,
-            };
-            tmpEndpointConfig.sandbox_endpoints = {
-                url: '',
-                endpoint_type: 'address',
-                template_not_supported: false,
-            };
             tmpEndpointConfig.failOver = 'False';
             break;
         case 'prototyped':
@@ -205,6 +193,19 @@ function createEndpointConfig(endpointType) {
     return tmpEndpointConfig;
 }
 
+/**
+ * Get the endpoint template based on endpoint type.
+ *
+ * @param {string} type: Endpoint type (HTTP/ Address)
+ * @return {object} Endpoint Template
+ * */
+function getEndpointTemplate(type) {
+    if (type === 'address') {
+        return { url: '', endpoint_type: 'address', template_not_supported: false };
+    }
+    return { url: '', template_not_supported: false };
+}
+
 export {
     getEndpointTypeProperty,
     mergeEndpoints,
@@ -212,4 +213,5 @@ export {
     endpointsToList,
     getEndpointConfigByImpl,
     createEndpointConfig,
+    getEndpointTemplate,
 };

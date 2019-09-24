@@ -50,6 +50,7 @@ public class APIProduct {
     private String technicalOwnerEmail;
 
     private String tenantDomain;
+    private String rating;
     private List<APIProductResource> productResources = new ArrayList<>();
     private String definition;
     private JSONObject additionalProperties = new JSONObject();
@@ -63,6 +64,7 @@ public class APIProduct {
      */
     private String apiSecurity = "oauth2";
     private static final String NULL_VALUE = "NULL";
+    private static final String API_PRODUCT = "APIProduct";
 
     private String transports;
     private String responseCache;
@@ -162,7 +164,7 @@ public class APIProduct {
 
     public void setType(String type) {
         if (StringUtils.isEmpty(type) || NULL_VALUE.equalsIgnoreCase(StringUtils.trim(type))) {
-            this.type = "APIProduct";
+            this.type = API_PRODUCT;
         } else {
             this.type = type;
         }
@@ -433,5 +435,13 @@ public class APIProduct {
     }
     public void removeTags(Set<String> tags) {
         this.tags.removeAll(tags);
+    }
+
+    public String getRating() {
+        return rating;
+    }
+
+    public void setRating(String rating) {
+        this.rating = rating;
     }
 }

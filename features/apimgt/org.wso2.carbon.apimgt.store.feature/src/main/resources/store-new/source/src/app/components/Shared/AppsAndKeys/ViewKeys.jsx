@@ -287,7 +287,7 @@ class ViewKeys extends React.Component {
         return consumerKey ? (
             <React.Fragment>
                 <div className={classes.inputWrapper}>
-                    <Grid container spacing={24} className={classes.gridWrapper}>
+                    <Grid container spacing={3} className={classes.gridWrapper}>
                         <Grid item xs={6}>
                             <InputLabel htmlFor='adornment-amount'>
                                 <FormattedMessage
@@ -418,7 +418,7 @@ class ViewKeys extends React.Component {
                                                     subscriptionScopes={subscriptionScopes}
                                                 />
                                             )}
-                                            {showToken && <ViewToken token={tokenResponse} />}
+                                            {showToken && <ViewToken token={{...tokenResponse, isOauth: true}}/>}
                                         </DialogContentText>
                                     )}
                                     {showCurl && (
@@ -428,7 +428,7 @@ class ViewKeys extends React.Component {
                                     )}
                                     {(isKeyJWT && tokenDetails) && (
                                         <DialogContentText>
-                                            <ViewToken token={tokenDetails} />
+                                            <ViewToken token={{...tokenDetails, isOauth: true}} />
                                         </DialogContentText>
                                     )}
                                 </DialogContent>

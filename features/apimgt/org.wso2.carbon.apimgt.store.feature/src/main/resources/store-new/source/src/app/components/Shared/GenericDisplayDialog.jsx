@@ -29,7 +29,7 @@ const genericDisplayDialog = (props) => {
     return (
         <div className={classes.appContent}>
             <InlineMessage type='info' className={classes.dialogContainer}>
-                <Typography variant='headline' component='h3'>
+                <Typography variant='h5' component='h3'>
                     {heading}
                 </Typography>
                 <Typography component='p'>

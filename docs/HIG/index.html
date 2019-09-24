@@ -1,0 +1,164 @@
+<!--
+  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  *
+  * WSO2 Inc. licenses this file to you under the Apache License,
+  * Version 2.0 (the "License"); you may not use this file except
+  * in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  * http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing,
+  * software distributed under the License is distributed on an
+  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  * KIND, either express or implied. See the License for the
+  * specific language governing permissions and limitations
+  * under the License.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>APIM • Human Interface Guidelines</title>
+    <link rel="shortcut icon" type="image/ico" href="assets/images/favicon.png" alt="wso2favicon">
+    <link rel="stylesheet" type="text/css" href="assets/style.css">
+</head>
+<body>
+<header>
+    <div class="wrapper">
+        <h1>APIM &bullet; Human Interface Guidelines</h1>
+        <small>Updated: 23 Sep 2019</small>
+    </div>
+</header>
+<div class="wrapper">
+    <nav role="navigator">
+        <h4>Table of Contents</h4>
+        <ol>
+            <li><a href="#intro" id="toc-intro">Introduction</a></li>
+            <li><a href="#ui_elements" id="toc-ui_elements">UI Elements</a>
+                <ol>
+                    <li><a href="#buttons" id="toc-buttons">Buttons</a></li>
+                    <li><a href="#dialogs" id="toc-dialogs">Dialogs</a></li>
+                    <li><a href="#textfields" id="toc-textfields">Text Fields</a></li>
+                    <li><a href="#infobars" id="toc-infobars">Infobars</a></li>
+                </ol>
+            </li>
+        </ol>
+    </nav>
+    <article id="top">
+        <h2 id="intro" class="waypoint">Introduction</h2>
+        <p>This document has been produced as a set of guidelines to ensure a rich user
+            experience for end users of the API Manager app. </p>
+        <p>API Manager 3.x.x is designed to <a href="https://material.io/design/" target="blank">
+            material design</a> visual langauage concepts and uses <a href="https://material-ui.com/" target="blank">
+            MATERIAL-UI</a> for UI components. You can use <a href="https://material-ui.com/components/box/"
+                                                              target="blank">MUI component library</a> for your user
+            interface developments.</p>
+        <p>We will define set of guidelines so that user interfaces will be consistent throughout the
+            application.</p>
+
+        <hr>
+
+        <h2 id="ui_elements" class="waypoint">User Interface Elements</h2>
+        <section id="buttons" class="waypoint">
+            <h3>Buttons</h3>
+            <p>Buttons allow users to take actions, and make choices, with a single tap. Button pannel is left aligned
+                and primary button is placed first</p>
+            <p>&nbsp;</p>
+            <h4>Primary Action ( High emphasis )</h4>
+            <p>When it is the primary action of the user interface use
+                <a href="https://material-ui.com/components/buttons/#contained-buttons">Contained Buttons </a> for
+                primary action and <a href="https://material-ui.com/components/buttons/#text-buttons" target="blank">
+                    Text Buttons</a> for other actions. Usually there is only one primary action per user interface.
+            </p>
+            <img width="600" src="assets/images/forms.png" alt=""/>
+            <h4>Secondary Action ( Medium emphasis )</h4>
+            <p>When it is a secondary action of the user interface use
+                <a href="https://material-ui.com/components/buttons/#outlined-buttons" target="blank">Outlined
+                    Buttons</a>
+                for main action button and <a href="https://material-ui.com/components/buttons/#text-buttons"
+                                              target="blank">Text Buttons</a> for other actions
+            </p>
+            <p>Usually there can be many secondary actions per user interface.</p>
+
+            <img width="600" src="assets/images/buttons.png" alt=""/>
+
+        </section>
+        <section id="dialogs" class="waypoint">
+            <h3>Dialogs</h3>
+            <p>Dialogs inform users about a task and can contain critical information, require decisions, or involve
+                multiple tasks.
+            </p>
+            <h4>Title</h4>
+            <p>A dialog’s purpose should be communicated by its title and button text.</p>
+            <p>Titles should:</p>
+            <ul>
+                <li>
+                    Contain a brief, clear statement or question
+                </li>
+                <li>
+                    Avoid apologies (“Sorry for the interruption”), alarm (“Warning!”), or
+                    ambiguity (“Are you sure?”)
+                </li>
+            </ul>
+            <h4>Buttons</h4>
+            <ul>
+                <li>
+                    Button panel should right align
+                </li>
+                <li>
+                    Place the confirming action last
+                </li>
+            </ul>
+            <img width="600" src="assets/images/dialog.png" alt=""/>
+
+        </section>
+        <section id="textfields" class="waypoint">
+            <h3>Text Fields</h3>
+            <p>Text fields allow users to enter text into a UI. They typically appear in forms and dialogs.
+                Use outlined styling as the default styling for all the text fields.</p>
+            <h4>Required text indicator</h4>
+            <p>To indicate that a field is required, display an asterisk (*) next to the label text and mention near
+                the form that asterisks indicate required fields.
+            </p>
+            <ul>
+                <li>
+                    If some fields are required, indicate all required ones
+                </li>
+                <li>
+                    If most fields are required, indicate optional fields by displaying the word “optional”
+                    in parentheses next to the label text
+                </li>
+                <li>
+                    If all fields are required we can mention that near the form
+                </li>
+            </ul>
+            <img width="600" src="assets/images/textfield.png" alt=""/>
+        </section>
+        <section id="infobars" class="waypoint">
+            <h3>Infobars</h3>
+            <p>Infobars provide a globally visible means of alerting users and publishing notifications.</p>
+            <ul>
+                <li>
+                    <p><strong>Information</strong>: Presenting basic information or notifications to the user, which
+                        may include a button to perform a follow-up action.
+                    </p>
+                </li>
+            </ul>
+            <img width="600" src="assets/images/infobar.png" alt=""/>
+        </section>
+    </article>
+</div>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/waypoints/2.0.5/waypoints.min.js"></script>
+<script>
+    $('.waypoint').waypoint(function () {
+        var ID = $(this).attr('id');
+        $('nav a').removeClass('current');
+        $('#toc-' + ID).addClass('current');
+    }, {
+        offset: 40
+    });
+</script>
+</body>
+</html>

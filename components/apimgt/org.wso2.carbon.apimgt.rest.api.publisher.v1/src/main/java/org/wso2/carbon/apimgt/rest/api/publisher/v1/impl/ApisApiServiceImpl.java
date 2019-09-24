@@ -91,13 +91,11 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
@@ -135,10 +133,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
@@ -167,12 +163,10 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.mappings.MediationMapp
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.Optional;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -340,6 +334,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
             RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " + body.getName()
                     + " already exists.", log);
+        }
+        if (body.getAuthorizationHeader() == null) {
+            body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
 
         //Get all existing versions of  api been adding
@@ -535,8 +532,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = originalAPI.getId();
-            boolean isWSAPI = originalAPI.getType() != null && APIConstants.APITransportType.WS == APIConstants.APITransportType
-                    .valueOf(originalAPI.getType());
+            boolean isWSAPI = originalAPI.getType() != null
+                            && APIConstants.APITransportType.WS.toString().equals(originalAPI.getType());
 
             org.wso2.carbon.apimgt.rest.api.util.annotations.Scope[] apiDtoClassAnnotatedScopes =
                     APIDTO.class.getAnnotationsByType(org.wso2.carbon.apimgt.rest.api.util.annotations.Scope.class);
@@ -562,15 +559,21 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             //validation for tiers
             List<String> tiersFromDTO = body.getPolicies();
-            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
-                RestApiUtil.handleBadRequest("No tier defined for the API", log);
+            String originalStatus = originalAPI.getStatus();
+            if (tiersFromDTO == null || tiersFromDTO.isEmpty() &&
+                    !(APIConstants.CREATED.equals(originalStatus) || APIConstants.PROTOTYPED.equals(originalStatus))) {
+                RestApiUtil.handleBadRequest("A tier should be defined " +
+                        "if the API is not in CREATED or PROTOTYPED state", log);
             }
-            //check whether the added API's tiers are all valid
-            Set<Tier> definedTiers = apiProvider.getTiers();
-            List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
-            if (invalidTiers.size() > 0) {
-                RestApiUtil.handleBadRequest(
-                        "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
+
+            if (tiersFromDTO != null && !tiersFromDTO.isEmpty()) {
+                //check whether the added API's tiers are all valid
+                Set<Tier> definedTiers = apiProvider.getTiers();
+                List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
+                if (invalidTiers.size() > 0) {
+                    RestApiUtil.handleBadRequest(
+                            "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
+                }
             }
             if (body.getAccessControlRoles() != null) {
                 String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getAccessControlRoles());
@@ -593,12 +596,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             if (!isWSAPI) {
                 String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
-                Optional<APIDefinition> definitionOptional = OASParserUtil.getOASParser(oldDefinition);
-                if(!definitionOptional.isPresent()) {
-                    RestApiUtil.handleInternalServerError("Error occurred while getting swagger parser.", log);
-                    return null;
-                }
-                APIDefinition apiDefinition = definitionOptional.get();
+                APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
                 SwaggerData swaggerData = new SwaggerData(apiToUpdate);
                 String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
                 apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
@@ -2406,7 +2404,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier);
-            return Response.ok().entity(apiSwagger).build();
+            APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
+            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            String updatedDefinition = parser.getOASDefinitionForPublisher(api, apiSwagger);
+            return Response.ok().entity(updatedDefinition).header("Content-Disposition",
+                    "attachment; filename=\"" + "swagger.json" + "\"" ).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -2433,49 +2435,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch, MessageContext messageContext) {
         try {
-            APIDefinitionValidationResponse response = OASParserUtil
-                    .validateAPIDefinition(apiDefinition, true);
-            if (!response.isValid()) {
-                RestApiUtil.handleBadRequest(response.getErrorItems(), log);
-            }
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            //this will fail if user does not have access to the API or the API does not exist
-            API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            APIDefinition oasParser = response.getParser();
-            Set<URITemplate> uriTemplates = null;
-            try {
-                uriTemplates = oasParser.getURITemplates(response.getJsonContent());
-            } catch (APIManagementException e) {
-                // catch APIManagementException inside again to capture validation error
-                RestApiUtil.handleBadRequest(e.getMessage(), log);
-            }
-            Set<Scope> scopes = oasParser.getScopes(apiDefinition);
-            //validating scope roles
-            for (Scope scope : scopes) {
-                String roles = scope.getRoles();
-                if (roles != null) {
-                    for (String aRole : roles.split(",")) {
-                        boolean isValidRole = APIUtil.isRoleNameExist(RestApiUtil.getLoggedInUsername(), aRole);
-                        if (!isValidRole) {
-                            String error = "Role '" + aRole + "' Does not exist.";
-                            RestApiUtil.handleBadRequest(error, log);
-                        }
-                    }
-                }
-            }
-
-            existingAPI.setUriTemplates(uriTemplates);
-            existingAPI.setScopes(scopes);
-
-            //Update API is called to update URITemplates and scopes of the API
-            apiProvider.updateAPI(existingAPI);
-            SwaggerData swaggerData = new SwaggerData(existingAPI);
-            String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
-            apiProvider.saveSwagger20Definition(existingAPI.getId(), updatedApiDefinition);
-            //retrieves the updated swagger definition
-            String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
-            return Response.ok().entity(apiSwagger).build();
+            String updatedSwagger = updateSwagger(apiId, apiDefinition);
+            return Response.ok().entity(updatedSwagger).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
@@ -2493,6 +2454,59 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    /**
+     * update swagger definition of the given api
+     * @param apiId apiid
+     * @param apiDefinition swagger definition
+     * @return updated swagger definition
+     * @throws APIManagementException
+     * @throws FaultGatewaysException
+     */
+    private String updateSwagger(String apiId, String apiDefinition)
+            throws APIManagementException, FaultGatewaysException {
+        APIDefinitionValidationResponse response = OASParserUtil
+                .validateAPIDefinition(apiDefinition, true);
+        if (!response.isValid()) {
+            RestApiUtil.handleBadRequest(response.getErrorItems(), log);
+        }
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        //this will fail if user does not have access to the API or the API does not exist
+        API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        APIDefinition oasParser = response.getParser();
+        Set<URITemplate> uriTemplates = null;
+        try {
+            uriTemplates = oasParser.getURITemplates(apiDefinition);
+        } catch (APIManagementException e) {
+            // catch APIManagementException inside again to capture validation error
+            RestApiUtil.handleBadRequest(e.getMessage(), log);
+        }
+        Set<Scope> scopes = oasParser.getScopes(apiDefinition);
+        //validating scope roles
+        for (Scope scope : scopes) {
+            String roles = scope.getRoles();
+            if (roles != null) {
+                for (String aRole : roles.split(",")) {
+                    boolean isValidRole = APIUtil.isRoleNameExist(RestApiUtil.getLoggedInUsername(), aRole);
+                    if (!isValidRole) {
+                        String error = "Role '" + aRole + "' Does not exist.";
+                        RestApiUtil.handleBadRequest(error, log);
+                    }
+                }
+            }
+        }
+
+        existingAPI.setUriTemplates(uriTemplates);
+        existingAPI.setScopes(scopes);
+
+        //Update API is called to update URITemplates and scopes of the API
+        apiProvider.updateAPI(existingAPI);
+        SwaggerData swaggerData = new SwaggerData(existingAPI);
+        String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
+        apiProvider.saveSwagger20Definition(existingAPI.getId(), updatedApiDefinition);
+        return updatedApiDefinition;
     }
 
     /**
@@ -2558,12 +2572,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //for multiple http methods
             String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(api.getId());
             if (!org.apache.commons.lang3.StringUtils.isEmpty(apiSwaggerDefinition)) {
-                Optional<APIDefinition> definitionOptional = OASParserUtil.getOASParser(apiSwaggerDefinition);
-                if(!definitionOptional.isPresent()) {
-                    RestApiUtil.handleInternalServerError("Error occurred while getting swagger parser.", log);
-                    return null;
-                }
-                APIDefinition apiDefinition = definitionOptional.get();
+                APIDefinition apiDefinition = OASParserUtil.getOASParser(apiSwaggerDefinition);
                 Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(apiSwaggerDefinition);
                 api.setUriTemplates(uriTemplates);
 
@@ -2906,16 +2915,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             additionalPropertiesAPI.setProvider(RestApiUtil.getLoggedInUsername());
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.fromValue(implementationType));
             API apiToAdd = prepareToCreateAPIByDTO(additionalPropertiesAPI);
-
+            apiToAdd.setWsdlUrl(url);
+            API createdApi = null;
             if (isSoapAPI) {
-                importSOAPAPI(fileInputStream, fileDetail, url, apiToAdd);
+                createdApi = importSOAPAPI(fileInputStream, fileDetail, url, apiToAdd);
             } else if (isSoapToRestConvertedAPI) {
-                importSOAPToRESTAPI(fileInputStream, fileDetail, url, apiToAdd);
+                createdApi = importSOAPToRESTAPI(fileInputStream, fileDetail, url, apiToAdd);
+            } else {
+                RestApiUtil.handleBadRequest("Invalid implementationType parameter", log);
             }
-
-            APIIdentifier createdApiId = apiToAdd.getId();
-            //Retrieve the newly added API to send in the response payload
-            API createdApi = apiProvider.getAPI(createdApiId);
             createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
             //This URI used to set the location header of the POST response
             createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -2969,8 +2977,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param fileDetail file details
      * @param url URL of the WSDL
      * @param apiToAdd API object to be added to the system (which is not added yet)
+     * @return API added api
      */
-    private void importSOAPAPI(InputStream fileInputStream, Attachment fileDetail, String url, API apiToAdd) {
+    private API importSOAPAPI(InputStream fileInputStream, Attachment fileDetail, String url, API apiToAdd) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
@@ -2990,9 +2999,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
             apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
+            APIIdentifier createdApiId = apiToAdd.getId();
+            //Retrieve the newly added API to send in the response payload
+            API createdApi = apiProvider.getAPI(createdApiId);
+            return createdApi;
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while importing WSDL to create a SOAP API", e, log);
         }
+        return null;
     }
 
     /**
@@ -3002,19 +3016,30 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param fileDetail file details
      * @param url URL of the WSDL
      * @param apiToAdd API object to be added to the system (which is not added yet)
+     * @return API added api
      */
-    private void importSOAPToRESTAPI(InputStream fileInputStream, Attachment fileDetail, String url, API apiToAdd) {
+    private API importSOAPToRESTAPI(InputStream fileInputStream, Attachment fileDetail, String url, API apiToAdd) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             //adding the api
             apiProvider.addAPI(apiToAdd);
+            
+            APIIdentifier createdApiId = apiToAdd.getId();
+            //Retrieve the newly added API to send in the response payload
+            API createdApi = apiProvider.getAPI(createdApiId);
+            
+            
             String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(url);
-            apiProvider.saveSwagger20Definition(apiToAdd.getId(), swaggerStr);
-            SequenceGenerator.generateSequencesFromSwagger(swaggerStr, apiToAdd.getId());
-        } catch (APIManagementException e) {
+
+            String updatedSwagger = updateSwagger(createdApi.getUUID(), swaggerStr);
+            SequenceGenerator.generateSequencesFromSwagger(updatedSwagger, apiToAdd.getId());
+            
+            return createdApi;
+        } catch (APIManagementException | FaultGatewaysException e) {
             RestApiUtil.handleInternalServerError("Error while importing WSDL to create a SOAP-to-REST API",
                     e, log);
-        }
+        } 
+        return null;
     }
 
     /**
@@ -3034,7 +3059,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             ResourceFile getWSDLResponse = apiProvider.getWSDL(apiIdentifier);
-            return Response.ok(getWSDLResponse.getContent(), getWSDLResponse.getContentType()).build();
+            return RestApiUtil.getResponseFromResourceFile(apiIdentifier.toString(), getWSDLResponse);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
@@ -3223,9 +3248,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiProvider.addAPI(apiToAdd);
 
             //Save swagger definition of graphQL
-            APIDefinitionFromOpenAPISpec apiDefinitionUsingOASParser = new APIDefinitionFromOpenAPISpec();
+            APIDefinition parser = new OAS3Parser();
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
-            String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(swaggerData);
+            String apiDefinition = parser.generateAPIDefinition(swaggerData);
             apiProvider.saveSwagger20Definition(apiToAdd.getId(), apiDefinition);
 
             APIIdentifier createdApiId = apiToAdd.getId();
@@ -3440,19 +3465,18 @@ public class ApisApiServiceImpl implements ApisApiService {
      * This method is used to assign micro gateway labels to the DTO
      *
      * @param apiDTO API DTO
-     * @param api the API object
+     * @param api    the API object
      * @return the API object with labels
      */
     private API assignLabelsToDTO(APIDTO apiDTO, API api) {
 
         if (apiDTO.getLabels() != null) {
-            List<LabelDTO> dtoLabels = apiDTO.getLabels();
+            List<String> labels = apiDTO.getLabels();
             List<Label> labelList = new ArrayList<>();
-            for (LabelDTO labelDTO : dtoLabels) {
-                Label label = new Label();
-                label.setName(labelDTO.getName());
-//                label.setDescription(labelDTO.getDescription()); todo add description
-                labelList.add(label);
+            for (String label : labels) {
+                Label mgLabel = new Label();
+                mgLabel.setName(label);
+                labelList.add(mgLabel);
             }
             api.setGatewayLabels(labelList);
         }

@@ -99,6 +99,18 @@
           "roles": "admin",
           "name": "apim:monetization_usage_publish",
           "key": "apim:monetization_usage_publish"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:api_workflow",
+          "key": "apim:api_workflow"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:bot_data",
+          "key": "apim:bot_data"
         }
       ]
     }
@@ -2283,6 +2295,121 @@
         }
       }
     },
+    "/botData/getEmailList": {
+      "get": {
+        "x-scope": "apim:bot_data",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer 8739edc7-7c95-34d5-895a-398fe5dd5972\" https://localhost:9443/api/am/admin/v0.14/botData/getEmailList -H \"accept: application/json\"",
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Get all configured email list\n",
+        "description": "Get all email list which configured to trigger for BotData api email alert\n",
+        "parameters": [
+          {
+            "name": "tenantDomain",
+            "in": "query",
+            "description": "Pass the tenantDomain to get the email list and if not passed it will get from the logged user.\n",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nExport Successful.\n"
+          },
+          "400": {
+            "description": "Bad Request.messageID\nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nRequested Data does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/botData/deleteEmail": {
+      "delete": {
+        "x-scope": "apim:bot_data",
+        "x-wso2-curl": "curl -k -X DELETE -H \"Authorization: Bearer 7469aa7c-5e29-3d2b-a144-5d8160c91176\" https://localhost:9443/api/am/admin/v0.14/botData/deleteEmail?uuid=23a2a896-bd58-46ec-83c7-2f2b5cc09284 -H \"accept: application/json\"",
+        "summary": "Delete an configured email.",
+        "description": "Delete an configured email from DB by pasing uuid.\n",
+        "parameters": [
+          {
+            "name": "uuid",
+            "in": "query",
+            "description": "Pass the uuid to remove the email\n",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nEmail successfully deleted.\n"
+          },
+          "404": {
+            "description": "Not Found.\nResource to be deleted does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/botData/addEmail": {
+      "post": {
+        "x-scope": "apim:bot_data",
+        "summary": "Add an Email",
+        "description": "Here we can use this to configure email\n",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "A email\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Email"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nEmail List updated.\n",
+            "schema": {
+              "$ref": "#/definitions/Email"
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nThe resource to be updated does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/labels/{labelId}": {
       "put": {
         "x-scope": "apim:label_manage",
@@ -2420,6 +2547,59 @@
           }
         }
       }
+    },
+    "/workflows/update-workflow-status": {
+      "post": {
+        "x-scope": "apim:api_workflow",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9443/api/am/publisher/v0.14/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\"",
+        "x-wso2-request": "POST https://localhost:9443/api/am/publisher/v0.14/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n   \"status\" : \"APPROVED\",\n   \"attributes\" : {\n      \"apiCurrentState\": \"Created\",\n      \"apiLCAction\": \"Publish\",\n      \"apiName\":\"APIname\",\n      \"apiVersion\" : \"1.0.0\",\n      \"apiProvider\" : \"admin\",\n      \"invoker\": \"admin\"\n   }\n}",
+        "x-wso2-response": "HTTP/1.1 200 OK",
+        "summary": "Update workflow status",
+        "description": "This operation can be used to approve or reject a workflow task.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/workflowReferenceId-Q"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Workflow event that need to be updated\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Workflow"
+            }
+          }
+        ],
+        "tags": [
+          "Workflows (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nWorkflow request information is returned.\n",
+            "schema": {
+              "$ref": "#/definitions/Workflow"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nWorkflow for the given reference in not found.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
     }
   },
   "parameters": {
@@ -2523,6 +2703,13 @@
       "in": "query",
       "description": "username of the application creator\n",
       "required": false,
+      "type": "string"
+    },
+    "workflowReferenceId-Q": {
+      "name": "workflowReferenceId",
+      "in": "query",
+      "description": "Workflow reference id\n",
+      "required": true,
       "type": "string"
     }
   },
@@ -2664,6 +2851,16 @@
           "items": {
             "$ref": "#/definitions/AdvancedThrottlePolicyInfo"
           }
+        }
+      }
+    },
+    "Email": {
+      "title": "Email",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "email value",
+          "example": "abc@.com"
         }
       }
     },
@@ -3382,6 +3579,35 @@
         "lastPublsihedTime": {
           "type": "string",
           "description": "Timestamp of the last published time"
+        }
+      }
+    },
+    "Workflow": {
+      "title": "workflow",
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "description": "This attribute declares whether this workflow task is approved or rejected.\n",
+          "type": "string",
+          "enum": [
+            "APPROVED",
+            "REJECTED"
+          ],
+          "example": "APPROVED"
+        },
+        "attributes": {
+          "description": "Custom attributes to complete the workflow task\n",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "example": {}
+        },
+        "description": {
+          "type": "string",
+          "example": "Approve workflow request."
         }
       }
     }

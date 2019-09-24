@@ -16,14 +16,13 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 
 const APIContext = React.createContext({
     api: null,
 });
 
 const { Provider: APIProvider } = APIContext;
-
 
 /**
  * withAPI HOC can be used with class style components, To get the context with hooks useContext,
@@ -40,22 +39,23 @@ function withAPI(WrappedComponent) {
      * @returns
      */
     function HOCWithAPI(props) {
-        return (
-            <APIContext.Consumer>
-                {
-                    context => <WrappedComponent {...context} {...props} />
-                }
-            </APIContext.Consumer>
-        );
+        return <APIContext.Consumer>{context => <WrappedComponent {...context} {...props} />}</APIContext.Consumer>;
     }
     HOCWithAPI.displayName = `withAPI(${WrappedComponent.displayName})`;
     return HOCWithAPI;
 }
 
+
+/**
+ * Provide current api object and method updateAPI function to update it. To be used with hooks
+ *
+ * @returns {Array} Multiple return values
+ */
+function useAPI() {
+    const { api, updateAPI } = useContext(APIContext);
+    return [api, updateAPI];
+}
+
 export default APIContext;
 
-export {
-    withAPI,
-    APIProvider,
-    APIContext,
-};
+export { withAPI, APIProvider, APIContext, useAPI };

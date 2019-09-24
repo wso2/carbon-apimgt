@@ -21,6 +21,8 @@ import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import SearchOutlined from '@material-ui/icons/SearchOutlined';
@@ -103,24 +105,27 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
     const suffix = suggestion.type === 'API' ? suggestion.version : (suggestion.apiName + ' ' + suggestion.apiVersion);
     return (
         <React.Fragment>
-            <Link to={path}>
-                <MenuItem selected={isHighlighted} component='div'>
-                    { suggestion.type === 'API' ? <APIsIcon /> : <DocumentsIcon /> }
+            <Link to={path} style={{ color: 'black' }}>
+                <MenuItem selected={isHighlighted}>
+                    <ListItemIcon>
+                        { suggestion.type === 'API' ? <APIsIcon /> : <DocumentsIcon /> }
+                    </ListItemIcon>
 
-                    {parts.map((part, index) => {
-                        return part.highlight ? (
-                            <span key={String(index)} style={{ fontWeight: 500 }}>
-                                {part.text}
-                            </span>
-                        ) : (
-                            <strong key={String(index)} style={{ fontWeight: 300 }}>
-                                {part.text}
-                            </strong>
-                        );
-                    })}
-                    <pre />
-                    <pre />
-                    {suffix}
+
+                    <ListItemText
+                        primary={parts.map((part, index) => {
+                            return part.highlight ? (
+                                <span key={String(index)} style={{ fontWeight: 500 }}>
+                                    {part.text}
+                                </span>
+                            ) : (
+                                <strong key={String(index)} style={{ fontWeight: 300 }}>
+                                    {part.text}
+                                </strong>
+                            );
+                        })}
+                        secondary={suffix}
+                    />
                 </MenuItem>
             </Link>
             <Divider />
@@ -145,7 +150,7 @@ function getSuggestionValue(suggestion) {
  * @param lcState
  * @returns {string}
  */
-function buildSearchQuery(searchText, lcState){
+function buildSearchQuery(searchText, lcState) {
     searchText = (searchText && !searchText.includes(':')) ? 'content:' + searchText : searchText;
     return lcState
         ? (searchText + ' status:' + lcState).trim().toLowerCase() : searchText.trim().toLowerCase();
@@ -158,7 +163,7 @@ function buildSearchQuery(searchText, lcState){
  * @returns {Promise} If no input text, return a promise which resolve to empty array, else return the API.all response
  */
 function getSuggestions(searchText, lcState) {
-    const searchQuery = buildSearchQuery(searchText,lcState);
+    const searchQuery = buildSearchQuery(searchText, lcState);
     if (/:(\s+|(?![\s\S]))/g.test(searchText)) {
         return new Promise(resolve => resolve({ obj: { list: [] } }));
     } else {

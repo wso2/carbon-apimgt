@@ -1,0 +1,516 @@
+<div class="main-content">
+    <h1><a name="Alert Configuration"></a>Alert Configuration</h1>
+
+            <hr/>
+            <h4 class="operation-heading"><a name="addAlertConfig"></a>Add AbnormalRequestsPerMin alert configurations.
+</h4> <code>PUT https://apis.wso2.com/api/am/store/v1.0/alerts/{alert-type}/configurations/{configuration-id}</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation is used to add configuration for the AbnormalRequestsPerMin alert type.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:sub_alert_manage</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-addAlertConfig">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-addAlertConfig"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24 HTTP 1/1
+Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
+Content-Type: application/json
+
+{
+  &quot;requestCount&quot; : &quot;12112&quot;,
+  &quot;apiName&quot; : &quot;PizzaShackAPI&quot;,
+  &quot;apiVersion&quot; : &quot; 2.0&quot;,
+  &quot;applicationName&quot; : &quot;DefaultApplication&quot;
+}</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-addAlertConfig">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-addAlertConfig" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+Content-Type: application/json
+
+{
+  &quot;configurationId&quot; : &quot;YWRhZGEjIDIuMCNEZWZhdWx0QXBwbGljYXRpb24&quot;,
+  &quot;configuration&quot; : {
+    &quot;requestCount&quot; : &quot;12112&quot;,
+    &quot;apiName&quot; : &quot;PizzaShackAPI&quot;,
+    &quot;apiVersion&quot; : &quot; 2.0&quot;,
+    &quot;applicationName&quot; : &quot;DefaultApplication&quot;
+  }
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X PUT &#39;https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24&#39; -H &#39;Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2&#39; -H &#39;Content-Type: application/json&#39; -d @payload.json</code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>alert-type</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">The alert type.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>configuration-id</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">The alert configuration id.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            
+                            <span class="param-in">Body </span>
+                        </td>
+                        <td class="param-name">
+                            <p>body</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Configuration for AbnormalRequestCount alert type</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                AlertConfigInfo
+                                    (<a href="#!/models#AlertConfigInfo">AlertConfigInfo</a>)
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">201</p></td>
+                        <td class="parameter"><p class="marked">Created. Successful response with newly created object as entity. Location header contains URL of newly created entity. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#AlertConfig">AlertConfig</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request The request parameters validation failed. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">500</p></td>
+                        <td class="parameter"><p class="marked">Internal Server Error An error occurred while retrieving subscribed alert types by user. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h4 class="operation-heading"><a name="deleteAlertConfig"></a>Delete the selected configuration from AbnormalRequestsPerMin alert type.
+</h4> <code>DELETE https://apis.wso2.com/api/am/store/v1.0/alerts/{alert-type}/configurations/{configuration-id}</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation is used to delete configuration from the AbnormalRequestsPerMin alert type.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:sub_alert_manage</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-deleteAlertConfig">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-deleteAlertConfig"class="pre collapse in"><code class="json">DELETE https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24 HTTP 1/1
+Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
+Content-Type: application/json
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-deleteAlertConfig">
+                    <h5 class="section-heading">
+                        Response
+                    </h5>
+                </div>
+                    <p>Not Available</p>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X DELETE &#39;https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations/UGl6emFTaGFja0FQSSMxLjAuMCNEZWZhdWx0QXBwbGljYXRpb24&#39; -H &#39;Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2&#39; -H &#39;Content-Type: application/json&#39; </code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>alert-type</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">The alert type.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>configuration-id</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">The alert configuration id.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. The alert config is deleted successfully. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request The request parameters validation failed. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. The provided alert configuration is not found. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">500</p></td>
+                        <td class="parameter"><p class="marked">Internal Server Error An error occurred while retrieving subscribed alert types by user. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h4 class="operation-heading"><a name="getAllAlertConfigs"></a>Get all AbnormalRequestsPerMin alert configurations
+</h4> <code>GET https://apis.wso2.com/api/am/store/v1.0/alerts/{alert-type}/configurations</code>
+            <p class="marked"></p>
+
+            <p class="marked">This operation is used to get all configurations of the AbnormalRequestsPerMin alert type.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:sub_alert_manage</code>
+
+            <h4 class="section-heading">
+                Examples
+            </h4>
+            <h4 class="section-heading">
+                <u></u>
+            </h4>
+                <div class="pointer" data-toggle="collapse" data-target="#request-getAllAlertConfigs">
+                    <h5 class="section-heading">
+                        Request
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="request-getAllAlertConfigs"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations HTTP 1/1
+Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2
+</code></div>
+
+                <div class="pointer" data-toggle="collapse" data-target="#response-getAllAlertConfigs">
+                    <h5 class="section-heading">
+                        Response
+                            <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </h5>
+                </div>
+                    <div id="response-getAllAlertConfigs" class="pre collapse in"><code class="json">HTTP 1/1 200 OK
+Content-Type: application/json
+
+{
+  &quot;count&quot; : 1,
+  &quot;list&quot; : [ {
+    &quot;configurationId&quot; : &quot;UGl6emFTaGFja0FQSSsxLjAuMCtEZWZhdWx0QXBwbGljYXRpb24K&quot;,
+    &quot;configuration&quot; : {
+      &quot;apiName&quot; : &quot;PizzaShackAPI&quot;,
+      &quot;apiVersion&quot; : &quot;1.0.0&quot;,
+      &quot;applicationName&quot; : &quot;DefaultApplication&quot;,
+      &quot;requestConunt&quot; : &quot;12&quot;
+    }
+  } ]
+}</code></div>
+
+                <h5 class="section-heading">CURL</h5>
+                    <div class="pre"><code class="bash">curl -k -v -X GET &#39;https://localhost:9443/api/am/store/v1.0/alerts/AbnormalRequestCount/configurations&#39; -H &#39;Authorization: Bearer eff01a97-4dc0-3542-a184-75aecf355ec2&#39; </code></div>
+
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>alert-type</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">The alert type.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. The store alert configuration. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#AlertConfigList">AlertConfigList</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">500</p></td>
+                        <td class="parameter"><p class="marked">Internal Server Error An error occurred while retrieving subscribed alert types by user. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+</div>

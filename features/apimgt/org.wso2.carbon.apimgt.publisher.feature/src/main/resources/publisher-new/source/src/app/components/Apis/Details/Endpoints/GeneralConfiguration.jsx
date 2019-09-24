@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
     Collapse,
     ExpansionPanel,
@@ -33,7 +33,8 @@ import {
 import PropTypes from 'prop-types';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import AuthManager from 'AppData/AuthManager';
+import { isRestricted } from 'AppData/AuthManager';
+import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 import EndpointSecurity from './GeneralConfiguration/EndpointSecurity';
 import Certificates from './GeneralConfiguration/Certificates';
 import API from '../../../../data/api'; // TODO: Use webpack aliases instead of relative paths ~tmkb
@@ -98,34 +99,36 @@ function GeneralConfiguration(props) {
     const [isConfigExpanded, setConfigExpand] = useState(true);
     const [endpointCertificates, setEndpointCertificates] = useState([]);
     const [epTypeSubHeading, setEpTypeSubHeading] = useState('Single HTTP/ REST');
-    const isNotCreator = AuthManager.isNotCreator();
+    const { api } = useContext(APIContext);
 
     /**
      * Method to upload the certificate content by calling the rest api.
      * */
     const saveCertificate = (certificate, endpoint, alias) => {
-        API.addCertificate(certificate, endpoint, alias).then((resp) => {
-            if (resp.status === 201) {
-                Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.add.success',
-                    defaultMessage: 'Certificate added successfully',
-                }));
-                const tmpCertificates = [...endpointCertificates];
-                tmpCertificates.push({
-                    alias: resp.obj.alias,
-                    endpoint: resp.obj.endpoint,
-                });
-                setEndpointCertificates(tmpCertificates);
-            }
-        }).catch((err) => {
-            console.error(err.message);
-            if (err.message === 'Conflict') {
-                Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.alias.exist',
-                    defaultMessage: 'Adding Certificate Failed. Certificate alias exists.',
-                }));
-            }
-        });
+        return API.addCertificate(certificate, endpoint, alias)
+            .then((resp) => {
+                if (resp.status === 201) {
+                    Alert.info(intl.formatMessage({
+                        id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.add.success',
+                        defaultMessage: 'Certificate added successfully',
+                    }));
+                    const tmpCertificates = [...endpointCertificates];
+                    tmpCertificates.push({
+                        alias: resp.obj.alias,
+                        endpoint: resp.obj.endpoint,
+                    });
+                    setEndpointCertificates(tmpCertificates);
+                }
+            })
+            .catch((err) => {
+                console.error(err.message);
+                if (err.message === 'Conflict') {
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.alias.exist',
+                        defaultMessage: 'Adding Certificate Failed. Certificate alias exists.',
+                    }));
+                }
+            });
     };
 
     /**
@@ -172,27 +175,29 @@ function GeneralConfiguration(props) {
      * @param {string} alias The alias of the certificate to be deleted.
      * */
     const deleteCertificate = (alias) => {
-        API.deleteEndpointCertificate(alias).then((resp) => {
-            setEndpointCertificates(() => {
-                if (resp.status === 200) {
-                    return endpointCertificates.filter((cert) => {
-                        return cert.alias !== alias;
-                    });
-                } else {
-                    return -1;
-                }
+        return API.deleteEndpointCertificate(alias)
+            .then((resp) => {
+                setEndpointCertificates(() => {
+                    if (resp.status === 200) {
+                        return endpointCertificates.filter((cert) => {
+                            return cert.alias !== alias;
+                        });
+                    } else {
+                        return -1;
+                    }
+                });
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.delete.success',
+                    defaultMessage: 'Certificate Deleted Successfully',
+                }));
+            })
+            .catch((err) => {
+                console.log(err);
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.delete.error',
+                    defaultMessage: 'Error Deleting Certificate',
+                }));
             });
-            Alert.info(intl.formatMessage({
-                id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.delete.success',
-                defaultMessage: 'Certificate Deleted Successfully',
-            }));
-        }).catch((err) => {
-            console.log(err);
-            Alert.info(intl.formatMessage({
-                id: 'Apis.Details.Endpoints.GeneralConfiguration.Certificates.certificate.delete.error',
-                defaultMessage: 'Error Deleting Certificate',
-            }));
-        });
     };
 
     useEffect(() => {
@@ -202,22 +207,24 @@ function GeneralConfiguration(props) {
 
     // Get the certificates from backend.
     useEffect(() => {
-        API.getEndpointCertificates().then((resp) => {
-            const { certificates } = resp.obj;
-            const endpoints = endpointsToList(epConfig);
-            const filteredCertificates = certificates.filter((cert) => {
-                for (const endpoint of endpoints) {
-                    if (endpoint.url.indexOf(cert.endpoint) !== -1) {
-                        return true;
+        API.getEndpointCertificates()
+            .then((resp) => {
+                const { certificates } = resp.obj;
+                const endpoints = endpointsToList(epConfig);
+                const filteredCertificates = certificates.filter((cert) => {
+                    for (const endpoint of endpoints) {
+                        if (endpoint.url.indexOf(cert.endpoint) !== -1) {
+                            return true;
+                        }
                     }
-                }
-                return false;
+                    return false;
+                });
+                setEndpointCertificates(filteredCertificates);
+            })
+            .catch((err) => {
+                console.error(err);
+                setEndpointCertificates([]);
             });
-            setEndpointCertificates(filteredCertificates);
-        }).catch((err) => {
-            console.error(err);
-            setEndpointCertificates([]);
-        });
     }, []);
 
     return (
@@ -239,17 +246,21 @@ function GeneralConfiguration(props) {
                             defaultMessage='General Configuration'
                         />
                     </Typography>
-                    {apiType !== 'HTTP' ?
-                        <div /> :
+                    {apiType !== 'HTTP' ? (
+                        <div />
+                    ) : (
                         <Typography className={classes.secondaryHeading}>
                             <FormattedMessage
                                 id='Apis.Details.Endpoints.GeneralConfiguration.endpoint.type.sub.heading'
                                 defaultMessage='Endpoint Type'
-                            /> : {epTypeSubHeading}
+                            />{' '}
+                            : {epTypeSubHeading}
                             {' | '}
-                        </Typography> }
-                    {apiType !== 'HTTP' || endpointType.key === 'awslambda' ?
-                        <div /> :
+                        </Typography>
+                    )}
+                    {apiType !== 'HTTP' || endpointType.key === 'awslambda' ? (
+                        <div />
+                    ) : (
                         <Typography
                             className={classes.secondaryHeading}
                             hidden={
@@ -259,11 +270,14 @@ function GeneralConfiguration(props) {
                             <FormattedMessage
                                 id='Apis.Details.Endpoints.GeneralConfiguration.endpoint.security.sub.heading'
                                 defaultMessage='Endpoint Security'
-                            />: {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'None'}
+                            />
+                            : {endpointSecurityInfo !== null ? endpointSecurityInfo.type : 'None'}
                             {' | '}
-                        </Typography> }
-                    {apiType !== 'HTTP' || endpointType.key === 'default' || endpointType.key === 'awslambda' ?
-                        <div /> :
+                        </Typography>
+                    )}
+                    {apiType !== 'HTTP' || endpointType.key === 'default' || endpointType.key === 'awslambda' ? (
+                        <div />
+                    ) : (
                         <Typography
                             className={classes.secondaryHeading}
                             hidden={
@@ -273,13 +287,16 @@ function GeneralConfiguration(props) {
                             <FormattedMessage
                                 id='Apis.Details.Endpoints.GeneralConfiguration.certificates.sub.heading'
                                 defaultMessage='Certificates'
-                            />: {endpointCertificates.length}
-                        </Typography> }
+                            />
+                            : {endpointCertificates.length}
+                        </Typography>
+                    )}
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails className={classes.generalConfigContent}>
                     <Grid container direction='row' xs={12}>
-                        {apiType !== 'HTTP' ?
-                            <div /> :
+                        {apiType !== 'HTTP' ? (
+                            <div />
+                        ) : (
                             <Grid container item xs={8}>
                                 <Grid item xs className={classes.endpointConfigSection}>
                                     <FormControl className={classes.endpointTypeSelect}>
@@ -290,7 +307,7 @@ function GeneralConfiguration(props) {
                                             />
                                         </InputLabel>
                                         <Select
-                                            disabled={isNotCreator}
+                                            disabled={isRestricted(['apim:api_create'], api)}
                                             value={endpointType.key}
                                             onChange={handleEndpointTypeSelect}
                                             inputProps={{
@@ -299,13 +316,14 @@ function GeneralConfiguration(props) {
                                             }}
                                         >
                                             {endpointTypes.map((type) => {
-                                                return (<MenuItem value={type.key}>{type.value}</MenuItem>);
+                                                return <MenuItem value={type.key}>{type.value}</MenuItem>;
                                             })}
                                         </Select>
                                     </FormControl>
                                 </Grid>
-                                {apiType !== 'HTTP' ?
-                                    <div /> :
+                                {apiType !== 'HTTP' ? (
+                                    <div />
+                                ) : (
                                     <Grid
                                         item
                                         xs
@@ -315,14 +333,21 @@ function GeneralConfiguration(props) {
                                         <FormControlLabel
                                             value='start'
                                             checked={endpointSecurityInfo !== null}
-                                            control={<Switch color='primary' disabled={isNotCreator} />}
-                                            label={(
+                                            control={
+                                                <Switch
+                                                    color='primary'
+                                                    disabled={isRestricted(['apim:api_create'], api)}
+                                                />
+                                            }
+                                            label={
                                                 <FormattedMessage
-                                                    id={'Apis.Details.Endpoints.EndpointOverview.'
-                                                + 'endpoint.security.enable.switch'}
+                                                    id={
+                                                        'Apis.Details.Endpoints.EndpointOverview.' +
+                                                        'endpoint.security.enable.switch'
+                                                    }
                                                     defaultMessage='Endpoint Security'
                                                 />
-                                            )}
+                                            }
                                             labelPlacement='start'
                                             onChange={handleToggleEndpointSecurity}
                                         />
@@ -333,9 +358,9 @@ function GeneralConfiguration(props) {
                                             />
                                         </Collapse>
                                     </Grid>
-                                }
+                                )}
                             </Grid>
-                        }
+                        )}
                         <Grid
                             item
                             xs
@@ -348,7 +373,6 @@ function GeneralConfiguration(props) {
                                 deleteCertificate={deleteCertificate}
                             />
                         </Grid>
-
                     </Grid>
                 </ExpansionPanelDetails>
             </ExpansionPanel>

@@ -45,7 +45,7 @@ const subscibeButtonPanel = (props) => {
     return (
         <div className={classes.subscribeButtons}>
             <div>
-                <Typography variant='headline'>
+                <Typography variant='h5'>
                     <FormattedMessage
                         id='Apis.Details.Credentials.SubscibeButtonPanel.subscribed.applications'
                         defaultMessage='Subscribed Applications'
