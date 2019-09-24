@@ -158,14 +158,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             String ifNoneMatch, Boolean expand, String accept ,String tenantDomain, MessageContext messageContext) {
 
         List<API> allMatchedApis = new ArrayList<>();
-        APIListDTO apiListDTO;
+        Object apiListDTO;
 
         //pre-processing
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "" : query;
-        expand = (expand != null && expand) ? true : false;
+        expand = expand != null && expand;
         try {
             String newSearchQuery = APIUtil.constructApisGetQuery(query);
 
