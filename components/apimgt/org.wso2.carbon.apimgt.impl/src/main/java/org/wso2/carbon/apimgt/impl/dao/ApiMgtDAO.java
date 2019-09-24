@@ -14145,6 +14145,7 @@ public class ApiMgtDAO {
                         APIProductResource resource = new APIProductResource();
                         APIIdentifier apiId = new APIIdentifier(rs.getString("API_PROVIDER"), rs.getString("API_NAME"),
                                 rs.getString("API_VERSION"));
+                        Set<Scope> scopes = getAPIScopes(apiId);
                         resource.setProductIdentifier(productIdentifier);
                         resource.setApiIdentifier(apiId);
                         resource.setApiName(rs.getString("API_NAME"));
@@ -14153,6 +14154,12 @@ public class ApiMgtDAO {
                         uriTemplate.setResourceURI(rs.getString("URL_PATTERN"));
                         uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
                         uriTemplate.setId(rs.getInt("URL_MAPPING_ID"));
+                        uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
+                        uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
+                        String resourceScopeKey = APIUtil.getResourceKey(rs.getString("CONTEXT"), apiId.getVersion(),
+                                uriTemplate.getUriTemplate(), uriTemplate.getHTTPVerb());
+                        HashMap<String, String> resourceScopes = getResourceToScopeMapping(apiId);
+                        uriTemplate.setScope(APIUtil.findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
                         resource.setUriTemplate(uriTemplate);
                         productResourceList.add(resource);
                     }

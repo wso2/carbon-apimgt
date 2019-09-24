@@ -61,10 +61,7 @@ export default function OperationGovernance(props) {
                     <FormControlLabel
                         control={
                             <Switch
-                                // TODO: operation.authType should not be null,
-                                // Null check was added due to an issue in api product
-                                // https://github.com/wso2/product-apim/issues/5635 ~tmkb
-                                checked={operation.authType && operation.authType.toLowerCase() !== 'none'}
+                                checked={operation.authType.toLowerCase() !== 'none'}
                                 onChange={({ target: { checked } }) =>
                                     operationActionsDispatcher({
                                         action: 'authType',
