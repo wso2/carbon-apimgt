@@ -532,7 +532,6 @@ class APIDefinition extends React.Component {
                             )
                         }
 
-                        {this.isNotCreator
                         {isRestricted(['apim:api_create'], api)
                             && (
                                 <Typography variant='body2' color='primary'>
@@ -544,7 +543,6 @@ class APIDefinition extends React.Component {
                                 </Typography>
                             )
                         }
-
                     </div>
                     {isGraphQL === 0 && (
                         <div className={classes.converterWrapper}>
