@@ -586,7 +586,7 @@ class Details extends Component {
                                     path={Details.subPaths.ENVIRONMENTS}
                                     component={() => <Environments api={api} />}
                                 />
-                                <Route path={Details.subPaths.OPERATIONS} component={() => <Operations api={api} />} />
+                                <Route path={Details.subPaths.OPERATIONS} component={() => <Operations api={api} updateAPI={this.updateAPI} />} />
                                 <Route
                                     exact
                                     path={Details.subPaths.RESOURCES_PRODUCT}
