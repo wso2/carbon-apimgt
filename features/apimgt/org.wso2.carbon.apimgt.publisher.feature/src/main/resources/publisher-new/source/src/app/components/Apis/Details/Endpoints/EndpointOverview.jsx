@@ -441,7 +441,7 @@ function EndpointOverview(props) {
     };
 
     return (
-        <React.Fragment className={classes.overviewWrapper}>
+        <div className={classes.overviewWrapper}>
             <Grid container xs={12}>
                 <Grid container item xs={12}>
                     <GeneralConfiguration
@@ -622,7 +622,7 @@ function EndpointOverview(props) {
                     />
                 </DialogContent>
             </Dialog>
-        </React.Fragment>
+        </div>
     );
 }
 

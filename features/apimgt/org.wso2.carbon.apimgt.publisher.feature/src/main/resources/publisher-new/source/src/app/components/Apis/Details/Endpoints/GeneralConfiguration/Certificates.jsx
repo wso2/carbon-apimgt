@@ -162,6 +162,8 @@ function Certificates(props) {
         setCertificateList(certificates);
     }, [certificates]);
 
+    console.log(endpoints);
+
     return (
         <Grid container direction='column'>
             {/* TODO: Add list of existing certificates */}
@@ -240,7 +242,6 @@ function Certificates(props) {
                     </Typography>
                 </DialogTitle>
                 <DialogContent className={classes.alertWrapper}>
-                    <Icon className={classes.warningIcon}>warning</Icon>
                     <Typography>
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.confirm.certificate.delete'
