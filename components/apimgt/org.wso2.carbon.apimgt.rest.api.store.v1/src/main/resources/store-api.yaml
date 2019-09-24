@@ -3824,6 +3824,8 @@ definitions:
         additionalProperties:
           type: string
         example: {}
+      monetization:
+        $ref: '#/definitions/APIMonetizationInfo'
       endpointURLs:
         type: array
         items:
@@ -3926,6 +3928,19 @@ definitions:
         items:
           type: string
           example: "http://localhost:9443/"
+
+  #-----------------------------------------------------
+  # The API monetization resource
+  #-----------------------------------------------------
+  APIMonetizationInfo:
+    title: API monetization object
+    required:
+      - enabled
+    properties:
+      enabled:
+        type: boolean
+        description: Flag to indicate the monetization status
+        example: true
 
 #-----------------------------------------------------
 # The Application List resource
