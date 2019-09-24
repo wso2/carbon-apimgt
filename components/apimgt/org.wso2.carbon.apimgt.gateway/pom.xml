@@ -302,9 +302,6 @@
                             <value>true</value>
                         </property>
                     </systemProperties>
-                    <classpathDependencyExcludes>
-                        <classpathDependencyExclude>org.ops4j.pax.logging</classpathDependencyExclude>
-                    </classpathDependencyExcludes>
                 </configuration>
             </plugin>
 
