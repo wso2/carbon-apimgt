@@ -79,7 +79,7 @@ public class WSO2APIPublisherTestCase {
     private API api;
     private WSO2APIPublisher wso2APIPublisher;
     private TenantManager tenantManager;
-    private File file;
+    private String apiArtifactDir = "/tmp/test";
     private StatusLine statusLine;
     private APIImportExportManager apiImportExportManager;
     private CloseableHttpClient defaultHttpClient;
@@ -112,7 +112,6 @@ public class WSO2APIPublisherTestCase {
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.EXTERNAL_API_STORES + "."
                 + APIConstants.EXTERNAL_API_STORES_STORE_URL)).thenReturn(storeRedirectURL);
-        file = Mockito.mock(File.class);
         HttpGet httpGet = Mockito.mock(HttpGet.class);
         HttpPost httpPost = Mockito.mock(HttpPost.class);
         HttpDelete httpDelete = Mockito.mock(HttpDelete.class);
@@ -151,7 +150,7 @@ public class WSO2APIPublisherTestCase {
     public void testPublishAndUpdateToStore() throws Exception {
 
         Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantID);
-        Mockito.doReturn(file).when(apiImportExportManager).exportAPIArchive(Matchers.any(API.class),
+        Mockito.doReturn(apiArtifactDir).when(apiImportExportManager).exportAPIArtifacts(Matchers.any(API.class),
                 Matchers.anyBoolean(), Matchers.any(ExportFormat.class));
         //Test Unauthenticated scenario for publishing API
         Mockito.doReturn(HttpStatus.SC_UNAUTHORIZED).when(statusLine).getStatusCode();
@@ -186,7 +185,7 @@ public class WSO2APIPublisherTestCase {
 
         //Error path - When exporting API failed
         PowerMockito.doThrow(new APIImportExportException("Error while exporting API")).when(apiImportExportManager)
-                .exportAPIArchive(Matchers.any(API.class), Matchers.anyBoolean(), Matchers.any(ExportFormat.class));
+                .exportAPIArtifacts(Matchers.any(API.class), Matchers.anyBoolean(), Matchers.any(ExportFormat.class));
         try {
             wso2APIPublisher.publishToStore(api, store);
             Assert.fail("APIManagement exception not thrown for error scenario");
