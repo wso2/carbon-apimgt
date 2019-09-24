@@ -43,7 +43,6 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import PropTypes from 'prop-types';
 
 import Alert from 'AppComponents/Shared/Alert';
-import SubscriptionsBlock from 'AppComponents/Apis/Details/Subscriptions/SubscriptionsBlock';
 import API from 'AppData/api';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import AuthManager from 'AppData/AuthManager';
@@ -117,6 +116,16 @@ const styles = theme => ({
         borderTop: '1px solid #000000',
         fontWeight: 'bold',
     },
+    mainTitle: {
+        paddingLeft: 0,
+        marginTop: theme.spacing.unit * 2,
+    },
+    titleWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: theme.spacing(3),
+    },
 });
 
 const tableHeaders = (
@@ -156,18 +165,14 @@ const tableHeaders = (
                 />
             </ScopeValidation>
         </TableCell>
-        <TableCell>
-            <FormattedMessage
-                id='Apis.Details.Subscriptions.SubscriptionsTable.invoice.heading'
-                defaultMessage='Invoice'
-            />
-            <Typography component='p' variant='body1'>
+        <Tooltip title='Only for Usage based plans'>
+            <TableCell>
                 <FormattedMessage
-                    id='Apis.Details.Subscriptions.SubscriptionsTable.invoice.sub'
-                    defaultMessage='(Only for Usage based plans)'
+                    id='Apis.Details.Subscriptions.SubscriptionsTable.invoice.heading'
+                    defaultMessage='Invoice'
                 />
-            </Typography>
-        </TableCell>
+            </TableCell>
+        </Tooltip>
     </TableRow>
 );
 
@@ -300,6 +305,142 @@ class SubscriptionsTable extends Component {
 
     componentDidMount() {
         this.fetchSubscriptionData();
+    }
+
+    /**
+     * Returns the set of action buttons based on the current subscription state
+     *
+     * @param {*} state State of the subscription (PROD_ONLY_BLOCKED/BLOCKED/ACTIVE)
+     * @param {*} subscriptionId Subscription ID
+     * @returns {JSX} Action buttons in JSX
+     * @memberof SubscriptionsTable
+     */
+    getSubscriptionBlockingButtons(state, subscriptionId) {
+        const { classes } = this.props;
+        if (state === subscriptionStatus.PROD_BLOCKED) {
+            return (
+                <dev>
+                    <Button
+                        size='small'
+                        variant='outlined'
+                        color='primary'
+                        onClick={() => this.blockProductionOnly(subscriptionId)}
+                        className={classes.button}
+                        disabled='true'
+                    >
+                        <FormattedMessage
+                            id='block.production.only'
+                            defaultMessage='Block Production Only'
+                        />
+                    </Button>
+                    <Button
+                        size='small'
+                        variant='outlined'
+                        color='primary'
+                        onClick={() => this.blockSubscription(subscriptionId)}
+                        className={classes.button}
+                    >
+                        <FormattedMessage
+                            id='block.all'
+                            defaultMessage='Block All'
+                        />
+                    </Button>
+                    <Button
+                        size='small'
+                        variant='outlined'
+                        color='primary'
+                        onClick={() => this.unblockSubscription(subscriptionId)}
+                        className={classes.button}
+                    >
+                        <FormattedMessage
+                            id='unblock'
+                            defaultMessage='Unblock'
+                        />
+                    </Button>
+                </dev>);
+        } else if (state === subscriptionStatus.BLOCKED) {
+            return (
+                <dev>
+                    <Button
+                        size='small'
+                        variant='outlined'
+                        color='primary'
+                        onClick={() => this.blockProductionOnly(subscriptionId)}
+                        className={classes.button}
+                    >
+                        <FormattedMessage
+                            id='block.production.only'
+                            defaultMessage='Block Production Only'
+                        />
+                    </Button>
+                    <Button
+                        size='small'
+                        variant='outlined'
+                        color='primary'
+                        onClick={() => this.blockSubscription(subscriptionId)}
+                        className={classes.button}
+                        disabled='true'
+                    >
+                        <FormattedMessage
+                            id='block.all'
+                            defaultMessage='Block All'
+                        />
+                    </Button>
+                    <Button
+                        size='small'
+                        variant='outlined'
+                        color='primary'
+                        onClick={() => this.unblockSubscription(subscriptionId)}
+                        className={classes.button}
+                    >
+                        <FormattedMessage
+                            id='unblock'
+                            defaultMessage='Unblock'
+                        />
+                    </Button>
+                </dev>);
+        } else {
+            return (
+                <dev>
+                    <Button
+                        size='small'
+                        variant='outlined'
+                        color='primary'
+                        onClick={() => this.blockProductionOnly(subscriptionId)}
+                        className={classes.button}
+                    >
+                        <FormattedMessage
+                            id='block.production.only'
+                            defaultMessage='Block Production Only'
+                        />
+                    </Button>
+                    <Button
+                        size='small'
+                        variant='outlined'
+                        color='primary'
+                        onClick={() => this.blockSubscription(subscriptionId)}
+                        className={classes.button}
+                    >
+                        <FormattedMessage
+                            id='block.all'
+                            defaultMessage='Block All'
+                        />
+                    </Button>
+                    <Button
+                        size='small'
+                        variant='outlined'
+                        color='primary'
+                        onClick={() => this.unblockSubscription(subscriptionId)}
+                        className={classes.button}
+                        disabled='true'
+                    >
+                        <FormattedMessage
+                            id='unblock'
+                            defaultMessage='Unblock'
+                        />
+                    </Button>
+                </dev>);
+        }
     }
 
     /**
@@ -518,8 +659,6 @@ class SubscriptionsTable extends Component {
             rowsPerPageOptions, emptyColumnHeight,
         } = this.state;
         const { classes, intl } = this.props;
-        const emptyRows = totalSubscription > 0 ?
-            (rowsPerPage - Math.min(rowsPerPage, totalSubscription - (page * rowsPerPage))) : 0;
         return (
             <div>
                 <Dialog open={showPopup} onClose={this.handleClose} class={classes.dialog} fullWidth='true'>
@@ -546,7 +685,7 @@ class SubscriptionsTable extends Component {
                                         />
                                     </TableCell>
                                     <TableCell>
-                                         : {
+                                        : {
                                             (invoice.customer_email === null) ? (
                                                 <FormattedMessage
                                                     id='Apis.Details.Subscriptions.SubscriptionsTable.not.registered'
@@ -566,7 +705,7 @@ class SubscriptionsTable extends Component {
                                         />
                                     </TableCell>
                                     <TableCell>
-                                         : {invoice.billing}
+                                        : {invoice.billing}
                                     </TableCell>
                                 </TableRow>
                                 <TableRow>
@@ -628,12 +767,14 @@ class SubscriptionsTable extends Component {
                         </Table>
                     </Paper>
                 </Dialog>
-                <Typography className={classes.headline} gutterBottom variant='headline' component='h2'>
-                    <FormattedMessage
-                        id='Apis.Details.Subscriptions.SubscriptionsTable.manage.subscriptions'
-                        defaultMessage='Manage Subscriptions'
-                    />
-                </Typography>
+                <div className={classes.titleWrapper}>
+                    <Typography variant='h4' align='left' className={classes.mainTitle}>
+                        <FormattedMessage
+                            id='Apis.Details.Subscriptions.SubscriptionsTable.manage.subscriptions'
+                            defaultMessage='Manage Subscriptions'
+                        />
+                    </Typography>
+                </div>
                 <Paper>
                     <Tooltip
                         title={intl.formatMessage({
@@ -688,13 +829,12 @@ class SubscriptionsTable extends Component {
                                                         resourceMethod={resourceMethod.POST}
                                                         resourcePath={resourcePath.BLOCK_SUBSCRIPTION}
                                                     >
-                                                        <SubscriptionsBlock
-                                                            subscriptionId={sub.subscriptionId}
-                                                            subscriptionStatus={sub.subscriptionStatus}
-                                                            blockProductionSubs={this.blockProductionOnly}
-                                                            blockAllSubs={this.blockSubscription}
-                                                            unblockSubs={this.unblockSubscription}
-                                                        />
+                                                        {
+                                                            this.getSubscriptionBlockingButtons(
+                                                                sub.subscriptionStatus,
+                                                                sub.subscriptionId,
+                                                            )
+                                                        }
                                                     </ScopeValidation>
                                                 </TableCell>
                                                 <TableCell>
@@ -714,16 +854,6 @@ class SubscriptionsTable extends Component {
                                                 </TableCell>
                                             </TableRow>
                                         ))
-                                    }
-                                    {
-                                        emptyRows > 0 && (
-                                            <TableRow>
-                                                <TableCell
-                                                    colSpan={6}
-                                                    style={{ height: emptyRows * emptyColumnHeight }}
-                                                />
-                                            </TableRow>
-                                        )
                                     }
                                 </TableBody>
                                 <TableFooter>

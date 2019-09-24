@@ -45,6 +45,9 @@ const styles = theme => ({
     gridLabel: {
         marginTop: theme.spacing.unit * 1.5,
     },
+    mainTitle: {
+        paddingLeft: 0,
+    },
 });
 
 /**
@@ -131,7 +134,7 @@ class SubscriptionPoliciesManage extends Component {
                             <FormHelperText>
                                 <FormattedMessage
                                     id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.policies.update'
-                                    defaultMessage='Add/remove subscription policies'
+                                    defaultMessage='Attach subscription policies to API'
                                 />
                             </FormHelperText>
                         </Grid>

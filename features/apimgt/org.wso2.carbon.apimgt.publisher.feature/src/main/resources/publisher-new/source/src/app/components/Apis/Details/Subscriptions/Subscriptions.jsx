@@ -17,19 +17,26 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import withStyles from '@material-ui/core/styles/withStyles';
 import API from 'AppData/api';
 import CONSTS from 'AppData/Constants';
+import { FormattedMessage } from 'react-intl';
+import Typography from '@material-ui/core/Typography';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import SubscriptionsTable from './SubscriptionsTable';
 import SubscriptionPoliciesManage from './SubscriptionPoliciesManage';
 import SubscriptionAvailability from './SubscriptionAvailability';
 
-const styles = theme => ({
+const useStyles = makeStyles(theme => ({
     button: {
         margin: theme.spacing.unit,
     },
-});
+    emptyBox: {
+        marginTop: theme.spacing.unit * 2,
+    },
+}));
 
 /**
  * Subscriptions component
@@ -38,9 +45,11 @@ const styles = theme => ({
  * @extends {Component}
  */
 function Subscriptions(props) {
+    const classes = useStyles();
     const { api, updateAPI } = props;
     const restApi = new API();
     const [tenants, setTenants] = useState([]);
+    const [subscriptions, setSubsriptions] = useState([]);
     useEffect(() => {
         restApi.getTenantsByState(CONSTS.TENANT_STATE_ACTIVE)
             .then((result) => {
@@ -48,13 +57,33 @@ function Subscriptions(props) {
             });
     }, []);
 
+    useEffect(() => {
+        restApi.subscriptions(api.id)
+            .then((result) => {
+                setSubsriptions(result.body.count);
+            });
+    }, []);
+
     return (
         <div>
-            <SubscriptionsTable api={api} />
-            <SubscriptionPoliciesManage api={api} updateAPI={updateAPI} />
             {tenants !== 0 && (
                 <SubscriptionAvailability api={api} updateAPI={updateAPI} />
             )}
+            {subscriptions !== 0 ? (
+                <SubscriptionsTable api={api} />
+            ) : (
+                <InlineMessage type='info' height={80} className={classes.emptyBox}>
+                    <div className={classes.contentWrapper}>
+                        <Typography component='p' className={classes.content}>
+                            <FormattedMessage
+                                id='Apis.Details.Subscriptions.table.empty'
+                                defaultMessage='No subscription data available.'
+                            />
+                        </Typography>
+                    </div>
+                </InlineMessage>
+            )}
+            <SubscriptionPoliciesManage api={api} updateAPI={updateAPI} />
         </div>
     );
 }
@@ -64,4 +93,4 @@ Subscriptions.propTypes = {
     updateAPI: PropTypes.func.isRequired,
 };
 
-export default withStyles(styles)(Subscriptions);
+export default withStyles(makeStyles)(Subscriptions);
