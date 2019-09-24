@@ -1576,7 +1576,7 @@
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.7.11</carbon.commons.version>
-        <carbon.registry.version>4.7.12</carbon.registry.version>
+        <carbon.registry.version>4.7.13</carbon.registry.version>
         <carbon.mediation.version>4.7.14</carbon.mediation.version>
 
         <!-- Carbon Identity versions -->
