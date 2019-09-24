@@ -34,7 +34,7 @@ const styles = theme => ({
     root: {
         flexGrow: 1,
         marginTop: 10,
-        width: theme.custom.contentAreaWidth,
+        maxWidth: theme.custom.contentAreaWidth,
     },
     titleWrapper: {
         display: 'flex',
