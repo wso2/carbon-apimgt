@@ -173,11 +173,9 @@ class DeleteApiButton extends React.Component {
                         <DialogContentText>
                             <FormattedMessage
                                 id='Apis.Details.components.DeleteApiButton.text.description'
-                                defaultMessage='{type} <b> {name} {version} </b> will be deleted immediately and
-                                permanently. <p> Do you want to delete the {type} ? </p>'
+                                defaultMessage='{type} <b> {name} {version} </b> will be deleted permanently.'
                                 values={{
                                     b: msg => <b>{msg}</b>,
-                                    p: msg => <p>{msg}</p>,
                                     type,
                                     name: api.name,
                                     version,
