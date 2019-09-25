@@ -3827,6 +3827,8 @@ definitions:
         additionalProperties:
           type: string
         example: {}
+      monetization:
+        $ref: '#/definitions/APIMonetizationInfo'
       endpointURLs:
         type: array
         items:
@@ -3929,6 +3931,19 @@ definitions:
         items:
           type: string
           example: "http://localhost:9443/"
+
+  #-----------------------------------------------------
+  # The API monetization resource
+  #-----------------------------------------------------
+  APIMonetizationInfo:
+    title: API monetization object
+    required:
+      - enabled
+    properties:
+      enabled:
+        type: boolean
+        description: Flag to indicate the monetization status
+        example: true
 
 #-----------------------------------------------------
 # The Application List resource
@@ -4194,6 +4209,8 @@ definitions:
           even if the request count exceeded within a unit time
         type: boolean
         example: true
+      monetizationAttributes:
+        $ref: '#/definitions/MonetizationInfo'
       throttlingPolicyPermissions:
           $ref: '#/definitions/ThrottlingPolicyPermissionInfo'
 
@@ -4698,6 +4715,31 @@ definitions:
           type: string
         description: roles for this permission
         example: ["manager","developer"]
+
+#-----------------------------------------------------
+# The Monetization Info resource
+#-----------------------------------------------------
+  MonetizationInfo:
+    title: Monetization
+    properties:
+      billingType :
+        type: string
+        example: "fixedPrice"
+        enum:
+          - fixedPrice
+          - dynamicRate
+      billingCycle:
+        type: string
+        example: "month"
+      fixedPrice:
+        type: string
+        example: "10"
+      pricePerRequest:
+        type: string
+        example: "1"
+      currencyType:
+        type: string
+        example: "USD"
 
   #-----------------------------------------------------
   # The API monetization usage resource

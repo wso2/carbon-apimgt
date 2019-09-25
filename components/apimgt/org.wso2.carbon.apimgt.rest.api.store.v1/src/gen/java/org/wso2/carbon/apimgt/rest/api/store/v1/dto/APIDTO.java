@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
@@ -45,6 +46,7 @@ public class APIDTO   {
     private List<APITiersDTO> tiers = new ArrayList<>();
     private Boolean hasThumbnail = false;
     private Map<String, String> additionalProperties = new HashMap<>();
+    private APIMonetizationInfoDTO monetization = null;
     private List<APIEndpointURLsDTO> endpointURLs = new ArrayList<>();
     private APIBusinessInformationDTO businessInformation = null;
     private List<LabelDTO> labels = new ArrayList<>();
@@ -398,6 +400,23 @@ public class APIDTO   {
 
   /**
    **/
+  public APIDTO monetization(APIMonetizationInfoDTO monetization) {
+    this.monetization = monetization;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("monetization")
+  public APIMonetizationInfoDTO getMonetization() {
+    return monetization;
+  }
+  public void setMonetization(APIMonetizationInfoDTO monetization) {
+    this.monetization = monetization;
+  }
+
+  /**
+   **/
   public APIDTO endpointURLs(List<APIEndpointURLsDTO> endpointURLs) {
     this.endpointURLs = endpointURLs;
     return this;
@@ -548,6 +567,7 @@ public class APIDTO   {
         Objects.equals(tiers, API.tiers) &&
         Objects.equals(hasThumbnail, API.hasThumbnail) &&
         Objects.equals(additionalProperties, API.additionalProperties) &&
+        Objects.equals(monetization, API.monetization) &&
         Objects.equals(endpointURLs, API.endpointURLs) &&
         Objects.equals(businessInformation, API.businessInformation) &&
         Objects.equals(labels, API.labels) &&
@@ -559,7 +579,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo);
   }
 
   @Override
@@ -586,6 +606,7 @@ public class APIDTO   {
     sb.append("    tiers: ").append(toIndentedString(tiers)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
+    sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
     sb.append("    endpointURLs: ").append(toIndentedString(endpointURLs)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    labels: ").append(toIndentedString(labels)).append("\n");

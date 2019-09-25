@@ -31,6 +31,8 @@ import Button from '@material-ui/core/Button';
 import { FormattedMessage } from 'react-intl';
 import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/Shared/ScopeValidation';
 import PropTypes from 'prop-types';
+import Api from 'AppData/api';
+import Subscription from 'AppData/Subscription';
 
 /**
  *
@@ -48,10 +50,14 @@ class SubscriptionTableData extends React.Component {
         super(props);
         this.state = {
             openMenu: false,
+            isMonetizedAPI: false,
+            isDynamicUsagePolicy: false,
         };
         this.handleRequestClose = this.handleRequestClose.bind(this);
         this.handleRequestOpen = this.handleRequestOpen.bind(this);
         this.handleRequestDelete = this.handleRequestDelete.bind(this);
+        this.checkIfDynamicUsagePolicy = this.checkIfDynamicUsagePolicy.bind(this);
+        this.checkIfMonetizedAPI = this.checkIfMonetizedAPI.bind(this);
     }
 
     /**
@@ -84,6 +90,50 @@ class SubscriptionTableData extends React.Component {
         if (handleSubscriptionDelete) {
             handleSubscriptionDelete(subscriptionId);
         }
+    }
+
+    /**
+     * Check if the API is monetized
+     * @param apiUUID API UUID
+     */
+    checkIfMonetizedAPI(apiUUID) {
+        const apiClient = new Api();
+        const promisedApi = apiClient.getAPIById(apiUUID);
+        promisedApi.then((response) => {
+            if (response && response.data) {
+                const apiData = JSON.parse(response.data);
+                this.setState({isMonetizedAPI: apiData.monetization.enabled});
+            }
+        });
+    }
+
+    /**
+     * Check if the policy is dynamic usage type
+     * @param subscriptionUUID subscription UUID
+     */
+    checkIfDynamicUsagePolicy(subscriptionUUID) {
+        const client = new Subscription();
+        const promisedSubscription = client.getSubscription(subscriptionUUID);
+        promisedSubscription.then((response) => {
+            if (response && response.body) {
+                const subscriptionData = JSON.parse(response.data);
+                if (subscriptionData.throttlingPolicy) {
+                    const apiClient = new Api();
+                    const promisedPolicy = apiClient.getTierByName(subscriptionData.throttlingPolicy, 'subscription');
+                    promisedPolicy.then((policyResponse) => {
+                        const policyData = JSON.parse(policyResponse.data);
+                        if (policyData.monetizationAttributes.billingType && (policyData.monetizationAttributes.billingType === 'DYNAMICRATE')) {
+                            this.setState({isDynamicUsagePolicy: true});
+                        }
+                    });
+                }                
+            }
+        });
+    }
+
+    componentDidMount() {
+        this.checkIfMonetizedAPI(this.props.subscription.apiId);
+        this.checkIfDynamicUsagePolicy(this.props.subscription.subscriptionId);
     }
 
     /**
@@ -143,6 +193,21 @@ class SubscriptionTableData extends React.Component {
                                 </Button>
                             </DialogActions>
                         </Dialog>
+                    </div>
+                </TableCell>
+                <TableCell>
+                    <div>
+                        <Button
+                            variant='outlined'
+                            size='small'
+                            color='primary'
+                            disabled={!(this.isMonetizedAPI && this.isDynamicUsagePolicy)}
+                        >
+                            <FormattedMessage
+                                id='Applications.Details.SubscriptionTableData.view.subscription.invoice'
+                                defaultMessage='View Invoice'
+                            />
+                        </Button>
                     </div>
                 </TableCell>
             </TableRow>
