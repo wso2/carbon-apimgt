@@ -377,7 +377,7 @@ class ApiConsole extends React.Component {
                             </Paper>
                         </Grid>
                     )}
-                    {user != null && subscriptions && (
+                    {user && subscriptions && (
                         <Grid container>
                             <Grid item md={4} xs={4} className={classes.gridWrapper}>
                                 <FormControl className={classes.formControl} disabled={subscriptions.length === 0}>
@@ -528,8 +528,11 @@ class ApiConsole extends React.Component {
                     </Grid>
                 </Grid>
 
-                <SwaggerUI accessTokenProvider={this.accessTokenProvider} spec={swagger}
-                    authorizationHeader={authorizationHeader} />
+                <SwaggerUI
+                    accessTokenProvider={this.accessTokenProvider}
+                    spec={swagger}
+                    authorizationHeader={authorizationHeader}
+                />
             </React.Fragment>
         );
     }

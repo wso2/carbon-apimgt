@@ -77,7 +77,7 @@ function GenericEndpoint(props) {
     }, [endpointURL]);
 
     return (
-        <React.Fragment className={classes.endpointInputWrapper}>
+        <div className={classes.endpointInputWrapper}>
             <TextField
                 disabled={isRestricted(['apim:api_create'], api)}
                 label={<FormattedMessage
@@ -127,7 +127,7 @@ function GenericEndpoint(props) {
                     ),
                 }}
             />
-        </React.Fragment>);
+        </div>);
 }
 
 GenericEndpoint.defaultProps = {

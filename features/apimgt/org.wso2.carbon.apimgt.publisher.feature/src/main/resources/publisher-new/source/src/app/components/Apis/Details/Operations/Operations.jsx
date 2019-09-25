@@ -29,8 +29,8 @@ import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import Grid from '@material-ui/core/Grid';
-import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import APIRateLimiting from '../Resources/components/APIRateLimiting';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import Operation from './Operation';
 
@@ -122,12 +122,11 @@ class Operations extends React.Component {
         this.state = {
             notFound: false,
             apiPolicies: [],
-            operationList: null,
+            operations: null,
         };
 
         this.newApi = new Api();
         this.handleUpdateList = this.handleUpdateList.bind(this);
-        this.updateOperations = this.updateOperations.bind(this);
     }
 
     /**
@@ -135,7 +134,7 @@ class Operations extends React.Component {
      */
     componentDidMount() {
         this.setState({
-            operationList: this.props.api.operations,
+            operations: this.props.api.operations,
         });
         const promisedResPolicies = Api.policies('api');
         promisedResPolicies
@@ -160,130 +159,126 @@ class Operations extends React.Component {
      * @param {*} newOperation
      */
     handleUpdateList(newOperation) {
-        const { operationList } = this.state;
-        const updatedList = operationList.map(operation => (operation.target === newOperation.target
+        const { operations } = this.state;
+        const updatedList = operations.map(operation => (operation.target === newOperation.target
             ? newOperation : operation));
-        this.setState({ operationList: updatedList });
+        this.setState({ operations: updatedList });
     }
 
     /**
      *
      */
-    updateOperations() {
-        const { api, intl } = this.props;
-        const { operationList } = this.state;
-        api.operations = operationList;
-        const promisedApi = this.newApi.update(JSON.parse(JSON.stringify(api)));
-        promisedApi
-            .then(() => {
-                Alert.info(intl.formatMessage({
-                    id: 'Apis.Details.Operations.Operations.api.updated.successfully',
-                    defaultMessage: 'API updated successfully!',
-                }));
-            })
-            .catch(() => {
-                Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.Operations.Operations.something.went.wrong.while.updating.the.api',
-                    defaultMessage: 'Error occurred while updating API',
-                }));
-            });
+    updateOperations(updateAPI) {
+        const { operations } = this.state;
+        updateAPI({ operations });
     }
 
     /**
      * @inheritdoc
      */
     render() {
+        const { api, updateAPI } = this.props;
         const {
-            operationList, apiPolicies,
+            operations, apiPolicies,
         } = this.state;
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFoundMessage} />;
         }
-        if (!operationList) {
+        if (!operations && apiPolicies.length === 0) {
             return <Progress />;
         }
         const { classes } = this.props;
         return (
-            <div className={classes.root}>
-                <div className={classes.titleWrapper}>
-                    <Typography variant='h4' align='left' className={classes.mainTitle}>
-                        <FormattedMessage
-                            id='Apis.Details.Operations.Operations.operation'
-                            defaultMessage='Operations'
-                        />
-                    </Typography>
-                </div>
-                <div className={classes.contentWrapper}>
-                    <List>
-                        <Grid>
-                            <Table>
-                                <TableRow>
-                                    <TableCell>
-                                        <Typography variant='subtitle2'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Resources.Resource.Operation'
-                                                defaultMessage='Operation'
+            <Grid container direction='row' spacing={3} justify='flex-start' alignItems='flex-start'>
+                <Grid item md={12}>
+                    <APIRateLimiting
+                        operationRateLimits={apiPolicies}
+                        api={api}
+                        onChange={this.handleApiThrottlePolicy}
+                    />
+                </Grid>
+                <div className={classes.root}>
+                    <div className={classes.titleWrapper}>
+                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                            <FormattedMessage
+                                id='Apis.Details.Operations.Operations.operation'
+                                defaultMessage='Operations'
+                            />
+                        </Typography>
+                    </div>
+                    <div className={classes.contentWrapper}>
+                        <List>
+                            <Grid>
+                                <Table>
+                                    <TableRow>
+                                        <TableCell>
+                                            <Typography variant='subtitle2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Resources.Resource.Operation'
+                                                    defaultMessage='Operation'
+                                                />
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Typography variant='subtitle2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Resources.Resource.OperationType'
+                                                    defaultMessage='Operation Type'
+                                                />
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Typography variant='subtitle2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Resources.Resource.throttling.policy'
+                                                    defaultMessage='Throttling Policy'
+                                                />
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Typography variant='subtitle2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Resources.Resource.scopes'
+                                                    defaultMessage='Scopes'
+                                                />
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Typography variant='subtitle2'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Resources.Resource.authType'
+                                                    defaultMessage='Security Enabled'
+                                                />
+                                            </Typography>
+                                        </TableCell>
+                                    </TableRow>
+                                    {operations.map((item) => {
+                                        return (
+                                            <Operation
+                                                operation={item}
+                                                handleUpdateList={this.handleUpdateList}
+                                                scopes={this.props.api.scopes}
+                                                disabledAction
+                                                apiPolicies={apiPolicies}
                                             />
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Typography variant='subtitle2'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Resources.Resource.OperationType'
-                                                defaultMessage='Operation Type'
-                                            />
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Typography variant='subtitle2'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Resources.Resource.throttling.policy'
-                                                defaultMessage='Throttling Policy'
-                                            />
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Typography variant='subtitle2'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Resources.Resource.scopes'
-                                                defaultMessage='Scopes'
-                                            />
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Typography variant='subtitle2'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Resources.Resource.authType'
-                                                defaultMessage='Security Enabled'
-                                            />
-                                        </Typography>
-                                    </TableCell>
-                                </TableRow>
-                                {operationList.map((item) => {
-                                    return (
-                                        <Operation
-                                            operation={item}
-                                            handleUpdateList={this.handleUpdateList}
-                                            scopes={this.props.api.scopes}
-                                            apiPolicies={apiPolicies}
-                                        />
-                                    );
-                                })}
-                            </Table>
-                        </Grid>
-                    </List>
-                    <div>
-                        <Button
-                            variant='contained'
-                            color='primary'
-                            className={classes.buttonMain}
-                            onClick={this.updateOperations}
-                        >
-                            <FormattedMessage id='Apis.Details.Resources.Resources.save' defaultMessage='Save' />
-                        </Button>
+                                        );
+                                    })}
+                                </Table>
+                            </Grid>
+                        </List>
+                        <div>
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                className={classes.buttonMain}
+                                onClick={() => this.updateOperations(updateAPI)}
+                            >
+                                <FormattedMessage id='Apis.Details.Resources.Resources.save' defaultMessage='Save' />
+                            </Button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </Grid>
         );
     }
 }
@@ -303,6 +298,7 @@ Operations.propTypes = {
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,
+    updateAPI: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Operations));

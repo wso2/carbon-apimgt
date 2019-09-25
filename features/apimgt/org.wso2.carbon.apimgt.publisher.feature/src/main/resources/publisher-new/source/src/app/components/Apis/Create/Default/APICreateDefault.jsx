@@ -220,7 +220,7 @@ function APICreateDefault(props) {
                         </Grid>
                         <Grid item>
                             <Link to='/apis/'>
-                                <Button variant='outlined'>
+                                <Button variant='text'>
                                     <FormattedMessage
                                         id='Apis.Create.Default.APICreateDefault.cancel'
                                         defaultMessage='Cancel'

@@ -208,7 +208,7 @@ class LifeCycleImage extends React.Component {
                         <path id='path6796' d='m 427.52944,78.811947 24,0 0,24.000003 -24,0 z' fill='none' />
                     </g>
                     <path d='m 427.52944,236.8622 24,0 0,24 -24,0 z' id='path6810' clipRule='evenodd' fill='none' />
-                    <g id='maintenance' style={this.highLightMe('maintenance')}>
+                    <g id='blocked' style={this.highLightMe('blocked')}>
                         <text
                             id='text6532'
                             y='282.362'
@@ -221,7 +221,7 @@ class LifeCycleImage extends React.Component {
                             wordSpacing='0'
                         >
                             <tspan y='282.362' x='386.858' id='tspan6534'>
-                                MAINTENANCE
+                                BLOCKED
                             </tspan>
                         </text>
                         <path

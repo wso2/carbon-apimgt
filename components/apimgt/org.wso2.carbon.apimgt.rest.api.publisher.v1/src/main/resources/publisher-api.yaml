@@ -542,6 +542,9 @@ paths:
         - APIs
       responses:
         200:
+          schema:
+            type: string
+            example: ""
           description: |
             OK.
             Successful response with updated Swagger definition
@@ -6874,6 +6877,27 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/APIInfo'
+      pagination:
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/apis?limit=1&offset=2&query="
+        #   previous: "/apis?limit=1&offset=0&query="
+
+  #-----------------------------------------------------
+  # The API List resource
+  #-----------------------------------------------------
+  APIListExpanded:
+    title: API List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of APIs returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/API'
       pagination:
         $ref: '#/definitions/Pagination'
         # example:

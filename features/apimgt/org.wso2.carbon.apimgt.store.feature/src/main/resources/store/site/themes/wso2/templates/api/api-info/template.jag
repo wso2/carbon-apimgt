@@ -160,7 +160,7 @@ var isOAuthProtected = false;
                                             <p class="form-control-static"><span class="label <%= labelType %>"><%=api.status%></span></p>
                                         </div>
                                     </div>
-                                    <div class="form-group">
+                                    <div class="form-group"  id="overviewRatingId">
                                         <% if(isRatingActivated && user){%>
                                             <label class="col-xs-4 col-sm-4 control-label"><strong><%=i18n.localize("Rating:")%></strong></label>
                                             <div class="col-xs-5 col-sm-5">

@@ -93,7 +93,7 @@ class AppsTableContent extends Component {
                     .map((app) => {
                         return (
                             <TableRow key={app.applicationId}>
-                                <TableCell>
+                                <TableCell align='left'>
                                     {app.status === this.APPLICATION_STATES.APPROVED ? (
                                         <Link to={'/applications/' + app.applicationId}>{app.name}</Link>
                                     ) : (
@@ -101,9 +101,9 @@ class AppsTableContent extends Component {
                                     )
                                     }
                                 </TableCell>
-                                <TableCell>{app.owner}</TableCell>
-                                <TableCell>{app.throttlingPolicy}</TableCell>
-                                <TableCell>
+                                <TableCell align='left'>{app.owner}</TableCell>
+                                <TableCell align='left'>{app.throttlingPolicy}</TableCell>
+                                <TableCell align='left'>
                                     {app.status === this.APPLICATION_STATES.APPROVED && (
                                         <Typography variant='subtitle1' gutterBottom>
                                             <FormattedMessage
@@ -135,8 +135,8 @@ class AppsTableContent extends Component {
                                         </Typography>
                                     )}
                                 </TableCell>
-                                <TableCell>{app.subscriptionCount}</TableCell>
-                                <TableCell>
+                                <TableCell align='left'>{app.subscriptionCount}</TableCell>
+                                <TableCell align='left'>
                                     <ScopeValidation
                                         resourcePath={resourcePaths.SINGLE_APPLICATION}
                                         resourceMethod={resourceMethods.PUT}

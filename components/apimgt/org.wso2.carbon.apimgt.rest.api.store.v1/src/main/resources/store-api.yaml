@@ -254,6 +254,9 @@ paths:
         - APIs
       responses:
         200:
+          schema:
+            type: string
+            example: ""
           description: |
             OK.
             Requested swagger document of the API is returned
