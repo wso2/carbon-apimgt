@@ -114,7 +114,7 @@
   "apim.sdk.artifact_id": "org.wso2.client.",
   "apim.sdk.model_package": "org.wso2.client.model.",
   "apim.sdk.api_package": "org.wso2.client.api.",
-  "apim.sdk.supported_languages": "android,java,scala-akka,csharp,dart,flash,groovy,javascript,jmeter,perl,php,python,ruby,swift4,clojure,csharp-dotnet2,nodejs-server",
+  "apim.sdk.supported_languages": "android,java,javascript,jmeter",
   "apim.token.revocation.notifier_impl": "org.wso2.carbon.apimgt.keymgt.events.TokenRevocationNotifierImpl",
   "apim.token.revocation.enable_realtime_notifier": true,
   "apim.token.revocation.enable_persistent_notifier": false,
