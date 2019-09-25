@@ -79,8 +79,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -207,7 +205,7 @@ public final class APIImportUtil {
             return FileUtils.readFileToString(
                     new File(pathToArchive, APIImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION));
         }
-        throw new IOException("Missing graphQL schema definition file. graphql_schema.sdl should be present.");
+        throw new IOException("Missing graphQL schema definition file. schema.graphql should be present.");
     }
 
     /**
@@ -388,10 +386,10 @@ public final class APIImportUtil {
                     importedApi.setUriTemplates(uriTemplates);
                     Set<Scope> scopes = apiDefinition.getScopes(swaggerContent);
                     importedApi.setScopes(scopes);
-                    // This is required to make url templates and scopes get effected
-                    apiProvider.updateAPI(importedApi);
                 }
             }
+            // This is required to make url templates and scopes get effected
+            apiProvider.updateAPI(importedApi);
 
             //Since Image, documents, sequences and WSDL are optional, exceptions are logged and ignored in implementation
             addAPIImage(pathToArchive, importedApi, apiProvider);
