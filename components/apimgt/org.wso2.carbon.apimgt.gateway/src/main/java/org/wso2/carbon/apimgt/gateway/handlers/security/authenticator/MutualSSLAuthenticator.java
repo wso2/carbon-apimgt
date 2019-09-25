@@ -50,7 +50,7 @@ import java.util.Map;
  * Authenticator responsible for handle API requests with mutual SSL.
  */
 public class MutualSSLAuthenticator implements Authenticator {
-    private static final Log log = LogFactory.getLog(APIAuthenticationHandler.class);
+    private static final Log log = LogFactory.getLog(MutualSSLAuthenticator.class);
     private String apiLevelPolicy;
     private String requestOrigin;
     private static String challengeString;
