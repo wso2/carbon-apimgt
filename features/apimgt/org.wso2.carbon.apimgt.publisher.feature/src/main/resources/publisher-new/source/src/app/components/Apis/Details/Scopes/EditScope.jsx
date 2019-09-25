@@ -28,7 +28,6 @@ import { withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Alert from 'AppComponents/Shared/Alert';
-import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = theme => ({
     buttonSave: {
@@ -75,7 +74,7 @@ class EditScope extends React.Component {
     updateScope() {
         const { apiScope } = this.state;
         const {
-            intl, api, history, isAPIProduct,
+            intl, api, history, isAPIProduct, updateAPI,
         } = this.props;
         const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
         const scopes = api.scopes.map((scope) => {
@@ -86,7 +85,7 @@ class EditScope extends React.Component {
             }
         });
         const updateProperties = { scopes };
-        const promisedApiUpdate = api.update(updateProperties);
+        const promisedApiUpdate = updateAPI(updateProperties);
         promisedApiUpdate.then(() => {
             Alert.info(intl.formatMessage({
                 id: 'Apis.Details.Scopes.CreateScope.scope.updated.successfully',
@@ -209,10 +208,11 @@ EditScope.propTypes = {
     }).isRequired,
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
+    updateAPI: PropTypes.func.isRequired,
 };
 
 EditScope.defaultProps = {
     match: { params: {} },
 };
 
-export default injectIntl(withAPI(withRouter(withStyles(styles)(EditScope))));
+export default injectIntl(withRouter(withStyles(styles)(EditScope)));
