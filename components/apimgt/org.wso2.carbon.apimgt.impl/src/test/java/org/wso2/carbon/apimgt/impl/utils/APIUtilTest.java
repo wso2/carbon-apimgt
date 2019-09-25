@@ -1183,8 +1183,6 @@ public class APIUtilTest {
         Assert.assertEquals(APIUtil.getDocumentation(genericArtifact, "admin@wso2.com").getVisibility().name(),
                 Documentation.DocumentVisibility.API_LEVEL.name());
         Assert.assertEquals(APIUtil.getDocumentation(genericArtifact, "admin@wso2.com").getVisibility().name(),
-                Documentation.DocumentVisibility.API_LEVEL.name());
-        Assert.assertEquals(APIUtil.getDocumentation(genericArtifact, "admin@wso2.com").getVisibility().name(),
                 Documentation.DocumentVisibility.PRIVATE.name());
         Assert.assertEquals(APIUtil.getDocumentation(genericArtifact, "admin@wso2.com").getVisibility().name(),
                 Documentation.DocumentVisibility.OWNER_ONLY.name());

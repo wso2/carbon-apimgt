@@ -280,7 +280,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
         OMElement payload = getFaultPayload(errorMessage);
         Utils.setFaultPayload(messageContext, payload);
         Mediator sequence = messageContext.getSequence(APISecurityConstants.GRAPHQL_API_FAILURE_HANDLER);
-        if (sequence != null && !sequence.mediate(messageContext)){
+        if (sequence != null && !sequence.mediate(messageContext)) {
             return;
         }
         Utils.sendFault(messageContext, HttpStatus.SC_UNPROCESSABLE_ENTITY);

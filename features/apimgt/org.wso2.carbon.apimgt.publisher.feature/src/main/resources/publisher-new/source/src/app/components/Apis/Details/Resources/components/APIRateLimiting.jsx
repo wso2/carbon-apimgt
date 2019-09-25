@@ -46,7 +46,9 @@ const RateLimitingLevels = {
  * @returns
  */
 export default function APIRateLimiting(props) {
-    const { api, updateAPI, operationRateLimits } = props;
+    const {
+        api, updateAPI, operationRateLimits, disabledAction,
+    } = props;
     const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(api.apiThrottlingPolicy);
     const isResourceLevel = apiThrottlingPolicy === null;
     const rateLimitingLevel = isResourceLevel ? RateLimitingLevels.RESOURCE : RateLimitingLevels.API;
@@ -148,6 +150,7 @@ export default function APIRateLimiting(props) {
                 <Grid item md={12}>
                     <Divider />
                 </Grid>
+                { disabledAction === false &&
                 <Grid item>
                     <Box ml={1}>
                         <Button onClick={saveChanges} disabled={false} variant='outlined' size='small' color='primary'>
@@ -159,6 +162,7 @@ export default function APIRateLimiting(props) {
                         </Button>
                     </Box>
                 </Grid>
+                }
             </Grid>
         </Paper>
     );
@@ -168,4 +172,5 @@ APIRateLimiting.propTypes = {
     api: PropTypes.shape({ id: PropTypes.string }).isRequired,
     updateAPI: PropTypes.func.isRequired,
     operationRateLimits: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+    disabledAction: PropTypes.shape({}).isRequired,
 };

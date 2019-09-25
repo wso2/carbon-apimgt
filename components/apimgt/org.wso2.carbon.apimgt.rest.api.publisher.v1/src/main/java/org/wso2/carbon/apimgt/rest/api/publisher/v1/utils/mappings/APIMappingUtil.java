@@ -1612,7 +1612,7 @@ public class APIMappingUtil {
         businessInformation.setBusinessOwner(product.getBusinessOwner());
         businessInformation.setBusinessOwnerEmail(product.getBusinessOwnerEmail());
         businessInformation.setTechnicalOwner(product.getTechnicalOwner());
-        businessInformation.setTechnicalOwner(product.getTechnicalOwnerEmail());
+        businessInformation.setTechnicalOwnerEmail(product.getTechnicalOwnerEmail());
         productDto.setBusinessInformation(businessInformation );
 
         APICorsConfigurationDTO apiCorsConfigurationDTO = new APICorsConfigurationDTO();

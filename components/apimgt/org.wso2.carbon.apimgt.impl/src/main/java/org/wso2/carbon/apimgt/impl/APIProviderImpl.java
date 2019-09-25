@@ -7081,7 +7081,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (visibleRolesList != null) {
                 visibleRoles = visibleRolesList.split(",");
             }
-
+            org.wso2.carbon.registry.core.Tag[] oldTags = registry.getTags(artifactPath);
+            if (oldTags != null) {
+                for (org.wso2.carbon.registry.core.Tag tag : oldTags) {
+                    registry.removeTag(artifactPath, tag.getTagName());
+                }
+            }
+            Set<String> tagSet = apiProduct.getTags();
+            if (tagSet != null) {
+                for (String tag : tagSet) {
+                    registry.applyTag(artifactPath, tag);
+                }
+            }
             String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
             updateRegistryResources(artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
                     apiProduct.getAdditionalProperties());
