@@ -58,7 +58,7 @@ if (blackListedTenantDomains_forTutorial.indexOf(tenantDomain)>0) {
                         </span>
 
                         <span class="hidden-xs">
-			                <%=i18n.localize("API Store walkthrough")%>
+				<%=i18n.localize("API Store walkthrough")%>
                         </span>
                     </a>
                 </li>
