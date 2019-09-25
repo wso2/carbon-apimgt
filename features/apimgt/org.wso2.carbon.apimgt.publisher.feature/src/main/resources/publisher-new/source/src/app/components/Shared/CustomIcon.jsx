@@ -18,6 +18,7 @@ export default function CustomIcon(props) {
                 viewBox='0 0 8.5272856 8.5114363'
                 id='svg8'
                 className={className}
+                style={{ padding: 0 }}
             >
                 <g id='layer2' transform='translate(79.857 -62.367)'>
                     <g
