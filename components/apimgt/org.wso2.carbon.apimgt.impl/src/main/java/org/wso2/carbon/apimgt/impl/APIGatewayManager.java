@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
+import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
@@ -330,9 +331,12 @@ public class APIGatewayManager {
      *            - The template builder
      * @param tenantDomain
      *            - Tenant Domain of the publisher
+     * @param associatedAPIs
+     *            - APIs associated with the current API Product
      */
-    public Map<String, String> publishToGateway(APIProduct apiProduct, APITemplateBuilder builder, String tenantDomain) {
-        Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
+    public Map<String, String> publishToGateway(APIProduct apiProduct, APITemplateBuilder builder, String tenantDomain,
+                                                Set<API> associatedAPIs) {
+        Map<String, String> failedEnvironmentsMap = new HashMap<>(0);
 
         if (apiProduct.getEnvironments() == null) {
             return failedEnvironmentsMap;
@@ -360,6 +364,7 @@ public class APIGatewayManager {
                 continue;
             }
             APIGatewayAdminClient client;
+            LocalEntryAdminClient localEntryAdminClient;
             try {
                 client = new APIGatewayAdminClient(environment);
                 if (debugEnabled) {
@@ -372,6 +377,15 @@ public class APIGatewayManager {
                     long endTime = System.currentTimeMillis();
                     log.debug("Time taken to fetch API Data: " + (endTime - apiGetStartTime) / 1000 + "  seconds");
                 }
+
+                localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
+
+                String definition = apiProduct.getDefinition();
+                localEntryAdminClient.deleteEntry(apiProduct.getUuid());
+                localEntryAdminClient.addLocalEntry("<localEntry key=\"" + apiProduct.getUuid() + "\">" +
+                        definition.replaceAll("&(?!amp;)", "&amp;").
+                                replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                        + "</localEntry>");
 
                 // If the API exists in the Gateway
                 if (apiData != null) {
@@ -386,6 +400,13 @@ public class APIGatewayManager {
 
                     //Update the API
                     client.updateApi(builder, tenantDomain, id);
+
+                    for (API api : associatedAPIs) {
+                        APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
+                        client.saveEndpoint(api, apiTemplateBuilder, tenantDomain);
+                        setSecureVaultProperty(client, api, tenantDomain, environment);
+                        updateClientCertificates(client, api, tenantDomain);
+                    }
 
                     if (debugEnabled) {
                         long endTime = System.currentTimeMillis();
@@ -409,20 +430,27 @@ public class APIGatewayManager {
                     //Add the API
                     client.addApi(builder, tenantDomain, id);
 
+                    for (API api : associatedAPIs) {
+                        APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
+                        client.addEndpoint(api, apiTemplateBuilder, tenantDomain);
+                        setSecureVaultProperty(client, api, tenantDomain, environment);
+                        deployClientCertificates(client, api, tenantDomain);
+                    }
+
                     if (debugEnabled) {
                         long endTime = System.currentTimeMillis();
                         log.debug("Publishing API (if the API does not exist in the Gateway) took " +
                                 (endTime - startTime) / 1000 + "  seconds");
                     }
                 }
-            } catch (AxisFault axisFault) {
+            } catch (AxisFault | EndpointAdminException | APIManagementException | CertificateManagementException e) {
                 /*
                 didn't throw this exception to handle multiple gateway publishing
                 if gateway is unreachable we collect that environments into map with issue and show on popup in ui
                 therefore this didn't break the gateway publishing if one gateway unreachable
                  */
-                failedEnvironmentsMap.put(environmentName, axisFault.getMessage());
-                log.error("Error occurred when publish to gateway " + environmentName, axisFault);
+                failedEnvironmentsMap.put(environmentName, e.getMessage());
+                log.error("Error occurred when publish to gateway " + environmentName, e);
             }
 
             if (debugEnabled) {

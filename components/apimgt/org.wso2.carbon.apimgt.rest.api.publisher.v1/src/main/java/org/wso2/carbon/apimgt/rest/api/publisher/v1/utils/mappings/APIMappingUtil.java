@@ -1660,7 +1660,7 @@ public class APIMappingUtil {
         productDto.setState(StateEnum.valueOf(product.getState()));
         productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                 .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
-        List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
+
         //Aggregate API resources to each relevant API.
         Map<String, ProductAPIDTO> aggregatedAPIs = new HashMap<String, ProductAPIDTO>();
         List<APIProductResource> resources = product.getProductResources();
@@ -1670,11 +1670,7 @@ public class APIMappingUtil {
                 ProductAPIDTO productAPI = aggregatedAPIs.get(uuid);
                 URITemplate template = apiProductResource.getUriTemplate();
                 List<APIOperationsDTO> operations = productAPI.getOperations();
-                APIOperationsDTO operation = new APIOperationsDTO();
-                operation.setVerb(template.getHTTPVerb());
-                operation.setTarget(template.getResourceURI());
-                operation.setAuthType(template.getAuthType());
-                operation.setThrottlingPolicy(template.getThrottlingTier());
+                APIOperationsDTO operation = getOperationFromURITemplate(template);
                 operations.add(operation);
             } else {
                 ProductAPIDTO productAPI = new ProductAPIDTO();
@@ -1683,19 +1679,14 @@ public class APIMappingUtil {
                 List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
                 URITemplate template = apiProductResource.getUriTemplate();
 
-                APIOperationsDTO operation = new APIOperationsDTO();
-                operation.setVerb(template.getHTTPVerb());
-                operation.setTarget(template.getResourceURI());
-                operation.setAuthType(template.getAuthType());
-                operation.setThrottlingPolicy(template.getThrottlingTier());
+                APIOperationsDTO operation = getOperationFromURITemplate(template);
                 operations.add(operation);
 
                 productAPI.setOperations(operations);
                 aggregatedAPIs.put(uuid, productAPI);
             }
         }
-        apis = new ArrayList<ProductAPIDTO>(aggregatedAPIs.values());
-        productDto.setApis(apis);
+        productDto.setApis(new ArrayList<>(aggregatedAPIs.values()));
 
         String subscriptionAvailability = product.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {
