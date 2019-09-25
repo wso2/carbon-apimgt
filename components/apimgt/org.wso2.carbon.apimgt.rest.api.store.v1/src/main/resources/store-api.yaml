@@ -4206,6 +4206,8 @@ definitions:
           even if the request count exceeded within a unit time
         type: boolean
         example: true
+      monetizationAttributes:
+        $ref: '#/definitions/MonetizationInfo'
       throttlingPolicyPermissions:
           $ref: '#/definitions/ThrottlingPolicyPermissionInfo'
 
@@ -4710,6 +4712,31 @@ definitions:
           type: string
         description: roles for this permission
         example: ["manager","developer"]
+
+#-----------------------------------------------------
+# The Monetization Info resource
+#-----------------------------------------------------
+  MonetizationInfo:
+    title: Monetization
+    properties:
+      billingType :
+        type: string
+        example: "fixedPrice"
+        enum:
+          - fixedPrice
+          - dynamicRate
+      billingCycle:
+        type: string
+        example: "month"
+      fixedPrice:
+        type: string
+        example: "10"
+      pricePerRequest:
+        type: string
+        example: "1"
+      currencyType:
+        type: string
+        example: "USD"
 
   #-----------------------------------------------------
   # The API monetization usage resource
