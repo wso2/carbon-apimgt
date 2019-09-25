@@ -1733,7 +1733,7 @@ public final class APIConstants {
         public static final String REST_API_PUBLISHER_CONTEXT_FULL_1 =
                 REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION_1;
         public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
-        public static final String REST_API_ADMIN_VERSION = "v0.14";
+        public static final String REST_API_ADMIN_VERSION = "v0.15";
         public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
         public static final String REST_API_ADMIN_IMPORT_API_RESOURCE = "/import/api";
         public static final String IMPORT_API_PRESERVE_PROVIDER = "preserveProvider";
