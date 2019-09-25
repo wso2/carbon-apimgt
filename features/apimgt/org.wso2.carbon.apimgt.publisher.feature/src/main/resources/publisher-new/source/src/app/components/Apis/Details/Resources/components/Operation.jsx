@@ -36,7 +36,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import Utils from 'AppData/Utils';
 import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from '@material-ui/core/IconButton';
-
+import Checkbox from '@material-ui/core/Checkbox';
 // splitted operation components
 
 import DescriptionAndSummary from './operationComponents/DescriptionAndSummary';
@@ -59,6 +59,9 @@ export default function Operation(props) {
         api,
         disableDelete,
         disableUpdate,
+        disableMultiSelect,
+        onOperationSelect,
+        selected,
     } = props;
     const [isSaving, setIsSaving] = useState(false); // Use to show the loader and disable button
     const [isDeleting, setIsDeleting] = useState(false); // Use to disable the expansion panel
@@ -189,6 +192,27 @@ export default function Operation(props) {
             >
                 <Grid container direction='row' justify='space-between' alignItems='center' spacing={0}>
                     <Grid item md={10}>
+                        {!disableMultiSelect && (
+                            <span
+                                onKeyDown={() => {
+                                    /* Just to satisfy click-events-have-key-events eslint rule */
+                                }}
+                            >
+                                <Checkbox
+                                    checked={selected}
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        event.preventDefault();
+                                        onOperationSelect(operation, !selected);
+                                    }}
+                                    value='checkedB'
+                                    color='primary'
+                                    inputProps={{
+                                        'aria-label': 'secondary checkbox',
+                                    }}
+                                />
+                            </span>
+                        )}
                         {closedWithUnsavedChanges ? (
                             <Badge color='primary' variant='dot'>
                                 <Button
@@ -287,11 +311,17 @@ Operation.defaultProps = {
     highlight: false,
     disableUpdate: false,
     disableDelete: false,
+    onOperationSelect: () => {},
+    selected: false,
+    disableMultiSelect: false,
     operationRateLimits: [], // Response body.list from apis policies for `api` throttling policies type
 };
 Operation.propTypes = {
     api: PropTypes.shape({ scopes: PropTypes.arrayOf(PropTypes.shape({})) }).isRequired,
     updateOpenAPI: PropTypes.func.isRequired,
+    onOperationSelect: PropTypes.func,
+    selected: PropTypes.bool,
+    disableMultiSelect: PropTypes.bool,
     disableDelete: PropTypes.bool,
     disableUpdate: PropTypes.bool,
     operation: PropTypes.shape({

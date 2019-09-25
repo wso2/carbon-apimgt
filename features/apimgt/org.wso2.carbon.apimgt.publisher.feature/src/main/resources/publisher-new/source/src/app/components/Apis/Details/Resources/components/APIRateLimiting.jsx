@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import Radio from '@material-ui/core/Radio';
 import Button from '@material-ui/core/Button';
@@ -47,13 +47,27 @@ const RateLimitingLevels = {
  */
 export default function APIRateLimiting(props) {
     const {
-        api, updateAPI, operationRateLimits, disabledAction,
+        api, updateAPI, operationRateLimits, disableUpdate, onChange,
     } = props;
     const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(api.apiThrottlingPolicy);
     const isResourceLevel = apiThrottlingPolicy === null;
     const rateLimitingLevel = isResourceLevel ? RateLimitingLevels.RESOURCE : RateLimitingLevels.API;
     const [isSaving, setIsSaving] = useState(false);
 
+    /**
+     *
+     *
+     * @param {*} event
+     */
+    function updateRateLimitingPolicy(event) {
+        // If the selected option is resource, we set the api level rate limiting to null
+        const userSelection = event.target.value === RateLimitingLevels.RESOURCE ? null : '';
+        if (onChange) { // Assumed controlled component
+            onChange(userSelection);
+        } else {
+            setApiThrottlingPolicy(userSelection);
+        }
+    }
     /**
      *
      *
@@ -97,10 +111,7 @@ export default function APIRateLimiting(props) {
                         <RadioGroup
                             aria-label='Apply rate limiting in'
                             value={rateLimitingLevel}
-                            onChange={(event) => {
-                                // If the selected option is resource, we set the api level rate limiting to null
-                                setApiThrottlingPolicy(event.target.value === RateLimitingLevels.RESOURCE ? null : '');
-                            }}
+                            onChange={updateRateLimitingPolicy}
                             row
                         >
                             <FormControlLabel
@@ -147,30 +158,43 @@ export default function APIRateLimiting(props) {
                         )}
                     </Box>
                 </Grid>
-                <Grid item md={12}>
-                    <Divider />
-                </Grid>
-                { disabledAction === false &&
-                <Grid item>
-                    <Box ml={1}>
-                        <Button onClick={saveChanges} disabled={false} variant='outlined' size='small' color='primary'>
-                            Save
-                            {isSaving && <CircularProgress size={24} />}
-                        </Button>
-                        <Button size='small' onClick={resetChanges}>
-                            Reset
-                        </Button>
-                    </Box>
-                </Grid>
-                }
+                {!disableUpdate && (
+                    <Fragment>
+                        <Grid item md={12}>
+                            <Divider />
+                        </Grid>
+                        <Grid item>
+                            <Box ml={1}>
+                                <Button
+                                    onClick={saveChanges}
+                                    disabled={false}
+                                    variant='outlined'
+                                    size='small'
+                                    color='primary'
+                                >
+                                    Save
+                                    {isSaving && <CircularProgress size={24} />}
+                                </Button>
+                                <Button size='small' onClick={resetChanges}>
+                                    Reset
+                                </Button>
+                            </Box>
+                        </Grid>
+                    </Fragment>
+                )}
             </Grid>
         </Paper>
     );
 }
-APIRateLimiting.defaultProps = {};
+APIRateLimiting.defaultProps = {
+    disableUpdate: false,
+    onChange: null,
+};
 APIRateLimiting.propTypes = {
     api: PropTypes.shape({ id: PropTypes.string }).isRequired,
     updateAPI: PropTypes.func.isRequired,
+    disableUpdate: PropTypes.bool,
+    onChange: PropTypes.oneOf([null, PropTypes.func]),
     operationRateLimits: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
     disabledAction: PropTypes.shape({}).isRequired,
 };

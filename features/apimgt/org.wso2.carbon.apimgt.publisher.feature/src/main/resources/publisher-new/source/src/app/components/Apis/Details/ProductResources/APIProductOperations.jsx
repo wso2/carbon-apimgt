@@ -63,6 +63,7 @@ export default function APIProductOperations() {
                         disableDelete: true,
                     }}
                     disableRateLimiting
+                    disableMultiSelect
                 />
             </Grid>
         </Grid>
