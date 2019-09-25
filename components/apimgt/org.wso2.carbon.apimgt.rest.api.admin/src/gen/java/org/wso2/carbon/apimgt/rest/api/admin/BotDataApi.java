@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.admin;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.*;
 import org.wso2.carbon.apimgt.rest.api.admin.BotDataApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.factories.BotDataApiServiceFactory;
@@ -10,7 +9,6 @@ import io.swagger.annotations.ApiParam;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.EmailDTO;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import java.io.InputStream;
@@ -40,7 +38,8 @@ public class BotDataApi  {
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nThe resource to be updated does not exist.\n") })
 
-    public Response botDataAddEmailPost(@ApiParam(value = "A email\n" ,required=true ) EmailDTO body) throws APIManagementException, SQLException {
+    public Response botDataAddEmailPost(@ApiParam(value = "A email\n" ,required=true ) EmailDTO body)
+    {
     return delegate.botDataAddEmailPost(body);
     }
     @DELETE
@@ -55,7 +54,8 @@ public class BotDataApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response botDataDeleteEmailDelete(@ApiParam(value = "Pass the uuid to remove the email\n",required=true) @QueryParam("uuid")  String uuid) throws APIManagementException, SQLException {
+    public Response botDataDeleteEmailDelete(@ApiParam(value = "Pass the uuid to remove the email\n",required=true) @QueryParam("uuid")  String uuid)
+    {
     return delegate.botDataDeleteEmailDelete(uuid);
     }
     @GET
@@ -72,7 +72,8 @@ public class BotDataApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
 
-    public Response botDataGetEmailListGet(@ApiParam(value = "Pass the tenantDomain to get the email list and if not passed it will get from the logged user.\n") @QueryParam("tenantDomain")  String tenantDomain) throws APIManagementException {
+    public Response botDataGetEmailListGet(@ApiParam(value = "Pass the tenantDomain to get the email list and if not passed it will get from the logged user.\n") @QueryParam("tenantDomain")  String tenantDomain)
+    {
     return delegate.botDataGetEmailListGet(tenantDomain);
     }
 }

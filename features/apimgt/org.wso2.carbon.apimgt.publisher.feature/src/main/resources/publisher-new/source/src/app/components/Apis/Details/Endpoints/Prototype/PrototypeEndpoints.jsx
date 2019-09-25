@@ -40,6 +40,7 @@ const styles = theme => ({
     },
     prototypeEndpointsWrapper: {
         marginTop: theme.spacing(),
+        width: '100%',
     },
     genericEndpointWrapper: {
         padding: theme.spacing(),

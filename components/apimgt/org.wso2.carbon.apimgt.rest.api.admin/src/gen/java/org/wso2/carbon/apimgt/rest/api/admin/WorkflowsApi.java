@@ -36,7 +36,7 @@ public class WorkflowsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nWorkflow for the given reference in not found.\n") })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nWorkflow for the given reference is not found.\n") })
 
     public Response workflowsUpdateWorkflowStatusPost(@ApiParam(value = "Workflow reference id\n",required=true) @QueryParam("workflowReferenceId")  String workflowReferenceId,
     @ApiParam(value = "Workflow event that need to be updated\n" ,required=true ) WorkflowDTO body)

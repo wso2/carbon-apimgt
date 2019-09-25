@@ -1839,12 +1839,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APITemplateBuilder builder = null;
         APIProductIdentifier apiProductId = apiProduct.getId();
 
+        apiProduct.setDefinition(getOpenAPIDefinition(apiProduct.getId()));
+
         String provider = apiProductId.getProviderName();
         if (provider.contains("AT")) {
             provider = provider.replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        } else {
+            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         }
-
 
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         gatewayManager.setProductResourceSequences(this, apiProduct, tenantDomain);
@@ -1855,13 +1858,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Error while publishing to Gateway ", e);
         }
 
-        failedEnvironment = gatewayManager.publishToGateway(apiProduct, builder, tenantDomain);
+        Set<API> associatedAPIs = getAssociatedAPIs(apiProduct);
+        failedEnvironment = gatewayManager.publishToGateway(apiProduct, builder, tenantDomain, associatedAPIs);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + apiProductId.getName() + ", API Version " + apiProductId.getVersion()
                     + " published to gateway";
             log.debug(logMessage);
         }
         return failedEnvironment;
+    }
+
+
+    private Set<API> getAssociatedAPIs(APIProduct apiProduct) throws APIManagementException {
+        List<APIProductResource> productResources = apiProduct.getProductResources();
+
+        Set<API> apis = new HashSet<>();
+
+        for (APIProductResource productResource : productResources) {
+            API api = getAPI(productResource.getApiIdentifier());
+            apis.add(api);
+        }
+
+        return apis;
     }
 
     /**
@@ -2243,9 +2261,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private APITemplateBuilder getAPITemplateBuilder(APIProduct apiProduct) throws APIManagementException {
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(apiProduct);
-        vtb.addHandler(
-                "org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtLatencyStatsHandler", Collections
-                        .<String, String>emptyMap());
+        Map<String, String> latencyStatsProperties = new HashMap<String, String>();
+        latencyStatsProperties.put(APIConstants.API_UUID, apiProduct.getUuid());
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtLatencyStatsHandler",
+                latencyStatsProperties);
 
         Map<String, String> corsProperties = new HashMap<>();
         corsProperties.put(APIConstants.CORSHeaders.IMPLEMENTATION_TYPE_HANDLER_VALUE,
@@ -6627,7 +6646,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void addAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException {
+    public void addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException {
         validateApiProductInfo(product);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(product.getId().getProviderName()));
@@ -6686,10 +6705,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         product.setProductResources(validResources);
         //now we have validated APIs and it's resources inside the API product. Add it to database
 
+        apiMgtDAO.addAPIProduct(product, tenantDomain);
+    }
+
+    @Override
+    public void saveToGateway(APIProduct product) throws FaultGatewaysException, APIManagementException {
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
 
+        List<APIProductResource> productResources = product.getProductResources();
+
         //Only publish to gateways if the state is in Published state and has atleast one resource
-        if("PUBLISHED".equals(product.getState()) && !validResources.isEmpty()) {
+        if("PUBLISHED".equals(product.getState()) && !productResources.isEmpty()) {
             Map<String, String> failedToPublishEnvironments = publishToGateway(product);
             if (!failedToPublishEnvironments.isEmpty()) {
                 Set<String> publishedEnvironments =
@@ -6700,8 +6726,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 failedGateways.put("UNPUBLISHED", Collections.<String,String>emptyMap());
             }
         }
-
-        apiMgtDAO.addAPIProduct(product, tenantDomain);
 
         if (!failedGateways.isEmpty() &&
                 (!failedGateways.get("UNPUBLISHED").isEmpty() || !failedGateways.get("PUBLISHED").isEmpty())) {
@@ -7081,7 +7105,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (visibleRolesList != null) {
                 visibleRoles = visibleRolesList.split(",");
             }
-
+            org.wso2.carbon.registry.core.Tag[] oldTags = registry.getTags(artifactPath);
+            if (oldTags != null) {
+                for (org.wso2.carbon.registry.core.Tag tag : oldTags) {
+                    registry.removeTag(artifactPath, tag.getTagName());
+                }
+            }
+            Set<String> tagSet = apiProduct.getTags();
+            if (tagSet != null) {
+                for (String tag : tagSet) {
+                    registry.applyTag(artifactPath, tag);
+                }
+            }
             String publisherAccessControlRoles = apiProduct.getAccessControlRoles();
             updateRegistryResources(artifactPath, publisherAccessControlRoles, apiProduct.getAccessControl(),
                     apiProduct.getAdditionalProperties());

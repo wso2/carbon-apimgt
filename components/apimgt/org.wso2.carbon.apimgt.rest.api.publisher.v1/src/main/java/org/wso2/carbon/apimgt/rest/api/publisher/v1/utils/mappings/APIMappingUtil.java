@@ -355,21 +355,44 @@ public class APIMappingUtil {
      * @param expand  defines whether APIListDTO should contain APIINFODTOs or APIDTOs
      * @return APIListDTO object containing APIDTOs
      */
-    public static APIListDTO fromAPIListToDTO(List<API> apiList, boolean expand) throws APIManagementException {
+    public static Object fromAPIListToDTO(List<API> apiList, boolean expand) throws APIManagementException {
+        if (expand) {
+            return fromAPIListToExpandedDTO(apiList);
+        } else {
+            return fromAPIListToInfoDTO(apiList);
+        }
+    }
+
+    /**
+     * Converts a List object of APIs into Info DTO List
+     *
+     * @param apiList List of APIs
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static APIListDTO fromAPIListToInfoDTO(List<API> apiList) throws APIManagementException {
 
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
-        if (apiList != null && !expand) {
-            for (API api : apiList) {
-                apiInfoDTOs.add(fromAPIToInfoDTO(api));
-            }
+        for (API api : apiList) {
+            apiInfoDTOs.add(fromAPIToInfoDTO(api));
         }
-        //todo: support expand
-//        else if (apiList != null && expand) {
-//            for (API api : apiList) {
-//                apiInfoDTOs.add(fromAPItoDTO(api));
-//            }
-//        }
+        apiListDTO.setCount(apiInfoDTOs.size());
+        return apiListDTO;
+    }
+
+    /**
+     * Converts a List object of APIs into a Expanded DTO List
+     *
+     * @param apiList List of APIs
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static APIListExpandedDTO fromAPIListToExpandedDTO(List<API> apiList) throws APIManagementException {
+
+        APIListExpandedDTO apiListDTO = new APIListExpandedDTO();
+        List<APIDTO> apiInfoDTOs = apiListDTO.getList();
+        for (API api : apiList) {
+            apiInfoDTOs.add(fromAPItoDTO(api));
+        }
         apiListDTO.setCount(apiInfoDTOs.size());
         return apiListDTO;
     }
@@ -474,7 +497,7 @@ public class APIMappingUtil {
      * @param offset     starting index
      * @param size       max offset
      */
-    public static void setPaginationParams(APIListDTO apiListDTO, String query, int offset, int limit, int size) {
+    public static void setPaginationParams(Object apiListDTO, String query, int offset, int limit, int size) {
 
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
@@ -495,7 +518,11 @@ public class APIMappingUtil {
 
         PaginationDTO paginationDTO = CommonMappingUtil
                 .getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
-        apiListDTO.setPagination(paginationDTO);
+        if (apiListDTO instanceof APIListDTO) {
+            ((APIListDTO)apiListDTO).setPagination(paginationDTO);
+        } else if (apiListDTO instanceof APIListExpandedDTO) {
+            ((APIListExpandedDTO)apiListDTO).setPagination(paginationDTO);
+        }
     }
 
     private static String checkAndSetVersionParam(String context) {
@@ -1612,7 +1639,7 @@ public class APIMappingUtil {
         businessInformation.setBusinessOwner(product.getBusinessOwner());
         businessInformation.setBusinessOwnerEmail(product.getBusinessOwnerEmail());
         businessInformation.setTechnicalOwner(product.getTechnicalOwner());
-        businessInformation.setTechnicalOwner(product.getTechnicalOwnerEmail());
+        businessInformation.setTechnicalOwnerEmail(product.getTechnicalOwnerEmail());
         productDto.setBusinessInformation(businessInformation );
 
         APICorsConfigurationDTO apiCorsConfigurationDTO = new APICorsConfigurationDTO();
@@ -1633,7 +1660,7 @@ public class APIMappingUtil {
         productDto.setState(StateEnum.valueOf(product.getState()));
         productDto.setThumbnailUri(RestApiConstants.RESOURCE_PATH_THUMBNAIL_API_PRODUCT
                 .replace(RestApiConstants.APIPRODUCTID_PARAM, product.getUuid()));
-        List<ProductAPIDTO> apis = new ArrayList<ProductAPIDTO>();
+
         //Aggregate API resources to each relevant API.
         Map<String, ProductAPIDTO> aggregatedAPIs = new HashMap<String, ProductAPIDTO>();
         List<APIProductResource> resources = product.getProductResources();
@@ -1643,11 +1670,7 @@ public class APIMappingUtil {
                 ProductAPIDTO productAPI = aggregatedAPIs.get(uuid);
                 URITemplate template = apiProductResource.getUriTemplate();
                 List<APIOperationsDTO> operations = productAPI.getOperations();
-                APIOperationsDTO operation = new APIOperationsDTO();
-                operation.setVerb(template.getHTTPVerb());
-                operation.setTarget(template.getResourceURI());
-                operation.setAuthType(template.getAuthType());
-                operation.setThrottlingPolicy(template.getThrottlingTier());
+                APIOperationsDTO operation = getOperationFromURITemplate(template);
                 operations.add(operation);
             } else {
                 ProductAPIDTO productAPI = new ProductAPIDTO();
@@ -1656,19 +1679,14 @@ public class APIMappingUtil {
                 List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
                 URITemplate template = apiProductResource.getUriTemplate();
 
-                APIOperationsDTO operation = new APIOperationsDTO();
-                operation.setVerb(template.getHTTPVerb());
-                operation.setTarget(template.getResourceURI());
-                operation.setAuthType(template.getAuthType());
-                operation.setThrottlingPolicy(template.getThrottlingTier());
+                APIOperationsDTO operation = getOperationFromURITemplate(template);
                 operations.add(operation);
 
                 productAPI.setOperations(operations);
                 aggregatedAPIs.put(uuid, productAPI);
             }
         }
-        apis = new ArrayList<ProductAPIDTO>(aggregatedAPIs.values());
-        productDto.setApis(apis);
+        productDto.setApis(new ArrayList<>(aggregatedAPIs.values()));
 
         String subscriptionAvailability = product.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {

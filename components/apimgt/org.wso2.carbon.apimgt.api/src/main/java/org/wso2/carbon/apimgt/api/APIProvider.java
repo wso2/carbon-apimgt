@@ -1171,7 +1171,14 @@ public interface APIProvider extends APIManager {
      * @return UUID of the api product
      * @throws APIManagementException exception
      */
-    void addAPIProduct(APIProduct product) throws APIManagementException, FaultGatewaysException;
+    void addAPIProductWithoutPublishingToGateway(APIProduct product) throws APIManagementException;
+
+    /**
+     * Publish API Product to Gateway
+     * @param product product object containing details of the product
+     * @throws FaultGatewaysException
+     */
+    void saveToGateway(APIProduct product) throws FaultGatewaysException, APIManagementException;
 
     /**
      * Delete an API Product
@@ -1250,7 +1257,7 @@ public interface APIProvider extends APIManager {
     public void addProductDocumentationContent(APIProduct apiProduct, String documentationName, String text) throws APIManagementException;
 
     /**
-     * This method used to save the graphql schema content
+     * This method is used to save the graphql schema content
      *
      * @param api api
      * @param schemaDefinition schema Definition

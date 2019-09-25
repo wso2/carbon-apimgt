@@ -305,6 +305,13 @@ public class OAS3Parser extends APIDefinition {
         }
         updateSwaggerSecurityDefinition(openAPI, swaggerData, "https://test.com");
         updateLegacyScopesFromSwagger(openAPI, swaggerData);
+        
+        if (StringUtils.isEmpty(openAPI.getInfo().getTitle())) {
+            openAPI.getInfo().setTitle(swaggerData.getTitle());
+        }
+        if (StringUtils.isEmpty(openAPI.getInfo().getVersion())) {
+            openAPI.getInfo().setVersion(swaggerData.getVersion());
+        }
         return Json.pretty(openAPI);
     }
 

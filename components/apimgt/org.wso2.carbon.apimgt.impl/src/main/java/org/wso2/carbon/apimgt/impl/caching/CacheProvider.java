@@ -61,6 +61,27 @@ public class CacheProvider {
     }
 
     /**
+     * @return basic auth resource cache
+     */
+    public static Cache getGatewayBasicAuthResourceCache() {
+        return getCache(APIConstants.GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME);
+    }
+
+    /**
+     * @return gateway user name cache
+     */
+    public static Cache getGatewayUsernameCache() {
+        return getCache(APIConstants.GATEWAY_USERNAME_CACHE_NAME);
+    }
+
+    /**
+     * @return gateway invalid user name cache
+     */
+    public static Cache getInvalidUsernameCache() {
+        return getCache(APIConstants.GATEWAY_INVALID_USERNAME_CACHE_NAME);
+    }
+
+    /**
      * @return APIManagerConfiguration
      */
     private static APIManagerConfiguration getApiManagerConfiguration() {
@@ -136,8 +157,7 @@ public class CacheProvider {
      * Create and return GATEWAY_TOKEN_CACHE
      */
     public static Cache createGatewayTokenCache() {
-        String apimGWCacheExpiry = getApiManagerConfiguration().
-                getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
         if (apimGWCacheExpiry != null) {
             return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_TOKEN_CACHE_NAME,
                     Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
@@ -153,8 +173,7 @@ public class CacheProvider {
      * Create and return GATEWAY_INVALID_TOKEN_CACHE
      */
     public static Cache createInvalidTokenCache() {
-        String apimGWCacheExpiry = getApiManagerConfiguration().
-                getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
         if (apimGWCacheExpiry != null) {
             return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants
                     .GATEWAY_INVALID_TOKEN_CACHE_NAME, Long.parseLong(apimGWCacheExpiry), Long.parseLong
@@ -163,6 +182,51 @@ public class CacheProvider {
             long defaultCacheTimeout = getDefaultCacheTimeout();
             return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants
                     .GATEWAY_INVALID_TOKEN_CACHE_NAME, defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
+     * Create and return basic authenticated resource request cache
+     */
+    public static Cache createGatewayBasicAuthResourceCache() {
+        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (apimGWCacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME,
+                    Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME,
+                    defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
+     * Create and return the valid username cache
+     */
+    public static Cache createGatewayUsernameCache() {
+        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (apimGWCacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_USERNAME_CACHE_NAME,
+                    Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_USERNAME_CACHE_NAME,
+                    defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
+     * Create and return the invalid username cache
+     */
+    public static Cache createInvalidUsernameCache() {
+        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (apimGWCacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_INVALID_USERNAME_CACHE_NAME,
+                    Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_INVALID_USERNAME_CACHE_NAME,
+                    defaultCacheTimeout, defaultCacheTimeout);
         }
     }
 
@@ -178,5 +242,11 @@ public class CacheProvider {
                 getName());
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.getInvalidTokenCache().
                 getName());
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
+                createGatewayBasicAuthResourceCache().getName());
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
+                createGatewayUsernameCache().getName());
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
+                createInvalidUsernameCache().getName());
     }
 }

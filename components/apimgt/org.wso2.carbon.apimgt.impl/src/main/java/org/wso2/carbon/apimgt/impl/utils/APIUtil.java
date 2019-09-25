@@ -8874,6 +8874,14 @@ public final class APIUtil {
                 Resource productResource = registry.get(apiPath);
                 String artifactId = productResource.getUUID();
                 resource.setApiId(artifactId);
+
+                GenericArtifactManager artifactManager = getArtifactManager(registry,
+                        APIConstants.API_KEY);
+
+                GenericArtifact apiArtifact = artifactManager.getGenericArtifact(resource.getApiId());
+                API api = getAPI(apiArtifact, registry);
+
+                resource.setEndpointConfig(api.getEndpointConfig());
             }
 
             apiProduct.setProductResources(resources);

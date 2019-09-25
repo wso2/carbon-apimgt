@@ -109,7 +109,7 @@ var drawGraphAPIUsage = function(from,to){
                 if(dataLength>0){
                 $('#apiUsage').empty();
                     for(var k=0 ; k<dataLength ;k++){
-                    $('#apiUsage').append($('<h4>Application Name:  '+json.usage[k].appName+'</h4><div class="col-md-12"><div class="col-md-6"><div id="apiChart'+(k+1)+'" class="chart"><svg style="height:400px;"></svg></div></div> <div class="col-md-6"> <table class="table table-striped table-bordered" id="apiTable'+(k+1)+'" class="display" cellspacing="0" width="100%"><thead><tr> <th>API Name</th><th>Number of API Calls</th></tr></thead> </table> </div></div>'));
+                    $('#apiUsage').append($('<h4>'+i18n.t("Application Name")+": "+json.usage[k].appName+'</h4><div class="col-md-12"><div class="col-md-6"><div id="apiChart'+(k+1)+'" class="chart"><svg style="height:400px;"></svg></div></div> <div class="col-md-6"> <table class="table table-striped table-bordered" id="apiTable'+(k+1)+'" class="display" cellspacing="0" width="100%"><thead><tr> <th>'+i18n.t("API Name")+'</th><th>'+i18n.t("Number of API Calls")+'</th></tr></thead> </table> </div></div>'));
                     }
 
                      for(var k=0 ; k<dataLength ;k++){
