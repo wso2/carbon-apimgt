@@ -197,6 +197,7 @@
                             org.apache.commons.io.*,
                             com.fasterxml.jackson.databind.*; version="${fasterxml.jackson.version}",
                             com.fasterxml.jackson.annotation.*; version="${fasterxml.jackson.version}",
+                            org.apache.axiom.om.*;
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.hybrid.gateway.api.synchronizer.internal,
