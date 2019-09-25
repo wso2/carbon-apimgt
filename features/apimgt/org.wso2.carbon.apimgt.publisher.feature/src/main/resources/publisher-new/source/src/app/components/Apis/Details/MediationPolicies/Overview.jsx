@@ -21,7 +21,7 @@
  * @param {any} props The props passed to the layout
  * @returns {any} HTML representation.
  */
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Grid } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
@@ -29,20 +29,15 @@ import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { withStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
-import { isRestricted } from 'AppData/AuthManager';
 import Alert from 'AppComponents/Shared/Alert';
 import isEmpty from 'lodash/isEmpty';
-import InFlow from './InFlow';
-import OutFlow from './OutFlow';
-import FaultFlow from './FaultFlow';
+import cloneDeep from 'lodash.clonedeep';
+import Flow from './Flow';
+import Diagram from './Diagram';
 
 const styles = theme => ({
-
-    buttonWrapper: {
-        paddingTop: 20,
-    },
     paperRoot: {
         padding: 20,
         marginTop: 20,
@@ -55,6 +50,33 @@ const styles = theme => ({
     itemWrapper: {
         width: 500,
     },
+    root: {
+        paddingTop: 0,
+        paddingLeft: 0,
+        maxWidth: theme.custom.contentAreaWidth,
+    },
+    titleWrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    button: {
+        marginLeft: theme.spacing(2),
+        textTransform: theme.custom.leftMenuTextStyle,
+        color: theme.palette.getContrastText(theme.palette.primary.main),
+    },
+    buttonWrapper: {
+        paddingTop: theme.spacing(3),
+    },
+    addProperty: {
+        marginRight: theme.spacing(2),
+    },
+    buttonIcon: {
+        marginRight: theme.spacing(1),
+    },
+    diagramDown: {
+        marginTop: 80,
+    },
 });
 /**
  * The base component of the mediation policy view.
@@ -62,58 +84,56 @@ const styles = theme => ({
  * @returns {any} HTML representation.
  */
 function Overview(props) {
-    const { classes, api } = props;
-    const inFlowMediationPolicy = (api.mediationPolicies.filter(seq => seq.type === 'IN')[0]);
-    const outFlowMediationPolicy = (api.mediationPolicies.filter(seq => seq.type === 'OUT')[0]);
-    const faultFlowMediationPolicy = (api.mediationPolicies.filter(seq => seq.type === 'FAULT')[0]);
-    const [inPolicyName, setInPolicyName] = useState(inFlowMediationPolicy !== (null || undefined) ?
-        { id: inFlowMediationPolicy.id, name: inFlowMediationPolicy.name, type: inFlowMediationPolicy.type } : {});
-    const [outPolicyName, setOutPolicyName] = useState(outFlowMediationPolicy !== (null || undefined) ?
-        { id: outFlowMediationPolicy.id, name: outFlowMediationPolicy.name, type: outFlowMediationPolicy.type } : {});
-    const [faultPolicyName, setFaultPolicyName] = useState(faultFlowMediationPolicy !== (null || undefined) ?
-        { id: faultFlowMediationPolicy.id, name: faultFlowMediationPolicy.name, type: faultFlowMediationPolicy.type } :
-        {});
-    const NONE = 'none';
-    const mediationPolicies = [];
-    if (!(isEmpty(inPolicyName) || inPolicyName.name === NONE)) {
-        mediationPolicies.push(inPolicyName);
-    }
-    if (!(isEmpty(outPolicyName) || outPolicyName.name === NONE)) {
-        mediationPolicies.push(outPolicyName);
-    }
-    if (!(isEmpty(faultPolicyName) || faultPolicyName.name === NONE)) {
-        mediationPolicies.push(faultPolicyName);
-    }
+    const { classes } = props;
+    const { api, updateAPI } = useContext(ApiContext);
+    const mediationPolicies = cloneDeep(api.mediationPolicies || []);
+    const [inPolicy, setInPolicy] = useState(mediationPolicies.filter(seq => seq.type === 'IN')[0]);
+    const [outPolicy, setOutPolicy] = useState(mediationPolicies.filter(seq => seq.type === 'OUT')[0]);
+    const [faultPolicy, setFaultPolicy] = useState(mediationPolicies.filter(seq => seq.type === 'FAULT')[0]);
+    const [updating, setUpdating] = useState(false);
 
     /**
      * Method to update the api.
      *
-     * @param {function} updateAPI The api update function.
      */
-    const saveAPI = (updateAPI) => {
-        const promisedApi = api.get(api.id);
-        promisedApi
-            .then((getResponse) => {
-                const apiData = getResponse.body;
-                apiData.mediationPolicies = mediationPolicies;
-                updateAPI(apiData);
+    const saveAPI = () => {
+        setUpdating(true);
+        const NONE = 'none';
+        const newMediationPolicies = [];
+        if (!(isEmpty(inPolicy) || inPolicy.name === NONE)) {
+            newMediationPolicies.push(inPolicy);
+        }
+        if (!(isEmpty(outPolicy) || outPolicy.name === NONE)) {
+            newMediationPolicies.push(outPolicy);
+        }
+        if (!(isEmpty(faultPolicy) || faultPolicy.name === NONE)) {
+            newMediationPolicies.push(faultPolicy);
+        }
+
+        updateAPI({ mediationPolicies: newMediationPolicies })
+            .then(() => {
+                Alert.success('Successfully Updated API mediation policies');
             })
             .catch((errorResponse) => {
                 console.error(errorResponse);
                 Alert.error('Error occurred while retrieving API to save mediation policies');
+            })
+            .finally(() => {
+                setUpdating(false);
             });
     };
-    const updateInMediationPolicy = (policies) => {
-        setInPolicyName({ id: policies.id, name: policies.name, type: policies.type });
+    const updateInMediationPolicy = (policy) => {
+        setInPolicy({ id: policy.id, name: policy.name, type: policy.type });
     };
-    const updateOutMediationPolicy = (policies) => {
-        setOutPolicyName({ id: policies.id, name: policies.name, type: policies.type });
+    const updateOutMediationPolicy = (policy) => {
+        setOutPolicy({ id: policy.id, name: policy.name, type: policy.type });
     };
-    const updateFaultMediationPolicy = (policies) => {
-        setFaultPolicyName({ id: policies.id, name: policies.name, type: policies.type });
+    const updateFaultMediationPolicy = (policy) => {
+        setFaultPolicy({ id: policy.id, name: policy.name, type: policy.type });
     };
+
     return (
-        <div >
+        <div className={classes.root}>
             <div className={classes.titleWrapper}>
                 <Typography variant='h4' align='left' className={classes.mainTitle}>
                     <FormattedMessage
@@ -122,41 +142,56 @@ function Overview(props) {
                     />
                 </Typography>
             </div>
-            <ApiContext.Consumer>
-                {({ updateAPI }) => (
-                    <div className={classes.formControl}>
-                        <Grid
-                            container
-                            spacing={12}
-                        >
-                            <Grid item xs={12}>
-                                <Paper className={classes.paperRoot} elevation={1}>
-                                    <InFlow api={api} updateMediationPolicy={updateInMediationPolicy} />
-                                    <OutFlow api={api} updateMediationPolicy={updateOutMediationPolicy} />
-                                    <FaultFlow api={api} updateMediationPolicy={updateFaultMediationPolicy} />
-                                </Paper>
-                            </Grid>
-                        </Grid>
+            <Grid container spacing={1}>
+                <Grid item xs={12} md={4}>
+                    <Flow
+                        updateMediationPolicy={updateInMediationPolicy}
+                        saveAPI={saveAPI}
+                        selectedMediationPolicy={inPolicy}
+                        type='IN'
+                    />
+                    <Flow
+                        updateMediationPolicy={updateOutMediationPolicy}
+                        saveAPI={saveAPI}
+                        selectedMediationPolicy={outPolicy}
+                        type='OUT'
+                    />
+                    <Flow
+                        updateMediationPolicy={updateFaultMediationPolicy}
+                        saveAPI={saveAPI}
+                        selectedMediationPolicy={faultPolicy}
+                        type='FAULT'
+                    />
+                </Grid>
+                <Grid item xs={12} md={8} className={classes.diagramDown}>
+                    <Diagram inPolicy={inPolicy} outPolicy={outPolicy} faultPolicy={faultPolicy} />
+                </Grid>
+                <Grid item xs={12}>
+                    <div className={classes.buttonWrapper}>
                         <Grid
                             container
                             direction='row'
-                            alignItems='center'
-                            spacing={4}
+                            alignItems='flex-start'
+                            spacing={1}
                             className={classes.buttonSection}
-                            style={{ marginTop: 20 }}
                         >
                             <Grid item>
                                 <div>
-                                    <Button
-                                        variant='contained'
-                                        color='primary'
-                                        onClick={() => saveAPI(updateAPI)}
-                                        disabled={isRestricted(['apim:api_create'], api)}
-                                    >
-                                        <FormattedMessage
-                                            id='Apis.Details.MediationPolicies.Overview.save'
-                                            defaultMessage='Save'
-                                        />
+                                    <Button variant='contained' color='primary' onClick={saveAPI} disabled={updating}>
+                                        {updating ? (
+                                            <React.Fragment>
+                                                <FormattedMessage
+                                                    id='Apis.Details.MediationPolicies.MediationPolicies.saving'
+                                                    defaultMessage='Saving..'
+                                                />
+                                                <CircularProgress className={classes.progress} size={16} />
+                                            </React.Fragment>
+                                        ) : (
+                                            <FormattedMessage
+                                                id='Apis.Details.MediationPolicies.MediationPolicies.save'
+                                                defaultMessage='Save'
+                                            />
+                                        )}
                                     </Button>
                                 </div>
                             </Grid>
@@ -164,7 +199,7 @@ function Overview(props) {
                                 <Link to={'/apis/' + api.id + '/overview'}>
                                     <Button>
                                         <FormattedMessage
-                                            id='Apis.Details.MediationPolicies.Overview.cancel'
+                                            id='Apis.Details.MediationPolicies.MediationPolicies.cancel'
                                             defaultMessage='Cancel'
                                         />
                                     </Button>
@@ -172,9 +207,8 @@ function Overview(props) {
                             </Grid>
                         </Grid>
                     </div>
-
-                )}
-            </ApiContext.Consumer>
+                </Grid>
+            </Grid>
         </div>
     );
 }
