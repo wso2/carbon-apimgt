@@ -56,7 +56,12 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -94,6 +99,8 @@ public class APIKeyMgtSubscriberServiceTest {
     @Before
     public void init() throws Exception {
         System.setProperty(CARBON_HOME, "");
+        String confPath = getClass().getClassLoader().getResource("conf").getPath();
+        System.setProperty("carbon.config.dir.path", confPath);
     }
 
     @Test
