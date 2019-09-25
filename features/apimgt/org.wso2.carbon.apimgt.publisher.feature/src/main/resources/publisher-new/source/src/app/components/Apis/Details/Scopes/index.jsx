@@ -15,23 +15,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useContext } from 'react';
+import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import CreateScope from './CreateScope';
 import EditScope from './EditScope';
 import Scopes from './Scopes';
 import { PageNotFound } from '../../../Base/Errors';
 
 const Scope = () => {
-    const { isAPIProduct } = useContext(APIContext);
-    const urlPrefix = isAPIProduct ? 'api-products' : 'apis';
+    const [api, updateAPI] = useAPI();
+    const urlPrefix = api.isAPIProduct() ? 'api-products' : 'apis';
     return (
         <Switch>
-            <Route exact path={'/' + urlPrefix + '/:api_uuid/scopes/'} component={() => <Scopes />} />
-            <Route exact path={'/' + urlPrefix + '/:api_uuid/scopes/create'} component={() => <CreateScope />} />
-            <Route exact path={'/' + urlPrefix + '/:api_uuid/scopes/edit'} component={() => <EditScope />} />
+            <Route exact path={'/' + urlPrefix + '/:api_uuid/scopes/'} component={Scopes} />
+            <Route
+                exact
+                path={'/' + urlPrefix + '/:api_uuid/scopes/create'}
+                component={props => <CreateScope api={api} {...props} updateAPI={updateAPI} />}
+            />
+            <Route
+                exact
+                path={'/' + urlPrefix + '/:api_uuid/scopes/edit'}
+                component={props => <EditScope api={api} {...props} updateAPI={updateAPI} />}
+            />
             <Route component={PageNotFound} />
         </Switch>
     );
