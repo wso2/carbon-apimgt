@@ -34,7 +34,7 @@ const createAppStep = (props) => {
         name: '',
         throttlingPolicy: '',
         description: '',
-        tokenType: null,
+        tokenType: 'JWT',
     });
     const [isNameValid, setIsNameValid] = useState(true);
 

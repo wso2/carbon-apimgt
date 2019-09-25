@@ -105,7 +105,7 @@ class AppsTableContent extends Component {
                                 <TableCell align='left'>{app.throttlingPolicy}</TableCell>
                                 <TableCell align='left'>
                                     {app.status === this.APPLICATION_STATES.APPROVED && (
-                                        <Typography variant='subheading' gutterBottom>
+                                        <Typography variant='subtitle1' gutterBottom>
                                             <FormattedMessage
                                                 id='Applications.Listing.AppsTableContent.active'
                                                 defaultMessage='ACTIVE'
@@ -113,7 +113,7 @@ class AppsTableContent extends Component {
                                         </Typography>
                                     )}
                                     {app.status === this.APPLICATION_STATES.CREATED && (
-                                        <Typography variant='subheading' gutterBottom>
+                                        <Typography variant='subtitle1' gutterBottom>
                                             <FormattedMessage
                                                 id='Applications.Listing.AppsTableContent.inactive'
                                                 defaultMessage='INACTIVE'
@@ -127,7 +127,7 @@ class AppsTableContent extends Component {
                                         </Typography>
                                     )}
                                     {app.status === this.APPLICATION_STATES.REJECTED && (
-                                        <Typography variant='subheading' gutterBottom>
+                                        <Typography variant='subtitle1' gutterBottom>
                                             <FormattedMessage
                                                 id='Applications.Listing.AppsTableContent.rejected'
                                                 defaultMessage='REJECTED'

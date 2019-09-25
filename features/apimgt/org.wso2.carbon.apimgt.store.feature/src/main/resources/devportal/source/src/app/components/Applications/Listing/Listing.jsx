@@ -263,7 +263,7 @@ class Listing extends Component {
                         <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='applications' />
                     </div>
                     <div className={classes.mainTitleWrapper}>
-                        <Typography variant='display1' className={classes.mainTitle}>
+                        <Typography variant='h4' className={classes.mainTitle}>
                             <FormattedMessage
                                 id='Applications.Listing.Listing.applications'
                                 defaultMessage='Applications'

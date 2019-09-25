@@ -336,7 +336,7 @@ class SignUp extends React.Component {
                                         />
                                     </Grid>
                                     <Grid item>
-                                        <Typography type='subheading' align='right' gutterBottom>
+                                        <Typography variant='subtitle1' align='right' gutterBottom>
                                             <FormattedMessage
                                                 id='AnonymousView.SignUp.api.store'
                                                 defaultMessage='API STORE'
@@ -351,7 +351,7 @@ class SignUp extends React.Component {
                                 <div className='login-main-content'>
                                     <Paper elevation={1} square className='login-paper'>
                                         <form className='login-form'>
-                                            <Typography type='body1' gutterBottom>
+                                            <Typography variant='body1' gutterBottom>
                                                 <FormattedMessage
                                                     id='AnonymousView.SignUp.create.your.account'
                                                     defaultMessage='Create your account'

@@ -19,7 +19,12 @@
 import React from 'react';
 import Notification from 'rc-notification';
 import { injectIntl } from 'react-intl';
+import Configurations from 'Config';
+import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
+import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import Message from './Message';
+
+const theme = createMuiTheme(Configurations.themes.light);
 
 /**
  * Common alerting/message displaying component for Store application, Pre-set vertical: 'top',
@@ -63,7 +68,10 @@ class Alert {
                     duration: this.duration,
                     content: (
                         <div>
-                            <Message handleClose={this.remove} message={this.message} type={this.type} />
+                            <MuiThemeProvider theme={theme}>
+                                <Message handleClose={this.remove} message={this.message} type={this.type} />
+                            </MuiThemeProvider>
+
                         </div>
                     ),
                 });

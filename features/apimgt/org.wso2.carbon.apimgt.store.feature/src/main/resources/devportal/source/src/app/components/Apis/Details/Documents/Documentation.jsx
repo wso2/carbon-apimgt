@@ -234,7 +234,7 @@ function FullWidthGrid(props) {
                 <FormattedMessage id='Apis.Details.Documents.Documentation.title' defaultMessage='Documentation' />
             </Typography>
             {documentList && (
-                <Grid container spacing={24} className={classes.docContent}>
+                <Grid container spacing={3} className={classes.docContent}>
                     <Grid item xs={12} sm={3}>
                         <Paper className={classes.paperMenu}>
                             <List component='nav' className={classes.listRoot}>

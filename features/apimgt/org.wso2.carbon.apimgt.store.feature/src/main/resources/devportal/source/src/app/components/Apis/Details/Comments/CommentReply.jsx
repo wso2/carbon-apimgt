@@ -210,12 +210,12 @@ class CommentReply extends React.Component {
             comments
                 && comments.map((comment, index) => (
                     <div key={comment.commentId + '-' + index} className={classes.contentWrapper}>
-                        <Grid container spacing={8} className={classes.root}>
+                        <Grid container spacing={1} className={classes.root}>
                             <Grid item>
                                 <Icon className={classes.commentIcon}>account_box</Icon>
                             </Grid>
                             <Grid item xs zeroMinWidth>
-                                <Typography noWrap className={classes.commentText} variant='body2'>
+                                <Typography noWrap className={classes.commentText} variant='body1'>
                                     {comment.createdBy}
                                 </Typography>
 

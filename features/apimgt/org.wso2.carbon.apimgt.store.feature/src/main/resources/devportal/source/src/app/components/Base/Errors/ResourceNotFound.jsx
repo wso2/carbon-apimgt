@@ -24,10 +24,10 @@ import { FormattedMessage } from 'react-intl';
 const ResourceNotFound = (props) => {
     return (
         <Paper elevation={4}>
-            <Typography type='headline' component='h3'>
+            <Typography variant='h5' component='h3'>
                 <FormattedMessage id='Base.Errors.ResourceNotfound.title' defaultMessage='404 Resource Not Found!' />
             </Typography>
-            <Typography type='body1' component='p'>
+            <Typography variant='body1' component='p'>
                 <FormattedMessage
                     id='Base.Errors.ResourceNotfound.message'
                     defaultMessage="Can't find the resource you are looking for"

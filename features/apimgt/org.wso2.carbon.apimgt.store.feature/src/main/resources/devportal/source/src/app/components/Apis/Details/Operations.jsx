@@ -55,7 +55,7 @@ RenderMethodBase.propTypes = {
     method: PropTypes.object.isRequired,
 };
 
-const RenderMethod = withTheme()(RenderMethodBase);
+const RenderMethod = withTheme(RenderMethodBase);
 /**
  *
  *

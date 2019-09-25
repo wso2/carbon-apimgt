@@ -140,7 +140,7 @@ function Overview(props) {
     return (
         <ApiContext.Consumer>
             {({ api, applicationsAvailable, subscribedApplications }) => (
-                <Grid container className={classes.root} spacing={16}>
+                <Grid container className={classes.root} spacing={2}>
                     {!api.advertiseInfo.advertised
                         && (
                             <Grid item xs={12} lg={6}>
@@ -161,7 +161,7 @@ function Overview(props) {
                                         </Typography>
                                     </ExpansionPanelSummary>
                                     <ExpansionPanelDetails>
-                                        <Grid container className={classes.root} spacing={16}>
+                                        <Grid container className={classes.root} spacing={2}>
                                             <Grid item xs={12}>
                                                 <div className={classes.subscriptionTop}>
                                                     <div className={classes.boxBadge}>
@@ -329,7 +329,7 @@ function Overview(props) {
                                             </Typography>
                                         </ExpansionPanelSummary>
                                         <ExpansionPanelDetails className={classes.resourceWrapper}>
-                                            <Grid container className={classes.root} spacing={16}>
+                                            <Grid container className={classes.root} spacing={2}>
                                                 {api && <Sdk apiId={api.id} onlyIcons />}
                                                 <Grid item xs={12}>
                                                     <Typography>
@@ -376,7 +376,7 @@ function Overview(props) {
                                 </Typography>
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails className={classes.resourceWrapper}>
-                                <Grid container className={classes.root} spacing={16}>
+                                <Grid container className={classes.root} spacing={2}>
                                     <OverviewDocuments apiId={api.id} />
                                 </Grid>
                             </ExpansionPanelDetails>
@@ -401,7 +401,7 @@ function Overview(props) {
                                     </Typography>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
-                                    <Grid container className={classes.root} spacing={16}>
+                                    <Grid container className={classes.root} spacing={2}>
                                         <Grid item xs={12}>
                                             <div className={classes.subscriptionTop}>
                                                 <div className={classes.boxBadge}>1</div>

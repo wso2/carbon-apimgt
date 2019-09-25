@@ -89,7 +89,7 @@ const generateAccessTokenStep = (props) => {
         <React.Fragment>
             <Tabs
                 value={0}
-                fullWidth
+                variant='fullWidth'
                 indicatorColor='secondary'
                 textColor='secondary'
             >

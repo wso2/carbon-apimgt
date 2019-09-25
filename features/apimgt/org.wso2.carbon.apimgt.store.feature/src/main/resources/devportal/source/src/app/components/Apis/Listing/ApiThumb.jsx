@@ -230,7 +230,7 @@ class ApiThumb extends React.Component {
                     <Link to={details_link} className={classes.textWrapper}>
                         <Typography
                             className={classes.thumbHeader}
-                            variant='display1'
+                            variant='h4'
                             gutterBottom
                             onClick={this.handleRedirectToAPIOverview}
                             title={name}
@@ -244,13 +244,13 @@ class ApiThumb extends React.Component {
                     </Typography>
                     <div className={classes.thumbInfo}>
                         <div className={classes.thumbLeft}>
-                            <Typography variant='subheading'>{version}</Typography>
+                            <Typography variant='subtitle1'>{version}</Typography>
                             <Typography variant='caption' gutterBottom align='left'>
                                 <FormattedMessage defaultMessage='Version' id='Apis.Listing.ApiThumb.version' />
                             </Typography>
                         </div>
                         <div className={classes.thumbRight}>
-                            <Typography variant='subheading' align='right' className={classes.contextBox}>
+                            <Typography variant='subtitle1' align='right' className={classes.contextBox}>
                                 {context}
                             </Typography>
                             <Typography variant='caption' gutterBottom align='right'>
@@ -260,12 +260,12 @@ class ApiThumb extends React.Component {
                     </div>
                     <div className={classes.thumbInfo}>
                         <div className={classes.thumbLeft}>
-                            <Typography variant='subheading' gutterBottom align='left'>
+                            <Typography variant='subtitle1' gutterBottom align='left'>
                                 <StarRatingBar apiRating={api.avgRating} apiId={api.id} isEditable={false} showSummary={false} />
                             </Typography>
                         </div>
                         <div className={classes.thumbRight}>
-                            <Typography variant='subheading' gutterBottom align='right'>
+                            <Typography variant='subtitle1' gutterBottom align='right'>
                                 {api.type === 'GRAPHQL' && (
                                     <Chip label={api.type} color='primary' />
                                 )}

@@ -143,26 +143,28 @@ class DocThumb extends React.Component {
             selectedIcon, color, backgroundIndex, category,
         } = this.state;
         const { doc, classes, theme } = this.props;
-        const { doc : { name, sourceType, apiName, apiVersion, id, apiUUID } } = this.props;
+        const { doc: {
+ name, sourceType, apiName, apiVersion, id, apiUUID 
+} } = this.props;
         const details_link = '/apis/' + apiUUID + '/docs';
         const { thumbnail } = theme.custom;
         const imageWidth = thumbnail.width;
         const defaultImage = thumbnail.defaultApiImage;
 
-        let ImageView = (
-                <ImageGenerator
-                    width={imageWidth}
-                    height={140}
-                    api={doc}
-                    fixedIcon={{
-                        key: selectedIcon,
-                        color,
-                        backgroundIndex,
-                        category,
-                        doc,
-                    }}
-                />
-            );
+        const ImageView = (
+            <ImageGenerator
+                width={imageWidth}
+                height={140}
+                api={doc}
+                fixedIcon={{
+                    key: selectedIcon,
+                    color,
+                    backgroundIndex,
+                    category,
+                    doc,
+                }}
+            />
+        );
 
         return (
             <div className={classes.thumbWrapper}>
@@ -179,7 +181,7 @@ class DocThumb extends React.Component {
                     <Link to={details_link} className={classes.textWrapper}>
                         <Typography
                             className={classes.thumbHeader}
-                            variant='display1'
+                            variant='h4'
                             gutterBottom
                             onClick={this.handleRedirectToAPIOverview}
                             title={name}
@@ -193,13 +195,13 @@ class DocThumb extends React.Component {
                     </Typography>
                     <div className={classes.thumbInfo}>
                         <div className={classes.thumbLeft}>
-                            <Typography variant='subheading'>{apiName}</Typography>
+                            <Typography variant='subtitle1'>{apiName}</Typography>
                             <Typography variant='caption' gutterBottom align='left'>
                                 <FormattedMessage defaultMessage='Api Name' id='Apis.Listing.DocThumb.apiName' />
                             </Typography>
                         </div>
                         <div className={classes.thumbRight}>
-                            <Typography variant='subheading' align='right' className={classes.contextBox}>
+                            <Typography variant='subtitle1' align='right' className={classes.contextBox}>
                                 {apiVersion}
                             </Typography>
                             <Typography variant='caption' gutterBottom align='right'>

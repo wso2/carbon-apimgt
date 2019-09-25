@@ -144,7 +144,7 @@ class TagCloudListing extends React.Component {
                         <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
                     </div>
                     <div className={classes.mainTitleWrapper}>
-                        <Typography variant='display1' className={classes.mainTitle}>
+                        <Typography variant='h4' className={classes.mainTitle}>
                             <FormattedMessage
                                 defaultMessage='API Groups'
                                 id='Apis.Listing.TagCloudListing.apigroups.main'
@@ -177,7 +177,7 @@ class TagCloudListing extends React.Component {
                     ? <ApiTagCloud data={apisTagCloudGroup} listType={listType} apiType={apiType} />
                     : (
                         <div className={classes.mainTitle}>
-                            <Typography variant='subheading' gutterBottom align='center'>
+                            <Typography variant='subtitle1' gutterBottom align='center'>
                                 <FormattedMessage
                                     defaultMessage='Tags Connot be Found'
                                     id='Apis.Listing.TagCloudListing.tagsNotFound'

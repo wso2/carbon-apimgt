@@ -121,7 +121,7 @@ function ApiTagThumb(props) {
                 <Link to={tagLink} className={classes.textWrapper}>
                     <Typography
                         className={classes.thumbHeader}
-                        variant='display1'
+                        variant='h4'
                         gutterBottom
                         onClick={this}
                         title={name}
