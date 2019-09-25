@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -970,5 +971,21 @@ public class API implements Serializable {
                     .append("\"}\n");
         }
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+
+        if (!(o instanceof API)) {
+            return false;
+        }
+
+        return Objects.equals(id, ((API) o).id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -721,7 +720,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
 
             APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(body, provider);
 
-            apiProvider.addAPIProduct(productToBeAdded);
+            apiProvider.addAPIProductWithoutPublishingToGateway(productToBeAdded);
             APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
 
             APIDefinition parser = new OAS3Parser();
@@ -730,6 +729,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             apiProvider.saveSwagger20Definition(productToBeAdded.getId(), apiDefinition);
 
             APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
+
+            apiProvider.saveToGateway(createdProduct);
 
             APIProductDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct);
             URI createdApiProductUri = new URI(

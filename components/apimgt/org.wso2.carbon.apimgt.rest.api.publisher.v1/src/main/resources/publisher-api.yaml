@@ -6842,6 +6842,27 @@ definitions:
         #   next: "/apis?limit=1&offset=2&query="
         #   previous: "/apis?limit=1&offset=0&query="
 
+  #-----------------------------------------------------
+  # The API List resource
+  #-----------------------------------------------------
+  APIListExpanded:
+    title: API List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of APIs returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/API'
+      pagination:
+        $ref: '#/definitions/Pagination'
+        # example:
+        #   next: "/apis?limit=1&offset=2&query="
+        #   previous: "/apis?limit=1&offset=0&query="
+
 #-----------------------------------------------------
 # The API Info resource
 #-----------------------------------------------------
