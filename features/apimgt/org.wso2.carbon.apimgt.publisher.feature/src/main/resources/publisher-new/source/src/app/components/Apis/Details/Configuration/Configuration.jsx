@@ -184,7 +184,8 @@ export default function Configuration() {
             case 'securityScheme':
                 // If event came from mandatory selector of either Application level or Transport level
                 if (
-                    [API_SECURITY_MUTUAL_SSL_MANDATORY, API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY].includes(event.name)
+                    [API_SECURITY_MUTUAL_SSL_MANDATORY, API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY]
+                        .includes(event.name)
                 ) {
                     // If user select not mandatory (optional) , Remove the respective schema, else add it
                     if (event.value === 'optional') {
@@ -218,13 +219,15 @@ export default function Configuration() {
                             newState[action].includes(API_SECURITY_API_KEY)
                         )
                     ) {
-                        const noMandatoryOAuthBasicAuth = newState[action].filter(schema => schema !== API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
+                        const noMandatoryOAuthBasicAuth = newState[action]
+                            .filter(schema => schema !== API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
                         return {
                             ...newState,
                             [action]: noMandatoryOAuthBasicAuth,
                         };
                     } else if (!newState[action].includes(API_SECURITY_MUTUAL_SSL)) {
-                        const noMandatoryMutualSSL = newState[action].filter(schema => schema !== API_SECURITY_MUTUAL_SSL_MANDATORY);
+                        const noMandatoryMutualSSL = newState[action]
+                            .filter(schema => schema !== API_SECURITY_MUTUAL_SSL_MANDATORY);
                         return {
                             ...newState,
                             [action]: noMandatoryMutualSSL,
