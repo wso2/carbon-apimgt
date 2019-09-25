@@ -30,8 +30,10 @@ import TableRow from '@material-ui/core/TableRow';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+
 import APIRateLimiting from '../Resources/components/APIRateLimiting';
-import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import Operation from './Operation';
 
 
@@ -119,23 +121,25 @@ class Operations extends React.Component {
      */
     constructor(props) {
         super(props);
+        const { api } = props;
         this.state = {
             notFound: false,
             apiPolicies: [],
-            operations: null,
+            operations: api.operations,
+            apiThrottlingPolicy: api.apiThrottlingPolicy,
+            isSaving: false,
         };
 
         this.newApi = new Api();
         this.handleUpdateList = this.handleUpdateList.bind(this);
+        this.handleApiThrottlePolicy = this.handleApiThrottlePolicy.bind(this);
+        this.updateOperations = this.updateOperations.bind(this);
     }
 
     /**
      *
      */
     componentDidMount() {
-        this.setState({
-            operations: this.props.api.operations,
-        });
         const promisedResPolicies = Api.policies('api');
         promisedResPolicies
             .then((policies) => {
@@ -160,26 +164,37 @@ class Operations extends React.Component {
      */
     handleUpdateList(newOperation) {
         const { operations } = this.state;
-        const updatedList = operations.map(operation => (operation.target === newOperation.target
-            ? newOperation : operation));
+        const updatedList = operations.map(operation =>
+            (operation.target === newOperation.target ? newOperation : operation));
         this.setState({ operations: updatedList });
     }
 
     /**
      *
+     *
+     * @param {*} throttlePolicy
+     * @memberof Operations
      */
-    updateOperations(updateAPI) {
-        const { operations } = this.state;
-        updateAPI({ operations });
+    handleApiThrottlePolicy(apiThrottlingPolicy) {
+        this.setState({ apiThrottlingPolicy });
+    }
+    /**
+     *
+     */
+    updateOperations() {
+        const { operations, apiThrottlingPolicy } = this.state;
+        const { updateAPI } = this.props;
+        this.setState({ isSaving: true });
+        updateAPI({ operations, apiThrottlingPolicy }).finally(() => this.setState({ isSaving: false }));
     }
 
     /**
      * @inheritdoc
      */
     render() {
-        const { api, updateAPI } = this.props;
+        const { api } = this.props;
         const {
-            operations, apiPolicies,
+            operations, apiPolicies, apiThrottlingPolicy, isSaving,
         } = this.state;
         if (this.state.notFound) {
             return <ResourceNotFound message={this.props.resourceNotFoundMessage} />;
@@ -194,6 +209,7 @@ class Operations extends React.Component {
                     <APIRateLimiting
                         operationRateLimits={apiPolicies}
                         api={api}
+                        value={apiThrottlingPolicy}
                         onChange={this.handleApiThrottlePolicy}
                     />
                 </Grid>
@@ -270,9 +286,11 @@ class Operations extends React.Component {
                             <Button
                                 variant='contained'
                                 color='primary'
+                                disabled={isSaving}
                                 className={classes.buttonMain}
-                                onClick={() => this.updateOperations(updateAPI)}
+                                onClick={this.updateOperations}
                             >
+                                {isSaving && <CircularProgress size={20} />}
                                 <FormattedMessage id='Apis.Details.Resources.Resources.save' defaultMessage='Save' />
                             </Button>
                         </div>
@@ -284,8 +302,7 @@ class Operations extends React.Component {
 }
 
 Operations.propTypes = {
-    classes: PropTypes.shape({
-    }).isRequired,
+    classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         operations: PropTypes.array,
         scopes: PropTypes.array,

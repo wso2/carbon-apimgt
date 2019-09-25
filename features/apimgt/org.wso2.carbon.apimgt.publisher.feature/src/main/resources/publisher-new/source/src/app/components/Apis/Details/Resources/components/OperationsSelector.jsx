@@ -17,6 +17,7 @@
  */
 
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -30,6 +31,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
+import Tooltip from '@material-ui/core/Tooltip';
 
 /**
  *
@@ -91,14 +93,16 @@ export default function OperationsSelector(props) {
             </Grid>
             <Grid item>
                 <Box mr={19}>
-                    <IconButton
-                        onClick={() => setIsConfirmOpen(true)}
-                        disabled={!(isIndeterminate || isSelectAll) || isDeleting}
-                        aria-label='delete all'
-                        size='small'
-                    >
-                        {isDeleting ? <CircularProgress size={24} thickness={3} /> : <DeleteSweepIcon />}
-                    </IconButton>
+                    <Tooltip title='Delete selected operations'>
+                        <IconButton
+                            onClick={() => setIsConfirmOpen(true)}
+                            disabled={!(isIndeterminate || isSelectAll) || isDeleting}
+                            aria-label='delete all'
+                            size='small'
+                        >
+                            {isDeleting ? <CircularProgress size={24} thickness={3} /> : <DeleteSweepIcon />}
+                        </IconButton>
+                    </Tooltip>
                 </Box>
             </Grid>
             <Dialog
@@ -122,3 +126,12 @@ export default function OperationsSelector(props) {
         </Grid>
     );
 }
+
+OperationsSelector.defaultProps = {};
+
+OperationsSelector.propTypes = {
+    selectedOperations: PropTypes.shape({}).isRequired,
+    setSelectedOperation: PropTypes.func.isRequired,
+    openAPI: PropTypes.shape({}).isRequired,
+    updateOpenAPI: PropTypes.func.isRequired,
+};

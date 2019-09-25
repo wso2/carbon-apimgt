@@ -224,9 +224,9 @@ export default function Resources(props) {
                 <Grid item md={12}>
                     <APIRateLimiting
                         operationRateLimits={operationRateLimits}
-                        api={api}
+                        value={api.apiThrottlingPolicy}
                         updateAPI={updateAPI}
-                        disabledAction={false}
+                        isAPIProduct={api.isAPIProduct()}
                     />
                 </Grid>
             )}
