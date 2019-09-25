@@ -97,10 +97,24 @@ function InFlow(props) {
                 )}
             </Typography>
             <Typography variant='caption' align='left' className={classes.subTitleDescription} component='div'>
-                <FormattedMessage
-                    id='Apis.Details.MediationPolicies.MediationPolicies.flow.content'
-                    defaultMessage='Mediation policy that is engaged in Request Flow'
-                />
+                {type === 'IN' && (
+                    <FormattedMessage
+                        id='Apis.Details.MediationPolicies.MediationPolicies.flow.in.content'
+                        defaultMessage='Mediation policy that is engaged in Request Flow'
+                    />
+                )}
+                {type === 'OUT' && (
+                    <FormattedMessage
+                        id='Apis.Details.MediationPolicies.MediationPolicies.flow.out.content'
+                        defaultMessage='Mediation policy that is engaged in Out Flow'
+                    />
+                )}
+                {type === 'FAULT' && (
+                    <FormattedMessage
+                        id='Apis.Details.MediationPolicies.MediationPolicies.flow.fault.content'
+                        defaultMessage='Mediation policy that is engaged in Fault Flow'
+                    />
+                )}
             </Typography>
             <Paper className={classes.paper}>
                 <div className={classes.flowWrapper}>
@@ -112,7 +126,10 @@ function InFlow(props) {
                         )}
                     </Typography>
                     <Button variant='contained' className={classes.button} onClick={startEditing}>
-                        Update
+                        <FormattedMessage
+                            id='Apis.Details.MediationPolicies.MediationPolicies.flow.update.btn'
+                            defaultMessage='Update'
+                        />
                     </Button>
                 </div>
             </Paper>
