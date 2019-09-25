@@ -8,6 +8,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
@@ -63,10 +64,11 @@ import static org.mockito.Matchers.any;
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ MultitenantUtils.class, PrivilegedCarbonContext.class, CarbonContext.class, OAuthApplicationInfo.class, ApplicationManagementService.class,
-        APIKeyMgtSubscriberService.class, ApiMgtDAO.class, OAuthServerConfiguration.class, OAuthCache.class,
-        ServiceReferenceHolder.class, CarbonUtils.class, ServerConfiguration.class, APIUtil.class,
-        APIKeyMgtUtil.class, OAuthServerConfiguration.class })
+@PrepareForTest(
+        { MultitenantUtils.class, PrivilegedCarbonContext.class, CarbonContext.class, OAuthApplicationInfo.class,
+                ApplicationManagementService.class, APIKeyMgtSubscriberService.class, ApiMgtDAO.class,
+                OAuthServerConfiguration.class, OAuthCache.class, ServiceReferenceHolder.class, CarbonUtils.class,
+                ServerConfiguration.class, APIUtil.class, APIKeyMgtUtil.class, OAuthServerConfiguration.class })
 public class APIKeyMgtSubscriberServiceTest {
     private final int TENANT_ID = 1234;
     private final String TENANT_DOMAIN = "foo.com";
@@ -88,6 +90,11 @@ public class APIKeyMgtSubscriberServiceTest {
 
     @Mock
     private OAuthServerConfiguration mockOAuthServerConfiguration;
+
+    @Before
+    public void init() throws Exception {
+        System.setProperty(CARBON_HOME, "");
+    }
 
     @Test
     public void createOAuthApplicationByApplicationInfo() throws Exception {
