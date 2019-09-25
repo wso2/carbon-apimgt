@@ -86,8 +86,10 @@ class SOAPToRESTConfigContext extends ConfigContext {
     }
 
     private void init() {
-        resourcePath = soapAction.replaceAll(namespace, SOAPToRESTConstants.EMPTY_STRING);
-        resourcePath = resourcePath.replaceAll(SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR,
-                SOAPToRESTConstants.EMPTY_STRING);
+        if (soapAction != null) {
+            resourcePath = soapAction.replaceAll(namespace, SOAPToRESTConstants.EMPTY_STRING);
+            resourcePath = resourcePath.replaceAll(SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR,
+                    SOAPToRESTConstants.EMPTY_STRING);
+        }
     }
 }
