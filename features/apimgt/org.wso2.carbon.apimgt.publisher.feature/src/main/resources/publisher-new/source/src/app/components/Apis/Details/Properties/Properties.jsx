@@ -40,6 +40,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import APIContext, { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import { isRestricted } from 'AppData/AuthManager';
+import Alert from 'AppComponents/Shared/Alert';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import EditableRow from './EditableRow';
 
@@ -242,9 +243,14 @@ function Properties(props) {
      */
     const handleAddToList = () => {
         const additionalPropertiesCopy = JSON.parse(JSON.stringify(additionalProperties));
-
-        additionalPropertiesCopy[propertyKey] = propertyValue;
-        setAdditionalProperties(additionalPropertiesCopy);
+        if (additionalPropertiesCopy[propertyKey] != null) {
+            Alert.warning('Property name already exists');
+        } else {
+            additionalPropertiesCopy[propertyKey] = propertyValue;
+            setAdditionalProperties(additionalPropertiesCopy);
+            setPropertyKey(null);
+            setPropertyValue(null);
+        }
     };
 
     /**
@@ -328,7 +334,7 @@ function Properties(props) {
                                 <FormattedMessage
                                     id='Apis.Details.Properties.Properties.add.new.property.message.content'
                                     defaultMessage={
-                                        'If you want to add specific custom properties to your' +
+                                        'If you want to add specific custom properties to your ' +
                                         'API you can add them here.'
                                     }
                                 />
@@ -361,7 +367,7 @@ function Properties(props) {
                                         <TableCell>
                                             <FormattedMessage
                                                 id='Apis.Details.Properties.Properties.add.new.property.table'
-                                                defaultMessage='Add New Property'
+                                                defaultMessage='Property Name'
                                             />
                                         </TableCell>
                                         <TableCell>
@@ -384,7 +390,7 @@ function Properties(props) {
                                                         label={intl.formatMessage({
                                                             id: `Apis.Details.Properties.Properties.
                                                                 show.add.property.property.name`,
-                                                            defaultMessage: 'Property Name',
+                                                            defaultMessage: 'Name',
                                                         })}
                                                         margin='normal'
                                                         variant='outlined'
@@ -405,7 +411,7 @@ function Properties(props) {
                                                         id='outlined-required'
                                                         label={intl.formatMessage({
                                                             id: 'Apis.Details.Properties.Properties.property.value',
-                                                            defaultMessage: 'Property Value',
+                                                            defaultMessage: 'Value',
                                                         })}
                                                         margin='normal'
                                                         variant='outlined'
@@ -451,9 +457,9 @@ function Properties(props) {
                                                         <FormattedMessage
                                                             id='Apis.Details.Properties.Properties.help'
                                                             defaultMessage={
-                                                                'Property name should be unique, should not contain' +
+                                                                'Property name should be unique, should not contain ' +
                                                                 'spaces, cannot be case-sensitive, cannot be any ' +
-                                                                'of the following as they are reserved keywords:' +
+                                                                'of the following as they are reserved keywords : ' +
                                                                 'provider, version, context, status, description, ' +
                                                                 'subcontext, doc, lcState, name, tags.'
                                                             }
