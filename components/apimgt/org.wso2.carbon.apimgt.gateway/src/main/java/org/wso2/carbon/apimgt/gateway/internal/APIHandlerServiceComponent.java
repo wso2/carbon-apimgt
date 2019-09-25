@@ -132,6 +132,9 @@ public class APIHandlerServiceComponent {
         CacheProvider.createResourceCache();
         CacheProvider.createGatewayTokenCache();
         CacheProvider.createInvalidTokenCache();
+        CacheProvider.createGatewayBasicAuthResourceCache();
+        CacheProvider.createGatewayUsernameCache();
+        CacheProvider.createInvalidUsernameCache();
     }
 
     @Deactivate
