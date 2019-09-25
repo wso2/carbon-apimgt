@@ -229,7 +229,7 @@ for (var index = 0; index < apiSecurity.length; index++){
                 </div>
            </div>
         <% } %>
-     <div class="col-md-12 col-lg-9">
+    <div class="col-md-12 col-lg-9" id="socialMediaId">
     <!-- End Additional Properties Section -->
     <h4 class="add-margin-top-5x"><%=i18n.localize("Share")%></h4>
     <ul class="nav nav-pills">
@@ -259,7 +259,7 @@ for (var index = 0; index < apiSecurity.length; index++){
 </div>
 </div>
 <div class="row">
-      <div class="col-md-12 col-lg-9">
+      <div class="col-md-12 col-lg-9"  id="commentsId">
             <h4 class="add-margin-top-5x"><%=i18n.localize("Comments")%></h4>
             <% if(user) jagg.includeBlock("comment/comment-add", null); %>
             <% jagg.includeBlock("comment/comment-list", {api:api}); %>

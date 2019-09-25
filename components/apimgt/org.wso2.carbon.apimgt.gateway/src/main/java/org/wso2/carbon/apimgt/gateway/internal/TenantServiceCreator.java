@@ -136,6 +136,9 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
         CacheProvider.createResourceCache();
         CacheProvider.createGatewayTokenCache();
         CacheProvider.createInvalidTokenCache();
+        CacheProvider.createGatewayBasicAuthResourceCache();
+        CacheProvider.createGatewayUsernameCache();
+        CacheProvider.createInvalidUsernameCache();
     }
 
     /**

@@ -99,7 +99,7 @@ const useStyles = makeStyles(theme => ({
  */
 function Certificates(props) {
     const {
-        certificates, uploadCertificate, deleteCertificate, isMutualSSLEnabled, apiId,
+        certificates, uploadCertificate, deleteCertificate, isMutualSSLEnabled, apiId, endpoints,
     } = props;
     const [certificateList, setCertificateList] = useState([]);
     const [openCertificateDetails, setOpenCertificateDetails] = useState({ open: false, anchor: null, details: {} });
@@ -240,7 +240,6 @@ function Certificates(props) {
                     </Typography>
                 </DialogTitle>
                 <DialogContent className={classes.alertWrapper}>
-                    <Icon className={classes.warningIcon}>warning</Icon>
                     <Typography>
                         <FormattedMessage
                             id='Apis.Details.Endpoints.GeneralConfiguration.Certificates.confirm.certificate.delete'
@@ -311,6 +310,7 @@ function Certificates(props) {
                 </DialogActions>
             </Dialog>
             <UploadCertificate
+                endpoints={endpoints}
                 certificates={certificates}
                 uploadCertificate={uploadCertificate}
                 isMutualSSLEnabled={isMutualSSLEnabled}
@@ -336,5 +336,6 @@ Certificates.propTypes = {
     deleteCertificate: PropTypes.func.isRequired,
     apiId: PropTypes.string,
     isMutualSSLEnabled: PropTypes.bool,
+    endpoints: PropTypes.shape([]).isRequired,
 };
 export default injectIntl((Certificates));

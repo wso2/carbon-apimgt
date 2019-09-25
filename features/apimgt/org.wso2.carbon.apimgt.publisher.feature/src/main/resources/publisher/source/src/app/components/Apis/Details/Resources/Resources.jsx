@@ -178,7 +178,12 @@ export default function Resources(props) {
         <Grid container direction='row' justify='flex-start' spacing={2} alignItems='stretch'>
             {!disableRateLimiting && (
                 <Grid item md={12}>
-                    <APIRateLimiting operationRateLimits={operationRateLimits} api={api} updateAPI={updateAPI} />
+                    <APIRateLimiting
+                        operationRateLimits={operationRateLimits}
+                        api={api}
+                        updateAPI={updateAPI}
+                        disabledAction={false}
+                    />
                 </Grid>
             )}
             {!disableAddOperation && (

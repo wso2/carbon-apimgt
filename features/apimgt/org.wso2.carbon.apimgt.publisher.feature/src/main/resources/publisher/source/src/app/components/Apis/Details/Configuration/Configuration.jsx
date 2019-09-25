@@ -339,16 +339,18 @@ export default function Configuration() {
                             <div className={classes.itemPadding}>
                                 <Tags api={apiConfig} configDispatcher={configDispatcher} />
                             </div>
-                            <div className={classes.itemPadding}>
-                                <Grid
-                                    container
-                                    direction='row'
-                                >
-                                    <Grid item xs={12} md={6}>
-                                        <DefaultVersion api={apiConfig} configDispatcher={configDispatcher} />
+                            { api.apiType !== 'APIProduct' && (
+                                <div className={classes.itemPadding}>
+                                    <Grid
+                                        container
+                                        direction='row'
+                                    >
+                                        <Grid item xs={12} md={6}>
+                                            <DefaultVersion api={apiConfig} configDispatcher={configDispatcher} />
+                                        </Grid>
                                     </Grid>
-                                </Grid>
-                            </div>
+                                </div>
+                            )}
                         </Paper>
                     </Grid>
                     <Grid item xs={5}>

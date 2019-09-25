@@ -109,6 +109,7 @@ const styles = theme => ({
  */
 class Listing extends Component {
     static contextType = Settings;
+
     /**
      *
      * @param {any} props properties

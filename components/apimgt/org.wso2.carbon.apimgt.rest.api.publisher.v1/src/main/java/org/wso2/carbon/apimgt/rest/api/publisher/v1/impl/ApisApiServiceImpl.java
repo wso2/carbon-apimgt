@@ -2314,7 +2314,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
         apiProvider.saveSwagger20Definition(existingAPI.getId(), updatedApiDefinition);
-        return updatedApiDefinition;
+        //retrieves the updated swagger definition
+        String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
+        return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
     /**
@@ -2584,7 +2586,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String definitionToAdd = validationResponse.getJsonContent();
             if (syncOperations) {
                 swaggerData = new SwaggerData(apiToAdd);
-                definitionToAdd = apiDefinition.generateAPIDefinition(swaggerData, definitionToAdd);
+                definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
             }
             Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
             Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
@@ -2593,7 +2595,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (!syncOperations) {
                 swaggerData = new SwaggerData(apiToAdd);
                 definitionToAdd = apiDefinition
-                        .generateAPIDefinition(swaggerData, validationResponse.getJsonContent());
+                        .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
             }
 
             // adding the API and definition

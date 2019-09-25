@@ -168,7 +168,7 @@
                     {{/each}}
                   </select>
             </div>
-            <div class="form-group">
+            <div class="form-group"  id="validityPeriodId">
                 <label for="" class="control-label"><%=i18n.localize("Validity period")%></label>
                     <div class="input-group col-sm-6">
                       <input type="text" title="validityTime" size="10" value='{{ValidityTime}}' class="form-control validity_time">
