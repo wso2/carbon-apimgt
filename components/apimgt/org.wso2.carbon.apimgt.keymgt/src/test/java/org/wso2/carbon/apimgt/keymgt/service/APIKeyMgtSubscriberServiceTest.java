@@ -99,7 +99,7 @@ public class APIKeyMgtSubscriberServiceTest {
     @Before
     public void init() throws Exception {
         System.setProperty(CARBON_HOME, "");
-        String confPath = getClass().getClassLoader().getResource("conf").getPath();
+        String confPath = this.getClass().getClassLoader().getResource("conf").getPath();
         System.setProperty("carbon.config.dir.path", confPath);
     }
 
