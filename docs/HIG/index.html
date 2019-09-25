@@ -40,6 +40,7 @@
                     <li><a href="#buttons" id="toc-buttons">Buttons</a></li>
                     <li><a href="#dialogs" id="toc-dialogs">Dialogs</a></li>
                     <li><a href="#textfields" id="toc-textfields">Text Fields</a></li>
+                    <li><a href="#table" id="toc-table">Data Tables</a></li>
                     <li><a href="#infobars" id="toc-infobars">Infobars</a></li>
                 </ol>
             </li>
@@ -63,7 +64,18 @@
         <section id="buttons" class="waypoint">
             <h3>Buttons</h3>
             <p>Buttons allow users to take actions, and make choices, with a single tap. Button pannel is left aligned
-                and primary button is placed first</p>
+                and primary button is placed first.</p>
+            <ul>
+                <li>
+                    Primary button color set to primary. => color="primary"
+                </li>
+                <li>
+                    Secondary button do not set the color so it will be default.
+                </li>
+                <li>
+                    Spacing should be one unit in-between two buttons.
+                </li>
+            </ul>
             <p>&nbsp;</p>
             <h4>Primary Action ( High emphasis )</h4>
             <p>When it is the primary action of the user interface use
@@ -89,6 +101,40 @@
             <p>Dialogs inform users about a task and can contain critical information, require decisions, or involve
                 multiple tasks.
             </p>
+            <h4>When to use </h4>
+            <p>Dialogs should be used for:</p>
+            <ul class="lst-kix_36sx301u5cnj-0 start">
+                <li>Errors that block an app’s normal operation</li>
+                <li>Critical information that requires a specific user task, decision, or acknowledgement</li>
+            </ul>
+            <table class="s-tag-table">
+                <tbody>
+                <tr>
+                    <td colspan="1" rowspan="1"><p><strong>Component</strong></p></td>
+                    <td colspan="1" rowspan="1"><p><strong>Priority</strong></p></td>
+                    <td colspan="1" rowspan="1"><p><strong>User action</strong></p></td>
+                </tr>
+                <tr>
+                    <td colspan="1" rowspan="1"><p>Snackbar</p></td>
+                    <td colspan="1" rowspan="1"><p>Low priority</p></td>
+                    <td colspan="1" rowspan="1"><p>Optional: Snackbars disappear automatically</p></td>
+                </tr>
+                <tr>
+                    <td colspan="1" rowspan="1"><p>Banner</p></td>
+                    <td colspan="1" rowspan="1"><p>Prominent, medium priority</p></td>
+                    <td colspan="1" rowspan="1"><p>Optional: Banners remain until dismissed by the user, or if the
+                        state
+                        that caused the banner is resolved </p></td>
+                </tr>
+                <tr>
+                    <td colspan="1" rowspan="1"><p>Dialog</p></td>
+                    <td colspan="1" rowspan="1"><p>Highest priority</p></td>
+                    <td colspan="1" rowspan="1"><p>Required: Dialogs block app usage until the user takes a dialog
+                        action or exits the dialog (if available)</p></td>
+                </tr>
+                </tbody>
+            </table>
+
             <h4>Title</h4>
             <p>A dialog’s purpose should be communicated by its title and button text.</p>
             <p>Titles should:</p>
@@ -134,6 +180,22 @@
                 </li>
             </ul>
             <img width="600" src="assets/images/textfield.png" alt=""/>
+        </section>
+        <section id="table" class="waypoint">
+            <h3>Data Tables</h3>
+            <p>Data tables display sets of data across rows and columns.</p>
+            <ul>
+                <li>
+                    All the columns containing text should left align
+                </li>
+                <li>
+                    Right align columns that contain numbers
+                </li>
+                <li>
+                    Use only icons for buttons when the action is clear
+                </li>
+            </ul>
+            <img width="600" src="assets/images/table.png" alt=""/>
         </section>
         <section id="infobars" class="waypoint">
             <h3>Infobars</h3>
