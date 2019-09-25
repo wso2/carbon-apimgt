@@ -53,6 +53,7 @@ import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
@@ -99,7 +100,7 @@ public class APIKeyMgtSubscriberServiceTest {
     @Before
     public void init() throws Exception {
         System.setProperty(CARBON_HOME, "");
-        String confPath = this.getClass().getClassLoader().getResource("conf").getPath();
+        String confPath = new File("src/test/resources/conf").getAbsolutePath();
         System.setProperty("carbon.config.dir.path", confPath);
     }
 
