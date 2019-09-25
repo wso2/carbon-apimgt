@@ -106,7 +106,8 @@ export default function MaxBackendTps(props) {
                                     configDispatcher({
                                         action: 'maxTps',
                                         value:
-                                            event.target.value === 'specify' ? { production: null, sandbox: null } : null,
+                                            event.target.value
+                                             === 'specify' ? { production: null, sandbox: null } : null,
                                     });
                                 }}
                                 row
