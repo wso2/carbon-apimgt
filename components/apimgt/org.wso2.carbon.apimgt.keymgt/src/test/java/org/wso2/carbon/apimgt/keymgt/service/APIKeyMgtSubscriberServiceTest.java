@@ -8,6 +8,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
@@ -62,6 +63,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import static org.mockito.Matchers.any;
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
+@Ignore
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ MultitenantUtils.class, PrivilegedCarbonContext.class, CarbonContext.class, OAuthApplicationInfo.class, ApplicationManagementService.class,
         APIKeyMgtSubscriberService.class, ApiMgtDAO.class, OAuthServerConfiguration.class, OAuthCache.class,
