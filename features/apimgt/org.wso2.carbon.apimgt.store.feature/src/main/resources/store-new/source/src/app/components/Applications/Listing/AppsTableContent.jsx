@@ -113,18 +113,21 @@ class AppsTableContent extends Component {
                                         </Typography>
                                     )}
                                     {app.status === this.APPLICATION_STATES.CREATED && (
-                                        <Typography variant='subtitle1' gutterBottom>
-                                            <FormattedMessage
-                                                id='Applications.Listing.AppsTableContent.inactive'
-                                                defaultMessage='INACTIVE'
-                                            />
+                                        <React.Fragment>
+                                            <Typography variant='subtitle1' gutterBottom>
+                                                <FormattedMessage
+                                                    id='Applications.Listing.AppsTableContent.inactive'
+                                                    defaultMessage='INACTIVE'
+                                                />
+
+                                            </Typography>
                                             <Typography variant='caption'>
                                                 <FormattedMessage
                                                     id='Applications.Listing.AppsTableContent.wait.approval'
                                                     defaultMessage='waiting for approval'
                                                 />
                                             </Typography>
-                                        </Typography>
+                                        </React.Fragment>
                                     )}
                                     {app.status === this.APPLICATION_STATES.REJECTED && (
                                         <Typography variant='subtitle1' gutterBottom>
