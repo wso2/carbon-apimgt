@@ -7415,6 +7415,10 @@ definitions:
         items:
           type: string
         example: ["Unlimited"]
+      apiThrottlingPolicy:
+         description: The API level throttling policy selected for the particular API Product
+         type: string
+         example: "Unlimited"
       authorizationHeader:
         type: string
         description: |

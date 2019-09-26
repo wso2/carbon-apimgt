@@ -492,6 +492,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             product.setUuid(apiProductId);
 
             apiProvider.updateAPIProduct(product);
+
+            APIDefinition parser = new OAS3Parser();
+            SwaggerData swaggerData = new SwaggerData(product);
+            String apiDefinition = parser.generateAPIDefinition(swaggerData);
+            apiProvider.saveSwaggerDefinition(product, apiDefinition);
+
             APIProduct updatedProduct = apiProvider.getAPIProduct(productIdentifier);
             APIProductDTO updatedProductDTO = APIMappingUtil.fromAPIProducttoDTO(updatedProduct);
             return Response.ok().entity(updatedProductDTO).build();

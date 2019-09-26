@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.MonetizationInfoDTO;
 import javax.validation.constraints.*;
 
 
@@ -24,7 +23,6 @@ public class SubscriptionDTO   {
     private APIInfoDTO apiInfo = null;
     private ApplicationInfoDTO applicationInfo = null;
     private String throttlingPolicy = null;
-    private MonetizationInfoDTO monetizationAttributes = null;
 
 @XmlType(name="TypeEnum")
 @XmlEnum(String.class)
@@ -203,23 +201,6 @@ public enum StatusEnum {
 
   /**
    **/
-  public SubscriptionDTO monetizationAttributes(MonetizationInfoDTO monetizationAttributes) {
-    this.monetizationAttributes = monetizationAttributes;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("monetizationAttributes")
-  public MonetizationInfoDTO getMonetizationAttributes() {
-    return monetizationAttributes;
-  }
-  public void setMonetizationAttributes(MonetizationInfoDTO monetizationAttributes) {
-    this.monetizationAttributes = monetizationAttributes;
-  }
-
-  /**
-   **/
   public SubscriptionDTO type(TypeEnum type) {
     this.type = type;
     return this;
@@ -268,14 +249,13 @@ public enum StatusEnum {
         Objects.equals(apiInfo, subscription.apiInfo) &&
         Objects.equals(applicationInfo, subscription.applicationInfo) &&
         Objects.equals(throttlingPolicy, subscription.throttlingPolicy) &&
-        Objects.equals(monetizationAttributes, subscription.monetizationAttributes) &&
         Objects.equals(type, subscription.type) &&
         Objects.equals(status, subscription.status);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionId, applicationId, apiId, apiInfo, applicationInfo, throttlingPolicy, monetizationAttributes, type, status);
+    return Objects.hash(subscriptionId, applicationId, apiId, apiInfo, applicationInfo, throttlingPolicy, type, status);
   }
 
   @Override
@@ -289,7 +269,6 @@ public enum StatusEnum {
     sb.append("    apiInfo: ").append(toIndentedString(apiInfo)).append("\n");
     sb.append("    applicationInfo: ").append(toIndentedString(applicationInfo)).append("\n");
     sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
-    sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("}");

@@ -45,6 +45,8 @@ import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -1704,6 +1706,9 @@ public class APIMappingUtil {
             tiersToReturn.add(tier.getName());
         }
         productDto.setPolicies(tiersToReturn);
+
+        productDto.setApiThrottlingPolicy(product.getProductLevelPolicy());
+
         if (product.getVisibility() != null) {
             productDto.setVisibility(mapVisibilityFromAPIProducttoDTO(product.getVisibility()));
         }
@@ -1829,8 +1834,7 @@ public class APIMappingUtil {
             product.setTechnicalOwnerEmail(dto.getBusinessInformation().getTechnicalOwnerEmail());
         }
 
-        String state = dto.getState() == null ? APIStatus.CREATED.toString() :dto.getState().toString() ;
-        product.setState(state);
+        product.setState(APIStatus.PUBLISHED.toString());
         Set<Tier> apiTiers = new HashSet<>();
         List<String> tiersFromDTO = dto.getPolicies();
 
@@ -1859,6 +1863,27 @@ public class APIMappingUtil {
             apiTiers.add(new Tier(tier));
         }
         product.setAvailableTiers(apiTiers);
+
+        product.setProductLevelPolicy(dto.getApiThrottlingPolicy());
+
+        // set default API Level Policy
+        if (StringUtils.isBlank(product.getProductLevelPolicy())) {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            Policy[] apiPolicies = apiProvider.getPolicies(RestApiUtil.getLoggedInUsername(),
+                    PolicyConstants.POLICY_LEVEL_API);
+            if (apiPolicies.length > 0) {
+                for (Policy policy : apiPolicies) {
+                    if (policy.getPolicyName().equals(APIConstants.UNLIMITED_TIER)) {
+                        product.setProductLevelPolicy(APIConstants.UNLIMITED_TIER);
+                        break;
+                    }
+                }
+                if (StringUtils.isBlank(product.getProductLevelPolicy())) {
+                    product.setProductLevelPolicy(apiPolicies[0].getPolicyName());
+                }
+            }
+        }
+
         if (dto.getSubscriptionAvailability() != null) {
             product.setSubscriptionAvailability(
                     mapSubscriptionAvailabilityFromDTOtoAPIProduct(dto.getSubscriptionAvailability()));
