@@ -226,6 +226,11 @@
         <li class="nav-header">
             <a href="#"><i class="fw fw-alert fw-2x" style="font-size:22px;"></i><%=i18n.localize("Bot Detection")%><i class="fw fw-down fw-stack-1x toggle-icon-down toggle-caret remove-float"></i></a>
              <ul class="nav nav-pills secondary-nav collapse">
+             <%
+                 var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+                 var isAnalyticsEnabled = APIUtil.isAnalyticsEnabled();
+                 if(isAnalyticsEnabled) {
+             %>
                 <li <%if (reqUrl.match("bot-detected-data-list")){%> class="active" <% } %>><a href="<%= jagg.url("/bot-detected-data-list") %>"
                     onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
                     <i class="fw fw-list"></i><%=i18n.localize("Bot Detection Data")%></a>
@@ -234,6 +239,9 @@
                     onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
                     <i class="fw fw-mail"></i><%=i18n.localize("Configure Emails")%></a>
                 </li>
+                <%
+                 }
+                %>
              </ul>
         </li>
         <li class="nav-header">
