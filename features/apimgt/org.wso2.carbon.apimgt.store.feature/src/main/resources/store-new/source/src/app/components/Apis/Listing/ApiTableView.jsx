@@ -26,6 +26,7 @@ import API from 'AppData/api';
 import CONSTS from 'AppData/Constants';
 import Configurations from 'Config';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
+import Loading from 'AppComponents/Base/Loading/Loading';
 import ImageGenerator from './ImageGenerator';
 import ApiThumb from './ApiThumb';
 import DocThumb from './DocThumb';
@@ -336,7 +337,7 @@ class ApiTableView extends React.Component {
                             if (artifact) {
                                 if (artifact.type !== 'DOC') {
                                     const apiId = tableMeta.rowData[0];
-                                    const avgRating = tableMeta.rowData[7];
+                                    const avgRating = tableMeta.rowData[8];
                                     return (
                                         <StarRatingBar
                                             apiRating={avgRating}
@@ -410,6 +411,9 @@ class ApiTableView extends React.Component {
         }
         if (page === 0 && this.count <= rowsPerPage) {
             options.pagination = false;
+        }
+        if (data.length === 0) {
+            return <Loading />;
         }
         return (
             <MuiThemeProvider theme={this.getMuiTheme()}>
